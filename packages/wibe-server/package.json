@@ -1,0 +1,19 @@
+{
+	"name": "wibe-server",
+	"version": "0.0.1",
+	"description": "wibe-server",
+	"scripts": {
+		"dev": "bun src/index.ts --watch"
+	},
+	"dependencies": {
+		"@apollo/server": "4.9.3",
+		"@elysiajs/apollo": "0.6.0",
+		"elysia": "0.6.16",
+		"graphql": "16.8.0",
+		"mongodb": "6.0.0"
+	},
+	"devDependencies": {
+		"bun-types": "0.8.1"
+	},
+	"module": "src/index.js"
+}
