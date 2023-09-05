@@ -1,9 +1,11 @@
 import { Elysia } from 'elysia'
 import { Schema } from '../schema'
+import { DatabaseConfig } from '../database'
 
 interface WibeConfig {
 	port: number
 	schema: Schema[]
+	database: DatabaseConfig
 }
 
 export class WibeApp {

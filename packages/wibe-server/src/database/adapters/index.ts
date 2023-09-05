@@ -1,5 +1,9 @@
+import { Schema } from '../../schema'
+
 export interface DatabaseAdapter {
-	connect(): Promise<void>
-	disconnect(): Promise<void>
-	insert(): Promise<void>
+	fillDatabase(schema: Schema): Promise<void>
+}
+
+export interface AdapterOptions {
+	url: string
 }

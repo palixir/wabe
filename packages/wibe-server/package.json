@@ -3,7 +3,8 @@
 	"version": "0.0.1",
 	"description": "wibe-server",
 	"scripts": {
-		"dev": "bun src/index.ts --watch"
+		"dev": "bun src/index.ts --watch",
+		"test:jest": "jest --watch"
 	},
 	"dependencies": {
 		"@apollo/server": "4.9.3",
@@ -13,7 +14,10 @@
 		"mongodb": "6.0.0"
 	},
 	"devDependencies": {
-		"bun-types": "0.8.1"
-	},
-	"module": "src/index.js"
+		"@types/jest": "29.5.4",
+		"bun-types": "0.8.1",
+		"jest": "29.6.4",
+		"ts-jest": "29.1.1",
+		"typescript": "5.2.2"
+	}
 }
