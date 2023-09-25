@@ -1,11 +1,12 @@
 {
-	"name": "main",
-	"private": true,
-	"version": "1.0.0",
-	"workspaces": [
-		"packages/*"
-	],
-	"dependencies": {
-		"prettier": "3.0.3"
-	}
+  "name": "main",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "packages/*"
+  ],
+  "dependencies": {
+    "bun-types": "",
+    "prettier": "3.0.3"
+  }
 }

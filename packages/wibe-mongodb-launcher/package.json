@@ -1,15 +1,18 @@
 {
 	"name": "wibe-mongodb-launcher",
 	"version": "0.0.1",
+	"license": "MIT",
+	"main": "src/index.ts",
 	"description": "Package to launch the mongodb for test",
 	"scripts": {
-		"dev": "bun src/index.ts --watch",
-		"start": "bun src/index.ts"
+		"dev": "bun index.ts --watch",
+		"start": "bun index.ts",
+		"build": "bun build index.ts --minify --target=bun --outdir lib"
 	},
 	"dependencies": {
 		"mongodb-memory-server": "8.15.1"
 	},
 	"devDependencies": {
-		"bun-types": "0.8.1"
+		"bun-types": "1.0.3"
 	}
 }
