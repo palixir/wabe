@@ -1,10 +1,10 @@
 import { Elysia } from 'elysia'
 import { DatabaseConfig } from '../database'
-import { Schema } from '../schema/schema'
+import { SchemaInterface } from '../schema/schema'
 
 interface WibeConfig {
 	port: number
-	schema: Schema[]
+	schema: SchemaInterface[]
 	database: DatabaseConfig
 }
 
@@ -15,8 +15,15 @@ export class WibeApp {
 	constructor(config: WibeConfig) {
 		this.config = config
 
-		this.server = new Elysia()
+		this.server = new Elysia().get(
+			'/health',
+			(context) => (context.set.status = 200),
+		)
 
 		this.server.listen(this.config.port)
+	}
+
+	async close() {
+		return this.server.stop()
 	}
 }

@@ -8,6 +8,7 @@
 		"build": "bun build index.ts --minify --target=bun --outdir lib && bun run generate:types"
 	},
 	"dependencies": {
+		"elysia": "0.7.15",
 		"mongodb": "6.1.0"
 	},
 	"devDependencies": {
