@@ -1,6 +1,6 @@
 import { Elysia } from 'elysia'
 import { DatabaseConfig } from '../database'
-import { SchemaInterface } from '../schema/schema'
+import { SchemaInterface } from '../schema/Schema'
 
 interface WibeConfig {
 	port: number

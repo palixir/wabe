@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it, mock } from 'bun:test'
-import { Schema } from './schema'
+import { Schema } from './Schema'
 
 describe('Schema', () => {
 	let schema: Schema

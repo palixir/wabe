@@ -1,4 +1,4 @@
-import { DatabaseController } from '../database/controllers/databaseController'
+import { DatabaseController } from '../database/controllers/DatabaseController'
 
 type TypeField =
 	| {
