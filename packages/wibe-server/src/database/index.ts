@@ -5,4 +5,5 @@ export enum DatabaseEnum {
 export interface DatabaseConfig {
 	type: DatabaseEnum
 	url: string
+	name: string
 }

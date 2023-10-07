@@ -20,4 +20,27 @@ describe('Server', () => {
 		expect(res.status).toEqual(200)
 		await wibe.close()
 	})
+
+	it('should call the schema creation', () => {
+		const wibe = new WibeApp({
+			database: {
+				type: DatabaseEnum.Mongo,
+				url: 'mongodb://localhost:27017',
+			},
+			port: 3000,
+			schema: [
+				{
+					name: 'Collection 1',
+					fields: {
+						name: { type: 'string' },
+						age: { type: 'number' },
+					},
+				},
+			],
+		})
+
+		// Step 1 : Create an array of schema
+		// Step 2 : Fill the database with all the fields
+		// Step 3 : Create a GraphQL schema
+	})
 })

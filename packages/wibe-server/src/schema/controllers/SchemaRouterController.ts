@@ -1,5 +1,14 @@
-export class SchemaRouterController {
-	constructor() {}
+import { Schema } from '../Schema'
+import { SchemaRouterAdapter } from '../adapters'
 
-	async createSchema() {}
+export class SchemaRouterController {
+	private adapter: SchemaRouterAdapter
+
+	constructor(adapter: SchemaRouterAdapter) {
+		this.adapter = adapter
+	}
+
+	createSchema() {
+		return this.adapter.createSchema()
+	}
 }

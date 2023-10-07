@@ -1,3 +1,7 @@
+import { NexusObjectTypeDef } from 'nexus/dist/core'
+
 export abstract class SchemaRouterAdapter {
-	abstract createSchema(): void
+	abstract createSchema(): NexusObjectTypeDef<string>[]
 }
+
+export * from './GraphQLSchemaAdapter'
