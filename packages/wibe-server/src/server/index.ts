@@ -1,6 +1,7 @@
 import { Elysia } from 'elysia'
+import { apollo, gql } from '@elysiajs/apollo'
 import { DatabaseConfig } from '../database'
-import { SchemaInterface } from '../schema/Schema'
+import { SchemaInterface } from '../schema/interface'
 
 interface WibeConfig {
 	port: number
@@ -19,6 +20,8 @@ export class WibeApp {
 			'/health',
 			(context) => (context.set.status = 200),
 		)
+
+		// this.server.use(apollo({}))
 
 		this.server.listen(this.config.port)
 	}
