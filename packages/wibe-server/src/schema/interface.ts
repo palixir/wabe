@@ -1,11 +1,11 @@
 export type TypeField =
 	| {
-			type: 'string'
+			type: 'String'
 			required?: boolean
 			defaultValue?: string
 	  }
 	| {
-			type: 'number'
+			type: 'Int'
 			required?: boolean
 			defaultValue?: number
 	  }

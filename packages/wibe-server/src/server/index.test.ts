@@ -8,10 +8,11 @@ describe('Server', () => {
 			database: {
 				type: DatabaseEnum.Mongo,
 				url: 'mongodb://localhost:27017',
+				name: 'wibe',
 			},
 			port: 3000,
 			schema: [
-				{ name: 'Collection 1', fields: { name: { type: 'string' } } },
+				{ name: 'Collection1', fields: { name: { type: 'String' } } },
 			],
 		})
 
@@ -26,14 +27,15 @@ describe('Server', () => {
 			database: {
 				type: DatabaseEnum.Mongo,
 				url: 'mongodb://localhost:27017',
+				name: 'wibe',
 			},
 			port: 3000,
 			schema: [
 				{
 					name: 'Collection 1',
 					fields: {
-						name: { type: 'string' },
-						age: { type: 'number' },
+						name: { type: 'String' },
+						age: { type: 'Int' },
 					},
 				},
 			],

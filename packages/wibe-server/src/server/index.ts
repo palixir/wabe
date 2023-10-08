@@ -1,6 +1,6 @@
 import { Elysia } from 'elysia'
 import { apollo, gql } from '@elysiajs/apollo'
-import { DatabaseConfig } from '../database'
+import { DatabaseConfig, DatabaseEnum } from '../database'
 import { SchemaInterface } from '../schema/interface'
 import { Schema } from '../schema'
 import { DatabaseController } from '../database/controllers/DatabaseController'

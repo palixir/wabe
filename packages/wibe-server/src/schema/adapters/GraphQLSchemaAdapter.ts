@@ -1,15 +1,10 @@
-import { objectType } from 'nexus'
-import { SchemaRouterAdapter } from '.'
+import { nonNull, objectType } from 'nexus'
 import { Schema } from '../Schema'
-import { TypeField } from '../interface'
-import { ObjectDefinitionBlock, OutputDefinitionBlock } from 'nexus/dist/blocks'
 
-export class GraphQLSchemaAdapter extends SchemaRouterAdapter {
+export class GraphQLSchemaAdapter {
 	private schema: Schema[]
 
 	constructor(schema: Schema[]) {
-		super()
-
 		this.schema = schema
 	}
 
@@ -31,7 +26,11 @@ export class GraphQLSchemaAdapter extends SchemaRouterAdapter {
 								type: typeField.valueType,
 							})
 
-						return t.field(fieldName, { type: typeField.type })
+						return t.field(fieldName, {
+							type: typeField.required
+								? nonNull(typeField.type)
+								: typeField.type,
+						})
 					})
 				},
 			})

@@ -1,23 +1,23 @@
 {
-  "name": "wibe-server",
-  "version": "0.0.1",
-  "description": "wibe-server",
-  "scripts": {
-    "dev": "bun src/index.ts --watch",
-    "generate:types": "dts-bundle-generator index.ts -o lib/index.d.ts",
-    "build": "bun build index.ts --minify --target=bun --outdir lib && bun run generate:types"
-  },
-  "dependencies": {
-    "@apollo/server": "^4.9.4",
-    "@elysiajs/apollo": "^0.7.0",
-    "elysia": "0.7.15",
-    "mongodb": "6.1.0",
-    "nexus": "^1.3.0"
-  },
-  "devDependencies": {
-    "wibe-mongodb-launcher": "workspace:*",
-    "bun-types": "1.0.3",
-    "typescript": "5.2.2",
-    "dts-bundle-generator": "8.0.1"
-  }
+	"name": "wibe-server",
+	"version": "0.0.1",
+	"description": "wibe-server",
+	"scripts": {
+		"dev": "bun src/index.ts --watch",
+		"generate:types": "dts-bundle-generator index.ts -o lib/index.d.ts",
+		"build": "bun build index.ts --minify --target=bun --outdir lib && bun run generate:types"
+	},
+	"dependencies": {
+		"@apollo/server": "4.9.4",
+		"@elysiajs/apollo": "0.7.0",
+		"elysia": "0.7.15",
+		"mongodb": "6.1.0",
+		"nexus": "1.3.0"
+	},
+	"devDependencies": {
+		"wibe-mongodb-launcher": "workspace:*",
+		"bun-types": "1.0.3",
+		"typescript": "5.2.2",
+		"dts-bundle-generator": "8.0.1"
+	}
 }
