@@ -13,7 +13,7 @@ export class GraphQLSchemaAdapter {
 
 		const arrayOfType = this.schema.map((schema) => {
 			const fields = schema.getFields()
-			const name = schema.getName()
+			const name = schema.getName().replace(' ', '')
 
 			return objectType({
 				name,

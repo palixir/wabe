@@ -10,13 +10,18 @@ export type TypeField =
 			defaultValue?: number
 	  }
 	| {
-			type: 'boolean'
+			type: 'Float'
+			required?: boolean
+			defaultValue?: number
+	  }
+	| {
+			type: 'Boolean'
 			required?: boolean
 			defaultValue?: boolean
 	  }
 	| {
 			type: 'array'
-			valueType: 'string' | 'number' | 'boolean'
+			valueType: 'String' | 'Int' | 'Boolean'
 			required?: boolean
 			defaultValue?: any[]
 	  }
