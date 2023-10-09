@@ -49,9 +49,9 @@ export class WibeApp {
 		const schemaRouterController = new SchemaRouterController(
 			schemaRouterAdapter,
 		)
-		const routerSchema = schemaRouterController.createSchema()
+		const types = schemaRouterController.createSchema()
 
-		const graphqlSchema = makeSchema({ types: routerSchema })
+		const graphqlSchema = makeSchema({ types })
 
 		this.server.use(apollo({ schema: graphqlSchema }))
 
@@ -62,3 +62,21 @@ export class WibeApp {
 		return this.server.stop()
 	}
 }
+
+const wibe = new WibeApp({
+	database: {
+		type: DatabaseEnum.Mongo,
+		url: 'mongodb://localhost:27017',
+		name: 'wibe',
+	},
+	port: 3000,
+	schema: [
+		{
+			name: 'Collection 1',
+			fields: {
+				name: { type: 'String' },
+				age: { type: 'Int' },
+			},
+		},
+	],
+})

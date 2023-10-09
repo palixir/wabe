@@ -1,12 +1,12 @@
 import { Db, MongoClient } from 'mongodb'
-import { AdapterOptions, DatabaseAdapter } from '.'
-export class MongoAdapter extends DatabaseAdapter {
+import { AdapterOptions } from '.'
+
+export class MongoAdapter {
 	private options: AdapterOptions
 	private client: MongoClient
 	public database?: Db
 
 	constructor(options: AdapterOptions) {
-		super()
 		this.options = options
 		this.client = new MongoClient(options.databaseUrl)
 	}

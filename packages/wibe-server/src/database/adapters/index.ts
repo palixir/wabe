@@ -3,7 +3,7 @@ export interface AdapterOptions {
 	databaseName: string
 }
 
-export abstract class DatabaseAdapter {
-	abstract connect(): Promise<any>
-	abstract createClass(className: string): Promise<any>
+export interface DatabaseAdapter {
+	connect(): Promise<any>
+	createClass(className: string): Promise<any>
 }

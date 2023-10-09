@@ -14,4 +14,8 @@ export class DatabaseController {
 	async createClass(className: string) {
 		return this.adapter.createClass(className)
 	}
+
+	async getField(className: string, fieldName: string) {
+		return this.adapter.getField(className, fieldName)
+	}
 }
