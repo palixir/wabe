@@ -4,11 +4,10 @@ import { DatabaseConfig, DatabaseEnum } from '../database'
 import { SchemaInterface } from '../schema/interface'
 import { Schema } from '../schema'
 import { DatabaseController } from '../database/controllers/DatabaseController'
-import { DatabaseAdapter } from '../database/adapters'
-import { MongoAdapter } from '../database/adapters/MongoAdapter'
 import { SchemaRouterController } from '../schema/controllers/SchemaRouterController'
 import { GraphQLSchemaAdapter } from '../schema/adapters'
 import { makeSchema } from 'nexus'
+import { MongoAdapter } from '../database/adapters/MongoAdapter'
 
 interface WibeConfig {
 	port: number
@@ -72,7 +71,7 @@ const wibe = new WibeApp({
 	port: 3000,
 	schema: [
 		{
-			name: 'Collection 1',
+			name: 'user',
 			fields: {
 				name: { type: 'String' },
 				age: { type: 'Int' },
