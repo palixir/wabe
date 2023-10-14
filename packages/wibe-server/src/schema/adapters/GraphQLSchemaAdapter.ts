@@ -1,6 +1,21 @@
-import { nonNull, objectType, extendType, arg, inputObjectType } from 'nexus'
+import {
+	nonNull,
+	objectType,
+	extendType,
+	arg,
+	inputObjectType,
+	list,
+} from 'nexus'
 import { Schema } from '../Schema'
 import { SchemaFields } from '../interface'
+import { getWhereInputFromType } from '../../graphql'
+import {
+	AllNexusOutputTypeDefs,
+	NexusMetaType,
+	NexusObjectTypeDef,
+} from 'nexus/dist/core'
+import { NexusGenObjects } from '../../../generated/nexus-typegen'
+import { NexusGenScalars } from '../../../generated/nexusTypegen'
 
 export class GraphQLSchemaAdapter {
 	private schema: Schema[]
@@ -70,8 +85,8 @@ export class GraphQLSchemaAdapter {
 					},
 				})
 
-				const typeCreateInput = inputObjectType({
-					name: `Create${nameWithFirstLetterUpperCase}Input`,
+				const typeInput = inputObjectType({
+					name: `${nameWithFirstLetterUpperCase}Input`,
 					definition: (t) => {
 						this.getTypesFromFields({ fields, fieldsKeys, t })
 					},
@@ -81,7 +96,30 @@ export class GraphQLSchemaAdapter {
 					name: `Update${nameWithFirstLetterUpperCase}Input`,
 					definition: (t) => {
 						t.nonNull.id('id')
-						this.getTypesFromFields({ fields, fieldsKeys, t })
+						t.field('fields', { type: typeInput })
+					},
+				})
+
+				const typeUpdatesInput = inputObjectType({
+					name: `Update${nameWithFirstLetterUpperCase}sInput`,
+					definition: (t) => {
+						fieldsKeys.map((fieldName) => {
+							t.field(fieldName, {
+								type: getWhereInputFromType({
+									typeField: schema.getFields()[fieldName],
+									name: `${fieldName[0].toUpperCase()}${fieldName.slice(
+										1,
+									)}`,
+								}),
+							})
+						})
+					},
+				})
+
+				const typeDeleteInput = inputObjectType({
+					name: `Delete${nameWithFirstLetterUpperCase}Input`,
+					definition: (t) => {
+						t.nonNull.id('id')
 					},
 				})
 
@@ -90,13 +128,35 @@ export class GraphQLSchemaAdapter {
 					definition: (t) => {
 						t.field(`create${nameWithFirstLetterUpperCase}`, {
 							type: nameWithFirstLetterUpperCase,
-							args: { input: typeCreateInput },
+							args: { input: typeInput },
+							resolve: (root, args) => {},
+						})
+
+						t.field(`create${nameWithFirstLetterUpperCase}s`, {
+							type: nonNull(list(nameWithFirstLetterUpperCase)),
+							args: { input: typeInput },
 							resolve: (root, args) => {},
 						})
 
 						t.field(`update${nameWithFirstLetterUpperCase}`, {
 							type: nameWithFirstLetterUpperCase,
-							args: { input: typeUpdateInput },
+							args: {
+								input: typeUpdateInput,
+							},
+							resolve: (root, args) => {},
+						})
+
+						t.list.field(`update${nameWithFirstLetterUpperCase}s`, {
+							type: nameWithFirstLetterUpperCase,
+							args: {
+								where: typeUpdatesInput,
+							},
+							resolve: (root, args) => {},
+						})
+
+						t.field(`delete${nameWithFirstLetterUpperCase}`, {
+							type: nameWithFirstLetterUpperCase,
+							args: { typeDeleteInput },
 							resolve: (root, args) => {},
 						})
 					},

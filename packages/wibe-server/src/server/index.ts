@@ -8,6 +8,7 @@ import { SchemaRouterController } from '../schema/controllers/SchemaRouterContro
 import { GraphQLSchemaAdapter } from '../schema/adapters'
 import { makeSchema } from 'nexus'
 import { MongoAdapter } from '../database/adapters/MongoAdapter'
+import { join } from 'path'
 
 interface WibeConfig {
 	port: number
@@ -50,11 +51,27 @@ export class WibeApp {
 		)
 		const types = schemaRouterController.createSchema()
 
-		const graphqlSchema = makeSchema({ types })
+		const graphqlSchema = makeSchema({
+			types,
+			outputs: {
+				schema: join(
+					// @ts-ignore
+					import.meta.dir,
+					'../../generated/schema.graphql',
+				),
+				typegen: join(
+					// @ts-ignore
+					import.meta.dir,
+					'../../generated/nexusTypegen.ts',
+				),
+			},
+		})
 
 		this.server.use(apollo({ schema: graphqlSchema }))
 
-		this.server.listen(this.config.port)
+		this.server.listen(this.config.port, () => {
+			console.log(`Server running on port ${this.config.port}`)
+		})
 	}
 
 	async close() {
