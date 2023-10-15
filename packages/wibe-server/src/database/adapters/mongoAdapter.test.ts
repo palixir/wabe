@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from 'bun:test'
+import { describe, it, expect, beforeAll, afterAll } from 'bun:test'
 import { fail } from 'assert'
 import { getMongoAdapter } from '../../utils/testHelper'
 import { MongoAdapter } from './MongoAdapter'
@@ -8,6 +8,10 @@ describe('Mongo adapter', () => {
 
 	beforeAll(async () => {
 		mongoAdapter = await getMongoAdapter()
+	})
+
+	afterAll(async () => {
+		await mongoAdapter.close()
 	})
 
 	it('should create class', async () => {

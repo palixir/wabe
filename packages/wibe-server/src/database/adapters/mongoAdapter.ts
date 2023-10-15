@@ -18,6 +18,10 @@ export class MongoAdapter {
 		return client
 	}
 
+	async close() {
+		return this.client.close()
+	}
+
 	async createClass(className: string) {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
