@@ -33,7 +33,84 @@ describe('GraphQLSchemaAdapter', () => {
 	})
 
 	it("should create input types from schema's fields", () => {
-		console.log(graphqlSchema.getType('UserInput'))
+		// Check UserInput
+		const userInput = graphqlSchema.getType('UserInput')
+
+		// @ts-ignore
+		const fields = userInput.getFields()
+
+		expect(fields.name.type.toString()).toEqual('String')
+		expect(fields.age.type.toString()).toEqual('Int')
+		expect(fields.testFloat.type.toString()).toEqual('Float')
+		expect(fields.valid.type.toString()).toEqual('Boolean')
+		expect(fields.stringArrayTest.type.toString()).toEqual('[String]')
+		expect(fields.numberArrayTest.type.toString()).toEqual('[Int]')
+		expect(fields.booleanArrayTest.type.toString()).toEqual('[Boolean]')
+
+		// Check UpdateUserInput
+		const updateUserInput = graphqlSchema.getType('UpdateUserInput')
+
+		// @ts-ignore
+		const updateUserFields = updateUserInput.getFields()
+
+		expect(updateUserFields.id.type.toString()).toEqual('ID!')
+		expect(updateUserFields.fields.type.toString()).toEqual('UserInput')
+
+		// Check UpdateUsersInput
+		const updateUsersInput = graphqlSchema.getType('UpdateUsersInput')
+
+		// @ts-ignore
+		const updateUsersFields = updateUsersInput.getFields()
+
+		expect(updateUsersFields.name.type.name).toEqual('WhereUpdateNameInput')
+		expect(updateUsersFields.age.type.name).toEqual('WhereUpdateAgeInput')
+		expect(updateUsersFields.testFloat.type.name).toEqual(
+			'WhereUpdateTestFloatInput',
+		)
+		expect(updateUsersFields.valid.type.name).toEqual(
+			'WhereUpdateValidInput',
+		)
+		expect(updateUsersFields.stringArrayTest.type.name).toEqual(
+			'WhereUpdateStringArrayTestInput',
+		)
+		expect(updateUsersFields.numberArrayTest.type.name).toEqual(
+			'WhereUpdateNumberArrayTestInput',
+		)
+		expect(updateUsersFields.booleanArrayTest.type.name).toEqual(
+			'WhereUpdateBooleanArrayTestInput',
+		)
+
+		// Check DeleteUserInput
+		const deleteUserInput = graphqlSchema.getType('DeleteUserInput')
+
+		// @ts-ignore
+		const deleteUserFields = deleteUserInput.getFields()
+
+		expect(deleteUserFields.id.type.toString()).toEqual('ID!')
+
+		// Check DeleteUsersInput
+		const deleteUsersInput = graphqlSchema.getType('DeleteUsersInput')
+
+		// @ts-ignore
+		const deleteUsersFields = deleteUsersInput.getFields()
+
+		expect(deleteUsersFields.name.type.name).toEqual('WhereDeleteNameInput')
+		expect(deleteUsersFields.age.type.name).toEqual('WhereDeleteAgeInput')
+		expect(deleteUsersFields.testFloat.type.name).toEqual(
+			'WhereDeleteTestFloatInput',
+		)
+		expect(deleteUsersFields.valid.type.name).toEqual(
+			'WhereDeleteValidInput',
+		)
+		expect(deleteUsersFields.stringArrayTest.type.name).toEqual(
+			'WhereDeleteStringArrayTestInput',
+		)
+		expect(deleteUsersFields.numberArrayTest.type.name).toEqual(
+			'WhereDeleteNumberArrayTestInput',
+		)
+		expect(deleteUsersFields.booleanArrayTest.type.name).toEqual(
+			'WhereDeleteBooleanArrayTestInput',
+		)
 	})
 
 	it('should create types graphql schema', () => {
@@ -80,6 +157,7 @@ describe('GraphQLSchemaAdapter', () => {
 
 		expect(fields['updateUsers'].type.toString()).toEqual('[User]')
 		expect(fields['updateUsers'].args.length).toEqual(1)
+		expect(fields['updateUsers'].args[0].name).toEqual('where')
 		expect(fields['updateUsers'].args[0].type.name).toEqual(
 			'UpdateUsersInput',
 		)
