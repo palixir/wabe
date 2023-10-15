@@ -1,3 +1,5 @@
+export type ArrayValueType = 'String' | 'Int' | 'Float' | 'Boolean'
+
 export type TypeField =
 	| {
 			type: 'String'
@@ -21,7 +23,7 @@ export type TypeField =
 	  }
 	| {
 			type: 'array'
-			valueType: 'String' | 'Int' | 'Boolean'
+			valueType: ArrayValueType
 			required?: boolean
 			defaultValue?: any[]
 	  }

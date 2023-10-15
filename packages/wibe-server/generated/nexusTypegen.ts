@@ -22,14 +22,16 @@ export interface NexusGenInputs {
     id: string; // ID!
   }
   UpdateUsersInput: { // input type
-    age?: NexusGenInputs['WhereAgeInput'] | null; // WhereAgeInput
-    name?: NexusGenInputs['WhereNameInput'] | null; // WhereNameInput
+    age?: NexusGenInputs['WhereUpdateAgeInput'] | null; // WhereUpdateAgeInput
+    name?: NexusGenInputs['WhereUpdateNameInput'] | null; // WhereUpdateNameInput
+    stringArrayTest?: NexusGenInputs['WhereUpdateStringArrayTestInput'] | null; // WhereUpdateStringArrayTestInput
   }
   UserInput: { // input type
     age?: number | null; // Int
     name?: string | null; // String
+    stringArrayTest?: Array<string | null> | null; // [String]
   }
-  WhereAgeInput: { // input type
+  WhereUpdateAgeInput: { // input type
     equalTo?: number | null; // Int
     greaterThan?: number | null; // Int
     greaterThanOrEqualTo?: number | null; // Int
@@ -37,9 +39,13 @@ export interface NexusGenInputs {
     lessThanOrEqualTo?: number | null; // Int
     notEqualTo?: number | null; // Int
   }
-  WhereNameInput: { // input type
+  WhereUpdateNameInput: { // input type
     equalTo?: string | null; // String
     notEqualTo?: string | null; // String
+  }
+  WhereUpdateStringArrayTestInput: { // input type
+    in?: Array<string | null> | null; // [String]
+    notIn?: Array<string | null> | null; // [String]
   }
 }
 
@@ -60,6 +66,7 @@ export interface NexusGenObjects {
   User: { // root type
     age?: number | null; // Int
     name?: string | null; // String
+    stringArrayTest?: Array<string | null> | null; // [String]
   }
 }
 
@@ -76,7 +83,7 @@ export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars
 export interface NexusGenFieldTypes {
   Mutation: { // field return type
     createUser: NexusGenRootTypes['User'] | null; // User
-    createUsers: Array<NexusGenRootTypes['User'] | null>; // [User]!
+    createUsers: Array<NexusGenRootTypes['User'] | null> | null; // [User]
     deleteUser: NexusGenRootTypes['User'] | null; // User
     updateUser: NexusGenRootTypes['User'] | null; // User
     updateUsers: Array<NexusGenRootTypes['User'] | null> | null; // [User]
@@ -88,6 +95,7 @@ export interface NexusGenFieldTypes {
   User: { // field return type
     age: number | null; // Int
     name: string | null; // String
+    stringArrayTest: Array<string | null> | null; // [String]
   }
 }
 
@@ -106,6 +114,7 @@ export interface NexusGenFieldTypeNames {
   User: { // field return type name
     age: 'Int'
     name: 'String'
+    stringArrayTest: 'String'
   }
 }
 
@@ -118,7 +127,7 @@ export interface NexusGenArgTypes {
       input?: NexusGenInputs['UserInput'] | null; // UserInput
     }
     deleteUser: { // args
-      typeDeleteInput?: NexusGenInputs['DeleteUserInput'] | null; // DeleteUserInput
+      input?: NexusGenInputs['DeleteUserInput'] | null; // DeleteUserInput
     }
     updateUser: { // args
       input?: NexusGenInputs['UpdateUserInput'] | null; // UpdateUserInput

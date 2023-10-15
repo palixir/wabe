@@ -8,8 +8,8 @@ input DeleteUserInput {
 
 type Mutation {
   createUser(input: UserInput): User
-  createUsers(input: UserInput): [User]!
-  deleteUser(typeDeleteInput: DeleteUserInput): User
+  createUsers(input: UserInput): [User]
+  deleteUser(input: DeleteUserInput): User
   updateUser(input: UpdateUserInput): User
   updateUsers(where: UpdateUsersInput): [User]
 }
@@ -25,21 +25,24 @@ input UpdateUserInput {
 }
 
 input UpdateUsersInput {
-  age: WhereAgeInput
-  name: WhereNameInput
+  age: WhereUpdateAgeInput
+  name: WhereUpdateNameInput
+  stringArrayTest: WhereUpdateStringArrayTestInput
 }
 
 type User {
   age: Int
   name: String
+  stringArrayTest: [String]
 }
 
 input UserInput {
   age: Int
   name: String
+  stringArrayTest: [String]
 }
 
-input WhereAgeInput {
+input WhereUpdateAgeInput {
   equalTo: Int
   greaterThan: Int
   greaterThanOrEqualTo: Int
@@ -48,7 +51,12 @@ input WhereAgeInput {
   notEqualTo: Int
 }
 
-input WhereNameInput {
+input WhereUpdateNameInput {
   equalTo: String
   notEqualTo: String
+}
+
+input WhereUpdateStringArrayTestInput {
+  in: [String]
+  notIn: [String]
 }

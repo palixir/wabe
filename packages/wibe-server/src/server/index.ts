@@ -92,6 +92,7 @@ const wibe = new WibeApp({
 			fields: {
 				name: { type: 'String' },
 				age: { type: 'Int' },
+				stringArrayTest: { type: 'array', valueType: 'String' },
 			},
 		},
 	],
