@@ -14,22 +14,36 @@ declare global {
 }
 
 export interface NexusGenInputs {
-  DeleteUserInput: { // input type
-    id: string; // ID!
-  }
-  UpdateUserInput: { // input type
-    fields?: NexusGenInputs['UserInput'] | null; // UserInput
-    id: string; // ID!
-  }
-  UpdateUsersInput: { // input type
-    age?: NexusGenInputs['WhereUpdateAgeInput'] | null; // WhereUpdateAgeInput
-    name?: NexusGenInputs['WhereUpdateNameInput'] | null; // WhereUpdateNameInput
-    stringArrayTest?: NexusGenInputs['WhereUpdateStringArrayTestInput'] | null; // WhereUpdateStringArrayTestInput
-  }
-  UserInput: { // input type
+  Collection1Input: { // input type
     age?: number | null; // Int
     name?: string | null; // String
-    stringArrayTest?: Array<string | null> | null; // [String]
+  }
+  DeleteCollection1Input: { // input type
+    id: string; // ID!
+  }
+  DeleteCollection1sInput: { // input type
+    age?: NexusGenInputs['WhereDeleteAgeInput'] | null; // WhereDeleteAgeInput
+    name?: NexusGenInputs['WhereDeleteNameInput'] | null; // WhereDeleteNameInput
+  }
+  UpdateCollection1Input: { // input type
+    fields?: NexusGenInputs['Collection1Input'] | null; // Collection1Input
+    id: string; // ID!
+  }
+  UpdateCollection1sInput: { // input type
+    age?: NexusGenInputs['WhereUpdateAgeInput'] | null; // WhereUpdateAgeInput
+    name?: NexusGenInputs['WhereUpdateNameInput'] | null; // WhereUpdateNameInput
+  }
+  WhereDeleteAgeInput: { // input type
+    equalTo?: number | null; // Int
+    greaterThan?: number | null; // Int
+    greaterThanOrEqualTo?: number | null; // Int
+    lessThan?: number | null; // Int
+    lessThanOrEqualTo?: number | null; // Int
+    notEqualTo?: number | null; // Int
+  }
+  WhereDeleteNameInput: { // input type
+    equalTo?: string | null; // String
+    notEqualTo?: string | null; // String
   }
   WhereUpdateAgeInput: { // input type
     equalTo?: number | null; // Int
@@ -42,10 +56,6 @@ export interface NexusGenInputs {
   WhereUpdateNameInput: { // input type
     equalTo?: string | null; // String
     notEqualTo?: string | null; // String
-  }
-  WhereUpdateStringArrayTestInput: { // input type
-    in?: Array<string | null> | null; // [String]
-    notIn?: Array<string | null> | null; // [String]
   }
 }
 
@@ -61,13 +71,12 @@ export interface NexusGenScalars {
 }
 
 export interface NexusGenObjects {
-  Mutation: {};
-  Query: {};
-  User: { // root type
+  Collection1: { // root type
     age?: number | null; // Int
     name?: string | null; // String
-    stringArrayTest?: Array<string | null> | null; // [String]
   }
+  Mutation: {};
+  Query: {};
 }
 
 export interface NexusGenInterfaces {
@@ -81,63 +90,66 @@ export type NexusGenRootTypes = NexusGenObjects
 export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars
 
 export interface NexusGenFieldTypes {
-  Mutation: { // field return type
-    createUser: NexusGenRootTypes['User'] | null; // User
-    createUsers: Array<NexusGenRootTypes['User'] | null> | null; // [User]
-    deleteUser: NexusGenRootTypes['User'] | null; // User
-    updateUser: NexusGenRootTypes['User'] | null; // User
-    updateUsers: Array<NexusGenRootTypes['User'] | null> | null; // [User]
-  }
-  Query: { // field return type
-    user: NexusGenRootTypes['User'] | null; // User
-    users: Array<NexusGenRootTypes['User'] | null> | null; // [User]
-  }
-  User: { // field return type
+  Collection1: { // field return type
     age: number | null; // Int
     name: string | null; // String
-    stringArrayTest: Array<string | null> | null; // [String]
+  }
+  Mutation: { // field return type
+    createCollection1: NexusGenRootTypes['Collection1'] | null; // Collection1
+    createCollection1s: Array<NexusGenRootTypes['Collection1'] | null> | null; // [Collection1]
+    deleteCollection1: NexusGenRootTypes['Collection1'] | null; // Collection1
+    deleteCollection1s: Array<NexusGenRootTypes['Collection1'] | null> | null; // [Collection1]
+    updateCollection1: NexusGenRootTypes['Collection1'] | null; // Collection1
+    updateCollection1s: Array<NexusGenRootTypes['Collection1'] | null> | null; // [Collection1]
+  }
+  Query: { // field return type
+    collection1: NexusGenRootTypes['Collection1'] | null; // Collection1
+    collection1s: Array<NexusGenRootTypes['Collection1'] | null> | null; // [Collection1]
   }
 }
 
 export interface NexusGenFieldTypeNames {
-  Mutation: { // field return type name
-    createUser: 'User'
-    createUsers: 'User'
-    deleteUser: 'User'
-    updateUser: 'User'
-    updateUsers: 'User'
-  }
-  Query: { // field return type name
-    user: 'User'
-    users: 'User'
-  }
-  User: { // field return type name
+  Collection1: { // field return type name
     age: 'Int'
     name: 'String'
-    stringArrayTest: 'String'
+  }
+  Mutation: { // field return type name
+    createCollection1: 'Collection1'
+    createCollection1s: 'Collection1'
+    deleteCollection1: 'Collection1'
+    deleteCollection1s: 'Collection1'
+    updateCollection1: 'Collection1'
+    updateCollection1s: 'Collection1'
+  }
+  Query: { // field return type name
+    collection1: 'Collection1'
+    collection1s: 'Collection1'
   }
 }
 
 export interface NexusGenArgTypes {
   Mutation: {
-    createUser: { // args
-      input?: NexusGenInputs['UserInput'] | null; // UserInput
+    createCollection1: { // args
+      input?: NexusGenInputs['Collection1Input'] | null; // Collection1Input
     }
-    createUsers: { // args
-      input?: NexusGenInputs['UserInput'] | null; // UserInput
+    createCollection1s: { // args
+      input?: NexusGenInputs['Collection1Input'] | null; // Collection1Input
     }
-    deleteUser: { // args
-      input?: NexusGenInputs['DeleteUserInput'] | null; // DeleteUserInput
+    deleteCollection1: { // args
+      input?: NexusGenInputs['DeleteCollection1Input'] | null; // DeleteCollection1Input
     }
-    updateUser: { // args
-      input?: NexusGenInputs['UpdateUserInput'] | null; // UpdateUserInput
+    deleteCollection1s: { // args
+      where?: NexusGenInputs['DeleteCollection1sInput'] | null; // DeleteCollection1sInput
     }
-    updateUsers: { // args
-      where?: NexusGenInputs['UpdateUsersInput'] | null; // UpdateUsersInput
+    updateCollection1: { // args
+      input?: NexusGenInputs['UpdateCollection1Input'] | null; // UpdateCollection1Input
+    }
+    updateCollection1s: { // args
+      where?: NexusGenInputs['UpdateCollection1sInput'] | null; // UpdateCollection1sInput
     }
   }
   Query: {
-    user: { // args
+    collection1: { // args
       id: string; // String!
     }
   }

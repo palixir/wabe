@@ -5,7 +5,7 @@ import { SchemaInterface } from '../schema/interface'
 import { Schema } from '../schema'
 import { DatabaseController } from '../database/controllers/DatabaseController'
 import { SchemaRouterController } from '../schema/controllers/SchemaRouterController'
-import { GraphQLSchemaAdapter } from '../schema/adapters'
+import { GraphQLSchemaAdapter, SchemaRouterAdapter } from '../schema/adapters'
 import { makeSchema } from 'nexus'
 import { MongoAdapter } from '../database/adapters/MongoAdapter'
 import { join } from 'path'
@@ -78,22 +78,3 @@ export class WibeApp {
 		return this.server.stop()
 	}
 }
-
-const wibe = new WibeApp({
-	database: {
-		type: DatabaseEnum.Mongo,
-		url: 'mongodb://localhost:27017',
-		name: 'wibe',
-	},
-	port: 3000,
-	schema: [
-		{
-			name: 'user',
-			fields: {
-				name: { type: 'String' },
-				age: { type: 'Int' },
-				stringArrayTest: { type: 'array', valueType: 'String' },
-			},
-		},
-	],
-})

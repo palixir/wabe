@@ -21,7 +21,7 @@ export class GraphQLSchemaAdapter {
 		this.schema = schema
 	}
 
-	private getTypesFromFields({
+	_getTypesFromFields({
 		fields,
 		fieldsKeys,
 		t,
@@ -69,7 +69,7 @@ export class GraphQLSchemaAdapter {
 				const object = objectType({
 					name: nameWithFirstLetterUpperCase,
 					definition: (t) => {
-						this.getTypesFromFields({ fields, fieldsKeys, t })
+						this._getTypesFromFields({ fields, fieldsKeys, t })
 					},
 				})
 
@@ -92,7 +92,7 @@ export class GraphQLSchemaAdapter {
 				const typeInput = inputObjectType({
 					name: `${nameWithFirstLetterUpperCase}Input`,
 					definition: (t) => {
-						this.getTypesFromFields({ fields, fieldsKeys, t })
+						this._getTypesFromFields({ fields, fieldsKeys, t })
 					},
 				})
 

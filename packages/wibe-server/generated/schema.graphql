@@ -2,44 +2,61 @@
 ### Do not make changes to this file directly
 
 
-input DeleteUserInput {
+type Collection1 {
+  age: Int
+  name: String
+}
+
+input Collection1Input {
+  age: Int
+  name: String
+}
+
+input DeleteCollection1Input {
   id: ID!
+}
+
+input DeleteCollection1sInput {
+  age: WhereDeleteAgeInput
+  name: WhereDeleteNameInput
 }
 
 type Mutation {
-  createUser(input: UserInput): User
-  createUsers(input: UserInput): [User]
-  deleteUser(input: DeleteUserInput): User
-  updateUser(input: UpdateUserInput): User
-  updateUsers(where: UpdateUsersInput): [User]
+  createCollection1(input: Collection1Input): Collection1
+  createCollection1s(input: Collection1Input): [Collection1]
+  deleteCollection1(input: DeleteCollection1Input): Collection1
+  deleteCollection1s(where: DeleteCollection1sInput): [Collection1]
+  updateCollection1(input: UpdateCollection1Input): Collection1
+  updateCollection1s(where: UpdateCollection1sInput): [Collection1]
 }
 
 type Query {
-  user(id: String!): User
-  users: [User]
+  collection1(id: String!): Collection1
+  collection1s: [Collection1]
 }
 
-input UpdateUserInput {
-  fields: UserInput
+input UpdateCollection1Input {
+  fields: Collection1Input
   id: ID!
 }
 
-input UpdateUsersInput {
+input UpdateCollection1sInput {
   age: WhereUpdateAgeInput
   name: WhereUpdateNameInput
-  stringArrayTest: WhereUpdateStringArrayTestInput
 }
 
-type User {
-  age: Int
-  name: String
-  stringArrayTest: [String]
+input WhereDeleteAgeInput {
+  equalTo: Int
+  greaterThan: Int
+  greaterThanOrEqualTo: Int
+  lessThan: Int
+  lessThanOrEqualTo: Int
+  notEqualTo: Int
 }
 
-input UserInput {
-  age: Int
-  name: String
-  stringArrayTest: [String]
+input WhereDeleteNameInput {
+  equalTo: String
+  notEqualTo: String
 }
 
 input WhereUpdateAgeInput {
@@ -54,9 +71,4 @@ input WhereUpdateAgeInput {
 input WhereUpdateNameInput {
   equalTo: String
   notEqualTo: String
-}
-
-input WhereUpdateStringArrayTestInput {
-  in: [String]
-  notIn: [String]
 }

@@ -9,8 +9,8 @@ describe('Schema', () => {
 		schema = new Schema({
 			name: 'Collection1',
 			fields: {
-				name: { type: 'string', defaultValue: 'Lucas' },
-				age: { type: 'number', defaultValue: 23 },
+				name: { type: 'String', defaultValue: 'Lucas' },
+				age: { type: 'Int', defaultValue: 23 },
 			},
 			databaseController: {
 				createClass: mockCreateClass,
