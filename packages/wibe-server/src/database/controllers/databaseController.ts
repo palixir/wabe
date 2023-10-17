@@ -15,7 +15,18 @@ export class DatabaseController {
 		return this.adapter.createClass(className)
 	}
 
-	// async getField(className: string, fieldName: string) {
-	// 	return this.adapter.getField(className, fieldName)
-	// }
+	async getObject(params: {
+		className: string
+		id: string
+		fields: Record<string, any>
+	}) {
+		return this.adapter.getObject(params)
+	}
+
+	async insertObject(params: {
+		className: string
+		data: Record<string, any>
+	}) {
+		return this.adapter.insertObject(params)
+	}
 }

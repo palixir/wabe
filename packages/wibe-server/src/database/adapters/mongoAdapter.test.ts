@@ -28,10 +28,47 @@ describe('Mongo adapter', () => {
 	})
 
 	it("should not create class if it's not connected", async () => {
-		mongoAdapter.database = undefined
+		const cloneMongoAdapter = Object.assign(
+			Object.create(Object.getPrototypeOf(mongoAdapter)),
+			mongoAdapter,
+		)
+		cloneMongoAdapter.database = undefined
 
 		expect(
-			async () => await mongoAdapter.createClass('Collection1'),
+			async () => await cloneMongoAdapter.createClass('Collection1'),
 		).toThrow(Error('Connection to database is not established'))
+	})
+
+	it('should insert object and get object', async () => {
+		const id = await mongoAdapter.insertObject({
+			className: 'Collection1',
+			data: {
+				name: 'John',
+				age: 20,
+			},
+		})
+
+		const field = await mongoAdapter.getObject({
+			className: 'Collection1',
+			id: id.toString(),
+			fields: ['name'],
+		})
+
+		expect(id).toBeDefined()
+		expect(id._bsontype).toEqual('ObjectId')
+
+		expect(field).toEqual({ name: 'John' })
+	})
+
+	it("should not get object if the object doesn't exist", async () => {
+		// TODO : make this test when bun is updated to support .rejects
+		// expect(
+		// 	async () =>
+		// 		await mongoAdapter.getObject({
+		// 			className: 'Collection1',
+		// 			id: '5f9b3b3b3b3b3b3b3b3b3b3b',
+		// 			fields: ['name'],
+		// 		}),
+		// ).toThrow(new Error('Object not found'))
 	})
 })

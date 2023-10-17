@@ -13,6 +13,7 @@ import {
 	NexusGenFieldTypes,
 	NexusGenInputs,
 } from '../../../generated/nexusTypegen'
+import { DatabaseController } from '../../database/controllers/DatabaseController'
 
 export class GraphQLSchemaAdapter {
 	private schema: Schema[]
@@ -46,7 +47,7 @@ export class GraphQLSchemaAdapter {
 		})
 	}
 
-	createSchema() {
+	createSchema(databaseController: DatabaseController) {
 		if (!this.schema) throw new Error('Schema not found')
 
 		const arrayOfType = this.schema
@@ -73,13 +74,15 @@ export class GraphQLSchemaAdapter {
 					},
 				})
 
-				const query = extendType({
+				const queries = extendType({
 					type: 'Query',
 					definition: (t) => {
 						t.field(nameWithFirstLetterLowerCase, {
 							type: nameWithFirstLetterUpperCase,
 							args: { id: nonNull('String') },
-							resolve: (root, args) => {},
+							resolve: (root, args) => {
+								// id => age, firstName
+							},
 						})
 
 						t.list.field(`${nameWithFirstLetterLowerCase}s`, {
@@ -196,7 +199,7 @@ export class GraphQLSchemaAdapter {
 					},
 				})
 
-				return [object, query, mutations]
+				return [object, queries, mutations]
 			})
 			.flat()
 
