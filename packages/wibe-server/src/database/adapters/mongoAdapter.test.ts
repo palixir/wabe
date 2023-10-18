@@ -57,11 +57,14 @@ describe('Mongo adapter', () => {
 		expect(id).toBeDefined()
 		expect(id._bsontype).toEqual('ObjectId')
 
-		expect(field).toEqual({ name: 'John' })
+		expect(field).toEqual({
+			_id: expect.anything(),
+			name: 'John',
+		})
 	})
 
-	it("should not get object if the object doesn't exist", async () => {
-		// TODO : make this test when bun is updated to support .rejects
+	it.skip("should not get object if the object doesn't exist", async () => {
+		// TODO : rejects make this test when bun is updated to support .rejects
 		// expect(
 		// 	async () =>
 		// 		await mongoAdapter.getObject({
@@ -70,5 +73,30 @@ describe('Mongo adapter', () => {
 		// 			fields: ['name'],
 		// 		}),
 		// ).toThrow(new Error('Object not found'))
+	})
+
+	it('should update object', async () => {
+		const id = await mongoAdapter.insertObject({
+			className: 'Collection1',
+			data: {
+				name: 'John',
+				age: 20,
+			},
+		})
+
+		const res = await mongoAdapter.updateObject({
+			className: 'Collection1',
+			id: id.toString(),
+			data: { name: 'Doe' },
+		})
+
+		const field = await mongoAdapter.getObject<'Collection1'>({
+			className: 'Collection1',
+			id: id.toString(),
+			fields: ['name'],
+		})
+
+		expect(res.modifiedCount).toEqual(1)
+		expect(field.name).toEqual('Doe')
 	})
 })

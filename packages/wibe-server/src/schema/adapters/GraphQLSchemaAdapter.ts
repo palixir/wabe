@@ -6,14 +6,11 @@ import {
 	inputObjectType,
 	list,
 } from 'nexus'
-import { Schema } from '../Schema'
 import { SchemaFields } from '../interface'
 import { getWhereInputFromType } from '../../graphql'
-import {
-	NexusGenFieldTypes,
-	NexusGenInputs,
-} from '../../../generated/nexusTypegen'
+import { NexusGenFieldTypes } from '../../../generated/nexusTypegen'
 import { DatabaseController } from '../../database/controllers/DatabaseController'
+import { Schema } from '../Schema'
 
 export class GraphQLSchemaAdapter {
 	private schema: Schema[]

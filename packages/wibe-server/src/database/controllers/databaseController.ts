@@ -1,4 +1,4 @@
-import { DatabaseAdapter } from '../adapters'
+import { DatabaseAdapter } from '../adaptersInterface'
 
 export class DatabaseController {
 	private adapter: DatabaseAdapter
@@ -28,5 +28,13 @@ export class DatabaseController {
 		data: Record<string, any>
 	}) {
 		return this.adapter.insertObject(params)
+	}
+
+	async updateObject(params: {
+		className: string
+		id: string
+		data: Record<string, any>
+	}) {
+		return this.adapter.updateObject(params)
 	}
 }

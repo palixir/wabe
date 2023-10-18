@@ -1,5 +1,6 @@
-import { Db, MongoClient, ObjectId } from 'mongodb'
-import { AdapterOptions } from '.'
+import { Db, Filter, MongoClient, ObjectId, WithId } from 'mongodb'
+import { AdapterOptions } from '../adaptersInterface'
+import { NexusGenObjects } from '../../../generated/nexusTypegen'
 
 export class MongoAdapter {
 	private options: AdapterOptions
@@ -29,6 +30,28 @@ export class MongoAdapter {
 		await this.database.createCollection(className)
 	}
 
+	async updateObject(params: {
+		className: string
+		id: string
+		data: Record<string, any>
+	}) {
+		if (!this.database)
+			throw new Error('Connection to database is not established')
+
+		const { className, id, data } = params
+
+		const collection = this.database.collection(className)
+
+		const result = await collection.updateOne(
+			{ _id: new ObjectId(id) },
+			{ $set: data },
+		)
+
+		if (!result.matchedCount) throw new Error('Object not found')
+
+		return result
+	}
+
 	async insertObject(params: {
 		className: string
 		data: Record<string, any>
@@ -45,24 +68,32 @@ export class MongoAdapter {
 		return result.insertedId
 	}
 
-	async getObject(params: {
+	async getObject<T extends keyof NexusGenObjects>(params: {
 		className: string
 		id: string
-		fields: Array<string>
+		fields: Array<keyof NexusGenObjects[T]>
 	}) {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 
 		const { className, id, fields } = params
 
-		const collection = this.database.collection(className)
+		const objectOfFieldsToGet = fields.reduce((acc, prev) => {
+			return { ...acc, [prev]: 1 }
+		}, {})
 
-		const res = await collection.findOne({ _id: new ObjectId(id) })
+		const collection =
+			this.database.collection<NexusGenObjects[T]>(className)
+
+		const res = await collection.findOne(
+			{ _id: new ObjectId(id) } as Filter<NexusGenObjects[T]>,
+			{
+				projection: objectOfFieldsToGet,
+			},
+		)
 
 		if (!res) throw new Error('Object not found')
 
-		return fields.reduce((acc, prev) => {
-			return { ...acc, [prev]: res[prev] }
-		}, {})
+		return res
 	}
 }
