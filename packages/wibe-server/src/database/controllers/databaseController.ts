@@ -1,4 +1,6 @@
+import { Document, WithId } from 'mongodb'
 import { DatabaseAdapter } from '../adaptersInterface'
+import { NexusGenObjects } from '../../../generated/nexusTypegen'
 
 export class DatabaseController {
 	private adapter: DatabaseAdapter
@@ -15,11 +17,11 @@ export class DatabaseController {
 		return this.adapter.createClass(className)
 	}
 
-	async getObject(params: {
+	async getObject<T extends keyof NexusGenObjects>(params: {
 		className: string
 		id: string
-		fields: Record<string, any>
-	}) {
+		fields: Array<keyof NexusGenObjects[T]>
+	}): Promise<WithId<Document>> {
 		return this.adapter.getObject(params)
 	}
 

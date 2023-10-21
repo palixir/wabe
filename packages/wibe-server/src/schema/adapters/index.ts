@@ -10,11 +10,9 @@ export interface SchemaRouterAdapter {
 		| NexusObjectTypeDef<keyof NexusGenFieldTypes>
 		| NexusExtendTypeDef<any>
 	)[]
-	_getTypesFromFields(options: {
+	_getTypesFromFields(params: {
 		fields: SchemaFields
 		fieldsKeys: string[]
 		t: any
 	}): any[]
 }
-
-export * from './GraphQLSchemaAdapter'

@@ -32,7 +32,7 @@ describe('Server', () => {
 			port: 3000,
 			schema: [
 				{
-					name: 'Collection 1',
+					name: 'User',
 					fields: {
 						name: { type: 'String' },
 						age: { type: 'Int' },

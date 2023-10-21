@@ -78,9 +78,13 @@ export class MongoAdapter {
 
 		const { className, id, fields } = params
 
-		const objectOfFieldsToGet = fields.reduce((acc, prev) => {
-			return { ...acc, [prev]: 1 }
-		}, {})
+		const objectOfFieldsToGet: Record<keyof NexusGenObjects[T], number> =
+			fields.reduce(
+				(acc, prev) => {
+					return { ...acc, [prev]: 1 }
+				},
+				{} as Record<keyof NexusGenObjects[T], number>,
+			)
 
 		const collection =
 			this.database.collection<NexusGenObjects[T]>(className)

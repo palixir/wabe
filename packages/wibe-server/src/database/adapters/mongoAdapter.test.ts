@@ -64,7 +64,7 @@ describe('Mongo adapter', () => {
 	})
 
 	it.skip("should not get object if the object doesn't exist", async () => {
-		// TODO : rejects make this test when bun is updated to support .rejects
+		// TODO : rejects bug : make this test when bun is updated to support .rejects
 		// expect(
 		// 	async () =>
 		// 		await mongoAdapter.getObject({

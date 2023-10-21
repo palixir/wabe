@@ -6,11 +6,11 @@ import {
 	inputObjectType,
 	list,
 } from 'nexus'
+import { Schema } from '../Schema'
 import { SchemaFields } from '../interface'
-import { getWhereInputFromType } from '../../graphql'
+import { getFieldsFromInfo, getWhereInputFromType } from '../../graphql'
 import { NexusGenFieldTypes } from '../../../generated/nexusTypegen'
 import { DatabaseController } from '../../database/controllers/DatabaseController'
-import { Schema } from '../Schema'
 
 export class GraphQLSchemaAdapter {
 	private schema: Schema[]
@@ -77,8 +77,17 @@ export class GraphQLSchemaAdapter {
 						t.field(nameWithFirstLetterLowerCase, {
 							type: nameWithFirstLetterUpperCase,
 							args: { id: nonNull('String') },
-							resolve: (root, args) => {
-								// id => age, firstName
+							resolve: async (_, { id }, __, info) => {
+								const fields = getFieldsFromInfo(info)
+
+								if (!fields)
+									throw new Error('No fields provided')
+
+								await databaseController.getObject<any>({
+									className: nameWithFirstLetterUpperCase,
+									id,
+									fields,
+								})
 							},
 						})
 

@@ -2,47 +2,47 @@
 ### Do not make changes to this file directly
 
 
-type Collection1 {
-  age: Int
-  name: String
-}
-
-input Collection1Input {
-  age: Int
-  name: String
-}
-
-input DeleteCollection1Input {
+input DeleteUserInput {
   id: ID!
 }
 
-input DeleteCollection1sInput {
+input DeleteUsersInput {
   age: WhereDeleteAgeInput
   name: WhereDeleteNameInput
 }
 
 type Mutation {
-  createCollection1(input: Collection1Input): Collection1
-  createCollection1s(input: Collection1Input): [Collection1]
-  deleteCollection1(input: DeleteCollection1Input): Collection1
-  deleteCollection1s(where: DeleteCollection1sInput): [Collection1]
-  updateCollection1(input: UpdateCollection1Input): Collection1
-  updateCollection1s(where: UpdateCollection1sInput): [Collection1]
+  createUser(input: UserInput): User
+  createUsers(input: UserInput): [User]
+  deleteUser(input: DeleteUserInput): User
+  deleteUsers(where: DeleteUsersInput): [User]
+  updateUser(input: UpdateUserInput): User
+  updateUsers(where: UpdateUsersInput): [User]
 }
 
 type Query {
-  collection1(id: String!): Collection1
-  collection1s: [Collection1]
+  user(id: String!): User
+  users: [User]
 }
 
-input UpdateCollection1Input {
-  fields: Collection1Input
+input UpdateUserInput {
+  fields: UserInput
   id: ID!
 }
 
-input UpdateCollection1sInput {
+input UpdateUsersInput {
   age: WhereUpdateAgeInput
   name: WhereUpdateNameInput
+}
+
+type User {
+  age: Int
+  name: String
+}
+
+input UserInput {
+  age: Int
+  name: String
 }
 
 input WhereDeleteAgeInput {

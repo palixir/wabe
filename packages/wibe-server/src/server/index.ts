@@ -2,13 +2,13 @@ import { Elysia } from 'elysia'
 import { apollo, gql } from '@elysiajs/apollo'
 import { DatabaseConfig, DatabaseEnum } from '../database'
 import { SchemaInterface } from '../schema/interface'
-import { Schema } from '../schema'
 import { DatabaseController } from '../database/controllers/DatabaseController'
 import { SchemaRouterController } from '../schema/controllers/SchemaRouterController'
-import { GraphQLSchemaAdapter, SchemaRouterAdapter } from '../schema/adapters'
 import { makeSchema } from 'nexus'
 import { MongoAdapter } from '../database/adapters/MongoAdapter'
 import { join } from 'path'
+import { GraphQLSchemaAdapter } from '../schema/adapters/GraphQLSchemaAdapter'
+import { Schema } from '../schema/Schema'
 
 interface WibeConfig {
 	port: number
@@ -46,9 +46,11 @@ export class WibeApp {
 
 		const schemaRouterAdapter = new GraphQLSchemaAdapter(schemas)
 
-		const schemaRouterController = new SchemaRouterController(
-			schemaRouterAdapter,
-		)
+		const schemaRouterController = new SchemaRouterController({
+			adapter: schemaRouterAdapter,
+			databaseController,
+		})
+
 		const types = schemaRouterController.createSchema()
 
 		const graphqlSchema = makeSchema({
@@ -78,3 +80,21 @@ export class WibeApp {
 		return this.server.stop()
 	}
 }
+
+const wibe = new WibeApp({
+	database: {
+		type: DatabaseEnum.Mongo,
+		url: 'mongodb://localhost:27017',
+		name: 'wibe',
+	},
+	port: 3000,
+	schema: [
+		{
+			name: 'User',
+			fields: {
+				name: { type: 'String' },
+				age: { type: 'Int' },
+			},
+		},
+	],
+})

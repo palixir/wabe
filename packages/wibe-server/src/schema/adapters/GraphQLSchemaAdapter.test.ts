@@ -1,15 +1,19 @@
-import { describe, it, beforeAll, expect } from 'bun:test'
+import { describe, it, beforeAll, expect, afterAll } from 'bun:test'
 import { GraphQLSchemaAdapter } from './GraphQLSchemaAdapter'
 import { Schema } from '../Schema'
 import { makeSchema } from 'nexus'
 import { NexusGraphQLSchema } from 'nexus/dist/core'
+import { getMongoAdapter } from '../../utils/testHelper'
+import { DatabaseController } from '../../database/controllers/DatabaseController'
+import { MongoAdapter } from '../../database/adapters/MongoAdapter'
 
 describe('GraphQLSchemaAdapter', () => {
 	let schemas: Schema[] = []
 	let graphqlSchema: NexusGraphQLSchema
 	let types: any
+	let mongoAdapter: MongoAdapter
 
-	beforeAll(() => {
+	beforeAll(async () => {
 		schemas.push(
 			new Schema({
 				name: 'Use r',
@@ -26,10 +30,18 @@ describe('GraphQLSchemaAdapter', () => {
 			}),
 		)
 
+		mongoAdapter = await getMongoAdapter()
+
+		const databaseController = new DatabaseController(mongoAdapter)
+
 		const graphqlSchemaAdapter = new GraphQLSchemaAdapter(schemas)
-		types = graphqlSchemaAdapter.createSchema()
+		types = graphqlSchemaAdapter.createSchema(databaseController)
 
 		graphqlSchema = makeSchema({ types })
+	})
+
+	afterAll(async () => {
+		mongoAdapter.close()
 	})
 
 	it("should create input types from schema's fields", () => {

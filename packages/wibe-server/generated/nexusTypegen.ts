@@ -14,24 +14,24 @@ declare global {
 }
 
 export interface NexusGenInputs {
-  Collection1Input: { // input type
-    age?: number | null; // Int
-    name?: string | null; // String
-  }
-  DeleteCollection1Input: { // input type
+  DeleteUserInput: { // input type
     id: string; // ID!
   }
-  DeleteCollection1sInput: { // input type
+  DeleteUsersInput: { // input type
     age?: NexusGenInputs['WhereDeleteAgeInput'] | null; // WhereDeleteAgeInput
     name?: NexusGenInputs['WhereDeleteNameInput'] | null; // WhereDeleteNameInput
   }
-  UpdateCollection1Input: { // input type
-    fields?: NexusGenInputs['Collection1Input'] | null; // Collection1Input
+  UpdateUserInput: { // input type
+    fields?: NexusGenInputs['UserInput'] | null; // UserInput
     id: string; // ID!
   }
-  UpdateCollection1sInput: { // input type
+  UpdateUsersInput: { // input type
     age?: NexusGenInputs['WhereUpdateAgeInput'] | null; // WhereUpdateAgeInput
     name?: NexusGenInputs['WhereUpdateNameInput'] | null; // WhereUpdateNameInput
+  }
+  UserInput: { // input type
+    age?: number | null; // Int
+    name?: string | null; // String
   }
   WhereDeleteAgeInput: { // input type
     equalTo?: number | null; // Int
@@ -71,12 +71,12 @@ export interface NexusGenScalars {
 }
 
 export interface NexusGenObjects {
-  Collection1: { // root type
+  Mutation: {};
+  Query: {};
+  User: { // root type
     age?: number | null; // Int
     name?: string | null; // String
   }
-  Mutation: {};
-  Query: {};
 }
 
 export interface NexusGenInterfaces {
@@ -90,66 +90,66 @@ export type NexusGenRootTypes = NexusGenObjects
 export type NexusGenAllTypes = NexusGenRootTypes & NexusGenScalars
 
 export interface NexusGenFieldTypes {
-  Collection1: { // field return type
-    age: number | null; // Int
-    name: string | null; // String
-  }
   Mutation: { // field return type
-    createCollection1: NexusGenRootTypes['Collection1'] | null; // Collection1
-    createCollection1s: Array<NexusGenRootTypes['Collection1'] | null> | null; // [Collection1]
-    deleteCollection1: NexusGenRootTypes['Collection1'] | null; // Collection1
-    deleteCollection1s: Array<NexusGenRootTypes['Collection1'] | null> | null; // [Collection1]
-    updateCollection1: NexusGenRootTypes['Collection1'] | null; // Collection1
-    updateCollection1s: Array<NexusGenRootTypes['Collection1'] | null> | null; // [Collection1]
+    createUser: NexusGenRootTypes['User'] | null; // User
+    createUsers: Array<NexusGenRootTypes['User'] | null> | null; // [User]
+    deleteUser: NexusGenRootTypes['User'] | null; // User
+    deleteUsers: Array<NexusGenRootTypes['User'] | null> | null; // [User]
+    updateUser: NexusGenRootTypes['User'] | null; // User
+    updateUsers: Array<NexusGenRootTypes['User'] | null> | null; // [User]
   }
   Query: { // field return type
-    collection1: NexusGenRootTypes['Collection1'] | null; // Collection1
-    collection1s: Array<NexusGenRootTypes['Collection1'] | null> | null; // [Collection1]
+    user: NexusGenRootTypes['User'] | null; // User
+    users: Array<NexusGenRootTypes['User'] | null> | null; // [User]
+  }
+  User: { // field return type
+    age: number | null; // Int
+    name: string | null; // String
   }
 }
 
 export interface NexusGenFieldTypeNames {
-  Collection1: { // field return type name
-    age: 'Int'
-    name: 'String'
-  }
   Mutation: { // field return type name
-    createCollection1: 'Collection1'
-    createCollection1s: 'Collection1'
-    deleteCollection1: 'Collection1'
-    deleteCollection1s: 'Collection1'
-    updateCollection1: 'Collection1'
-    updateCollection1s: 'Collection1'
+    createUser: 'User'
+    createUsers: 'User'
+    deleteUser: 'User'
+    deleteUsers: 'User'
+    updateUser: 'User'
+    updateUsers: 'User'
   }
   Query: { // field return type name
-    collection1: 'Collection1'
-    collection1s: 'Collection1'
+    user: 'User'
+    users: 'User'
+  }
+  User: { // field return type name
+    age: 'Int'
+    name: 'String'
   }
 }
 
 export interface NexusGenArgTypes {
   Mutation: {
-    createCollection1: { // args
-      input?: NexusGenInputs['Collection1Input'] | null; // Collection1Input
+    createUser: { // args
+      input?: NexusGenInputs['UserInput'] | null; // UserInput
     }
-    createCollection1s: { // args
-      input?: NexusGenInputs['Collection1Input'] | null; // Collection1Input
+    createUsers: { // args
+      input?: NexusGenInputs['UserInput'] | null; // UserInput
     }
-    deleteCollection1: { // args
-      input?: NexusGenInputs['DeleteCollection1Input'] | null; // DeleteCollection1Input
+    deleteUser: { // args
+      input?: NexusGenInputs['DeleteUserInput'] | null; // DeleteUserInput
     }
-    deleteCollection1s: { // args
-      where?: NexusGenInputs['DeleteCollection1sInput'] | null; // DeleteCollection1sInput
+    deleteUsers: { // args
+      where?: NexusGenInputs['DeleteUsersInput'] | null; // DeleteUsersInput
     }
-    updateCollection1: { // args
-      input?: NexusGenInputs['UpdateCollection1Input'] | null; // UpdateCollection1Input
+    updateUser: { // args
+      input?: NexusGenInputs['UpdateUserInput'] | null; // UpdateUserInput
     }
-    updateCollection1s: { // args
-      where?: NexusGenInputs['UpdateCollection1sInput'] | null; // UpdateCollection1sInput
+    updateUsers: { // args
+      where?: NexusGenInputs['UpdateUsersInput'] | null; // UpdateUsersInput
     }
   }
   Query: {
-    collection1: { // args
+    user: { // args
       id: string; // String!
     }
   }
