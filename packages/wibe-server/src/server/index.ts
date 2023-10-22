@@ -37,6 +37,8 @@ export class WibeApp {
 
 		const databaseController = new DatabaseController(databaseAdapter)
 
+		await databaseController.connect()
+
 		const schemas = this.config.schema.map(
 			(schema) =>
 				new Schema({

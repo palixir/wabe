@@ -21,6 +21,7 @@
 		"wibe-mongodb-launcher": "workspace:*",
 		"bun-types": "1.0.3",
 		"typescript": "5.2.2",
-		"dts-bundle-generator": "8.0.1"
+		"dts-bundle-generator": "8.0.1",
+		"uuid": "9.0.1"
 	}
 }

@@ -21,7 +21,6 @@ export class MongoAdapter implements DatabaseAdapter {
 	async connect() {
 		const client = await this.client.connect()
 		this.database = client.db(this.options.databaseName)
-
 		return client
 	}
 

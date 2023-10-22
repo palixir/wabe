@@ -10,7 +10,7 @@
 		"build": "bun build index.ts --minify --target=bun --outdir lib"
 	},
 	"dependencies": {
-		"get-port": "7.0.0",
+		"tcp-port-used": "1.0.2",
 		"mongodb-memory-server": "8.15.1"
 	},
 	"devDependencies": {

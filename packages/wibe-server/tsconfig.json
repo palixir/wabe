@@ -1,5 +1,6 @@
 {
 	"compilerOptions": {
+		"module": "ESNext",
 		"target": "ES2022",
 		"types": ["bun-types"],
 		"esModuleInterop": true,

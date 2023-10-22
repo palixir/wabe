@@ -1,17 +1,19 @@
 import { MongoMemoryReplSet } from 'mongodb-memory-server'
-import getPort from 'get-port'
+import tcpPortUsed from 'tcp-port-used'
 
 export const runDatabase = async () => {
-	const port = await getPort()
-	await MongoMemoryReplSet.create({
+	if (await tcpPortUsed.check(27045, '127.0.0.1')) return
+
+	const res = await MongoMemoryReplSet.create({
 		instanceOpts: [
 			{
-				port,
+				port: 27045,
 			},
 		],
-		replSet: { storageEngine: 'wiredTiger', dbName: 'wibe' },
+		replSet: { storageEngine: 'wiredTiger' },
 	})
-	console.info('MongoDB started')
 
-	return port
+	await res.waitUntilRunning()
+
+	console.info('MongoDB started')
 }
