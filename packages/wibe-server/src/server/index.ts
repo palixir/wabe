@@ -27,7 +27,9 @@ export class WibeApp {
 			'/health',
 			(context) => (context.set.status = 200),
 		)
+	}
 
+	async start() {
 		const databaseAdapter = new MongoAdapter({
 			databaseName: this.config.database.name,
 			databaseUrl: this.config.database.url,
@@ -69,7 +71,7 @@ export class WibeApp {
 			},
 		})
 
-		this.server.use(apollo({ schema: graphqlSchema }))
+		this.server.use(await apollo({ schema: graphqlSchema }))
 
 		this.server.listen(this.config.port, () => {
 			console.log(`Server running on port ${this.config.port}`)
@@ -80,21 +82,3 @@ export class WibeApp {
 		return this.server.stop()
 	}
 }
-
-const wibe = new WibeApp({
-	database: {
-		type: DatabaseEnum.Mongo,
-		url: 'mongodb://localhost:27017',
-		name: 'wibe',
-	},
-	port: 3000,
-	schema: [
-		{
-			name: 'User',
-			fields: {
-				name: { type: 'String' },
-				age: { type: 'Int' },
-			},
-		},
-	],
-})

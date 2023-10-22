@@ -17,14 +17,14 @@ describe('Mongo adapter', () => {
 	it('should create class', async () => {
 		expect((await mongoAdapter.database?.collections())?.length).toBe(0)
 
-		await mongoAdapter.createClass('Collection1')
+		await mongoAdapter.createClass('User')
 
 		const collections = await mongoAdapter.database?.collections()
 
 		if (!collections) fail()
 
 		expect((await mongoAdapter.database?.collections())?.length).toBe(1)
-		expect(collections[0].collectionName).toBe('Collection1')
+		expect(collections[0].collectionName).toBe('User')
 	})
 
 	it("should not create class if it's not connected", async () => {
@@ -34,22 +34,22 @@ describe('Mongo adapter', () => {
 		)
 		cloneMongoAdapter.database = undefined
 
-		expect(
-			async () => await cloneMongoAdapter.createClass('Collection1'),
-		).toThrow(Error('Connection to database is not established'))
+		expect(async () => await cloneMongoAdapter.createClass('User')).toThrow(
+			Error('Connection to database is not established'),
+		)
 	})
 
 	it('should insert object and get object', async () => {
 		const id = await mongoAdapter.insertObject({
-			className: 'Collection1',
+			className: 'User',
 			data: {
 				name: 'John',
 				age: 20,
 			},
 		})
 
-		const field = await mongoAdapter.getObject({
-			className: 'Collection1',
+		const field = await mongoAdapter.getObject<'User'>({
+			className: 'User',
 			id: id.toString(),
 			fields: ['name'],
 		})
@@ -77,7 +77,7 @@ describe('Mongo adapter', () => {
 
 	it('should update object', async () => {
 		const id = await mongoAdapter.insertObject({
-			className: 'Collection1',
+			className: 'User',
 			data: {
 				name: 'John',
 				age: 20,
@@ -85,13 +85,13 @@ describe('Mongo adapter', () => {
 		})
 
 		const res = await mongoAdapter.updateObject({
-			className: 'Collection1',
+			className: 'User',
 			id: id.toString(),
 			data: { name: 'Doe' },
 		})
 
-		const field = await mongoAdapter.getObject<'Collection1'>({
-			className: 'Collection1',
+		const field = await mongoAdapter.getObject<'User'>({
+			className: 'User',
 			id: id.toString(),
 			fields: ['name'],
 		})

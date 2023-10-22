@@ -9,7 +9,7 @@ import {
 import { NexusGenObjects } from '../../../generated/nexusTypegen'
 
 export class MongoAdapter implements DatabaseAdapter {
-	private options: AdapterOptions
+	public options: AdapterOptions
 	private client: MongoClient
 	public database?: Db
 

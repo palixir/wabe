@@ -16,6 +16,7 @@
 		"graphql": "16.8.1"
 	},
 	"devDependencies": {
+		"graphql-request": "6.1.0",
 		"get-port": "7.0.0",
 		"wibe-mongodb-launcher": "workspace:*",
 		"bun-types": "1.0.3",
