@@ -1,8 +1,14 @@
 import { Db, Filter, MongoClient, ObjectId, WithId } from 'mongodb'
-import { AdapterOptions } from '../adaptersInterface'
+import {
+	AdapterOptions,
+	DatabaseAdapter,
+	GetObjectOptions,
+	InsertObjectOptions,
+	UpdateObjectOptions,
+} from './adaptersInterface'
 import { NexusGenObjects } from '../../../generated/nexusTypegen'
 
-export class MongoAdapter {
+export class MongoAdapter implements DatabaseAdapter {
 	private options: AdapterOptions
 	private client: MongoClient
 	public database?: Db
@@ -30,11 +36,7 @@ export class MongoAdapter {
 		await this.database.createCollection(className)
 	}
 
-	async updateObject(params: {
-		className: string
-		id: string
-		data: Record<string, any>
-	}) {
+	async updateObject(params: UpdateObjectOptions) {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 
@@ -52,10 +54,7 @@ export class MongoAdapter {
 		return result
 	}
 
-	async insertObject(params: {
-		className: string
-		data: Record<string, any>
-	}) {
+	async insertObject(params: InsertObjectOptions) {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 
@@ -68,11 +67,9 @@ export class MongoAdapter {
 		return result.insertedId
 	}
 
-	async getObject<T extends keyof NexusGenObjects>(params: {
-		className: string
-		id: string
-		fields: Array<keyof NexusGenObjects[T]>
-	}) {
+	async getObject<T extends keyof NexusGenObjects>(
+		params: GetObjectOptions<T>,
+	) {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 

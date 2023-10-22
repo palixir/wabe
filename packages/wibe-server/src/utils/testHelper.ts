@@ -3,14 +3,8 @@ import { MongoAdapter } from '../database/adapters/MongoAdapter'
 
 let mongoAdapter: MongoAdapter | undefined = undefined
 
-const copyMongoAdapter = () =>
-	Object.assign(
-		Object.create(Object.getPrototypeOf(mongoAdapter)),
-		mongoAdapter,
-	)
-
 export const getMongoAdapter = async () => {
-	if (mongoAdapter) return copyMongoAdapter()
+	if (mongoAdapter) return mongoAdapter
 
 	const port = await runDatabase()
 
@@ -21,5 +15,5 @@ export const getMongoAdapter = async () => {
 
 	await mongoAdapter.connect()
 
-	return copyMongoAdapter()
+	return mongoAdapter
 }

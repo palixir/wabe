@@ -11,8 +11,9 @@ import { SchemaFields } from '../interface'
 import { getFieldsFromInfo, getWhereInputFromType } from '../../graphql'
 import { NexusGenFieldTypes } from '../../../generated/nexusTypegen'
 import { DatabaseController } from '../../database/controllers/DatabaseController'
+import { SchemaRouterAdapter } from './adaptersInterface'
 
-export class GraphQLSchemaAdapter {
+export class GraphQLSchemaAdapter implements SchemaRouterAdapter {
 	private schema: Schema[]
 
 	constructor(schema: Schema[]) {

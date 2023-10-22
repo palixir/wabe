@@ -1,5 +1,5 @@
 import { DatabaseController } from '../../database/controllers/DatabaseController'
-import { SchemaRouterAdapter } from '../adapters'
+import { SchemaRouterAdapter } from '../adapters/adaptersInterface'
 
 export class SchemaRouterController {
 	private adapter: SchemaRouterAdapter

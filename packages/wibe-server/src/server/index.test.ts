@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'bun:test'
+import getPort from 'get-port'
 import { WibeApp } from '.'
 import { DatabaseEnum } from '../database'
 
@@ -10,7 +11,7 @@ describe('Server', () => {
 				url: 'mongodb://localhost:27017',
 				name: 'wibe',
 			},
-			port: 3000,
+			port: await getPort(),
 			schema: [
 				{ name: 'Collection1', fields: { name: { type: 'String' } } },
 			],
@@ -22,14 +23,14 @@ describe('Server', () => {
 		await wibe.close()
 	})
 
-	it('should call the schema creation', () => {
+	it('should call the schema creation', async () => {
 		const wibe = new WibeApp({
 			database: {
 				type: DatabaseEnum.Mongo,
 				url: 'mongodb://localhost:27017',
 				name: 'wibe',
 			},
-			port: 3000,
+			port: await getPort(),
 			schema: [
 				{
 					name: 'User',

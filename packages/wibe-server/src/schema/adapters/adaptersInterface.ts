@@ -3,6 +3,10 @@ import { SchemaFields } from '../interface'
 import { NexusGenFieldTypes } from '../../../generated/nexusTypegen'
 import { DatabaseController } from '../../database/controllers/DatabaseController'
 
+export interface CreateSchemaOptions {
+	databaseController: DatabaseController
+}
+
 export interface SchemaRouterAdapter {
 	createSchema(
 		databaseController: DatabaseController,
@@ -10,9 +14,4 @@ export interface SchemaRouterAdapter {
 		| NexusObjectTypeDef<keyof NexusGenFieldTypes>
 		| NexusExtendTypeDef<any>
 	)[]
-	_getTypesFromFields(params: {
-		fields: SchemaFields
-		fieldsKeys: string[]
-		t: any
-	}): any[]
 }
