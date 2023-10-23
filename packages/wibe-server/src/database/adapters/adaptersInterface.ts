@@ -26,6 +26,7 @@ export interface UpdateObjectOptions {
 // TODO : Type the return of the functions
 export interface DatabaseAdapter {
 	connect(): Promise<any>
+	close(): Promise<any>
 	createClass(className: string): Promise<any>
 	getObject<T extends keyof NexusGenObjects>(
 		params: GetObjectOptions<T>,

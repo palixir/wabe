@@ -1,9 +1,29 @@
-import { describe, it, expect, spyOn, mock } from 'bun:test'
+import {
+	describe,
+	it,
+	expect,
+	spyOn,
+	mock,
+	beforeAll,
+	afterAll,
+} from 'bun:test'
 import { MongoAdapter } from '../adapters/MongoAdapter'
 import { DatabaseController } from './DatabaseController'
-import { getMongoAdapter } from '../../utils/testHelper'
+import { closeTests, setupTests } from '../../utils/testHelper'
+import { WibeApp } from '../../server'
 
 describe('DatabaseController', () => {
+	let wibe: WibeApp
+
+	beforeAll(async () => {
+		const setup = await setupTests()
+		wibe = setup.wibe
+	})
+
+	afterAll(async () => {
+		await closeTests(wibe)
+	})
+
 	it('should call adapter for createClass', async () => {
 		const spyMongoAdapterCreateClass = spyOn(
 			MongoAdapter.prototype,
@@ -11,7 +31,7 @@ describe('DatabaseController', () => {
 		).mockResolvedValue()
 
 		const databaseController = new DatabaseController(
-			await getMongoAdapter(),
+			wibe.databaseController.adapter as MongoAdapter,
 		)
 
 		await databaseController.createClass('Collection1')

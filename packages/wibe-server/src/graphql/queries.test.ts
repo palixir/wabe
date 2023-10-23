@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test'
 import { WibeApp } from '../server'
 import { gql } from '@elysiajs/apollo'
-import { getGraphqlClient, setupTests } from '../utils/testHelper'
+import { closeTests, getGraphqlClient, setupTests } from '../utils/testHelper'
 
 describe('GraphQL Queries', () => {
 	let wibe: WibeApp
@@ -14,7 +14,7 @@ describe('GraphQL Queries', () => {
 	})
 
 	afterAll(async () => {
-		await wibe.close()
+		await closeTests(wibe)
 	})
 
 	it('should call getObject with default query', async () => {

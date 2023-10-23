@@ -1,27 +1,8 @@
-import { runDatabase } from 'wibe-mongodb-launcher'
 import { v4 as uuid } from 'uuid'
-import { MongoAdapter } from '../database/adapters/MongoAdapter'
 import { GraphQLClient } from 'graphql-request'
 import { WibeApp } from '../server'
 import { DatabaseEnum } from '../database'
 import getPort from 'get-port'
-
-let mongoAdapter: MongoAdapter | undefined = undefined
-
-export const getMongoAdapter = async () => {
-	if (mongoAdapter) return mongoAdapter
-
-	const port = await runDatabase()
-
-	mongoAdapter = new MongoAdapter({
-		databaseUrl: `mongodb://127.0.0.1:${port}`,
-		databaseName: 'test',
-	})
-
-	await mongoAdapter.connect()
-
-	return mongoAdapter
-}
 
 export const getGraphqlClient = (port: number) => {
 	const client = new GraphQLClient(`http://127.0.0.1:${port}/graphql`)
@@ -52,4 +33,9 @@ export const setupTests = async () => {
 	await wibe.start()
 
 	return { wibe, port }
+}
+
+export const closeTests = async (wibe: WibeApp) => {
+	await wibe.databaseController.adapter?.close()
+	await wibe.close()
 }

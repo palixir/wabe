@@ -1,17 +1,22 @@
 import { describe, it, expect, beforeAll, afterAll } from 'bun:test'
 import { fail } from 'assert'
-import { getMongoAdapter } from '../../utils/testHelper'
+import { closeTests, setupTests } from '../../utils/testHelper'
 import { MongoAdapter } from './MongoAdapter'
+import { WibeApp } from '../../server'
 
 describe('Mongo adapter', () => {
 	let mongoAdapter: MongoAdapter
+	let wibe: WibeApp
 
 	beforeAll(async () => {
-		mongoAdapter = await getMongoAdapter()
+		const setup = await setupTests()
+		wibe = setup.wibe
+
+		mongoAdapter = wibe.databaseController.adapter as MongoAdapter
 	})
 
 	afterAll(async () => {
-		await mongoAdapter.close()
+		await closeTests(wibe)
 	})
 
 	it('should create class', async () => {

@@ -3,15 +3,16 @@ import { GraphQLSchemaAdapter } from './GraphQLSchemaAdapter'
 import { Schema } from '../Schema'
 import { makeSchema } from 'nexus'
 import { NexusGraphQLSchema } from 'nexus/dist/core'
-import { getMongoAdapter } from '../../utils/testHelper'
 import { DatabaseController } from '../../database/controllers/DatabaseController'
 import { MongoAdapter } from '../../database/adapters/MongoAdapter'
+import { closeTests, setupTests } from '../../utils/testHelper'
+import { WibeApp } from '../../server'
 
 describe('GraphQLSchemaAdapter', () => {
 	let schemas: Schema[] = []
 	let graphqlSchema: NexusGraphQLSchema
 	let types: any
-	let mongoAdapter: MongoAdapter
+	let wibe: WibeApp
 
 	beforeAll(async () => {
 		schemas.push(
@@ -30,9 +31,10 @@ describe('GraphQLSchemaAdapter', () => {
 			}),
 		)
 
-		mongoAdapter = await getMongoAdapter()
+		const setup = await setupTests()
+		wibe = setup.wibe
 
-		const databaseController = new DatabaseController(mongoAdapter)
+		const databaseController = setup.wibe.databaseController
 
 		const graphqlSchemaAdapter = new GraphQLSchemaAdapter(schemas)
 		types = graphqlSchemaAdapter.createSchema(databaseController)
@@ -41,7 +43,7 @@ describe('GraphQLSchemaAdapter', () => {
 	})
 
 	afterAll(async () => {
-		mongoAdapter.close()
+		await closeTests(wibe)
 	})
 
 	it("should create input types from schema's fields", () => {

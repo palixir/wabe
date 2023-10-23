@@ -1,16 +1,19 @@
 import { describe, expect, it } from 'bun:test'
+import { v4 as uuid } from 'uuid'
 import getPort from 'get-port'
 import { WibeApp } from '.'
 import { DatabaseEnum } from '../database'
 
 describe('Server', () => {
 	it('should run server', async () => {
+		const databaseId = uuid()
+
 		const port = await getPort()
 		const wibe = new WibeApp({
 			database: {
 				type: DatabaseEnum.Mongo,
-				url: 'mongodb://localhost:27017',
-				name: 'wibe',
+				url: `mongodb://127.0.0.1:27045`,
+				name: databaseId,
 			},
 			port,
 			schema: [

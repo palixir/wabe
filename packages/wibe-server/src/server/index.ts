@@ -1,6 +1,6 @@
 import { Elysia } from 'elysia'
-import { apollo, gql } from '@elysiajs/apollo'
-import { DatabaseConfig, DatabaseEnum } from '../database'
+import { apollo } from '@elysiajs/apollo'
+import { DatabaseConfig } from '../database'
 import { SchemaInterface } from '../schema/interface'
 import { DatabaseController } from '../database/controllers/DatabaseController'
 import { SchemaRouterController } from '../schema/controllers/SchemaRouterController'
@@ -19,6 +19,7 @@ interface WibeConfig {
 export class WibeApp {
 	private config: WibeConfig
 	private server: Elysia
+	public databaseController: DatabaseController
 
 	constructor(config: WibeConfig) {
 		this.config = config
@@ -27,24 +28,24 @@ export class WibeApp {
 			'/health',
 			(context) => (context.set.status = 200),
 		)
-	}
 
-	async start() {
 		const databaseAdapter = new MongoAdapter({
 			databaseName: this.config.database.name,
 			databaseUrl: this.config.database.url,
 		})
 
-		const databaseController = new DatabaseController(databaseAdapter)
+		this.databaseController = new DatabaseController(databaseAdapter)
+	}
 
-		await databaseController.connect()
+	async start() {
+		await this.databaseController.connect()
 
 		const schemas = this.config.schema.map(
 			(schema) =>
 				new Schema({
 					name: schema.name,
 					fields: schema.fields,
-					databaseController,
+					databaseController: this.databaseController,
 				}),
 		)
 
@@ -52,7 +53,7 @@ export class WibeApp {
 
 		const schemaRouterController = new SchemaRouterController({
 			adapter: schemaRouterAdapter,
-			databaseController,
+			databaseController: this.databaseController,
 		})
 
 		const types = schemaRouterController.createSchema()
@@ -81,6 +82,7 @@ export class WibeApp {
 	}
 
 	async close() {
-		return this.server.stop()
+		await this.databaseController.close()
+		await this.server.stop()
 	}
 }

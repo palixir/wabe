@@ -8,7 +8,7 @@ import {
 import { NexusGenObjects } from '../../../generated/nexusTypegen'
 
 export class DatabaseController {
-	private adapter: DatabaseAdapter
+	public adapter: DatabaseAdapter
 
 	constructor(adapter: DatabaseAdapter) {
 		this.adapter = adapter
@@ -16,6 +16,10 @@ export class DatabaseController {
 
 	async connect() {
 		return this.adapter.connect()
+	}
+
+	async close() {
+		return this.adapter.close()
 	}
 
 	async createClass(className: string) {
