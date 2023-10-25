@@ -44,14 +44,22 @@ describe('Mongo adapter', () => {
 		)
 	})
 
-	it('should insert object and get object', async () => {
-		const id = await mongoAdapter.insertObject({
+	it('should get object with specific field and * fields', async () => {
+		const insertedObject = await mongoAdapter.insertObject<'User'>({
 			className: 'User',
 			data: {
 				name: 'John',
 				age: 20,
 			},
+			fields: ['name'],
 		})
+
+		if (!insertedObject) fail()
+
+		const id = insertedObject._id
+
+		expect(id).toBeDefined()
+		expect(id._bsontype).toEqual('ObjectId')
 
 		const field = await mongoAdapter.getObject<'User'>({
 			className: 'User',
@@ -59,12 +67,21 @@ describe('Mongo adapter', () => {
 			fields: ['name'],
 		})
 
-		expect(id).toBeDefined()
-		expect(id._bsontype).toEqual('ObjectId')
-
 		expect(field).toEqual({
 			_id: expect.anything(),
 			name: 'John',
+		})
+
+		const allFields = await mongoAdapter.getObject<'User'>({
+			className: 'User',
+			id: id.toString(),
+			fields: ['*'],
+		})
+
+		expect(allFields).toEqual({
+			_id: expect.anything(),
+			name: 'John',
+			age: 20,
 		})
 	})
 
@@ -80,28 +97,75 @@ describe('Mongo adapter', () => {
 		// ).toThrow(new Error('Object not found'))
 	})
 
+	it('should insert object and return the created object', async () => {
+		const insertedObject = await mongoAdapter.insertObject<'User'>({
+			className: 'User',
+			data: {
+				name: 'Lucas',
+				age: 23,
+			},
+			fields: ['age'],
+		})
+
+		expect(insertedObject).toEqual({ age: 23, _id: expect.anything() })
+
+		const insertedObject2 = await mongoAdapter.insertObject<'User'>({
+			className: 'User',
+			data: {
+				name: 'Lucas2',
+				age: 24,
+			},
+			fields: ['*'],
+		})
+
+		expect(insertedObject2).toEqual({
+			age: 24,
+			_id: expect.anything(),
+			name: 'Lucas2',
+		})
+	})
+
 	it('should update object', async () => {
-		const id = await mongoAdapter.insertObject({
+		const insertedObject = await mongoAdapter.insertObject<'User'>({
 			className: 'User',
 			data: {
 				name: 'John',
 				age: 20,
 			},
+			fields: ['*'],
 		})
 
-		const res = await mongoAdapter.updateObject({
+		if (!insertedObject) fail()
+
+		const id = insertedObject._id
+
+		const updatedObject = await mongoAdapter.updateObject<'User'>({
 			className: 'User',
 			id: id.toString(),
 			data: { name: 'Doe' },
-		})
-
-		const field = await mongoAdapter.getObject<'User'>({
-			className: 'User',
-			id: id.toString(),
 			fields: ['name'],
 		})
 
-		expect(res.modifiedCount).toEqual(1)
-		expect(field.name).toEqual('Doe')
+		if (!updatedObject) fail()
+
+		expect(updatedObject).toEqual({
+			_id: expect.anything(),
+			name: 'Doe',
+		})
+
+		const updatedObject2 = await mongoAdapter.updateObject<'User'>({
+			className: 'User',
+			id: id.toString(),
+			data: { name: 'Doe' },
+			fields: ['*'],
+		})
+
+		if (!updatedObject2) fail()
+
+		expect(updatedObject2).toEqual({
+			_id: expect.anything(),
+			name: 'Doe',
+			age: 20,
+		})
 	})
 })

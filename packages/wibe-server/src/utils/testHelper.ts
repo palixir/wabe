@@ -4,10 +4,10 @@ import { WibeApp } from '../server'
 import { DatabaseEnum } from '../database'
 import getPort from 'get-port'
 
-export const getGraphqlClient = (port: number) => {
+export const getGraphqlClient = (port: number): GraphQLClient => {
 	const client = new GraphQLClient(`http://127.0.0.1:${port}/graphql`)
 
-	return { ...client, request: client.request<any> }
+	return { ...client, request: client.request<any> } as GraphQLClient
 }
 
 export const setupTests = async () => {

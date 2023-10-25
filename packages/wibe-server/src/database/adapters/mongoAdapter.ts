@@ -35,35 +35,47 @@ export class MongoAdapter implements DatabaseAdapter {
 		await this.database.createCollection(className)
 	}
 
-	async updateObject(params: UpdateObjectOptions) {
+	async updateObject<T extends keyof NexusGenObjects>(
+		params: UpdateObjectOptions<T>,
+	) {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 
-		const { className, id, data } = params
+		const { className, id, data, fields } = params
 
 		const collection = this.database.collection(className)
 
-		const result = await collection.updateOne(
+		const result = await collection.findOneAndUpdate(
 			{ _id: new ObjectId(id) },
 			{ $set: data },
 		)
 
-		if (!result.matchedCount) throw new Error('Object not found')
+		if (!result) throw new Error('Object not found')
 
-		return result
+		return this.getObject<T>({
+			className,
+			id: result._id.toString(),
+			fields,
+		})
 	}
 
-	async insertObject(params: InsertObjectOptions) {
+	async insertObject<T extends keyof NexusGenObjects>(
+		params: InsertObjectOptions<T>,
+	) {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 
-		const { className, data } = params
+		const { className, data, fields } = params
 
 		const collection = this.database.collection(className)
 
 		const result = await collection.insertOne(data)
 
-		return result.insertedId
+		return this.getObject<T>({
+			className,
+			id: result.insertedId.toString(),
+			fields,
+		})
 	}
 
 	async getObject<T extends keyof NexusGenObjects>(
@@ -73,6 +85,13 @@ export class MongoAdapter implements DatabaseAdapter {
 			throw new Error('Connection to database is not established')
 
 		const { className, id, fields } = params
+
+		if (fields.includes('*'))
+			return this.database
+				.collection<NexusGenObjects[T]>(className)
+				.findOne({ _id: new ObjectId(id) } as Filter<
+					NexusGenObjects[T]
+				>)
 
 		const objectOfFieldsToGet: Record<keyof NexusGenObjects[T], number> =
 			fields.reduce(
@@ -85,15 +104,11 @@ export class MongoAdapter implements DatabaseAdapter {
 		const collection =
 			this.database.collection<NexusGenObjects[T]>(className)
 
-		const res = await collection.findOne(
+		return collection.findOne(
 			{ _id: new ObjectId(id) } as Filter<NexusGenObjects[T]>,
 			{
-				projection: objectOfFieldsToGet,
+				projection: { ...objectOfFieldsToGet, _id: 1 },
 			},
 		)
-
-		if (!res) throw new Error('Object not found')
-
-		return res
 	}
 }

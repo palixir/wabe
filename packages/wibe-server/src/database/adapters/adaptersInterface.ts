@@ -9,18 +9,20 @@ export interface AdapterOptions {
 export interface GetObjectOptions<T extends keyof NexusGenObjects> {
 	className: string
 	id: string
-	fields: Array<keyof NexusGenObjects[T]>
+	fields: Array<keyof NexusGenObjects[T] | '*'>
 }
 
-export interface InsertObjectOptions {
+export interface InsertObjectOptions<T extends keyof NexusGenObjects> {
 	className: string
 	data: Record<string, any>
+	fields: Array<keyof NexusGenObjects[T] | '*'>
 }
 
-export interface UpdateObjectOptions {
+export interface UpdateObjectOptions<T extends keyof NexusGenObjects> {
 	className: string
 	id: string
 	data: Record<string, any>
+	fields: Array<keyof NexusGenObjects[T] | '*'>
 }
 
 // TODO : Type the return of the functions
@@ -30,7 +32,11 @@ export interface DatabaseAdapter {
 	createClass(className: string): Promise<any>
 	getObject<T extends keyof NexusGenObjects>(
 		params: GetObjectOptions<T>,
-	): Promise<WithId<Document>>
-	insertObject(params: InsertObjectOptions): Promise<any>
-	updateObject(params: UpdateObjectOptions): Promise<any>
+	): Promise<WithId<Document> | null>
+	insertObject<T extends keyof NexusGenObjects>(
+		params: InsertObjectOptions<T>,
+	): Promise<any>
+	updateObject<T extends keyof NexusGenObjects>(
+		params: UpdateObjectOptions<T>,
+	): Promise<any>
 }
