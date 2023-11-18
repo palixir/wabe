@@ -1,6 +1,7 @@
 import { Document, WithId } from 'mongodb'
 import {
 	CreateObjectOptions,
+	CreateObjectsOptions,
 	DatabaseAdapter,
 	GetObjectOptions,
 	GetObjectsOptions,
@@ -43,6 +44,12 @@ export class DatabaseController {
 		params: CreateObjectOptions<T>,
 	) {
 		return this.adapter.createObject(params)
+	}
+
+	async createObjects<T extends keyof NexusGenObjects>(
+		params: CreateObjectsOptions<T>,
+	) {
+		return this.adapter.createObjects(params)
 	}
 
 	async updateObject<T extends keyof NexusGenObjects>(

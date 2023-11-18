@@ -6,8 +6,10 @@ import {
 	CreateObjectOptions,
 	UpdateObjectOptions,
 	GetObjectsOptions,
+	CreateObjectsOptions,
 } from './adaptersInterface'
 import { NexusGenObjects } from '../../../generated/nexusTypegen'
+import { buildMongoWhereQuery } from './utils'
 
 export class MongoAdapter implements DatabaseAdapter {
 	public options: AdapterOptions
@@ -79,18 +81,35 @@ export class MongoAdapter implements DatabaseAdapter {
 		})
 	}
 
+	async createObjects<T extends keyof NexusGenObjects>(
+		params: CreateObjectsOptions<T>,
+	) {
+		if (!this.database)
+			throw new Error('Connection to database is not established')
+
+		const { className, data, fields } = params
+
+		const collection = this.database.collection(className)
+
+		await collection.insertMany(data, {})
+
+		return params.data
+	}
+
 	async getObjects<T extends keyof NexusGenObjects>(
 		params: GetObjectsOptions<T>,
 	) {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 
-		const { className, fields } = params
+		const { className, fields, where } = params
+
+		const whereBuilded = buildMongoWhereQuery(where)
 
 		if (fields.includes('*'))
 			return this.database
 				.collection<NexusGenObjects[T]>(className)
-				.find({})
+				.find(whereBuilded)
 				.toArray()
 
 		const objectOfFieldsToGet: Record<keyof NexusGenObjects[T], number> =
@@ -105,7 +124,9 @@ export class MongoAdapter implements DatabaseAdapter {
 			this.database.collection<NexusGenObjects[T]>(className)
 
 		return collection
-			.find({}, { projection: { ...objectOfFieldsToGet, _id: 1 } })
+			.find(whereBuilded, {
+				projection: { ...objectOfFieldsToGet, _id: 1 },
+			})
 			.toArray()
 	}
 

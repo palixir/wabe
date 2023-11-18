@@ -136,6 +136,70 @@ describe('Mongo adapter', () => {
 		])
 	})
 
+	it('should get all objects with where filter', async () => {
+		await mongoAdapter.createObject<any>({
+			className: 'Test3',
+			data: {
+				name: 'John1',
+				age: 20,
+			},
+			fields: ['name'],
+		})
+
+		await mongoAdapter.createObject<any>({
+			className: 'Test3',
+			data: {
+				name: 'John2',
+				age: 20,
+			},
+			fields: ['name'],
+		})
+
+		const objects = await mongoAdapter.getObjects<any>({
+			className: 'Test2',
+			fields: ['*'],
+			where: {
+				name: { equalTo: 'John1' },
+			},
+		})
+
+		expect(objects.length).toEqual(1)
+		expect(objects).toEqual([
+			{
+				_id: expect.anything(),
+				name: 'John1',
+				age: 20,
+			},
+		])
+
+		expect(
+			await mongoAdapter.getObjects<any>({
+				className: 'Test2',
+				fields: ['*'],
+				where: {
+					age: { greaterThan: 21 },
+				},
+			}),
+		).toEqual([])
+
+		const objects2 = await mongoAdapter.getObjects<any>({
+			className: 'Test2',
+			fields: ['*'],
+			where: {
+				name: { notEqualTo: 'John1' },
+			},
+		})
+
+		expect(objects2.length).toEqual(1)
+		expect(objects2).toEqual([
+			{
+				_id: expect.anything(),
+				name: 'John2',
+				age: 20,
+			},
+		])
+	})
+
 	it("should return null if the object doesn't exist", async () => {
 		expect(
 			await mongoAdapter.getObject<'User'>({
@@ -146,7 +210,7 @@ describe('Mongo adapter', () => {
 		).toEqual(null)
 	})
 
-	it('should insert object and return the created object', async () => {
+	it('should create object and return the created object', async () => {
 		const insertedObject = await mongoAdapter.createObject<'User'>({
 			className: 'User',
 			data: {
@@ -172,6 +236,34 @@ describe('Mongo adapter', () => {
 			_id: expect.anything(),
 			name: 'Lucas2',
 		})
+	})
+
+	it.skip('should create multiple objects and return an array of the created object', async () => {
+		const insertedObjects = await mongoAdapter.createObjects<'User'>({
+			className: 'User',
+			data: [
+				{
+					name: 'Lucas3',
+					age: 23,
+				},
+				{
+					name: 'Lucas4',
+					age: 24,
+				},
+			],
+			fields: ['name'],
+		})
+
+		expect(insertedObjects).toEqual([
+			{
+				_id: expect.anything(),
+				name: 'Lucas3',
+			},
+			{
+				_id: expect.anything(),
+				name: 'Lucas4',
+			},
+		])
 	})
 
 	it('should update object', async () => {
