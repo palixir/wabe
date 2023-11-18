@@ -45,8 +45,8 @@ describe('Mongo adapter', () => {
 	})
 
 	it('should get object with specific field and * fields', async () => {
-		const insertedObject = await mongoAdapter.insertObject<'User'>({
-			className: 'User',
+		const insertedObject = await mongoAdapter.createObject<any>({
+			className: 'Test1',
 			data: {
 				name: 'John',
 				age: 20,
@@ -61,8 +61,8 @@ describe('Mongo adapter', () => {
 		expect(id).toBeDefined()
 		expect(id._bsontype).toEqual('ObjectId')
 
-		const field = await mongoAdapter.getObject<'User'>({
-			className: 'User',
+		const field = await mongoAdapter.getObject<any>({
+			className: 'Test1',
 			id: id.toString(),
 			fields: ['name'],
 		})
@@ -71,34 +71,83 @@ describe('Mongo adapter', () => {
 			_id: expect.anything(),
 			name: 'John',
 		})
+	})
 
-		const allFields = await mongoAdapter.getObject<'User'>({
-			className: 'User',
-			id: id.toString(),
+	it('should get all object with specific field and * fields', async () => {
+		const objects = await mongoAdapter.getObjects<any>({
+			className: 'Test2',
+			fields: ['name'],
+		})
+
+		expect(objects.length).toEqual(0)
+
+		await mongoAdapter.createObject<any>({
+			className: 'Test2',
+			data: {
+				name: 'John1',
+				age: 20,
+			},
+			fields: ['name'],
+		})
+
+		await mongoAdapter.createObject<any>({
+			className: 'Test2',
+			data: {
+				name: 'John2',
+				age: 20,
+			},
+			fields: ['name'],
+		})
+
+		const objects2 = await mongoAdapter.getObjects<any>({
+			className: 'Test2',
+			fields: ['name'],
+		})
+
+		expect(objects2.length).toEqual(2)
+		expect(objects2).toEqual([
+			{
+				_id: expect.anything(),
+				name: 'John1',
+			},
+			{
+				_id: expect.anything(),
+				name: 'John2',
+			},
+		])
+
+		const objects3 = await mongoAdapter.getObjects<any>({
+			className: 'Test2',
 			fields: ['*'],
 		})
 
-		expect(allFields).toEqual({
-			_id: expect.anything(),
-			name: 'John',
-			age: 20,
-		})
+		expect(objects3.length).toEqual(2)
+		expect(objects3).toEqual([
+			{
+				_id: expect.anything(),
+				name: 'John1',
+				age: 20,
+			},
+			{
+				_id: expect.anything(),
+				name: 'John2',
+				age: 20,
+			},
+		])
 	})
 
-	it.skip("should not get object if the object doesn't exist", async () => {
-		// TODO : rejects bug : make this test when bun is updated to support .rejects
-		// expect(
-		// 	async () =>
-		// 		await mongoAdapter.getObject({
-		// 			className: 'Collection1',
-		// 			id: '5f9b3b3b3b3b3b3b3b3b3b3b',
-		// 			fields: ['name'],
-		// 		}),
-		// ).toThrow(new Error('Object not found'))
+	it("should return null if the object doesn't exist", async () => {
+		expect(
+			await mongoAdapter.getObject<'User'>({
+				className: 'Collection1',
+				id: '5f9b3b3b3b3b3b3b3b3b3b3b',
+				fields: ['name'],
+			}),
+		).toEqual(null)
 	})
 
 	it('should insert object and return the created object', async () => {
-		const insertedObject = await mongoAdapter.insertObject<'User'>({
+		const insertedObject = await mongoAdapter.createObject<'User'>({
 			className: 'User',
 			data: {
 				name: 'Lucas',
@@ -109,7 +158,7 @@ describe('Mongo adapter', () => {
 
 		expect(insertedObject).toEqual({ age: 23, _id: expect.anything() })
 
-		const insertedObject2 = await mongoAdapter.insertObject<'User'>({
+		const insertedObject2 = await mongoAdapter.createObject<'User'>({
 			className: 'User',
 			data: {
 				name: 'Lucas2',
@@ -126,7 +175,7 @@ describe('Mongo adapter', () => {
 	})
 
 	it('should update object', async () => {
-		const insertedObject = await mongoAdapter.insertObject<'User'>({
+		const insertedObject = await mongoAdapter.createObject<'User'>({
 			className: 'User',
 			data: {
 				name: 'John',

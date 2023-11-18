@@ -3,8 +3,9 @@ import {
 	AdapterOptions,
 	DatabaseAdapter,
 	GetObjectOptions,
-	InsertObjectOptions,
+	CreateObjectOptions,
 	UpdateObjectOptions,
+	GetObjectsOptions,
 } from './adaptersInterface'
 import { NexusGenObjects } from '../../../generated/nexusTypegen'
 
@@ -59,8 +60,8 @@ export class MongoAdapter implements DatabaseAdapter {
 		})
 	}
 
-	async insertObject<T extends keyof NexusGenObjects>(
-		params: InsertObjectOptions<T>,
+	async createObject<T extends keyof NexusGenObjects>(
+		params: CreateObjectOptions<T>,
 	) {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
@@ -76,6 +77,36 @@ export class MongoAdapter implements DatabaseAdapter {
 			id: result.insertedId.toString(),
 			fields,
 		})
+	}
+
+	async getObjects<T extends keyof NexusGenObjects>(
+		params: GetObjectsOptions<T>,
+	) {
+		if (!this.database)
+			throw new Error('Connection to database is not established')
+
+		const { className, fields } = params
+
+		if (fields.includes('*'))
+			return this.database
+				.collection<NexusGenObjects[T]>(className)
+				.find({})
+				.toArray()
+
+		const objectOfFieldsToGet: Record<keyof NexusGenObjects[T], number> =
+			fields.reduce(
+				(acc, prev) => {
+					return { ...acc, [prev]: 1 }
+				},
+				{} as Record<keyof NexusGenObjects[T], number>,
+			)
+
+		const collection =
+			this.database.collection<NexusGenObjects[T]>(className)
+
+		return collection
+			.find({}, { projection: { ...objectOfFieldsToGet, _id: 1 } })
+			.toArray()
 	}
 
 	async getObject<T extends keyof NexusGenObjects>(

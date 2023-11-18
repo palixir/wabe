@@ -61,13 +61,8 @@ export class WibeApp {
 		const graphqlSchema = makeSchema({
 			types,
 			outputs: {
-				schema: join(
-					// @ts-ignore
-					import.meta.dir,
-					'../../generated/schema.graphql',
-				),
+				schema: join(import.meta.dir, '../../generated/schema.graphql'),
 				typegen: join(
-					// @ts-ignore
 					import.meta.dir,
 					'../../generated/nexusTypegen.ts',
 				),

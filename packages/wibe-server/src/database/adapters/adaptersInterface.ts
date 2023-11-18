@@ -6,13 +6,18 @@ export interface AdapterOptions {
 	databaseName: string
 }
 
+export interface GetObjectsOptions<T extends keyof NexusGenObjects> {
+	className: string
+	fields: Array<keyof NexusGenObjects[T] | '*'>
+}
+
 export interface GetObjectOptions<T extends keyof NexusGenObjects> {
 	className: string
 	id: string
 	fields: Array<keyof NexusGenObjects[T] | '*'>
 }
 
-export interface InsertObjectOptions<T extends keyof NexusGenObjects> {
+export interface CreateObjectOptions<T extends keyof NexusGenObjects> {
 	className: string
 	data: Record<string, any>
 	fields: Array<keyof NexusGenObjects[T] | '*'>
@@ -33,8 +38,11 @@ export interface DatabaseAdapter {
 	getObject<T extends keyof NexusGenObjects>(
 		params: GetObjectOptions<T>,
 	): Promise<WithId<Document> | null>
-	insertObject<T extends keyof NexusGenObjects>(
-		params: InsertObjectOptions<T>,
+	getObjects<T extends keyof NexusGenObjects>(
+		params: GetObjectsOptions<T>,
+	): Promise<WithId<NexusGenObjects[T]>[]>
+	createObject<T extends keyof NexusGenObjects>(
+		params: CreateObjectOptions<T>,
 	): Promise<any>
 	updateObject<T extends keyof NexusGenObjects>(
 		params: UpdateObjectOptions<T>,

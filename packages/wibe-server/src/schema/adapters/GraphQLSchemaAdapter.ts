@@ -84,7 +84,7 @@ export class GraphQLSchemaAdapter implements SchemaRouterAdapter {
 								if (!fields)
 									throw new Error('No fields provided')
 
-								await databaseController.getObject<any>({
+								return databaseController.getObject<any>({
 									className: nameWithFirstLetterUpperCase,
 									id,
 									fields,
@@ -94,7 +94,17 @@ export class GraphQLSchemaAdapter implements SchemaRouterAdapter {
 
 						t.list.field(`${nameWithFirstLetterLowerCase}s`, {
 							type: nameWithFirstLetterUpperCase,
-							resolve: (root, args) => {},
+							resolve: (root, args, ctx, info) => {
+								const fields = getFieldsFromInfo(info)
+
+								if (!fields)
+									throw new Error('No fields provided')
+
+								return databaseController.getObjects<any>({
+									className: nameWithFirstLetterUpperCase,
+									fields,
+								})
+							},
 						})
 					},
 				})
@@ -165,7 +175,18 @@ export class GraphQLSchemaAdapter implements SchemaRouterAdapter {
 						t.field(`create${nameWithFirstLetterUpperCase}`, {
 							type: nameWithFirstLetterUpperCase,
 							args: { input: arg({ type: typeInput }) },
-							resolve: (root, args) => {},
+							resolve: async (root, args, ctx, info) => {
+								const fields = getFieldsFromInfo(info)
+
+								if (!fields)
+									throw new Error('No fields provided')
+
+								return databaseController.createObject<any>({
+									className: nameWithFirstLetterUpperCase,
+									data: args.input,
+									fields,
+								})
+							},
 						})
 
 						t.field(`create${nameWithFirstLetterUpperCase}s`, {

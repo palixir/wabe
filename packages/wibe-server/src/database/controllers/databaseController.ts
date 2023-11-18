@@ -1,8 +1,9 @@
 import { Document, WithId } from 'mongodb'
 import {
+	CreateObjectOptions,
 	DatabaseAdapter,
 	GetObjectOptions,
-	InsertObjectOptions,
+	GetObjectsOptions,
 	UpdateObjectOptions,
 } from '../adapters/adaptersInterface'
 import { NexusGenObjects } from '../../../generated/nexusTypegen'
@@ -28,15 +29,25 @@ export class DatabaseController {
 
 	async getObject<T extends keyof NexusGenObjects>(
 		params: GetObjectOptions<T>,
-	): Promise<WithId<Document>> {
+	) {
 		return this.adapter.getObject(params)
 	}
 
-	async insertObject(params: InsertObjectOptions) {
-		return this.adapter.insertObject(params)
+	async getObjects<T extends keyof NexusGenObjects>(
+		params: GetObjectsOptions<T>,
+	) {
+		return this.adapter.getObjects(params)
 	}
 
-	async updateObject(params: UpdateObjectOptions) {
+	async createObject<T extends keyof NexusGenObjects>(
+		params: CreateObjectOptions<T>,
+	) {
+		return this.adapter.createObject(params)
+	}
+
+	async updateObject<T extends keyof NexusGenObjects>(
+		params: UpdateObjectOptions<T>,
+	) {
 		return this.adapter.updateObject(params)
 	}
 }

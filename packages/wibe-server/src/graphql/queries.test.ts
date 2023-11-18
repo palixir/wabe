@@ -28,19 +28,24 @@ describe('GraphQL Queries', () => {
 		).toEqual({ user: null })
 	})
 
-	// it('should create an object', async () => {
-	// 	await client.request(graphql.createUser, {
-	// 		name: 'John',
-	// 		age: 23,
-	// 	})
+	it('should create an object', async () => {
+		const res = await client.request<any>(graphql.createUser, {
+			name: 'John',
+			age: 23,
+		})
 
-	// 	expect(await client.request(graphql.users, {})).toEqual([
-	// 		{
-	// 			name: 'John',
-	// 			age: 23,
-	// 		},
-	// 	])
-	// })
+		expect(res.createUser).toEqual({
+			name: 'John',
+			age: 23,
+		})
+
+		expect((await client.request<any>(graphql.users, {})).users).toEqual([
+			{
+				name: 'John',
+				age: 23,
+			},
+		])
+	})
 })
 
 const graphql = {
