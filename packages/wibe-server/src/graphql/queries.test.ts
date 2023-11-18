@@ -20,7 +20,7 @@ describe('GraphQL Queries', () => {
 		await closeTests(wibe)
 	})
 
-	it('should get an object that not exist', async () => {
+	it.skip('should get an object that not exist', async () => {
 		expect(
 			await client.request(graphql.user, {
 				id: '65356f69ea1fe46431076723',

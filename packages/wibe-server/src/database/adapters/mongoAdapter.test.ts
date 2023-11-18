@@ -155,16 +155,15 @@ describe('Mongo adapter', () => {
 			fields: ['name'],
 		})
 
-		const objects = await mongoAdapter.getObjects<any>({
-			className: 'Test2',
-			fields: ['*'],
-			where: {
-				name: { equalTo: 'John1' },
-			},
-		})
-
-		expect(objects.length).toEqual(1)
-		expect(objects).toEqual([
+		expect(
+			await mongoAdapter.getObjects<any>({
+				className: 'Test3',
+				fields: ['*'],
+				where: {
+					name: { equalTo: 'John1' },
+				},
+			}),
+		).toEqual([
 			{
 				_id: expect.anything(),
 				name: 'John1',
@@ -174,7 +173,7 @@ describe('Mongo adapter', () => {
 
 		expect(
 			await mongoAdapter.getObjects<any>({
-				className: 'Test2',
+				className: 'Test3',
 				fields: ['*'],
 				where: {
 					age: { greaterThan: 21 },
@@ -182,16 +181,67 @@ describe('Mongo adapter', () => {
 			}),
 		).toEqual([])
 
-		const objects2 = await mongoAdapter.getObjects<any>({
-			className: 'Test2',
-			fields: ['*'],
-			where: {
-				name: { notEqualTo: 'John1' },
+		expect(
+			await mongoAdapter.getObjects<any>({
+				className: 'Test3',
+				fields: ['*'],
+				where: {
+					name: { notEqualTo: 'John1' },
+				},
+			}),
+		).toEqual([
+			{
+				_id: expect.anything(),
+				name: 'John2',
+				age: 20,
 			},
-		})
+		])
 
-		expect(objects2.length).toEqual(1)
-		expect(objects2).toEqual([
+		expect(
+			await mongoAdapter.getObjects<any>({
+				className: 'Test3',
+				fields: ['*'],
+				where: {
+					name: { lessThan: 'John1' },
+				},
+			}),
+		).toEqual([])
+
+		expect(
+			await mongoAdapter.getObjects<any>({
+				className: 'Test3',
+				fields: ['*'],
+				where: {
+					age: { lessThan: 30 },
+				},
+			}),
+		).toEqual([
+			{
+				_id: expect.anything(),
+				name: 'John1',
+				age: 20,
+			},
+			{
+				_id: expect.anything(),
+				name: 'John2',
+				age: 20,
+			},
+		])
+
+		expect(
+			await mongoAdapter.getObjects<any>({
+				className: 'Test3',
+				fields: ['*'],
+				where: {
+					age: { equalTo: 20 },
+				},
+			}),
+		).toEqual([
+			{
+				_id: expect.anything(),
+				name: 'John1',
+				age: 20,
+			},
 			{
 				_id: expect.anything(),
 				name: 'John2',

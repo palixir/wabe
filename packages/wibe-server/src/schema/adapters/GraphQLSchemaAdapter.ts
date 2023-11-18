@@ -8,7 +8,11 @@ import {
 } from 'nexus'
 import { Schema } from '../Schema'
 import { SchemaFields } from '../interface'
-import { getFieldsFromInfo, getWhereInputFromType } from '../../graphql'
+import {
+	getFieldsFromInfo,
+	getWhereFromType,
+	getWhereInputFromType,
+} from '../../graphql'
 import { NexusGenFieldTypes } from '../../../generated/nexusTypegen'
 import { DatabaseController } from '../../database/controllers/DatabaseController'
 import { SchemaRouterAdapter } from './adaptersInterface'
@@ -69,6 +73,22 @@ export class GraphQLSchemaAdapter implements SchemaRouterAdapter {
 					name: nameWithFirstLetterUpperCase,
 					definition: (t) => {
 						this._getTypesFromFields({ fields, fieldsKeys, t })
+						fieldsKeys.map((fieldName) => {
+							const field = schema.getFields()[fieldName]
+
+							t.field(fieldName, {
+								type: getWhereFromType({
+									valueArrayType:
+										field.type === 'array'
+											? field.valueType
+											: undefined,
+									typeField: field,
+									name: `${fieldName[0].toUpperCase()}${fieldName.slice(
+										1,
+									)}`,
+								}),
+							})
+						})
 					},
 				})
 

@@ -74,8 +74,20 @@ export interface NexusGenObjects {
   Mutation: {};
   Query: {};
   User: { // root type
-    age?: number | null; // Int
-    name?: string | null; // String
+    age?: NexusGenRootTypes['WhereAgeInput'] | null; // WhereAgeInput
+    name?: NexusGenRootTypes['WhereNameInput'] | null; // WhereNameInput
+  }
+  WhereAgeInput: { // root type
+    equalTo?: number | null; // Int
+    greaterThan?: number | null; // Int
+    greaterThanOrEqualTo?: number | null; // Int
+    lessThan?: number | null; // Int
+    lessThanOrEqualTo?: number | null; // Int
+    notEqualTo?: number | null; // Int
+  }
+  WhereNameInput: { // root type
+    equalTo?: string | null; // String
+    notEqualTo?: string | null; // String
   }
 }
 
@@ -103,8 +115,20 @@ export interface NexusGenFieldTypes {
     users: Array<NexusGenRootTypes['User'] | null> | null; // [User]
   }
   User: { // field return type
-    age: number | null; // Int
-    name: string | null; // String
+    age: NexusGenRootTypes['WhereAgeInput'] | null; // WhereAgeInput
+    name: NexusGenRootTypes['WhereNameInput'] | null; // WhereNameInput
+  }
+  WhereAgeInput: { // field return type
+    equalTo: number | null; // Int
+    greaterThan: number | null; // Int
+    greaterThanOrEqualTo: number | null; // Int
+    lessThan: number | null; // Int
+    lessThanOrEqualTo: number | null; // Int
+    notEqualTo: number | null; // Int
+  }
+  WhereNameInput: { // field return type
+    equalTo: string | null; // String
+    notEqualTo: string | null; // String
   }
 }
 
@@ -122,8 +146,20 @@ export interface NexusGenFieldTypeNames {
     users: 'User'
   }
   User: { // field return type name
-    age: 'Int'
-    name: 'String'
+    age: 'WhereAgeInput'
+    name: 'WhereNameInput'
+  }
+  WhereAgeInput: { // field return type name
+    equalTo: 'Int'
+    greaterThan: 'Int'
+    greaterThanOrEqualTo: 'Int'
+    lessThan: 'Int'
+    lessThanOrEqualTo: 'Int'
+    notEqualTo: 'Int'
+  }
+  WhereNameInput: { // field return type name
+    equalTo: 'String'
+    notEqualTo: 'String'
   }
 }
 

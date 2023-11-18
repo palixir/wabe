@@ -36,13 +36,22 @@ input UpdateUsersInput {
 }
 
 type User {
-  age: Int
-  name: String
+  age: WhereAgeInput
+  name: WhereNameInput
 }
 
 input UserInput {
   age: Int
   name: String
+}
+
+type WhereAgeInput {
+  equalTo: Int
+  greaterThan: Int
+  greaterThanOrEqualTo: Int
+  lessThan: Int
+  lessThanOrEqualTo: Int
+  notEqualTo: Int
 }
 
 input WhereDeleteAgeInput {
@@ -55,6 +64,11 @@ input WhereDeleteAgeInput {
 }
 
 input WhereDeleteNameInput {
+  equalTo: String
+  notEqualTo: String
+}
+
+type WhereNameInput {
   equalTo: String
   notEqualTo: String
 }
