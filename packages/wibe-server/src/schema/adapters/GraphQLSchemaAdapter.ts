@@ -1,28 +1,20 @@
-import {
-	nonNull,
-	objectType,
-	extendType,
-	arg,
-	inputObjectType,
-	list,
-} from 'nexus'
 import { Schema } from '../Schema'
-import { SchemaFields } from '../interface'
-import {
-	getFieldsFromInfo,
-	getWhereFromType,
-	getWhereInputFromType,
-} from '../../graphql'
-import { NexusGenFieldTypes } from '../../../generated/nexusTypegen'
-import { DatabaseController } from '../../database/controllers/DatabaseController'
+import { SchemaFields, TypeField } from '../interface'
+import { getWhereInputFromType } from '../../graphql'
 import { SchemaRouterAdapter } from './adaptersInterface'
-import { NexusObjectTypeDef, NexusExtendTypeDef } from 'nexus/dist/core'
 import {
 	mutationToCreateMultipleObjects,
 	mutationToCreateObject,
 	queryForMultipleObject,
 	queryForOneObject,
 } from './resolvers'
+import {
+	GraphQLBoolean,
+	GraphQLFloat,
+	GraphQLInt,
+	GraphQLObjectType,
+	GraphQLString,
+} from 'graphql'
 
 export class GraphQLSchemaAdapter implements SchemaRouterAdapter {
 	private schema: Schema[]
@@ -31,189 +23,228 @@ export class GraphQLSchemaAdapter implements SchemaRouterAdapter {
 		this.schema = schema
 	}
 
-	createObjectSchema(
-		className: keyof NexusGenFieldTypes,
-		fieldsOfObject: SchemaFields,
-	) {
-		// Create the object for each className
-		const object = objectType({
-			name: className,
-			definition: (t) => {
-				Object.keys(fieldsOfObject).map((fieldName) => {
-					const typeOfObject = fieldsOfObject[fieldName].type
+	_getGraphqlTypeFromType(type: TypeField['type']) {
+		switch (type) {
+			case 'String':
+				return GraphQLString
+			case 'Int':
+				return GraphQLInt
+			case 'Float':
+				return GraphQLFloat
+			case 'Boolean':
+				return GraphQLBoolean
+		}
+	}
 
-					if (typeOfObject !== 'array')
-						t.field(fieldName, {
-							type: typeOfObject,
-						})
-				})
-			},
+	createObjectSchema(className: string, fieldsOfObject: SchemaFields) {
+		const res = Object.keys(fieldsOfObject).reduce((acc, fieldName) => {
+			const typeOfObject = fieldsOfObject[fieldName].type
+
+			if (typeOfObject !== 'array')
+				return {
+					...acc,
+					[fieldName]: {
+						type: this._getGraphqlTypeFromType(typeOfObject),
+					},
+				}
+
+			return { ...acc }
+		}, {})
+
+		const object = new GraphQLObjectType({
+			name: className,
+			fields: res,
 		})
 
 		return object
 	}
 
-	createQueriesSchema(className: keyof NexusGenFieldTypes) {
-		const queries = extendType({
-			type: 'Query',
-			definition: (t) => {
-				// Query for one object (for example : user)
-				t.field(className.toLowerCase(), {
-					type: className,
-					args: { id: nonNull('String') },
-					resolve: (root, args, ctx, info) =>
-						queryForOneObject(root, args, ctx, info, className),
-				})
+	createQueriesSchema(className: string) {
+		// const queries = Graphql({
+		// 	type: 'Query',
+		// 	definition: (t) => {
+		// 		// Query for one object (for example : user)
+		// 		t.field(className.toLowerCase(), {
+		// 			type: className,
+		// 			args: { id: nonNull('String') },
+		// 			resolve: (root, args, ctx, info) =>
+		// 				queryForOneObject(root, args, ctx, info, className),
+		// 		})
+		// 		// Query for multiple objects (for example : users)
+		// 		t.field(`${className.toLowerCase()}s`, {
+		// 			type: list(className),
+		// 			resolve: (root, args, ctx, info) =>
+		// 				queryForMultipleObject(
+		// 					root,
+		// 					args,
+		// 					ctx,
+		// 					info,
+		// 					className,
+		// 				),
+		// 		})
+		// 	},
+		// })
+		// return queries
 
-				// Query for multiple objects (for example : users)
-				t.field(`${className.toLowerCase()}s`, {
-					type: list(className),
-					resolve: (root, args, ctx, info) =>
-						queryForMultipleObject(
-							root,
-							args,
-							ctx,
-							info,
-							className,
-						),
-				})
-			},
+		const queries = new GraphQLObjectType({
+			name: 'Query',
+			fields: () => ({
+				[className.toLowerCase()]: {
+					type: GraphQLString,
+					args: { id: { type: GraphQLString } },
+					resolve: () =>
+						'queryForOneObject(root, args, ctx, info, className)',
+				},
+				// [`${className.toLowerCase()}s`]: {
+				// 	type: new GraphQLObjectType({
+				// 		name: `${className}List`,
+				// 		fields: {
+				// 			[`${className.toLowerCase()}s`]: {
+				// 				type: className,
+				// 			},
+
+				// 		},
+				// 	}),
+				// 	args: {
+
+				// 	},
+				// 	resolve: (root, args, ctx, info) =>
+				// 		queryForMultipleObject(
+				// 			root,
+				// 			args,
+				// 			ctx,
+				// 			info,
+				// 			className,
+				// 		),
+				// },
+			}),
 		})
 
 		return queries
 	}
 
-	createMutationsSchema(
-		className: keyof NexusGenFieldTypes,
-		fieldsOfObject: SchemaFields,
-	) {
+	createMutationsSchema(className: string, fieldsOfObject: SchemaFields) {
 		// user => User
-		const classNameFormat = `${className[0].toUpperCase()}${className.slice(
-			1,
-		)}`
-
-		const defaultTypeInput = inputObjectType({
-			name: `${classNameFormat}Input`,
-			definition: (t) => {
-				Object.keys(fieldsOfObject).map((fieldName) => {
-					const typeOfObject = fieldsOfObject[fieldName].type
-
-					if (typeOfObject !== 'array')
-						t.field(fieldName, {
-							type: typeOfObject,
-						})
-				})
-			},
-		})
-
-		const typeUpdateInput = inputObjectType({
-			name: `Update${classNameFormat}Input`,
-			definition: (t) => {
-				t.nonNull.id('id')
-				t.field('fields', { type: defaultTypeInput })
-			},
-		})
-
-		const typeWhereInput = inputObjectType({
-			name: `Where${className}Input`,
-			definition: (t) => {
-				Object.keys(fieldsOfObject).map((fieldName) => {
-					const fieldObject = fieldsOfObject[fieldName]
-
-					t.field(fieldName, {
-						type: getWhereInputFromType({
-							valueArrayType:
-								fieldObject.type === 'array'
-									? fieldObject.valueType
-									: undefined,
-							typeField: fieldObject,
-							name: `${fieldName[0].toUpperCase()}${fieldName.slice(
-								1,
-							)}`,
-						}),
-					})
-				})
-			},
-		})
-
-		const mutations = extendType({
-			type: 'Mutation',
-			definition: (t) => {
-				// createUser
-				t.field(`create${classNameFormat}`, {
-					type: className,
-					args: { input: arg({ type: defaultTypeInput }) },
-					resolve: (root, args, ctx, info) =>
-						mutationToCreateObject(
-							root,
-							args,
-							ctx,
-							info,
-							className,
-						),
-				})
-
-				// createUsers
-				t.field(`create${classNameFormat}s`, {
-					type: list(className),
-					args: { input: list(arg({ type: defaultTypeInput })) },
-					resolve: (root, args, ctx, info) =>
-						mutationToCreateMultipleObjects(
-							root,
-							args,
-							ctx,
-							info,
-							className,
-						),
-				})
-
-				// updateUser
-				t.field(`update${classNameFormat}`, {
-					type: className,
-					args: {
-						input: arg({ type: typeUpdateInput }),
-					},
-					resolve: (root, args) => {},
-				})
-
-				// updateUsers
-				t.field(`update${classNameFormat}s`, {
-					type: list(className),
-					args: {
-						fields: arg({ type: defaultTypeInput }),
-						where: arg({ type: typeWhereInput }),
-					},
-					resolve: (root, args) => {},
-				})
-
-				// deleteUser
-				t.field(`delete${classNameFormat}`, {
-					type: className,
-					args: {
-						input: arg({
-							type: inputObjectType({
-								name: `Delete${classNameFormat}Input`,
-								definition: (t) => {
-									t.nonNull.id('id')
-								},
-							}),
-						}),
-					},
-					resolve: (root, args) => {},
-				})
-
-				// deleteUsers
-				t.field(`delete${classNameFormat}s`, {
-					type: list(className),
-					args: {
-						where: arg({ type: typeWhereInput }),
-					},
-					resolve: (root, args) => {},
-				})
-			},
-		})
-
-		return mutations
+		// const classNameFormat = `${className[0].toUpperCase()}${className.slice(
+		// 	1,
+		// )}`
+		// const defaultTypeInput = inputObjectType({
+		// 	name: `${classNameFormat}Input`,
+		// 	definition: (t) => {
+		// 		Object.keys(fieldsOfObject).map((fieldName) => {
+		// 			const typeOfObject = fieldsOfObject[fieldName].type
+		// 			if (typeOfObject !== 'array')
+		// 				t.field(fieldName, {
+		// 					type: typeOfObject,
+		// 				})
+		// 		})
+		// 	},
+		// })
+		// const typeUpdateInput = inputObjectType({
+		// 	name: `Update${classNameFormat}Input`,
+		// 	definition: (t) => {
+		// 		t.nonNull.id('id')
+		// 		t.field('fields', { type: defaultTypeInput })
+		// 	},
+		// })
+		// const typeUpdatesInput = inputObjectType({
+		// 	name: `Update${classNameFormat}sInput`,
+		// 	definition: (t) => {
+		// 		t.field('fields', { type: defaultTypeInput })
+		// 		t.field('where', { type: typeWhereInput })
+		// 	},
+		// })
+		// const typeWhereInput = inputObjectType({
+		// 	name: `Where${className}Input`,
+		// 	definition: (t) => {
+		// 		Object.keys(fieldsOfObject).map((fieldName) => {
+		// 			const fieldObject = fieldsOfObject[fieldName]
+		// 			t.field(fieldName, {
+		// 				type: getWhereInputFromType({
+		// 					valueArrayType:
+		// 						fieldObject.type === 'array'
+		// 							? fieldObject.valueType
+		// 							: undefined,
+		// 					typeField: fieldObject,
+		// 					name: `${fieldName[0].toUpperCase()}${fieldName.slice(
+		// 						1,
+		// 					)}`,
+		// 				}),
+		// 			})
+		// 		})
+		// 	},
+		// })
+		// const mutations = extendType({
+		// 	type: 'Mutation',
+		// 	definition: (t) => {
+		// 		// createUser
+		// 		t.field(`create${classNameFormat}`, {
+		// 			type: className,
+		// 			args: { input: arg({ type: defaultTypeInput }) },
+		// 			resolve: (root, args, ctx, info) =>
+		// 				mutationToCreateObject(
+		// 					root,
+		// 					args,
+		// 					ctx,
+		// 					info,
+		// 					className,
+		// 				),
+		// 		})
+		// 		// createUsers
+		// 		t.field(`create${classNameFormat}s`, {
+		// 			type: list(className),
+		// 			args: { input: list(arg({ type: defaultTypeInput })) },
+		// 			resolve: (root, args, ctx, info) =>
+		// 				mutationToCreateMultipleObjects(
+		// 					root,
+		// 					args,
+		// 					ctx,
+		// 					info,
+		// 					className,
+		// 				),
+		// 		})
+		// 		// updateUser
+		// 		t.field(`update${classNameFormat}`, {
+		// 			type: className,
+		// 			args: {
+		// 				input: arg({ type: typeUpdateInput }),
+		// 			},
+		// 			resolve: (root, args) => {},
+		// 		})
+		// 		// updateUsers
+		// 		t.field(`update${classNameFormat}s`, {
+		// 			type: list(className),
+		// 			args: {
+		// 				input: arg({ type: typeUpdatesInput }),
+		// 			},
+		// 			resolve: (root, args) => {},
+		// 		})
+		// 		// deleteUser
+		// 		t.field(`delete${classNameFormat}`, {
+		// 			type: className,
+		// 			args: {
+		// 				input: arg({
+		// 					type: inputObjectType({
+		// 						name: `Delete${classNameFormat}Input`,
+		// 						definition: (t) => {
+		// 							t.nonNull.id('id')
+		// 						},
+		// 					}),
+		// 				}),
+		// 			},
+		// 			resolve: (root, args) => {},
+		// 		})
+		// 		// deleteUsers
+		// 		t.field(`delete${classNameFormat}s`, {
+		// 			type: list(className),
+		// 			args: {
+		// 				where: arg({ type: typeWhereInput }),
+		// 			},
+		// 			resolve: (root, args) => {},
+		// 		})
+		// 	},
+		// })
+		// return mutations
 	}
 
 	createSchema() {
@@ -223,9 +254,7 @@ export class GraphQLSchemaAdapter implements SchemaRouterAdapter {
 			.map((schema) => {
 				const fields = schema.getFields()
 
-				const className = schema
-					.getName()
-					.replace(' ', '') as keyof NexusGenFieldTypes
+				const className = schema.getName().replace(' ', '')
 
 				const object = this.createObjectSchema(className, fields)
 				const queries = this.createQueriesSchema(className)

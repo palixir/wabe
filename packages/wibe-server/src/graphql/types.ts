@@ -1,51 +1,45 @@
-import { inputObjectType, objectType } from 'nexus'
 import { ArrayValueType, TypeField } from '../schema/interface'
-import {
-	NexusGenInputs,
-	NexusGenObjects,
-	NexusGenScalars,
-} from '../../generated/nexusTypegen'
-import { InputDefinitionBlock, ObjectDefinitionBlock } from 'nexus/dist/core'
+import { GraphQLInputObjectType, GraphQLObjectType } from 'graphql'
 
-const getWhereDefinitionType = <T extends string>({
-	t,
-	typeField,
-}: {
-	t: any
-	typeField: TypeField
-}) => {
-	const type = typeField.type
+// const getWhereDefinitionType = <T extends string>({
+// 	t,
+// 	typeField,
+// }: {
+// 	t: any
+// 	typeField: TypeField
+// }) => {
+// 	const type = typeField.type
 
-	if (type === 'array') {
-		t.list.field('in', {
-			type: typeField.valueType as
-				| keyof NexusGenScalars
-				| keyof NexusGenObjects,
-		})
+// 	// if (type === 'array') {
+// 	// 	t.list.field('in', {
+// 	// 		type: typeField.valueType as
+// 	// 			| keyof NexusGenScalars
+// 	// 			| keyof NexusGenObjects,
+// 	// 	})
 
-		t.list.field('notIn', {
-			type: typeField.valueType as
-				| keyof NexusGenScalars
-				| keyof NexusGenObjects,
-		})
+// 	// 	t.list.field('notIn', {
+// 	// 		type: typeField.valueType as
+// 	// 			| keyof NexusGenScalars
+// 	// 			| keyof NexusGenObjects,
+// 	// 	})
 
-		return
-	}
+// 	// 	return
+// 	// }
 
-	t.field('equalTo', {
-		type,
-	})
-	t.field('notEqualTo', {
-		type,
-	})
+// 	t.field('equalTo', {
+// 		type,
+// 	})
+// 	t.field('notEqualTo', {
+// 		type,
+// 	})
 
-	if (type === 'Int' || type === 'Float') {
-		t.field('greaterThan', { type })
-		t.field('greaterThanOrEqualTo', { type })
-		t.field('lessThan', { type })
-		t.field('lessThanOrEqualTo', { type })
-	}
-}
+// 	if (type === 'Int' || type === 'Float') {
+// 		t.field('greaterThan', { type })
+// 		t.field('greaterThanOrEqualTo', { type })
+// 		t.field('lessThan', { type })
+// 		t.field('lessThanOrEqualTo', { type })
+// 	}
+// }
 
 export const getWhereFromType = ({
 	typeField,
@@ -56,11 +50,9 @@ export const getWhereFromType = ({
 	typeField: TypeField
 	name: string
 }) => {
-	return objectType({
+	return new GraphQLObjectType({
 		name: `Where${name}`,
-		definition: (t) => {
-			getWhereDefinitionType({ t, typeField })
-		},
+		fields: {},
 	})
 }
 
@@ -73,10 +65,8 @@ export const getWhereInputFromType = ({
 	typeField: TypeField
 	name: string
 }) => {
-	return inputObjectType({
+	return new GraphQLInputObjectType({
 		name: `Where${name}Input`,
-		definition: (t) => {
-			getWhereDefinitionType({ t, typeField })
-		},
+		fields: {},
 	})
 }

@@ -11,15 +11,14 @@
 		"@apollo/server": "4.9.4",
 		"@elysiajs/apollo": "0.7.0",
 		"elysia": "0.7.15",
-		"mongodb": "6.1.0",
-		"nexus": "1.3.0",
-		"graphql": "16.8.1"
+		"graphql": "16.8.1",
+		"mongodb": "6.1.0"
 	},
 	"devDependencies": {
 		"graphql-request": "6.1.0",
 		"get-port": "7.0.0",
 		"wibe-mongodb-launcher": "workspace:*",
-		"bun-types": "1.0.3",
+		"bun-types": "1.0.6",
 		"typescript": "5.2.2",
 		"dts-bundle-generator": "8.0.1",
 		"uuid": "9.0.1"
