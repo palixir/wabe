@@ -2,22 +2,11 @@
 ### Do not make changes to this file directly
 
 
-input DeleteUserInput {
-  id: ID!
-}
-
-input DeleteUsersInput {
-  age: WhereDeleteAgeInput
-  name: WhereDeleteNameInput
-}
-
 type Mutation {
   createUser(input: UserInput): User
-  createUsers(input: UserInput): [User]
-  deleteUser(input: DeleteUserInput): User
-  deleteUsers(where: DeleteUsersInput): [User]
+  createUsers(input: [UserInput]): [User]
   updateUser(input: UpdateUserInput): User
-  updateUsers(where: UpdateUsersInput): [User]
+  updateUsers(fields: UserInput, where: UpdateUsersInput): [User]
 }
 
 type Query {
@@ -36,41 +25,13 @@ input UpdateUsersInput {
 }
 
 type User {
-  age: WhereAgeInput
-  name: WhereNameInput
+  age: Int
+  name: String
 }
 
 input UserInput {
   age: Int
   name: String
-}
-
-type WhereAgeInput {
-  equalTo: Int
-  greaterThan: Int
-  greaterThanOrEqualTo: Int
-  lessThan: Int
-  lessThanOrEqualTo: Int
-  notEqualTo: Int
-}
-
-input WhereDeleteAgeInput {
-  equalTo: Int
-  greaterThan: Int
-  greaterThanOrEqualTo: Int
-  lessThan: Int
-  lessThanOrEqualTo: Int
-  notEqualTo: Int
-}
-
-input WhereDeleteNameInput {
-  equalTo: String
-  notEqualTo: String
-}
-
-type WhereNameInput {
-  equalTo: String
-  notEqualTo: String
 }
 
 input WhereUpdateAgeInput {

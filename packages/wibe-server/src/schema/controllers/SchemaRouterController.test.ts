@@ -14,12 +14,6 @@ describe('SchemaRouterController', () => {
 		const graphqlSchemaAdapter = new GraphQLSchemaAdapter([])
 		const schemaRouterController = new SchemaRouterController({
 			adapter: graphqlSchemaAdapter,
-			databaseController: new DatabaseController(
-				new MongoAdapter({
-					databaseName: 'wibe',
-					databaseUrl: 'mongodb://localhost:27017',
-				}),
-			),
 		})
 
 		schemaRouterController.createSchema()

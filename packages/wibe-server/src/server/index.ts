@@ -19,7 +19,7 @@ interface WibeConfig {
 export class WibeApp {
 	private config: WibeConfig
 	private server: Elysia
-	public databaseController: DatabaseController
+	static databaseController: DatabaseController
 
 	constructor(config: WibeConfig) {
 		this.config = config
@@ -34,18 +34,22 @@ export class WibeApp {
 			databaseUrl: this.config.database.url,
 		})
 
-		this.databaseController = new DatabaseController(databaseAdapter)
+		WibeApp.databaseController = new DatabaseController(databaseAdapter)
+	}
+
+	static async getDatabaseController() {
+		return WibeApp.databaseController
 	}
 
 	async start() {
-		await this.databaseController.connect()
+		await WibeApp.databaseController.connect()
 
 		const schemas = this.config.schema.map(
 			(schema) =>
 				new Schema({
 					name: schema.name,
 					fields: schema.fields,
-					databaseController: this.databaseController,
+					databaseController: WibeApp.databaseController,
 				}),
 		)
 
@@ -53,7 +57,6 @@ export class WibeApp {
 
 		const schemaRouterController = new SchemaRouterController({
 			adapter: schemaRouterAdapter,
-			databaseController: this.databaseController,
 		})
 
 		const types = schemaRouterController.createSchema()
@@ -77,7 +80,7 @@ export class WibeApp {
 	}
 
 	async close() {
-		await this.databaseController.close()
+		await WibeApp.databaseController.close()
 		await this.server.stop()
 	}
 }

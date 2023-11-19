@@ -57,7 +57,7 @@ export const getWhereFromType = ({
 	name: string
 }) => {
 	return objectType({
-		name: `Where${name}Input`,
+		name: `Where${name}`,
 		definition: (t) => {
 			getWhereDefinitionType({ t, typeField })
 		},

@@ -8,9 +8,7 @@ export interface CreateSchemaOptions {
 }
 
 export interface SchemaRouterAdapter {
-	createSchema(
-		databaseController: DatabaseController,
-	): (
+	createSchema(): (
 		| NexusObjectTypeDef<keyof NexusGenFieldTypes>
 		| NexusExtendTypeDef<any>
 	)[]

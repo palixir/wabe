@@ -12,7 +12,12 @@ const run = async () => {
 			name: 'Wibe',
 		},
 		port: 3000,
-		schema: [{ name: 'Collection1', fields: { name: { type: 'String' } } }],
+		schema: [
+			{
+				name: 'User',
+				fields: { name: { type: 'String' }, age: { type: 'Int' } },
+			},
+		],
 	})
 
 	await wibe.start()

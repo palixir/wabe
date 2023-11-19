@@ -14,13 +14,6 @@ declare global {
 }
 
 export interface NexusGenInputs {
-  DeleteUserInput: { // input type
-    id: string; // ID!
-  }
-  DeleteUsersInput: { // input type
-    age?: NexusGenInputs['WhereDeleteAgeInput'] | null; // WhereDeleteAgeInput
-    name?: NexusGenInputs['WhereDeleteNameInput'] | null; // WhereDeleteNameInput
-  }
   UpdateUserInput: { // input type
     fields?: NexusGenInputs['UserInput'] | null; // UserInput
     id: string; // ID!
@@ -32,18 +25,6 @@ export interface NexusGenInputs {
   UserInput: { // input type
     age?: number | null; // Int
     name?: string | null; // String
-  }
-  WhereDeleteAgeInput: { // input type
-    equalTo?: number | null; // Int
-    greaterThan?: number | null; // Int
-    greaterThanOrEqualTo?: number | null; // Int
-    lessThan?: number | null; // Int
-    lessThanOrEqualTo?: number | null; // Int
-    notEqualTo?: number | null; // Int
-  }
-  WhereDeleteNameInput: { // input type
-    equalTo?: string | null; // String
-    notEqualTo?: string | null; // String
   }
   WhereUpdateAgeInput: { // input type
     equalTo?: number | null; // Int
@@ -74,20 +55,8 @@ export interface NexusGenObjects {
   Mutation: {};
   Query: {};
   User: { // root type
-    age?: NexusGenRootTypes['WhereAgeInput'] | null; // WhereAgeInput
-    name?: NexusGenRootTypes['WhereNameInput'] | null; // WhereNameInput
-  }
-  WhereAgeInput: { // root type
-    equalTo?: number | null; // Int
-    greaterThan?: number | null; // Int
-    greaterThanOrEqualTo?: number | null; // Int
-    lessThan?: number | null; // Int
-    lessThanOrEqualTo?: number | null; // Int
-    notEqualTo?: number | null; // Int
-  }
-  WhereNameInput: { // root type
-    equalTo?: string | null; // String
-    notEqualTo?: string | null; // String
+    age?: number | null; // Int
+    name?: string | null; // String
   }
 }
 
@@ -105,8 +74,6 @@ export interface NexusGenFieldTypes {
   Mutation: { // field return type
     createUser: NexusGenRootTypes['User'] | null; // User
     createUsers: Array<NexusGenRootTypes['User'] | null> | null; // [User]
-    deleteUser: NexusGenRootTypes['User'] | null; // User
-    deleteUsers: Array<NexusGenRootTypes['User'] | null> | null; // [User]
     updateUser: NexusGenRootTypes['User'] | null; // User
     updateUsers: Array<NexusGenRootTypes['User'] | null> | null; // [User]
   }
@@ -115,20 +82,8 @@ export interface NexusGenFieldTypes {
     users: Array<NexusGenRootTypes['User'] | null> | null; // [User]
   }
   User: { // field return type
-    age: NexusGenRootTypes['WhereAgeInput'] | null; // WhereAgeInput
-    name: NexusGenRootTypes['WhereNameInput'] | null; // WhereNameInput
-  }
-  WhereAgeInput: { // field return type
-    equalTo: number | null; // Int
-    greaterThan: number | null; // Int
-    greaterThanOrEqualTo: number | null; // Int
-    lessThan: number | null; // Int
-    lessThanOrEqualTo: number | null; // Int
-    notEqualTo: number | null; // Int
-  }
-  WhereNameInput: { // field return type
-    equalTo: string | null; // String
-    notEqualTo: string | null; // String
+    age: number | null; // Int
+    name: string | null; // String
   }
 }
 
@@ -136,8 +91,6 @@ export interface NexusGenFieldTypeNames {
   Mutation: { // field return type name
     createUser: 'User'
     createUsers: 'User'
-    deleteUser: 'User'
-    deleteUsers: 'User'
     updateUser: 'User'
     updateUsers: 'User'
   }
@@ -146,20 +99,8 @@ export interface NexusGenFieldTypeNames {
     users: 'User'
   }
   User: { // field return type name
-    age: 'WhereAgeInput'
-    name: 'WhereNameInput'
-  }
-  WhereAgeInput: { // field return type name
-    equalTo: 'Int'
-    greaterThan: 'Int'
-    greaterThanOrEqualTo: 'Int'
-    lessThan: 'Int'
-    lessThanOrEqualTo: 'Int'
-    notEqualTo: 'Int'
-  }
-  WhereNameInput: { // field return type name
-    equalTo: 'String'
-    notEqualTo: 'String'
+    age: 'Int'
+    name: 'String'
   }
 }
 
@@ -169,18 +110,13 @@ export interface NexusGenArgTypes {
       input?: NexusGenInputs['UserInput'] | null; // UserInput
     }
     createUsers: { // args
-      input?: NexusGenInputs['UserInput'] | null; // UserInput
-    }
-    deleteUser: { // args
-      input?: NexusGenInputs['DeleteUserInput'] | null; // DeleteUserInput
-    }
-    deleteUsers: { // args
-      where?: NexusGenInputs['DeleteUsersInput'] | null; // DeleteUsersInput
+      input?: Array<NexusGenInputs['UserInput'] | null> | null; // [UserInput]
     }
     updateUser: { // args
       input?: NexusGenInputs['UpdateUserInput'] | null; // UpdateUserInput
     }
     updateUsers: { // args
+      fields?: NexusGenInputs['UserInput'] | null; // UserInput
       where?: NexusGenInputs['UpdateUsersInput'] | null; // UpdateUsersInput
     }
   }

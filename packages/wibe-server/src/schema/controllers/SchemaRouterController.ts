@@ -3,20 +3,12 @@ import { SchemaRouterAdapter } from '../adapters/adaptersInterface'
 
 export class SchemaRouterController {
 	private adapter: SchemaRouterAdapter
-	private dabataseController: DatabaseController
 
-	constructor({
-		adapter,
-		databaseController,
-	}: {
-		adapter: SchemaRouterAdapter
-		databaseController: DatabaseController
-	}) {
+	constructor({ adapter }: { adapter: SchemaRouterAdapter }) {
 		this.adapter = adapter
-		this.dabataseController = databaseController
 	}
 
 	createSchema() {
-		return this.adapter.createSchema(this.dabataseController)
+		return this.adapter.createSchema()
 	}
 }
