@@ -114,8 +114,8 @@ export class GraphQLSchemaAdapter implements SchemaRouterAdapter {
 			},
 		})
 
-		const typeWhereUpdatesInput = inputObjectType({
-			name: `Update${className}sInput`,
+		const typeWhereInput = inputObjectType({
+			name: `Where${className}Input`,
 			definition: (t) => {
 				Object.keys(fieldsOfObject).map((fieldName) => {
 					const fieldObject = fieldsOfObject[fieldName]
@@ -127,7 +127,7 @@ export class GraphQLSchemaAdapter implements SchemaRouterAdapter {
 									? fieldObject.valueType
 									: undefined,
 							typeField: fieldObject,
-							name: `Update${fieldName[0].toUpperCase()}${fieldName.slice(
+							name: `${fieldName[0].toUpperCase()}${fieldName.slice(
 								1,
 							)}`,
 						}),
@@ -181,7 +181,32 @@ export class GraphQLSchemaAdapter implements SchemaRouterAdapter {
 					type: list(className),
 					args: {
 						fields: arg({ type: defaultTypeInput }),
-						where: arg({ type: typeWhereUpdatesInput }),
+						where: arg({ type: typeWhereInput }),
+					},
+					resolve: (root, args) => {},
+				})
+
+				// deleteUser
+				t.field(`delete${classNameFormat}`, {
+					type: className,
+					args: {
+						input: arg({
+							type: inputObjectType({
+								name: `Delete${classNameFormat}Input`,
+								definition: (t) => {
+									t.nonNull.id('id')
+								},
+							}),
+						}),
+					},
+					resolve: (root, args) => {},
+				})
+
+				// deleteUsers
+				t.field(`delete${classNameFormat}s`, {
+					type: list(className),
+					args: {
+						where: arg({ type: typeWhereInput }),
 					},
 					resolve: (root, args) => {},
 				})
