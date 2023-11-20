@@ -260,11 +260,14 @@ export class GraphQLSchemaAdapter implements SchemaRouterAdapter {
 				const queries = this.createQueriesSchema(className)
 				const mutations = this.createMutationsSchema(className, fields)
 
-				return [object, queries, mutations]
+				return { object, queries, mutations }
 			})
 			.flat()
 
-		return arrayOfType
+		return {
+			object: arrayOfType.map((type) => type.object),
+			queries: arrayOfType.map((type) => type.queries),
+		}
 	}
 
 	// createSchema(databaseController: DatabaseController) {

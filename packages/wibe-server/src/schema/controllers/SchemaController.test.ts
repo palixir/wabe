@@ -1,10 +1,8 @@
 import { describe, expect, it, spyOn } from 'bun:test'
-import { SchemaRouterController } from './SchemaRouterController'
+import { SchemaRouterController } from './SchemaController'
 import { GraphQLSchemaAdapter } from '../adapters/GraphQLSchemaAdapter'
-import { DatabaseController } from '../../database/controllers/DatabaseController'
-import { MongoAdapter } from '../../database/adapters/MongoAdapter'
 
-describe('SchemaRouterController', () => {
+describe('SchemaController', () => {
 	it('should call the good adapter on create schema', () => {
 		const spyAdapterCreateSchema = spyOn(
 			GraphQLSchemaAdapter.prototype,

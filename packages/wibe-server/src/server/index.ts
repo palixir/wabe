@@ -3,7 +3,7 @@ import { apollo } from '@elysiajs/apollo'
 import { DatabaseConfig } from '../database'
 import { SchemaInterface } from '../schema/interface'
 import { DatabaseController } from '../database/controllers/DatabaseController'
-import { SchemaRouterController } from '../schema/controllers/SchemaRouterController'
+import { SchemaRouterController } from '../schema/controllers/SchemaController'
 import { MongoAdapter } from '../database/adapters/MongoAdapter'
 import { join } from 'path'
 import { GraphQLSchemaAdapter } from '../schema/adapters/GraphQLSchemaAdapter'
@@ -66,9 +66,19 @@ export class WibeApp {
 
 		const types = schemaRouterController.createSchema()
 
+		console.log(types.object)
+
 		const schema = new GraphQLSchema({
-			types: types[0],
-			query: types[1],
+			types: types.object,
+			query: new GraphQLObjectType({
+				name: 'Query',
+				fields: () => ({
+					hello: {
+						type: GraphQLString,
+						resolve: () => 'Hello world!',
+					},
+				}),
+			}),
 		})
 
 		this.server.use(await apollo({ schema }))
