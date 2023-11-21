@@ -23,6 +23,36 @@ export class GraphQLSchemaAdapter implements SchemaRouterAdapter {
 		this.schema = schema
 	}
 
+	createSchema() {
+		if (!this.schema) throw new Error('Schema not found')
+
+		const res = this.schema.reduce(
+			(previous, current) => {
+				const fields = current.getFields()
+
+				const className = current.getName().replace(' ', '')
+
+				const object = this.createObjectSchema(className, fields)
+				const queries = this.createQueriesSchema(className)
+				// const mutations = this.createMutationsSchema(className, fields)
+
+				return {
+					types: [...previous.types, object],
+					queries: { ...previous.queries, ...queries },
+				}
+			},
+			{ types: [], queries: {}, mutations: {} } as {
+				types: GraphQLObjectType[]
+				queries: any
+				mutations: any
+			},
+		)
+
+		console.log(res)
+
+		return res
+	}
+
 	_getGraphqlTypeFromType(type: TypeField['type']) {
 		switch (type) {
 			case 'String':
@@ -51,12 +81,10 @@ export class GraphQLSchemaAdapter implements SchemaRouterAdapter {
 			return { ...acc }
 		}, {})
 
-		const object = new GraphQLObjectType({
+		return new GraphQLObjectType({
 			name: className,
 			fields: res,
 		})
-
-		return object
 	}
 
 	createQueriesSchema(className: string) {
@@ -86,39 +114,36 @@ export class GraphQLSchemaAdapter implements SchemaRouterAdapter {
 		// })
 		// return queries
 
-		const queries = new GraphQLObjectType({
-			name: 'Query',
-			fields: () => ({
-				[className.toLowerCase()]: {
-					type: GraphQLString,
-					args: { id: { type: GraphQLString } },
-					resolve: () =>
-						'queryForOneObject(root, args, ctx, info, className)',
-				},
-				// [`${className.toLowerCase()}s`]: {
-				// 	type: new GraphQLObjectType({
-				// 		name: `${className}List`,
-				// 		fields: {
-				// 			[`${className.toLowerCase()}s`]: {
-				// 				type: className,
-				// 			},
+		const queries = {
+			[className.toLowerCase()]: {
+				type: className,
+				args: { id: { type: GraphQLString } },
+				resolve: (root: any, args: any, ctx: any, info: any) =>
+					queryForOneObject(root, args, ctx, info, className),
+			},
+			// [`${className.toLowerCase()}s`]: {
+			// 	type: new GraphQLObjectType({
+			// 		name: `${className}List`,
+			// 		fields: {
+			// 			[`${className.toLowerCase()}s`]: {
+			// 				type: className,
+			// 			},
 
-				// 		},
-				// 	}),
-				// 	args: {
+			// 		},
+			// 	}),
+			// 	args: {
 
-				// 	},
-				// 	resolve: (root, args, ctx, info) =>
-				// 		queryForMultipleObject(
-				// 			root,
-				// 			args,
-				// 			ctx,
-				// 			info,
-				// 			className,
-				// 		),
-				// },
-			}),
-		})
+			// 	},
+			// 	resolve: (root, args, ctx, info) =>
+			// 		queryForMultipleObject(
+			// 			root,
+			// 			args,
+			// 			ctx,
+			// 			info,
+			// 			className,
+			// 		),
+			// },
+		}
 
 		return queries
 	}
@@ -245,29 +270,6 @@ export class GraphQLSchemaAdapter implements SchemaRouterAdapter {
 		// 	},
 		// })
 		// return mutations
-	}
-
-	createSchema() {
-		if (!this.schema) throw new Error('Schema not found')
-
-		const arrayOfType = this.schema
-			.map((schema) => {
-				const fields = schema.getFields()
-
-				const className = schema.getName().replace(' ', '')
-
-				const object = this.createObjectSchema(className, fields)
-				const queries = this.createQueriesSchema(className)
-				const mutations = this.createMutationsSchema(className, fields)
-
-				return { object, queries, mutations }
-			})
-			.flat()
-
-		return {
-			object: arrayOfType.map((type) => type.object),
-			queries: arrayOfType.map((type) => type.queries),
-		}
 	}
 
 	// createSchema(databaseController: DatabaseController) {
