@@ -10,8 +10,12 @@ import {
 } from './resolvers'
 import {
 	GraphQLBoolean,
+	GraphQLFieldConfig,
 	GraphQLFloat,
+	GraphQLInputObjectType,
 	GraphQLInt,
+	GraphQLList,
+	GraphQLNonNull,
 	GraphQLObjectType,
 	GraphQLString,
 } from 'graphql'
@@ -33,22 +37,23 @@ export class GraphQLSchemaAdapter implements SchemaRouterAdapter {
 				const className = current.getName().replace(' ', '')
 
 				const object = this.createObjectSchema(className, fields)
-				const queries = this.createQueriesSchema(className)
-				// const mutations = this.createMutationsSchema(className, fields)
+				const queries = this.createQueriesSchema(className, object)
+				const mutations = this.createMutationsSchema(
+					className,
+					fields,
+					object,
+				)
 
 				return {
-					types: [...previous.types, object],
 					queries: { ...previous.queries, ...queries },
+					mutations: { ...previous.mutations, ...mutations },
 				}
 			},
-			{ types: [], queries: {}, mutations: {} } as {
-				types: GraphQLObjectType[]
+			{ queries: {}, mutations: {} } as {
 				queries: any
 				mutations: any
 			},
 		)
-
-		console.log(res)
 
 		return res
 	}
@@ -87,68 +92,66 @@ export class GraphQLSchemaAdapter implements SchemaRouterAdapter {
 		})
 	}
 
-	createQueriesSchema(className: string) {
-		// const queries = Graphql({
-		// 	type: 'Query',
-		// 	definition: (t) => {
-		// 		// Query for one object (for example : user)
-		// 		t.field(className.toLowerCase(), {
-		// 			type: className,
-		// 			args: { id: nonNull('String') },
-		// 			resolve: (root, args, ctx, info) =>
-		// 				queryForOneObject(root, args, ctx, info, className),
-		// 		})
-		// 		// Query for multiple objects (for example : users)
-		// 		t.field(`${className.toLowerCase()}s`, {
-		// 			type: list(className),
-		// 			resolve: (root, args, ctx, info) =>
-		// 				queryForMultipleObject(
-		// 					root,
-		// 					args,
-		// 					ctx,
-		// 					info,
-		// 					className,
-		// 				),
-		// 		})
-		// 	},
-		// })
-		// return queries
-
+	createQueriesSchema(className: string, object: GraphQLObjectType) {
 		const queries = {
 			[className.toLowerCase()]: {
-				type: className,
+				type: new GraphQLNonNull(object),
 				args: { id: { type: GraphQLString } },
 				resolve: (root: any, args: any, ctx: any, info: any) =>
 					queryForOneObject(root, args, ctx, info, className),
 			},
-			// [`${className.toLowerCase()}s`]: {
-			// 	type: new GraphQLObjectType({
-			// 		name: `${className}List`,
-			// 		fields: {
-			// 			[`${className.toLowerCase()}s`]: {
-			// 				type: className,
-			// 			},
-
-			// 		},
-			// 	}),
-			// 	args: {
-
-			// 	},
-			// 	resolve: (root, args, ctx, info) =>
-			// 		queryForMultipleObject(
-			// 			root,
-			// 			args,
-			// 			ctx,
-			// 			info,
-			// 			className,
-			// 		),
-			// },
+			[`${className.toLowerCase()}s`]: {
+				type: new GraphQLList(object),
+				args: {},
+				resolve: (root, args, ctx, info) =>
+					queryForMultipleObject(root, args, ctx, info, className),
+			},
 		}
 
 		return queries
 	}
 
-	createMutationsSchema(className: string, fieldsOfObject: SchemaFields) {
+	createMutationsSchema(
+		className: string,
+		fieldsOfObject: SchemaFields,
+		object: GraphQLObjectType,
+	) {
+		const createInputType = new GraphQLInputObjectType({
+			name: `Create${className}Input`,
+			fields: () =>
+				Object.keys(fieldsOfObject).reduce((acc, fieldName) => {
+					const typeOfObject = fieldsOfObject[fieldName].type
+
+					if (typeOfObject !== 'array')
+						return {
+							...acc,
+							[fieldName]: {
+								type: this._getGraphqlTypeFromType(
+									typeOfObject,
+								),
+							},
+						}
+
+					return { ...acc }
+				}, {}),
+		})
+
+		const mutations: Record<string, GraphQLFieldConfig<any, any, any>> = {
+			[`create${className.toLowerCase()}`]: {
+				type: new GraphQLNonNull(object),
+				args: { input: { type: createInputType } },
+				resolve: (root: any, args: any, ctx: any, info: any) =>
+					queryForOneObject(root, args, ctx, info, className),
+			},
+			[`create${className.toLowerCase()}s`]: {
+				type: new GraphQLList(object),
+				args: { input: { type: new GraphQLList(createInputType) } },
+				resolve: (root, args, ctx, info) =>
+					queryForMultipleObject(root, args, ctx, info, className),
+			},
+		}
+
+		return mutations
 		// user => User
 		// const classNameFormat = `${className[0].toUpperCase()}${className.slice(
 		// 	1,

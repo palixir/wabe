@@ -67,10 +67,13 @@ export class WibeApp {
 		const types = schemaRouterController.createSchema()
 
 		const schema = new GraphQLSchema({
-			types: types.types,
 			query: new GraphQLObjectType({
 				name: 'Query',
 				fields: () => types.queries,
+			}),
+			mutation: new GraphQLObjectType({
+				name: 'Mutation',
+				fields: () => types.mutations,
 			}),
 		})
 
