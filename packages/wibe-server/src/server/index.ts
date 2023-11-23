@@ -5,15 +5,9 @@ import { SchemaInterface } from '../schema/interface'
 import { DatabaseController } from '../database/controllers/DatabaseController'
 import { SchemaRouterController } from '../schema/controllers/SchemaController'
 import { MongoAdapter } from '../database/adapters/MongoAdapter'
-import { join } from 'path'
 import { GraphQLSchemaAdapter } from '../schema/adapters/GraphQLSchemaAdapter'
 import { Schema } from '../schema/Schema'
-import {
-	GraphQLObjectType,
-	GraphQLSchema,
-	GraphQLString,
-	buildSchema,
-} from 'graphql'
+import { GraphQLObjectType, GraphQLSchema } from 'graphql'
 
 interface WibeConfig {
 	port: number
@@ -69,11 +63,11 @@ export class WibeApp {
 		const schema = new GraphQLSchema({
 			query: new GraphQLObjectType({
 				name: 'Query',
-				fields: () => types.queries,
+				fields: types.queries,
 			}),
 			mutation: new GraphQLObjectType({
 				name: 'Mutation',
-				fields: () => types.mutations,
+				fields: types.mutations,
 			}),
 		})
 

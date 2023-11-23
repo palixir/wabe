@@ -1,13 +1,8 @@
+import { getWhereInputFromType } from '../../graphql'
 import { Schema } from '../Schema'
 import { SchemaFields, TypeField } from '../interface'
-import { getWhereInputFromType } from '../../graphql'
 import { SchemaRouterAdapter } from './adaptersInterface'
-import {
-	mutationToCreateMultipleObjects,
-	mutationToCreateObject,
-	queryForMultipleObject,
-	queryForOneObject,
-} from './resolvers'
+import { queryForMultipleObject, queryForOneObject } from './resolvers'
 import {
 	GraphQLBoolean,
 	GraphQLFieldConfig,
@@ -103,7 +98,7 @@ export class GraphQLSchemaAdapter implements SchemaRouterAdapter {
 			[`${className.toLowerCase()}s`]: {
 				type: new GraphQLList(object),
 				args: {},
-				resolve: (root, args, ctx, info) =>
+				resolve: (root: any, args: any, ctx: any, info: any) =>
 					queryForMultipleObject(root, args, ctx, info, className),
 			},
 		}
@@ -116,10 +111,12 @@ export class GraphQLSchemaAdapter implements SchemaRouterAdapter {
 		fieldsOfObject: SchemaFields,
 		object: GraphQLObjectType,
 	) {
-		const createInputType = new GraphQLInputObjectType({
-			name: `Create${className}Input`,
+		const fieldsOfObjectKeys = Object.keys(fieldsOfObject)
+
+		const defaultInputType = new GraphQLInputObjectType({
+			name: `${className}CreateInput`,
 			fields: () =>
-				Object.keys(fieldsOfObject).reduce((acc, fieldName) => {
+				fieldsOfObjectKeys.reduce((acc, fieldName) => {
 					const typeOfObject = fieldsOfObject[fieldName].type
 
 					if (typeOfObject !== 'array')
@@ -136,341 +133,94 @@ export class GraphQLSchemaAdapter implements SchemaRouterAdapter {
 				}, {}),
 		})
 
+		const whereInputType = new GraphQLInputObjectType({
+			name: `${className}WhereInput`,
+			fields: () => {
+				return fieldsOfObjectKeys.reduce((acc, fieldName) => {
+					const typeOfObject = fieldsOfObject[fieldName].type
+
+					if (typeOfObject !== 'array')
+						return {
+							...acc,
+							[fieldName]: {
+								type: getWhereInputFromType(typeOfObject),
+							},
+						}
+
+					return { ...acc }
+				}, {})
+			},
+		})
+
+		const updateInputType = new GraphQLInputObjectType({
+			name: `${className}UpdateInput`,
+			fields: () => ({
+				id: { type: GraphQLString },
+				fields: { type: defaultInputType },
+			}),
+		})
+
+		const updatesInputType = new GraphQLInputObjectType({
+			name: `${className}sUpdateInput`,
+			fields: () => ({
+				fields: { type: defaultInputType },
+				where: { type: whereInputType },
+			}),
+		})
+
+		const deleteInputType = new GraphQLInputObjectType({
+			name: `${className}DeleteInput`,
+			fields: () => ({
+				id: { type: GraphQLString },
+			}),
+		})
+
+		const deletesInputType = new GraphQLInputObjectType({
+			name: `${className}sDeleteInput`,
+			fields: () => ({
+				where: { type: whereInputType },
+			}),
+		})
+
 		const mutations: Record<string, GraphQLFieldConfig<any, any, any>> = {
-			[`create${className.toLowerCase()}`]: {
+			[`create${className}`]: {
 				type: new GraphQLNonNull(object),
-				args: { input: { type: createInputType } },
+				args: { input: { type: defaultInputType } },
 				resolve: (root: any, args: any, ctx: any, info: any) =>
 					queryForOneObject(root, args, ctx, info, className),
 			},
-			[`create${className.toLowerCase()}s`]: {
+			[`create${className}s`]: {
 				type: new GraphQLList(object),
-				args: { input: { type: new GraphQLList(createInputType) } },
+				args: { input: { type: new GraphQLList(defaultInputType) } },
 				resolve: (root, args, ctx, info) =>
 					queryForMultipleObject(root, args, ctx, info, className),
+			},
+			[`update${className}`]: {
+				type: new GraphQLNonNull(object),
+				args: { input: { type: updateInputType } },
+				resolve: (root: any, args: any, ctx: any, info: any) => {},
+			},
+			[`update${className}s`]: {
+				type: new GraphQLNonNull(new GraphQLList(object)),
+				args: { input: { type: updatesInputType } },
+				resolve: (root: any, args: any, ctx: any, info: any) => {},
+			},
+			[`delete${className}`]: {
+				type: new GraphQLNonNull(object),
+				args: {
+					input: {
+						type: deleteInputType,
+					},
+				},
+				resolve: (root: any, args: any, ctx: any, info: any) => {},
+			},
+			[`delete${className}s`]: {
+				type: new GraphQLNonNull(new GraphQLList(object)),
+				args: { input: { type: deletesInputType } },
+				resolve: (root: any, args: any, ctx: any, info: any) => {},
 			},
 		}
 
 		return mutations
-		// user => User
-		// const classNameFormat = `${className[0].toUpperCase()}${className.slice(
-		// 	1,
-		// )}`
-		// const defaultTypeInput = inputObjectType({
-		// 	name: `${classNameFormat}Input`,
-		// 	definition: (t) => {
-		// 		Object.keys(fieldsOfObject).map((fieldName) => {
-		// 			const typeOfObject = fieldsOfObject[fieldName].type
-		// 			if (typeOfObject !== 'array')
-		// 				t.field(fieldName, {
-		// 					type: typeOfObject,
-		// 				})
-		// 		})
-		// 	},
-		// })
-		// const typeUpdateInput = inputObjectType({
-		// 	name: `Update${classNameFormat}Input`,
-		// 	definition: (t) => {
-		// 		t.nonNull.id('id')
-		// 		t.field('fields', { type: defaultTypeInput })
-		// 	},
-		// })
-		// const typeUpdatesInput = inputObjectType({
-		// 	name: `Update${classNameFormat}sInput`,
-		// 	definition: (t) => {
-		// 		t.field('fields', { type: defaultTypeInput })
-		// 		t.field('where', { type: typeWhereInput })
-		// 	},
-		// })
-		// const typeWhereInput = inputObjectType({
-		// 	name: `Where${className}Input`,
-		// 	definition: (t) => {
-		// 		Object.keys(fieldsOfObject).map((fieldName) => {
-		// 			const fieldObject = fieldsOfObject[fieldName]
-		// 			t.field(fieldName, {
-		// 				type: getWhereInputFromType({
-		// 					valueArrayType:
-		// 						fieldObject.type === 'array'
-		// 							? fieldObject.valueType
-		// 							: undefined,
-		// 					typeField: fieldObject,
-		// 					name: `${fieldName[0].toUpperCase()}${fieldName.slice(
-		// 						1,
-		// 					)}`,
-		// 				}),
-		// 			})
-		// 		})
-		// 	},
-		// })
-		// const mutations = extendType({
-		// 	type: 'Mutation',
-		// 	definition: (t) => {
-		// 		// createUser
-		// 		t.field(`create${classNameFormat}`, {
-		// 			type: className,
-		// 			args: { input: arg({ type: defaultTypeInput }) },
-		// 			resolve: (root, args, ctx, info) =>
-		// 				mutationToCreateObject(
-		// 					root,
-		// 					args,
-		// 					ctx,
-		// 					info,
-		// 					className,
-		// 				),
-		// 		})
-		// 		// createUsers
-		// 		t.field(`create${classNameFormat}s`, {
-		// 			type: list(className),
-		// 			args: { input: list(arg({ type: defaultTypeInput })) },
-		// 			resolve: (root, args, ctx, info) =>
-		// 				mutationToCreateMultipleObjects(
-		// 					root,
-		// 					args,
-		// 					ctx,
-		// 					info,
-		// 					className,
-		// 				),
-		// 		})
-		// 		// updateUser
-		// 		t.field(`update${classNameFormat}`, {
-		// 			type: className,
-		// 			args: {
-		// 				input: arg({ type: typeUpdateInput }),
-		// 			},
-		// 			resolve: (root, args) => {},
-		// 		})
-		// 		// updateUsers
-		// 		t.field(`update${classNameFormat}s`, {
-		// 			type: list(className),
-		// 			args: {
-		// 				input: arg({ type: typeUpdatesInput }),
-		// 			},
-		// 			resolve: (root, args) => {},
-		// 		})
-		// 		// deleteUser
-		// 		t.field(`delete${classNameFormat}`, {
-		// 			type: className,
-		// 			args: {
-		// 				input: arg({
-		// 					type: inputObjectType({
-		// 						name: `Delete${classNameFormat}Input`,
-		// 						definition: (t) => {
-		// 							t.nonNull.id('id')
-		// 						},
-		// 					}),
-		// 				}),
-		// 			},
-		// 			resolve: (root, args) => {},
-		// 		})
-		// 		// deleteUsers
-		// 		t.field(`delete${classNameFormat}s`, {
-		// 			type: list(className),
-		// 			args: {
-		// 				where: arg({ type: typeWhereInput }),
-		// 			},
-		// 			resolve: (root, args) => {},
-		// 		})
-		// 	},
-		// })
-		// return mutations
 	}
-
-	// createSchema(databaseController: DatabaseController) {
-	// 	if (!this.schema) throw new Error('Schema not found')
-
-	// 	const arrayOfType = this.schema
-	// 		.map((schema) => {
-	// 			const fields = schema.getFields()
-	// 			const name = schema.getName().replace(' ', '')
-
-	// 			const nameWithFirstLetterLowerCase =
-	// 				`${name[0].toLowerCase()}${name.slice(
-	// 					1,
-	// 				)}` as keyof NexusGenFieldTypes
-
-	// 			const nameWithFirstLetterUpperCase =
-	// 				`${name[0].toUpperCase()}${name.slice(
-	// 					1,
-	// 				)}` as keyof NexusGenFieldTypes
-
-	// 			const fieldsKeys = Object.keys(fields)
-
-	// 			const object = objectType({
-	// 				name: nameWithFirstLetterUpperCase,
-	// 				definition: (t) => {
-	// 					this._getTypesFromFields({
-	// 						fields,
-	// 						fieldsKeys,
-	// 						t,
-	// 						className: nameWithFirstLetterUpperCase,
-	// 					})
-	// 				},
-	// 			})
-
-	// 			const queries = extendType({
-	// 				type: 'Query',
-	// 				definition: (t) => {
-	// 					t.field(nameWithFirstLetterLowerCase, {
-	// 						type: nameWithFirstLetterUpperCase,
-	// 						args: { id: nonNull('String') },
-	// 						resolve: async (_, { id }, __, info) => {
-	// 							const fields = getFieldsFromInfo(info)
-
-	// 							if (!fields)
-	// 								throw new Error('No fields provided')
-
-	// 							return databaseController.getObject<any>({
-	// 								className: nameWithFirstLetterUpperCase,
-	// 								id,
-	// 								fields,
-	// 							})
-	// 						},
-	// 					})
-
-	// 					t.list.field(`${nameWithFirstLetterLowerCase}s`, {
-	// 						type: nameWithFirstLetterUpperCase,
-	// 						resolve: (root, args, ctx, info) => {
-	// 							const fields = getFieldsFromInfo(info)
-
-	// 							if (!fields)
-	// 								throw new Error('No fields provided')
-
-	// 							return databaseController.getObjects<any>({
-	// 								className: nameWithFirstLetterUpperCase,
-	// 								fields,
-	// 							})
-	// 						},
-	// 					})
-	// 				},
-	// 			})
-
-	// 			const typeInput = inputObjectType({
-	// 				name: `${nameWithFirstLetterUpperCase}Input`,
-	// 				definition: (t) => {
-	// 					this._getTypesFromFields({
-	// 						fields,
-	// 						fieldsKeys,
-	// 						t,
-	// 						className: nameWithFirstLetterUpperCase,
-	// 					})
-	// 				},
-	// 			})
-
-	// 			const typeUpdateInput = inputObjectType({
-	// 				name: `Update${nameWithFirstLetterUpperCase}Input`,
-	// 				definition: (t) => {
-	// 					t.nonNull.id('id')
-	// 					t.field('fields', { type: typeInput })
-	// 				},
-	// 			})
-
-	// const typeUpdatesInput = inputObjectType({
-	// 	name: `Update${nameWithFirstLetterUpperCase}sInput`,
-	// 	definition: (t) => {
-	// 		fieldsKeys.map((fieldName) => {
-	// 			const field = schema.getFields()[fieldName]
-
-	// 			t.field(fieldName, {
-	// 				type: getWhereInputFromType({
-	// 					valueArrayType:
-	// 						field.type === 'array'
-	// 							? field.valueType
-	// 							: undefined,
-	// 					typeField: field,
-	// 					name: `Update${fieldName[0].toUpperCase()}${fieldName.slice(
-	// 						1,
-	// 					)}`,
-	// 				}),
-	// 			})
-	// 		})
-	// 	},
-	// })
-
-	// 			const typeDeleteInput = inputObjectType({
-	// 				name: `Delete${nameWithFirstLetterUpperCase}Input`,
-	// 				definition: (t) => {
-	// 					t.nonNull.id('id')
-	// 				},
-	// 			})
-
-	// 			const typeDeletesInput = inputObjectType({
-	// 				name: `Delete${nameWithFirstLetterUpperCase}sInput`,
-	// 				definition: (t) => {
-	// 					fieldsKeys.map((fieldName) => {
-	// 						t.field(fieldName, {
-	// 							type: getWhereInputFromType({
-	// 								typeField: schema.getFields()[fieldName],
-	// 								name: `Delete${fieldName[0].toUpperCase()}${fieldName.slice(
-	// 									1,
-	// 								)}`,
-	// 							}),
-	// 						})
-	// 					})
-	// 				},
-	// 			})
-
-	// 			const mutations = extendType({
-	// 				type: 'Mutation',
-	// 				definition: (t) => {
-	// t.field(`create${nameWithFirstLetterUpperCase}`, {
-	// 	type: nameWithFirstLetterUpperCase,
-	// 	args: { input: arg({ type: typeInput }) },
-	// 	resolve: async (root, args, ctx, info) => {
-	// 		const fields = getFieldsFromInfo(info)
-
-	// 		if (!fields)
-	// 			throw new Error('No fields provided')
-
-	// 		return databaseController.createObject<any>({
-	// 			className: nameWithFirstLetterUpperCase,
-	// 			data: args.input,
-	// 			fields,
-	// 		})
-	// 	},
-	// })
-
-	// 					t.field(`create${nameWithFirstLetterUpperCase}s`, {
-	// 						type: list(nameWithFirstLetterUpperCase),
-	// 						args: { input: arg({ type: typeInput }) },
-	// 						resolve: (root, args) => {},
-	// 					})
-
-	// 					t.field(`update${nameWithFirstLetterUpperCase}`, {
-	// 						type: nameWithFirstLetterUpperCase,
-	// 						args: {
-	// 							input: arg({ type: typeUpdateInput }),
-	// 						},
-	// 						resolve: (root, args) => {},
-	// 					})
-
-	// 					t.list.field(`update${nameWithFirstLetterUpperCase}s`, {
-	// 						type: nameWithFirstLetterUpperCase,
-	// 						args: {
-	// 							where: arg({ type: typeUpdatesInput }),
-	// 						},
-	// 						resolve: (root, args) => {},
-	// 					})
-
-	// 					t.field(`delete${nameWithFirstLetterUpperCase}`, {
-	// 						type: nameWithFirstLetterUpperCase,
-	// 						args: { input: arg({ type: typeDeleteInput }) },
-	// 						resolve: (root, args) => {},
-	// 					})
-
-	// 					t.list.field(`delete${nameWithFirstLetterUpperCase}s`, {
-	// 						type: nameWithFirstLetterUpperCase,
-	// 						args: {
-	// 							where: arg({ type: typeDeletesInput }),
-	// 						},
-	// 						resolve: (root, args) => {},
-	// 					})
-	// 				},
-	// 			})
-
-	// 			return [object, queries, mutations]
-	// 		})
-	// 		.flat()
-
-	// 	return arrayOfType
-	// }
 }

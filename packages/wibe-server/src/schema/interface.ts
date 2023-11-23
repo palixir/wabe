@@ -1,23 +1,30 @@
 export type ArrayValueType = 'String' | 'Int' | 'Float' | 'Boolean'
 
+export enum WibeType {
+	String = 'String',
+	Int = 'Int',
+	Float = 'Float',
+	Boolean = 'Boolean',
+}
+
 export type TypeField =
 	| {
-			type: 'String'
+			type: WibeType.String
 			required?: boolean
 			defaultValue?: string
 	  }
 	| {
-			type: 'Int'
+			type: WibeType.Int
 			required?: boolean
 			defaultValue?: number
 	  }
 	| {
-			type: 'Float'
+			type: WibeType.Float
 			required?: boolean
 			defaultValue?: number
 	  }
 	| {
-			type: 'Boolean'
+			type: WibeType.Boolean
 			required?: boolean
 			defaultValue?: boolean
 	  }

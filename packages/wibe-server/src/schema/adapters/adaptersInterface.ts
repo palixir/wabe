@@ -1,3 +1,4 @@
+import { GraphQLFieldConfig, ThunkObjMap } from 'graphql'
 import { DatabaseController } from '../../database/controllers/DatabaseController'
 
 export interface CreateSchemaOptions {
@@ -5,5 +6,8 @@ export interface CreateSchemaOptions {
 }
 
 export interface SchemaRouterAdapter {
-	createSchema(): { object: any; queries: any; mutations: any }
+	createSchema(): {
+		queries: ThunkObjMap<GraphQLFieldConfig<any, any, any>>
+		mutations: ThunkObjMap<GraphQLFieldConfig<any, any, any>>
+	}
 }
