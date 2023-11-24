@@ -1,8 +1,3 @@
-import { getWhereInputFromType } from '../../graphql'
-import { Schema } from '../Schema'
-import { SchemaFields, TypeField } from '../interface'
-import { SchemaRouterAdapter } from './adaptersInterface'
-import { queryForMultipleObject, queryForOneObject } from './resolvers'
 import {
 	GraphQLBoolean,
 	GraphQLFieldConfig,
@@ -13,19 +8,32 @@ import {
 	GraphQLNonNull,
 	GraphQLObjectType,
 	GraphQLString,
+	GraphQLType,
 } from 'graphql'
+import { Schema } from '../Schema'
+import { SchemaFields, TypeField } from '../interface'
+import { queryForMultipleObject, queryForOneObject } from '../resolvers'
+import { getWhereInputFromType } from '../../graphql'
 
-export class GraphQLSchemaAdapter implements SchemaRouterAdapter {
-	private schema: Schema[]
+const templateTypeToGraphqlType: Record<TypeField['type'], GraphQLType> = {
+	String: GraphQLString,
+	Int: GraphQLInt,
+	Float: GraphQLFloat,
+	Boolean: GraphQLBoolean,
+	array: new GraphQLList(GraphQLString),
+}
 
-	constructor(schema: Schema[]) {
-		this.schema = schema
+export class WibeGraphlQLSchema {
+	private schemas: Schema[]
+
+	constructor(schemas: Schema[]) {
+		this.schemas = schemas
 	}
 
 	createSchema() {
-		if (!this.schema) throw new Error('Schema not found')
+		if (!this.schemas) throw new Error('Schema not found')
 
-		const res = this.schema.reduce(
+		const res = this.schemas.reduce(
 			(previous, current) => {
 				const fields = current.getFields()
 
@@ -53,19 +61,6 @@ export class GraphQLSchemaAdapter implements SchemaRouterAdapter {
 		return res
 	}
 
-	_getGraphqlTypeFromType(type: TypeField['type']) {
-		switch (type) {
-			case 'String':
-				return GraphQLString
-			case 'Int':
-				return GraphQLInt
-			case 'Float':
-				return GraphQLFloat
-			case 'Boolean':
-				return GraphQLBoolean
-		}
-	}
-
 	createObjectSchema(className: string, fieldsOfObject: SchemaFields) {
 		const res = Object.keys(fieldsOfObject).reduce((acc, fieldName) => {
 			const typeOfObject = fieldsOfObject[fieldName].type
@@ -74,7 +69,7 @@ export class GraphQLSchemaAdapter implements SchemaRouterAdapter {
 				return {
 					...acc,
 					[fieldName]: {
-						type: this._getGraphqlTypeFromType(typeOfObject),
+						type: templateTypeToGraphqlType[typeOfObject],
 					},
 				}
 
@@ -123,9 +118,7 @@ export class GraphQLSchemaAdapter implements SchemaRouterAdapter {
 						return {
 							...acc,
 							[fieldName]: {
-								type: this._getGraphqlTypeFromType(
-									typeOfObject,
-								),
+								type: templateTypeToGraphqlType[typeOfObject],
 							},
 						}
 

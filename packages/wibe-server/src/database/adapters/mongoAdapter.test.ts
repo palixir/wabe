@@ -12,7 +12,7 @@ describe('Mongo adapter', () => {
 		const setup = await setupTests()
 		wibe = setup.wibe
 
-		mongoAdapter = wibe.databaseController.adapter as MongoAdapter
+		mongoAdapter = WibeApp.databaseController.adapter as MongoAdapter
 	})
 
 	afterAll(async () => {

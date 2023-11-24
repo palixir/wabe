@@ -30,11 +30,7 @@ describe('DatabaseController', () => {
 			'createClass',
 		).mockResolvedValue()
 
-		const databaseController = new DatabaseController(
-			wibe.databaseController.adapter as MongoAdapter,
-		)
-
-		await databaseController.createClass('Collection1')
+		await WibeApp.databaseController.createClass('Collection1')
 
 		expect(spyMongoAdapterCreateClass).toHaveBeenCalledTimes(1)
 	})

@@ -1,27 +1,17 @@
-import { DatabaseController } from '../database/controllers/DatabaseController'
+import { WibeApp } from '../server'
 import { SchemaFields } from './interface'
 
 export class Schema {
-	private name: string
-	private fields: SchemaFields
-	private databaseController: DatabaseController
+	public name: string
+	public fields: SchemaFields
 
-	constructor({
-		name,
-		fields,
-		databaseController,
-	}: {
-		name: string
-		fields: SchemaFields
-		databaseController: DatabaseController
-	}) {
+	constructor({ name, fields }: { name: string; fields: SchemaFields }) {
 		this.name = name
 		this.fields = fields
-		this.databaseController = databaseController
 	}
 
 	create() {
-		return this.databaseController.createClass(this.name)
+		return WibeApp.databaseController.createClass(this.name)
 	}
 
 	getFields() {

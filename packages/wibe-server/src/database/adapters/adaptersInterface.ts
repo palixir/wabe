@@ -1,15 +1,4 @@
 import { Document, WithId } from 'mongodb'
-import {
-	NexusGenInputs,
-	NexusGenObjects,
-} from '../../../generated/nexusTypegen'
-
-// getObjects({
-// 	where: {
-// 		name: { equalTo: 'John' },
-// 		age: { greaterThan: 20 },
-// 	},
-// })
 export interface WhereType {
 	[key: string]: {
 		equalTo?: any
@@ -28,34 +17,34 @@ export interface AdapterOptions {
 	databaseName: string
 }
 
-export interface GetObjectOptions<T extends keyof NexusGenObjects> {
+export interface GetObjectOptions<T extends any> {
 	className: string
 	id: string
-	fields: Array<keyof NexusGenObjects[T] | '*'>
+	fields: Array<any | '*'>
 }
 
-export interface GetObjectsOptions<T extends keyof NexusGenObjects> {
+export interface GetObjectsOptions<T extends any> {
 	className: string
 	where?: WhereType
-	fields: Array<keyof NexusGenObjects[T] | '*'>
+	fields: Array<any | '*'>
 }
 
-export interface CreateObjectOptions<T extends keyof NexusGenObjects> {
+export interface CreateObjectOptions<T extends any> {
 	className: string
 	data: Record<string, any>
-	fields: Array<keyof NexusGenObjects[T] | '*'>
+	fields: Array<any | '*'>
 }
-export interface CreateObjectsOptions<T extends keyof NexusGenObjects> {
+export interface CreateObjectsOptions<T extends any> {
 	className: string
 	data: Array<Record<string, any>>
-	fields: Array<keyof NexusGenObjects[T] | '*'>
+	fields: Array<any | '*'>
 }
 
-export interface UpdateObjectOptions<T extends keyof NexusGenObjects> {
+export interface UpdateObjectOptions<T extends any> {
 	className: string
 	id: string
 	data: Record<string, any>
-	fields: Array<keyof NexusGenObjects[T] | '*'>
+	fields: Array<any | '*'>
 }
 
 // TODO : Type the return of the functions
@@ -65,21 +54,15 @@ export interface DatabaseAdapter {
 
 	createClass(className: string): Promise<any>
 
-	getObject<T extends keyof NexusGenObjects>(
+	getObject<T extends any>(
 		params: GetObjectOptions<T>,
 	): Promise<WithId<Document> | null>
-	getObjects<T extends keyof NexusGenObjects>(
+	getObjects<T extends any>(
 		params: GetObjectsOptions<T>,
-	): Promise<WithId<NexusGenObjects[T]>[]>
+	): Promise<WithId<any>[]>
 
-	createObject<T extends keyof NexusGenObjects>(
-		params: CreateObjectOptions<T>,
-	): Promise<any>
-	createObjects<T extends keyof NexusGenObjects>(
-		params: CreateObjectsOptions<T>,
-	): Promise<any>
+	createObject<T extends any>(params: CreateObjectOptions<T>): Promise<any>
+	createObjects<T extends any>(params: CreateObjectsOptions<T>): Promise<any>
 
-	updateObject<T extends keyof NexusGenObjects>(
-		params: UpdateObjectOptions<T>,
-	): Promise<any>
+	updateObject<T extends any>(params: UpdateObjectOptions<T>): Promise<any>
 }

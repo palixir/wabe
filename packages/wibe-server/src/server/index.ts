@@ -3,11 +3,10 @@ import { apollo } from '@elysiajs/apollo'
 import { DatabaseConfig } from '../database'
 import { SchemaInterface } from '../schema/interface'
 import { DatabaseController } from '../database/controllers/DatabaseController'
-import { SchemaRouterController } from '../schema/controllers/SchemaController'
 import { MongoAdapter } from '../database/adapters/MongoAdapter'
-import { GraphQLSchemaAdapter } from '../schema/adapters/GraphQLSchemaAdapter'
 import { Schema } from '../schema/Schema'
 import { GraphQLObjectType, GraphQLSchema } from 'graphql'
+import { WibeGraphlQLSchema } from '../schema/controllers/WibeGraphQLSchema'
 
 interface WibeConfig {
 	port: number
@@ -36,10 +35,6 @@ export class WibeApp {
 		WibeApp.databaseController = new DatabaseController(databaseAdapter)
 	}
 
-	static async getDatabaseController() {
-		return WibeApp.databaseController
-	}
-
 	async start() {
 		await WibeApp.databaseController.connect()
 
@@ -48,17 +43,12 @@ export class WibeApp {
 				new Schema({
 					name: schema.name,
 					fields: schema.fields,
-					databaseController: WibeApp.databaseController,
 				}),
 		)
 
-		const schemaRouterAdapter = new GraphQLSchemaAdapter(schemas)
+		const graphqlSchema = new WibeGraphlQLSchema(schemas)
 
-		const schemaRouterController = new SchemaRouterController({
-			adapter: schemaRouterAdapter,
-		})
-
-		const types = schemaRouterController.createSchema()
+		const types = graphqlSchema.createSchema()
 
 		const schema = new GraphQLSchema({
 			query: new GraphQLObjectType({

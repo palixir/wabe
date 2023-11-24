@@ -1,6 +1,6 @@
 import { GraphQLResolveInfo } from 'graphql'
-import { getFieldsFromInfo } from '../../graphql/resolvers'
-import { WibeApp } from '../../server'
+import { getFieldsFromInfo } from '../graphql/resolvers'
+import { WibeApp } from '../server'
 
 export const queryForOneObject = (
 	_: any,

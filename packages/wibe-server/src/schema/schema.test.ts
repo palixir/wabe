@@ -1,20 +1,23 @@
-import { beforeAll, describe, expect, it, mock } from 'bun:test'
+import { beforeAll, describe, expect, it, mock, spyOn } from 'bun:test'
 import { Schema } from './Schema'
+import { WibeType } from './interface'
+import { WibeApp } from '../server'
+
+const mockCreateClass = mock(() => Promise.resolve())
+
+// @ts-expect-error
+WibeApp.databaseController = { createClass: mockCreateClass }
 
 describe('Schema', () => {
 	let schema: Schema
-	const mockCreateClass = mock(() => {})
 
 	beforeAll(async () => {
 		schema = new Schema({
 			name: 'Collection1',
 			fields: {
-				name: { type: 'String', defaultValue: 'Lucas' },
-				age: { type: 'Int', defaultValue: 23 },
+				name: { type: WibeType.String, defaultValue: 'Lucas' },
+				age: { type: WibeType.Int, defaultValue: 23 },
 			},
-			databaseController: {
-				createClass: mockCreateClass,
-			} as any,
 		})
 	})
 
