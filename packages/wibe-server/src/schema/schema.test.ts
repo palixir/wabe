@@ -1,6 +1,5 @@
-import { beforeAll, describe, expect, it, mock, spyOn } from 'bun:test'
-import { Schema } from './Schema'
-import { WibeType } from './interface'
+import { beforeAll, describe, expect, it, mock } from 'bun:test'
+import { Schema, WibeType } from './Schema'
 import { WibeApp } from '../server'
 
 const mockCreateClass = mock(() => Promise.resolve())

@@ -1,4 +1,3 @@
-import { Document, WithId } from 'mongodb'
 import {
 	CreateObjectOptions,
 	CreateObjectsOptions,
@@ -7,7 +6,6 @@ import {
 	GetObjectsOptions,
 	UpdateObjectOptions,
 } from '../adapters/adaptersInterface'
-import { NexusGenObjects } from '../../../generated/nexusTypegen'
 
 export class DatabaseController {
 	public adapter: DatabaseAdapter
@@ -28,33 +26,23 @@ export class DatabaseController {
 		return this.adapter.createClass(className)
 	}
 
-	async getObject<T extends keyof NexusGenObjects>(
-		params: GetObjectOptions<T>,
-	) {
+	async getObject<T extends any>(params: GetObjectOptions<T>) {
 		return this.adapter.getObject(params)
 	}
 
-	async getObjects<T extends keyof NexusGenObjects>(
-		params: GetObjectsOptions<T>,
-	) {
+	async getObjects<T extends any>(params: GetObjectsOptions<T>) {
 		return this.adapter.getObjects(params)
 	}
 
-	async createObject<T extends keyof NexusGenObjects>(
-		params: CreateObjectOptions<T>,
-	) {
+	async createObject<T extends any>(params: CreateObjectOptions<T>) {
 		return this.adapter.createObject(params)
 	}
 
-	async createObjects<T extends keyof NexusGenObjects>(
-		params: CreateObjectsOptions<T>,
-	) {
+	async createObjects<T extends any>(params: CreateObjectsOptions<T>) {
 		return this.adapter.createObjects(params)
 	}
 
-	async updateObject<T extends keyof NexusGenObjects>(
-		params: UpdateObjectOptions<T>,
-	) {
+	async updateObject<T extends any>(params: UpdateObjectOptions<T>) {
 		return this.adapter.updateObject(params)
 	}
 }

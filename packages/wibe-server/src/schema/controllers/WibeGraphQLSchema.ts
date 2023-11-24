@@ -10,8 +10,7 @@ import {
 	GraphQLString,
 	GraphQLType,
 } from 'graphql'
-import { Schema } from '../Schema'
-import { SchemaFields, TypeField } from '../interface'
+import { Schema, SchemaFields, TypeField } from '../Schema'
 import { queryForMultipleObject, queryForOneObject } from '../resolvers'
 import { getWhereInputFromType } from '../../graphql'
 

@@ -1,10 +1,10 @@
 import { Elysia } from 'elysia'
 import { apollo } from '@elysiajs/apollo'
 import { DatabaseConfig } from '../database'
-import { SchemaInterface } from '../schema/interface'
+
 import { DatabaseController } from '../database/controllers/DatabaseController'
 import { MongoAdapter } from '../database/adapters/MongoAdapter'
-import { Schema } from '../schema/Schema'
+import { Schema, SchemaInterface } from '../schema/Schema'
 import { GraphQLObjectType, GraphQLSchema } from 'graphql'
 import { WibeGraphlQLSchema } from '../schema/controllers/WibeGraphQLSchema'
 
