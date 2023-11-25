@@ -3,7 +3,7 @@ import { GraphQLClient } from 'graphql-request'
 import { WibeApp } from '../server'
 import { DatabaseEnum } from '../database'
 import getPort from 'get-port'
-import { WibeScalarType } from '../schema/interface'
+import { WibeScalarType } from '../schema/Schema'
 
 export const getGraphqlClient = (port: number): GraphQLClient => {
 	const client = new GraphQLClient(`http://127.0.0.1:${port}/graphql`)
@@ -28,7 +28,7 @@ export const setupTests = async () => {
 				name: 'User',
 				fields: {
 					name: { type: WibeScalarType.String },
-					age: { type: WibeScalarType.String },
+					age: { type: WibeScalarType.Int },
 				},
 			},
 		],

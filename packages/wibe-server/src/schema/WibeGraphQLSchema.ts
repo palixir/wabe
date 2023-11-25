@@ -11,7 +11,12 @@ import {
 	GraphQLType,
 } from 'graphql'
 import { Schema, SchemaFields, TypeField } from './Schema'
-import { queryForMultipleObject, queryForOneObject } from './resolvers'
+import {
+	mutationToCreateMultipleObjects,
+	mutationToCreateObject,
+	queryForMultipleObject,
+	queryForOneObject,
+} from './resolvers'
 import { getWhereInputFromType } from '../graphql'
 
 const templateTypeToGraphqlType: Record<TypeField['type'], GraphQLType> = {
@@ -169,13 +174,19 @@ export class WibeGraphlQLSchema {
 				type: new GraphQLNonNull(object),
 				args: { input: { type: defaultInputType } },
 				resolve: (root: any, args: any, ctx: any, info: any) =>
-					queryForOneObject(root, args, ctx, info, className),
+					mutationToCreateObject(root, args, ctx, info, className),
 			},
 			[`create${className}s`]: {
 				type: new GraphQLList(object),
 				args: { input: { type: new GraphQLList(defaultInputType) } },
 				resolve: (root, args, ctx, info) =>
-					queryForMultipleObject(root, args, ctx, info, className),
+					mutationToCreateMultipleObjects(
+						root,
+						args,
+						ctx,
+						info,
+						className,
+					),
 			},
 			[`update${className}`]: {
 				type: new GraphQLNonNull(object),
