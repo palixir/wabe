@@ -22,7 +22,7 @@ export const queryForOneObject = (
 
 export const queryForMultipleObject = (
 	_: any,
-	__: any,
+	args: any,
 	___: any,
 	info: GraphQLResolveInfo,
 	className: string,
@@ -33,6 +33,7 @@ export const queryForMultipleObject = (
 
 	return WibeApp.databaseController.getObjects<any>({
 		className,
+		where: args.where,
 		fields,
 	})
 }
@@ -61,4 +62,14 @@ export const mutationToCreateMultipleObjects = (
 	___: any,
 	info: GraphQLResolveInfo,
 	className: string,
-) => {}
+) => {
+	const fields = getFieldsFromInfo(info)
+
+	if (!fields) throw new Error('No fields provided')
+
+	return WibeApp.databaseController.createObjects<any>({
+		className,
+		data: args.input,
+		fields,
+	})
+}

@@ -44,7 +44,7 @@ describe('Mongo adapter', () => {
 		)
 	})
 
-	it('should get object with specific field and * fields', async () => {
+	it('should get one object with specific field and * fields', async () => {
 		const insertedObject = await mongoAdapter.createObject<any>({
 			className: 'Test1',
 			data: {
@@ -296,7 +296,7 @@ describe('Mongo adapter', () => {
 		})
 	})
 
-	it.skip('should create multiple objects and return an array of the created object', async () => {
+	it('should create multiple objects and return an array of the created object', async () => {
 		const insertedObjects = await mongoAdapter.createObjects<'User'>({
 			className: 'User',
 			data: [
@@ -320,6 +320,36 @@ describe('Mongo adapter', () => {
 			{
 				_id: expect.anything(),
 				name: 'Lucas4',
+			},
+		])
+	})
+
+	it('should create multiple objects and return an array of the created object with * fields', async () => {
+		const insertedObjects = await mongoAdapter.createObjects<'User'>({
+			className: 'User',
+			data: [
+				{
+					name: 'Lucas3',
+					age: 23,
+				},
+				{
+					name: 'Lucas4',
+					age: 24,
+				},
+			],
+			fields: ['*'],
+		})
+
+		expect(insertedObjects).toEqual([
+			{
+				_id: expect.anything(),
+				name: 'Lucas3',
+				age: 23,
+			},
+			{
+				_id: expect.anything(),
+				name: 'Lucas4',
+				age: 24,
 			},
 		])
 	})

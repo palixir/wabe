@@ -91,9 +91,20 @@ export class MongoAdapter implements DatabaseAdapter {
 
 		const collection = this.database.collection(className)
 
-		await collection.insertMany(data, {})
+		const res = await collection.insertMany(data, {})
 
-		return params.data
+		// TODO : Optimization using OR statement in the query instead of multiple single queries
+		const objects = await Promise.all(
+			Object.values(res.insertedIds).map((id) => {
+				return this.getObject<T>({
+					className,
+					id: id.toString(),
+					fields,
+				})
+			}),
+		)
+
+		return objects
 	}
 
 	async getObjects<T extends keyof WibeTypes>(params: GetObjectsOptions<T>) {

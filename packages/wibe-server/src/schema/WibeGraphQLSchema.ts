@@ -42,13 +42,53 @@ export class WibeGraphlQLSchema {
 
 				const className = current.name.replace(' ', '')
 
+				const fieldsOfObjectKeys = Object.keys(fields)
+
+				const defaultInputType = new GraphQLInputObjectType({
+					name: `${className}CreateInput`,
+					fields: () =>
+						fieldsOfObjectKeys.reduce((acc, fieldName) => {
+							const typeOfObject = fields[fieldName].type
+
+							return {
+								...acc,
+								[fieldName]: {
+									type: templateTypeToGraphqlType[
+										typeOfObject
+									],
+								},
+							}
+						}, {}),
+				})
+
+				const whereInputType = new GraphQLInputObjectType({
+					name: `${className}WhereInput`,
+					fields: () => {
+						return fieldsOfObjectKeys.reduce((acc, fieldName) => {
+							const typeOfObject = fields[fieldName].type
+
+							return {
+								...acc,
+								[fieldName]: {
+									type: getWhereInputFromType(typeOfObject),
+								},
+							}
+						}, {})
+					},
+				})
+
 				const object = this.createObjectSchema(className, fields)
-				const queries = this.createQueriesSchema(className, object)
-				const mutations = this.createMutationsSchema(
+				const queries = this.createQueriesSchema({
 					className,
-					fields,
+					whereInputType,
 					object,
-				)
+				})
+				const mutations = this.createMutationsSchema({
+					className,
+					defaultInputType,
+					whereInputType,
+					object,
+				})
 
 				return {
 					queries: { ...previous.queries, ...queries },
@@ -82,18 +122,26 @@ export class WibeGraphlQLSchema {
 		})
 	}
 
-	createQueriesSchema(className: string, object: GraphQLObjectType) {
-		const queries = {
+	createQueriesSchema({
+		className,
+		whereInputType,
+		object,
+	}: {
+		className: string
+		whereInputType: GraphQLInputObjectType
+		object: GraphQLObjectType
+	}) {
+		const queries: Record<string, GraphQLFieldConfig<any, any, any>> = {
 			[className.toLowerCase()]: {
-				type: new GraphQLNonNull(object),
+				type: object,
 				args: { id: { type: GraphQLString } },
-				resolve: (root: any, args: any, ctx: any, info: any) =>
+				resolve: (root, args, ctx, info) =>
 					queryForOneObject(root, args, ctx, info, className),
 			},
 			[`${className.toLowerCase()}s`]: {
 				type: new GraphQLList(object),
-				args: {},
-				resolve: (root: any, args: any, ctx: any, info: any) =>
+				args: { where: { type: whereInputType } },
+				resolve: (root, args, ctx, info) =>
 					queryForMultipleObject(root, args, ctx, info, className),
 			},
 		}
@@ -101,44 +149,17 @@ export class WibeGraphlQLSchema {
 		return queries
 	}
 
-	createMutationsSchema(
-		className: string,
-		fieldsOfObject: SchemaFields,
-		object: GraphQLObjectType,
-	) {
-		const fieldsOfObjectKeys = Object.keys(fieldsOfObject)
-
-		const defaultInputType = new GraphQLInputObjectType({
-			name: `${className}CreateInput`,
-			fields: () =>
-				fieldsOfObjectKeys.reduce((acc, fieldName) => {
-					const typeOfObject = fieldsOfObject[fieldName].type
-
-					return {
-						...acc,
-						[fieldName]: {
-							type: templateTypeToGraphqlType[typeOfObject],
-						},
-					}
-				}, {}),
-		})
-
-		const whereInputType = new GraphQLInputObjectType({
-			name: `${className}WhereInput`,
-			fields: () => {
-				return fieldsOfObjectKeys.reduce((acc, fieldName) => {
-					const typeOfObject = fieldsOfObject[fieldName].type
-
-					return {
-						...acc,
-						[fieldName]: {
-							type: getWhereInputFromType(typeOfObject),
-						},
-					}
-				}, {})
-			},
-		})
-
+	createMutationsSchema({
+		className,
+		object,
+		defaultInputType,
+		whereInputType,
+	}: {
+		className: string
+		defaultInputType: GraphQLInputObjectType
+		whereInputType: GraphQLInputObjectType
+		object: GraphQLObjectType
+	}) {
 		const updateInputType = new GraphQLInputObjectType({
 			name: `${className}UpdateInput`,
 			fields: () => ({
@@ -173,11 +194,11 @@ export class WibeGraphlQLSchema {
 			[`create${className}`]: {
 				type: new GraphQLNonNull(object),
 				args: { input: { type: defaultInputType } },
-				resolve: (root: any, args: any, ctx: any, info: any) =>
+				resolve: (root, args, ctx, info) =>
 					mutationToCreateObject(root, args, ctx, info, className),
 			},
 			[`create${className}s`]: {
-				type: new GraphQLList(object),
+				type: object,
 				args: { input: { type: new GraphQLList(defaultInputType) } },
 				resolve: (root, args, ctx, info) =>
 					mutationToCreateMultipleObjects(
@@ -191,12 +212,12 @@ export class WibeGraphlQLSchema {
 			[`update${className}`]: {
 				type: new GraphQLNonNull(object),
 				args: { input: { type: updateInputType } },
-				resolve: (root: any, args: any, ctx: any, info: any) => {},
+				resolve: (root, args, ctx, info) => {},
 			},
 			[`update${className}s`]: {
 				type: new GraphQLNonNull(new GraphQLList(object)),
 				args: { input: { type: updatesInputType } },
-				resolve: (root: any, args: any, ctx: any, info: any) => {},
+				resolve: (root, args, ctx, info) => {},
 			},
 			[`delete${className}`]: {
 				type: new GraphQLNonNull(object),
@@ -205,12 +226,12 @@ export class WibeGraphlQLSchema {
 						type: deleteInputType,
 					},
 				},
-				resolve: (root: any, args: any, ctx: any, info: any) => {},
+				resolve: (root, args, ctx, info) => {},
 			},
 			[`delete${className}s`]: {
 				type: new GraphQLNonNull(new GraphQLList(object)),
 				args: { input: { type: deletesInputType } },
-				resolve: (root: any, args: any, ctx: any, info: any) => {},
+				resolve: (root, args, ctx, info) => {},
 			},
 		}
 
