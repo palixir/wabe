@@ -5,8 +5,7 @@
 	"scripts": {
 		"generate:types": "dts-bundle-generator index.ts -o lib/index.d.ts",
 		"build": "bun build index.ts --minify --target=bun --outdir lib && bun run generate:types",
-		"dev": "bun run --watch dev/index.ts",
-		"generate:graphql": "graphql-codegen --config codegen.ts"
+		"dev": "bun run --watch dev/index.ts"
 	},
 	"dependencies": {
 		"@apollo/server": "4.9.4",
@@ -16,10 +15,6 @@
 		"mongodb": "6.1.0"
 	},
 	"devDependencies": {
-		"@graphql-codegen/cli": "5.0.0",
-		"@graphql-codegen/schema-ast": "4.0.0",
-		"@graphql-codegen/typescript": "4.0.1",
-		"@graphql-codegen/typescript-resolvers": "4.0.1",
 		"@parcel/watcher": "2.3.0",
 		"bun-types": "1.0.14",
 		"dts-bundle-generator": "8.0.1",

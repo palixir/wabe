@@ -6,8 +6,6 @@ import { MongoAdapter } from '../database/adapters/MongoAdapter'
 import { Schema, SchemaInterface } from '../schema/Schema'
 import { GraphQLObjectType, GraphQLSchema } from 'graphql'
 import { WibeGraphlQLSchema } from '../schema/WibeGraphQLSchema'
-import { generate } from '@graphql-codegen/cli'
-import GraphqlCodegenConfig from '../../codegen'
 
 interface WibeConfig {
 	port: number
@@ -60,9 +58,6 @@ export class WibeApp {
 		this.server.use(await apollo({ schema }))
 
 		if (process.env.NODE_ENV === 'development') {
-			// Generate GraphQL types
-			generate(GraphqlCodegenConfig)
-
 			// Generate Wibe types
 			const wibeTypes = wibeSchema.getTypesFromSchema()
 
