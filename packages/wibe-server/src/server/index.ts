@@ -15,12 +15,13 @@ interface WibeConfig {
 }
 
 export class WibeApp {
-	private config: WibeConfig
 	private server: Elysia
+
+	static config: WibeConfig
 	static databaseController: DatabaseController
 
 	constructor(config: WibeConfig) {
-		this.config = config
+		WibeApp.config = config
 
 		this.server = new Elysia().get(
 			'/health',
@@ -28,8 +29,8 @@ export class WibeApp {
 		)
 
 		const databaseAdapter = new MongoAdapter({
-			databaseName: this.config.database.name,
-			databaseUrl: this.config.database.url,
+			databaseName: config.database.name,
+			databaseUrl: config.database.url,
 		})
 
 		WibeApp.databaseController = new DatabaseController(databaseAdapter)
@@ -38,7 +39,7 @@ export class WibeApp {
 	async start() {
 		await WibeApp.databaseController.connect()
 
-		const schemas = this.config.schema.map(
+		const schemas = WibeApp.config.schema.map(
 			(schema) =>
 				new Schema({
 					name: schema.name,
@@ -63,8 +64,8 @@ export class WibeApp {
 
 		this.server.use(await apollo({ schema }))
 
-		this.server.listen(this.config.port, () => {
-			console.log(`Server running on port ${this.config.port}`)
+		this.server.listen(WibeApp.config.port, () => {
+			console.log(`Server running on port ${WibeApp.config.port}`)
 		})
 	}
 

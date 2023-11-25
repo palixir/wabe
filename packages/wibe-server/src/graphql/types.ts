@@ -6,7 +6,7 @@ import {
 	GraphQLList,
 	GraphQLString,
 } from 'graphql'
-import { WibeType } from '../schema/interface'
+import { WibeType } from '../schema/Schema'
 
 export const StringWhereInput = new GraphQLInputObjectType({
 	name: 'StringWhereInput',
