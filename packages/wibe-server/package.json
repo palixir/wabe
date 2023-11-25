@@ -5,7 +5,7 @@
 	"scripts": {
 		"generate:types": "dts-bundle-generator index.ts -o lib/index.d.ts",
 		"build": "bun build index.ts --minify --target=bun --outdir lib && bun run generate:types",
-		"dev": "concurrently \"bun run generate:graphql\" \"bun run --watch dev/index.ts\"",
+		"dev": "concurrently -r \"bun run generate:graphql\" \"bun run --watch dev/index.ts\"",
 		"generate:graphql": "graphql-codegen --config codegen.ts"
 	},
 	"dependencies": {
