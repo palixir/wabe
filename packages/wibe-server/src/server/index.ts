@@ -5,7 +5,7 @@ import { DatabaseController } from '../database/controllers/DatabaseController'
 import { MongoAdapter } from '../database/adapters/MongoAdapter'
 import { Schema, SchemaInterface } from '../schema/Schema'
 import { GraphQLObjectType, GraphQLSchema } from 'graphql'
-import { WibeGraphlQLSchema } from '../schema/controllers/WibeGraphQLSchema'
+import { WibeGraphlQLSchema } from '../schema/WibeGraphQLSchema'
 import { generate } from '@graphql-codegen/cli'
 import GraphqlCodegenConfig from '../../codegen'
 
@@ -40,15 +40,9 @@ export class WibeApp {
 	async start() {
 		await WibeApp.databaseController.connect()
 
-		const schemas = WibeApp.config.schema.map(
-			(schema) =>
-				new Schema({
-					name: schema.name,
-					fields: schema.fields,
-				}),
-		)
+		const wibeSchema = new Schema(WibeApp.config.schema)
 
-		const graphqlSchema = new WibeGraphlQLSchema(schemas)
+		const graphqlSchema = new WibeGraphlQLSchema(wibeSchema)
 
 		const types = graphqlSchema.createSchema()
 
@@ -65,8 +59,15 @@ export class WibeApp {
 
 		this.server.use(await apollo({ schema }))
 
-		if (process.env.NODE_ENV === 'development')
+		if (process.env.NODE_ENV === 'development') {
+			// Generate GraphQL types
 			generate(GraphqlCodegenConfig)
+
+			// Generate Wibe types
+			const wibeTypes = wibeSchema.getTypesFromSchema()
+
+			await Bun.write(`generated/wibe.ts`, wibeTypes)
+		}
 
 		this.server.listen(WibeApp.config.port, () => {
 			console.log(`Server running on port ${WibeApp.config.port}`)

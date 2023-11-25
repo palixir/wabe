@@ -146,7 +146,7 @@ describe('Mongo adapter', () => {
 			fields: ['name'],
 		})
 
-		await mongoAdapter.createObject<any>({
+		await mongoAdapter.createObject<'User'>({
 			className: 'Test3',
 			data: {
 				name: 'John2',
@@ -155,8 +155,16 @@ describe('Mongo adapter', () => {
 			fields: ['name'],
 		})
 
+		await mongoAdapter.getObjects<'User'>({
+			className: 'Test3',
+			fields: ['*'],
+			where: {
+				name: { equalTo: 'John1' },
+			},
+		})
+
 		expect(
-			await mongoAdapter.getObjects<any>({
+			await mongoAdapter.getObjects<'User'>({
 				className: 'Test3',
 				fields: ['*'],
 				where: {

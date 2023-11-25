@@ -1,8 +1,6 @@
-import { WibeApp } from '../server'
-
 export type ArrayValueType = 'String' | 'Int' | 'Float' | 'Boolean'
 
-export enum WibeType {
+export enum WibeScalarType {
 	String = 'String',
 	Int = 'Int',
 	Float = 'Float',
@@ -11,30 +9,24 @@ export enum WibeType {
 
 export type TypeField =
 	| {
-			type: WibeType.String
+			type: WibeScalarType.String
 			required?: boolean
 			defaultValue?: string
 	  }
 	| {
-			type: WibeType.Int
+			type: WibeScalarType.Int
 			required?: boolean
 			defaultValue?: number
 	  }
 	| {
-			type: WibeType.Float
+			type: WibeScalarType.Float
 			required?: boolean
 			defaultValue?: number
 	  }
 	| {
-			type: WibeType.Boolean
+			type: WibeScalarType.Boolean
 			required?: boolean
 			defaultValue?: boolean
-	  }
-	| {
-			type: 'array'
-			valueType: ArrayValueType
-			required?: boolean
-			defaultValue?: any[]
 	  }
 
 export type SchemaFields = Record<string, TypeField>
@@ -44,24 +36,76 @@ export interface SchemaInterface {
 	fields: SchemaFields
 }
 
+const wibeTypToTypeScriptType: Record<WibeScalarType, string> = {
+	[WibeScalarType.String]: 'string',
+	[WibeScalarType.Int]: 'number',
+	[WibeScalarType.Float]: 'number',
+	[WibeScalarType.Boolean]: 'boolean',
+}
+
 export class Schema {
-	public name: string
-	public fields: SchemaFields
+	public schema: SchemaInterface[]
 
-	constructor({ name, fields }: { name: string; fields: SchemaFields }) {
-		this.name = name
-		this.fields = fields
+	constructor(schema: SchemaInterface[]) {
+		this.schema = schema
 	}
 
-	create() {
-		return WibeApp.databaseController.createClass(this.name)
-	}
+	getTypesFromSchema() {
+		const wibeTypes = this.schema.map((schema) => {
+			const fields = Object.keys(schema.fields)
 
-	getFields() {
-		return this.fields
-	}
+			const firstTypeScriptType =
+				wibeTypToTypeScriptType[schema.fields[fields[0]].type]
 
-	getName() {
-		return this.name
+			if (!firstTypeScriptType)
+				throw new Error(
+					`Invalid type: ${schema.fields[fields[0]].type}`,
+				)
+
+			const res = fields.reduce(
+				(prev, current) => {
+					const WibeScalarType = schema.fields[current].type
+					const typeScriptType =
+						wibeTypToTypeScriptType[WibeScalarType]
+
+					if (!typeScriptType)
+						throw new Error(`Invalid type: ${WibeScalarType}`)
+
+					return {
+						...prev,
+						[current]: wibeTypToTypeScriptType[WibeScalarType],
+					}
+				},
+				{
+					[fields[0]]: firstTypeScriptType,
+				},
+			)
+
+			const type = `export type ${schema.name} = ${JSON.stringify(
+				res,
+				null,
+				2,
+			)}`
+
+			return type.replaceAll('"', '')
+		})
+
+		const allNames = this.schema.map((schema) => schema.name)
+		const globalWibeType = allNames.reduce(
+			(prev, current) => {
+				return { ...prev, [current]: current }
+			},
+			{ [allNames[0]]: allNames[0] },
+		)
+
+		const globalWibeTypeString = `export type WibeTypes = ${JSON.stringify(
+			globalWibeType,
+			null,
+			2,
+		)}`
+
+		return [...wibeTypes, globalWibeTypeString.replaceAll('"', '')].join(
+			'\n',
+		)
 	}
 }

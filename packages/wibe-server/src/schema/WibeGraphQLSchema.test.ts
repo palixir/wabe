@@ -1,7 +1,7 @@
 import { describe, expect, it, spyOn } from 'bun:test'
 import { WibeGraphlQLSchema } from './WibeGraphQLSchema'
 
-describe('SchemaController', () => {
+describe('WibeGraphlQLSchema', () => {
 	it('should call the good adapter on create schema', () => {
 		const spyAdapterCreateSchema = spyOn(
 			WibeGraphlQLSchema.prototype,

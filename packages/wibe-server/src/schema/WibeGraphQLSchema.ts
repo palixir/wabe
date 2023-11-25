@@ -10,33 +10,32 @@ import {
 	GraphQLString,
 	GraphQLType,
 } from 'graphql'
-import { Schema, SchemaFields, TypeField } from '../Schema'
-import { queryForMultipleObject, queryForOneObject } from '../resolvers'
-import { getWhereInputFromType } from '../../graphql'
+import { Schema, SchemaFields, TypeField } from './Schema'
+import { queryForMultipleObject, queryForOneObject } from './resolvers'
+import { getWhereInputFromType } from '../graphql'
 
 const templateTypeToGraphqlType: Record<TypeField['type'], GraphQLType> = {
 	String: GraphQLString,
 	Int: GraphQLInt,
 	Float: GraphQLFloat,
 	Boolean: GraphQLBoolean,
-	array: new GraphQLList(GraphQLString),
 }
 
 export class WibeGraphlQLSchema {
-	private schemas: Schema[]
+	private schemas: Schema
 
-	constructor(schemas: Schema[]) {
+	constructor(schemas: Schema) {
 		this.schemas = schemas
 	}
 
 	createSchema() {
 		if (!this.schemas) throw new Error('Schema not found')
 
-		const res = this.schemas.reduce(
+		const res = this.schemas.schema.reduce(
 			(previous, current) => {
-				const fields = current.getFields()
+				const fields = current.fields
 
-				const className = current.getName().replace(' ', '')
+				const className = current.name.replace(' ', '')
 
 				const object = this.createObjectSchema(className, fields)
 				const queries = this.createQueriesSchema(className, object)
@@ -64,15 +63,12 @@ export class WibeGraphlQLSchema {
 		const res = Object.keys(fieldsOfObject).reduce((acc, fieldName) => {
 			const typeOfObject = fieldsOfObject[fieldName].type
 
-			if (typeOfObject !== 'array')
-				return {
-					...acc,
-					[fieldName]: {
-						type: templateTypeToGraphqlType[typeOfObject],
-					},
-				}
-
-			return { ...acc }
+			return {
+				...acc,
+				[fieldName]: {
+					type: templateTypeToGraphqlType[typeOfObject],
+				},
+			}
 		}, {})
 
 		return new GraphQLObjectType({
@@ -113,15 +109,12 @@ export class WibeGraphlQLSchema {
 				fieldsOfObjectKeys.reduce((acc, fieldName) => {
 					const typeOfObject = fieldsOfObject[fieldName].type
 
-					if (typeOfObject !== 'array')
-						return {
-							...acc,
-							[fieldName]: {
-								type: templateTypeToGraphqlType[typeOfObject],
-							},
-						}
-
-					return { ...acc }
+					return {
+						...acc,
+						[fieldName]: {
+							type: templateTypeToGraphqlType[typeOfObject],
+						},
+					}
 				}, {}),
 		})
 
@@ -131,15 +124,12 @@ export class WibeGraphlQLSchema {
 				return fieldsOfObjectKeys.reduce((acc, fieldName) => {
 					const typeOfObject = fieldsOfObject[fieldName].type
 
-					if (typeOfObject !== 'array')
-						return {
-							...acc,
-							[fieldName]: {
-								type: getWhereInputFromType(typeOfObject),
-							},
-						}
-
-					return { ...acc }
+					return {
+						...acc,
+						[fieldName]: {
+							type: getWhereInputFromType(typeOfObject),
+						},
+					}
 				}, {})
 			},
 		})

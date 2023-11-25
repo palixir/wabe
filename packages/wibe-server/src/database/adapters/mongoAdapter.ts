@@ -9,6 +9,7 @@ import {
 	CreateObjectsOptions,
 } from './adaptersInterface'
 import { buildMongoWhereQuery } from './utils'
+import { WibeTypes } from '../../../generated/wibe'
 
 export class MongoAdapter implements DatabaseAdapter {
 	public options: AdapterOptions
@@ -37,7 +38,9 @@ export class MongoAdapter implements DatabaseAdapter {
 		await this.database.createCollection(className)
 	}
 
-	async updateObject<T extends any>(params: UpdateObjectOptions<T>) {
+	async updateObject<T extends keyof WibeTypes>(
+		params: UpdateObjectOptions<T>,
+	) {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 
@@ -59,7 +62,9 @@ export class MongoAdapter implements DatabaseAdapter {
 		})
 	}
 
-	async createObject<T extends any>(params: CreateObjectOptions<T>) {
+	async createObject<T extends keyof WibeTypes>(
+		params: CreateObjectOptions<T>,
+	) {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 
@@ -76,7 +81,9 @@ export class MongoAdapter implements DatabaseAdapter {
 		})
 	}
 
-	async createObjects<T extends any>(params: CreateObjectsOptions<T>) {
+	async createObjects<T extends keyof WibeTypes>(
+		params: CreateObjectsOptions<T>,
+	) {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 
@@ -89,7 +96,7 @@ export class MongoAdapter implements DatabaseAdapter {
 		return params.data
 	}
 
-	async getObjects<T extends any>(params: GetObjectsOptions<T>) {
+	async getObjects<T extends keyof WibeTypes>(params: GetObjectsOptions<T>) {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 
@@ -119,7 +126,7 @@ export class MongoAdapter implements DatabaseAdapter {
 			.toArray()
 	}
 
-	async getObject<T extends any>(params: GetObjectOptions<T>) {
+	async getObject<T extends keyof WibeTypes>(params: GetObjectOptions<T>) {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 

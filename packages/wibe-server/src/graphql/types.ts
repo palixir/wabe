@@ -6,7 +6,7 @@ import {
 	GraphQLList,
 	GraphQLString,
 } from 'graphql'
-import { WibeType } from '../schema/Schema'
+import { WibeScalarType } from '../schema/Schema'
 
 export const StringWhereInput = new GraphQLInputObjectType({
 	name: 'StringWhereInput',
@@ -54,12 +54,12 @@ export const BooleanWhereInput = new GraphQLInputObjectType({
 	},
 })
 
-const templateWhereInput: Record<WibeType, GraphQLInputObjectType> = {
-	[WibeType.String]: StringWhereInput,
-	[WibeType.Int]: IntWhereInput,
-	[WibeType.Float]: FloatWhereInput,
-	[WibeType.Boolean]: BooleanWhereInput,
+const templateWhereInput: Record<WibeScalarType, GraphQLInputObjectType> = {
+	[WibeScalarType.String]: StringWhereInput,
+	[WibeScalarType.Int]: IntWhereInput,
+	[WibeScalarType.Float]: FloatWhereInput,
+	[WibeScalarType.Boolean]: BooleanWhereInput,
 }
 
-export const getWhereInputFromType = (type: WibeType) =>
+export const getWhereInputFromType = (type: WibeScalarType) =>
 	templateWhereInput[type]
