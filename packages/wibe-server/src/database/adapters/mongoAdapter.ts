@@ -7,6 +7,7 @@ import {
 	UpdateObjectOptions,
 	GetObjectsOptions,
 	CreateObjectsOptions,
+	UpdateObjectsOptions,
 } from './adaptersInterface'
 import { buildMongoWhereQuery } from './utils'
 import { WibeTypes } from '../../../generated/wibe'
@@ -60,6 +61,32 @@ export class MongoAdapter implements DatabaseAdapter {
 			id: result._id.toString(),
 			fields,
 		})
+	}
+
+	async updateObjects<T extends keyof WibeTypes>(
+		params: UpdateObjectsOptions<T>,
+	) {
+		if (!this.database)
+			throw new Error('Connection to database is not established')
+
+		const { className, where, data, fields } = params
+
+		const whereBuilded = buildMongoWhereQuery(where)
+
+		const collection = this.database.collection(className)
+
+		const result = await collection.updateMany(whereBuilded, { $set: data })
+
+		const objects = await this.getObjects<T>({
+			className,
+			where,
+			fields,
+		})
+
+		if (objects.length !== result.modifiedCount)
+			throw new Error('Not all objects were updated')
+
+		return objects
 	}
 
 	async createObject<T extends keyof WibeTypes>(

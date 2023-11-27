@@ -14,6 +14,8 @@ import { Schema, SchemaFields, TypeField } from './Schema'
 import {
 	mutationToCreateMultipleObjects,
 	mutationToCreateObject,
+	mutationToUpdateMultipleObjects,
+	mutationToUpdateObject,
 	queryForMultipleObject,
 	queryForOneObject,
 } from './resolvers'
@@ -139,7 +141,7 @@ export class WibeGraphlQLSchema {
 					queryForOneObject(root, args, ctx, info, className),
 			},
 			[`${className.toLowerCase()}s`]: {
-				type: new GraphQLList(object),
+				type: new GraphQLNonNull(new GraphQLList(object)),
 				args: { where: { type: whereInputType } },
 				resolve: (root, args, ctx, info) =>
 					queryForMultipleObject(root, args, ctx, info, className),
@@ -198,7 +200,7 @@ export class WibeGraphlQLSchema {
 					mutationToCreateObject(root, args, ctx, info, className),
 			},
 			[`create${className}s`]: {
-				type: object,
+				type: new GraphQLNonNull(new GraphQLList(object)),
 				args: { input: { type: new GraphQLList(defaultInputType) } },
 				resolve: (root, args, ctx, info) =>
 					mutationToCreateMultipleObjects(
@@ -212,12 +214,20 @@ export class WibeGraphlQLSchema {
 			[`update${className}`]: {
 				type: new GraphQLNonNull(object),
 				args: { input: { type: updateInputType } },
-				resolve: (root, args, ctx, info) => {},
+				resolve: (root, args, ctx, info) =>
+					mutationToUpdateObject(root, args, ctx, info, className),
 			},
 			[`update${className}s`]: {
 				type: new GraphQLNonNull(new GraphQLList(object)),
 				args: { input: { type: updatesInputType } },
-				resolve: (root, args, ctx, info) => {},
+				resolve: (root, args, ctx, info) =>
+					mutationToUpdateMultipleObjects(
+						root,
+						args,
+						ctx,
+						info,
+						className,
+					),
 			},
 			[`delete${className}`]: {
 				type: new GraphQLNonNull(object),

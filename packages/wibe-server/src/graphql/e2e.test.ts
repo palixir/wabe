@@ -37,6 +37,22 @@ const graphql = {
 			}
 		}
 	`,
+	updateUser: gql`
+		mutation updateUser($input: UserUpdateInput!) {
+			updateUser(input: $input) {
+				name
+				age
+			}
+		}
+	`,
+	updateUsers: gql`
+		mutation updateUsers($input: UsersUpdateInput!) {
+			updateUsers(input: $input) {
+				name
+				age
+			}
+		}
+	`,
 }
 
 describe('GraphQL Queries', () => {
@@ -97,5 +113,73 @@ describe('GraphQL Queries', () => {
 				age: 23,
 			},
 		])
+	})
+
+	it("should create multiple objects and get them by 'where' query", async () => {
+		const res = await client.request<any>(graphql.createUsers, {
+			input: [
+				{ name: 'Lucas2', age: 24 },
+				{ name: 'Jeanne2', age: 24 },
+			],
+		})
+
+		expect(res.createUsers).toEqual([
+			{ name: 'Lucas2', age: 24 },
+			{ name: 'Jeanne2', age: 24 },
+		])
+
+		const users = await client.request<any>(graphql.users, {
+			where: {
+				name: {
+					equalTo: 'Lucas2',
+				},
+			},
+		})
+
+		expect(users.users).toEqual([{ name: 'Lucas2', age: 24 }])
+
+		const users2 = await client.request<any>(graphql.users, {
+			where: {
+				age: {
+					equalTo: 24,
+				},
+			},
+		})
+
+		expect(users2.users).toEqual([
+			{ name: 'Lucas2', age: 24 },
+			{ name: 'Jeanne2', age: 24 },
+		])
+	})
+
+	it.only('should update one object', async () => {
+		const { users } = await client.request<any>(graphql.users, {})
+
+		const userToUpdate = users[0]
+
+		console.log(userToUpdate)
+
+		const res = await client.request<any>(graphql.updateUser, {
+			input: {
+				id: userToUpdate.id,
+				fields: {
+					name: 'NameAfterUpdate',
+				},
+			},
+		})
+
+		expect(res.updateUser).toEqual({
+			name: 'NameAfterUpdate',
+			age: userToUpdate.age,
+		})
+
+		// const user = await client.request<any>(graphql.user, {
+		// 	id: '60f69ea1fe46431076723653',
+		// })
+
+		// expect(user.user).toEqual({
+		// 	name: 'John2',
+		// 	age: 23,
+		// })
 	})
 })

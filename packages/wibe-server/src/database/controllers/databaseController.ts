@@ -6,6 +6,7 @@ import {
 	GetObjectOptions,
 	GetObjectsOptions,
 	UpdateObjectOptions,
+	UpdateObjectsOptions,
 } from '../adapters/adaptersInterface'
 
 export class DatabaseController {
@@ -51,5 +52,11 @@ export class DatabaseController {
 		params: UpdateObjectOptions<T>,
 	) {
 		return this.adapter.updateObject(params)
+	}
+
+	async updateObjects<T extends keyof WibeTypes>(
+		params: UpdateObjectsOptions<T>,
+	) {
+		return this.adapter.updateObjects(params)
 	}
 }

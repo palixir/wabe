@@ -73,3 +73,41 @@ export const mutationToCreateMultipleObjects = (
 		fields,
 	})
 }
+
+export const mutationToUpdateObject = (
+	_: any,
+	args: any,
+	___: any,
+	info: GraphQLResolveInfo,
+	className: string,
+) => {
+	const fields = getFieldsFromInfo(info)
+
+	if (!fields) throw new Error('No fields provided')
+
+	return WibeApp.databaseController.updateObject<any>({
+		className,
+		id: args.input.id,
+		data: args.input.fields,
+		fields,
+	})
+}
+
+export const mutationToUpdateMultipleObjects = (
+	_: any,
+	args: any,
+	___: any,
+	info: GraphQLResolveInfo,
+	className: string,
+) => {
+	const fields = getFieldsFromInfo(info)
+
+	if (!fields) throw new Error('No fields provided')
+
+	return WibeApp.databaseController.updateObjects<any>({
+		className,
+		where: args.input.where,
+		data: args.input.fields,
+		fields,
+	})
+}

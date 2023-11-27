@@ -47,6 +47,13 @@ export interface UpdateObjectOptions<T extends keyof WibeTypes> {
 	fields: Array<keyof WibeTypes[T] | '*'>
 }
 
+export interface UpdateObjectsOptions<T extends keyof WibeTypes> {
+	className: string
+	where: WhereType
+	data: Record<string, any>
+	fields: Array<keyof WibeTypes[T] | '*'>
+}
+
 // TODO : Type the return of the functions
 export interface DatabaseAdapter {
 	connect(): Promise<any>
@@ -71,4 +78,5 @@ export interface DatabaseAdapter {
 	updateObject<T extends keyof WibeTypes>(
 		params: UpdateObjectOptions<T>,
 	): Promise<any>
+	updateObjects<T extends keyof WibeTypes>(params: any): Promise<any>
 }

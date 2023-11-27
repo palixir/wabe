@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from 'bun:test'
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'bun:test'
 import { fail } from 'assert'
 import { closeTests, setupTests } from '../../utils/testHelper'
 import { MongoAdapter } from './MongoAdapter'
@@ -17,6 +17,10 @@ describe('Mongo adapter', () => {
 
 	afterAll(async () => {
 		await closeTests(wibe)
+	})
+
+	beforeEach(async () => {
+		await mongoAdapter.database?.dropDatabase()
 	})
 
 	it('should create class', async () => {
@@ -396,5 +400,63 @@ describe('Mongo adapter', () => {
 			name: 'Doe',
 			age: 20,
 		})
+	})
+
+	it('should update multiple objects', async () => {
+		const insertedObjects = await mongoAdapter.createObjects<'User'>({
+			className: 'User',
+			data: [
+				{
+					name: 'Lucas',
+					age: 20,
+				},
+				{
+					name: 'Lucas1',
+					age: 20,
+				},
+			],
+			fields: ['*'],
+		})
+
+		if (!insertedObjects) fail()
+
+		const updatedObjects = await mongoAdapter.updateObjects<'User'>({
+			className: 'User',
+			where: {
+				name: { equalTo: 'Lucas' },
+			},
+			data: { age: 21 },
+			fields: ['*'],
+		})
+
+		expect(updatedObjects).toEqual([
+			{
+				_id: expect.anything(),
+				name: 'Lucas',
+				age: 21,
+			},
+		])
+
+		const updatedObjects2 = await mongoAdapter.updateObjects<'User'>({
+			className: 'User',
+			where: {
+				age: { greaterThanOrEqualTo: 20 },
+			},
+			data: { age: 23 },
+			fields: ['*'],
+		})
+
+		expect(updatedObjects2).toEqual([
+			{
+				_id: expect.anything(),
+				name: 'Lucas',
+				age: 23,
+			},
+			{
+				_id: expect.anything(),
+				name: 'Lucas1',
+				age: 23,
+			},
+		])
 	})
 })
