@@ -75,8 +75,13 @@ export class MongoAdapter implements DatabaseAdapter {
 
 		const collection = this.database.collection(className)
 
-		const result = await collection.updateMany(whereBuilded, { $set: data })
+		const result = await collection.updateMany(
+			whereBuilded,
+			{ $set: data },
+			{ upsert: true },
+		)
 
+		console.log(result)
 		const objects = await this.getObjects<T>({
 			className,
 			where,

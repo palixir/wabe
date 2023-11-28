@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, it } from 'bun:test'
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'bun:test'
 import { WibeApp } from '../server'
 import { gql } from '@elysiajs/apollo'
 import { closeTests, getGraphqlClient, setupTests } from '../utils/testHelper'
@@ -67,7 +67,9 @@ describe('GraphQL Queries', () => {
 		wibe = setup.wibe
 		port = setup.port
 		client = getGraphqlClient(port)
+	})
 
+	beforeEach(async () => {
 		await client.request<any>(graphql.createUsers, {
 			input: [
 				{ name: 'Lucas', age: 23 },
@@ -175,5 +177,27 @@ describe('GraphQL Queries', () => {
 			name: 'NameAfterUpdate',
 			age: userToUpdate.age,
 		})
+	})
+
+	it.only('should update multiple objects', async () => {
+		const res = await client.request<any>(graphql.updateUsers, {
+			input: {
+				fields: {
+					name: 'Tata',
+				},
+				where: {
+					age: {
+						equalTo: 23,
+					},
+				},
+			},
+		})
+
+		expect(res.updateUsers).toEqual([
+			{
+				name: 'Tata',
+				age: 23,
+			},
+		])
 	})
 })
