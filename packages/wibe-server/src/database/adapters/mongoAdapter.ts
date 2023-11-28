@@ -1,4 +1,4 @@
-import { Db, Filter, MongoClient, ObjectId, WithId } from 'mongodb'
+import { Db, Filter, MongoClient, ObjectId } from 'mongodb'
 import {
 	AdapterOptions,
 	DatabaseAdapter,
@@ -142,11 +142,22 @@ export class MongoAdapter implements DatabaseAdapter {
 
 		const whereBuilded = buildMongoWhereQuery(where)
 
-		if (fields.includes('*'))
-			return this.database
+		if (fields.includes('*')) {
+			const res = await this.database
 				.collection<any>(className)
 				.find(whereBuilded)
 				.toArray()
+
+			// We standardize the id field
+			res.forEach((object) => {
+				if (object._id) {
+					object.id = object._id.toString()
+					delete object['_id']
+				}
+			})
+
+			return res
+		}
 
 		const objectOfFieldsToGet: Record<any, number> = fields.reduce(
 			(acc, prev) => {
@@ -157,11 +168,23 @@ export class MongoAdapter implements DatabaseAdapter {
 
 		const collection = this.database.collection<any>(className)
 
-		return collection
+		const isIdInProjection = fields.includes('id')
+
+		const res = await collection
 			.find(whereBuilded, {
-				projection: { ...objectOfFieldsToGet, _id: 1 },
+				projection: { ...objectOfFieldsToGet, _id: isIdInProjection },
 			})
 			.toArray()
+
+		// We standardize the id field
+		res.forEach((object) => {
+			if (object._id) {
+				object.id = object._id.toString()
+				delete object['_id']
+			}
+		})
+
+		return res
 	}
 
 	async getObject<T extends keyof WibeTypes>(params: GetObjectOptions<T>) {
@@ -170,10 +193,19 @@ export class MongoAdapter implements DatabaseAdapter {
 
 		const { className, id, fields } = params
 
-		if (fields.includes('*'))
-			return this.database
+		if (fields.includes('*')) {
+			const res = await this.database
 				.collection<any>(className)
 				.findOne({ _id: new ObjectId(id) } as Filter<any>)
+
+			// We standardize the id field
+			if (res._id) {
+				res.id = res._id.toString()
+				delete res['_id']
+			}
+
+			return res
+		}
 
 		const objectOfFieldsToGet: Record<any, number> = fields.reduce(
 			(acc, prev) => {
@@ -184,8 +216,21 @@ export class MongoAdapter implements DatabaseAdapter {
 
 		const collection = this.database.collection<any>(className)
 
-		return collection.findOne({ _id: new ObjectId(id) } as Filter<any>, {
-			projection: { ...objectOfFieldsToGet, _id: 1 },
-		})
+		const isIdInProjection = fields.includes('id')
+
+		const res = await collection.findOne(
+			{ _id: new ObjectId(id) } as Filter<any>,
+			{
+				projection: { ...objectOfFieldsToGet, _id: isIdInProjection },
+			},
+		)
+
+		// We standardize the id field
+		if (res && res._id) {
+			res.id = res._id.toString()
+			delete res['_id']
+		}
+
+		return res
 	}
 }

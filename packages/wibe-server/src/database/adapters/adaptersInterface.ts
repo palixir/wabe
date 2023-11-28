@@ -20,38 +20,38 @@ export interface AdapterOptions {
 export interface GetObjectOptions<T extends keyof WibeTypes> {
 	className: string
 	id: string
-	fields: Array<keyof WibeTypes[T] | '*'>
+	fields: Array<keyof WibeTypes[T] | '*' | 'id'>
 }
 
 export interface GetObjectsOptions<T extends keyof WibeTypes> {
 	className: string
 	where?: WhereType
-	fields: Array<keyof WibeTypes[T] | '*'>
+	fields: Array<keyof WibeTypes[T] | '*' | 'id'>
 }
 
 export interface CreateObjectOptions<T extends keyof WibeTypes> {
 	className: string
 	data: Record<string, any>
-	fields: Array<keyof WibeTypes[T] | '*'>
+	fields: Array<keyof WibeTypes[T] | '*' | 'id'>
 }
 export interface CreateObjectsOptions<T extends keyof WibeTypes> {
 	className: string
 	data: Array<Record<string, any>>
-	fields: Array<keyof WibeTypes[T] | '*'>
+	fields: Array<keyof WibeTypes[T] | '*' | 'id'>
 }
 
 export interface UpdateObjectOptions<T extends keyof WibeTypes> {
 	className: string
 	id: string
 	data: Record<string, any>
-	fields: Array<keyof WibeTypes[T] | '*'>
+	fields: Array<keyof WibeTypes[T] | '*' | 'id'>
 }
 
 export interface UpdateObjectsOptions<T extends keyof WibeTypes> {
 	className: string
 	where: WhereType
 	data: Record<string, any>
-	fields: Array<keyof WibeTypes[T] | '*'>
+	fields: Array<keyof WibeTypes[T] | '*' | 'id'>
 }
 
 // TODO : Type the return of the functions

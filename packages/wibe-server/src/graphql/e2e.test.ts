@@ -6,8 +6,9 @@ import { GraphQLClient } from 'graphql-request'
 
 const graphql = {
 	user: gql`
-		query user($id: String!) {
+		query user($id: ID!) {
 			user(id: $id) {
+				id
 				name
 				age
 			}
@@ -16,6 +17,7 @@ const graphql = {
 	users: gql`
 		query users($where: UserWhereInput) {
 			users(where: $where) {
+				id
 				name
 				age
 			}
@@ -109,6 +111,7 @@ describe('GraphQL Queries', () => {
 			).users,
 		).toEqual([
 			{
+				id: expect.anything(),
 				name: 'John',
 				age: 23,
 			},
@@ -136,7 +139,9 @@ describe('GraphQL Queries', () => {
 			},
 		})
 
-		expect(users.users).toEqual([{ name: 'Lucas2', age: 24 }])
+		expect(users.users).toEqual([
+			{ id: expect.anything(), name: 'Lucas2', age: 24 },
+		])
 
 		const users2 = await client.request<any>(graphql.users, {
 			where: {
@@ -147,17 +152,15 @@ describe('GraphQL Queries', () => {
 		})
 
 		expect(users2.users).toEqual([
-			{ name: 'Lucas2', age: 24 },
-			{ name: 'Jeanne2', age: 24 },
+			{ id: expect.anything(), name: 'Lucas2', age: 24 },
+			{ id: expect.anything(), name: 'Jeanne2', age: 24 },
 		])
 	})
 
-	it.only('should update one object', async () => {
+	it('should update one object', async () => {
 		const { users } = await client.request<any>(graphql.users, {})
 
 		const userToUpdate = users[0]
-
-		console.log(userToUpdate)
 
 		const res = await client.request<any>(graphql.updateUser, {
 			input: {
@@ -172,14 +175,5 @@ describe('GraphQL Queries', () => {
 			name: 'NameAfterUpdate',
 			age: userToUpdate.age,
 		})
-
-		// const user = await client.request<any>(graphql.user, {
-		// 	id: '60f69ea1fe46431076723653',
-		// })
-
-		// expect(user.user).toEqual({
-		// 	name: 'John2',
-		// 	age: 23,
-		// })
 	})
 })

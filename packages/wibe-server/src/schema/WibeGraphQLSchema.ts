@@ -2,6 +2,7 @@ import {
 	GraphQLBoolean,
 	GraphQLFieldConfig,
 	GraphQLFloat,
+	GraphQLID,
 	GraphQLInputObjectType,
 	GraphQLInt,
 	GraphQLList,
@@ -120,7 +121,7 @@ export class WibeGraphlQLSchema {
 
 		return new GraphQLObjectType({
 			name: className,
-			fields: res,
+			fields: { id: { type: GraphQLID }, ...res },
 		})
 	}
 
@@ -136,7 +137,7 @@ export class WibeGraphlQLSchema {
 		const queries: Record<string, GraphQLFieldConfig<any, any, any>> = {
 			[className.toLowerCase()]: {
 				type: object,
-				args: { id: { type: GraphQLString } },
+				args: { id: { type: GraphQLID } },
 				resolve: (root, args, ctx, info) =>
 					queryForOneObject(root, args, ctx, info, className),
 			},
@@ -165,7 +166,7 @@ export class WibeGraphlQLSchema {
 		const updateInputType = new GraphQLInputObjectType({
 			name: `${className}UpdateInput`,
 			fields: () => ({
-				id: { type: GraphQLString },
+				id: { type: GraphQLID },
 				fields: { type: defaultInputType },
 			}),
 		})
@@ -181,7 +182,7 @@ export class WibeGraphlQLSchema {
 		const deleteInputType = new GraphQLInputObjectType({
 			name: `${className}DeleteInput`,
 			fields: () => ({
-				id: { type: GraphQLString },
+				id: { type: GraphQLID },
 			}),
 		})
 

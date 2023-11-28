@@ -36,6 +36,33 @@ describe('Mongo adapter', () => {
 		expect(collections[0].collectionName).toBe('User')
 	})
 
+	it('should get the _id of an object', async () => {
+		const insertedObject = await mongoAdapter.createObject<any>({
+			className: 'Test1',
+			data: {
+				name: 'John',
+				age: 20,
+			},
+			fields: ['name', 'id'],
+		})
+
+		const res = await mongoAdapter.getObject<any>({
+			id: insertedObject?.id.toString(),
+			className: 'Test1',
+			fields: ['id'],
+		})
+
+		expect(res.id).toEqual(insertedObject?.id)
+
+		const res2 = await mongoAdapter.getObject<any>({
+			id: insertedObject?.id.toString(),
+			className: 'Test1',
+			fields: ['name'],
+		})
+
+		expect(res2.id).toEqual(undefined)
+	})
+
 	it("should not create class if it's not connected", async () => {
 		const cloneMongoAdapter = Object.assign(
 			Object.create(Object.getPrototypeOf(mongoAdapter)),
@@ -55,15 +82,14 @@ describe('Mongo adapter', () => {
 				name: 'John',
 				age: 20,
 			},
-			fields: ['name'],
+			fields: ['name', 'id'],
 		})
 
 		if (!insertedObject) fail()
 
-		const id = insertedObject._id
+		const id = insertedObject.id
 
 		expect(id).toBeDefined()
-		expect(id._bsontype).toEqual('ObjectId')
 
 		const field = await mongoAdapter.getObject<any>({
 			className: 'Test1',
@@ -72,7 +98,6 @@ describe('Mongo adapter', () => {
 		})
 
 		expect(field).toEqual({
-			_id: expect.anything(),
 			name: 'John',
 		})
 	})
@@ -111,11 +136,9 @@ describe('Mongo adapter', () => {
 		expect(objects2.length).toEqual(2)
 		expect(objects2).toEqual([
 			{
-				_id: expect.anything(),
 				name: 'John1',
 			},
 			{
-				_id: expect.anything(),
 				name: 'John2',
 			},
 		])
@@ -128,12 +151,12 @@ describe('Mongo adapter', () => {
 		expect(objects3.length).toEqual(2)
 		expect(objects3).toEqual([
 			{
-				_id: expect.anything(),
+				id: expect.anything(),
 				name: 'John1',
 				age: 20,
 			},
 			{
-				_id: expect.anything(),
+				id: expect.anything(),
 				name: 'John2',
 				age: 20,
 			},
@@ -159,14 +182,6 @@ describe('Mongo adapter', () => {
 			fields: ['name'],
 		})
 
-		await mongoAdapter.getObjects<'User'>({
-			className: 'Test3',
-			fields: ['*'],
-			where: {
-				name: { equalTo: 'John1' },
-			},
-		})
-
 		expect(
 			await mongoAdapter.getObjects<'User'>({
 				className: 'Test3',
@@ -177,7 +192,7 @@ describe('Mongo adapter', () => {
 			}),
 		).toEqual([
 			{
-				_id: expect.anything(),
+				id: expect.anything(),
 				name: 'John1',
 				age: 20,
 			},
@@ -203,7 +218,7 @@ describe('Mongo adapter', () => {
 			}),
 		).toEqual([
 			{
-				_id: expect.anything(),
+				id: expect.anything(),
 				name: 'John2',
 				age: 20,
 			},
@@ -229,12 +244,12 @@ describe('Mongo adapter', () => {
 			}),
 		).toEqual([
 			{
-				_id: expect.anything(),
+				id: expect.anything(),
 				name: 'John1',
 				age: 20,
 			},
 			{
-				_id: expect.anything(),
+				id: expect.anything(),
 				name: 'John2',
 				age: 20,
 			},
@@ -250,12 +265,12 @@ describe('Mongo adapter', () => {
 			}),
 		).toEqual([
 			{
-				_id: expect.anything(),
+				id: expect.anything(),
 				name: 'John1',
 				age: 20,
 			},
 			{
-				_id: expect.anything(),
+				id: expect.anything(),
 				name: 'John2',
 				age: 20,
 			},
@@ -282,7 +297,7 @@ describe('Mongo adapter', () => {
 			fields: ['age'],
 		})
 
-		expect(insertedObject).toEqual({ age: 23, _id: expect.anything() })
+		expect(insertedObject).toEqual({ age: 23 })
 
 		const insertedObject2 = await mongoAdapter.createObject<'User'>({
 			className: 'User',
@@ -295,7 +310,7 @@ describe('Mongo adapter', () => {
 
 		expect(insertedObject2).toEqual({
 			age: 24,
-			_id: expect.anything(),
+			id: expect.anything(),
 			name: 'Lucas2',
 		})
 	})
@@ -318,11 +333,9 @@ describe('Mongo adapter', () => {
 
 		expect(insertedObjects).toEqual([
 			{
-				_id: expect.anything(),
 				name: 'Lucas3',
 			},
 			{
-				_id: expect.anything(),
 				name: 'Lucas4',
 			},
 		])
@@ -346,12 +359,12 @@ describe('Mongo adapter', () => {
 
 		expect(insertedObjects).toEqual([
 			{
-				_id: expect.anything(),
+				id: expect.anything(),
 				name: 'Lucas3',
 				age: 23,
 			},
 			{
-				_id: expect.anything(),
+				id: expect.anything(),
 				name: 'Lucas4',
 				age: 24,
 			},
@@ -370,7 +383,7 @@ describe('Mongo adapter', () => {
 
 		if (!insertedObject) fail()
 
-		const id = insertedObject._id
+		const id = insertedObject.id
 
 		const updatedObject = await mongoAdapter.updateObject<'User'>({
 			className: 'User',
@@ -382,7 +395,6 @@ describe('Mongo adapter', () => {
 		if (!updatedObject) fail()
 
 		expect(updatedObject).toEqual({
-			_id: expect.anything(),
 			name: 'Doe',
 		})
 
@@ -396,7 +408,7 @@ describe('Mongo adapter', () => {
 		if (!updatedObject2) fail()
 
 		expect(updatedObject2).toEqual({
-			_id: expect.anything(),
+			id: expect.anything(),
 			name: 'Doe',
 			age: 20,
 		})
@@ -431,7 +443,7 @@ describe('Mongo adapter', () => {
 
 		expect(updatedObjects).toEqual([
 			{
-				_id: expect.anything(),
+				id: expect.anything(),
 				name: 'Lucas',
 				age: 21,
 			},
@@ -448,12 +460,12 @@ describe('Mongo adapter', () => {
 
 		expect(updatedObjects2).toEqual([
 			{
-				_id: expect.anything(),
+				id: expect.anything(),
 				name: 'Lucas',
 				age: 23,
 			},
 			{
-				_id: expect.anything(),
+				id: expect.anything(),
 				name: 'Lucas1',
 				age: 23,
 			},
