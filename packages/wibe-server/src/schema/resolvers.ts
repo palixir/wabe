@@ -111,3 +111,39 @@ export const mutationToUpdateMultipleObjects = (
 		fields,
 	})
 }
+
+export const mutationToDeleteObject = (
+	_: any,
+	args: any,
+	___: any,
+	info: GraphQLResolveInfo,
+	className: string,
+) => {
+	const fields = getFieldsFromInfo(info)
+
+	if (!fields) throw new Error('No fields provided')
+
+	return WibeApp.databaseController.deleteObject<any>({
+		className,
+		id: args.input.id,
+		fields,
+	})
+}
+
+export const mutationToDeleteMultipleObjects = (
+	_: any,
+	args: any,
+	___: any,
+	info: GraphQLResolveInfo,
+	className: string,
+) => {
+	const fields = getFieldsFromInfo(info)
+
+	if (!fields) throw new Error('No fields provided')
+
+	return WibeApp.databaseController.deleteObjects<any>({
+		className,
+		where: args.input.where,
+		fields,
+	})
+}

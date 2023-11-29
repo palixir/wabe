@@ -1,4 +1,12 @@
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'bun:test'
+import {
+	afterAll,
+	afterEach,
+	beforeAll,
+	beforeEach,
+	describe,
+	expect,
+	it,
+} from 'bun:test'
 import { WibeApp } from '../server'
 import { gql } from '@elysiajs/apollo'
 import { closeTests, getGraphqlClient, setupTests } from '../utils/testHelper'
@@ -55,6 +63,22 @@ const graphql = {
 			}
 		}
 	`,
+	deleteUser: gql`
+		mutation deleteUser($input: UserDeleteInput!) {
+			deleteUser(input: $input) {
+				name
+				age
+			}
+		}
+	`,
+	deleteUsers: gql`
+		mutation deleteUsers($input: UsersDeleteInput!) {
+			deleteUsers(input: $input) {
+				name
+				age
+			}
+		}
+	`,
 }
 
 describe('GraphQL Queries', () => {
@@ -76,6 +100,18 @@ describe('GraphQL Queries', () => {
 				{ name: 'Jeanne', age: 23 },
 			],
 		})
+	})
+
+	afterEach(async () => {
+		const { users } = await client.request<any>(graphql.users, {})
+
+		await Promise.all(
+			users.map((user: any) =>
+				client.request<any>(graphql.deleteUser, {
+					id: user.id,
+				}),
+			),
+		)
 	})
 
 	afterAll(async () => {
@@ -179,15 +215,15 @@ describe('GraphQL Queries', () => {
 		})
 	})
 
-	it.only('should update multiple objects', async () => {
+	it('should update multiple objects', async () => {
 		const res = await client.request<any>(graphql.updateUsers, {
 			input: {
 				fields: {
 					name: 'Tata',
 				},
 				where: {
-					age: {
-						equalTo: 23,
+					name: {
+						equalTo: 'Lucas',
 					},
 				},
 			},

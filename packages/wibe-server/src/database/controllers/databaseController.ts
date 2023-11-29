@@ -3,6 +3,8 @@ import {
 	CreateObjectOptions,
 	CreateObjectsOptions,
 	DatabaseAdapter,
+	DeleteObjectOptions,
+	DeleteObjectsOptions,
 	GetObjectOptions,
 	GetObjectsOptions,
 	UpdateObjectOptions,
@@ -58,5 +60,17 @@ export class DatabaseController {
 		params: UpdateObjectsOptions<T>,
 	) {
 		return this.adapter.updateObjects(params)
+	}
+
+	async deleteObject<T extends keyof WibeTypes>(
+		params: DeleteObjectOptions<T>,
+	) {
+		return this.adapter.deleteObject(params)
+	}
+
+	async deleteObjects<T extends keyof WibeTypes>(
+		params: DeleteObjectsOptions<T>,
+	) {
+		return this.adapter.deleteObjects(params)
 	}
 }

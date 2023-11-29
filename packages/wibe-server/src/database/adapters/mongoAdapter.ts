@@ -8,6 +8,7 @@ import {
 	GetObjectsOptions,
 	CreateObjectsOptions,
 	UpdateObjectsOptions,
+	DeleteObjectsOptions,
 } from './adaptersInterface'
 import { buildMongoWhereQuery } from './utils'
 import { WibeTypes } from '../../../generated/wibe'
@@ -75,21 +76,23 @@ export class MongoAdapter implements DatabaseAdapter {
 
 		const collection = this.database.collection(className)
 
-		const result = await collection.updateMany(
-			whereBuilded,
-			{ $set: data },
-			{ upsert: true },
-		)
-
-		console.log(result)
-		const objects = await this.getObjects<T>({
+		const objectsBeforeUpdate = await this.getObjects<T>({
 			className,
 			where,
-			fields,
+			fields: ['id'],
 		})
 
-		if (objects.length !== result.modifiedCount)
-			throw new Error('Not all objects were updated')
+		await collection.updateMany(whereBuilded, { $set: data })
+
+		const objects = await Promise.all(
+			objectsBeforeUpdate.map((object) =>
+				this.getObject<T>({
+					className,
+					id: object.id,
+					fields,
+				}),
+			),
+		)
 
 		return objects
 	}
@@ -219,9 +222,9 @@ export class MongoAdapter implements DatabaseAdapter {
 			{} as Record<any, number>,
 		)
 
-		const collection = this.database.collection<any>(className)
-
 		const isIdInProjection = fields.includes('id')
+
+		const collection = this.database.collection<any>(className)
 
 		const res = await collection.findOne(
 			{ _id: new ObjectId(id) } as Filter<any>,
@@ -237,5 +240,52 @@ export class MongoAdapter implements DatabaseAdapter {
 		}
 
 		return res
+	}
+
+	async deleteObject<T extends keyof WibeTypes>(params: GetObjectOptions<T>) {
+		if (!this.database)
+			throw new Error('Connection to database is not established')
+
+		const { className, id, fields } = params
+
+		const collection = this.database.collection(className)
+
+		const objectToReturn = this.getObject<T>({
+			className,
+			id,
+			fields,
+		})
+
+		const res = await collection.deleteOne({
+			_id: new ObjectId(id),
+		} as Filter<any>)
+
+		if (res.deletedCount === 0)
+			throw new Error('Object not found for deletion')
+
+		return objectToReturn
+	}
+
+	async deleteObjects<T extends keyof WibeTypes>(
+		params: DeleteObjectsOptions<T>,
+	) {
+		if (!this.database)
+			throw new Error('Connection to database is not established')
+
+		const { className, where, fields } = params
+
+		const whereBuilded = buildMongoWhereQuery(where)
+
+		const collection = this.database.collection(className)
+
+		const objectsBeforeDelete = await this.getObjects<T>({
+			className,
+			where,
+			fields,
+		})
+
+		await collection.deleteMany(whereBuilded)
+
+		return objectsBeforeDelete
 	}
 }

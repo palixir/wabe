@@ -54,6 +54,18 @@ export interface UpdateObjectsOptions<T extends keyof WibeTypes> {
 	fields: Array<keyof WibeTypes[T] | '*' | 'id'>
 }
 
+export interface DeleteObjectOptions<T extends keyof WibeTypes> {
+	className: string
+	id: string
+	fields: Array<keyof WibeTypes[T] | '*' | 'id'>
+}
+
+export interface DeleteObjectsOptions<T extends keyof WibeTypes> {
+	className: string
+	where: WhereType
+	fields: Array<keyof WibeTypes[T] | '*' | 'id'>
+}
+
 // TODO : Type the return of the functions
 export interface DatabaseAdapter {
 	connect(): Promise<any>
@@ -78,5 +90,14 @@ export interface DatabaseAdapter {
 	updateObject<T extends keyof WibeTypes>(
 		params: UpdateObjectOptions<T>,
 	): Promise<any>
-	updateObjects<T extends keyof WibeTypes>(params: any): Promise<any>
+	updateObjects<T extends keyof WibeTypes>(
+		params: UpdateObjectsOptions<T>,
+	): Promise<any>
+
+	deleteObject<T extends keyof WibeTypes>(
+		params: DeleteObjectOptions<T>,
+	): Promise<any>
+	deleteObjects<T extends keyof WibeTypes>(
+		params: DeleteObjectsOptions<T>,
+	): Promise<any>
 }

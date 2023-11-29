@@ -15,6 +15,8 @@ import { Schema, SchemaFields, TypeField } from './Schema'
 import {
 	mutationToCreateMultipleObjects,
 	mutationToCreateObject,
+	mutationToDeleteMultipleObjects,
+	mutationToDeleteObject,
 	mutationToUpdateMultipleObjects,
 	mutationToUpdateObject,
 	queryForMultipleObject,
@@ -237,12 +239,20 @@ export class WibeGraphlQLSchema {
 						type: deleteInputType,
 					},
 				},
-				resolve: (root, args, ctx, info) => {},
+				resolve: (root, args, ctx, info) =>
+					mutationToDeleteObject(root, args, ctx, info, className),
 			},
 			[`delete${className}s`]: {
 				type: new GraphQLNonNull(new GraphQLList(object)),
 				args: { input: { type: deletesInputType } },
-				resolve: (root, args, ctx, info) => {},
+				resolve: (root, args, ctx, info) =>
+					mutationToDeleteMultipleObjects(
+						root,
+						args,
+						ctx,
+						info,
+						className,
+					),
 			},
 		}
 

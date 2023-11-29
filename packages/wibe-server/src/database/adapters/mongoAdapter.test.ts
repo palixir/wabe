@@ -471,4 +471,74 @@ describe('Mongo adapter', () => {
 			},
 		])
 	})
+
+	it('should delete one object', async () => {
+		const insertedObject = await mongoAdapter.createObject<'User'>({
+			className: 'User',
+			data: {
+				name: 'John',
+				age: 20,
+			},
+			fields: ['*'],
+		})
+
+		if (!insertedObject) fail()
+
+		const id = insertedObject.id
+
+		const deletedObject = await mongoAdapter.deleteObject<'User'>({
+			className: 'User',
+			id: id.toString(),
+			fields: ['*'],
+		})
+
+		if (!deletedObject) fail()
+
+		expect(deletedObject).toEqual({
+			id: expect.anything(),
+			name: 'John',
+			age: 20,
+		})
+	})
+
+	it('should delete multiple object', async () => {
+		await mongoAdapter.createObject<'User'>({
+			className: 'User',
+			data: {
+				name: 'John',
+				age: 18,
+			},
+			fields: ['*'],
+		})
+
+		await mongoAdapter.createObject<'User'>({
+			className: 'User',
+			data: {
+				name: 'Lucas',
+				age: 18,
+			},
+			fields: ['*'],
+		})
+
+		const deletedObject = await mongoAdapter.deleteObjects<'User'>({
+			className: 'User',
+			where: { age: { equalTo: 18 } },
+			fields: ['*'],
+		})
+
+		if (!deletedObject) fail()
+
+		expect(deletedObject).toEqual([
+			{
+				id: expect.anything(),
+				name: 'John',
+				age: 18,
+			},
+			{
+				id: expect.anything(),
+				name: 'Lucas',
+				age: 18,
+			},
+		])
+	})
 })
