@@ -72,7 +72,7 @@ export class MongoAdapter implements DatabaseAdapter {
 
 		const { className, where, data, fields } = params
 
-		const whereBuilded = buildMongoWhereQuery(where)
+		const whereBuilded = buildMongoWhereQuery<T>(where)
 
 		const collection = this.database.collection(className)
 
@@ -148,7 +148,7 @@ export class MongoAdapter implements DatabaseAdapter {
 
 		const { className, fields, where } = params
 
-		const whereBuilded = buildMongoWhereQuery(where)
+		const whereBuilded = buildMongoWhereQuery<T>(where)
 
 		if (fields.includes('*')) {
 			const res = await this.database
@@ -271,7 +271,7 @@ export class MongoAdapter implements DatabaseAdapter {
 
 		const { className, where, fields } = params
 
-		const whereBuilded = buildMongoWhereQuery(where)
+		const whereBuilded = buildMongoWhereQuery<T>(where)
 
 		const collection = this.database.collection(className)
 

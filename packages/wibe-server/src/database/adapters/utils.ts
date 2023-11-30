@@ -1,6 +1,9 @@
+import { WibeTypes } from '../../../generated/wibe'
 import { WhereType } from './adaptersInterface'
 
-export const buildMongoWhereQuery = (where?: WhereType) => {
+export const buildMongoWhereQuery = <T extends keyof WibeTypes>(
+	where?: WhereType<T>,
+) => {
 	if (!where) return {}
 
 	const objectKeys = Object.keys(where)

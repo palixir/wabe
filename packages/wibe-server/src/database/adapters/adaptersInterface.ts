@@ -1,8 +1,8 @@
 import { Document, WithId } from 'mongodb'
 import { WibeTypes } from '../../../generated/wibe'
 
-type WhereAggregation = {
-	[key in keyof WibeTypes]: {
+type WhereAggregation<T> = {
+	[key in keyof T]: {
 		equalTo?: any
 		notEqualTo?: any
 		greaterThan?: any
@@ -14,11 +14,11 @@ type WhereAggregation = {
 	}
 }
 
-type WhereConditional = {
-	OR: WhereType
+type WhereConditional<T> = {
+	OR: WhereType<T>
 }
 
-export type WhereType = WhereAggregation & WhereConditional
+export type WhereType<T> = WhereAggregation<T> & WhereConditional<T>
 
 export interface AdapterOptions {
 	databaseUrl: string
@@ -33,7 +33,7 @@ export interface GetObjectOptions<T extends keyof WibeTypes> {
 
 export interface GetObjectsOptions<T extends keyof WibeTypes> {
 	className: string
-	where?: WhereType
+	where?: WhereType<T>
 	fields: Array<keyof WibeTypes[T] | '*' | 'id'>
 }
 
@@ -57,7 +57,7 @@ export interface UpdateObjectOptions<T extends keyof WibeTypes> {
 
 export interface UpdateObjectsOptions<T extends keyof WibeTypes> {
 	className: string
-	where: WhereType
+	where: WhereType<T>
 	data: Record<string, any>
 	fields: Array<keyof WibeTypes[T] | '*' | 'id'>
 }
@@ -70,7 +70,7 @@ export interface DeleteObjectOptions<T extends keyof WibeTypes> {
 
 export interface DeleteObjectsOptions<T extends keyof WibeTypes> {
 	className: string
-	where: WhereType
+	where: WhereType<T>
 	fields: Array<keyof WibeTypes[T] | '*' | 'id'>
 }
 
