@@ -9,6 +9,9 @@ describe('Utils database adapter', () => {
 				age: { greaterThan: 20 },
 				height: { greaterThanOrEqualTo: 1.8 },
 				firstName: { notEqualTo: 'Pierre' },
+				OR: {
+					lastName: { equalTo: 'Smith' },
+				},
 			})
 
 			expect(where).toEqual({

@@ -1,7 +1,8 @@
 import { Document, WithId } from 'mongodb'
 import { WibeTypes } from '../../../generated/wibe'
-export interface WhereType {
-	[key: string]: {
+
+type WhereAggregation = {
+	[key in keyof WibeTypes]: {
 		equalTo?: any
 		notEqualTo?: any
 		greaterThan?: any
@@ -12,6 +13,13 @@ export interface WhereType {
 		notIn?: any[]
 	}
 }
+
+type WhereConditional = {
+	OR: WhereType
+}
+
+export type WhereType = WhereAggregation & WhereConditional
+
 export interface AdapterOptions {
 	databaseUrl: string
 	databaseName: string

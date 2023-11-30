@@ -29,6 +29,8 @@ export const setupTests = async () => {
 				fields: {
 					name: { type: WibeScalarType.String },
 					age: { type: WibeScalarType.Int },
+					isAdmin: { type: WibeScalarType.Boolean },
+					floatValue: { type: WibeScalarType.Float },
 				},
 			},
 		],

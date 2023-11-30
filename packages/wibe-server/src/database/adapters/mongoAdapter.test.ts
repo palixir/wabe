@@ -20,7 +20,7 @@ describe('Mongo adapter', () => {
 	})
 
 	beforeEach(async () => {
-		await mongoAdapter.database?.dropDatabase()
+		await mongoAdapter.database?.collection('User').deleteMany({})
 	})
 
 	it('should create class', async () => {
@@ -414,6 +414,36 @@ describe('Mongo adapter', () => {
 		})
 	})
 
+	it('should update the same field of an objet that which we use in the where field', async () => {
+		const insertedObject = await mongoAdapter.createObject<'User'>({
+			className: 'User',
+			data: {
+				name: 'John',
+				age: 20,
+			},
+			fields: ['*'],
+		})
+
+		if (!insertedObject) fail()
+
+		const updatedObjects = await mongoAdapter.updateObjects<'User'>({
+			className: 'User',
+			data: { name: 'Doe' },
+			where: {
+				name: {
+					equalTo: 'John',
+				},
+			},
+			fields: ['age'],
+		})
+
+		expect(updatedObjects).toEqual([
+			{
+				age: 20,
+			},
+		])
+	})
+
 	it('should update multiple objects', async () => {
 		const insertedObjects = await mongoAdapter.createObjects<'User'>({
 			className: 'User',
@@ -499,6 +529,16 @@ describe('Mongo adapter', () => {
 			name: 'John',
 			age: 20,
 		})
+	})
+
+	it("should not delete an user that doesn't exist", async () => {
+		const res = await mongoAdapter.deleteObject<'User'>({
+			className: 'User',
+			id: '5f9b3b3b3b3b3b3b3b3b3b3b',
+			fields: ['*'],
+		})
+
+		expect(res).toEqual(null)
 	})
 
 	it('should delete multiple object', async () => {

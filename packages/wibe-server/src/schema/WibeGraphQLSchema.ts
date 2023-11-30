@@ -69,16 +69,32 @@ export class WibeGraphlQLSchema {
 				const whereInputType = new GraphQLInputObjectType({
 					name: `${className}WhereInput`,
 					fields: () => {
-						return fieldsOfObjectKeys.reduce((acc, fieldName) => {
-							const typeOfObject = fields[fieldName].type
+						const whereInputObject = fieldsOfObjectKeys.reduce(
+							(acc, fieldName) => {
+								const typeOfObject = fields[fieldName].type
 
-							return {
-								...acc,
-								[fieldName]: {
-									type: getWhereInputFromType(typeOfObject),
-								},
-							}
-						}, {})
+								return {
+									...acc,
+									[fieldName]: {
+										type: getWhereInputFromType(
+											typeOfObject,
+										),
+									},
+								}
+							},
+							{},
+						)
+
+						const conditionFields: Record<string, any> = {
+							OR: {
+								type: new GraphQLList(whereInputType),
+							},
+						}
+
+						return {
+							...whereInputObject,
+							...conditionFields,
+						}
 					},
 				})
 

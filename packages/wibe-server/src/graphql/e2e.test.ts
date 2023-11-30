@@ -34,6 +34,7 @@ const graphql = {
 	createUser: gql`
 		mutation createUser($name: String!, $age: Int!) {
 			createUser(input: { name: $name, age: $age }) {
+				id
 				name
 				age
 			}
@@ -108,7 +109,7 @@ describe('GraphQL Queries', () => {
 		await Promise.all(
 			users.map((user: any) =>
 				client.request<any>(graphql.deleteUser, {
-					id: user.id,
+					input: { id: user.id },
 				}),
 			),
 		)
@@ -126,6 +127,48 @@ describe('GraphQL Queries', () => {
 		).toEqual({ user: null })
 	})
 
+	it('should get an object', async () => {
+		const res = await client.request<any>(graphql.createUser, {
+			name: 'CurrentUser',
+			age: 99,
+		})
+
+		const { user } = await client.request<any>(graphql.user, {
+			id: res.createUser.id,
+		})
+
+		expect(user).toEqual({
+			id: res.createUser.id,
+			name: 'CurrentUser',
+			age: 99,
+		})
+	})
+
+	it('should get multiple objects', async () => {
+		const res = await client.request<any>(graphql.users, {
+			input: {
+				where: {
+					name: {
+						equalTo: 'Lucas',
+					},
+				},
+			},
+		})
+
+		expect(res.users).toEqual([
+			{
+				id: expect.anything(),
+				name: 'Lucas',
+				age: 23,
+			},
+			{
+				id: expect.anything(),
+				name: 'Jeanne',
+				age: 23,
+			},
+		])
+	})
+
 	it('should create an object', async () => {
 		const res = await client.request<any>(graphql.createUser, {
 			name: 'John',
@@ -133,6 +176,7 @@ describe('GraphQL Queries', () => {
 		})
 
 		expect(res.createUser).toEqual({
+			id: expect.anything(),
 			name: 'John',
 			age: 23,
 		})
@@ -156,7 +200,7 @@ describe('GraphQL Queries', () => {
 		])
 	})
 
-	it("should create multiple objects and get them by 'where' query", async () => {
+	it('should create multiple objects', async () => {
 		const res = await client.request<any>(graphql.createUsers, {
 			input: [
 				{ name: 'Lucas2', age: 24 },
@@ -235,5 +279,55 @@ describe('GraphQL Queries', () => {
 				age: 23,
 			},
 		])
+	})
+
+	it('should delete one object', async () => {
+		const { users } = await client.request<any>(graphql.users, {})
+
+		const userToDelete = users[0]
+
+		expect(users.length).toEqual(2)
+
+		const res = await client.request<any>(graphql.deleteUser, {
+			input: {
+				id: userToDelete.id,
+			},
+		})
+
+		expect(res.deleteUser).toEqual({
+			name: userToDelete.name,
+			age: userToDelete.age,
+		})
+
+		const { users: users2 } = await client.request<any>(graphql.users, {})
+
+		expect(users2.length).toEqual(1)
+	})
+
+	it('should delete multiple objects', async () => {
+		const res = await client.request<any>(graphql.deleteUsers, {
+			input: {
+				where: {
+					age: {
+						equalTo: 23,
+					},
+				},
+			},
+		})
+
+		expect(res.deleteUsers).toEqual([
+			{
+				name: 'Lucas',
+				age: 23,
+			},
+			{
+				name: 'Jeanne',
+				age: 23,
+			},
+		])
+
+		const { users } = await client.request<any>(graphql.users, {})
+
+		expect(users.length).toEqual(0)
 	})
 })

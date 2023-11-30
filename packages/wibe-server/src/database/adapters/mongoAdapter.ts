@@ -207,7 +207,7 @@ export class MongoAdapter implements DatabaseAdapter {
 				.findOne({ _id: new ObjectId(id) } as Filter<any>)
 
 			// We standardize the id field
-			if (res._id) {
+			if (res && res._id) {
 				res.id = res._id.toString()
 				delete res['_id']
 			}
@@ -250,18 +250,15 @@ export class MongoAdapter implements DatabaseAdapter {
 
 		const collection = this.database.collection(className)
 
-		const objectToReturn = this.getObject<T>({
+		const objectToReturn = await this.getObject<T>({
 			className,
 			id,
 			fields,
 		})
 
-		const res = await collection.deleteOne({
+		await collection.deleteOne({
 			_id: new ObjectId(id),
 		} as Filter<any>)
-
-		if (res.deletedCount === 0)
-			throw new Error('Object not found for deletion')
 
 		return objectToReturn
 	}

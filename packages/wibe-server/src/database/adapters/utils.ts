@@ -27,6 +27,9 @@ export const buildMongoWhereQuery = (where?: WhereType) => {
 		if (value.in) return { ...acc, [key]: { $in: value.in } }
 		if (value.notIn) return { ...acc, [key]: { $nin: value.notIn } }
 
+		if (value.OR) {
+		}
+
 		return { ...acc }
 	}, {})
 }
