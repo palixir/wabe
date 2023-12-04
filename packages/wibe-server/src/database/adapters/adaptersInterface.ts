@@ -1,8 +1,8 @@
 import { Document, WithId } from 'mongodb'
 import { WibeTypes } from '../../../generated/wibe'
 
-type WhereAggregation<T> = {
-	[key in keyof T]: {
+type WhereAggregation<T extends keyof WibeTypes> = {
+	[key in keyof WibeTypes[T]]: {
 		equalTo?: any
 		notEqualTo?: any
 		greaterThan?: any
@@ -11,15 +11,18 @@ type WhereAggregation<T> = {
 		lessThanOrEqualTo?: any
 		in?: any[]
 		notIn?: any[]
-	}
+	} & WhereConditional<T>
 }
 
-type WhereConditional<T> = {
-	OR: WhereType<T>
+type WhereConditional<T extends keyof WibeTypes> = {
+	OR?: WhereType<T>
+	AND?: WhereType<T>
 }
 
-export type WhereType<T> = WhereAggregation<T> & WhereConditional<T>
-
+export type WhereType<T extends keyof WibeTypes> = Partial<
+	WhereAggregation<T>
+> &
+	WhereConditional<T>
 export interface AdapterOptions {
 	databaseUrl: string
 	databaseName: string

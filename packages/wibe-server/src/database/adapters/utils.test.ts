@@ -4,21 +4,38 @@ import { buildMongoWhereQuery } from './utils'
 describe('Utils database adapter', () => {
 	describe('MongoAdapter', () => {
 		it('should build where query for mongo adapter', () => {
-			const where = buildMongoWhereQuery({
+			const where = buildMongoWhereQuery<'User'>({
 				name: { equalTo: 'John' },
 				age: { greaterThan: 20 },
-				height: { greaterThanOrEqualTo: 1.8 },
-				firstName: { notEqualTo: 'Pierre' },
 				OR: {
-					lastName: { equalTo: 'Smith' },
+					age: { lessThan: 10 },
+					name: { equalTo: 'John' },
+					OR: {
+						name: { equalTo: 'Tata' },
+					},
+				},
+				AND: {
+					age: { lessThan: 10 },
+					name: { equalTo: 'John' },
+					AND: {
+						name: { equalTo: 'Tata' },
+					},
 				},
 			})
 
 			expect(where).toEqual({
 				name: 'John',
-				firstName: { $ne: 'Pierre' },
 				age: { $gt: 20 },
-				height: { $gte: 1.8 },
+				$or: [
+					{ age: { $lt: 10 } },
+					{ name: 'John' },
+					{ $or: [{ name: 'Tata' }] },
+				],
+				$and: [
+					{ age: { $lt: 10 } },
+					{ name: 'John' },
+					{ $and: [{ name: 'Tata' }] },
+				],
 			})
 		})
 
