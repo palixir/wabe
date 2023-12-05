@@ -182,6 +182,59 @@ describe('Mongo adapter', () => {
 			fields: ['name'],
 		})
 
+		// OR statement
+		expect(
+			await mongoAdapter.getObjects<'User'>({
+				className: 'Test3',
+				fields: ['*'],
+				where: {
+					OR: [
+						{
+							name: { equalTo: 'John1' },
+						},
+						{
+							name: { equalTo: 'John2' },
+						},
+					],
+				},
+			}),
+		).toEqual([
+			{
+				id: expect.anything(),
+				name: 'John1',
+				age: 20,
+			},
+			{
+				id: expect.anything(),
+				name: 'John2',
+				age: 20,
+			},
+		])
+
+		expect(
+			await mongoAdapter.getObjects<'User'>({
+				className: 'Test3',
+				fields: ['*'],
+				where: {
+					OR: [
+						{
+							name: { equalTo: 'John1' },
+						},
+						{
+							name: { equalTo: 'John3' },
+						},
+					],
+				},
+			}),
+		).toEqual([
+			{
+				id: expect.anything(),
+				name: 'John1',
+				age: 20,
+			},
+		])
+
+		// Equal to statement
 		expect(
 			await mongoAdapter.getObjects<'User'>({
 				className: 'Test3',
@@ -208,6 +261,7 @@ describe('Mongo adapter', () => {
 			}),
 		).toEqual([])
 
+		// Not equal to statement
 		expect(
 			await mongoAdapter.getObjects<any>({
 				className: 'Test3',
@@ -224,6 +278,7 @@ describe('Mongo adapter', () => {
 			},
 		])
 
+		// Less than statement on string (not implemented)
 		expect(
 			await mongoAdapter.getObjects<any>({
 				className: 'Test3',
@@ -234,6 +289,7 @@ describe('Mongo adapter', () => {
 			}),
 		).toEqual([])
 
+		// Less than to statement on number
 		expect(
 			await mongoAdapter.getObjects<any>({
 				className: 'Test3',
@@ -255,6 +311,7 @@ describe('Mongo adapter', () => {
 			},
 		])
 
+		// Equal to statement on number
 		expect(
 			await mongoAdapter.getObjects<any>({
 				className: 'Test3',

@@ -89,6 +89,9 @@ export class WibeGraphlQLSchema {
 							OR: {
 								type: new GraphQLList(whereInputType),
 							},
+							AND: {
+								type: new GraphQLList(whereInputType),
+							},
 						}
 
 						return {

@@ -2,25 +2,37 @@ import { describe, expect, it } from 'bun:test'
 import { buildMongoWhereQuery } from './utils'
 
 describe('Utils database adapter', () => {
-	describe('MongoAdapter', () => {
+	describe('Mongo', () => {
 		it('should build where query for mongo adapter', () => {
 			const where = buildMongoWhereQuery<'User'>({
 				name: { equalTo: 'John' },
 				age: { greaterThan: 20 },
-				OR: {
-					age: { lessThan: 10 },
-					name: { equalTo: 'John' },
-					OR: {
-						name: { equalTo: 'Tata' },
+				OR: [
+					{
+						age: { lessThan: 10 },
 					},
-				},
-				AND: {
-					age: { lessThan: 10 },
-					name: { equalTo: 'John' },
-					AND: {
-						name: { equalTo: 'Tata' },
+					{ name: { equalTo: 'John' } },
+					{
+						OR: [
+							{
+								name: { equalTo: 'Tata' },
+							},
+						],
 					},
-				},
+				],
+				AND: [
+					{
+						age: { lessThan: 10 },
+					},
+					{ name: { equalTo: 'John' } },
+					{
+						AND: [
+							{
+								name: { equalTo: 'Tata' },
+							},
+						],
+					},
+				],
 			})
 
 			expect(where).toEqual({

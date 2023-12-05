@@ -51,6 +51,73 @@ describe('GraphQL : aggregation', () => {
 		await closeTests(wibe)
 	})
 
+	it('should support OR statement', async () => {
+		const { users } = await client.request<any>(graphql.users, {
+			where: {
+				OR: [{ age: { equalTo: 20 } }, { age: { equalTo: 18 } }],
+			},
+		})
+
+		expect(users).toEqual([
+			{
+				id: expect.any(String),
+				name: 'Lucas',
+				age: 20,
+				isAdmin: true,
+				floatValue: 1.5,
+			},
+			{
+				id: expect.any(String),
+				name: 'Jeanne',
+				age: 18,
+				isAdmin: false,
+				floatValue: 2.5,
+			},
+		])
+
+		const { users: users2 } = await client.request<any>(graphql.users, {
+			where: {
+				OR: [{ age: { equalTo: 20 } }, { age: { equalTo: 19 } }],
+			},
+		})
+
+		expect(users2).toEqual([
+			{
+				id: expect.any(String),
+				name: 'Lucas',
+				age: 20,
+				isAdmin: true,
+				floatValue: 1.5,
+			},
+		])
+	})
+
+	it('should support AND statement', async () => {
+		const { users } = await client.request<any>(graphql.users, {
+			where: {
+				AND: [{ age: { equalTo: 20 } }, { age: { equalTo: 18 } }],
+			},
+		})
+
+		expect(users).toEqual([])
+
+		const { users: users2 } = await client.request<any>(graphql.users, {
+			where: {
+				AND: [{ age: { equalTo: 20 } }, { isAdmin: { equalTo: true } }],
+			},
+		})
+
+		expect(users2).toEqual([
+			{
+				id: expect.any(String),
+				name: 'Lucas',
+				age: 20,
+				isAdmin: true,
+				floatValue: 1.5,
+			},
+		])
+	})
+
 	it('should support equalTo for each wibe scalar', async () => {
 		const { users } = await client.request<any>(graphql.users, {
 			where: {

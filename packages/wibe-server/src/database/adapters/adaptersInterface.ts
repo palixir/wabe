@@ -11,18 +11,19 @@ type WhereAggregation<T extends keyof WibeTypes> = {
 		lessThanOrEqualTo?: any
 		in?: any[]
 		notIn?: any[]
-	} & WhereConditional<T>
+	}
 }
 
 type WhereConditional<T extends keyof WibeTypes> = {
-	OR?: WhereType<T>
-	AND?: WhereType<T>
+	OR?: Array<WhereType<T>>
+	AND?: Array<WhereType<T>>
 }
 
 export type WhereType<T extends keyof WibeTypes> = Partial<
 	WhereAggregation<T>
 > &
 	WhereConditional<T>
+
 export interface AdapterOptions {
 	databaseUrl: string
 	databaseName: string

@@ -30,16 +30,17 @@ export const buildMongoWhereQuery = <T extends keyof WibeTypes>(
 		if (value?.in) return { ...acc, [key]: { $in: value.in } }
 		if (value?.notIn) return { ...acc, [key]: { $nin: value.notIn } }
 
-		if (value && (key === 'OR' || key === 'AND')) {
-			const objectKeys = Object.keys(value)
+		if (value && key === 'OR')
+			return {
+				...acc,
+				$or: where.OR?.map((or) => buildMongoWhereQuery(or)),
+			}
 
-			const whereFromOrObject = buildMongoWhereQuery(value)
-			const orObject = objectKeys.map((objectKey) => {
-				return { [objectKey]: whereFromOrObject[objectKey] }
-			})
-
-			return { ...acc, [key === 'OR' ? '$or' : '$and']: orObject }
-		}
+		if (value && key === 'AND')
+			return {
+				...acc,
+				$and: where.AND?.map((and) => buildMongoWhereQuery(and)),
+			}
 
 		return { ...acc }
 	}, {})
