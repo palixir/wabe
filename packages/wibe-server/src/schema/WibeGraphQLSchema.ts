@@ -11,7 +11,7 @@ import {
 	GraphQLString,
 	GraphQLType,
 } from 'graphql'
-import { Schema, SchemaFields, TypeField } from './Schema'
+import { Schema, SchemaFields, WibeSchemaType } from './Schema'
 import {
 	mutationToCreateMultipleObjects,
 	mutationToCreateObject,
@@ -24,12 +24,32 @@ import {
 } from './resolvers'
 import { DateScalarType, getWhereInputFromType } from '../graphql'
 
-const templateTypeToGraphqlType: Record<TypeField['type'], GraphQLType> = {
+const templateTypeToGraphqlType: Record<
+	Exclude<WibeSchemaType, 'Array'>,
+	GraphQLType
+> = {
 	String: GraphQLString,
 	Int: GraphQLInt,
 	Float: GraphQLFloat,
 	Boolean: GraphQLBoolean,
 	Date: DateScalarType,
+}
+
+// For the moment we not support array of array (for sql database it's tricky)
+const getGraphqlTypeFromTemplate = ({
+	wibeType,
+	typeValue,
+}: {
+	wibeType: WibeSchemaType
+	typeValue?: Exclude<WibeSchemaType, 'Array'>
+}) => {
+	if (wibeType === WibeSchemaType.Array) {
+		if (!typeValue) throw new Error('Type value not found')
+
+		return templateTypeToGraphqlType[typeValue]
+	}
+
+	return templateTypeToGraphqlType[wibeType]
 }
 
 export class WibeGraphlQLSchema {

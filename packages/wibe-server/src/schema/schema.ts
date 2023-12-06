@@ -1,11 +1,10 @@
-export type ArrayValueType = 'String' | 'Int' | 'Float' | 'Boolean'
-
 export enum WibeSchemaType {
 	String = 'String',
 	Int = 'Int',
 	Float = 'Float',
 	Boolean = 'Boolean',
 	Date = 'Date',
+	Array = 'Array',
 }
 
 type TypeFieldBase<T, K extends WibeSchemaType> = {
@@ -20,6 +19,12 @@ export type TypeField =
 	| TypeFieldBase<number, WibeSchemaType.Float>
 	| TypeFieldBase<boolean, WibeSchemaType.Boolean>
 	| TypeFieldBase<Date, WibeSchemaType.Date>
+	| {
+			type: WibeSchemaType.Array
+			required?: boolean
+			defaultValue?: any[]
+			typeValue: WibeSchemaType
+	  }
 
 export type SchemaFields = Record<string, TypeField>
 
@@ -28,12 +33,13 @@ export interface SchemaInterface {
 	fields: SchemaFields
 }
 
-const wibeTypToTypeScriptType: Record<WibeSchemaType, string> = {
+const wibeTypeToTypeScriptType: Record<WibeSchemaType, string> = {
 	[WibeSchemaType.String]: 'string',
 	[WibeSchemaType.Int]: 'number',
 	[WibeSchemaType.Float]: 'number',
 	[WibeSchemaType.Boolean]: 'boolean',
 	[WibeSchemaType.Date]: 'Date',
+	[WibeSchemaType.Array]: 'any[]',
 }
 
 export class Schema {
@@ -48,7 +54,7 @@ export class Schema {
 			const fields = Object.keys(schema.fields)
 
 			const firstTypeScriptType =
-				wibeTypToTypeScriptType[schema.fields[fields[0]].type]
+				wibeTypeToTypeScriptType[schema.fields[fields[0]].type]
 
 			if (!firstTypeScriptType)
 				throw new Error(
@@ -59,14 +65,14 @@ export class Schema {
 				(prev, current) => {
 					const WibeSchemaType = schema.fields[current].type
 					const typeScriptType =
-						wibeTypToTypeScriptType[WibeSchemaType]
+						wibeTypeToTypeScriptType[WibeSchemaType]
 
 					if (!typeScriptType)
 						throw new Error(`Invalid type: ${WibeSchemaType}`)
 
 					return {
 						...prev,
-						[current]: wibeTypToTypeScriptType[WibeSchemaType],
+						[current]: wibeTypeToTypeScriptType[WibeSchemaType],
 					}
 				},
 				{
