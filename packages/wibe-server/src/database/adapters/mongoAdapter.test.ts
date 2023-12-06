@@ -234,6 +234,47 @@ describe('Mongo adapter', () => {
 			},
 		])
 
+		// AND statement
+		expect(
+			await mongoAdapter.getObjects<'User'>({
+				className: 'Test3',
+				fields: ['*'],
+				where: {
+					AND: [
+						{
+							name: { equalTo: 'John1' },
+						},
+						{
+							age: { equalTo: 20 },
+						},
+					],
+				},
+			}),
+		).toEqual([
+			{
+				id: expect.anything(),
+				name: 'John1',
+				age: 20,
+			},
+		])
+
+		expect(
+			await mongoAdapter.getObjects<'User'>({
+				className: 'Test3',
+				fields: ['*'],
+				where: {
+					AND: [
+						{
+							name: { equalTo: 'John1' },
+						},
+						{
+							age: { equalTo: 10 },
+						},
+					],
+				},
+			}),
+		).toEqual([])
+
 		// Equal to statement
 		expect(
 			await mongoAdapter.getObjects<'User'>({

@@ -4,9 +4,35 @@ import {
 	GraphQLInputObjectType,
 	GraphQLInt,
 	GraphQLList,
+	GraphQLScalarType,
 	GraphQLString,
 } from 'graphql'
-import { WibeScalarType } from '../schema/Schema'
+import { WibeSchemaType } from '../schema/Schema'
+
+export const DateScalarType = new GraphQLScalarType({
+	name: 'Date',
+	description: 'Date scalar type',
+	parseValue(value: any) {
+		return new Date(value)
+	},
+	serialize(value: any) {
+		return value.getTime()
+	},
+})
+
+export const DateWhereInput = new GraphQLInputObjectType({
+	name: 'DateWhereInput',
+	fields: {
+		equalTo: { type: DateScalarType },
+		notEqualTo: { type: DateScalarType },
+		in: { type: new GraphQLList(DateScalarType) },
+		notIn: { type: new GraphQLList(DateScalarType) },
+		lessThan: { type: DateScalarType },
+		lessThanOrEqualTo: { type: DateScalarType },
+		greaterThan: { type: DateScalarType },
+		greaterThanOrEqualTo: { type: DateScalarType },
+	},
+})
 
 export const StringWhereInput = new GraphQLInputObjectType({
 	name: 'StringWhereInput',
@@ -54,12 +80,13 @@ export const BooleanWhereInput = new GraphQLInputObjectType({
 	},
 })
 
-const templateWhereInput: Record<WibeScalarType, GraphQLInputObjectType> = {
-	[WibeScalarType.String]: StringWhereInput,
-	[WibeScalarType.Int]: IntWhereInput,
-	[WibeScalarType.Float]: FloatWhereInput,
-	[WibeScalarType.Boolean]: BooleanWhereInput,
+const templateWhereInput: Record<WibeSchemaType, GraphQLInputObjectType> = {
+	[WibeSchemaType.String]: StringWhereInput,
+	[WibeSchemaType.Int]: IntWhereInput,
+	[WibeSchemaType.Float]: FloatWhereInput,
+	[WibeSchemaType.Boolean]: BooleanWhereInput,
+	[WibeSchemaType.Date]: DateWhereInput,
 }
 
-export const getWhereInputFromType = (type: WibeScalarType) =>
+export const getWhereInputFromType = (type: WibeSchemaType) =>
 	templateWhereInput[type]

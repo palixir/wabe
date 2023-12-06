@@ -22,13 +22,14 @@ import {
 	queryForMultipleObject,
 	queryForOneObject,
 } from './resolvers'
-import { getWhereInputFromType } from '../graphql'
+import { DateScalarType, getWhereInputFromType } from '../graphql'
 
 const templateTypeToGraphqlType: Record<TypeField['type'], GraphQLType> = {
 	String: GraphQLString,
 	Int: GraphQLInt,
 	Float: GraphQLFloat,
 	Boolean: GraphQLBoolean,
+	Date: DateScalarType,
 }
 
 export class WibeGraphlQLSchema {

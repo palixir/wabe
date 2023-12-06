@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it, mock } from 'bun:test'
-import { Schema, WibeScalarType } from './Schema'
+import { Schema, WibeSchemaType } from './Schema'
 
 describe('Schema', () => {
 	let schema: Schema
@@ -10,12 +10,12 @@ describe('Schema', () => {
 				name: 'Collection1',
 				fields: {
 					name: {
-						type: WibeScalarType.String,
+						type: WibeSchemaType.String,
 						defaultValue: 'Lucas',
 					},
-					age: { type: WibeScalarType.Int, defaultValue: 23 },
+					age: { type: WibeSchemaType.Int, defaultValue: 23 },
 					isReady: {
-						type: WibeScalarType.Boolean,
+						type: WibeSchemaType.Boolean,
 						defaultValue: true,
 					},
 				},

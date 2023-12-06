@@ -3,7 +3,7 @@ import { v4 as uuid } from 'uuid'
 import getPort from 'get-port'
 import { WibeApp } from '.'
 import { DatabaseEnum } from '../database'
-import { WibeScalarType } from '../schema/Schema'
+import { WibeSchemaType } from '../schema/Schema'
 
 describe('Server', () => {
 	it('should run server', async () => {
@@ -20,7 +20,7 @@ describe('Server', () => {
 			schema: [
 				{
 					name: 'Collection1',
-					fields: { name: { type: WibeScalarType.String } },
+					fields: { name: { type: WibeSchemaType.String } },
 				},
 			],
 		})

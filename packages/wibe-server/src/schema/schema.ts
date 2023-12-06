@@ -1,33 +1,25 @@
 export type ArrayValueType = 'String' | 'Int' | 'Float' | 'Boolean'
 
-export enum WibeScalarType {
+export enum WibeSchemaType {
 	String = 'String',
 	Int = 'Int',
 	Float = 'Float',
 	Boolean = 'Boolean',
+	Date = 'Date',
+}
+
+type TypeFieldBase<T, K extends WibeSchemaType> = {
+	type: K
+	required?: boolean
+	defaultValue?: T
 }
 
 export type TypeField =
-	| {
-			type: WibeScalarType.String
-			required?: boolean
-			defaultValue?: string
-	  }
-	| {
-			type: WibeScalarType.Int
-			required?: boolean
-			defaultValue?: number
-	  }
-	| {
-			type: WibeScalarType.Float
-			required?: boolean
-			defaultValue?: number
-	  }
-	| {
-			type: WibeScalarType.Boolean
-			required?: boolean
-			defaultValue?: boolean
-	  }
+	| TypeFieldBase<string, WibeSchemaType.String>
+	| TypeFieldBase<number, WibeSchemaType.Int>
+	| TypeFieldBase<number, WibeSchemaType.Float>
+	| TypeFieldBase<boolean, WibeSchemaType.Boolean>
+	| TypeFieldBase<Date, WibeSchemaType.Date>
 
 export type SchemaFields = Record<string, TypeField>
 
@@ -36,11 +28,12 @@ export interface SchemaInterface {
 	fields: SchemaFields
 }
 
-const wibeTypToTypeScriptType: Record<WibeScalarType, string> = {
-	[WibeScalarType.String]: 'string',
-	[WibeScalarType.Int]: 'number',
-	[WibeScalarType.Float]: 'number',
-	[WibeScalarType.Boolean]: 'boolean',
+const wibeTypToTypeScriptType: Record<WibeSchemaType, string> = {
+	[WibeSchemaType.String]: 'string',
+	[WibeSchemaType.Int]: 'number',
+	[WibeSchemaType.Float]: 'number',
+	[WibeSchemaType.Boolean]: 'boolean',
+	[WibeSchemaType.Date]: 'Date',
 }
 
 export class Schema {
@@ -64,16 +57,16 @@ export class Schema {
 
 			const res = fields.reduce(
 				(prev, current) => {
-					const WibeScalarType = schema.fields[current].type
+					const WibeSchemaType = schema.fields[current].type
 					const typeScriptType =
-						wibeTypToTypeScriptType[WibeScalarType]
+						wibeTypToTypeScriptType[WibeSchemaType]
 
 					if (!typeScriptType)
-						throw new Error(`Invalid type: ${WibeScalarType}`)
+						throw new Error(`Invalid type: ${WibeSchemaType}`)
 
 					return {
 						...prev,
-						[current]: wibeTypToTypeScriptType[WibeScalarType],
+						[current]: wibeTypToTypeScriptType[WibeSchemaType],
 					}
 				},
 				{
