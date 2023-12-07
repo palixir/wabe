@@ -20,7 +20,12 @@ const run = async () => {
 					name: { type: WibeSchemaType.String },
 					age: { type: WibeSchemaType.Int },
 					isCool: { type: WibeSchemaType.Boolean },
-					birthDate: { type: WibeSchemaType.Date },
+					birthDate: { type: WibeSchemaType.Date, required: true },
+					firstName: {
+						type: WibeSchemaType.Array,
+						typeValue: WibeSchemaType.String,
+						required: true,
+					},
 				},
 			},
 			{

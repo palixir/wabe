@@ -11,7 +11,7 @@ import {
 	GraphQLString,
 	GraphQLType,
 } from 'graphql'
-import { Schema, SchemaFields, WibeSchemaType } from './Schema'
+import { Schema, SchemaFields, TypeField, WibeSchemaType } from './Schema'
 import {
 	mutationToCreateMultipleObjects,
 	mutationToCreateObject,
@@ -35,18 +35,29 @@ const templateTypeToGraphqlType: Record<
 	Date: DateScalarType,
 }
 
+// TODO : Add test to test if element is required
+const wrapGraphQLTypeIn = ({
+	required,
+	type,
+}: {
+	required: boolean
+	type: GraphQLType
+}) => (required ? new GraphQLNonNull(type) : type)
+
 // For the moment we not support array of array (for sql database it's tricky)
 const getGraphqlTypeFromTemplate = ({
 	wibeType,
 	typeValue,
 }: {
 	wibeType: WibeSchemaType
-	typeValue?: Exclude<WibeSchemaType, 'Array'>
+	typeValue?: WibeSchemaType
 }) => {
 	if (wibeType === WibeSchemaType.Array) {
 		if (!typeValue) throw new Error('Type value not found')
+		if (typeValue === WibeSchemaType.Array)
+			throw new Error('Array of array are not supported')
 
-		return templateTypeToGraphqlType[typeValue]
+		return new GraphQLList(templateTypeToGraphqlType[typeValue])
 	}
 
 	return templateTypeToGraphqlType[wibeType]
@@ -74,14 +85,36 @@ export class WibeGraphlQLSchema {
 					name: `${className}CreateInput`,
 					fields: () =>
 						fieldsOfObjectKeys.reduce((acc, fieldName) => {
-							const typeOfObject = fields[fieldName].type
+							const currentField = fields[fieldName]
+
+							if (
+								currentField.type === WibeSchemaType.Array &&
+								currentField.typeValue
+							) {
+								return {
+									...acc,
+									[fieldName]: {
+										type: wrapGraphQLTypeIn({
+											required: !!currentField.required,
+											type: getGraphqlTypeFromTemplate({
+												wibeType: currentField.type,
+												typeValue:
+													currentField.typeValue,
+											}),
+										}),
+									},
+								}
+							}
 
 							return {
 								...acc,
 								[fieldName]: {
-									type: templateTypeToGraphqlType[
-										typeOfObject
-									],
+									type: wrapGraphQLTypeIn({
+										required: !!currentField.required,
+										type: getGraphqlTypeFromTemplate({
+											wibeType: currentField.type,
+										}),
+									}),
 								},
 							}
 						}, {}),
@@ -92,14 +125,15 @@ export class WibeGraphlQLSchema {
 					fields: () => {
 						const whereInputObject = fieldsOfObjectKeys.reduce(
 							(acc, fieldName) => {
-								const typeOfObject = fields[fieldName].type
+								const currentField = fields[fieldName]
+								const typeOfObject = currentField.type
 
 								return {
 									...acc,
 									[fieldName]: {
-										type: getWhereInputFromType(
-											typeOfObject,
-										),
+										type: getWhereInputFromType({
+											wibeType: typeOfObject,
+										}),
 									},
 								}
 							},
@@ -151,12 +185,35 @@ export class WibeGraphlQLSchema {
 
 	createObjectSchema(className: string, fieldsOfObject: SchemaFields) {
 		const res = Object.keys(fieldsOfObject).reduce((acc, fieldName) => {
-			const typeOfObject = fieldsOfObject[fieldName].type
+			const currentField = fieldsOfObject[fieldName]
+
+			if (
+				currentField.type === WibeSchemaType.Array &&
+				currentField.typeValue
+			) {
+				return {
+					...acc,
+					[fieldName]: {
+						type: wrapGraphQLTypeIn({
+							required: !!currentField.required,
+							type: getGraphqlTypeFromTemplate({
+								wibeType: currentField.type,
+								typeValue: currentField.typeValue,
+							}),
+						}),
+					},
+				}
+			}
 
 			return {
 				...acc,
 				[fieldName]: {
-					type: templateTypeToGraphqlType[typeOfObject],
+					type: wrapGraphQLTypeIn({
+						required: !!currentField.required,
+						type: getGraphqlTypeFromTemplate({
+							wibeType: currentField.type,
+						}),
+					}),
 				},
 			}
 		}, {})

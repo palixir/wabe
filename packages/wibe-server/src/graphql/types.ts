@@ -9,6 +9,14 @@ import {
 } from 'graphql'
 import { WibeSchemaType } from '../schema/Schema'
 
+export const AnyScalarType = new GraphQLScalarType({
+	name: 'Any',
+	description:
+		'The Any scalar type is used in operations and types that involve any type of value.',
+	parseValue: (value) => value,
+	serialize: (value) => value,
+})
+
 export const DateScalarType = new GraphQLScalarType({
 	name: 'Date',
 	description: 'Date scalar type',
@@ -17,6 +25,16 @@ export const DateScalarType = new GraphQLScalarType({
 	},
 	serialize(value: any) {
 		return value.getTime()
+	},
+})
+
+export const ArrayWhereInput = new GraphQLInputObjectType({
+	name: 'ArrayWhereInput',
+	fields: {
+		equalTo: { type: AnyScalarType },
+		notEqualTo: { type: AnyScalarType },
+		contains: { type: AnyScalarType },
+		notContains: { type: AnyScalarType },
 	},
 })
 
@@ -86,7 +104,11 @@ const templateWhereInput: Record<WibeSchemaType, GraphQLInputObjectType> = {
 	[WibeSchemaType.Float]: FloatWhereInput,
 	[WibeSchemaType.Boolean]: BooleanWhereInput,
 	[WibeSchemaType.Date]: DateWhereInput,
+	[WibeSchemaType.Array]: ArrayWhereInput,
 }
 
-export const getWhereInputFromType = (type: WibeSchemaType) =>
-	templateWhereInput[type]
+export const getWhereInputFromType = ({
+	wibeType,
+}: {
+	wibeType: WibeSchemaType
+}) => templateWhereInput[wibeType]
