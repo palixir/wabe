@@ -83,41 +83,115 @@ export class WibeGraphlQLSchema {
 
 				const defaultInputType = new GraphQLInputObjectType({
 					name: `${className}CreateInput`,
-					fields: () =>
-						fieldsOfObjectKeys.reduce((acc, fieldName) => {
+					fields: () => {
+						const res = fieldsOfObjectKeys.map((fieldName) => {
 							const currentField = fields[fieldName]
+							const typeOfObject = currentField.type
 
 							if (
-								currentField.type === WibeSchemaType.Array &&
+								typeOfObject === WibeSchemaType.Array &&
 								currentField.typeValue
 							) {
-								return {
-									...acc,
-									[fieldName]: {
-										type: wrapGraphQLTypeIn({
-											required: !!currentField.required,
-											type: getGraphqlTypeFromTemplate({
-												wibeType: currentField.type,
-												typeValue:
-													currentField.typeValue,
-											}),
-										}),
+								return [
+									{
+										[fieldName]: {
+											type: new GraphQLList(
+												getGraphqlTypeFromTemplate({
+													wibeType: typeOfObject,
+													typeValue:
+														currentField.typeValue,
+												}),
+											),
+										},
 									},
-								}
+								]
 							}
 
-							return {
-								...acc,
-								[fieldName]: {
-									type: wrapGraphQLTypeIn({
-										required: !!currentField.required,
+							return [
+								{
+									[fieldName]: {
 										type: getGraphqlTypeFromTemplate({
-											wibeType: currentField.type,
+											wibeType: typeOfObject,
 										}),
-									}),
+									},
 								},
-							}
-						}, {}),
+							]
+						})
+
+						console.log(res)
+
+						return Object.fromEntries(res)
+
+						// return fieldsOfObjectKeys.reduce((acc, fieldName) => {
+						// 	const currentField = fields[fieldName]
+
+						// 	if (
+						// 		currentField.type === WibeSchemaType.Array &&
+						// 		currentField.typeValue
+						// 	) {
+						// 		return {
+						// 			...acc,
+						// 			[fieldName]: {
+						// 				type: wrapGraphQLTypeIn({
+						// 					required: !!currentField.required,
+						// 					type: getGraphqlTypeFromTemplate({
+						// 						wibeType: currentField.type,
+						// 						typeValue:
+						// 							currentField.typeValue,
+						// 					}),
+						// 				}),
+						// 			},
+						// 		}
+						// 	}
+
+						// 	return {
+						// 		...acc,
+						// 		[fieldName]: {
+						// 			type: wrapGraphQLTypeIn({
+						// 				required: !!currentField.required,
+						// 				type: getGraphqlTypeFromTemplate({
+						// 					wibeType: currentField.type,
+						// 				}),
+						// 			}),
+						// 		},
+						// 	}
+						// }, {})
+					},
+
+					// fieldsOfObjectKeys.reduce((acc, fieldName) => {
+					// 	const currentField = fields[fieldName]
+
+					// 	if (
+					// 		currentField.type === WibeSchemaType.Array &&
+					// 		currentField.typeValue
+					// 	) {
+					// 		return {
+					// 			...acc,
+					// 			[fieldName]: {
+					// 				type: wrapGraphQLTypeIn({
+					// 					required: !!currentField.required,
+					// 					type: getGraphqlTypeFromTemplate({
+					// 						wibeType: currentField.type,
+					// 						typeValue:
+					// 							currentField.typeValue,
+					// 					}),
+					// 				}),
+					// 			},
+					// 		}
+					// 	}
+
+					// 	return {
+					// 		...acc,
+					// 		[fieldName]: {
+					// 			type: wrapGraphQLTypeIn({
+					// 				required: !!currentField.required,
+					// 				type: getGraphqlTypeFromTemplate({
+					// 					wibeType: currentField.type,
+					// 				}),
+					// 			}),
+					// 		},
+					// 	}
+					// }, {}),
 				})
 
 				const whereInputType = new GraphQLInputObjectType({

@@ -7,7 +7,9 @@
 		"build": "bun build index.ts --minify --target=bun --outdir lib && bun run generate:types",
 		"dev": "bun run --watch dev/index.ts",
 		"test": "bun test --watch",
-		"test:only": "bun test --watch --only"
+		"test:only": "bun test --watch --only",
+		"linter": "biome lint ./src/**/*.ts",
+		"formater": "biome format --write ./src/**/*.ts"
 	},
 	"dependencies": {
 		"@apollo/server": "4.9.4",
@@ -17,6 +19,7 @@
 		"mongodb": "6.1.0"
 	},
 	"devDependencies": {
+		"@biomejs/biome": "1.4.1",
 		"@parcel/watcher": "2.3.0",
 		"bun-types": "1.0.14",
 		"dts-bundle-generator": "8.0.1",
