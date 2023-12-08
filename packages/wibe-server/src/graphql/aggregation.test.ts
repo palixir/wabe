@@ -65,6 +65,440 @@ describe('GraphQL : aggregation', () => {
 		await closeTests(wibe)
 	})
 
+	it("should support DateScalarType's aggregation", async () => {
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					birthDate: { equalTo: now },
+				},
+			}),
+		).toEqual({
+			users: [
+				{
+					id: expect.any(String),
+					name: 'Lucas',
+					age: 20,
+					isAdmin: true,
+					floatValue: 1.5,
+				},
+			],
+		})
+
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					birthDate: { notEqualTo: now },
+				},
+			}),
+		).toEqual({
+			users: [
+				{
+					id: expect.any(String),
+					name: 'Jeanne',
+					age: 18,
+					isAdmin: false,
+					floatValue: 2.5,
+				},
+			],
+		})
+
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					birthDate: { lessThan: new Date(now.getTime() + 1000) },
+				},
+			}),
+		).toEqual({
+			users: [
+				{
+					id: expect.any(String),
+					name: 'Lucas',
+					age: 20,
+					isAdmin: true,
+					floatValue: 1.5,
+				},
+			],
+		})
+
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					birthDate: { lessThanOrEqualTo: now },
+				},
+			}),
+		).toEqual({
+			users: [
+				{
+					id: expect.any(String),
+					name: 'Lucas',
+					age: 20,
+					isAdmin: true,
+					floatValue: 1.5,
+				},
+			],
+		})
+
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					birthDate: { greaterThan: now },
+				},
+			}),
+		).toEqual({
+			users: [
+				{
+					id: expect.any(String),
+					name: 'Jeanne',
+					age: 18,
+					isAdmin: false,
+					floatValue: 2.5,
+				},
+			],
+		})
+
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					birthDate: { greaterThanOrEqualTo: now },
+				},
+			}),
+		).toEqual({
+			users: [
+				{
+					id: expect.any(String),
+					name: 'Lucas',
+					age: 20,
+					isAdmin: true,
+					floatValue: 1.5,
+				},
+				{
+					id: expect.any(String),
+					name: 'Jeanne',
+					age: 18,
+					isAdmin: false,
+					floatValue: 2.5,
+				},
+			],
+		})
+	})
+
+	it("should support Int's aggregation", async () => {
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					age: { equalTo: 20 },
+				},
+			}),
+		).toEqual({
+			users: [
+				{
+					id: expect.any(String),
+					name: 'Lucas',
+					age: 20,
+					isAdmin: true,
+					floatValue: 1.5,
+				},
+			],
+		})
+
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					age: { notEqualTo: 20 },
+				},
+			}),
+		).toEqual({
+			users: [
+				{
+					id: expect.any(String),
+					name: 'Jeanne',
+					age: 18,
+					isAdmin: false,
+					floatValue: 2.5,
+				},
+			],
+		})
+
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					age: { lessThan: 20 },
+				},
+			}),
+		).toEqual({
+			users: [
+				{
+					id: expect.any(String),
+					name: 'Jeanne',
+					age: 18,
+					isAdmin: false,
+					floatValue: 2.5,
+				},
+			],
+		})
+
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					age: { lessThanOrEqualTo: 20 },
+				},
+			}),
+		).toEqual({
+			users: [
+				{
+					id: expect.any(String),
+					name: 'Lucas',
+					age: 20,
+					isAdmin: true,
+					floatValue: 1.5,
+				},
+				{
+					id: expect.any(String),
+					name: 'Jeanne',
+					age: 18,
+					isAdmin: false,
+					floatValue: 2.5,
+				},
+			],
+		})
+
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					age: { greaterThan: 18 },
+				},
+			}),
+		).toEqual({
+			users: [
+				{
+					id: expect.any(String),
+					name: 'Lucas',
+					age: 20,
+					isAdmin: true,
+					floatValue: 1.5,
+				},
+			],
+		})
+
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					age: { greaterThanOrEqualTo: 18 },
+				},
+			}),
+		).toEqual({
+			users: [
+				{
+					id: expect.any(String),
+					name: 'Lucas',
+					age: 20,
+					isAdmin: true,
+					floatValue: 1.5,
+				},
+				{
+					id: expect.any(String),
+					name: 'Jeanne',
+					age: 18,
+					isAdmin: false,
+					floatValue: 2.5,
+				},
+			],
+		})
+	})
+
+	it("should support Boolean's aggregation", async () => {
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					isAdmin: { equalTo: true },
+				},
+			}),
+		).toEqual({
+			users: [
+				{
+					id: expect.any(String),
+					name: 'Lucas',
+					age: 20,
+					isAdmin: true,
+					floatValue: 1.5,
+				},
+			],
+		})
+
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					isAdmin: { notEqualTo: true },
+				},
+			}),
+		).toEqual({
+			users: [
+				{
+					id: expect.any(String),
+					name: 'Jeanne',
+					age: 18,
+					isAdmin: false,
+					floatValue: 2.5,
+				},
+			],
+		})
+	})
+
+	it("should support Float's aggregation", async () => {
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					floatValue: { equalTo: 1.5 },
+				},
+			}),
+		).toEqual({
+			users: [
+				{
+					id: expect.any(String),
+					name: 'Lucas',
+					age: 20,
+					isAdmin: true,
+					floatValue: 1.5,
+				},
+			],
+		})
+
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					floatValue: { notEqualTo: 1.5 },
+				},
+			}),
+		).toEqual({
+			users: [
+				{
+					id: expect.any(String),
+					name: 'Jeanne',
+					age: 18,
+					isAdmin: false,
+					floatValue: 2.5,
+				},
+			],
+		})
+
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					floatValue: { lessThan: 2.5 },
+				},
+			}),
+		).toEqual({
+			users: [
+				{
+					id: expect.any(String),
+					name: 'Lucas',
+					age: 20,
+					isAdmin: true,
+					floatValue: 1.5,
+				},
+			],
+		})
+
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					floatValue: { lessThanOrEqualTo: 2.5 },
+				},
+			}),
+		).toEqual({
+			users: [
+				{
+					id: expect.any(String),
+					name: 'Lucas',
+					age: 20,
+					isAdmin: true,
+					floatValue: 1.5,
+				},
+				{
+					id: expect.any(String),
+					name: 'Jeanne',
+					age: 18,
+					isAdmin: false,
+					floatValue: 2.5,
+				},
+			],
+		})
+
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					floatValue: { greaterThan: 1.5 },
+				},
+			}),
+		).toEqual({
+			users: [
+				{
+					id: expect.any(String),
+					name: 'Jeanne',
+					age: 18,
+					isAdmin: false,
+					floatValue: 2.5,
+				},
+			],
+		})
+
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					floatValue: { greaterThanOrEqualTo: 2.5 },
+				},
+			}),
+		).toEqual({
+			users: [
+				{
+					id: expect.any(String),
+					name: 'Jeanne',
+					age: 18,
+					isAdmin: false,
+					floatValue: 2.5,
+				},
+			],
+		})
+	})
+
+	it("should support String's aggregation", async () => {
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					name: { notEqualTo: 'Lucas' },
+				},
+			}),
+		).toEqual({
+			users: [
+				{
+					id: expect.any(String),
+					name: 'Jeanne',
+					age: 18,
+					isAdmin: false,
+					floatValue: 2.5,
+				},
+			],
+		})
+
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					name: { equalTo: 'Lucas' },
+				},
+			}),
+		).toEqual({
+			users: [
+				{
+					id: expect.any(String),
+					name: 'Lucas',
+					age: 20,
+					isAdmin: true,
+					floatValue: 1.5,
+				},
+			],
+		})
+	})
+
 	it('should support OR statement', async () => {
 		const { users } = await client.request<any>(graphql.users, {
 			where: {
@@ -130,441 +564,5 @@ describe('GraphQL : aggregation', () => {
 				floatValue: 1.5,
 			},
 		])
-	})
-
-	it('should support equalTo for each wibe scalar', async () => {
-		expect(
-			await client.request<any>(graphql.users, {
-				where: {
-					birthDate: { equalTo: now },
-				},
-			}),
-		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Lucas',
-					age: 20,
-					isAdmin: true,
-					floatValue: 1.5,
-				},
-			],
-		})
-
-		expect(
-			await client.request<any>(graphql.users, {
-				where: {
-					age: { equalTo: 20 },
-				},
-			}),
-		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Lucas',
-					age: 20,
-					isAdmin: true,
-					floatValue: 1.5,
-				},
-			],
-		})
-
-		expect(
-			await client.request<any>(graphql.users, {
-				where: {
-					isAdmin: { equalTo: true },
-				},
-			}),
-		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Lucas',
-					age: 20,
-					isAdmin: true,
-					floatValue: 1.5,
-				},
-			],
-		})
-
-		expect(
-			await client.request<any>(graphql.users, {
-				where: {
-					floatValue: { equalTo: 1.5 },
-				},
-			}),
-		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Lucas',
-					age: 20,
-					isAdmin: true,
-					floatValue: 1.5,
-				},
-			],
-		})
-
-		expect(
-			await client.request<any>(graphql.users, {
-				where: {
-					name: { equalTo: 'Lucas' },
-				},
-			}),
-		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Lucas',
-					age: 20,
-					isAdmin: true,
-					floatValue: 1.5,
-				},
-			],
-		})
-	})
-
-	it('should support notEqualTo for each wibe scalar', async () => {
-		expect(
-			await client.request<any>(graphql.users, {
-				where: {
-					birthDate: { notEqualTo: now },
-				},
-			}),
-		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Jeanne',
-					age: 18,
-					isAdmin: false,
-					floatValue: 2.5,
-				},
-			],
-		})
-
-		expect(
-			await client.request<any>(graphql.users, {
-				where: {
-					age: { notEqualTo: 20 },
-				},
-			}),
-		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Jeanne',
-					age: 18,
-					isAdmin: false,
-					floatValue: 2.5,
-				},
-			],
-		})
-
-		expect(
-			await client.request<any>(graphql.users, {
-				where: {
-					isAdmin: { notEqualTo: true },
-				},
-			}),
-		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Jeanne',
-					age: 18,
-					isAdmin: false,
-					floatValue: 2.5,
-				},
-			],
-		})
-
-		expect(
-			await client.request<any>(graphql.users, {
-				where: {
-					floatValue: { notEqualTo: 1.5 },
-				},
-			}),
-		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Jeanne',
-					age: 18,
-					isAdmin: false,
-					floatValue: 2.5,
-				},
-			],
-		})
-
-		expect(
-			await client.request<any>(graphql.users, {
-				where: {
-					name: { notEqualTo: 'Lucas' },
-				},
-			}),
-		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Jeanne',
-					age: 18,
-					isAdmin: false,
-					floatValue: 2.5,
-				},
-			],
-		})
-	})
-
-	it('should support lessThan for each wibe scalar', async () => {
-		expect(
-			await client.request<any>(graphql.users, {
-				where: {
-					birthDate: { lessThan: new Date(now.getTime() + 1000) },
-				},
-			}),
-		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Lucas',
-					age: 20,
-					isAdmin: true,
-					floatValue: 1.5,
-				},
-			],
-		})
-
-		expect(
-			await client.request<any>(graphql.users, {
-				where: {
-					age: { lessThan: 20 },
-				},
-			}),
-		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Jeanne',
-					age: 18,
-					isAdmin: false,
-					floatValue: 2.5,
-				},
-			],
-		})
-
-		expect(
-			await client.request<any>(graphql.users, {
-				where: {
-					floatValue: { lessThan: 2.5 },
-				},
-			}),
-		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Lucas',
-					age: 20,
-					isAdmin: true,
-					floatValue: 1.5,
-				},
-			],
-		})
-	})
-
-	it('should support lessThanOrEqualTo for each wibe scalar', async () => {
-		expect(
-			await client.request<any>(graphql.users, {
-				where: {
-					birthDate: { lessThanOrEqualTo: now },
-				},
-			}),
-		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Lucas',
-					age: 20,
-					isAdmin: true,
-					floatValue: 1.5,
-				},
-			],
-		})
-
-		expect(
-			await client.request<any>(graphql.users, {
-				where: {
-					age: { lessThanOrEqualTo: 20 },
-				},
-			}),
-		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Lucas',
-					age: 20,
-					isAdmin: true,
-					floatValue: 1.5,
-				},
-				{
-					id: expect.any(String),
-					name: 'Jeanne',
-					age: 18,
-					isAdmin: false,
-					floatValue: 2.5,
-				},
-			],
-		})
-
-		expect(
-			await client.request<any>(graphql.users, {
-				where: {
-					floatValue: { lessThanOrEqualTo: 2.5 },
-				},
-			}),
-		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Lucas',
-					age: 20,
-					isAdmin: true,
-					floatValue: 1.5,
-				},
-				{
-					id: expect.any(String),
-					name: 'Jeanne',
-					age: 18,
-					isAdmin: false,
-					floatValue: 2.5,
-				},
-			],
-		})
-	})
-
-	it('should support greaterThan for each wibe scalar', async () => {
-		expect(
-			await client.request<any>(graphql.users, {
-				where: {
-					birthDate: { greaterThan: now },
-				},
-			}),
-		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Jeanne',
-					age: 18,
-					isAdmin: false,
-					floatValue: 2.5,
-				},
-			],
-		})
-
-		expect(
-			await client.request<any>(graphql.users, {
-				where: {
-					age: { greaterThan: 18 },
-				},
-			}),
-		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Lucas',
-					age: 20,
-					isAdmin: true,
-					floatValue: 1.5,
-				},
-			],
-		})
-
-		expect(
-			await client.request<any>(graphql.users, {
-				where: {
-					floatValue: { greaterThan: 1.5 },
-				},
-			}),
-		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Jeanne',
-					age: 18,
-					isAdmin: false,
-					floatValue: 2.5,
-				},
-			],
-		})
-	})
-
-	it('should support greaterThanOrEqualTo for each wibe scalar', async () => {
-		expect(
-			await client.request<any>(graphql.users, {
-				where: {
-					birthDate: { greaterThanOrEqualTo: now },
-				},
-			}),
-		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Lucas',
-					age: 20,
-					isAdmin: true,
-					floatValue: 1.5,
-				},
-				{
-					id: expect.any(String),
-					name: 'Jeanne',
-					age: 18,
-					isAdmin: false,
-					floatValue: 2.5,
-				},
-			],
-		})
-
-		expect(
-			await client.request<any>(graphql.users, {
-				where: {
-					age: { greaterThanOrEqualTo: 18 },
-				},
-			}),
-		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Lucas',
-					age: 20,
-					isAdmin: true,
-					floatValue: 1.5,
-				},
-				{
-					id: expect.any(String),
-					name: 'Jeanne',
-					age: 18,
-					isAdmin: false,
-					floatValue: 2.5,
-				},
-			],
-		})
-
-		expect(
-			await client.request<any>(graphql.users, {
-				where: {
-					floatValue: { greaterThanOrEqualTo: 2.5 },
-				},
-			}),
-		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Jeanne',
-					age: 18,
-					isAdmin: false,
-					floatValue: 2.5,
-				},
-			],
-		})
 	})
 })
