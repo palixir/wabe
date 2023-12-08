@@ -1,7 +1,11 @@
 import { beforeAll, afterAll, describe, it, expect } from 'bun:test'
 import { GraphQLClient, gql } from 'graphql-request'
-import { WibeApp } from '../server'
-import { closeTests, getGraphqlClient, setupTests } from '../utils/testHelper'
+import { WibeApp } from '../../server'
+import {
+	closeTests,
+	getGraphqlClient,
+	setupTests,
+} from '../../utils/testHelper'
 
 const graphql = {
 	users: gql`

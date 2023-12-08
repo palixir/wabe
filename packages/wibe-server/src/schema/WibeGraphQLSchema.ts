@@ -21,7 +21,7 @@ import {
 	mutationToUpdateObject,
 	queryForMultipleObject,
 	queryForOneObject,
-} from './resolvers'
+} from '../graphql'
 import { DateScalarType, getWhereInputFromType } from '../graphql'
 
 const templateTypeToGraphqlType: Record<
@@ -62,6 +62,7 @@ const getGraphqlTypeFromTemplate = ({
 	return templateTypeToGraphqlType[wibeType]
 }
 
+// This class is tested in e2e test in graphql folder
 export class WibeGraphlQLSchema {
 	private schemas: Schema
 

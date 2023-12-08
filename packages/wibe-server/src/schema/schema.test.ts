@@ -36,7 +36,7 @@ describe('Schema', () => {
 			{
 				name: 'Collection1',
 				fields: {
-					// @ts-ignore
+					// @ts-expect-error
 					invalidField: { type: 'tata', defaultValue: 'Lucas' },
 				},
 			},
