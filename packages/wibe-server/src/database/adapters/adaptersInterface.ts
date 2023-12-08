@@ -11,6 +11,8 @@ type WhereAggregation<T extends keyof WibeTypes> = {
 		lessThanOrEqualTo?: any
 		in?: any[]
 		notIn?: any[]
+		contains?: any
+		notContains?: any
 	}
 }
 

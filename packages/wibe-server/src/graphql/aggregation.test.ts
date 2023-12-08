@@ -49,6 +49,7 @@ describe('GraphQL : aggregation', () => {
 					isAdmin: true,
 					floatValue: 1.5,
 					birthDate: now,
+					arrayValue: ['a', 'b'],
 				},
 				{
 					name: 'Jeanne',
@@ -56,6 +57,7 @@ describe('GraphQL : aggregation', () => {
 					isAdmin: false,
 					floatValue: 2.5,
 					birthDate: new Date(Date.now() + 100000),
+					arrayValue: ['c', 'd'],
 				},
 			],
 		})
@@ -63,6 +65,100 @@ describe('GraphQL : aggregation', () => {
 
 	afterAll(async () => {
 		await closeTests(wibe)
+	})
+
+	it("should support Array's aggregation", async () => {
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					arrayValue: { contains: 'a' },
+				},
+			}),
+		).toEqual({
+			users: [
+				{
+					id: expect.any(String),
+					name: 'Lucas',
+					age: 20,
+					isAdmin: true,
+					floatValue: 1.5,
+				},
+			],
+		})
+
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					arrayValue: { notContains: 'a' },
+				},
+			}),
+		).toEqual({
+			users: [
+				{
+					id: expect.any(String),
+					name: 'Jeanne',
+					age: 18,
+					isAdmin: false,
+					floatValue: 2.5,
+				},
+			],
+		})
+
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					arrayValue: { equalTo: ['a', 'b'] },
+				},
+			}),
+		).toEqual({
+			users: [
+				{
+					id: expect.any(String),
+					name: 'Lucas',
+					age: 20,
+					isAdmin: true,
+					floatValue: 1.5,
+				},
+			],
+		})
+
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					arrayValue: { notEqualTo: ['a', 'b'] },
+				},
+			}),
+		).toEqual({
+			users: [
+				{
+					id: expect.any(String),
+					name: 'Jeanne',
+					age: 18,
+					isAdmin: false,
+					floatValue: 2.5,
+				},
+			],
+		})
+
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					arrayValue: { equalTo: ['z', 'w'] },
+				},
+			}),
+		).toEqual({
+			users: [],
+		})
+
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					arrayValue: { contains: 'z' },
+				},
+			}),
+		).toEqual({
+			users: [],
+		})
 	})
 
 	it("should support DateScalarType's aggregation", async () => {

@@ -32,6 +32,10 @@ export const setupTests = async () => {
 					isAdmin: { type: WibeSchemaType.Boolean },
 					floatValue: { type: WibeSchemaType.Float },
 					birthDate: { type: WibeSchemaType.Date },
+					arrayValue: {
+						type: WibeSchemaType.Array,
+						typeValue: WibeSchemaType.String,
+					},
 				},
 			},
 		],

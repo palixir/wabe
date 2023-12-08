@@ -5,7 +5,9 @@
 	"scripts": {
 		"generate:types": "dts-bundle-generator index.ts -o lib/index.d.ts",
 		"build": "bun build index.ts --minify --target=bun --outdir lib && bun run generate:types",
-		"dev": "bun run --watch dev/index.ts"
+		"dev": "bun run --watch dev/index.ts",
+		"test": "bun test --watch",
+		"test:only": "bun test --watch --only"
 	},
 	"dependencies": {
 		"@apollo/server": "4.9.4",

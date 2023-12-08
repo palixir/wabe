@@ -11,6 +11,9 @@ export const buildMongoWhereQuery = <T extends keyof WibeTypes>(
 	return objectKeys.reduce((acc, key) => {
 		const value = where[key]
 
+		if (value?.contains) return { ...acc, [key]: value.contains }
+		if (value?.notContains)
+			return { ...acc, [key]: { $ne: value.notContains } }
 		if (value?.equalTo) return { ...acc, [key]: value.equalTo }
 		if (value?.notEqualTo)
 			return { ...acc, [key]: { $ne: value.notEqualTo } }
