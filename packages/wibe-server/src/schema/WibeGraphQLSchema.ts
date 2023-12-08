@@ -35,7 +35,6 @@ const templateTypeToGraphqlType: Record<
 	Date: DateScalarType,
 }
 
-// TODO : Add test to test if element is required
 const wrapGraphQLTypeIn = ({
 	required,
 	type,

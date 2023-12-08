@@ -119,6 +119,14 @@ describe('GraphQL Queries', () => {
 		await closeTests(wibe)
 	})
 
+	it('should throw an error if a field is required and not provided', async () => {
+		expect(() =>
+			client.request<any>(graphql.createUsers, {
+				input: [{ age: 23 }],
+			}),
+		).toThrow()
+	})
+
 	it('should get an object that not exist', async () => {
 		expect(
 			await client.request<any>(graphql.user, {
