@@ -13,6 +13,7 @@ type TypeFieldBase<T, K extends WibeSchemaType> = {
 	defaultValue?: T
 }
 
+// TODO: Add tests for default value
 export type TypeField =
 	| TypeFieldBase<string, WibeSchemaType.String>
 	| TypeFieldBase<number, WibeSchemaType.Int>
@@ -28,9 +29,31 @@ export type TypeField =
 
 export type SchemaFields = Record<string, TypeField>
 
+export type Resolver = {
+	type: WibeSchemaType
+	required?: boolean
+	args?: {
+		[key: string]: {
+			type: WibeSchemaType
+			required?: boolean
+		}
+	}
+	resolve: (...args: any) => any
+}
+
+export type TypeResolver = {
+	queries?: {
+		[key: string]: Resolver
+	}
+	mutations?: {
+		[key: string]: Resolver
+	}
+}
+
 export interface SchemaInterface {
 	name: string
 	fields: SchemaFields
+	resolvers?: TypeResolver
 }
 
 const wibeTypeToTypeScriptType: Record<WibeSchemaType, string> = {

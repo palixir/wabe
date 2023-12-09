@@ -17,6 +17,16 @@ import {
 import { GraphQLClient } from 'graphql-request'
 
 const graphql = {
+	customQuery: gql`
+		query customQuery($name: String!) {
+			customQuery(name: $name)
+		}
+	`,
+	customMutation: gql`
+		mutation customMutation($a: Int!, $b: Int!) {
+			customMutation(a: $a, b: $b)
+		}
+	`,
 	user: gql`
 		query user($id: ID!) {
 			user(id: $id) {
@@ -86,7 +96,7 @@ const graphql = {
 	`,
 }
 
-describe('GraphQL Queries', () => {
+describe('GraphQL : E2E', () => {
 	let wibe: WibeApp
 	let port: number
 	let client: GraphQLClient
@@ -121,6 +131,44 @@ describe('GraphQL Queries', () => {
 
 	afterAll(async () => {
 		await closeTests(wibe)
+	})
+
+	it('should create custom query successfully', async () => {
+		// Test required field
+		expect(() => client.request<any>(graphql.customQuery, {})).toThrow()
+
+		// Test String param is correctly passed
+		expect(() =>
+			client.request<any>(graphql.customMutation, {
+				name: 1.5,
+			}),
+		).toThrow()
+
+		const res = await client.request<any>(graphql.customQuery, {
+			name: 'Lucas',
+		})
+
+		expect(res.customQuery).toEqual('Successfull')
+	})
+
+	it('should create custom mutation successfully', async () => {
+		// Test required field
+		expect(() => client.request<any>(graphql.customMutation, {})).toThrow()
+
+		// Test Int param is correctly passed
+		expect(() =>
+			client.request<any>(graphql.customMutation, {
+				a: 1.5,
+				b: 1.5,
+			}),
+		).toThrow()
+
+		const res = await client.request<any>(graphql.customMutation, {
+			a: 1,
+			b: 1,
+		})
+
+		expect(res.customMutation).toEqual(2)
 	})
 
 	it('should throw an error if a field is required and not provided', async () => {

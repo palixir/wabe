@@ -9,7 +9,7 @@ const run = async () => {
 	const wibe = new WibeApp({
 		database: {
 			type: DatabaseEnum.Mongo,
-			url: `mongodb://127.0.0.1:27045`,
+			url: 'mongodb://127.0.0.1:27045',
 			name: 'Wibe',
 		},
 		port: 3000,
@@ -25,6 +25,33 @@ const run = async () => {
 						type: WibeSchemaType.Array,
 						typeValue: WibeSchemaType.String,
 						required: true,
+					},
+				},
+				resolvers: {
+					queries: {
+						helloWorld: {
+							type: WibeSchemaType.String,
+							args: {
+								name: {
+									type: WibeSchemaType.String,
+									required: true,
+								},
+							},
+							resolve: () => 'Hello World',
+						},
+					},
+					mutations: {
+						createMutation: {
+							type: WibeSchemaType.Boolean,
+							required: true,
+							args: {
+								name: {
+									type: WibeSchemaType.Int,
+									required: true,
+								},
+							},
+							resolve: () => true,
+						},
 					},
 				},
 			},

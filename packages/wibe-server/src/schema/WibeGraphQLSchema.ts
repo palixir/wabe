@@ -5,13 +5,22 @@ import {
 	GraphQLID,
 	GraphQLInputObjectType,
 	GraphQLInt,
+	GraphQLInterfaceType,
 	GraphQLList,
 	GraphQLNonNull,
 	GraphQLObjectType,
+	GraphQLOutputType,
 	GraphQLString,
 	GraphQLType,
 } from 'graphql'
-import { Schema, SchemaFields, TypeField, WibeSchemaType } from './Schema'
+import {
+	Resolver,
+	Schema,
+	SchemaFields,
+	TypeField,
+	TypeResolver,
+	WibeSchemaType,
+} from './Schema'
 import {
 	mutationToCreateMultipleObjects,
 	mutationToCreateObject,
@@ -146,26 +155,43 @@ export class WibeGraphlQLSchema {
 				})
 
 				const object = this.createObjectSchema(className, fields)
-				const queries = this.createQueriesSchema({
+				const defaultQueries = this.createDefaultQueriesSchema({
 					className,
 					whereInputType,
 					object,
 				})
-				const mutations = this.createMutationsSchema({
+				const customQueries = this.createCustomResolvers({
+					resolvers: current.resolvers?.queries || {},
+				})
+
+				const customMutations = this.createCustomResolvers({
+					resolvers: current.resolvers?.mutations || {},
+				})
+
+				const defaultMutations = this.createDefaultMutationsSchema({
 					className,
 					defaultInputType,
 					whereInputType,
 					object,
 				})
 
+				// TODO : Refactor to avoid O(n)² complexity
 				return {
-					queries: { ...previous.queries, ...queries },
-					mutations: { ...previous.mutations, ...mutations },
+					queries: {
+						...previous.queries,
+						...defaultQueries,
+						...customQueries,
+					},
+					mutations: {
+						...previous.mutations,
+						...defaultMutations,
+						...customMutations,
+					},
 				}
 			},
 			{ queries: {}, mutations: {} } as {
-				queries: any
-				mutations: any
+				queries: Record<string, GraphQLFieldConfig<any, any, any>>
+				mutations: Record<string, GraphQLFieldConfig<any, any, any>>
 			},
 		)
 
@@ -188,12 +214,12 @@ export class WibeGraphlQLSchema {
 									? currentField.typeValue
 									: undefined,
 						}),
-					}),
+					}) as GraphQLInterfaceType,
 				}
 
 				return acc
 			},
-			{} as Record<string, any>,
+			{} as Record<string, GraphQLFieldConfig<any, any, any>>,
 		)
 
 		return new GraphQLObjectType({
@@ -202,7 +228,54 @@ export class WibeGraphlQLSchema {
 		})
 	}
 
-	createQueriesSchema({
+	createCustomResolvers({
+		resolvers,
+	}: { resolvers: Record<string, Resolver> }) {
+		const queriesKeys = Object.keys(resolvers)
+
+		const res = queriesKeys.reduce(
+			(acc, currentKey) => {
+				const currentQuery = resolvers[currentKey]
+				const required = !!currentQuery.required
+				const currentArgs = currentQuery.args || {}
+				const argsKeys = Object.keys(currentArgs)
+
+				const args = argsKeys.reduce(
+					(acc, argKey) => {
+						acc[argKey] = {
+							type: wrapGraphQLTypeIn({
+								required: !!currentArgs[argKey].required,
+								type: getGraphqlTypeFromTemplate({
+									wibeType: currentArgs[argKey].type,
+								}),
+							}),
+						}
+
+						return acc
+					},
+					{} as Record<string, any>,
+				)
+
+				acc[currentKey] = {
+					type: wrapGraphQLTypeIn({
+						required,
+						type: getGraphqlTypeFromTemplate({
+							wibeType: currentQuery.type,
+						}),
+					}) as GraphQLOutputType,
+					args,
+					resolve: currentQuery.resolve,
+				}
+
+				return acc
+			},
+			{} as Record<string, GraphQLFieldConfig<any, any, any>>,
+		)
+
+		return res
+	}
+
+	createDefaultQueriesSchema({
 		className,
 		whereInputType,
 		object,
@@ -211,7 +284,7 @@ export class WibeGraphlQLSchema {
 		whereInputType: GraphQLInputObjectType
 		object: GraphQLObjectType
 	}) {
-		const queries: Record<string, GraphQLFieldConfig<any, any, any>> = {
+		return {
 			[className.toLowerCase()]: {
 				type: object,
 				args: { id: { type: GraphQLID } },
@@ -224,12 +297,10 @@ export class WibeGraphlQLSchema {
 				resolve: (root, args, ctx, info) =>
 					queryForMultipleObject(root, args, ctx, info, className),
 			},
-		}
-
-		return queries
+		} as Record<string, GraphQLFieldConfig<any, any, any>>
 	}
 
-	createMutationsSchema({
+	createDefaultMutationsSchema({
 		className,
 		object,
 		defaultInputType,

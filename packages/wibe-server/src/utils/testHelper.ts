@@ -37,6 +37,36 @@ export const setupTests = async () => {
 						typeValue: WibeSchemaType.String,
 					},
 				},
+				resolvers: {
+					queries: {
+						customQuery: {
+							type: WibeSchemaType.String,
+							args: {
+								name: {
+									type: WibeSchemaType.String,
+									required: true,
+								},
+							},
+							resolve: () => 'Successfull',
+						},
+					},
+					mutations: {
+						customMutation: {
+							type: WibeSchemaType.Int,
+							args: {
+								a: {
+									type: WibeSchemaType.Int,
+									required: true,
+								},
+								b: {
+									type: WibeSchemaType.Int,
+									required: true,
+								},
+							},
+							resolve: (root: any, args: any) => args.a + args.b,
+						},
+					},
+				},
 			},
 		],
 	})
