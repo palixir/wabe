@@ -13,14 +13,7 @@ import {
 	GraphQLString,
 	GraphQLType,
 } from 'graphql'
-import {
-	Resolver,
-	Schema,
-	SchemaFields,
-	TypeField,
-	TypeResolver,
-	WibeSchemaType,
-} from './Schema'
+import { Resolver, Schema, SchemaFields, WibeSchemaType } from './Schema'
 import {
 	mutationToCreateMultipleObjects,
 	mutationToCreateObject,
@@ -175,19 +168,33 @@ export class WibeGraphlQLSchema {
 					object,
 				})
 
-				// TODO : Refactor to avoid O(n)² complexity
-				return {
-					queries: {
-						...previous.queries,
-						...defaultQueries,
-						...customQueries,
-					},
-					mutations: {
-						...previous.mutations,
-						...defaultMutations,
-						...customMutations,
-					},
+				const defaultQueriesKeys = Object.keys(defaultQueries)
+				const customQueriesKeys = Object.keys(customQueries)
+				const defaultMutationsKeys = Object.keys(defaultMutations)
+				const customMutationsKeys = Object.keys(customMutations)
+
+				// Loop to avoid O(n)² complexity of spread on accumulator
+				for (const key in defaultQueriesKeys) {
+					previous.queries[defaultQueriesKeys[key]] =
+						defaultQueries[defaultQueriesKeys[key]]
 				}
+
+				for (const key in customQueriesKeys) {
+					previous.queries[customQueriesKeys[key]] =
+						customQueries[customQueriesKeys[key]]
+				}
+
+				for (const key in defaultMutationsKeys) {
+					previous.mutations[defaultMutationsKeys[key]] =
+						defaultMutations[defaultMutationsKeys[key]]
+				}
+
+				for (const key in customMutationsKeys) {
+					previous.mutations[customMutationsKeys[key]] =
+						customMutations[customMutationsKeys[key]]
+				}
+
+				return previous
 			},
 			{ queries: {}, mutations: {} } as {
 				queries: Record<string, GraphQLFieldConfig<any, any, any>>
