@@ -19,7 +19,7 @@ export const setupTests = async () => {
 	const wibe = new WibeApp({
 		database: {
 			type: DatabaseEnum.Mongo,
-			url: `mongodb://127.0.0.1:27045`,
+			url: 'mongodb://127.0.0.1:27045',
 			name: databaseId,
 		},
 		port,

@@ -70,10 +70,9 @@ export class Schema {
 					if (!typeScriptType)
 						throw new Error(`Invalid type: ${WibeSchemaType}`)
 
-					return {
-						...prev,
-						[current]: wibeTypeToTypeScriptType[WibeSchemaType],
-					}
+					prev[current] = wibeTypeToTypeScriptType[WibeSchemaType]
+
+					return prev
 				},
 				{
 					[fields[0]]: firstTypeScriptType,
@@ -92,7 +91,8 @@ export class Schema {
 		const allNames = this.schema.map((schema) => schema.name)
 		const globalWibeType = allNames.reduce(
 			(prev, current) => {
-				return { ...prev, [current]: current }
+				prev[current] = current
+				return prev
 			},
 			{ [allNames[0]]: allNames[0] },
 		)

@@ -84,114 +84,30 @@ export class WibeGraphlQLSchema {
 				const defaultInputType = new GraphQLInputObjectType({
 					name: `${className}CreateInput`,
 					fields: () => {
-						const res = fieldsOfObjectKeys.map((fieldName) => {
-							const currentField = fields[fieldName]
-							const typeOfObject = currentField.type
+						return fieldsOfObjectKeys.reduce(
+							(acc, fieldName) => {
+								const currentField = fields[fieldName]
 
-							if (
-								typeOfObject === WibeSchemaType.Array &&
-								currentField.typeValue
-							) {
-								return [
-									{
-										[fieldName]: {
-											type: new GraphQLList(
-												getGraphqlTypeFromTemplate({
-													wibeType: typeOfObject,
-													typeValue:
-														currentField.typeValue,
-												}),
-											),
-										},
-									},
-								]
-							}
-
-							return [
-								{
-									[fieldName]: {
+								acc[fieldName] = {
+									type: wrapGraphQLTypeIn({
+										required: !!currentField.required,
 										type: getGraphqlTypeFromTemplate({
-											wibeType: typeOfObject,
+											wibeType: currentField.type,
+											typeValue:
+												currentField.type ===
+													WibeSchemaType.Array &&
+												currentField.typeValue
+													? currentField.typeValue
+													: undefined,
 										}),
-									},
-								},
-							]
-						})
+									}),
+								}
 
-						console.log(res)
-
-						return Object.fromEntries(res)
-
-						// return fieldsOfObjectKeys.reduce((acc, fieldName) => {
-						// 	const currentField = fields[fieldName]
-
-						// 	if (
-						// 		currentField.type === WibeSchemaType.Array &&
-						// 		currentField.typeValue
-						// 	) {
-						// 		return {
-						// 			...acc,
-						// 			[fieldName]: {
-						// 				type: wrapGraphQLTypeIn({
-						// 					required: !!currentField.required,
-						// 					type: getGraphqlTypeFromTemplate({
-						// 						wibeType: currentField.type,
-						// 						typeValue:
-						// 							currentField.typeValue,
-						// 					}),
-						// 				}),
-						// 			},
-						// 		}
-						// 	}
-
-						// 	return {
-						// 		...acc,
-						// 		[fieldName]: {
-						// 			type: wrapGraphQLTypeIn({
-						// 				required: !!currentField.required,
-						// 				type: getGraphqlTypeFromTemplate({
-						// 					wibeType: currentField.type,
-						// 				}),
-						// 			}),
-						// 		},
-						// 	}
-						// }, {})
+								return acc
+							},
+							{} as Record<string, any>,
+						)
 					},
-
-					// fieldsOfObjectKeys.reduce((acc, fieldName) => {
-					// 	const currentField = fields[fieldName]
-
-					// 	if (
-					// 		currentField.type === WibeSchemaType.Array &&
-					// 		currentField.typeValue
-					// 	) {
-					// 		return {
-					// 			...acc,
-					// 			[fieldName]: {
-					// 				type: wrapGraphQLTypeIn({
-					// 					required: !!currentField.required,
-					// 					type: getGraphqlTypeFromTemplate({
-					// 						wibeType: currentField.type,
-					// 						typeValue:
-					// 							currentField.typeValue,
-					// 					}),
-					// 				}),
-					// 			},
-					// 		}
-					// 	}
-
-					// 	return {
-					// 		...acc,
-					// 		[fieldName]: {
-					// 			type: wrapGraphQLTypeIn({
-					// 				required: !!currentField.required,
-					// 				type: getGraphqlTypeFromTemplate({
-					// 					wibeType: currentField.type,
-					// 				}),
-					// 			}),
-					// 		},
-					// 	}
-					// }, {}),
 				})
 
 				const whereInputType = new GraphQLInputObjectType({
@@ -202,16 +118,15 @@ export class WibeGraphlQLSchema {
 								const currentField = fields[fieldName]
 								const typeOfObject = currentField.type
 
-								return {
-									...acc,
-									[fieldName]: {
-										type: getWhereInputFromType({
-											wibeType: typeOfObject,
-										}),
-									},
+								acc[fieldName] = {
+									type: getWhereInputFromType({
+										wibeType: typeOfObject,
+									}),
 								}
+
+								return acc
 							},
-							{},
+							{} as Record<string, any>,
 						)
 
 						const conditionFields: Record<string, any> = {
@@ -258,39 +173,28 @@ export class WibeGraphlQLSchema {
 	}
 
 	createObjectSchema(className: string, fieldsOfObject: SchemaFields) {
-		const res = Object.keys(fieldsOfObject).reduce((acc, fieldName) => {
-			const currentField = fieldsOfObject[fieldName]
+		const res = Object.keys(fieldsOfObject).reduce(
+			(acc, fieldName) => {
+				const currentField = fieldsOfObject[fieldName]
 
-			if (
-				currentField.type === WibeSchemaType.Array &&
-				currentField.typeValue
-			) {
-				return {
-					...acc,
-					[fieldName]: {
-						type: wrapGraphQLTypeIn({
-							required: !!currentField.required,
-							type: getGraphqlTypeFromTemplate({
-								wibeType: currentField.type,
-								typeValue: currentField.typeValue,
-							}),
-						}),
-					},
-				}
-			}
-
-			return {
-				...acc,
-				[fieldName]: {
+				acc[fieldName] = {
 					type: wrapGraphQLTypeIn({
 						required: !!currentField.required,
 						type: getGraphqlTypeFromTemplate({
 							wibeType: currentField.type,
+							typeValue:
+								currentField.type === WibeSchemaType.Array &&
+								currentField.typeValue
+									? currentField.typeValue
+									: undefined,
 						}),
 					}),
-				},
-			}
-		}, {})
+				}
+
+				return acc
+			},
+			{} as Record<string, any>,
+		)
 
 		return new GraphQLObjectType({
 			name: className,

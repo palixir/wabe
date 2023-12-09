@@ -23,10 +23,9 @@ export class WibeApp {
 	constructor(config: WibeConfig) {
 		WibeApp.config = config
 
-		this.server = new Elysia().get(
-			'/health',
-			(context) => (context.set.status = 200),
-		)
+		this.server = new Elysia().get('/health', (context) => {
+			context.set.status = 200
+		})
 
 		const databaseAdapter = new MongoAdapter({
 			databaseName: config.database.name,
@@ -63,7 +62,7 @@ export class WibeApp {
 			const wibeTypes = wibeSchema.getTypesFromSchema()
 
 			fs.mkdirSync('generated', { recursive: true })
-			fs.writeFileSync(`generated/wibe.ts`, wibeTypes, {})
+			fs.writeFileSync('generated/wibe.ts', wibeTypes, {})
 		}
 
 		this.server.listen(WibeApp.config.port, () => {

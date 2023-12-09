@@ -20,45 +20,36 @@ export const buildMongoWhereQuery = <T extends keyof WibeTypes>(
 
 	const objectKeys = Object.keys(where) as Array<keyof WhereType<T>>
 
-	return objectKeys.reduce((acc, key) => {
-		const value = where[key]
+	return objectKeys.reduce(
+		(acc, key) => {
+			const value = where[key]
 
-		if (value?.contains) return { ...acc, [key]: value.contains }
-		if (value?.notContains)
-			return { ...acc, [key]: { $ne: value.notContains } }
-		if (value?.equalTo) return { ...acc, [key]: value.equalTo }
-		if (value?.notEqualTo)
-			return { ...acc, [key]: { $ne: value.notEqualTo } }
+			if (value?.contains) acc[key] = value.contains
+			if (value?.notContains) acc[key] = { $ne: value.notContains }
+			if (value?.equalTo) acc[key] = value.equalTo
+			if (value?.notEqualTo) acc[key] = { $ne: value.notEqualTo }
 
-		if (value?.greaterThan)
-			return { ...acc, [key]: { $gt: value.greaterThan } }
-		if (value?.greaterThanOrEqualTo)
-			return {
-				...acc,
-				[key]: { $gte: value.greaterThanOrEqualTo },
-			}
+			if (value?.greaterThan) acc[key] = { $gt: value.greaterThan }
+			if (value?.greaterThanOrEqualTo)
+				acc[key] = { $gte: value.greaterThanOrEqualTo }
 
-		if (value?.lessThan) return { ...acc, [key]: { $lt: value.lessThan } }
-		if (value?.lessThanOrEqualTo)
-			return { ...acc, [key]: { $lte: value.lessThanOrEqualTo } }
+			if (value?.lessThan) acc[key] = { $lt: value.lessThan }
+			if (value?.lessThanOrEqualTo)
+				acc[key] = { $lte: value.lessThanOrEqualTo }
 
-		if (value?.in) return { ...acc, [key]: { $in: value.in } }
-		if (value?.notIn) return { ...acc, [key]: { $nin: value.notIn } }
+			if (value?.in) acc[key] = { $in: value.in }
+			if (value?.notIn) acc[key] = { $nin: value.notIn }
 
-		if (value && key === 'OR')
-			return {
-				...acc,
-				$or: where.OR?.map((or) => buildMongoWhereQuery(or)),
-			}
+			if (value && key === 'OR')
+				acc.$or = where.OR?.map((or) => buildMongoWhereQuery(or))
 
-		if (value && key === 'AND')
-			return {
-				...acc,
-				$and: where.AND?.map((and) => buildMongoWhereQuery(and)),
-			}
+			if (value && key === 'AND')
+				acc.$and = where.AND?.map((and) => buildMongoWhereQuery(and))
 
-		return { ...acc }
-	}, {})
+			return acc
+		},
+		{} as Record<any, any>,
+	)
 }
 
 export class MongoAdapter implements DatabaseAdapter {
@@ -205,19 +196,21 @@ export class MongoAdapter implements DatabaseAdapter {
 				.toArray()
 
 			// We standardize the id field
-			res.forEach((object) => {
+			for (const object of res) {
 				if (object._id) {
 					object.id = object._id.toString()
-					delete object['_id']
+					object._id = undefined
 				}
-			})
+			}
 
 			return res
 		}
 
 		const objectOfFieldsToGet: Record<any, number> = fields.reduce(
 			(acc, prev) => {
-				return { ...acc, [prev]: 1 }
+				acc[prev] = 1
+
+				return acc
 			},
 			{} as Record<any, number>,
 		)
@@ -233,12 +226,12 @@ export class MongoAdapter implements DatabaseAdapter {
 			.toArray()
 
 		// We standardize the id field
-		res.forEach((object) => {
+		for (const object of res) {
 			if (object._id) {
 				object.id = object._id.toString()
-				delete object['_id']
+				object._id = undefined
 			}
-		})
+		}
 
 		return res
 	}
@@ -255,9 +248,9 @@ export class MongoAdapter implements DatabaseAdapter {
 				.findOne({ _id: new ObjectId(id) } as Filter<any>)
 
 			// We standardize the id field
-			if (res && res._id) {
+			if (res?._id) {
 				res.id = res._id.toString()
-				delete res['_id']
+				res._id = undefined
 			}
 
 			return res
@@ -265,7 +258,8 @@ export class MongoAdapter implements DatabaseAdapter {
 
 		const objectOfFieldsToGet: Record<any, number> = fields.reduce(
 			(acc, prev) => {
-				return { ...acc, [prev]: 1 }
+				acc[prev] = 1
+				return acc
 			},
 			{} as Record<any, number>,
 		)
@@ -282,9 +276,9 @@ export class MongoAdapter implements DatabaseAdapter {
 		)
 
 		// We standardize the id field
-		if (res && res._id) {
+		if (res?._id) {
 			res.id = res._id.toString()
-			delete res['_id']
+			res._id = undefined
 		}
 
 		return res
