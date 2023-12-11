@@ -59,11 +59,11 @@ const wrapGraphQLTypeIn = ({
 const getGraphqlTypeFromTemplate = ({
 	wibeType,
 	typeValue,
-	schema,
+	scalars,
 }: {
 	wibeType: WibeTypes
 	typeValue?: WibeTypes
-	schema: SchemaInterface
+	scalars: GraphQLScalarType[]
 }) => {
 	if (wibeType === 'Array') {
 		if (!typeValue) throw new Error('Type value not found')
@@ -76,15 +76,8 @@ const getGraphqlTypeFromTemplate = ({
 	}
 
 	// Here we create all custom scalars
-	if (!Object.keys(templateTypeToGraphqlType).includes(wibeType)) {
-		const scalarInformations = schema.scalars?.find(
-			(scalar) => scalar.name === wibeType,
-		)
-
-		if (!scalarInformations) throw new Error(`Scalar ${wibeType} not found`)
-		console.log('ICI')
-		return new GraphQLScalarType({ ...scalarInformations })
-	}
+	if (!Object.keys(templateTypeToGraphqlType).includes(wibeType))
+		return scalars.find((scalar) => scalar.name === wibeType)
 
 	// Ignore this error because scalar are compute above
 	// @ts-expect-error
@@ -94,13 +87,17 @@ const getGraphqlTypeFromTemplate = ({
 // This class is tested in e2e test in graphql folder
 export class WibeGraphlQLSchema {
 	private schemas: Schema
+	private customScalars: GraphQLScalarType[]
 
 	constructor(schemas: Schema) {
 		this.schemas = schemas
+		this.customScalars = []
 	}
 
 	createSchema() {
 		if (!this.schemas) throw new Error('Schema not found')
+
+		const scalars = this.createScalars()
 
 		const queriesAndMutations = this.schemas.schema.class.reduce(
 			(previous, current) => {
@@ -127,7 +124,7 @@ export class WibeGraphlQLSchema {
 												currentField.typeValue
 													? currentField.typeValue
 													: undefined,
-											schema: this.schemas.schema,
+											scalars: this.customScalars,
 										}),
 									}),
 								}
@@ -230,7 +227,21 @@ export class WibeGraphlQLSchema {
 			},
 		)
 
-		return queriesAndMutations
+		return { ...queriesAndMutations, scalars }
+	}
+
+	createScalars() {
+		const scalars =
+			this.schemas.schema.scalars?.map(
+				(scalar) =>
+					new GraphQLScalarType({
+						...scalar,
+					}),
+			) || []
+
+		this.customScalars = scalars
+
+		return scalars
 	}
 
 	createObjects(className: string, fieldsOfObject: SchemaFields) {
@@ -248,7 +259,7 @@ export class WibeGraphlQLSchema {
 								currentField.typeValue
 									? currentField.typeValue
 									: undefined,
-							schema: this.schemas.schema,
+							scalars: this.customScalars,
 						}),
 					}) as GraphQLInterfaceType,
 				}
@@ -283,7 +294,7 @@ export class WibeGraphlQLSchema {
 								required: !!currentArgs[argKey].required,
 								type: getGraphqlTypeFromTemplate({
 									wibeType: currentArgs[argKey].type,
-									schema: this.schemas.schema,
+									scalars: this.customScalars,
 								}),
 							}),
 						}
@@ -298,7 +309,7 @@ export class WibeGraphlQLSchema {
 						required,
 						type: getGraphqlTypeFromTemplate({
 							wibeType: currentQuery.type,
-							schema: this.schemas.schema,
+							scalars: this.customScalars,
 						}),
 					}) as GraphQLOutputType,
 					args,
