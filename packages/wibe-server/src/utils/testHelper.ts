@@ -3,7 +3,6 @@ import { GraphQLClient } from 'graphql-request'
 import { WibeApp } from '../server'
 import { DatabaseEnum } from '../database'
 import getPort from 'get-port'
-import { WibeSchemaType } from '../schema/Schema'
 
 export const getGraphqlClient = (port: number): GraphQLClient => {
 	const client = new GraphQLClient(`http://127.0.0.1:${port}/graphql`)
@@ -23,52 +22,64 @@ export const setupTests = async () => {
 			name: databaseId,
 		},
 		port,
-		schema: [
-			{
-				name: 'User',
-				fields: {
-					name: { type: WibeSchemaType.String, required: true },
-					age: { type: WibeSchemaType.Int },
-					isAdmin: { type: WibeSchemaType.Boolean },
-					floatValue: { type: WibeSchemaType.Float },
-					birthDate: { type: WibeSchemaType.Date },
-					arrayValue: {
-						type: WibeSchemaType.Array,
-						typeValue: WibeSchemaType.String,
-					},
-				},
-				resolvers: {
-					queries: {
-						customQuery: {
-							type: WibeSchemaType.String,
-							args: {
-								name: {
-									type: WibeSchemaType.String,
-									required: true,
-								},
-							},
-							resolve: () => 'Successfull',
+		schema: {
+			class: [
+				{
+					name: 'User',
+					fields: {
+						name: { type: 'String', required: true },
+						age: { type: 'Int' },
+						isAdmin: { type: 'Boolean' },
+						floatValue: { type: 'Float' },
+						birthDate: { type: 'Date' },
+						arrayValue: {
+							type: 'Array',
+							typeValue: 'String',
+						},
+						phone: {
+							type: 'Phone',
 						},
 					},
-					mutations: {
-						customMutation: {
-							type: WibeSchemaType.Int,
-							args: {
-								a: {
-									type: WibeSchemaType.Int,
-									required: true,
+					resolvers: {
+						queries: {
+							customQuery: {
+								type: 'String',
+								args: {
+									name: {
+										type: 'String',
+										required: true,
+									},
 								},
-								b: {
-									type: WibeSchemaType.Int,
-									required: true,
-								},
+								resolve: () => 'Successfull',
 							},
-							resolve: (root: any, args: any) => args.a + args.b,
+						},
+						mutations: {
+							customMutation: {
+								type: 'Int',
+								args: {
+									a: {
+										type: 'Int',
+										required: true,
+									},
+									b: {
+										type: 'Int',
+										required: true,
+									},
+								},
+								resolve: (root: any, args: any) =>
+									args.a + args.b,
+							},
 						},
 					},
 				},
-			},
-		],
+			],
+			scalars: [
+				{
+					name: 'Phone',
+					description: 'Phone scalar',
+				},
+			],
+		},
 	})
 
 	await wibe.start()

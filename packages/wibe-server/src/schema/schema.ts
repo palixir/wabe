@@ -1,40 +1,43 @@
-export enum WibeSchemaType {
-	String = 'String',
-	Int = 'Int',
-	Float = 'Float',
-	Boolean = 'Boolean',
-	Date = 'Date',
-	Array = 'Array',
-}
+import { WibeSchemaScalars } from '../../generated/wibe'
 
-type TypeFieldBase<T, K extends WibeSchemaType> = {
-	type: K
+export type WibeDefaultTypes =
+	| 'String'
+	| 'Int'
+	| 'Float'
+	| 'Boolean'
+	| 'Date'
+	| 'Array'
+
+export type WibeTypes = WibeSchemaScalars | WibeDefaultTypes
+
+type TypeFieldBase<T, K extends WibeTypes> = {
+	type: K | WibeSchemaScalars
 	required?: boolean
 	defaultValue?: T
 }
 
 // TODO: Add tests for default value
 export type TypeField =
-	| TypeFieldBase<string, WibeSchemaType.String>
-	| TypeFieldBase<number, WibeSchemaType.Int>
-	| TypeFieldBase<number, WibeSchemaType.Float>
-	| TypeFieldBase<boolean, WibeSchemaType.Boolean>
-	| TypeFieldBase<Date, WibeSchemaType.Date>
+	| TypeFieldBase<string, 'String'>
+	| TypeFieldBase<number, 'Int'>
+	| TypeFieldBase<number, 'Float'>
+	| TypeFieldBase<boolean, 'Boolean'>
+	| TypeFieldBase<Date, 'Date'>
 	| {
-			type: WibeSchemaType.Array
+			type: 'Array'
 			required?: boolean
 			defaultValue?: any[]
-			typeValue: WibeSchemaType
+			typeValue: WibeTypes
 	  }
 
 export type SchemaFields = Record<string, TypeField>
 
 export type Resolver = {
-	type: WibeSchemaType
+	type: WibeTypes
 	required?: boolean
 	args?: {
 		[key: string]: {
-			type: WibeSchemaType
+			type: WibeTypes
 			required?: boolean
 		}
 	}
@@ -50,50 +53,71 @@ export type TypeResolver = {
 	}
 }
 
-export interface SchemaInterface {
+export interface ClassInterface {
 	name: string
 	fields: SchemaFields
 	resolvers?: TypeResolver
 }
 
-const wibeTypeToTypeScriptType: Record<WibeSchemaType, string> = {
-	[WibeSchemaType.String]: 'string',
-	[WibeSchemaType.Int]: 'number',
-	[WibeSchemaType.Float]: 'number',
-	[WibeSchemaType.Boolean]: 'boolean',
-	[WibeSchemaType.Date]: 'Date',
-	[WibeSchemaType.Array]: 'any[]',
+export interface ScalarInterface {
+	name: string
+	description?: string
+	parseValue?: (value: any) => any
+	serialize?: (value: any) => any
+	parseLiteral?: (ast: any) => any
+}
+
+export interface SchemaInterface {
+	class: ClassInterface[]
+	scalars?: ScalarInterface[]
+}
+
+const wibeTypeToTypeScriptType: Record<WibeDefaultTypes, string> = {
+	String: 'string',
+	Int: 'number',
+	Float: 'number',
+	Boolean: 'boolean',
+	Date: 'Date',
+	Array: 'any[]',
+}
+
+const getTypescriptFromWibeType = (type: WibeTypes) => {
+	if (wibeTypeToTypeScriptType[type as WibeDefaultTypes])
+		return wibeTypeToTypeScriptType[type as WibeDefaultTypes]
+
+	return type
 }
 
 export class Schema {
-	public schema: SchemaInterface[]
+	public schema: SchemaInterface
 
-	constructor(schema: SchemaInterface[]) {
+	constructor(schema: SchemaInterface) {
 		this.schema = schema
 	}
 
 	getTypesFromSchema() {
-		const wibeTypes = this.schema.map((schema) => {
+		const wibeClassTypes = this.schema.class.map((schema) => {
 			const fields = Object.keys(schema.fields)
 
-			const firstTypeScriptType =
-				wibeTypeToTypeScriptType[schema.fields[fields[0]].type]
+			const firstTypeScriptType = getTypescriptFromWibeType(
+				schema.fields[fields[0]].type,
+			)
 
 			if (!firstTypeScriptType)
 				throw new Error(
 					`Invalid type: ${schema.fields[fields[0]].type}`,
 				)
 
-			const res = fields.reduce(
+			const fieldsRes = fields.reduce(
 				(prev, current) => {
-					const WibeSchemaType = schema.fields[current].type
+					const wibeSchemaType = schema.fields[current].type
 					const typeScriptType =
-						wibeTypeToTypeScriptType[WibeSchemaType]
+						getTypescriptFromWibeType(wibeSchemaType)
 
 					if (!typeScriptType)
-						throw new Error(`Invalid type: ${WibeSchemaType}`)
+						throw new Error(`Invalid type: ${wibeSchemaType}`)
 
-					prev[current] = wibeTypeToTypeScriptType[WibeSchemaType]
+					prev[current] = getTypescriptFromWibeType(wibeSchemaType)
 
 					return prev
 				},
@@ -103,7 +127,7 @@ export class Schema {
 			)
 
 			const type = `export type ${schema.name} = ${JSON.stringify(
-				res,
+				fieldsRes,
 				null,
 				2,
 			)}`
@@ -111,7 +135,16 @@ export class Schema {
 			return type.replaceAll('"', '')
 		})
 
-		const allNames = this.schema.map((schema) => schema.name)
+		const listOfScalars =
+			this.schema.scalars?.map((scalar) => {
+				return `"${scalar.name}"`
+			}) || []
+
+		const wibeScalarTypes = [
+			`export type WibeSchemaScalars = ${listOfScalars.join(' | ')}`,
+		]
+
+		const allNames = this.schema.class.map((schema) => schema.name)
 		const globalWibeType = allNames.reduce(
 			(prev, current) => {
 				prev[current] = current
@@ -120,14 +153,16 @@ export class Schema {
 			{ [allNames[0]]: allNames[0] },
 		)
 
-		const globalWibeTypeString = `export type WibeTypes = ${JSON.stringify(
+		const globalWibeTypeString = `export type WibeSchemaTypes = ${JSON.stringify(
 			globalWibeType,
 			null,
 			2,
 		)}`
 
-		return [...wibeTypes, globalWibeTypeString.replaceAll('"', '')].join(
-			'\n',
-		)
+		return [
+			...wibeClassTypes,
+			...wibeScalarTypes,
+			globalWibeTypeString.replaceAll('"', ''),
+		].join('\n')
 	}
 }

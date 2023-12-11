@@ -7,7 +7,7 @@ import {
 	GraphQLScalarType,
 	GraphQLString,
 } from 'graphql'
-import { WibeSchemaType } from '../schema/Schema'
+import { WibeDefaultTypes, WibeTypes } from '../schema'
 
 export const AnyScalarType = new GraphQLScalarType({
 	name: 'Any',
@@ -25,6 +25,14 @@ export const DateScalarType = new GraphQLScalarType({
 	},
 	serialize(value: any) {
 		return value.getTime()
+	},
+})
+
+export const AnyWhereInput = new GraphQLInputObjectType({
+	name: 'AnyWhereInput',
+	fields: {
+		equalTo: { type: AnyScalarType },
+		notEqualTo: { type: AnyScalarType },
 	},
 })
 
@@ -98,17 +106,23 @@ export const BooleanWhereInput = new GraphQLInputObjectType({
 	},
 })
 
-const templateWhereInput: Record<WibeSchemaType, GraphQLInputObjectType> = {
-	[WibeSchemaType.String]: StringWhereInput,
-	[WibeSchemaType.Int]: IntWhereInput,
-	[WibeSchemaType.Float]: FloatWhereInput,
-	[WibeSchemaType.Boolean]: BooleanWhereInput,
-	[WibeSchemaType.Date]: DateWhereInput,
-	[WibeSchemaType.Array]: ArrayWhereInput,
+const templateWhereInput: Record<WibeDefaultTypes, GraphQLInputObjectType> = {
+	String: StringWhereInput,
+	Int: IntWhereInput,
+	Float: FloatWhereInput,
+	Boolean: BooleanWhereInput,
+	Date: DateWhereInput,
+	Array: ArrayWhereInput,
 }
 
 export const getWhereInputFromType = ({
 	wibeType,
 }: {
-	wibeType: WibeSchemaType
-}) => templateWhereInput[wibeType]
+	wibeType: WibeTypes
+}) => {
+	if (Object.keys(templateWhereInput).includes(wibeType))
+		// @ts-expect-error
+		templateWhereInput[wibeType]
+
+	return AnyWhereInput
+}

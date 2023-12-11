@@ -3,7 +3,6 @@ import { v4 as uuid } from 'uuid'
 import getPort from 'get-port'
 import { WibeApp } from '.'
 import { DatabaseEnum } from '../database'
-import { WibeSchemaType } from '../schema/Schema'
 
 describe('Server', () => {
 	it('should run server', async () => {
@@ -17,12 +16,14 @@ describe('Server', () => {
 				name: databaseId,
 			},
 			port,
-			schema: [
-				{
-					name: 'Collection1',
-					fields: { name: { type: WibeSchemaType.String } },
-				},
-			],
+			schema: {
+				class: [
+					{
+						name: 'Collection1',
+						fields: { name: { type: 'String' } },
+					},
+				],
+			},
 		})
 
 		await wibe.start()

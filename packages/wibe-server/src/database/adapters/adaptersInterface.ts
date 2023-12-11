@@ -1,8 +1,8 @@
 import { Document, WithId } from 'mongodb'
-import { WibeTypes } from '../../../generated/wibe'
+import { WibeSchemaTypes } from '../../../generated/wibe'
 
-type WhereAggregation<T extends keyof WibeTypes> = {
-	[key in keyof WibeTypes[T]]: {
+type WhereAggregation<T extends keyof WibeSchemaTypes> = {
+	[key in keyof WibeSchemaTypes[T]]: {
 		equalTo?: any
 		notEqualTo?: any
 		greaterThan?: any
@@ -16,12 +16,12 @@ type WhereAggregation<T extends keyof WibeTypes> = {
 	}
 }
 
-type WhereConditional<T extends keyof WibeTypes> = {
+type WhereConditional<T extends keyof WibeSchemaTypes> = {
 	OR?: Array<WhereType<T>>
 	AND?: Array<WhereType<T>>
 }
 
-export type WhereType<T extends keyof WibeTypes> = Partial<
+export type WhereType<T extends keyof WibeSchemaTypes> = Partial<
 	WhereAggregation<T>
 > &
 	WhereConditional<T>
@@ -31,53 +31,53 @@ export interface AdapterOptions {
 	databaseName: string
 }
 
-export interface GetObjectOptions<T extends keyof WibeTypes> {
+export interface GetObjectOptions<T extends keyof WibeSchemaTypes> {
 	className: string
 	id: string
-	fields: Array<keyof WibeTypes[T] | '*' | 'id'>
+	fields: Array<keyof WibeSchemaTypes[T] | '*' | 'id'>
 }
 
-export interface GetObjectsOptions<T extends keyof WibeTypes> {
+export interface GetObjectsOptions<T extends keyof WibeSchemaTypes> {
 	className: string
 	where?: WhereType<T>
-	fields: Array<keyof WibeTypes[T] | '*' | 'id'>
+	fields: Array<keyof WibeSchemaTypes[T] | '*' | 'id'>
 }
 
-export interface CreateObjectOptions<T extends keyof WibeTypes> {
+export interface CreateObjectOptions<T extends keyof WibeSchemaTypes> {
 	className: string
 	data: Record<string, any>
-	fields: Array<keyof WibeTypes[T] | '*' | 'id'>
+	fields: Array<keyof WibeSchemaTypes[T] | '*' | 'id'>
 }
-export interface CreateObjectsOptions<T extends keyof WibeTypes> {
+export interface CreateObjectsOptions<T extends keyof WibeSchemaTypes> {
 	className: string
 	data: Array<Record<string, any>>
-	fields: Array<keyof WibeTypes[T] | '*' | 'id'>
+	fields: Array<keyof WibeSchemaTypes[T] | '*' | 'id'>
 }
 
-export interface UpdateObjectOptions<T extends keyof WibeTypes> {
+export interface UpdateObjectOptions<T extends keyof WibeSchemaTypes> {
 	className: string
 	id: string
 	data: Record<string, any>
-	fields: Array<keyof WibeTypes[T] | '*' | 'id'>
+	fields: Array<keyof WibeSchemaTypes[T] | '*' | 'id'>
 }
 
-export interface UpdateObjectsOptions<T extends keyof WibeTypes> {
+export interface UpdateObjectsOptions<T extends keyof WibeSchemaTypes> {
 	className: string
 	where: WhereType<T>
 	data: Record<string, any>
-	fields: Array<keyof WibeTypes[T] | '*' | 'id'>
+	fields: Array<keyof WibeSchemaTypes[T] | '*' | 'id'>
 }
 
-export interface DeleteObjectOptions<T extends keyof WibeTypes> {
+export interface DeleteObjectOptions<T extends keyof WibeSchemaTypes> {
 	className: string
 	id: string
-	fields: Array<keyof WibeTypes[T] | '*' | 'id'>
+	fields: Array<keyof WibeSchemaTypes[T] | '*' | 'id'>
 }
 
-export interface DeleteObjectsOptions<T extends keyof WibeTypes> {
+export interface DeleteObjectsOptions<T extends keyof WibeSchemaTypes> {
 	className: string
 	where: WhereType<T>
-	fields: Array<keyof WibeTypes[T] | '*' | 'id'>
+	fields: Array<keyof WibeSchemaTypes[T] | '*' | 'id'>
 }
 
 // TODO : Type the return of the functions
@@ -87,31 +87,31 @@ export interface DatabaseAdapter {
 
 	createClass(className: string): Promise<any>
 
-	getObject<T extends keyof WibeTypes>(
+	getObject<T extends keyof WibeSchemaTypes>(
 		params: GetObjectOptions<T>,
 	): Promise<WithId<Document> | null>
-	getObjects<T extends keyof WibeTypes>(
+	getObjects<T extends keyof WibeSchemaTypes>(
 		params: GetObjectsOptions<T>,
 	): Promise<WithId<any>[]>
 
-	createObject<T extends keyof WibeTypes>(
+	createObject<T extends keyof WibeSchemaTypes>(
 		params: CreateObjectOptions<T>,
 	): Promise<any>
-	createObjects<T extends keyof WibeTypes>(
+	createObjects<T extends keyof WibeSchemaTypes>(
 		params: CreateObjectsOptions<T>,
 	): Promise<any>
 
-	updateObject<T extends keyof WibeTypes>(
+	updateObject<T extends keyof WibeSchemaTypes>(
 		params: UpdateObjectOptions<T>,
 	): Promise<any>
-	updateObjects<T extends keyof WibeTypes>(
+	updateObjects<T extends keyof WibeSchemaTypes>(
 		params: UpdateObjectsOptions<T>,
 	): Promise<any>
 
-	deleteObject<T extends keyof WibeTypes>(
+	deleteObject<T extends keyof WibeSchemaTypes>(
 		params: DeleteObjectOptions<T>,
 	): Promise<any>
-	deleteObjects<T extends keyof WibeTypes>(
+	deleteObjects<T extends keyof WibeSchemaTypes>(
 		params: DeleteObjectsOptions<T>,
 	): Promise<any>
 }

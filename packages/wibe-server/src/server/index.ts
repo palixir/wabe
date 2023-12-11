@@ -10,7 +10,7 @@ import { WibeGraphlQLSchema } from '../schema/WibeGraphQLSchema'
 
 interface WibeConfig {
 	port: number
-	schema: SchemaInterface[]
+	schema: SchemaInterface
 	database: DatabaseConfig
 }
 

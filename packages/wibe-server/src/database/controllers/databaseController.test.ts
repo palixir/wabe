@@ -8,7 +8,6 @@ import {
 	afterAll,
 } from 'bun:test'
 import { MongoAdapter } from '../adapters/MongoAdapter'
-import { DatabaseController } from './DatabaseController'
 import { closeTests, setupTests } from '../../utils/testHelper'
 import { WibeApp } from '../../server'
 

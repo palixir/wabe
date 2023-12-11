@@ -10,10 +10,18 @@ import {
 	GraphQLNonNull,
 	GraphQLObjectType,
 	GraphQLOutputType,
+	GraphQLScalarType,
 	GraphQLString,
 	GraphQLType,
 } from 'graphql'
-import { Resolver, Schema, SchemaFields, WibeSchemaType } from './Schema'
+import {
+	Resolver,
+	Schema,
+	SchemaFields,
+	SchemaInterface,
+	WibeDefaultTypes,
+	WibeTypes,
+} from './Schema'
 import {
 	mutationToCreateMultipleObjects,
 	mutationToCreateObject,
@@ -27,7 +35,7 @@ import {
 import { DateScalarType, getWhereInputFromType } from '../graphql'
 
 const templateTypeToGraphqlType: Record<
-	Exclude<WibeSchemaType, 'Array'>,
+	Exclude<WibeDefaultTypes, 'Array'>,
 	GraphQLType
 > = {
 	String: GraphQLString,
@@ -43,24 +51,43 @@ const wrapGraphQLTypeIn = ({
 }: {
 	required: boolean
 	type: GraphQLType
-}) => (required ? new GraphQLNonNull(type) : type)
+}) => {
+	return required ? new GraphQLNonNull(type) : type
+}
 
 // For the moment we not support array of array (for sql database it's tricky)
 const getGraphqlTypeFromTemplate = ({
 	wibeType,
 	typeValue,
+	schema,
 }: {
-	wibeType: WibeSchemaType
-	typeValue?: WibeSchemaType
+	wibeType: WibeTypes
+	typeValue?: WibeTypes
+	schema: SchemaInterface
 }) => {
-	if (wibeType === WibeSchemaType.Array) {
+	if (wibeType === 'Array') {
 		if (!typeValue) throw new Error('Type value not found')
-		if (typeValue === WibeSchemaType.Array)
+		if (typeValue === 'Array')
 			throw new Error('Array of array are not supported')
 
+		// Ignore this error because scalar are compute below
+		// @ts-expect-error
 		return new GraphQLList(templateTypeToGraphqlType[typeValue])
 	}
 
+	// Here we create all custom scalars
+	if (!Object.keys(templateTypeToGraphqlType).includes(wibeType)) {
+		const scalarInformations = schema.scalars?.find(
+			(scalar) => scalar.name === wibeType,
+		)
+
+		if (!scalarInformations) throw new Error(`Scalar ${wibeType} not found`)
+		console.log('ICI')
+		return new GraphQLScalarType({ ...scalarInformations })
+	}
+
+	// Ignore this error because scalar are compute above
+	// @ts-expect-error
 	return templateTypeToGraphqlType[wibeType]
 }
 
@@ -75,7 +102,7 @@ export class WibeGraphlQLSchema {
 	createSchema() {
 		if (!this.schemas) throw new Error('Schema not found')
 
-		const res = this.schemas.schema.reduce(
+		const queriesAndMutations = this.schemas.schema.class.reduce(
 			(previous, current) => {
 				const fields = current.fields
 
@@ -96,11 +123,11 @@ export class WibeGraphlQLSchema {
 										type: getGraphqlTypeFromTemplate({
 											wibeType: currentField.type,
 											typeValue:
-												currentField.type ===
-													WibeSchemaType.Array &&
+												currentField.type === 'Array' &&
 												currentField.typeValue
 													? currentField.typeValue
 													: undefined,
+											schema: this.schemas.schema,
 										}),
 									}),
 								}
@@ -147,12 +174,13 @@ export class WibeGraphlQLSchema {
 					},
 				})
 
-				const object = this.createObjectSchema(className, fields)
+				const object = this.createObjects(className, fields)
 				const defaultQueries = this.createDefaultQueriesSchema({
 					className,
 					whereInputType,
 					object,
 				})
+
 				const customQueries = this.createCustomResolvers({
 					resolvers: current.resolvers?.queries || {},
 				})
@@ -202,10 +230,10 @@ export class WibeGraphlQLSchema {
 			},
 		)
 
-		return res
+		return queriesAndMutations
 	}
 
-	createObjectSchema(className: string, fieldsOfObject: SchemaFields) {
+	createObjects(className: string, fieldsOfObject: SchemaFields) {
 		const res = Object.keys(fieldsOfObject).reduce(
 			(acc, fieldName) => {
 				const currentField = fieldsOfObject[fieldName]
@@ -216,10 +244,11 @@ export class WibeGraphlQLSchema {
 						type: getGraphqlTypeFromTemplate({
 							wibeType: currentField.type,
 							typeValue:
-								currentField.type === WibeSchemaType.Array &&
+								currentField.type === 'Array' &&
 								currentField.typeValue
 									? currentField.typeValue
 									: undefined,
+							schema: this.schemas.schema,
 						}),
 					}) as GraphQLInterfaceType,
 				}
@@ -254,6 +283,7 @@ export class WibeGraphlQLSchema {
 								required: !!currentArgs[argKey].required,
 								type: getGraphqlTypeFromTemplate({
 									wibeType: currentArgs[argKey].type,
+									schema: this.schemas.schema,
 								}),
 							}),
 						}
@@ -268,6 +298,7 @@ export class WibeGraphlQLSchema {
 						required,
 						type: getGraphqlTypeFromTemplate({
 							wibeType: currentQuery.type,
+							schema: this.schemas.schema,
 						}),
 					}) as GraphQLOutputType,
 					args,

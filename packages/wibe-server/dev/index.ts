@@ -1,7 +1,6 @@
 import { runDatabase } from 'wibe-mongodb-launcher'
 import { WibeApp } from '../src'
 import { DatabaseEnum } from '../src/database'
-import { WibeSchemaType } from '../src/schema/Schema'
 
 const run = async () => {
 	await runDatabase()
@@ -13,59 +12,73 @@ const run = async () => {
 			name: 'Wibe',
 		},
 		port: 3000,
-		schema: [
-			{
-				name: 'User',
-				fields: {
-					name: { type: WibeSchemaType.String },
-					age: { type: WibeSchemaType.Int },
-					isCool: { type: WibeSchemaType.Boolean },
-					birthDate: { type: WibeSchemaType.Date, required: true },
-					firstName: {
-						type: WibeSchemaType.Array,
-						typeValue: WibeSchemaType.String,
-						required: true,
-					},
-				},
-				resolvers: {
-					queries: {
-						helloWorld: {
-							type: WibeSchemaType.String,
-							args: {
-								name: {
-									type: WibeSchemaType.String,
-									required: true,
-								},
-							},
-							resolve: () => 'Hello World',
-						},
-					},
-					mutations: {
-						createMutation: {
-							type: WibeSchemaType.Boolean,
+		schema: {
+			class: [
+				{
+					name: 'User',
+					fields: {
+						name: { type: 'String' },
+						age: { type: 'Int' },
+						isCool: { type: 'Boolean' },
+						birthDate: {
+							type: 'Date',
 							required: true,
-							args: {
-								name: {
-									type: WibeSchemaType.Int,
-									required: true,
+						},
+						firstName: {
+							type: 'Array',
+							typeValue: 'String',
+							required: true,
+						},
+						phone: {
+							type: 'Phone',
+						},
+					},
+					resolvers: {
+						queries: {
+							helloWorld: {
+								type: 'String',
+								args: {
+									name: {
+										type: 'String',
+										required: true,
+									},
 								},
+								resolve: () => 'Hello World',
 							},
-							resolve: () => true,
+						},
+						mutations: {
+							createMutation: {
+								type: 'Boolean',
+								required: true,
+								args: {
+									name: {
+										type: 'Int',
+										required: true,
+									},
+								},
+								resolve: () => true,
+							},
 						},
 					},
 				},
-			},
-			{
-				name: 'Address',
-				fields: {
-					address1: { type: WibeSchemaType.String },
-					address2: { type: WibeSchemaType.String },
-					postalCode: { type: WibeSchemaType.String },
-					city: { type: WibeSchemaType.String },
-					country: { type: WibeSchemaType.String },
+				{
+					name: 'Address',
+					fields: {
+						address1: { type: 'String' },
+						address2: { type: 'String' },
+						postalCode: { type: 'String' },
+						city: { type: 'String' },
+						country: { type: 'String' },
+					},
 				},
-			},
-		],
+			],
+			scalars: [
+				{
+					name: 'Phone',
+					description: 'Phone custom scalar type',
+				},
+			],
+		},
 	})
 
 	await wibe.start()
