@@ -18,7 +18,6 @@ import {
 	Resolver,
 	Schema,
 	SchemaFields,
-	SchemaInterface,
 	WibeDefaultTypes,
 	WibeTypes,
 } from './Schema'
@@ -34,10 +33,7 @@ import {
 } from '../graphql'
 import { DateScalarType, getWhereInputFromType } from '../graphql'
 
-const templateTypeToGraphqlType: Record<
-	Exclude<WibeDefaultTypes, 'Array'>,
-	GraphQLType
-> = {
+const templateTypeToGraphqlType: Record<any, GraphQLType> = {
 	String: GraphQLString,
 	Int: GraphQLInt,
 	Float: GraphQLFloat,
@@ -70,17 +66,17 @@ const getGraphqlTypeFromTemplate = ({
 		if (typeValue === 'Array')
 			throw new Error('Array of array are not supported')
 
-		// Ignore this error because scalar are compute below
-		// @ts-expect-error
 		return new GraphQLList(templateTypeToGraphqlType[typeValue])
 	}
 
 	// Here we create all custom scalars
-	if (!Object.keys(templateTypeToGraphqlType).includes(wibeType))
-		return scalars.find((scalar) => scalar.name === wibeType)
+	if (!Object.keys(templateTypeToGraphqlType).includes(wibeType)) {
+		const scalarExist = scalars.find((scalar) => scalar.name === wibeType)
+		if (!scalarExist) throw new Error(`Scalar ${wibeType} not found`)
 
-	// Ignore this error because scalar are compute above
-	// @ts-expect-error
+		return scalarExist
+	}
+
 	return templateTypeToGraphqlType[wibeType]
 }
 
@@ -147,6 +143,7 @@ export class WibeGraphlQLSchema {
 								acc[fieldName] = {
 									type: getWhereInputFromType({
 										wibeType: typeOfObject,
+										scalars,
 									}),
 								}
 

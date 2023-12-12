@@ -106,7 +106,7 @@ export const BooleanWhereInput = new GraphQLInputObjectType({
 	},
 })
 
-const templateWhereInput: Record<WibeDefaultTypes, GraphQLInputObjectType> = {
+const templateWhereInput: Record<any, GraphQLInputObjectType> = {
 	String: StringWhereInput,
 	Int: IntWhereInput,
 	Float: FloatWhereInput,
@@ -117,12 +117,17 @@ const templateWhereInput: Record<WibeDefaultTypes, GraphQLInputObjectType> = {
 
 export const getWhereInputFromType = ({
 	wibeType,
+	scalars,
 }: {
 	wibeType: WibeTypes
+	scalars: GraphQLScalarType[]
 }) => {
-	if (Object.keys(templateWhereInput).includes(wibeType))
-		// @ts-expect-error
-		templateWhereInput[wibeType]
+	if (!Object.keys(templateWhereInput).includes(wibeType)) {
+		const scalarExist = scalars.find((scalar) => scalar.name === wibeType)
+		if (!scalarExist) throw new Error(`Scalar ${wibeType} not found`)
 
-	return AnyWhereInput
+		return AnyWhereInput
+	}
+
+	return templateWhereInput[wibeType]
 }

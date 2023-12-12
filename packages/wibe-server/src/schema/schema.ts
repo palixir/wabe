@@ -82,10 +82,7 @@ const wibeTypeToTypeScriptType: Record<WibeDefaultTypes, string> = {
 }
 
 const getTypescriptFromWibeType = (type: WibeTypes) => {
-	if (wibeTypeToTypeScriptType[type as WibeDefaultTypes])
-		return wibeTypeToTypeScriptType[type as WibeDefaultTypes]
-
-	return type
+	return wibeTypeToTypeScriptType[type as WibeDefaultTypes]
 }
 
 export class Schema {
