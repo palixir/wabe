@@ -75,14 +75,12 @@ const getGraphqlTypeFromTemplate = ({
 	// Here we create all custom scalars and all custom enum
 	if (!Object.keys(templateTypeToGraphqlType).includes(wibeType)) {
 		const scalarExist = scalars.find((scalar) => scalar.name === wibeType)
-		const enumExist = enums.find((e) => e.name === wibeType)
-
-		if (!scalarExist && !enumExist)
-			throw new Error(`${wibeType} not exist in schema`)
-
 		if (scalarExist) return scalarExist
 
-		return enumExist
+		const enumExist = enums.find((e) => e.name === wibeType)
+		if (enumExist) return enumExist
+
+		throw new Error(`${wibeType} not exist in schema`)
 	}
 
 	return templateTypeToGraphqlType[wibeType]
@@ -156,6 +154,7 @@ export class WibeGraphlQLSchema {
 									type: getWhereInputFromType({
 										wibeType: typeOfObject,
 										scalars,
+										enums,
 									}),
 								}
 

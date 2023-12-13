@@ -32,6 +32,15 @@ describe('Schema', () => {
 					description: 'Email custom scalar type',
 				},
 			],
+			enums: [
+				{
+					name: 'Role',
+					values: {
+						Admin: 'admin',
+						Member: 'member',
+					},
+				},
+			],
 		})
 	})
 
@@ -39,25 +48,7 @@ describe('Schema', () => {
 		const output = schema.getTypesFromSchema()
 
 		expect(output).toEqual(
-			'export type Collection1 = {\n  name: string,\n  age: number,\n  isReady: boolean\n}\nexport type WibeSchemaScalars = "Phone" | "Email"\nexport type WibeSchemaTypes = {\n  Collection1: Collection1\n}',
-		)
-	})
-
-	it('should not write schema with invalid schema', () => {
-		const invalidSchema = new Schema({
-			class: [
-				{
-					name: 'Collection1',
-					fields: {
-						// @ts-expect-error
-						invalidField: { type: 'tata', defaultValue: 'Lucas' },
-					},
-				},
-			],
-		})
-
-		expect(() => invalidSchema.getTypesFromSchema()).toThrow(
-			Error('Invalid type: tata'),
+			`export type Collection1 = {\n  name: string,\n  age: number,\n  isReady: boolean\n}\n\nexport type WibeSchemaScalars = "Phone" | "Email"\n\nexport enum Role {\n	Admin = 'admin',\n	Member = 'member',\n}\n\nexport type WibeSchemaEnums = "Role"\n\nexport type WibeSchemaTypes = {\n  Collection1: Collection1\n}`,
 		)
 	})
 })

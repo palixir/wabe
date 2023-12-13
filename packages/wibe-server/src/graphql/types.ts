@@ -1,5 +1,6 @@
 import {
 	GraphQLBoolean,
+	GraphQLEnumType,
 	GraphQLFloat,
 	GraphQLInputObjectType,
 	GraphQLInt,
@@ -118,13 +119,20 @@ const templateWhereInput: Record<any, GraphQLInputObjectType> = {
 export const getWhereInputFromType = ({
 	wibeType,
 	scalars,
+	enums,
 }: {
 	wibeType: WibeTypes
 	scalars: GraphQLScalarType[]
+	enums: GraphQLEnumType[]
 }) => {
 	if (!Object.keys(templateWhereInput).includes(wibeType)) {
 		const scalarExist = scalars.find((scalar) => scalar.name === wibeType)
-		if (!scalarExist) throw new Error(`Scalar ${wibeType} not found`)
+		const enumExist = enums.find((e) => e.name === wibeType)
+
+		if (!scalarExist && !enumExist)
+			throw new Error(`${wibeType} not exist in schema`)
+
+		if (scalarExist) return scalarExist
 
 		return AnyWhereInput
 	}

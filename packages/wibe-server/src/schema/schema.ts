@@ -1,4 +1,5 @@
-import { WibeSchemaScalars } from '../../generated/wibe'
+import { GraphQLEnumType } from 'graphql'
+import { WibeSchemaEnums, WibeSchemaScalars } from '../../generated/wibe'
 
 export type WibeDefaultTypes =
 	| 'String'
@@ -8,10 +9,10 @@ export type WibeDefaultTypes =
 	| 'Date'
 	| 'Array'
 
-export type WibeTypes = WibeSchemaScalars | WibeDefaultTypes
+export type WibeTypes = WibeSchemaScalars | WibeSchemaEnums | WibeDefaultTypes
 
 type TypeFieldBase<T, K extends WibeTypes> = {
-	type: K | WibeSchemaScalars
+	type: K | WibeSchemaScalars | WibeSchemaEnums
 	required?: boolean
 	defaultValue?: T
 }
@@ -78,7 +79,7 @@ export interface SchemaInterface {
 	enums?: EnumInterface[]
 }
 
-const wibeTypeToTypeScriptType: Record<WibeDefaultTypes, string> = {
+const wibeTypeToTypeScriptType: Record<any, string> = {
 	String: 'string',
 	Int: 'number',
 	Float: 'number',
@@ -87,8 +88,17 @@ const wibeTypeToTypeScriptType: Record<WibeDefaultTypes, string> = {
 	Array: 'any[]',
 }
 
-const getTypescriptFromWibeType = (type: WibeTypes) => {
-	return wibeTypeToTypeScriptType[type as WibeDefaultTypes]
+const getTypescriptFromWibeType = ({
+	type,
+	enums,
+}: { type: WibeTypes; enums: EnumInterface[] }) => {
+	const isEnum = enums.find((enumType) => enumType.name === type)
+	if (isEnum) return type
+
+	const typeScriptType = wibeTypeToTypeScriptType[type]
+	if (!typeScriptType) return 'any'
+
+	return typeScriptType
 }
 
 export class Schema {
@@ -102,25 +112,26 @@ export class Schema {
 		const wibeClassTypes = this.schema.class.map((schema) => {
 			const fields = Object.keys(schema.fields)
 
-			const firstTypeScriptType = getTypescriptFromWibeType(
-				schema.fields[fields[0]].type,
-			)
-
-			if (!firstTypeScriptType)
-				throw new Error(
-					`Invalid type: ${schema.fields[fields[0]].type}`,
-				)
+			const firstTypeScriptType = getTypescriptFromWibeType({
+				type: schema.fields[fields[0]].type,
+				enums: this.schema.enums || [],
+			})
 
 			const fieldsRes = fields.reduce(
 				(prev, current) => {
 					const wibeSchemaType = schema.fields[current].type
-					const typeScriptType =
-						getTypescriptFromWibeType(wibeSchemaType)
+					const typeScriptType = getTypescriptFromWibeType({
+						type: wibeSchemaType,
+						enums: this.schema.enums || [],
+					})
 
 					if (!typeScriptType)
 						throw new Error(`Invalid type: ${wibeSchemaType}`)
 
-					prev[current] = getTypescriptFromWibeType(wibeSchemaType)
+					prev[current] = getTypescriptFromWibeType({
+						type: wibeSchemaType,
+						enums: this.schema.enums || [],
+					})
 
 					return prev
 				},
@@ -139,13 +150,31 @@ export class Schema {
 		})
 
 		const listOfScalars =
-			this.schema.scalars?.map((scalar) => {
-				return `"${scalar.name}"`
+			this.schema.scalars?.map((scalar) => `"${scalar.name}"`) || []
+
+		const wibeScalarType = `export type WibeSchemaScalars = ${listOfScalars.join(
+			' | ',
+		)}`
+
+		const wibeEnumsTypes =
+			this.schema.enums?.map((wibeEnum) => {
+				const values = wibeEnum.values
+
+				const enumString = Object.keys(values)
+					.map((key) => {
+						return `\t${key} = '${values[key]}',`
+					})
+					.join('\n')
+
+				return `export enum ${wibeEnum.name} {\n${enumString}\n}`
 			}) || []
 
-		const wibeScalarTypes = [
-			`export type WibeSchemaScalars = ${listOfScalars.join(' | ')}`,
-		]
+		const wibeEnumsGlobalTypes =
+			this.schema.enums?.map((wibeEnum) => `"${wibeEnum.name}"`) || []
+
+		const wibeEnumsGlobalTypesString = `export type WibeSchemaEnums = ${wibeEnumsGlobalTypes.join(
+			' | ',
+		)}`
 
 		const allNames = this.schema.class.map((schema) => schema.name)
 		const globalWibeType = allNames.reduce(
@@ -164,8 +193,10 @@ export class Schema {
 
 		return [
 			...wibeClassTypes,
-			...wibeScalarTypes,
+			wibeScalarType,
+			...wibeEnumsTypes,
+			wibeEnumsGlobalTypesString,
 			globalWibeTypeString.replaceAll('"', ''),
-		].join('\n')
+		].join('\n\n')
 	}
 }

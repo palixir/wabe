@@ -32,6 +32,9 @@ const run = async () => {
 						phone: {
 							type: 'Phone',
 						},
+						role: {
+							type: 'Role',
+						},
 					},
 					resolvers: {
 						queries: {
