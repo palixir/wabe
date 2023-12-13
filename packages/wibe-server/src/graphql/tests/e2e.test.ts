@@ -133,6 +133,45 @@ describe('GraphQL : E2E', () => {
 		await closeTests(wibe)
 	})
 
+	it('should create user with a custom scalar (phone)', async () => {
+		await client.request<any>(graphql.createUsers, {
+			input: [{ name: 'Jack', phone: '+33577223355' }],
+		})
+
+		const { users } = await client.request<any>(graphql.users, {
+			where: {
+				phone: {
+					equalTo: '+33577223355',
+				},
+			},
+		})
+
+		expect(users.length).toEqual(1)
+		expect(users[0].name).toEqual('Jack')
+
+		const { users: users2 } = await client.request<any>(graphql.users, {
+			where: {
+				phone: {
+					notEqualTo: '+33577223355',
+				},
+			},
+		})
+
+		expect(users2.length).toEqual(2)
+		expect(users2).toEqual([
+			{
+				id: expect.anything(),
+				name: 'Lucas',
+				age: 23,
+			},
+			{
+				id: expect.anything(),
+				name: 'Jeanne',
+				age: 23,
+			},
+		])
+	})
+
 	it('should create custom query successfully', async () => {
 		// Test required field
 		expect(() => client.request<any>(graphql.customQuery, {})).toThrow()

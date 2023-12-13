@@ -1,5 +1,6 @@
 import {
 	GraphQLBoolean,
+	GraphQLEnumType,
 	GraphQLFieldConfig,
 	GraphQLFloat,
 	GraphQLID,
@@ -56,10 +57,12 @@ const getGraphqlTypeFromTemplate = ({
 	wibeType,
 	typeValue,
 	scalars,
+	enums,
 }: {
 	wibeType: WibeTypes
 	typeValue?: WibeTypes
 	scalars: GraphQLScalarType[]
+	enums: GraphQLEnumType[]
 }) => {
 	if (wibeType === 'Array') {
 		if (!typeValue) throw new Error('Type value not found')
@@ -69,12 +72,17 @@ const getGraphqlTypeFromTemplate = ({
 		return new GraphQLList(templateTypeToGraphqlType[typeValue])
 	}
 
-	// Here we create all custom scalars
+	// Here we create all custom scalars and all custom enum
 	if (!Object.keys(templateTypeToGraphqlType).includes(wibeType)) {
 		const scalarExist = scalars.find((scalar) => scalar.name === wibeType)
-		if (!scalarExist) throw new Error(`Scalar ${wibeType} not found`)
+		const enumExist = enums.find((e) => e.name === wibeType)
 
-		return scalarExist
+		if (!scalarExist && !enumExist)
+			throw new Error(`${wibeType} not exist in schema`)
+
+		if (scalarExist) return scalarExist
+
+		return enumExist
 	}
 
 	return templateTypeToGraphqlType[wibeType]
@@ -84,16 +92,19 @@ const getGraphqlTypeFromTemplate = ({
 export class WibeGraphlQLSchema {
 	private schemas: Schema
 	private customScalars: GraphQLScalarType[]
+	private customEnums: GraphQLEnumType[]
 
 	constructor(schemas: Schema) {
 		this.schemas = schemas
 		this.customScalars = []
+		this.customEnums = []
 	}
 
 	createSchema() {
 		if (!this.schemas) throw new Error('Schema not found')
 
 		const scalars = this.createScalars()
+		const enums = this.createEnums()
 
 		const queriesAndMutations = this.schemas.schema.class.reduce(
 			(previous, current) => {
@@ -121,6 +132,7 @@ export class WibeGraphlQLSchema {
 													? currentField.typeValue
 													: undefined,
 											scalars: this.customScalars,
+											enums: this.customEnums,
 										}),
 									}),
 								}
@@ -224,7 +236,7 @@ export class WibeGraphlQLSchema {
 			},
 		)
 
-		return { ...queriesAndMutations, scalars }
+		return { ...queriesAndMutations, scalars, enums }
 	}
 
 	createScalars() {
@@ -239,6 +251,31 @@ export class WibeGraphlQLSchema {
 		this.customScalars = scalars
 
 		return scalars
+	}
+
+	createEnums() {
+		const enums =
+			this.schemas.schema.enums?.map((wibeEnum) => {
+				const enumValues = wibeEnum.values
+
+				const values = Object.keys(enumValues).reduce(
+					(acc, value) => {
+						acc[value] = { value: enumValues[value] }
+
+						return acc
+					},
+					{} as Record<string, any>,
+				)
+
+				return new GraphQLEnumType({
+					name: wibeEnum.name,
+					values,
+				})
+			}) || []
+
+		this.customEnums = enums
+
+		return enums
 	}
 
 	createObjects(className: string, fieldsOfObject: SchemaFields) {
@@ -257,6 +294,7 @@ export class WibeGraphlQLSchema {
 									? currentField.typeValue
 									: undefined,
 							scalars: this.customScalars,
+							enums: this.customEnums,
 						}),
 					}) as GraphQLInterfaceType,
 				}
@@ -292,6 +330,7 @@ export class WibeGraphlQLSchema {
 								type: getGraphqlTypeFromTemplate({
 									wibeType: currentArgs[argKey].type,
 									scalars: this.customScalars,
+									enums: this.customEnums,
 								}),
 							}),
 						}
@@ -307,6 +346,7 @@ export class WibeGraphlQLSchema {
 						type: getGraphqlTypeFromTemplate({
 							wibeType: currentQuery.type,
 							scalars: this.customScalars,
+							enums: this.customEnums,
 						}),
 					}) as GraphQLOutputType,
 					args,

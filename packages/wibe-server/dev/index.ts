@@ -78,6 +78,15 @@ const run = async () => {
 					description: 'Phone custom scalar type',
 				},
 			],
+			enums: [
+				{
+					name: 'Role',
+					values: {
+						Admin: 'admin',
+						Member: 'member',
+					},
+				},
+			],
 		},
 	})
 

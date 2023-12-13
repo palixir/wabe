@@ -67,9 +67,15 @@ export interface ScalarInterface {
 	parseLiteral?: (ast: any) => any
 }
 
+export interface EnumInterface {
+	name: string
+	values: Record<string, string>
+}
+
 export interface SchemaInterface {
 	class: ClassInterface[]
 	scalars?: ScalarInterface[]
+	enums?: EnumInterface[]
 }
 
 const wibeTypeToTypeScriptType: Record<WibeDefaultTypes, string> = {

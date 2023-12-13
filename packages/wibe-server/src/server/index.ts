@@ -53,7 +53,7 @@ export class WibeApp {
 				name: 'Mutation',
 				fields: types.mutations,
 			}),
-			types: types.scalars,
+			types: [...types.scalars, ...types.enums],
 		})
 
 		this.server.use(await apollo({ schema }))
