@@ -35,26 +35,29 @@ const run = async () => {
 						role: {
 							type: 'Role',
 						},
-						// address: {
-						// 	type: 'Object',
-						// 	fields: {
-						// 		address1: {
-						// 			type: 'String',
-						// 		},
-						// 		address2: {
-						// 			type: 'String',
-						// 		},
-						// 		postalCode: {
-						// 			type: 'Int',
-						// 		},
-						// 		city: {
-						// 			type: 'String',
-						// 		},
-						// 		country: {
-						// 			type: 'String',
-						// 		},
-						// 	},
-						// },
+						address: {
+							type: 'Object',
+							object: {
+								name: 'Address',
+								fields: {
+									address1: {
+										type: 'String',
+									},
+									address2: {
+										type: 'String',
+									},
+									postalCode: {
+										type: 'Int',
+									},
+									city: {
+										type: 'String',
+									},
+									country: {
+										type: 'String',
+									},
+								},
+							},
+						},
 					},
 					resolvers: {
 						queries: {

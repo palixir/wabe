@@ -6,6 +6,7 @@ import {
 	GraphQLInt,
 	GraphQLList,
 	GraphQLNonNull,
+	GraphQLObjectType,
 	GraphQLScalarType,
 	GraphQLString,
 	GraphQLType,
@@ -51,11 +52,15 @@ export const wrapGraphQLTypeIn = ({
 export const getGraphqlTypeFromTemplate = ({
 	scalars,
 	enums,
+	objects,
 	field,
+	fieldName,
 }: {
+	fieldName: string
 	field: TypeField
 	scalars: GraphQLScalarType[]
 	enums: GraphQLEnumType[]
+	objects: GraphQLObjectType[]
 }) => {
 	if (field.type === 'Array') {
 		if (!field.typeValue) throw new Error('Type value not found')

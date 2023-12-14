@@ -33,7 +33,7 @@ export type TypeField =
 	| {
 			type: 'Object'
 			required?: boolean
-			fields: SchemaFields
+			object: ClassInterface
 	  }
 
 export type SchemaFields = Record<string, TypeField>

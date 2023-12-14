@@ -10,7 +10,7 @@ import {
 	GraphQLOutputType,
 	GraphQLScalarType,
 } from 'graphql'
-import { Resolver, Schema, TypeField, } from './Schema'
+import { ClassInterface, Resolver, Schema, TypeField } from './Schema'
 import {
 	mutationToCreateMultipleObjects,
 	mutationToCreateObject,
@@ -46,7 +46,7 @@ export class WibeGraphlQLSchema {
 
 		const scalars = this.createScalars()
 		const enums = this.createEnums()
-		const objects = this.createObjects()
+		this.createObjects()
 
 		const queriesAndMutations = this.schemas.schema.class.reduce(
 			(previous, current) => {
@@ -67,6 +67,8 @@ export class WibeGraphlQLSchema {
 									type: wrapGraphQLTypeIn({
 										required: !!currentField.required,
 										type: getGraphqlTypeFromTemplate({
+											fieldName: fieldName,
+											objects: this.objects,
 											field: currentField,
 											scalars: this.customScalars,
 											enums: this.customEnums,
@@ -118,7 +120,7 @@ export class WibeGraphlQLSchema {
 					},
 				})
 
-				const object = objects.find((o) => o.name === className)
+				const object = this.objects.find((o) => o.name === className)
 				if (!object) throw new Error(`Object ${className} not found`)
 
 				// Queries
@@ -176,7 +178,7 @@ export class WibeGraphlQLSchema {
 			},
 		)
 
-		return { ...queriesAndMutations, scalars, enums, objects }
+		return { ...queriesAndMutations, scalars, enums, objects: this.objects }
 	}
 
 	createScalars() {
@@ -218,42 +220,53 @@ export class WibeGraphlQLSchema {
 		return enums
 	}
 
-	createObjects() {
-		const objects = this.schemas.schema.class.map((wibeClass) => {
-			const fields = wibeClass.fields
-			const fieldsOfObjectKeys = Object.keys(fields)
-			const className = wibeClass.name.replace(' ', '')
+	createObject(wibeClass: ClassInterface) {
+		const { name, fields } = wibeClass
 
-			const graphqlFields = fieldsOfObjectKeys.reduce(
-				(acc, fieldName) => {
-					const currentField = fields[fieldName]
+		const fieldsOfObjectKeys = Object.keys(fields)
+		const className = name.replace(' ', '')
 
-					acc[fieldName] = {
-						type: wrapGraphQLTypeIn({
-							required: !!currentField.required,
-							type: getGraphqlTypeFromTemplate({
-								field: currentField,
-								scalars: this.customScalars,
-								enums: this.customEnums,
-							}),
-						}) as GraphQLInterfaceType,
-					}
+		const graphqlFields = fieldsOfObjectKeys.reduce(
+			(acc, fieldName) => {
+				const currentField = fields[fieldName]
 
-					return acc
-				},
-				{} as Record<string, GraphQLFieldConfig<any, any, any>>,
-			)
+				if (currentField.type === 'Object') {
+					this.createObject(currentField.object)
+				}
 
-			return new GraphQLObjectType({
-				name: className,
-				fields: () => ({
-					id: { type: GraphQLID },
-					...graphqlFields,
-				}),
-			})
+				acc[fieldName] = {
+					type: wrapGraphQLTypeIn({
+						required: !!currentField.required,
+						type: getGraphqlTypeFromTemplate({
+							fieldName: fieldName,
+							objects: this.objects,
+							field: currentField,
+							scalars: this.customScalars,
+							enums: this.customEnums,
+						}),
+					}) as GraphQLInterfaceType,
+				}
+
+				return acc
+			},
+			{} as Record<string, GraphQLFieldConfig<any, any, any>>,
+		)
+
+		const object = new GraphQLObjectType({
+			name: className,
+			fields: () => ({
+				id: { type: GraphQLID },
+				...graphqlFields,
+			}),
 		})
 
-		return objects
+		this.objects.push(object)
+	}
+
+	createObjects() {
+		this.schemas.schema.class.map((wibeClass) =>
+			this.createObject(wibeClass),
+		)
 	}
 
 	createCustomResolvers({
@@ -274,6 +287,8 @@ export class WibeGraphlQLSchema {
 							type: wrapGraphQLTypeIn({
 								required: !!currentArgs[argKey].required,
 								type: getGraphqlTypeFromTemplate({
+									fieldName: argKey,
+									objects: this.objects,
 									field: currentArgs[argKey] as TypeField,
 									scalars: this.customScalars,
 									enums: this.customEnums,
@@ -290,6 +305,8 @@ export class WibeGraphlQLSchema {
 					type: wrapGraphQLTypeIn({
 						required,
 						type: getGraphqlTypeFromTemplate({
+							fieldName: currentKey,
+							objects: this.objects,
 							field: currentQuery as TypeField,
 							scalars: this.customScalars,
 							enums: this.customEnums,
