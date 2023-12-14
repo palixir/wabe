@@ -39,6 +39,9 @@ export const setupTests = async () => {
 						phone: {
 							type: 'Phone',
 						},
+						role: {
+							type: 'Role',
+						},
 					},
 					resolvers: {
 						queries: {
@@ -77,6 +80,15 @@ export const setupTests = async () => {
 				{
 					name: 'Phone',
 					description: 'Phone scalar',
+				},
+			],
+			enums: [
+				{
+					name: 'Role',
+					values: {
+						Admin: 'Admin',
+						Member: 'Member',
+					},
 				},
 			],
 		},

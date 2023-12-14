@@ -15,6 +15,7 @@ import {
 	setupTests,
 } from '../../utils/testHelper'
 import { GraphQLClient } from 'graphql-request'
+import { Role } from '../../../generated/wibe'
 
 const graphql = {
 	customQuery: gql`
@@ -131,6 +132,45 @@ describe('GraphQL : E2E', () => {
 
 	afterAll(async () => {
 		await closeTests(wibe)
+	})
+
+	it('should create user with custom enum (Role)', async () => {
+		await client.request<any>(graphql.createUsers, {
+			input: [{ name: 'Jack', role: Role.Admin }],
+		})
+
+		const { users } = await client.request<any>(graphql.users, {
+			where: {
+				role: {
+					equalTo: Role.Admin,
+				},
+			},
+		})
+
+		expect(users.length).toEqual(1)
+		expect(users[0].name).toEqual('Jack')
+
+		const { users: users2 } = await client.request<any>(graphql.users, {
+			where: {
+				role: {
+					notEqualTo: Role.Admin,
+				},
+			},
+		})
+
+		expect(users2.length).toEqual(2)
+		expect(users2).toEqual([
+			{
+				id: expect.anything(),
+				name: 'Lucas',
+				age: 23,
+			},
+			{
+				id: expect.anything(),
+				name: 'Jeanne',
+				age: 23,
+			},
+		])
 	})
 
 	it('should create user with a custom scalar (phone)', async () => {
