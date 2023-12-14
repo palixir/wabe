@@ -138,8 +138,8 @@ describe('Mongo adapter', () => {
 		)
 		cloneMongoAdapter.database = undefined
 
-		expect(async () => await cloneMongoAdapter.createClass('User')).toThrow(
-			Error('Connection to database is not established'),
+		expect(cloneMongoAdapter.createClass('User')).rejects.toThrow(
+			'Connection to database is not established',
 		)
 	})
 

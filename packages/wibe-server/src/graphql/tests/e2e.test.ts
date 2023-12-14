@@ -174,14 +174,14 @@ describe('GraphQL : E2E', () => {
 
 	it('should create custom query successfully', async () => {
 		// Test required field
-		expect(() => client.request<any>(graphql.customQuery, {})).toThrow()
+		expect(client.request<any>(graphql.customQuery, {})).rejects.toThrow()
 
 		// Test String param is correctly passed
-		expect(() =>
+		expect(
 			client.request<any>(graphql.customMutation, {
 				name: 1.5,
 			}),
-		).toThrow()
+		).rejects.toThrow()
 
 		const res = await client.request<any>(graphql.customQuery, {
 			name: 'Lucas',
@@ -192,15 +192,17 @@ describe('GraphQL : E2E', () => {
 
 	it('should create custom mutation successfully', async () => {
 		// Test required field
-		expect(() => client.request<any>(graphql.customMutation, {})).toThrow()
+		expect(
+			client.request<any>(graphql.customMutation, {}),
+		).rejects.toThrow()
 
 		// Test Int param is correctly passed
-		expect(() =>
+		expect(
 			client.request<any>(graphql.customMutation, {
 				a: 1.5,
 				b: 1.5,
 			}),
-		).toThrow()
+		).rejects.toThrow()
 
 		const res = await client.request<any>(graphql.customMutation, {
 			a: 1,
@@ -211,11 +213,11 @@ describe('GraphQL : E2E', () => {
 	})
 
 	it('should throw an error if a field is required and not provided', async () => {
-		expect(() =>
+		expect(
 			client.request<any>(graphql.createUsers, {
 				input: [{ age: 23 }],
 			}),
-		).toThrow()
+		).rejects.toThrow()
 	})
 
 	it('should get an object that not exist', async () => {
