@@ -35,6 +35,26 @@ const run = async () => {
 						role: {
 							type: 'Role',
 						},
+						// address: {
+						// 	type: 'Object',
+						// 	fields: {
+						// 		address1: {
+						// 			type: 'String',
+						// 		},
+						// 		address2: {
+						// 			type: 'String',
+						// 		},
+						// 		postalCode: {
+						// 			type: 'Int',
+						// 		},
+						// 		city: {
+						// 			type: 'String',
+						// 		},
+						// 		country: {
+						// 			type: 'String',
+						// 		},
+						// 	},
+						// },
 					},
 					resolvers: {
 						queries: {
@@ -62,16 +82,6 @@ const run = async () => {
 								resolve: () => true,
 							},
 						},
-					},
-				},
-				{
-					name: 'Address',
-					fields: {
-						address1: { type: 'String' },
-						address2: { type: 'String' },
-						postalCode: { type: 'String' },
-						city: { type: 'String' },
-						country: { type: 'String' },
 					},
 				},
 			],

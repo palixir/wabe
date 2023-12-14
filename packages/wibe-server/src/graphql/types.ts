@@ -8,7 +8,7 @@ import {
 	GraphQLScalarType,
 	GraphQLString,
 } from 'graphql'
-import { WibeDefaultTypes, WibeTypes } from '../schema'
+import { WibeTypes } from '../schema'
 
 export const AnyScalarType = new GraphQLScalarType({
 	name: 'Any',

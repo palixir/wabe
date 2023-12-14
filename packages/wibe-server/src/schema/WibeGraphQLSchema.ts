@@ -15,13 +15,7 @@ import {
 	GraphQLString,
 	GraphQLType,
 } from 'graphql'
-import {
-	Resolver,
-	Schema,
-	SchemaFields,
-	WibeDefaultTypes,
-	WibeTypes,
-} from './Schema'
+import { Resolver, Schema, WibeTypes } from './Schema'
 import {
 	mutationToCreateMultipleObjects,
 	mutationToCreateObject,
@@ -89,11 +83,13 @@ const getGraphqlTypeFromTemplate = ({
 // This class is tested in e2e test in graphql folder
 export class WibeGraphlQLSchema {
 	private schemas: Schema
+	private objects: GraphQLObjectType[]
 	private customScalars: GraphQLScalarType[]
 	private customEnums: GraphQLEnumType[]
 
 	constructor(schemas: Schema) {
 		this.schemas = schemas
+		this.objects = []
 		this.customScalars = []
 		this.customEnums = []
 	}
@@ -103,6 +99,7 @@ export class WibeGraphlQLSchema {
 
 		const scalars = this.createScalars()
 		const enums = this.createEnums()
+		const objects = this.createObjects()
 
 		const queriesAndMutations = this.schemas.schema.class.reduce(
 			(previous, current) => {
@@ -179,21 +176,23 @@ export class WibeGraphlQLSchema {
 					},
 				})
 
-				const object = this.createObjects(className, fields)
+				const object = objects.find((o) => o.name === className)
+				if (!object) throw new Error(`Object ${className} not found`)
+
+				// Queries
 				const defaultQueries = this.createDefaultQueriesSchema({
 					className,
 					whereInputType,
 					object,
 				})
-
 				const customQueries = this.createCustomResolvers({
 					resolvers: current.resolvers?.queries || {},
 				})
 
+				// Mutations
 				const customMutations = this.createCustomResolvers({
 					resolvers: current.resolvers?.mutations || {},
 				})
-
 				const defaultMutations = this.createDefaultMutationsSchema({
 					className,
 					defaultInputType,
@@ -235,7 +234,7 @@ export class WibeGraphlQLSchema {
 			},
 		)
 
-		return { ...queriesAndMutations, scalars, enums }
+		return { ...queriesAndMutations, scalars, enums, objects }
 	}
 
 	createScalars() {
@@ -277,36 +276,47 @@ export class WibeGraphlQLSchema {
 		return enums
 	}
 
-	createObjects(className: string, fieldsOfObject: SchemaFields) {
-		const res = Object.keys(fieldsOfObject).reduce(
-			(acc, fieldName) => {
-				const currentField = fieldsOfObject[fieldName]
+	createObjects() {
+		const objects = this.schemas.schema.class.map((wibeClass) => {
+			const fields = wibeClass.fields
+			const fieldsOfObjectKeys = Object.keys(fields)
+			const className = wibeClass.name.replace(' ', '')
 
-				acc[fieldName] = {
-					type: wrapGraphQLTypeIn({
-						required: !!currentField.required,
-						type: getGraphqlTypeFromTemplate({
-							wibeType: currentField.type,
-							typeValue:
-								currentField.type === 'Array' &&
-								currentField.typeValue
-									? currentField.typeValue
-									: undefined,
-							scalars: this.customScalars,
-							enums: this.customEnums,
-						}),
-					}) as GraphQLInterfaceType,
-				}
+			const graphqlFields = fieldsOfObjectKeys.reduce(
+				(acc, fieldName) => {
+					const currentField = fields[fieldName]
 
-				return acc
-			},
-			{} as Record<string, GraphQLFieldConfig<any, any, any>>,
-		)
+					acc[fieldName] = {
+						type: wrapGraphQLTypeIn({
+							required: !!currentField.required,
+							type: getGraphqlTypeFromTemplate({
+								wibeType: currentField.type,
+								typeValue:
+									currentField.type === 'Array' &&
+									currentField.typeValue
+										? currentField.typeValue
+										: undefined,
+								scalars: this.customScalars,
+								enums: this.customEnums,
+							}),
+						}) as GraphQLInterfaceType,
+					}
 
-		return new GraphQLObjectType({
-			name: className,
-			fields: { id: { type: GraphQLID }, ...res },
+					return acc
+				},
+				{} as Record<string, GraphQLFieldConfig<any, any, any>>,
+			)
+
+			return new GraphQLObjectType({
+				name: className,
+				fields: () => ({
+					id: { type: GraphQLID },
+					...graphqlFields,
+				}),
+			})
 		})
+
+		return objects
 	}
 
 	createCustomResolvers({

@@ -1,4 +1,3 @@
-import { GraphQLEnumType } from 'graphql'
 import { WibeSchemaEnums, WibeSchemaScalars } from '../../generated/wibe'
 
 export type WibeDefaultTypes =
@@ -8,6 +7,7 @@ export type WibeDefaultTypes =
 	| 'Boolean'
 	| 'Date'
 	| 'Array'
+	| 'Object'
 
 export type WibeTypes = WibeSchemaScalars | WibeSchemaEnums | WibeDefaultTypes
 
@@ -29,6 +29,11 @@ export type TypeField =
 			required?: boolean
 			defaultValue?: any[]
 			typeValue: WibeTypes
+	  }
+	| {
+			type: 'Object'
+			required?: boolean
+			fields: SchemaFields
 	  }
 
 export type SchemaFields = Record<string, TypeField>
