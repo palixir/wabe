@@ -1,6 +1,5 @@
 import {
 	GraphQLBoolean,
-	GraphQLEnumType,
 	GraphQLFloat,
 	GraphQLInputObjectType,
 	GraphQLInt,
@@ -8,7 +7,6 @@ import {
 	GraphQLScalarType,
 	GraphQLString,
 } from 'graphql'
-import { WibeTypes } from '../schema'
 
 export const AnyScalarType = new GraphQLScalarType({
 	name: 'Any',
@@ -106,36 +104,3 @@ export const BooleanWhereInput = new GraphQLInputObjectType({
 		notEqualTo: { type: GraphQLBoolean },
 	},
 })
-
-const templateWhereInput: Record<any, GraphQLInputObjectType> = {
-	String: StringWhereInput,
-	Int: IntWhereInput,
-	Float: FloatWhereInput,
-	Boolean: BooleanWhereInput,
-	Date: DateWhereInput,
-	Array: ArrayWhereInput,
-}
-
-export const getWhereInputFromType = ({
-	wibeType,
-	scalars,
-	enums,
-}: {
-	wibeType: WibeTypes
-	scalars: GraphQLScalarType[]
-	enums: GraphQLEnumType[]
-}) => {
-	if (!Object.keys(templateWhereInput).includes(wibeType)) {
-		const scalarExist = scalars.find((scalar) => scalar.name === wibeType)
-		const enumExist = enums.find((e) => e.name === wibeType)
-
-		if (!scalarExist && !enumExist)
-			throw new Error(`${wibeType} not exist in schema`)
-
-		if (scalarExist) return scalarExist
-
-		return AnyWhereInput
-	}
-
-	return templateWhereInput[wibeType]
-}

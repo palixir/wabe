@@ -1,21 +1,16 @@
 import {
-	GraphQLBoolean,
 	GraphQLEnumType,
 	GraphQLFieldConfig,
-	GraphQLFloat,
 	GraphQLID,
 	GraphQLInputObjectType,
-	GraphQLInt,
 	GraphQLInterfaceType,
 	GraphQLList,
 	GraphQLNonNull,
 	GraphQLObjectType,
 	GraphQLOutputType,
 	GraphQLScalarType,
-	GraphQLString,
-	GraphQLType,
 } from 'graphql'
-import { Resolver, Schema, WibeTypes } from './Schema'
+import { Resolver, Schema, TypeField, } from './Schema'
 import {
 	mutationToCreateMultipleObjects,
 	mutationToCreateObject,
@@ -26,59 +21,11 @@ import {
 	queryForMultipleObject,
 	queryForOneObject,
 } from '../graphql'
-import { DateScalarType, getWhereInputFromType } from '../graphql'
-
-const templateTypeToGraphqlType: Record<any, GraphQLType> = {
-	String: GraphQLString,
-	Int: GraphQLInt,
-	Float: GraphQLFloat,
-	Boolean: GraphQLBoolean,
-	Date: DateScalarType,
-}
-
-const wrapGraphQLTypeIn = ({
-	required,
-	type,
-}: {
-	required: boolean
-	type: GraphQLType
-}) => {
-	return required ? new GraphQLNonNull(type) : type
-}
-
-// For the moment we not support array of array (for sql database it's tricky)
-const getGraphqlTypeFromTemplate = ({
-	wibeType,
-	typeValue,
-	scalars,
-	enums,
-}: {
-	wibeType: WibeTypes
-	typeValue?: WibeTypes
-	scalars: GraphQLScalarType[]
-	enums: GraphQLEnumType[]
-}) => {
-	if (wibeType === 'Array') {
-		if (!typeValue) throw new Error('Type value not found')
-		if (typeValue === 'Array')
-			throw new Error('Array of array are not supported')
-
-		return new GraphQLList(templateTypeToGraphqlType[typeValue])
-	}
-
-	// Here we create all custom scalars and all custom enum
-	if (!Object.keys(templateTypeToGraphqlType).includes(wibeType)) {
-		const scalarExist = scalars.find((scalar) => scalar.name === wibeType)
-		if (scalarExist) return scalarExist
-
-		const enumExist = enums.find((e) => e.name === wibeType)
-		if (enumExist) return enumExist
-
-		throw new Error(`${wibeType} not exist in schema`)
-	}
-
-	return templateTypeToGraphqlType[wibeType]
-}
+import {
+	getGraphqlTypeFromTemplate,
+	getWhereInputFromType,
+	wrapGraphQLTypeIn,
+} from './utils'
 
 // This class is tested in e2e test in graphql folder
 export class WibeGraphlQLSchema {
@@ -120,12 +67,7 @@ export class WibeGraphlQLSchema {
 									type: wrapGraphQLTypeIn({
 										required: !!currentField.required,
 										type: getGraphqlTypeFromTemplate({
-											wibeType: currentField.type,
-											typeValue:
-												currentField.type === 'Array' &&
-												currentField.typeValue
-													? currentField.typeValue
-													: undefined,
+											field: currentField,
 											scalars: this.customScalars,
 											enums: this.customEnums,
 										}),
@@ -290,12 +232,7 @@ export class WibeGraphlQLSchema {
 						type: wrapGraphQLTypeIn({
 							required: !!currentField.required,
 							type: getGraphqlTypeFromTemplate({
-								wibeType: currentField.type,
-								typeValue:
-									currentField.type === 'Array' &&
-									currentField.typeValue
-										? currentField.typeValue
-										: undefined,
+								field: currentField,
 								scalars: this.customScalars,
 								enums: this.customEnums,
 							}),
@@ -337,7 +274,7 @@ export class WibeGraphlQLSchema {
 							type: wrapGraphQLTypeIn({
 								required: !!currentArgs[argKey].required,
 								type: getGraphqlTypeFromTemplate({
-									wibeType: currentArgs[argKey].type,
+									field: currentArgs[argKey] as TypeField,
 									scalars: this.customScalars,
 									enums: this.customEnums,
 								}),
@@ -353,7 +290,7 @@ export class WibeGraphlQLSchema {
 					type: wrapGraphQLTypeIn({
 						required,
 						type: getGraphqlTypeFromTemplate({
-							wibeType: currentQuery.type,
+							field: currentQuery as TypeField,
 							scalars: this.customScalars,
 							enums: this.customEnums,
 						}),
