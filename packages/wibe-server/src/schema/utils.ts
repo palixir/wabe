@@ -107,3 +107,140 @@ export const getWhereInputFromType = ({
 
 	return templateWhereInput[wibeType]
 }
+
+export const getDefaultInputType = ({
+	fields,
+	fieldsOfObjectKeys,
+	objects,
+	scalars,
+	enums,
+	className,
+}: {
+	className: string
+	fieldsOfObjectKeys: string[]
+	fields: SchemaFields
+	objects: GraphQLObjectType[]
+	scalars: GraphQLScalarType[]
+	enums: GraphQLEnumType[]
+}) => {
+	const defaultInputType = new GraphQLInputObjectType({
+		name: `${className}Input`,
+		fields: () => {
+			return fieldsOfObjectKeys.reduce(
+				(acc, fieldName) => {
+					const currentField = fields[fieldName]
+
+					if (currentField.type === 'Object') {
+						acc[fieldName] = {
+							type: wrapGraphQLTypeIn({
+								required: !!currentField.required,
+								type: getDefaultInputType({
+									fields: currentField.object.fields,
+									fieldsOfObjectKeys: Object.keys(
+										currentField.object.fields,
+									),
+									objects,
+									scalars,
+									enums,
+									className: currentField.object.name,
+								}),
+							}),
+						}
+
+						return acc
+					}
+
+					acc[fieldName] = {
+						type: wrapGraphQLTypeIn({
+							required: !!currentField.required,
+							type: getGraphqlTypeFromTemplate({
+								fieldName: fieldName,
+								objects: objects,
+								field: currentField,
+								scalars,
+								enums,
+							}),
+						}),
+					}
+
+					return acc
+				},
+				{} as Record<string, any>,
+			)
+		},
+	})
+
+	return defaultInputType
+}
+
+export const getWhereInputType = ({
+	fields,
+	fieldsOfObjectKeys,
+	objects,
+	scalars,
+	enums,
+	className,
+}: {
+	className: string
+	fieldsOfObjectKeys: string[]
+	fields: SchemaFields
+	objects: GraphQLObjectType[]
+	scalars: GraphQLScalarType[]
+	enums: GraphQLEnumType[]
+}) => {
+	const whereInputType = new GraphQLInputObjectType({
+		name: `${className}WhereInput`,
+		fields: () => {
+			const whereInputObject = fieldsOfObjectKeys.reduce(
+				(acc, fieldName) => {
+					const currentField = fields[fieldName]
+					const typeOfObject = currentField.type
+
+					if (currentField.type === 'Object') {
+						acc[fieldName] = {
+							type: getWhereInputType({
+								fields: currentField.object.fields,
+								fieldsOfObjectKeys: Object.keys(
+									currentField.object.fields,
+								),
+								objects,
+								scalars,
+								enums,
+								className: currentField.object.name,
+							}),
+						}
+
+						return acc
+					}
+
+					acc[fieldName] = {
+						type: getWhereInputFromType({
+							wibeType: typeOfObject,
+							scalars,
+							enums,
+						}),
+					}
+
+					return acc
+				},
+				{} as Record<string, any>,
+			)
+
+			const conditionFields: Record<string, any> = {
+				OR: {
+					type: new GraphQLList(whereInputType),
+				},
+				AND: {
+					type: new GraphQLList(whereInputType),
+				},
+			}
+
+			return {
+				...whereInputObject,
+				...conditionFields,
+			} as Record<string, any>
+		},
+	})
+
+	return whereInputType
+}

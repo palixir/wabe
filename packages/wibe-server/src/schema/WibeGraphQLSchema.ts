@@ -22,8 +22,9 @@ import {
 	queryForOneObject,
 } from '../graphql'
 import {
+	getDefaultInputType,
 	getGraphqlTypeFromTemplate,
-	getWhereInputFromType,
+	getWhereInputType,
 	wrapGraphQLTypeIn,
 } from './utils'
 
@@ -56,81 +57,22 @@ export class WibeGraphlQLSchema {
 
 				const fieldsOfObjectKeys = Object.keys(fields)
 
-				const defaultInputType = new GraphQLInputObjectType({
-					name: `${className}CreateInput`,
-					fields: () => {
-						return fieldsOfObjectKeys.reduce(
-							(acc, fieldName) => {
-								const currentField = fields[fieldName]
-
-								if (currentField.type === 'Object') {
-									acc[fieldName] = {
-										type: currentField.object.name,
-									}
-
-									return acc
-								}
-
-								acc[fieldName] = {
-									type: wrapGraphQLTypeIn({
-										required: !!currentField.required,
-										type: getGraphqlTypeFromTemplate({
-											fieldName: fieldName,
-											objects: this.objects,
-											field: currentField,
-											scalars: this.customScalars,
-											enums: this.customEnums,
-										}),
-									}),
-								}
-
-								return acc
-							},
-							{} as Record<string, any>,
-						)
-					},
+				const defaultInputType = getDefaultInputType({
+					fields,
+					fieldsOfObjectKeys,
+					objects: this.objects,
+					scalars,
+					enums,
+					className,
 				})
 
-				const whereInputType = new GraphQLInputObjectType({
-					name: `${className}WhereInput`,
-					fields: () => {
-						const whereInputObject = fieldsOfObjectKeys.reduce(
-							(acc, fieldName) => {
-								const currentField = fields[fieldName]
-								const typeOfObject = currentField.type
-
-								if (currentField.type === 'Object') {
-									// TODO
-									return acc
-								}
-
-								acc[fieldName] = {
-									type: getWhereInputFromType({
-										wibeType: typeOfObject,
-										scalars,
-										enums,
-									}),
-								}
-
-								return acc
-							},
-							{} as Record<string, any>,
-						)
-
-						const conditionFields: Record<string, any> = {
-							OR: {
-								type: new GraphQLList(whereInputType),
-							},
-							AND: {
-								type: new GraphQLList(whereInputType),
-							},
-						}
-
-						return {
-							...whereInputObject,
-							...conditionFields,
-						}
-					},
+				const whereInputType = getWhereInputType({
+					fields,
+					fieldsOfObjectKeys,
+					objects: this.objects,
+					scalars,
+					enums,
+					className,
 				})
 
 				const object = this.objects.find((o) => o.name === className)
@@ -245,6 +187,20 @@ export class WibeGraphlQLSchema {
 
 				if (currentField.type === 'Object') {
 					this.createObject(currentField.object)
+
+					const object = this.objects.find(
+						(o) => o.name === currentField.object.name,
+					)
+
+					if (!object)
+						throw new Error(
+							`Failed to create ${currentField.object.name}`,
+						)
+
+					acc[fieldName] = {
+						type: object,
+					}
+
 					return acc
 				}
 

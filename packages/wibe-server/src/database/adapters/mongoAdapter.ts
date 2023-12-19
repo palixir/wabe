@@ -46,6 +46,8 @@ export const buildMongoWhereQuery = <T extends keyof WibeSchemaTypes>(
 			if (value && key === 'AND')
 				acc.$and = where.AND?.map((and) => buildMongoWhereQuery(and))
 
+			console.log(key, where)
+
 			return acc
 		},
 		{} as Record<any, any>,

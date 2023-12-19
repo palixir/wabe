@@ -20,7 +20,7 @@ const graphql = {
 		}
 	`,
 	createUsers: gql`
-		mutation createUsers($input: [UserCreateInput]) {
+		mutation createUsers($input: [UserInput]) {
 			createUsers(input: $input) {
 				id
 				name

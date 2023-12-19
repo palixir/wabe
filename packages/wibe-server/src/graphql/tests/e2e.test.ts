@@ -43,6 +43,13 @@ const graphql = {
 				id
 				name
 				age
+				address{
+					address1
+					address2
+					postalCode
+					city
+					country
+				}
 			}
 		}
 	`,
@@ -52,11 +59,12 @@ const graphql = {
 				id
 				name
 				age
+				
 			}
 		}
 	`,
 	createUsers: gql`
-		mutation createUsers($input: [UserCreateInput]) {
+		mutation createUsers($input: [UserInput]) {
 			createUsers(input: $input) {
 				name
 				age
@@ -132,6 +140,38 @@ describe('GraphQL : E2E', () => {
 
 	afterAll(async () => {
 		await closeTests(wibe)
+	})
+
+	it.only('should create user with custom object in schema', async () => {
+		await client.request<any>(graphql.createUsers, {
+			input: [
+				{
+					name: 'Jean',
+					address: {
+						address1: '1 rue de la paix',
+						address2: '2 rue de la paix',
+						postalCode: 75000,
+						city: 'Paris',
+						country: 'France',
+					},
+				},
+				{ name: 'Jeanne', age: 23 },
+			],
+		})
+
+		const { users } = await client.request<any>(graphql.users, {
+			where: {
+				address: {
+					address1: {
+						equalTo: '1 rue de la paix',
+					},
+				},
+			},
+		})
+
+		// console.log(users)
+		expect(users.length).toEqual(1)
+		expect(users[0].name).toEqual('Jean')
 	})
 
 	it('should create user with custom enum (Role)', async () => {
