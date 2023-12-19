@@ -63,6 +63,14 @@ export class WibeGraphlQLSchema {
 							(acc, fieldName) => {
 								const currentField = fields[fieldName]
 
+								if (currentField.type === 'Object') {
+									acc[fieldName] = {
+										type: currentField.object.name,
+									}
+
+									return acc
+								}
+
 								acc[fieldName] = {
 									type: wrapGraphQLTypeIn({
 										required: !!currentField.required,
@@ -90,6 +98,11 @@ export class WibeGraphlQLSchema {
 							(acc, fieldName) => {
 								const currentField = fields[fieldName]
 								const typeOfObject = currentField.type
+
+								if (currentField.type === 'Object') {
+									// TODO
+									return acc
+								}
 
 								acc[fieldName] = {
 									type: getWhereInputFromType({
@@ -232,6 +245,7 @@ export class WibeGraphlQLSchema {
 
 				if (currentField.type === 'Object') {
 					this.createObject(currentField.object)
+					return acc
 				}
 
 				acc[fieldName] = {
@@ -271,7 +285,9 @@ export class WibeGraphlQLSchema {
 
 	createCustomResolvers({
 		resolvers,
-	}: { resolvers: Record<string, Resolver> }) {
+	}: {
+		resolvers: Record<string, Resolver>
+	}) {
 		const queriesKeys = Object.keys(resolvers)
 
 		const res = queriesKeys.reduce(

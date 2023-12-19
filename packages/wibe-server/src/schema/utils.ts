@@ -11,7 +11,7 @@ import {
 	GraphQLString,
 	GraphQLType,
 } from 'graphql'
-import { TypeField, WibeTypes } from './Schema'
+import { SchemaFields, TypeField, WibeTypes } from './Schema'
 import {
 	AnyWhereInput,
 	ArrayWhereInput,

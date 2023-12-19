@@ -58,7 +58,7 @@ export class WibeApp {
 
 		this.server.use(await apollo({ schema }))
 
-		if (process.env.NODE_ENV === 'development') {
+		if (process.env.NODE_ENV !== 'production') {
 			// Generate Wibe types
 			const wibeTypes = wibeSchema.getTypesFromSchema()
 
