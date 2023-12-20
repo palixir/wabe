@@ -40,13 +40,26 @@ export const buildMongoWhereQuery = <T extends keyof WibeSchemaTypes>(
 			if (value?.in) acc[key] = { $in: value.in }
 			if (value?.notIn) acc[key] = { $nin: value.notIn }
 
-			if (value && key === 'OR')
+			if (value && key === 'OR') {
 				acc.$or = where.OR?.map((or) => buildMongoWhereQuery(or))
+				return acc
+			}
 
-			if (value && key === 'AND')
+			if (value && key === 'AND') {
 				acc.$and = where.AND?.map((and) => buildMongoWhereQuery(and))
+				return acc
+			}
 
-			console.log(key, where)
+			if (typeof value === 'object') {
+				const tata = buildMongoWhereQuery(value as WhereType<T>)
+				const entries = Object.entries(tata)
+
+				if (entries.length > 0) {
+					return {
+						[`${key.toString()}.${entries[0][0]}`]: entries[0][1],
+					}
+				}
+			}
 
 			return acc
 		},
@@ -225,7 +238,10 @@ export class MongoAdapter implements DatabaseAdapter {
 
 		const res = await collection
 			.find(whereBuilded, {
-				projection: { ...objectOfFieldsToGet, _id: isIdInProjection },
+				projection: {
+					...objectOfFieldsToGet,
+					_id: isIdInProjection,
+				},
 			})
 			.toArray()
 

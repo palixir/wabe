@@ -65,6 +65,25 @@ export const setupTests = async () => {
 								},
 							},
 						},
+						object: {
+							type: 'Object',
+							object: {
+								name: 'Object',
+								fields: {
+									objectOfObject: {
+										type: 'Object',
+										object: {
+											name: 'ObjectOfObject',
+											fields: {
+												name: {
+													type: 'String',
+												},
+											},
+										},
+									},
+								},
+							},
+						},
 					},
 					resolvers: {
 						queries: {

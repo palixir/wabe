@@ -58,6 +58,25 @@ const run = async () => {
 								},
 							},
 						},
+						object: {
+							type: 'Object',
+							object: {
+								name: 'Object',
+								fields: {
+									objectOfObject: {
+										type: 'Object',
+										object: {
+											name: 'ObjectOfObject',
+											fields: {
+												name: {
+													type: 'String',
+												},
+											},
+										},
+									},
+								},
+							},
+						},
 					},
 					resolvers: {
 						queries: {
@@ -98,8 +117,8 @@ const run = async () => {
 				{
 					name: 'Role',
 					values: {
-						Admin: 'admin',
-						Member: 'member',
+						Admin: 'Admin',
+						Member: 'Member',
 					},
 				},
 			],

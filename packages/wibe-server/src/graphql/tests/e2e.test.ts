@@ -43,13 +43,6 @@ const graphql = {
 				id
 				name
 				age
-				address{
-					address1
-					address2
-					postalCode
-					city
-					country
-				}
 			}
 		}
 	`,
@@ -142,7 +135,7 @@ describe('GraphQL : E2E', () => {
 		await closeTests(wibe)
 	})
 
-	it.only('should create user with custom object in schema', async () => {
+	it('should create user with custom object in schema', async () => {
 		await client.request<any>(graphql.createUsers, {
 			input: [
 				{
@@ -169,9 +162,85 @@ describe('GraphQL : E2E', () => {
 			},
 		})
 
-		// console.log(users)
 		expect(users.length).toEqual(1)
 		expect(users[0].name).toEqual('Jean')
+
+		const { users: users2 } = await client.request<any>(graphql.users, {
+			where: {
+				address: {
+					postalCode: {
+						equalTo: 75000,
+					},
+				},
+			},
+		})
+
+		expect(users2.length).toEqual(1)
+		expect(users2[0].name).toEqual('Jean')
+
+		const { users: users3 } = await client.request<any>(graphql.users, {
+			where: {
+				address: {
+					address1: {
+						notEqualTo: '1 rue de la paix',
+					},
+				},
+			},
+		})
+
+		expect(users3.length).toEqual(3)
+	})
+
+	it('should create user with object of object in schema', async () => {
+		await client.request<any>(graphql.createUsers, {
+			input: [
+				{
+					name: 'Jean',
+					object: {
+						objectOfObject: {
+							name: 'object',
+						},
+					},
+				},
+			],
+		})
+
+		const { users } = await client.request<any>(graphql.users, {
+			where: {
+				object: {
+					objectOfObject: {
+						name: { equalTo: 'object' },
+					},
+				},
+			},
+		})
+
+		expect(users.length).toEqual(1)
+		expect(users[0].name).toEqual('Jean')
+
+		const { users: users2 } = await client.request<any>(graphql.users, {
+			where: {
+				object: {
+					objectOfObject: {
+						name: { equalTo: 'object2' },
+					},
+				},
+			},
+		})
+
+		expect(users2.length).toEqual(0)
+
+		const { users: users3 } = await client.request<any>(graphql.users, {
+			where: {
+				object: {
+					objectOfObject: {
+						name: { notEqualTo: 'object' },
+					},
+				},
+			},
+		})
+
+		expect(users3.length).toEqual(2)
 	})
 
 	it('should create user with custom enum (Role)', async () => {
