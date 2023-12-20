@@ -20,6 +20,10 @@ export const DateScalarType = new GraphQLScalarType({
 	name: 'Date',
 	description: 'Date scalar type',
 	parseValue(value: any) {
+		const date = new Date(value)
+
+		if (Number.isNaN(date.getTime())) throw new Error('Invalid date')
+
 		return new Date(value)
 	},
 	serialize(value: any) {
