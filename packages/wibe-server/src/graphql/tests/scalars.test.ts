@@ -113,7 +113,7 @@ describe('GraphQL : Scalars', () => {
 			await client.request<any>(graphql.createUsers, {
 				input: [
 					{
-						name: 'Jean3',
+						name: 'Jean4',
 						birthDate: '2023-12-20',
 					},
 				],
@@ -122,7 +122,7 @@ describe('GraphQL : Scalars', () => {
 			const { users } = await client.request<any>(graphql.users, {
 				where: {
 					name: {
-						equalTo: 'Jean3',
+						equalTo: 'Jean4',
 					},
 				},
 			})
