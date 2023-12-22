@@ -24,10 +24,23 @@ export const DateScalarType = new GraphQLScalarType({
 
 		if (Number.isNaN(date.getTime())) throw new Error('Invalid date')
 
-		return new Date(value)
+		return date
 	},
 	serialize(value: any) {
-		return value.getTime()
+		return value.toISOString()
+	},
+})
+
+export const EmailScalarType = new GraphQLScalarType({
+	name: 'Email',
+	description: 'Email scalar type',
+	parseValue(value: any) {
+		if (typeof value !== 'string') throw new Error('Invalid email')
+
+		if (!value.match(/^[^@\s]+@[^@\s]+\.[^@\s]+$/))
+			throw new Error('Invalid email')
+
+		return value
 	},
 })
 
@@ -60,6 +73,16 @@ export const DateWhereInput = new GraphQLInputObjectType({
 		lessThanOrEqualTo: { type: DateScalarType },
 		greaterThan: { type: DateScalarType },
 		greaterThanOrEqualTo: { type: DateScalarType },
+	},
+})
+
+export const EmailWhereInput = new GraphQLInputObjectType({
+	name: 'EmailWhereInput',
+	fields: {
+		equalTo: { type: EmailScalarType },
+		notEqualTo: { type: EmailScalarType },
+		in: { type: new GraphQLList(EmailScalarType) },
+		notIn: { type: new GraphQLList(EmailScalarType) },
 	},
 })
 

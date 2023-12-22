@@ -52,7 +52,6 @@ const graphql = {
 				id
 				name
 				age
-				
 			}
 		}
 	`,

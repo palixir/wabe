@@ -18,6 +18,8 @@ import {
 	BooleanWhereInput,
 	DateScalarType,
 	DateWhereInput,
+	EmailScalarType,
+	EmailWhereInput,
 	FloatWhereInput,
 	IntWhereInput,
 	StringWhereInput,
@@ -29,6 +31,7 @@ const templateTypeToGraphqlType: Record<any, GraphQLType> = {
 	Float: GraphQLFloat,
 	Boolean: GraphQLBoolean,
 	Date: DateScalarType,
+	Email: EmailScalarType,
 }
 
 const templateWhereInput: Record<any, GraphQLInputObjectType> = {
@@ -37,6 +40,7 @@ const templateWhereInput: Record<any, GraphQLInputObjectType> = {
 	Float: FloatWhereInput,
 	Boolean: BooleanWhereInput,
 	Date: DateWhereInput,
+	Email: EmailWhereInput,
 	Array: ArrayWhereInput,
 }
 

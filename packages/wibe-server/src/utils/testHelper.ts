@@ -39,8 +39,12 @@ export const setupTests = async () => {
 						phone: {
 							type: 'Phone',
 						},
+						email: {
+							type: 'Email',
+						},
 						role: {
 							type: 'Role',
+							defaultValue: 'Member',
 						},
 						address: {
 							type: 'Object',

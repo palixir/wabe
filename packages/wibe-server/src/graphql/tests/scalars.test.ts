@@ -14,6 +14,7 @@ const graphql = {
                 id
                 name
                 birthDate
+				email
             }
         }
     `,
@@ -22,6 +23,7 @@ const graphql = {
             createUsers(input: $input) {
                 name
                 birthDate
+				email
             }
         }
     `,
@@ -47,87 +49,67 @@ describe('GraphQL : Scalars', () => {
 
 	describe('Date', () => {
 		it('should create a date with JavaScript Date', async () => {
-			await client.request<any>(graphql.createUsers, {
-				input: [
-					{
-						name: 'Jean',
-						birthDate: now,
-					},
-				],
-			})
-
-			const { users } = await client.request<any>(graphql.users, {
-				where: {
-					name: {
-						equalTo: 'Jean',
-					},
+			const { createUsers } = await client.request<any>(
+				graphql.createUsers,
+				{
+					input: [
+						{
+							name: 'Jean',
+							birthDate: now,
+						},
+					],
 				},
-			})
+			)
 
-			expect(users[0].birthDate).toEqual(now.getTime())
+			expect(createUsers[0].birthDate).toEqual(now.toISOString())
 		})
 
 		it('should create a date with timestamp in number', async () => {
-			await client.request<any>(graphql.createUsers, {
-				input: [
-					{
-						name: 'Jean2',
-						birthDate: now.getTime(),
-					},
-				],
-			})
-
-			const { users } = await client.request<any>(graphql.users, {
-				where: {
-					name: {
-						equalTo: 'Jean2',
-					},
+			const { createUsers } = await client.request<any>(
+				graphql.createUsers,
+				{
+					input: [
+						{
+							name: 'Jean2',
+							birthDate: now.getTime(),
+						},
+					],
 				},
-			})
+			)
 
-			expect(users[0].birthDate).toEqual(now.getTime())
+			expect(createUsers[0].birthDate).toEqual(now.toISOString())
 		})
 
 		it('should create a date with iso string', async () => {
-			await client.request<any>(graphql.createUsers, {
-				input: [
-					{
-						name: 'Jean3',
-						birthDate: now.toISOString(),
-					},
-				],
-			})
-
-			const { users } = await client.request<any>(graphql.users, {
-				where: {
-					name: {
-						equalTo: 'Jean3',
-					},
+			const { createUsers } = await client.request<any>(
+				graphql.createUsers,
+				{
+					input: [
+						{
+							name: 'Jean3',
+							birthDate: now.toISOString(),
+						},
+					],
 				},
-			})
+			)
 
-			expect(users[0].birthDate).toEqual(now.getTime())
+			expect(createUsers[0].birthDate).toEqual(now.toISOString())
 		})
 
 		it('should create a date with partial date', async () => {
-			await client.request<any>(graphql.createUsers, {
-				input: [
-					{
-						name: 'Jean4',
-						birthDate: '2023-12-20',
-					},
-				],
-			})
-
-			const { users } = await client.request<any>(graphql.users, {
-				where: {
-					name: {
-						equalTo: 'Jean4',
-					},
+			const { createUsers } = await client.request<any>(
+				graphql.createUsers,
+				{
+					input: [
+						{
+							name: 'Jean4',
+							birthDate: '2023-12-20',
+						},
+					],
 				},
-			})
+			)
 
-			const birthDate = new Date(users[0].birthDate)
+			const birthDate = new Date(createUsers[0].birthDate)
 			const date = new Date('2023-12-20')
 
 			expect(date.getFullYear()).toEqual(birthDate.getFullYear())
@@ -140,7 +122,7 @@ describe('GraphQL : Scalars', () => {
 				client.request<any>(graphql.createUsers, {
 					input: [
 						{
-							name: 'Jean3',
+							name: 'Jean5',
 							birthDate: now.getTime().toString(),
 						},
 					],
@@ -151,12 +133,98 @@ describe('GraphQL : Scalars', () => {
 				client.request<any>(graphql.createUsers, {
 					input: [
 						{
-							name: 'Jean3',
+							name: 'Jean5',
 							birthDate: 'tata',
 						},
 					],
 				}),
 			).rejects.toThrow('Invalid date')
+		})
+	})
+
+	describe('Email', () => {
+		it('should create an email', async () => {
+			const { createUsers } = await client.request<any>(
+				graphql.createUsers,
+				{
+					input: [
+						{
+							name: 'Jean',
+							email: 'jean.doe@gmail.com',
+						},
+					],
+				},
+			)
+
+			expect(createUsers[0].email).toEqual('jean.doe@gmail.com')
+
+			expect(
+				client.request<any>(graphql.createUsers, {
+					input: [
+						{
+							name: 'Jean',
+							email: 'oe@gmail.com',
+						},
+					],
+				}),
+			).resolves.toEqual(expect.anything())
+
+			expect(
+				client.request<any>(graphql.createUsers, {
+					input: [
+						{
+							name: 'Jean',
+							email: 'test.@gmail.fr',
+						},
+					],
+				}),
+			).resolves.toEqual(expect.anything())
+		})
+
+		it('should not create an invalid email', async () => {
+			expect(
+				client.request<any>(graphql.createUsers, {
+					input: [
+						{
+							name: 'Jean',
+							email: 'jean.doe',
+						},
+					],
+				}),
+			).rejects.toThrow('Invalid email')
+
+			expect(
+				client.request<any>(graphql.createUsers, {
+					input: [
+						{
+							name: 'Jean',
+							email: 'jean.doe@gmail',
+						},
+					],
+				}),
+			).rejects.toThrow('Invalid email')
+
+			expect(
+				client.request<any>(graphql.createUsers, {
+					input: [
+						{
+							name: 'Jean',
+							email: '@gmail.com',
+						},
+					],
+				}),
+			).rejects.toThrow('Invalid email')
+
+			expect(
+				client.request<any>(graphql.createUsers, {
+					input: [
+						{
+							name: 'Jean',
+							email: '@gmail',
+						},
+					],
+				}),
+			).rejects.toThrow('Invalid email')
 		})
 	})
 })

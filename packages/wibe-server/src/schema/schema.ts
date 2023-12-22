@@ -6,6 +6,7 @@ export type WibeDefaultTypes =
 	| 'Float'
 	| 'Boolean'
 	| 'Date'
+	| 'Email'
 	| 'Array'
 	| 'Object'
 
@@ -17,13 +18,14 @@ type TypeFieldBase<T, K extends WibeTypes> = {
 	defaultValue?: T
 }
 
-// TODO: Add tests for default value
+// TODO: Add tests for defaultValue (need to be update in a before save event)
 export type TypeField =
 	| TypeFieldBase<string, 'String'>
 	| TypeFieldBase<number, 'Int'>
 	| TypeFieldBase<number, 'Float'>
 	| TypeFieldBase<boolean, 'Boolean'>
 	| TypeFieldBase<Date, 'Date'>
+	| TypeFieldBase<string, 'Email'>
 	| {
 			type: 'Array'
 			required?: boolean
