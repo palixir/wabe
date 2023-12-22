@@ -129,5 +129,7 @@ export const BooleanWhereInput = new GraphQLInputObjectType({
 	fields: {
 		equalTo: { type: GraphQLBoolean },
 		notEqualTo: { type: GraphQLBoolean },
+		in: { type: new GraphQLList(GraphQLBoolean) },
+		notIn: { type: new GraphQLList(GraphQLBoolean) },
 	},
 })

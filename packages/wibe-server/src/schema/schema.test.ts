@@ -1,5 +1,7 @@
-import { beforeAll, describe, expect, it, } from 'bun:test'
+import { beforeAll, describe, expect, it } from 'bun:test'
 import { Schema } from './Schema'
+import { DatabaseEnum } from '../database'
+import { WibeApp } from '../server'
 
 describe('Schema', () => {
 	let schema: Schema
@@ -49,6 +51,34 @@ describe('Schema', () => {
 
 		expect(output).toEqual(
 			`export type Collection1 = {\n  name: string,\n  age: number,\n  isReady: boolean\n}\n\nexport type WibeSchemaScalars = "Phone" | "Email"\n\nexport enum Role {\n	Admin = 'admin',\n	Member = 'member',\n}\n\nexport type WibeSchemaEnums = "Role"\n\nexport type WibeSchemaTypes = {\n  Collection1: Collection1\n}`,
+		)
+	})
+
+	it("should throw an error if the scalar doesn't exist", async () => {
+		const wibe = new WibeApp({
+			database: {
+				type: DatabaseEnum.Mongo,
+				url: 'mongodb://127.0.0.1:27045',
+				name: 'Wibe',
+			},
+			port: 3000,
+			schema: {
+				class: [
+					{
+						name: 'User',
+						fields: {
+							name: {
+								// @ts-ignore
+								type: 'ScalarThatDoesntExist',
+							},
+						},
+					},
+				],
+			},
+		})
+
+		expect(wibe.start()).rejects.toThrow(
+			'ScalarThatDoesntExist not exist in schema',
 		)
 	})
 })

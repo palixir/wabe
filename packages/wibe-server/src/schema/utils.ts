@@ -11,7 +11,7 @@ import {
 	GraphQLString,
 	GraphQLType,
 } from 'graphql'
-import { SchemaFields, TypeField, WibeTypes } from './Schema'
+import { SchemaFields, TypeField, WibeDefaultTypes, WibeTypes } from './Schema'
 import {
 	AnyWhereInput,
 	ArrayWhereInput,
@@ -25,7 +25,17 @@ import {
 	StringWhereInput,
 } from '../graphql'
 
-const templateTypeToGraphqlType: Record<any, GraphQLType> = {
+type WibeDefaultTypesWithoutObject = Exclude<WibeDefaultTypes, 'Object'>
+
+type WibeDefaultTypesWithoutArrayAndObject = Exclude<
+	WibeDefaultTypesWithoutObject,
+	'Array'
+>
+
+const templateTypeToGraphqlType: Record<
+	WibeDefaultTypesWithoutArrayAndObject,
+	GraphQLType
+> = {
 	String: GraphQLString,
 	Int: GraphQLInt,
 	Float: GraphQLFloat,
@@ -34,7 +44,10 @@ const templateTypeToGraphqlType: Record<any, GraphQLType> = {
 	Email: EmailScalarType,
 }
 
-const templateWhereInput: Record<any, GraphQLInputObjectType> = {
+const templateWhereInput: Record<
+	Exclude<WibeDefaultTypes, 'Object'>,
+	GraphQLInputObjectType
+> = {
 	String: StringWhereInput,
 	Int: IntWhereInput,
 	Float: FloatWhereInput,
@@ -53,39 +66,51 @@ export const wrapGraphQLTypeIn = ({
 }) => (required ? new GraphQLNonNull(type) : type)
 
 // For the moment we not support array of array (for sql database it's tricky)
-export const getGraphqlTypeFromTemplate = ({
-	scalars,
-	enums,
-	objects,
+// Don't export this function
+const getGraphqlTypeFromTemplate = ({
 	field,
-	fieldName,
 }: {
-	fieldName: string
 	field: TypeField
-	scalars: GraphQLScalarType[]
-	enums: GraphQLEnumType[]
-	objects: GraphQLObjectType[]
 }) => {
 	if (field.type === 'Array') {
 		if (!field.typeValue) throw new Error('Type value not found')
 		if (field.typeValue === 'Array')
 			throw new Error('Array of array are not supported')
 
-		return new GraphQLList(templateTypeToGraphqlType[field.typeValue])
+		// We can cast because we exclude scalars and enums before in getGraphqlType
+		return new GraphQLList(
+			templateTypeToGraphqlType[
+				field.typeValue as WibeDefaultTypesWithoutArrayAndObject
+			],
+		)
 	}
 
-	// Here we create all custom scalars and all custom enum
-	if (!Object.keys(templateTypeToGraphqlType).includes(field.type)) {
-		const scalarExist = scalars.find((scalar) => scalar.name === field.type)
-		if (scalarExist) return scalarExist
+	// We can cast because we exclude scalars and enums before in getGraphqlType
+	return templateTypeToGraphqlType[
+		field.type as WibeDefaultTypesWithoutArrayAndObject
+	]
+}
 
-		const enumExist = enums.find((e) => e.name === field.type)
-		if (enumExist) return enumExist
+export const getGraphqlType = ({
+	scalars,
+	enums,
+	field,
+}: {
+	field: TypeField
+	scalars: GraphQLScalarType[]
+	enums: GraphQLEnumType[]
+}) => {
+	const scalarExist = scalars.find((scalar) => scalar.name === field.type)
+	if (scalarExist) return scalarExist
 
-		throw new Error(`${field.type} not exist in schema`)
-	}
+	const enumExist = enums.find((e) => e.name === field.type)
+	if (enumExist) return enumExist
 
-	return templateTypeToGraphqlType[field.type]
+	const graphqlType = getGraphqlTypeFromTemplate({ field })
+
+	if (!graphqlType) throw new Error(`${field.type} not exist in schema`)
+
+	return graphqlType
 }
 
 export const getWhereInputFromType = ({
@@ -109,7 +134,7 @@ export const getWhereInputFromType = ({
 		return AnyWhereInput
 	}
 
-	return templateWhereInput[wibeType]
+	return templateWhereInput[wibeType as WibeDefaultTypesWithoutObject]
 }
 
 export const getDefaultInputType = ({
@@ -157,9 +182,7 @@ export const getDefaultInputType = ({
 					acc[fieldName] = {
 						type: wrapGraphQLTypeIn({
 							required: !!currentField.required,
-							type: getGraphqlTypeFromTemplate({
-								fieldName: fieldName,
-								objects: objects,
+							type: getGraphqlType({
 								field: currentField,
 								scalars,
 								enums,

@@ -54,6 +54,7 @@ describe('GraphQL : aggregation', () => {
 					floatValue: 1.5,
 					birthDate: now,
 					arrayValue: ['a', 'b'],
+					email: 'lucas@mail.fr',
 				},
 				{
 					name: 'Jeanne',
@@ -62,6 +63,7 @@ describe('GraphQL : aggregation', () => {
 					floatValue: 2.5,
 					birthDate: new Date(Date.now() + 100000),
 					arrayValue: ['c', 'd'],
+					email: 'jean.doe@mail.fr',
 				},
 			],
 		})
@@ -280,6 +282,116 @@ describe('GraphQL : aggregation', () => {
 				},
 			],
 		})
+
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					birthDate: { in: [now] },
+				},
+			}),
+		).toEqual({
+			users: [
+				{
+					id: expect.any(String),
+					name: 'Lucas',
+					age: 20,
+					isAdmin: true,
+					floatValue: 1.5,
+				},
+			],
+		})
+
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					birthDate: { notIn: [now] },
+				},
+			}),
+		).toEqual({
+			users: [
+				{
+					id: expect.any(String),
+					name: 'Jeanne',
+					age: 18,
+					isAdmin: false,
+					floatValue: 2.5,
+				},
+			],
+		})
+	})
+
+	it("should support EmailScalayType's aggregation", async () => {
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					email: { equalTo: 'lucas@mail.fr' },
+				},
+			}),
+		).toEqual({
+			users: [
+				{
+					id: expect.any(String),
+					name: 'Lucas',
+					age: 20,
+					isAdmin: true,
+					floatValue: 1.5,
+				},
+			],
+		})
+
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					email: { notEqualTo: 'lucas@mail.fr' },
+				},
+			}),
+		).toEqual({
+			users: [
+				{
+					id: expect.any(String),
+					name: 'Jeanne',
+					age: 18,
+					isAdmin: false,
+					floatValue: 2.5,
+				},
+			],
+		})
+
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					email: { in: ['lucas@mail.fr'] },
+				},
+			}),
+		).toEqual({
+			users: [
+				{
+					id: expect.any(String),
+					name: 'Lucas',
+					age: 20,
+					isAdmin: true,
+					floatValue: 1.5,
+				},
+			],
+		})
+
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					email: { notIn: ['lucas@mail.fr'] },
+				},
+			}),
+		).toEqual({
+			users: [
+				{
+					id: expect.any(String),
+					name: 'Jeanne',
+					age: 18,
+					isAdmin: false,
+					floatValue: 2.5,
+				},
+			],
+		})
 	})
 
 	it("should support Int's aggregation", async () => {
@@ -404,6 +516,42 @@ describe('GraphQL : aggregation', () => {
 				},
 			],
 		})
+
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					age: { in: [20] },
+				},
+			}),
+		).toEqual({
+			users: [
+				{
+					id: expect.any(String),
+					name: 'Lucas',
+					age: 20,
+					isAdmin: true,
+					floatValue: 1.5,
+				},
+			],
+		})
+
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					age: { notIn: [20] },
+				},
+			}),
+		).toEqual({
+			users: [
+				{
+					id: expect.any(String),
+					name: 'Jeanne',
+					age: 18,
+					isAdmin: false,
+					floatValue: 2.5,
+				},
+			],
+		})
 	})
 
 	it("should support Boolean's aggregation", async () => {
@@ -429,6 +577,42 @@ describe('GraphQL : aggregation', () => {
 			await client.request<any>(graphql.users, {
 				where: {
 					isAdmin: { notEqualTo: true },
+				},
+			}),
+		).toEqual({
+			users: [
+				{
+					id: expect.any(String),
+					name: 'Jeanne',
+					age: 18,
+					isAdmin: false,
+					floatValue: 2.5,
+				},
+			],
+		})
+
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					isAdmin: { in: [true] },
+				},
+			}),
+		).toEqual({
+			users: [
+				{
+					id: expect.any(String),
+					name: 'Lucas',
+					age: 20,
+					isAdmin: true,
+					floatValue: 1.5,
+				},
+			],
+		})
+
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					isAdmin: { notIn: [true] },
 				},
 			}),
 		).toEqual({
@@ -559,6 +743,42 @@ describe('GraphQL : aggregation', () => {
 				},
 			],
 		})
+
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					floatValue: { in: [1.5] },
+				},
+			}),
+		).toEqual({
+			users: [
+				{
+					id: expect.any(String),
+					name: 'Lucas',
+					age: 20,
+					isAdmin: true,
+					floatValue: 1.5,
+				},
+			],
+		})
+
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					floatValue: { notIn: [1.5] },
+				},
+			}),
+		).toEqual({
+			users: [
+				{
+					id: expect.any(String),
+					name: 'Jeanne',
+					age: 18,
+					isAdmin: false,
+					floatValue: 2.5,
+				},
+			],
+		})
 	})
 
 	it("should support String's aggregation", async () => {
@@ -594,6 +814,42 @@ describe('GraphQL : aggregation', () => {
 					age: 20,
 					isAdmin: true,
 					floatValue: 1.5,
+				},
+			],
+		})
+
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					name: { in: ['Lucas'] },
+				},
+			}),
+		).toEqual({
+			users: [
+				{
+					id: expect.any(String),
+					name: 'Lucas',
+					age: 20,
+					isAdmin: true,
+					floatValue: 1.5,
+				},
+			],
+		})
+
+		expect(
+			await client.request<any>(graphql.users, {
+				where: {
+					name: { notIn: ['Lucas'] },
+				},
+			}),
+		).toEqual({
+			users: [
+				{
+					id: expect.any(String),
+					name: 'Jeanne',
+					age: 18,
+					isAdmin: false,
+					floatValue: 2.5,
 				},
 			],
 		})
