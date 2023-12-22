@@ -94,6 +94,118 @@ export class MongoAdapter implements DatabaseAdapter {
 		await this.database.createCollection(className)
 	}
 
+	async getObject<T extends keyof WibeSchemaTypes>(
+		params: GetObjectOptions<T>,
+	) {
+		if (!this.database)
+			throw new Error('Connection to database is not established')
+
+		const { className, id, fields } = params
+
+		if (fields.includes('*')) {
+			const res = await this.database
+				.collection<any>(className)
+				.findOne({ _id: new ObjectId(id) } as Filter<any>)
+
+			// We standardize the id field
+			if (res?._id) {
+				res.id = res._id.toString()
+				res._id = undefined
+			}
+
+			return res
+		}
+
+		const objectOfFieldsToGet: Record<any, number> = fields.reduce(
+			(acc, prev) => {
+				acc[prev] = 1
+				return acc
+			},
+			{} as Record<any, number>,
+		)
+
+		const isIdInProjection = fields.includes('id')
+
+		const collection = this.database.collection<any>(className)
+
+		const res = await collection.findOne(
+			{ _id: new ObjectId(id) } as Filter<any>,
+			{
+				projection: { ...objectOfFieldsToGet, _id: isIdInProjection },
+			},
+		)
+
+		// We standardize the id field
+		if (res?._id) {
+			res.id = res._id.toString()
+			res._id = undefined
+		}
+
+		return res
+	}
+
+	async getObjects<T extends keyof WibeSchemaTypes>(
+		params: GetObjectsOptions<T>,
+	) {
+		if (!this.database)
+			throw new Error('Connection to database is not established')
+
+		const { className, fields, where, offset, limit } = params
+
+		const whereBuilded = buildMongoWhereQuery<T>(where)
+
+		if (fields.includes('*')) {
+			const res = await this.database
+				.collection<any>(className)
+				.find(whereBuilded)
+				.toArray()
+
+			// We standardize the id field
+			for (const object of res) {
+				if (object._id) {
+					object.id = object._id.toString()
+					object._id = undefined
+				}
+			}
+
+			return res
+		}
+
+		const objectOfFieldsToGet: Record<any, number> = fields.reduce(
+			(acc, prev) => {
+				acc[prev] = 1
+
+				return acc
+			},
+			{} as Record<any, number>,
+		)
+
+		const collection = this.database.collection<any>(className)
+
+		const isIdInProjection = fields.includes('id')
+
+		const res = await collection
+			.find(whereBuilded, {
+				projection: {
+					...objectOfFieldsToGet,
+					_id: isIdInProjection,
+				},
+			})
+			.limit(limit || 0)
+			.skip(offset || 0)
+			.toArray()
+
+		// We standardize the id field
+		for (const object of res) {
+			if (object._id) {
+				object.id = object._id.toString()
+				object._id = undefined
+			}
+		}
+
+		return res
+	}
+
 	async updateObject<T extends keyof WibeSchemaTypes>(
 		params: UpdateObjectOptions<T>,
 	) {
@@ -176,134 +288,23 @@ export class MongoAdapter implements DatabaseAdapter {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 
-		const { className, data, fields } = params
+		const { className, data, fields, offset, limit } = params
 
 		const collection = this.database.collection(className)
 
 		const res = await collection.insertMany(data, {})
 
-		// TODO : Optimization using OR statement in the query instead of multiple single queries
-		const objects = await Promise.all(
-			Object.values(res.insertedIds).map((id) => {
-				return this.getObject<T>({
-					className,
-					id: id.toString(),
-					fields,
-				})
-			}),
-		)
+		const orStatement = Object.keys(res.insertedIds).map((id) => ({
+			id: id.toString(),
+		}))
 
-		return objects
-	}
-
-	async getObjects<T extends keyof WibeSchemaTypes>(
-		params: GetObjectsOptions<T>,
-	) {
-		if (!this.database)
-			throw new Error('Connection to database is not established')
-
-		const { className, fields, where } = params
-
-		const whereBuilded = buildMongoWhereQuery<T>(where)
-
-		if (fields.includes('*')) {
-			const res = await this.database
-				.collection<any>(className)
-				.find(whereBuilded)
-				.toArray()
-
-			// We standardize the id field
-			for (const object of res) {
-				if (object._id) {
-					object.id = object._id.toString()
-					object._id = undefined
-				}
-			}
-
-			return res
-		}
-
-		const objectOfFieldsToGet: Record<any, number> = fields.reduce(
-			(acc, prev) => {
-				acc[prev] = 1
-
-				return acc
-			},
-			{} as Record<any, number>,
-		)
-
-		const collection = this.database.collection<any>(className)
-
-		const isIdInProjection = fields.includes('id')
-
-		const res = await collection
-			.find(whereBuilded, {
-				projection: {
-					...objectOfFieldsToGet,
-					_id: isIdInProjection,
-				},
-			})
-			.toArray()
-
-		// We standardize the id field
-		for (const object of res) {
-			if (object._id) {
-				object.id = object._id.toString()
-				object._id = undefined
-			}
-		}
-
-		return res
-	}
-
-	async getObject<T extends keyof WibeSchemaTypes>(
-		params: GetObjectOptions<T>,
-	) {
-		if (!this.database)
-			throw new Error('Connection to database is not established')
-
-		const { className, id, fields } = params
-
-		if (fields.includes('*')) {
-			const res = await this.database
-				.collection<any>(className)
-				.findOne({ _id: new ObjectId(id) } as Filter<any>)
-
-			// We standardize the id field
-			if (res?._id) {
-				res.id = res._id.toString()
-				res._id = undefined
-			}
-
-			return res
-		}
-
-		const objectOfFieldsToGet: Record<any, number> = fields.reduce(
-			(acc, prev) => {
-				acc[prev] = 1
-				return acc
-			},
-			{} as Record<any, number>,
-		)
-
-		const isIdInProjection = fields.includes('id')
-
-		const collection = this.database.collection<any>(className)
-
-		const res = await collection.findOne(
-			{ _id: new ObjectId(id) } as Filter<any>,
-			{
-				projection: { ...objectOfFieldsToGet, _id: isIdInProjection },
-			},
-		)
-
-		// We standardize the id field
-		if (res?._id) {
-			res.id = res._id.toString()
-			res._id = undefined
-		}
-
-		return res
+		return this.getObjects<T>({
+			className,
+			where: { OR: orStatement },
+			fields,
+			offset,
+			limit,
+		})
 	}
 
 	async deleteObject<T extends keyof WibeSchemaTypes>(

@@ -56,6 +56,7 @@ export const queryForMultipleObject = async (
 			className,
 			where: args.where,
 			fields,
+			...args.input,
 		}),
 	}
 }
@@ -94,6 +95,7 @@ export const mutationToCreateMultipleObjects = async (
 			className,
 			data: args.input.fields,
 			fields,
+			...args.input,
 		}),
 	}
 }
@@ -134,6 +136,7 @@ export const mutationToUpdateMultipleObjects = async (
 			where: args.input.where,
 			data: args.input.fields,
 			fields,
+			...args.input,
 		}),
 	}
 }
@@ -172,6 +175,7 @@ export const mutationToDeleteMultipleObjects = async (
 			className,
 			where: args.input.where,
 			fields,
+			...args.input,
 		}),
 	}
 }

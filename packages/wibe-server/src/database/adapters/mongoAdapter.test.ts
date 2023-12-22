@@ -20,78 +20,198 @@ describe('Mongo adapter', () => {
 	})
 
 	beforeEach(async () => {
-		await mongoAdapter.database?.collection('User').deleteMany({})
+		const collections = await mongoAdapter.database?.collections()
+
+		if (collections)
+			await Promise.all(
+				collections?.map((collection) => collection.drop()),
+			)
 	})
 
-	it('should build where query for mongo adapter', () => {
-		const where = buildMongoWhereQuery<'User'>({
-			name: { equalTo: 'John' },
-			age: { greaterThan: 20 },
-			OR: [
+	it.only('should getObjects with the number of objects specified in limit input', async () => {
+		const tata = await mongoAdapter.createObjects<any>({
+			className: 'Test1',
+			data: [
 				{
-					age: { lessThan: 10 },
+					name: 'John',
+					age: 20,
 				},
-				{ name: { equalTo: 'John' } },
 				{
-					OR: [
-						{
-							name: { equalTo: 'Tata' },
-						},
-					],
+					name: 'John1',
+					age: 20,
 				},
-			],
-			AND: [
 				{
-					age: { lessThan: 10 },
+					name: 'John2',
+					age: 20,
 				},
-				{ name: { equalTo: 'John' } },
 				{
-					AND: [
-						{
-							name: { equalTo: 'Tata' },
-						},
-					],
+					name: 'John3',
+					age: 20,
+				},
+				{
+					name: 'John4',
+					age: 20,
 				},
 			],
+			fields: ['name', 'id'],
 		})
 
-		expect(where).toEqual({
-			name: 'John',
-			age: { $gt: 20 },
-			$or: [
-				{ age: { $lt: 10 } },
-				{ name: 'John' },
-				{ $or: [{ name: 'Tata' }] },
-			],
-			$and: [
-				{ age: { $lt: 10 } },
-				{ name: 'John' },
-				{ $and: [{ name: 'Tata' }] },
-			],
+		console.log(tata)
+
+		const res = await mongoAdapter.getObjects<any>({
+			className: 'Test1',
+			fields: ['name'],
+			limit: 2,
 		})
+
+		expect(res.length).toEqual(2)
 	})
 
-	it('should build empty where query for mongoAdapter if where is empty', () => {
-		const where = buildMongoWhereQuery({})
+	it('should getObjects with the number of objects specified in limit and offset input', async () => {
+		await mongoAdapter.createObjects<any>({
+			className: 'Test1',
+			data: [
+				{
+					name: 'John',
+					age: 20,
+				},
+				{
+					name: 'John1',
+					age: 20,
+				},
+				{
+					name: 'John2',
+					age: 20,
+				},
+				{
+					name: 'John3',
+					age: 20,
+				},
+				{
+					name: 'John4',
+					age: 20,
+				},
+			],
+			fields: ['name', 'id'],
+		})
 
-		expect(where).toEqual({})
+		const res = await mongoAdapter.getObjects<any>({
+			className: 'Test1',
+			fields: ['name'],
+			limit: 2,
+			offset: 2,
+		})
+
+		expect(res.length).toEqual(2)
+		expect(res[0].name).toEqual('John2')
+		expect(res[1].name).toEqual('John3')
 	})
 
-	it('should build empty where query for mongoAdapter if operation not exist', () => {
-		// @ts-expect-error
-		const where = buildMongoWhereQuery({ name: { notExist: 'John' } })
+	it('should get all the objects without limit number', async () => {
+		await mongoAdapter.createObjects<any>({
+			className: 'Test1',
+			data: [
+				{
+					name: 'John',
+					age: 20,
+				},
+				{
+					name: 'John1',
+					age: 20,
+				},
+				{
+					name: 'John2',
+					age: 20,
+				},
+				{
+					name: 'John3',
+					age: 20,
+				},
+				{
+					name: 'John4',
+					age: 20,
+				},
+			],
+			fields: ['name', 'id'],
+		})
 
-		expect(where).toEqual({})
+		const res = await mongoAdapter.getObjects<any>({
+			className: 'Test1',
+			fields: ['name'],
+		})
+
+		expect(res.length).toEqual(5)
 	})
 
-	it('should build empty where query for mongoAdapter if operation not exist', () => {
-		// @ts-expect-error
-		const where = buildMongoWhereQuery({ name: { notExist: 'John' } })
+	it('should createObjects with the number of objects specified in limit input', async () => {
+		const res = await mongoAdapter.createObjects<any>({
+			className: 'Test1',
+			data: [
+				{
+					name: 'John',
+					age: 20,
+				},
+				{
+					name: 'John1',
+					age: 20,
+				},
+				{
+					name: 'John2',
+					age: 20,
+				},
+				{
+					name: 'John3',
+					age: 20,
+				},
+				{
+					name: 'John4',
+					age: 20,
+				},
+			],
+			fields: ['name', 'id'],
+			limit: 2,
+		})
 
-		expect(where).toEqual({})
+		expect(res.length).toEqual(2)
+	})
+
+	it('should createObjects with the number of objects specified in limit and offset input', async () => {
+		const res = await mongoAdapter.createObjects<any>({
+			className: 'Test1',
+			data: [
+				{
+					name: 'John',
+					age: 20,
+				},
+				{
+					name: 'John1',
+					age: 20,
+				},
+				{
+					name: 'John2',
+					age: 20,
+				},
+				{
+					name: 'John3',
+					age: 20,
+				},
+				{
+					name: 'John4',
+					age: 20,
+				},
+			],
+			fields: ['name', 'id'],
+			limit: 2,
+			offset: 2,
+		})
+
+		expect(res.length).toEqual(2)
+		expect(res[0].name).toEqual('John2')
+		expect(res[1].name).toEqual('John3')
 	})
 
 	it('should create class', async () => {
+		console.log(await mongoAdapter.database?.collections())
 		expect((await mongoAdapter.database?.collections())?.length).toBe(0)
 
 		await mongoAdapter.createClass('User')
@@ -746,5 +866,73 @@ describe('Mongo adapter', () => {
 				age: 18,
 			},
 		])
+	})
+
+	it('should build where query for mongo adapter', () => {
+		const where = buildMongoWhereQuery<'User'>({
+			name: { equalTo: 'John' },
+			age: { greaterThan: 20 },
+			OR: [
+				{
+					age: { lessThan: 10 },
+				},
+				{ name: { equalTo: 'John' } },
+				{
+					OR: [
+						{
+							name: { equalTo: 'Tata' },
+						},
+					],
+				},
+			],
+			AND: [
+				{
+					age: { lessThan: 10 },
+				},
+				{ name: { equalTo: 'John' } },
+				{
+					AND: [
+						{
+							name: { equalTo: 'Tata' },
+						},
+					],
+				},
+			],
+		})
+
+		expect(where).toEqual({
+			name: 'John',
+			age: { $gt: 20 },
+			$or: [
+				{ age: { $lt: 10 } },
+				{ name: 'John' },
+				{ $or: [{ name: 'Tata' }] },
+			],
+			$and: [
+				{ age: { $lt: 10 } },
+				{ name: 'John' },
+				{ $and: [{ name: 'Tata' }] },
+			],
+		})
+	})
+
+	it('should build empty where query for mongoAdapter if where is empty', () => {
+		const where = buildMongoWhereQuery({})
+
+		expect(where).toEqual({})
+	})
+
+	it('should build empty where query for mongoAdapter if operation not exist', () => {
+		// @ts-expect-error
+		const where = buildMongoWhereQuery({ name: { notExist: 'John' } })
+
+		expect(where).toEqual({})
+	})
+
+	it('should build empty where query for mongoAdapter if operation not exist', () => {
+		// @ts-expect-error
+		const where = buildMongoWhereQuery({ name: { notExist: 'John' } })
+
+		expect(where).toEqual({})
 	})
 })

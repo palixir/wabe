@@ -41,6 +41,8 @@ export interface GetObjectsOptions<T extends keyof WibeSchemaTypes> {
 	className: string
 	where?: WhereType<T>
 	fields: Array<keyof WibeSchemaTypes[T] | '*' | 'id'>
+	offset?: number
+	limit?: number
 }
 
 export interface CreateObjectOptions<T extends keyof WibeSchemaTypes> {
@@ -52,6 +54,8 @@ export interface CreateObjectsOptions<T extends keyof WibeSchemaTypes> {
 	className: string
 	data: Array<Record<string, any>>
 	fields: Array<keyof WibeSchemaTypes[T] | '*' | 'id'>
+	offset?: number
+	limit?: number
 }
 
 export interface UpdateObjectOptions<T extends keyof WibeSchemaTypes> {
@@ -66,6 +70,8 @@ export interface UpdateObjectsOptions<T extends keyof WibeSchemaTypes> {
 	where: WhereType<T>
 	data: Record<string, any>
 	fields: Array<keyof WibeSchemaTypes[T] | '*' | 'id'>
+	offset?: number
+	limit?: number
 }
 
 export interface DeleteObjectOptions<T extends keyof WibeSchemaTypes> {
@@ -78,6 +84,8 @@ export interface DeleteObjectsOptions<T extends keyof WibeSchemaTypes> {
 	className: string
 	where: WhereType<T>
 	fields: Array<keyof WibeSchemaTypes[T] | '*' | 'id'>
+	offset?: number
+	limit?: number
 }
 
 // TODO : Type the return of the functions
