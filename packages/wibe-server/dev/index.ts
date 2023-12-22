@@ -17,16 +17,11 @@ const run = async () => {
 				{
 					name: 'User',
 					fields: {
-						name: { type: 'String' },
+						name: { type: 'String', required: true },
 						age: { type: 'Int' },
 						isCool: { type: 'Boolean' },
 						birthDate: {
 							type: 'Date',
-							required: true,
-						},
-						firstName: {
-							type: 'Array',
-							typeValue: 'String',
 							required: true,
 						},
 						phone: {

@@ -49,8 +49,8 @@ const graphql = {
 		}
 	`,
 	createUser: gql`
-		mutation createUser($name: String!, $age: Int!) {
-			createUser(input: { name: $name, age: $age }) {
+		mutation createUser($input: UserCreateInput!) {
+			createUser(input: $input) {
 				id
 				name
 				age
@@ -58,7 +58,7 @@ const graphql = {
 		}
 	`,
 	createUsers: gql`
-		mutation createUsers($input: [UserInput]) {
+		mutation createUsers($input: UsersCreateInput!) {
 			createUsers(input: $input) {
 				objects{
 					name
@@ -118,11 +118,13 @@ describe('GraphQL : E2E', () => {
 	})
 
 	beforeEach(async () => {
-		const res = await client.request<any>(graphql.createUsers, {
-			input: [
-				{ name: 'Lucas', age: 23 },
-				{ name: 'Jeanne', age: 23 },
-			],
+		await client.request<any>(graphql.createUsers, {
+			input: {
+				fields: [
+					{ name: 'Lucas', age: 23 },
+					{ name: 'Jeanne', age: 23 },
+				],
+			},
 		})
 	})
 
@@ -143,19 +145,21 @@ describe('GraphQL : E2E', () => {
 
 	it('should create user with custom object in schema', async () => {
 		await client.request<any>(graphql.createUsers, {
-			input: [
-				{
-					name: 'Jean',
-					address: {
-						address1: '1 rue de la paix',
-						address2: '2 rue de la paix',
-						postalCode: 75000,
-						city: 'Paris',
-						country: 'France',
+			input: {
+				fields: [
+					{
+						name: 'Jean',
+						address: {
+							address1: '1 rue de la paix',
+							address2: '2 rue de la paix',
+							postalCode: 75000,
+							city: 'Paris',
+							country: 'France',
+						},
 					},
-				},
-				{ name: 'Jeanne', age: 23 },
-			],
+					{ name: 'Jeanne', age: 23 },
+				],
+			},
 		})
 
 		const { users } = await client.request<any>(graphql.users, {
@@ -199,16 +203,18 @@ describe('GraphQL : E2E', () => {
 
 	it('should create user with object of object in schema', async () => {
 		await client.request<any>(graphql.createUsers, {
-			input: [
-				{
-					name: 'Jean',
-					object: {
-						objectOfObject: {
-							name: 'object',
+			input: {
+				fields: [
+					{
+						name: 'Jean',
+						object: {
+							objectOfObject: {
+								name: 'object',
+							},
 						},
 					},
-				},
-			],
+				],
+			},
 		})
 
 		const { users } = await client.request<any>(graphql.users, {
@@ -251,7 +257,7 @@ describe('GraphQL : E2E', () => {
 
 	it('should create user with custom enum (Role)', async () => {
 		await client.request<any>(graphql.createUsers, {
-			input: [{ name: 'Jack', role: Role.Admin }],
+			input: { fields: [{ name: 'Jack', role: Role.Admin }] },
 		})
 
 		const { users } = await client.request<any>(graphql.users, {
@@ -290,7 +296,7 @@ describe('GraphQL : E2E', () => {
 
 	it('should create user with a custom scalar (phone)', async () => {
 		await client.request<any>(graphql.createUsers, {
-			input: [{ name: 'Jack', phone: '+33577223355' }],
+			input: { fields: [{ name: 'Jack', phone: '+33577223355' }] },
 		})
 
 		const { users } = await client.request<any>(graphql.users, {
@@ -370,7 +376,7 @@ describe('GraphQL : E2E', () => {
 	it('should throw an error if a field is required and not provided', async () => {
 		expect(
 			client.request<any>(graphql.createUsers, {
-				input: [{ age: 23 }],
+				input: { fields: [{ age: 23 }] },
 			}),
 		).rejects.toThrow()
 	})
@@ -385,8 +391,12 @@ describe('GraphQL : E2E', () => {
 
 	it('should get an object', async () => {
 		const res = await client.request<any>(graphql.createUser, {
-			name: 'CurrentUser',
-			age: 99,
+			input: {
+				fields: {
+					name: 'CurrentUser',
+					age: 99,
+				},
+			},
 		})
 
 		const { user } = await client.request<any>(graphql.user, {
@@ -427,8 +437,12 @@ describe('GraphQL : E2E', () => {
 
 	it('should create an object', async () => {
 		const res = await client.request<any>(graphql.createUser, {
-			name: 'John',
-			age: 23,
+			input: {
+				fields: {
+					name: 'John',
+					age: 23,
+				},
+			},
 		})
 
 		expect(res.createUser).toEqual({
@@ -458,10 +472,12 @@ describe('GraphQL : E2E', () => {
 
 	it('should create multiple objects', async () => {
 		const res = await client.request<any>(graphql.createUsers, {
-			input: [
-				{ name: 'Lucas2', age: 24 },
-				{ name: 'Jeanne2', age: 24 },
-			],
+			input: {
+				fields: [
+					{ name: 'Lucas2', age: 24 },
+					{ name: 'Jeanne2', age: 24 },
+				],
+			},
 		})
 
 		expect(res.createUsers.objects).toEqual([

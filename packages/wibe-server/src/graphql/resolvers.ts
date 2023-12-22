@@ -73,7 +73,7 @@ export const mutationToCreateObject = (
 
 	return WibeApp.databaseController.createObject<any>({
 		className,
-		data: args.input,
+		data: args.input.fields,
 		fields,
 	})
 }
@@ -92,7 +92,7 @@ export const mutationToCreateMultipleObjects = async (
 	return {
 		objects: await WibeApp.databaseController.createObjects<any>({
 			className,
-			data: args.input,
+			data: args.input.fields,
 			fields,
 		}),
 	}

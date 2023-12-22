@@ -3,6 +3,7 @@ import {
 	GraphQLFieldConfig,
 	GraphQLID,
 	GraphQLInputObjectType,
+	GraphQLInt,
 	GraphQLInterfaceType,
 	GraphQLList,
 	GraphQLNonNull,
@@ -336,7 +337,11 @@ export class WibeGraphlQLSchema {
 			},
 			[`${className.toLowerCase()}s`]: {
 				type: new GraphQLNonNull(getOutputType({ object, allObjects })),
-				args: { where: { type: whereInputType } },
+				args: {
+					where: { type: whereInputType },
+					offset: { type: GraphQLInt },
+					limit: { type: GraphQLInt },
+				},
 				resolve: (root, args, ctx, info) =>
 					queryForMultipleObject(root, args, ctx, info, className),
 			},
@@ -356,6 +361,24 @@ export class WibeGraphlQLSchema {
 		object: GraphQLObjectType
 		allObjects: GraphQLObjectType[]
 	}) {
+		const createInputType = new GraphQLInputObjectType({
+			name: `${className}CreateInput`,
+			fields: () => ({
+				fields: { type: defaultInputType },
+			}),
+		})
+
+		const createsInputType = new GraphQLInputObjectType({
+			name: `${className}sCreateInput`,
+			fields: () => ({
+				fields: {
+					type: new GraphQLNonNull(new GraphQLList(defaultInputType)),
+				},
+				offset: { type: GraphQLInt },
+				limit: { type: GraphQLInt },
+			}),
+		})
+
 		const updateInputType = new GraphQLInputObjectType({
 			name: `${className}UpdateInput`,
 			fields: () => ({
@@ -369,6 +392,8 @@ export class WibeGraphlQLSchema {
 			fields: () => ({
 				fields: { type: defaultInputType },
 				where: { type: whereInputType },
+				offset: { type: GraphQLInt },
+				limit: { type: GraphQLInt },
 			}),
 		})
 
@@ -389,13 +414,13 @@ export class WibeGraphlQLSchema {
 		const mutations: Record<string, GraphQLFieldConfig<any, any, any>> = {
 			[`create${className}`]: {
 				type: new GraphQLNonNull(object),
-				args: { input: { type: defaultInputType } },
+				args: { input: { type: createInputType } },
 				resolve: (root, args, ctx, info) =>
 					mutationToCreateObject(root, args, ctx, info, className),
 			},
 			[`create${className}s`]: {
 				type: new GraphQLNonNull(getOutputType({ object, allObjects })),
-				args: { input: { type: new GraphQLList(defaultInputType) } },
+				args: { input: { type: createsInputType } },
 				resolve: (root, args, ctx, info) =>
 					mutationToCreateMultipleObjects(
 						root,

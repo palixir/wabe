@@ -22,7 +22,7 @@ const graphql = {
 		}
 	`,
 	createUsers: gql`
-		mutation createUsers($input: [UserInput]) {
+		mutation createUsers($input: UsersCreateInput!) {
 			createUsers(input: $input) {
 				objects{
 					id
@@ -50,26 +50,28 @@ describe('GraphQL : aggregation', () => {
 		client = getGraphqlClient(port)
 
 		await client.request<any>(graphql.createUsers, {
-			input: [
-				{
-					name: 'Lucas',
-					age: 20,
-					isAdmin: true,
-					floatValue: 1.5,
-					birthDate: now,
-					arrayValue: ['a', 'b'],
-					email: 'lucas@mail.fr',
-				},
-				{
-					name: 'Jeanne',
-					age: 18,
-					isAdmin: false,
-					floatValue: 2.5,
-					birthDate: new Date(Date.now() + 100000),
-					arrayValue: ['c', 'd'],
-					email: 'jean.doe@mail.fr',
-				},
-			],
+			input: {
+				fields: [
+					{
+						name: 'Lucas',
+						age: 20,
+						isAdmin: true,
+						floatValue: 1.5,
+						birthDate: now,
+						arrayValue: ['a', 'b'],
+						email: 'lucas@mail.fr',
+					},
+					{
+						name: 'Jeanne',
+						age: 18,
+						isAdmin: false,
+						floatValue: 2.5,
+						birthDate: new Date(Date.now() + 100000),
+						arrayValue: ['c', 'd'],
+						email: 'jean.doe@mail.fr',
+					},
+				],
+			},
 		})
 	})
 
