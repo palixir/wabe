@@ -271,3 +271,17 @@ export const getWhereInputType = ({
 
 	return whereInputType
 }
+
+export const getOutputType = ({
+	allObjects,
+	object,
+}: { allObjects: GraphQLObjectType[]; object: GraphQLObjectType }) => {
+	// We search in all object the corresponding output object
+	const outputObject = allObjects.find(
+		(o) => o.name === `${object.name}Output`,
+	)
+	if (!outputObject)
+		throw new Error(`Output type not found for ${object.name}`)
+
+	return outputObject
+}

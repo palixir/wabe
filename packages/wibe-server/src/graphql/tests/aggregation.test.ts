@@ -11,22 +11,26 @@ const graphql = {
 	users: gql`
 		query users($where: UserWhereInput) {
 			users(where: $where) {
-				id
-				name
-				age
-				isAdmin
-				floatValue
+				objects{
+					id
+					name
+					age
+					isAdmin
+					floatValue
+				}
 			}
 		}
 	`,
 	createUsers: gql`
 		mutation createUsers($input: [UserInput]) {
 			createUsers(input: $input) {
-				id
-				name
-				age
-				isAdmin
-				floatValue
+				objects{
+					id
+					name
+					age
+					isAdmin
+					floatValue
+				}
 			}
 		}
 	`,
@@ -81,15 +85,17 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Lucas',
-					age: 20,
-					isAdmin: true,
-					floatValue: 1.5,
-				},
-			],
+			users: {
+				objects: [
+					{
+						id: expect.any(String),
+						name: 'Lucas',
+						age: 20,
+						isAdmin: true,
+						floatValue: 1.5,
+					},
+				],
+			},
 		})
 
 		expect(
@@ -99,15 +105,17 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Jeanne',
-					age: 18,
-					isAdmin: false,
-					floatValue: 2.5,
-				},
-			],
+			users: {
+				objects: [
+					{
+						id: expect.any(String),
+						name: 'Jeanne',
+						age: 18,
+						isAdmin: false,
+						floatValue: 2.5,
+					},
+				],
+			},
 		})
 
 		expect(
@@ -117,15 +125,17 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Lucas',
-					age: 20,
-					isAdmin: true,
-					floatValue: 1.5,
-				},
-			],
+			users: {
+				objects: [
+					{
+						id: expect.any(String),
+						name: 'Lucas',
+						age: 20,
+						isAdmin: true,
+						floatValue: 1.5,
+					},
+				],
+			},
 		})
 
 		expect(
@@ -135,15 +145,17 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Jeanne',
-					age: 18,
-					isAdmin: false,
-					floatValue: 2.5,
-				},
-			],
+			users: {
+				objects: [
+					{
+						id: expect.any(String),
+						name: 'Jeanne',
+						age: 18,
+						isAdmin: false,
+						floatValue: 2.5,
+					},
+				],
+			},
 		})
 
 		expect(
@@ -153,7 +165,7 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [],
+			users: { objects: [] },
 		})
 
 		expect(
@@ -163,7 +175,7 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [],
+			users: { objects: [] },
 		})
 	})
 
@@ -175,15 +187,17 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Lucas',
-					age: 20,
-					isAdmin: true,
-					floatValue: 1.5,
-				},
-			],
+			users: {
+				objects: [
+					{
+						id: expect.any(String),
+						name: 'Lucas',
+						age: 20,
+						isAdmin: true,
+						floatValue: 1.5,
+					},
+				],
+			},
 		})
 
 		expect(
@@ -193,15 +207,17 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Jeanne',
-					age: 18,
-					isAdmin: false,
-					floatValue: 2.5,
-				},
-			],
+			users: {
+				objects: [
+					{
+						id: expect.any(String),
+						name: 'Jeanne',
+						age: 18,
+						isAdmin: false,
+						floatValue: 2.5,
+					},
+				],
+			},
 		})
 
 		expect(
@@ -211,15 +227,17 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Lucas',
-					age: 20,
-					isAdmin: true,
-					floatValue: 1.5,
-				},
-			],
+			users: {
+				objects: [
+					{
+						id: expect.any(String),
+						name: 'Lucas',
+						age: 20,
+						isAdmin: true,
+						floatValue: 1.5,
+					},
+				],
+			},
 		})
 
 		expect(
@@ -229,15 +247,17 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Lucas',
-					age: 20,
-					isAdmin: true,
-					floatValue: 1.5,
-				},
-			],
+			users: {
+				objects: [
+					{
+						id: expect.any(String),
+						name: 'Lucas',
+						age: 20,
+						isAdmin: true,
+						floatValue: 1.5,
+					},
+				],
+			},
 		})
 
 		expect(
@@ -247,15 +267,17 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Jeanne',
-					age: 18,
-					isAdmin: false,
-					floatValue: 2.5,
-				},
-			],
+			users: {
+				objects: [
+					{
+						id: expect.any(String),
+						name: 'Jeanne',
+						age: 18,
+						isAdmin: false,
+						floatValue: 2.5,
+					},
+				],
+			},
 		})
 
 		expect(
@@ -265,22 +287,24 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Lucas',
-					age: 20,
-					isAdmin: true,
-					floatValue: 1.5,
-				},
-				{
-					id: expect.any(String),
-					name: 'Jeanne',
-					age: 18,
-					isAdmin: false,
-					floatValue: 2.5,
-				},
-			],
+			users: {
+				objects: [
+					{
+						id: expect.any(String),
+						name: 'Lucas',
+						age: 20,
+						isAdmin: true,
+						floatValue: 1.5,
+					},
+					{
+						id: expect.any(String),
+						name: 'Jeanne',
+						age: 18,
+						isAdmin: false,
+						floatValue: 2.5,
+					},
+				],
+			},
 		})
 
 		expect(
@@ -290,15 +314,17 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Lucas',
-					age: 20,
-					isAdmin: true,
-					floatValue: 1.5,
-				},
-			],
+			users: {
+				objects: [
+					{
+						id: expect.any(String),
+						name: 'Lucas',
+						age: 20,
+						isAdmin: true,
+						floatValue: 1.5,
+					},
+				],
+			},
 		})
 
 		expect(
@@ -308,15 +334,17 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Jeanne',
-					age: 18,
-					isAdmin: false,
-					floatValue: 2.5,
-				},
-			],
+			users: {
+				objects: [
+					{
+						id: expect.any(String),
+						name: 'Jeanne',
+						age: 18,
+						isAdmin: false,
+						floatValue: 2.5,
+					},
+				],
+			},
 		})
 	})
 
@@ -328,15 +356,17 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Lucas',
-					age: 20,
-					isAdmin: true,
-					floatValue: 1.5,
-				},
-			],
+			users: {
+				objects: [
+					{
+						id: expect.any(String),
+						name: 'Lucas',
+						age: 20,
+						isAdmin: true,
+						floatValue: 1.5,
+					},
+				],
+			},
 		})
 
 		expect(
@@ -346,15 +376,17 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Jeanne',
-					age: 18,
-					isAdmin: false,
-					floatValue: 2.5,
-				},
-			],
+			users: {
+				objects: [
+					{
+						id: expect.any(String),
+						name: 'Jeanne',
+						age: 18,
+						isAdmin: false,
+						floatValue: 2.5,
+					},
+				],
+			},
 		})
 
 		expect(
@@ -364,15 +396,17 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Lucas',
-					age: 20,
-					isAdmin: true,
-					floatValue: 1.5,
-				},
-			],
+			users: {
+				objects: [
+					{
+						id: expect.any(String),
+						name: 'Lucas',
+						age: 20,
+						isAdmin: true,
+						floatValue: 1.5,
+					},
+				],
+			},
 		})
 
 		expect(
@@ -382,15 +416,17 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Jeanne',
-					age: 18,
-					isAdmin: false,
-					floatValue: 2.5,
-				},
-			],
+			users: {
+				objects: [
+					{
+						id: expect.any(String),
+						name: 'Jeanne',
+						age: 18,
+						isAdmin: false,
+						floatValue: 2.5,
+					},
+				],
+			},
 		})
 	})
 
@@ -402,15 +438,17 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Lucas',
-					age: 20,
-					isAdmin: true,
-					floatValue: 1.5,
-				},
-			],
+			users: {
+				objects: [
+					{
+						id: expect.any(String),
+						name: 'Lucas',
+						age: 20,
+						isAdmin: true,
+						floatValue: 1.5,
+					},
+				],
+			},
 		})
 
 		expect(
@@ -420,15 +458,17 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Jeanne',
-					age: 18,
-					isAdmin: false,
-					floatValue: 2.5,
-				},
-			],
+			users: {
+				objects: [
+					{
+						id: expect.any(String),
+						name: 'Jeanne',
+						age: 18,
+						isAdmin: false,
+						floatValue: 2.5,
+					},
+				],
+			},
 		})
 
 		expect(
@@ -438,15 +478,17 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Jeanne',
-					age: 18,
-					isAdmin: false,
-					floatValue: 2.5,
-				},
-			],
+			users: {
+				objects: [
+					{
+						id: expect.any(String),
+						name: 'Jeanne',
+						age: 18,
+						isAdmin: false,
+						floatValue: 2.5,
+					},
+				],
+			},
 		})
 
 		expect(
@@ -456,22 +498,24 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Lucas',
-					age: 20,
-					isAdmin: true,
-					floatValue: 1.5,
-				},
-				{
-					id: expect.any(String),
-					name: 'Jeanne',
-					age: 18,
-					isAdmin: false,
-					floatValue: 2.5,
-				},
-			],
+			users: {
+				objects: [
+					{
+						id: expect.any(String),
+						name: 'Lucas',
+						age: 20,
+						isAdmin: true,
+						floatValue: 1.5,
+					},
+					{
+						id: expect.any(String),
+						name: 'Jeanne',
+						age: 18,
+						isAdmin: false,
+						floatValue: 2.5,
+					},
+				],
+			},
 		})
 
 		expect(
@@ -481,15 +525,17 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Lucas',
-					age: 20,
-					isAdmin: true,
-					floatValue: 1.5,
-				},
-			],
+			users: {
+				objects: [
+					{
+						id: expect.any(String),
+						name: 'Lucas',
+						age: 20,
+						isAdmin: true,
+						floatValue: 1.5,
+					},
+				],
+			},
 		})
 
 		expect(
@@ -499,22 +545,24 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Lucas',
-					age: 20,
-					isAdmin: true,
-					floatValue: 1.5,
-				},
-				{
-					id: expect.any(String),
-					name: 'Jeanne',
-					age: 18,
-					isAdmin: false,
-					floatValue: 2.5,
-				},
-			],
+			users: {
+				objects: [
+					{
+						id: expect.any(String),
+						name: 'Lucas',
+						age: 20,
+						isAdmin: true,
+						floatValue: 1.5,
+					},
+					{
+						id: expect.any(String),
+						name: 'Jeanne',
+						age: 18,
+						isAdmin: false,
+						floatValue: 2.5,
+					},
+				],
+			},
 		})
 
 		expect(
@@ -524,15 +572,17 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Lucas',
-					age: 20,
-					isAdmin: true,
-					floatValue: 1.5,
-				},
-			],
+			users: {
+				objects: [
+					{
+						id: expect.any(String),
+						name: 'Lucas',
+						age: 20,
+						isAdmin: true,
+						floatValue: 1.5,
+					},
+				],
+			},
 		})
 
 		expect(
@@ -542,15 +592,17 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Jeanne',
-					age: 18,
-					isAdmin: false,
-					floatValue: 2.5,
-				},
-			],
+			users: {
+				objects: [
+					{
+						id: expect.any(String),
+						name: 'Jeanne',
+						age: 18,
+						isAdmin: false,
+						floatValue: 2.5,
+					},
+				],
+			},
 		})
 	})
 
@@ -562,15 +614,17 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Lucas',
-					age: 20,
-					isAdmin: true,
-					floatValue: 1.5,
-				},
-			],
+			users: {
+				objects: [
+					{
+						id: expect.any(String),
+						name: 'Lucas',
+						age: 20,
+						isAdmin: true,
+						floatValue: 1.5,
+					},
+				],
+			},
 		})
 
 		expect(
@@ -580,15 +634,17 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Jeanne',
-					age: 18,
-					isAdmin: false,
-					floatValue: 2.5,
-				},
-			],
+			users: {
+				objects: [
+					{
+						id: expect.any(String),
+						name: 'Jeanne',
+						age: 18,
+						isAdmin: false,
+						floatValue: 2.5,
+					},
+				],
+			},
 		})
 
 		expect(
@@ -598,15 +654,17 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Lucas',
-					age: 20,
-					isAdmin: true,
-					floatValue: 1.5,
-				},
-			],
+			users: {
+				objects: [
+					{
+						id: expect.any(String),
+						name: 'Lucas',
+						age: 20,
+						isAdmin: true,
+						floatValue: 1.5,
+					},
+				],
+			},
 		})
 
 		expect(
@@ -616,15 +674,17 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Jeanne',
-					age: 18,
-					isAdmin: false,
-					floatValue: 2.5,
-				},
-			],
+			users: {
+				objects: [
+					{
+						id: expect.any(String),
+						name: 'Jeanne',
+						age: 18,
+						isAdmin: false,
+						floatValue: 2.5,
+					},
+				],
+			},
 		})
 	})
 
@@ -636,15 +696,17 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Lucas',
-					age: 20,
-					isAdmin: true,
-					floatValue: 1.5,
-				},
-			],
+			users: {
+				objects: [
+					{
+						id: expect.any(String),
+						name: 'Lucas',
+						age: 20,
+						isAdmin: true,
+						floatValue: 1.5,
+					},
+				],
+			},
 		})
 
 		expect(
@@ -654,15 +716,17 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Jeanne',
-					age: 18,
-					isAdmin: false,
-					floatValue: 2.5,
-				},
-			],
+			users: {
+				objects: [
+					{
+						id: expect.any(String),
+						name: 'Jeanne',
+						age: 18,
+						isAdmin: false,
+						floatValue: 2.5,
+					},
+				],
+			},
 		})
 
 		expect(
@@ -672,15 +736,17 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Lucas',
-					age: 20,
-					isAdmin: true,
-					floatValue: 1.5,
-				},
-			],
+			users: {
+				objects: [
+					{
+						id: expect.any(String),
+						name: 'Lucas',
+						age: 20,
+						isAdmin: true,
+						floatValue: 1.5,
+					},
+				],
+			},
 		})
 
 		expect(
@@ -690,22 +756,24 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Lucas',
-					age: 20,
-					isAdmin: true,
-					floatValue: 1.5,
-				},
-				{
-					id: expect.any(String),
-					name: 'Jeanne',
-					age: 18,
-					isAdmin: false,
-					floatValue: 2.5,
-				},
-			],
+			users: {
+				objects: [
+					{
+						id: expect.any(String),
+						name: 'Lucas',
+						age: 20,
+						isAdmin: true,
+						floatValue: 1.5,
+					},
+					{
+						id: expect.any(String),
+						name: 'Jeanne',
+						age: 18,
+						isAdmin: false,
+						floatValue: 2.5,
+					},
+				],
+			},
 		})
 
 		expect(
@@ -715,15 +783,17 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Jeanne',
-					age: 18,
-					isAdmin: false,
-					floatValue: 2.5,
-				},
-			],
+			users: {
+				objects: [
+					{
+						id: expect.any(String),
+						name: 'Jeanne',
+						age: 18,
+						isAdmin: false,
+						floatValue: 2.5,
+					},
+				],
+			},
 		})
 
 		expect(
@@ -733,15 +803,17 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Jeanne',
-					age: 18,
-					isAdmin: false,
-					floatValue: 2.5,
-				},
-			],
+			users: {
+				objects: [
+					{
+						id: expect.any(String),
+						name: 'Jeanne',
+						age: 18,
+						isAdmin: false,
+						floatValue: 2.5,
+					},
+				],
+			},
 		})
 
 		expect(
@@ -751,15 +823,17 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Lucas',
-					age: 20,
-					isAdmin: true,
-					floatValue: 1.5,
-				},
-			],
+			users: {
+				objects: [
+					{
+						id: expect.any(String),
+						name: 'Lucas',
+						age: 20,
+						isAdmin: true,
+						floatValue: 1.5,
+					},
+				],
+			},
 		})
 
 		expect(
@@ -769,15 +843,17 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Jeanne',
-					age: 18,
-					isAdmin: false,
-					floatValue: 2.5,
-				},
-			],
+			users: {
+				objects: [
+					{
+						id: expect.any(String),
+						name: 'Jeanne',
+						age: 18,
+						isAdmin: false,
+						floatValue: 2.5,
+					},
+				],
+			},
 		})
 	})
 
@@ -789,15 +865,17 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Jeanne',
-					age: 18,
-					isAdmin: false,
-					floatValue: 2.5,
-				},
-			],
+			users: {
+				objects: [
+					{
+						id: expect.any(String),
+						name: 'Jeanne',
+						age: 18,
+						isAdmin: false,
+						floatValue: 2.5,
+					},
+				],
+			},
 		})
 
 		expect(
@@ -807,15 +885,17 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Lucas',
-					age: 20,
-					isAdmin: true,
-					floatValue: 1.5,
-				},
-			],
+			users: {
+				objects: [
+					{
+						id: expect.any(String),
+						name: 'Lucas',
+						age: 20,
+						isAdmin: true,
+						floatValue: 1.5,
+					},
+				],
+			},
 		})
 
 		expect(
@@ -825,15 +905,17 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Lucas',
-					age: 20,
-					isAdmin: true,
-					floatValue: 1.5,
-				},
-			],
+			users: {
+				objects: [
+					{
+						id: expect.any(String),
+						name: 'Lucas',
+						age: 20,
+						isAdmin: true,
+						floatValue: 1.5,
+					},
+				],
+			},
 		})
 
 		expect(
@@ -843,15 +925,17 @@ describe('GraphQL : aggregation', () => {
 				},
 			}),
 		).toEqual({
-			users: [
-				{
-					id: expect.any(String),
-					name: 'Jeanne',
-					age: 18,
-					isAdmin: false,
-					floatValue: 2.5,
-				},
-			],
+			users: {
+				objects: [
+					{
+						id: expect.any(String),
+						name: 'Jeanne',
+						age: 18,
+						isAdmin: false,
+						floatValue: 2.5,
+					},
+				],
+			},
 		})
 	})
 
@@ -862,7 +946,7 @@ describe('GraphQL : aggregation', () => {
 			},
 		})
 
-		expect(users).toEqual([
+		expect(users.objects).toEqual([
 			{
 				id: expect.any(String),
 				name: 'Lucas',
@@ -885,7 +969,7 @@ describe('GraphQL : aggregation', () => {
 			},
 		})
 
-		expect(users2).toEqual([
+		expect(users2.objects).toEqual([
 			{
 				id: expect.any(String),
 				name: 'Lucas',
@@ -903,7 +987,7 @@ describe('GraphQL : aggregation', () => {
 			},
 		})
 
-		expect(users).toEqual([])
+		expect(users.objects).toEqual([])
 
 		const { users: users2 } = await client.request<any>(graphql.users, {
 			where: {
@@ -911,7 +995,7 @@ describe('GraphQL : aggregation', () => {
 			},
 		})
 
-		expect(users2).toEqual([
+		expect(users2.objects).toEqual([
 			{
 				id: expect.any(String),
 				name: 'Lucas',

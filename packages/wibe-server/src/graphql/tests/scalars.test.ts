@@ -11,20 +11,24 @@ const graphql = {
 	users: gql`
         query users($where: UserWhereInput) {
             users(where: $where) {
-                id
-                name
-                birthDate
-				email
+				objects {
+					id
+					name
+					birthDate
+					email
+				}
             }
         }
     `,
 	createUsers: gql`
         mutation createUsers($input: [UserInput]) {
             createUsers(input: $input) {
-                name
-                birthDate
-				email
-            }
+				objects {
+					name
+					birthDate
+					email
+				}
+			}
         }
     `,
 }
@@ -61,7 +65,7 @@ describe('GraphQL : Scalars', () => {
 				},
 			)
 
-			expect(createUsers[0].birthDate).toEqual(now.toISOString())
+			expect(createUsers.objects[0].birthDate).toEqual(now.toISOString())
 		})
 
 		it('should create a date with timestamp in number', async () => {
@@ -77,7 +81,7 @@ describe('GraphQL : Scalars', () => {
 				},
 			)
 
-			expect(createUsers[0].birthDate).toEqual(now.toISOString())
+			expect(createUsers.objects[0].birthDate).toEqual(now.toISOString())
 		})
 
 		it('should create a date with iso string', async () => {
@@ -93,7 +97,7 @@ describe('GraphQL : Scalars', () => {
 				},
 			)
 
-			expect(createUsers[0].birthDate).toEqual(now.toISOString())
+			expect(createUsers.objects[0].birthDate).toEqual(now.toISOString())
 		})
 
 		it('should create a date with partial date', async () => {
@@ -109,7 +113,7 @@ describe('GraphQL : Scalars', () => {
 				},
 			)
 
-			const birthDate = new Date(createUsers[0].birthDate)
+			const birthDate = new Date(createUsers.objects[0].birthDate)
 			const date = new Date('2023-12-20')
 
 			expect(date.getFullYear()).toEqual(birthDate.getFullYear())
@@ -156,7 +160,7 @@ describe('GraphQL : Scalars', () => {
 				},
 			)
 
-			expect(createUsers[0].email).toEqual('jean.doe@gmail.com')
+			expect(createUsers.objects[0].email).toEqual('jean.doe@gmail.com')
 
 			expect(
 				client.request<any>(graphql.createUsers, {

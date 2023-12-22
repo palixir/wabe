@@ -24,6 +24,7 @@ import {
 import {
 	getDefaultInputType,
 	getGraphqlType,
+	getOutputType,
 	getWhereInputType,
 	wrapGraphQLTypeIn,
 } from './utils'
@@ -46,9 +47,7 @@ export class WibeGraphlQLSchema {
 		const queriesAndMutations = this.schemas.schema.class.reduce(
 			(previous, current) => {
 				const fields = current.fields
-
 				const className = current.name.replace(' ', '')
-
 				const fieldsOfObjectKeys = Object.keys(fields)
 
 				const defaultInputType = getDefaultInputType({
@@ -77,6 +76,7 @@ export class WibeGraphlQLSchema {
 					className,
 					whereInputType,
 					object,
+					allObjects: objects,
 				})
 				const customQueries = this.createCustomResolvers({
 					resolvers: current.resolvers?.queries || {},
@@ -95,6 +95,7 @@ export class WibeGraphlQLSchema {
 					defaultInputType,
 					whereInputType,
 					object,
+					allObjects: objects,
 				})
 
 				const defaultQueriesKeys = Object.keys(defaultQueries)
@@ -230,13 +231,32 @@ export class WibeGraphlQLSchema {
 		})
 	}
 
+	createOutputObject({
+		object,
+		wibeClass,
+	}: { object: GraphQLObjectType; wibeClass: ClassInterface }) {
+		return new GraphQLObjectType({
+			name: `${wibeClass.name}Output`,
+			fields: () => ({
+				// TODO: Pagination and information on request
+				objects: { type: new GraphQLList(object) },
+			}),
+		})
+	}
+
 	createObjects({
 		scalars,
 		enums,
-	}: { scalars: GraphQLScalarType[]; enums: GraphQLEnumType[] }) {
-		return this.schemas.schema.class.map((wibeClass) =>
-			this.createObject({ scalars, enums, wibeClass }),
-		)
+	}: {
+		scalars: GraphQLScalarType[]
+		enums: GraphQLEnumType[]
+	}) {
+		return this.schemas.schema.class.flatMap((wibeClass) => {
+			const object = this.createObject({ scalars, enums, wibeClass })
+			const outputObject = this.createOutputObject({ object, wibeClass })
+
+			return [object, outputObject]
+		})
 	}
 
 	createCustomResolvers({
@@ -300,10 +320,12 @@ export class WibeGraphlQLSchema {
 		className,
 		whereInputType,
 		object,
+		allObjects,
 	}: {
 		className: string
 		whereInputType: GraphQLInputObjectType
 		object: GraphQLObjectType
+		allObjects: GraphQLObjectType[]
 	}) {
 		return {
 			[className.toLowerCase()]: {
@@ -313,7 +335,7 @@ export class WibeGraphlQLSchema {
 					queryForOneObject(root, args, ctx, info, className),
 			},
 			[`${className.toLowerCase()}s`]: {
-				type: new GraphQLNonNull(new GraphQLList(object)),
+				type: new GraphQLNonNull(getOutputType({ object, allObjects })),
 				args: { where: { type: whereInputType } },
 				resolve: (root, args, ctx, info) =>
 					queryForMultipleObject(root, args, ctx, info, className),
@@ -326,11 +348,13 @@ export class WibeGraphlQLSchema {
 		object,
 		defaultInputType,
 		whereInputType,
+		allObjects,
 	}: {
 		className: string
 		defaultInputType: GraphQLInputObjectType
 		whereInputType: GraphQLInputObjectType
 		object: GraphQLObjectType
+		allObjects: GraphQLObjectType[]
 	}) {
 		const updateInputType = new GraphQLInputObjectType({
 			name: `${className}UpdateInput`,
@@ -370,7 +394,7 @@ export class WibeGraphlQLSchema {
 					mutationToCreateObject(root, args, ctx, info, className),
 			},
 			[`create${className}s`]: {
-				type: new GraphQLNonNull(new GraphQLList(object)),
+				type: new GraphQLNonNull(getOutputType({ object, allObjects })),
 				args: { input: { type: new GraphQLList(defaultInputType) } },
 				resolve: (root, args, ctx, info) =>
 					mutationToCreateMultipleObjects(
@@ -388,7 +412,7 @@ export class WibeGraphlQLSchema {
 					mutationToUpdateObject(root, args, ctx, info, className),
 			},
 			[`update${className}s`]: {
-				type: new GraphQLNonNull(new GraphQLList(object)),
+				type: new GraphQLNonNull(getOutputType({ object, allObjects })),
 				args: { input: { type: updatesInputType } },
 				resolve: (root, args, ctx, info) =>
 					mutationToUpdateMultipleObjects(
@@ -410,7 +434,7 @@ export class WibeGraphlQLSchema {
 					mutationToDeleteObject(root, args, ctx, info, className),
 			},
 			[`delete${className}s`]: {
-				type: new GraphQLNonNull(new GraphQLList(object)),
+				type: new GraphQLNonNull(getOutputType({ object, allObjects })),
 				args: { input: { type: deletesInputType } },
 				resolve: (root, args, ctx, info) =>
 					mutationToDeleteMultipleObjects(
