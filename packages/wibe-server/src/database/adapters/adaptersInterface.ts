@@ -2,7 +2,7 @@ import { Document, WithId } from 'mongodb'
 import { WibeSchemaTypes } from '../../../generated/wibe'
 
 type WhereAggregation<T extends keyof WibeSchemaTypes> = {
-	[key in keyof WibeSchemaTypes[T]]: {
+	[key in keyof WibeSchemaTypes[T] | 'id']: {
 		equalTo?: any
 		notEqualTo?: any
 		greaterThan?: any

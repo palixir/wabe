@@ -3,6 +3,7 @@ import { fail } from 'assert'
 import { closeTests, setupTests } from '../../utils/testHelper'
 import { MongoAdapter, buildMongoWhereQuery } from './MongoAdapter'
 import { WibeApp } from '../../server'
+import { ObjectId } from 'mongodb'
 
 describe('Mongo adapter', () => {
 	let mongoAdapter: MongoAdapter
@@ -28,8 +29,95 @@ describe('Mongo adapter', () => {
 			)
 	})
 
-	it.only('should getObjects with the number of objects specified in limit input', async () => {
-		const tata = await mongoAdapter.createObjects<any>({
+	it('should getObjects using id and not _id', async () => {
+		const insertedObjects = await mongoAdapter.createObjects<'User'>({
+			className: 'User',
+			data: [
+				{
+					name: 'Lucas',
+					age: 20,
+				},
+				{
+					name: 'Lucas1',
+					age: 20,
+				},
+			],
+			fields: ['*'],
+		})
+
+		if (!insertedObjects) fail()
+
+		const res = await mongoAdapter.getObjects<'User'>({
+			className: 'User',
+			where: {
+				id: { equalTo: new ObjectId(insertedObjects[0].id) },
+			},
+			fields: ['*'],
+		})
+
+		expect(res.length).toEqual(1)
+	})
+
+	it('should update multiple objects', async () => {
+		const insertedObjects = await mongoAdapter.createObjects<'User'>({
+			className: 'User',
+			data: [
+				{
+					name: 'Lucas',
+					age: 20,
+				},
+				{
+					name: 'Lucas1',
+					age: 20,
+				},
+			],
+			fields: ['*'],
+		})
+
+		if (!insertedObjects) fail()
+
+		const updatedObjects = await mongoAdapter.updateObjects<'User'>({
+			className: 'User',
+			where: {
+				name: { equalTo: 'Lucas' },
+			},
+			data: { age: 21 },
+			fields: ['*'],
+		})
+
+		expect(updatedObjects).toEqual([
+			{
+				id: expect.anything(),
+				name: 'Lucas',
+				age: 21,
+			},
+		])
+
+		const updatedObjects2 = await mongoAdapter.updateObjects<'User'>({
+			className: 'User',
+			where: {
+				age: { greaterThanOrEqualTo: 20 },
+			},
+			data: { age: 23 },
+			fields: ['*'],
+		})
+
+		expect(updatedObjects2).toEqual([
+			{
+				id: expect.anything(),
+				name: 'Lucas',
+				age: 23,
+			},
+			{
+				id: expect.anything(),
+				name: 'Lucas1',
+				age: 23,
+			},
+		])
+	})
+
+	it('should getObjects with the number of objects specified in limit input', async () => {
+		await mongoAdapter.createObjects<any>({
 			className: 'Test1',
 			data: [
 				{
@@ -55,8 +143,6 @@ describe('Mongo adapter', () => {
 			],
 			fields: ['name', 'id'],
 		})
-
-		console.log(tata)
 
 		const res = await mongoAdapter.getObjects<any>({
 			className: 'Test1',
@@ -211,7 +297,6 @@ describe('Mongo adapter', () => {
 	})
 
 	it('should create class', async () => {
-		console.log(await mongoAdapter.database?.collections())
 		expect((await mongoAdapter.database?.collections())?.length).toBe(0)
 
 		await mongoAdapter.createClass('User')
@@ -324,9 +409,11 @@ describe('Mongo adapter', () => {
 		expect(objects2.length).toEqual(2)
 		expect(objects2).toEqual([
 			{
+				id: expect.anything(),
 				name: 'John1',
 			},
 			{
+				id: expect.anything(),
 				name: 'John2',
 			},
 		])
@@ -619,9 +706,11 @@ describe('Mongo adapter', () => {
 
 		expect(insertedObjects).toEqual([
 			{
+				id: expect.anything(),
 				name: 'Lucas3',
 			},
 			{
+				id: expect.anything(),
 				name: 'Lucas4',
 			},
 		])
@@ -725,65 +814,8 @@ describe('Mongo adapter', () => {
 
 		expect(updatedObjects).toEqual([
 			{
+				id: expect.anything(),
 				age: 20,
-			},
-		])
-	})
-
-	it('should update multiple objects', async () => {
-		const insertedObjects = await mongoAdapter.createObjects<'User'>({
-			className: 'User',
-			data: [
-				{
-					name: 'Lucas',
-					age: 20,
-				},
-				{
-					name: 'Lucas1',
-					age: 20,
-				},
-			],
-			fields: ['*'],
-		})
-
-		if (!insertedObjects) fail()
-
-		const updatedObjects = await mongoAdapter.updateObjects<'User'>({
-			className: 'User',
-			where: {
-				name: { equalTo: 'Lucas' },
-			},
-			data: { age: 21 },
-			fields: ['*'],
-		})
-
-		expect(updatedObjects).toEqual([
-			{
-				id: expect.anything(),
-				name: 'Lucas',
-				age: 21,
-			},
-		])
-
-		const updatedObjects2 = await mongoAdapter.updateObjects<'User'>({
-			className: 'User',
-			where: {
-				age: { greaterThanOrEqualTo: 20 },
-			},
-			data: { age: 23 },
-			fields: ['*'],
-		})
-
-		expect(updatedObjects2).toEqual([
-			{
-				id: expect.anything(),
-				name: 'Lucas',
-				age: 23,
-			},
-			{
-				id: expect.anything(),
-				name: 'Lucas1',
-				age: 23,
 			},
 		])
 	})

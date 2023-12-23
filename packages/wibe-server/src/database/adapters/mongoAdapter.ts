@@ -24,28 +24,30 @@ export const buildMongoWhereQuery = <T extends keyof WibeSchemaTypes>(
 		(acc, key) => {
 			const value = where[key]
 
-			if (value?.contains) acc[key] = value.contains
-			if (value?.notContains) acc[key] = { $ne: value.notContains }
-			if (value?.equalTo) acc[key] = value.equalTo
-			if (value?.notEqualTo) acc[key] = { $ne: value.notEqualTo }
+			const keyToWrite = key === 'id' ? '_id' : key
 
-			if (value?.greaterThan) acc[key] = { $gt: value.greaterThan }
+			if (value?.contains) acc[keyToWrite] = value.contains
+			if (value?.notContains) acc[keyToWrite] = { $ne: value.notContains }
+			if (value?.equalTo) acc[keyToWrite] = value.equalTo
+			if (value?.notEqualTo) acc[keyToWrite] = { $ne: value.notEqualTo }
+
+			if (value?.greaterThan) acc[keyToWrite] = { $gt: value.greaterThan }
 			if (value?.greaterThanOrEqualTo)
-				acc[key] = { $gte: value.greaterThanOrEqualTo }
+				acc[keyToWrite] = { $gte: value.greaterThanOrEqualTo }
 
-			if (value?.lessThan) acc[key] = { $lt: value.lessThan }
+			if (value?.lessThan) acc[keyToWrite] = { $lt: value.lessThan }
 			if (value?.lessThanOrEqualTo)
-				acc[key] = { $lte: value.lessThanOrEqualTo }
+				acc[keyToWrite] = { $lte: value.lessThanOrEqualTo }
 
-			if (value?.in) acc[key] = { $in: value.in }
-			if (value?.notIn) acc[key] = { $nin: value.notIn }
+			if (value?.in) acc[keyToWrite] = { $in: value.in }
+			if (value?.notIn) acc[keyToWrite] = { $nin: value.notIn }
 
-			if (value && key === 'OR') {
+			if (value && keyToWrite === 'OR') {
 				acc.$or = where.OR?.map((or) => buildMongoWhereQuery(or))
 				return acc
 			}
 
-			if (value && key === 'AND') {
+			if (value && keyToWrite === 'AND') {
 				acc.$and = where.AND?.map((and) => buildMongoWhereQuery(and))
 				return acc
 			}
@@ -56,7 +58,8 @@ export const buildMongoWhereQuery = <T extends keyof WibeSchemaTypes>(
 
 				if (entries.length > 0) {
 					return {
-						[`${key.toString()}.${entries[0][0]}`]: entries[0][1],
+						[`${keyToWrite.toString()}.${entries[0][0]}`]:
+							entries[0][1],
 					}
 				}
 			}
@@ -158,13 +161,16 @@ export class MongoAdapter implements DatabaseAdapter {
 			const res = await this.database
 				.collection<any>(className)
 				.find(whereBuilded)
+				.limit(limit || 0)
+				.skip(offset || 0)
 				.toArray()
 
 			// We standardize the id field
 			for (const object of res) {
 				if (object._id) {
 					object.id = object._id.toString()
-					object._id = undefined
+					// biome-ignore lint/performance/noDelete: <explanation>
+					delete object._id
 				}
 			}
 
@@ -173,6 +179,7 @@ export class MongoAdapter implements DatabaseAdapter {
 
 		const objectOfFieldsToGet: Record<any, number> = fields.reduce(
 			(acc, prev) => {
+				// if (prev === 'id') prev = '_id'
 				acc[prev] = 1
 
 				return acc
@@ -182,13 +189,10 @@ export class MongoAdapter implements DatabaseAdapter {
 
 		const collection = this.database.collection<any>(className)
 
-		const isIdInProjection = fields.includes('id')
-
 		const res = await collection
 			.find(whereBuilded, {
 				projection: {
 					...objectOfFieldsToGet,
-					_id: isIdInProjection,
 				},
 			})
 			.limit(limit || 0)
@@ -199,7 +203,8 @@ export class MongoAdapter implements DatabaseAdapter {
 		for (const object of res) {
 			if (object._id) {
 				object.id = object._id.toString()
-				object._id = undefined
+				// biome-ignore lint/performance/noDelete: <explanation>
+				delete object._id
 			}
 		}
 
@@ -236,7 +241,7 @@ export class MongoAdapter implements DatabaseAdapter {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 
-		const { className, where, data, fields } = params
+		const { className, where, data, fields, offset, limit } = params
 
 		const whereBuilded = buildMongoWhereQuery<T>(where)
 
@@ -246,21 +251,27 @@ export class MongoAdapter implements DatabaseAdapter {
 			className,
 			where,
 			fields: ['id'],
+			offset,
+			limit,
 		})
 
 		await collection.updateMany(whereBuilded, { $set: data })
 
-		const objects = await Promise.all(
-			objectsBeforeUpdate.map((object) =>
-				this.getObject<T>({
-					className,
-					id: object.id,
-					fields,
-				}),
-			),
-		)
+		const orStatement = objectsBeforeUpdate.map((object) => ({
+			id: { equalTo: new ObjectId(object.id) },
+		}))
 
-		return objects
+		const res = await this.getObjects<T>({
+			className,
+			where: {
+				OR: orStatement,
+			} as WhereType<T>,
+			fields,
+			offset,
+			limit,
+		})
+
+		return res
 	}
 
 	async createObject<T extends keyof WibeSchemaTypes>(
@@ -294,13 +305,13 @@ export class MongoAdapter implements DatabaseAdapter {
 
 		const res = await collection.insertMany(data, {})
 
-		const orStatement = Object.keys(res.insertedIds).map((id) => ({
-			id: id.toString(),
+		const orStatement = Object.keys(res.insertedIds).map((key) => ({
+			id: { equalTo: res.insertedIds[key] },
 		}))
 
 		return this.getObjects<T>({
 			className,
-			where: { OR: orStatement },
+			where: { OR: orStatement } as WhereType<T>,
 			fields,
 			offset,
 			limit,
@@ -336,7 +347,7 @@ export class MongoAdapter implements DatabaseAdapter {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 
-		const { className, where, fields } = params
+		const { className, where, fields, limit, offset } = params
 
 		const whereBuilded = buildMongoWhereQuery<T>(where)
 
@@ -346,6 +357,8 @@ export class MongoAdapter implements DatabaseAdapter {
 			className,
 			where,
 			fields,
+			limit,
+			offset,
 		})
 
 		await collection.deleteMany(whereBuilded)
