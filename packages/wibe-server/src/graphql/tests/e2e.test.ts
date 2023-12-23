@@ -38,8 +38,8 @@ const graphql = {
 		}
 	`,
 	users: gql`
-		query users($where: UserWhereInput) {
-			users(where: $where) {
+		query users($where: UserWhereInput, $offset: Int, $limit: Int) {
+			users(where: $where, offset: $offset, limit: $limit) {
 				objects{
 					id
 					name
@@ -105,6 +105,17 @@ const graphql = {
 	`,
 }
 
+const cleanUsers = async (client: GraphQLClient) => {
+	const { users } = await client.request<any>(graphql.users, {})
+	await Promise.all(
+		users.objects.map((user: any) =>
+			client.request<any>(graphql.deleteUser, {
+				input: { id: user.id },
+			}),
+		),
+	)
+}
+
 describe('GraphQL : E2E', () => {
 	let wibe: WibeApp
 	let port: number
@@ -129,18 +140,46 @@ describe('GraphQL : E2E', () => {
 	})
 
 	afterEach(async () => {
-		const { users } = await client.request<any>(graphql.users, {})
-		await Promise.all(
-			users.objects.map((user: any) =>
-				client.request<any>(graphql.deleteUser, {
-					input: { id: user.id },
-				}),
-			),
-		)
+		await cleanUsers(client)
 	})
 
 	afterAll(async () => {
 		await closeTests(wibe)
+	})
+
+	it("should use pagination with 'offset' and 'limit' arguments", async () => {
+		await cleanUsers(client)
+
+		const res = await client.request<any>(graphql.createUsers, {
+			input: {
+				fields: [
+					{
+						name: 'Toto1',
+					},
+					{ name: 'Toto2' },
+					{ name: 'Toto3' },
+					{ name: 'Toto4' },
+					{ name: 'Toto5' },
+					{ name: 'Toto6' },
+					{ name: 'Toto7' },
+					{ name: 'Toto8' },
+					{ name: 'Toto9' },
+					{ name: 'Toto10' },
+				],
+				offset: 0,
+				limit: 5,
+			},
+		})
+
+		expect(res.createUsers.objects.length).toEqual(5)
+
+		const { users } = await client.request<any>(graphql.users, {
+			offset: 5,
+			limit: 2,
+		})
+
+		expect(users.objects.length).toEqual(2)
+		expect(users.objects[0].name).toEqual('Toto6')
 	})
 
 	it('should create user with custom object in schema', async () => {

@@ -42,7 +42,7 @@ export const queryForOneObject = (
 
 export const queryForMultipleObject = async (
 	_: any,
-	args: any,
+	{ where, offset, limit }: any,
 	___: any,
 	info: GraphQLResolveInfo,
 	className: string,
@@ -54,8 +54,10 @@ export const queryForMultipleObject = async (
 	return {
 		objects: await WibeApp.databaseController.getObjects<any>({
 			className,
-			where: args.where,
+			where,
 			fields,
+			offset,
+			limit,
 		}),
 	}
 }
@@ -73,7 +75,7 @@ export const mutationToCreateObject = (
 
 	return WibeApp.databaseController.createObject<any>({
 		className,
-		data: args.input.fields,
+		data: args.input?.fields,
 		fields,
 	})
 }
@@ -92,8 +94,10 @@ export const mutationToCreateMultipleObjects = async (
 	return {
 		objects: await WibeApp.databaseController.createObjects<any>({
 			className,
-			data: args.input.fields,
+			data: args.input?.fields,
 			fields,
+			offset: args.input?.offset,
+			limit: args.input?.limit,
 		}),
 	}
 }
@@ -111,8 +115,8 @@ export const mutationToUpdateObject = (
 
 	return WibeApp.databaseController.updateObject<any>({
 		className,
-		id: args.input.id,
-		data: args.input.fields,
+		id: args.input?.id,
+		data: args.input?.fields,
 		fields,
 	})
 }
@@ -131,9 +135,11 @@ export const mutationToUpdateMultipleObjects = async (
 	return {
 		objects: await WibeApp.databaseController.updateObjects<any>({
 			className,
-			where: args.input.where,
-			data: args.input.fields,
+			where: args.input?.where,
+			data: args.input?.fields,
 			fields,
+			offset: args.input?.offset,
+			limit: args.input?.limit,
 		}),
 	}
 }
@@ -151,7 +157,7 @@ export const mutationToDeleteObject = (
 
 	return WibeApp.databaseController.deleteObject<any>({
 		className,
-		id: args.input.id,
+		id: args.input?.id,
 		fields,
 	})
 }
@@ -170,8 +176,10 @@ export const mutationToDeleteMultipleObjects = async (
 	return {
 		objects: await WibeApp.databaseController.deleteObjects<any>({
 			className,
-			where: args.input.where,
+			where: args.input?.where,
 			fields,
+			offset: args.input?.offset,
+			limit: args.input?.limit,
 		}),
 	}
 }

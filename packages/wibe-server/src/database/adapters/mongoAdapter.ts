@@ -305,9 +305,11 @@ export class MongoAdapter implements DatabaseAdapter {
 
 		const res = await collection.insertMany(data, {})
 
-		const orStatement = Object.keys(res.insertedIds).map((key) => ({
-			id: { equalTo: res.insertedIds[key] },
-		}))
+		const orStatement = Object.entries(res.insertedIds).map(
+			([, value]) => ({
+				id: { equalTo: value },
+			}),
+		)
 
 		return this.getObjects<T>({
 			className,
