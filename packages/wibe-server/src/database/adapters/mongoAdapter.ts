@@ -188,7 +188,6 @@ export class MongoAdapter implements DatabaseAdapter {
 		)
 
 		const collection = this.database.collection<any>(className)
-
 		const res = await collection
 			.find(whereBuilded, {
 				projection: {

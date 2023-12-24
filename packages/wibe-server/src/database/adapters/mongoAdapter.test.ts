@@ -58,102 +58,7 @@ describe('Mongo adapter', () => {
 		expect(res.length).toEqual(1)
 	})
 
-	it('should update multiple objects', async () => {
-		const insertedObjects = await mongoAdapter.createObjects<'User'>({
-			className: 'User',
-			data: [
-				{
-					name: 'Lucas',
-					age: 20,
-				},
-				{
-					name: 'Lucas1',
-					age: 20,
-				},
-			],
-			fields: ['*'],
-		})
-
-		if (!insertedObjects) fail()
-
-		const updatedObjects = await mongoAdapter.updateObjects<'User'>({
-			className: 'User',
-			where: {
-				name: { equalTo: 'Lucas' },
-			},
-			data: { age: 21 },
-			fields: ['*'],
-		})
-
-		expect(updatedObjects).toEqual([
-			{
-				id: expect.anything(),
-				name: 'Lucas',
-				age: 21,
-			},
-		])
-
-		const updatedObjects2 = await mongoAdapter.updateObjects<'User'>({
-			className: 'User',
-			where: {
-				age: { greaterThanOrEqualTo: 20 },
-			},
-			data: { age: 23 },
-			fields: ['*'],
-		})
-
-		expect(updatedObjects2).toEqual([
-			{
-				id: expect.anything(),
-				name: 'Lucas',
-				age: 23,
-			},
-			{
-				id: expect.anything(),
-				name: 'Lucas1',
-				age: 23,
-			},
-		])
-	})
-
-	it('should getObjects with the number of objects specified in limit input', async () => {
-		await mongoAdapter.createObjects<any>({
-			className: 'Test1',
-			data: [
-				{
-					name: 'John',
-					age: 20,
-				},
-				{
-					name: 'John1',
-					age: 20,
-				},
-				{
-					name: 'John2',
-					age: 20,
-				},
-				{
-					name: 'John3',
-					age: 20,
-				},
-				{
-					name: 'John4',
-					age: 20,
-				},
-			],
-			fields: ['name', 'id'],
-		})
-
-		const res = await mongoAdapter.getObjects<any>({
-			className: 'Test1',
-			fields: ['name'],
-			limit: 2,
-		})
-
-		expect(res.length).toEqual(2)
-	})
-
-	it('should getObjects with the number of objects specified in limit and offset input', async () => {
+	it('should getObjects with limit and offset', async () => {
 		await mongoAdapter.createObjects<any>({
 			className: 'Test1',
 			data: [
@@ -193,7 +98,105 @@ describe('Mongo adapter', () => {
 		expect(res[1].name).toEqual('John3')
 	})
 
-	it('should get all the objects without limit number', async () => {
+	it('should get all the objects with limit', async () => {
+		const res = await mongoAdapter.createObjects<any>({
+			className: 'Test1',
+			data: [
+				{
+					name: 'John',
+					age: 20,
+				},
+				{
+					name: 'John1',
+					age: 20,
+				},
+				{
+					name: 'John2',
+					age: 20,
+				},
+				{
+					name: 'John3',
+					age: 20,
+				},
+				{
+					name: 'John4',
+					age: 20,
+				},
+			],
+			fields: ['name', 'id'],
+			limit: 2,
+		})
+
+		expect(res.length).toEqual(2)
+	})
+
+	// For the moment we keep the mongodb behavior for the negative value (for limit)
+	// https://www.mongodb.com/docs/manual/reference/method/cursor.limit/#negative-values
+	it('should get all the objects with negative limit and offset', async () => {
+		const res = await mongoAdapter.createObjects<any>({
+			className: 'Test1',
+			data: [
+				{
+					name: 'John',
+					age: 20,
+				},
+				{
+					name: 'John1',
+					age: 20,
+				},
+				{
+					name: 'John2',
+					age: 20,
+				},
+				{
+					name: 'John3',
+					age: 20,
+				},
+				{
+					name: 'John4',
+					age: 20,
+				},
+			],
+			fields: ['name', 'id'],
+			limit: -2,
+		})
+
+		expect(res.length).toEqual(2)
+
+		expect(
+			mongoAdapter.createObjects<any>({
+				className: 'Test1',
+				data: [
+					{
+						name: 'John',
+						age: 20,
+					},
+					{
+						name: 'John1',
+						age: 20,
+					},
+					{
+						name: 'John2',
+						age: 20,
+					},
+					{
+						name: 'John3',
+						age: 20,
+					},
+					{
+						name: 'John4',
+						age: 20,
+					},
+				],
+				fields: ['name', 'id'],
+				offset: -2,
+			}),
+		).rejects.toThrow(
+			"BSON field 'skip' value must be >= 0, actual value '-2'",
+		)
+	})
+
+	it('should get all the objects without limit and without offset', async () => {
 		await mongoAdapter.createObjects<any>({
 			className: 'Test1',
 			data: [
@@ -229,39 +232,7 @@ describe('Mongo adapter', () => {
 		expect(res.length).toEqual(5)
 	})
 
-	it('should createObjects with the number of objects specified in limit input', async () => {
-		const res = await mongoAdapter.createObjects<any>({
-			className: 'Test1',
-			data: [
-				{
-					name: 'John',
-					age: 20,
-				},
-				{
-					name: 'John1',
-					age: 20,
-				},
-				{
-					name: 'John2',
-					age: 20,
-				},
-				{
-					name: 'John3',
-					age: 20,
-				},
-				{
-					name: 'John4',
-					age: 20,
-				},
-			],
-			fields: ['name', 'id'],
-			limit: 2,
-		})
-
-		expect(res.length).toEqual(2)
-	})
-
-	it('should createObjects with the number of objects specified in limit and offset input', async () => {
+	it('should createObjects and deleteObjects with offset and limit', async () => {
 		const res = await mongoAdapter.createObjects<any>({
 			className: 'Test1',
 			data: [
@@ -294,6 +265,24 @@ describe('Mongo adapter', () => {
 		expect(res.length).toEqual(2)
 		expect(res[0].name).toEqual('John2')
 		expect(res[1].name).toEqual('John3')
+
+		const res2 = await mongoAdapter.deleteObjects<'User'>({
+			className: 'Test1',
+			where: {
+				OR: [
+					{ name: { equalTo: 'John2' } },
+					{ name: { equalTo: 'John3' } },
+					{ name: { equalTo: 'John4' } },
+				],
+			},
+			fields: ['name'],
+			limit: 2,
+			offset: 1,
+		})
+
+		expect(res2.length).toEqual(2)
+		expect(res2[0].name).toEqual('John3')
+		expect(res2[1].name).toEqual('John4')
 	})
 
 	it('should create class', async () => {
@@ -787,6 +776,64 @@ describe('Mongo adapter', () => {
 			name: 'Doe',
 			age: 20,
 		})
+	})
+
+	it('should update multiple objects', async () => {
+		const insertedObjects = await mongoAdapter.createObjects<'User'>({
+			className: 'User',
+			data: [
+				{
+					name: 'Lucas',
+					age: 20,
+				},
+				{
+					name: 'Lucas1',
+					age: 20,
+				},
+			],
+			fields: ['*'],
+		})
+
+		if (!insertedObjects) fail()
+
+		const updatedObjects = await mongoAdapter.updateObjects<'User'>({
+			className: 'User',
+			where: {
+				name: { equalTo: 'Lucas' },
+			},
+			data: { age: 21 },
+			fields: ['*'],
+		})
+
+		expect(updatedObjects).toEqual([
+			{
+				id: expect.anything(),
+				name: 'Lucas',
+				age: 21,
+			},
+		])
+
+		const updatedObjects2 = await mongoAdapter.updateObjects<'User'>({
+			className: 'User',
+			where: {
+				age: { greaterThanOrEqualTo: 20 },
+			},
+			data: { age: 23 },
+			fields: ['*'],
+		})
+
+		expect(updatedObjects2).toEqual([
+			{
+				id: expect.anything(),
+				name: 'Lucas',
+				age: 23,
+			},
+			{
+				id: expect.anything(),
+				name: 'Lucas1',
+				age: 23,
+			},
+		])
 	})
 
 	it('should update the same field of an objet that which we use in the where field', async () => {
