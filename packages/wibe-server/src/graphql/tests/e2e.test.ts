@@ -15,7 +15,6 @@ import {
 	setupTests,
 } from '../../utils/testHelper'
 import { GraphQLClient } from 'graphql-request'
-import { Role } from '../../../generated/wibe'
 
 const graphql = {
 	customQuery: gql`
@@ -317,7 +316,7 @@ describe('GraphQL : E2E', () => {
 
 	it('should create user with custom enum (Role)', async () => {
 		await client.request<any>(graphql.createManyUser, {
-			input: { fields: [{ name: 'Jack', role: Role.Admin }] },
+			input: { fields: [{ name: 'Jack', role: 'Admin' }] },
 		})
 
 		const { findManyUser } = await client.request<any>(
@@ -325,7 +324,7 @@ describe('GraphQL : E2E', () => {
 			{
 				where: {
 					role: {
-						equalTo: Role.Admin,
+						equalTo: 'Admin',
 					},
 				},
 			},
@@ -339,7 +338,7 @@ describe('GraphQL : E2E', () => {
 			{
 				where: {
 					role: {
-						notEqualTo: Role.Admin,
+						notEqualTo: 'Admin',
 					},
 				},
 			},

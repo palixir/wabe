@@ -1,4 +1,7 @@
-import { WibeSchemaEnums, WibeSchemaScalars } from '../../generated/wibe'
+import {
+	type WibeSchemaEnums,
+	type WibeSchemaScalars,
+} from '../../generated/wibe'
 
 export type WibeDefaultTypes =
 	| 'String'

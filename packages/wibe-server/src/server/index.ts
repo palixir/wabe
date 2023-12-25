@@ -11,6 +11,7 @@ interface WibeConfig {
 	port: number
 	schema: SchemaInterface
 	database: DatabaseConfig
+	codegen?: boolean
 }
 
 export class WibeApp {
@@ -19,16 +20,16 @@ export class WibeApp {
 	static config: WibeConfig
 	static databaseController: DatabaseController
 
-	constructor(config: WibeConfig) {
-		WibeApp.config = config
+	constructor({ port, schema, database, codegen = true }: WibeConfig) {
+		WibeApp.config = { port, schema, database, codegen }
 
 		this.server = new Elysia().get('/health', (context) => {
 			context.set.status = 200
 		})
 
 		const databaseAdapter = new MongoAdapter({
-			databaseName: config.database.name,
-			databaseUrl: config.database.url,
+			databaseName: database.name,
+			databaseUrl: database.url,
 		})
 
 		WibeApp.databaseController = new DatabaseController(databaseAdapter)
@@ -59,7 +60,8 @@ export class WibeApp {
 
 		if (
 			process.env.NODE_ENV !== 'production' &&
-			process.env.NODE_ENV !== 'test'
+			process.env.NODE_ENV !== 'test' &&
+			WibeApp.config.codegen
 		) {
 			// Generate Wibe types
 			const wibeTypes = wibeSchema.getTypesFromSchema()
