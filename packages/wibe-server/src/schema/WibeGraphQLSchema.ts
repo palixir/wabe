@@ -239,7 +239,6 @@ export class WibeGraphlQLSchema {
 		return new GraphQLObjectType({
 			name: `${wibeClass.name}Output`,
 			fields: () => ({
-				// TODO: Pagination and information on request
 				objects: { type: new GraphQLList(object) },
 			}),
 		})
