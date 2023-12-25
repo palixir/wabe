@@ -329,13 +329,13 @@ export class WibeGraphlQLSchema {
 		allObjects: GraphQLObjectType[]
 	}) {
 		return {
-			[className.toLowerCase()]: {
+			[`findOne${className}`]: {
 				type: object,
 				args: { id: { type: GraphQLID } },
 				resolve: (root, args, ctx, info) =>
 					queryForOneObject(root, args, ctx, info, className),
 			},
-			[`${className.toLowerCase()}s`]: {
+			[`findMany${className}`]: {
 				type: new GraphQLNonNull(getOutputType({ object, allObjects })),
 				args: {
 					where: { type: whereInputType },
@@ -412,13 +412,13 @@ export class WibeGraphlQLSchema {
 		})
 
 		const mutations: Record<string, GraphQLFieldConfig<any, any, any>> = {
-			[`create${className}`]: {
+			[`createOne${className}`]: {
 				type: new GraphQLNonNull(object),
 				args: { input: { type: createInputType } },
 				resolve: (root, args, ctx, info) =>
 					mutationToCreateObject(root, args, ctx, info, className),
 			},
-			[`create${className}s`]: {
+			[`createMany${className}`]: {
 				type: new GraphQLNonNull(getOutputType({ object, allObjects })),
 				args: { input: { type: createsInputType } },
 				resolve: (root, args, ctx, info) =>
@@ -430,13 +430,13 @@ export class WibeGraphlQLSchema {
 						className,
 					),
 			},
-			[`update${className}`]: {
+			[`updateOne${className}`]: {
 				type: new GraphQLNonNull(object),
 				args: { input: { type: updateInputType } },
 				resolve: (root, args, ctx, info) =>
 					mutationToUpdateObject(root, args, ctx, info, className),
 			},
-			[`update${className}s`]: {
+			[`updateMany${className}`]: {
 				type: new GraphQLNonNull(getOutputType({ object, allObjects })),
 				args: { input: { type: updatesInputType } },
 				resolve: (root, args, ctx, info) =>
@@ -448,7 +448,7 @@ export class WibeGraphlQLSchema {
 						className,
 					),
 			},
-			[`delete${className}`]: {
+			[`deleteOne${className}`]: {
 				type: new GraphQLNonNull(object),
 				args: {
 					input: {
@@ -458,7 +458,7 @@ export class WibeGraphlQLSchema {
 				resolve: (root, args, ctx, info) =>
 					mutationToDeleteObject(root, args, ctx, info, className),
 			},
-			[`delete${className}s`]: {
+			[`deleteMany${className}`]: {
 				type: new GraphQLNonNull(getOutputType({ object, allObjects })),
 				args: { input: { type: deletesInputType } },
 				resolve: (root, args, ctx, info) =>

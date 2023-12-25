@@ -28,18 +28,18 @@ const graphql = {
 			customMutation(a: $a, b: $b)
 		}
 	`,
-	user: gql`
-		query user($id: ID!) {
-			user(id: $id) {
+	findOneUser: gql`
+		query findOneUser($id: ID!) {
+			findOneUser(id: $id) {
 				id
 				name
 				age
 			}
 		}
 	`,
-	users: gql`
-		query users($where: UserWhereInput, $offset: Int, $limit: Int) {
-			users(where: $where, offset: $offset, limit: $limit) {
+	findManyUser: gql`
+		query findManyUser($where: UserWhereInput, $offset: Int, $limit: Int) {
+			findManyUser(where: $where, offset: $offset, limit: $limit) {
 				objects{
 					id
 					name
@@ -48,18 +48,18 @@ const graphql = {
 			}
 		}
 	`,
-	createUser: gql`
-		mutation createUser($input: UserCreateInput!) {
-			createUser(input: $input) {
+	createOneUser: gql`
+		mutation createOneUser($input: UserCreateInput!) {
+			createOneUser(input: $input) {
 				id
 				name
 				age
 			}
 		}
 	`,
-	createUsers: gql`
-		mutation createUsers($input: UsersCreateInput!) {
-			createUsers(input: $input) {
+	createManyUser: gql`
+		mutation createManyUser($input: UsersCreateInput!) {
+			createManyUser(input: $input) {
 				objects{
 					name
 					age
@@ -67,17 +67,17 @@ const graphql = {
 			}
 		}
 	`,
-	updateUser: gql`
-		mutation updateUser($input: UserUpdateInput!) {
-			updateUser(input: $input) {
+	updateOneUser: gql`
+		mutation updateOneUser($input: UserUpdateInput!) {
+			updateOneUser(input: $input) {
 				name
 				age
 			}
 		}
 	`,
-	updateUsers: gql`
-		mutation updateUsers($input: UsersUpdateInput!) {
-			updateUsers(input: $input) {
+	updateManyUser: gql`
+		mutation updateManyUser($input: UsersUpdateInput!) {
+			updateManyUser(input: $input) {
 				objects{
 					name
 					age
@@ -85,17 +85,17 @@ const graphql = {
 			}
 		}
 	`,
-	deleteUser: gql`
-		mutation deleteUser($input: UserDeleteInput!) {
-			deleteUser(input: $input) {
+	deleteOneUser: gql`
+		mutation deleteOneUser($input: UserDeleteInput!) {
+			deleteOneUser(input: $input) {
 				name
 				age
 			}
 		}
 	`,
-	deleteUsers: gql`
-		mutation deleteUsers($input: UsersDeleteInput!) {
-			deleteUsers(input: $input) {
+	deleteManyUser: gql`
+		mutation deleteManyUser($input: UsersDeleteInput!) {
+			deleteManyUser(input: $input) {
 				objects{
 					name
 					age
@@ -106,10 +106,10 @@ const graphql = {
 }
 
 const cleanUsers = async (client: GraphQLClient) => {
-	const { users } = await client.request<any>(graphql.users, {})
+	const { findManyUser } = await client.request<any>(graphql.findManyUser, {})
 	await Promise.all(
-		users.objects.map((user: any) =>
-			client.request<any>(graphql.deleteUser, {
+		findManyUser.objects.map((user: any) =>
+			client.request<any>(graphql.deleteOneUser, {
 				input: { id: user.id },
 			}),
 		),
@@ -129,7 +129,7 @@ describe('GraphQL : E2E', () => {
 	})
 
 	beforeEach(async () => {
-		await client.request<any>(graphql.createUsers, {
+		await client.request<any>(graphql.createManyUser, {
 			input: {
 				fields: [
 					{ name: 'Lucas', age: 23 },
@@ -150,7 +150,7 @@ describe('GraphQL : E2E', () => {
 	it("should use pagination with 'offset' and 'limit' arguments", async () => {
 		await cleanUsers(client)
 
-		const res = await client.request<any>(graphql.createUsers, {
+		const res = await client.request<any>(graphql.createManyUser, {
 			input: {
 				fields: [
 					{
@@ -171,19 +171,22 @@ describe('GraphQL : E2E', () => {
 			},
 		})
 
-		expect(res.createUsers.objects.length).toEqual(5)
+		expect(res.createManyUser.objects.length).toEqual(5)
 
-		const { users } = await client.request<any>(graphql.users, {
-			offset: 5,
-			limit: 2,
-		})
+		const { findManyUser } = await client.request<any>(
+			graphql.findManyUser,
+			{
+				offset: 5,
+				limit: 2,
+			},
+		)
 
-		expect(users.objects.length).toEqual(2)
-		expect(users.objects[0].name).toEqual('Toto6')
+		expect(findManyUser.objects.length).toEqual(2)
+		expect(findManyUser.objects[0].name).toEqual('Toto6')
 	})
 
 	it('should create user with custom object in schema', async () => {
-		await client.request<any>(graphql.createUsers, {
+		await client.request<any>(graphql.createManyUser, {
 			input: {
 				fields: [
 					{
@@ -201,47 +204,56 @@ describe('GraphQL : E2E', () => {
 			},
 		})
 
-		const { users } = await client.request<any>(graphql.users, {
-			where: {
-				address: {
-					address1: {
-						equalTo: '1 rue de la paix',
+		const { findManyUser } = await client.request<any>(
+			graphql.findManyUser,
+			{
+				where: {
+					address: {
+						address1: {
+							equalTo: '1 rue de la paix',
+						},
 					},
 				},
 			},
-		})
+		)
 
-		expect(users.objects.length).toEqual(1)
-		expect(users.objects[0].name).toEqual('Jean')
+		expect(findManyUser.objects.length).toEqual(1)
+		expect(findManyUser.objects[0].name).toEqual('Jean')
 
-		const { users: users2 } = await client.request<any>(graphql.users, {
-			where: {
-				address: {
-					postalCode: {
-						equalTo: 75000,
+		const { findManyUser: users2 } = await client.request<any>(
+			graphql.findManyUser,
+			{
+				where: {
+					address: {
+						postalCode: {
+							equalTo: 75000,
+						},
 					},
 				},
 			},
-		})
+		)
 
 		expect(users2.objects.length).toEqual(1)
 		expect(users2.objects[0].name).toEqual('Jean')
 
-		const { users: users3 } = await client.request<any>(graphql.users, {
-			where: {
-				address: {
-					address1: {
-						notEqualTo: '1 rue de la paix',
+		const { findManyUser: users3 } = await client.request<any>(
+			graphql.findManyUser,
+			{
+				where: {
+					address: {
+						address1: {
+							notEqualTo: '1 rue de la paix',
+						},
 					},
 				},
 			},
-		})
+		)
 
 		expect(users3.objects.length).toEqual(3)
 	})
 
 	it('should create user with object of object in schema', async () => {
-		await client.request<any>(graphql.createUsers, {
+		await client.request<any>(graphql.createManyUser, {
 			input: {
 				fields: [
 					{
@@ -256,67 +268,82 @@ describe('GraphQL : E2E', () => {
 			},
 		})
 
-		const { users } = await client.request<any>(graphql.users, {
-			where: {
-				object: {
-					objectOfObject: {
-						name: { equalTo: 'object' },
+		const { findManyUser } = await client.request<any>(
+			graphql.findManyUser,
+			{
+				where: {
+					object: {
+						objectOfObject: {
+							name: { equalTo: 'object' },
+						},
 					},
 				},
 			},
-		})
+		)
 
-		expect(users.objects.length).toEqual(1)
-		expect(users.objects[0].name).toEqual('Jean')
+		expect(findManyUser.objects.length).toEqual(1)
+		expect(findManyUser.objects[0].name).toEqual('Jean')
 
-		const { users: users2 } = await client.request<any>(graphql.users, {
-			where: {
-				object: {
-					objectOfObject: {
-						name: { equalTo: 'object2' },
+		const { findManyUser: users2 } = await client.request<any>(
+			graphql.findManyUser,
+			{
+				where: {
+					object: {
+						objectOfObject: {
+							name: { equalTo: 'object2' },
+						},
 					},
 				},
 			},
-		})
+		)
 
 		expect(users2.objects.length).toEqual(0)
 
-		const { users: users3 } = await client.request<any>(graphql.users, {
-			where: {
-				object: {
-					objectOfObject: {
-						name: { notEqualTo: 'object' },
+		const { findManyUser: users3 } = await client.request<any>(
+			graphql.findManyUser,
+			{
+				where: {
+					object: {
+						objectOfObject: {
+							name: { notEqualTo: 'object' },
+						},
 					},
 				},
 			},
-		})
+		)
 
 		expect(users3.objects.length).toEqual(2)
 	})
 
 	it('should create user with custom enum (Role)', async () => {
-		await client.request<any>(graphql.createUsers, {
+		await client.request<any>(graphql.createManyUser, {
 			input: { fields: [{ name: 'Jack', role: Role.Admin }] },
 		})
 
-		const { users } = await client.request<any>(graphql.users, {
-			where: {
-				role: {
-					equalTo: Role.Admin,
+		const { findManyUser } = await client.request<any>(
+			graphql.findManyUser,
+			{
+				where: {
+					role: {
+						equalTo: Role.Admin,
+					},
 				},
 			},
-		})
+		)
 
-		expect(users.objects.length).toEqual(1)
-		expect(users.objects[0].name).toEqual('Jack')
+		expect(findManyUser.objects.length).toEqual(1)
+		expect(findManyUser.objects[0].name).toEqual('Jack')
 
-		const { users: users2 } = await client.request<any>(graphql.users, {
-			where: {
-				role: {
-					notEqualTo: Role.Admin,
+		const { findManyUser: users2 } = await client.request<any>(
+			graphql.findManyUser,
+			{
+				where: {
+					role: {
+						notEqualTo: Role.Admin,
+					},
 				},
 			},
-		})
+		)
 
 		expect(users2.objects.length).toEqual(2)
 		expect(users2.objects).toEqual([
@@ -334,28 +361,34 @@ describe('GraphQL : E2E', () => {
 	})
 
 	it('should create user with a custom scalar (phone)', async () => {
-		await client.request<any>(graphql.createUsers, {
+		await client.request<any>(graphql.createManyUser, {
 			input: { fields: [{ name: 'Jack', phone: '+33577223355' }] },
 		})
 
-		const { users } = await client.request<any>(graphql.users, {
-			where: {
-				phone: {
-					equalTo: '+33577223355',
+		const { findManyUser } = await client.request<any>(
+			graphql.findManyUser,
+			{
+				where: {
+					phone: {
+						equalTo: '+33577223355',
+					},
 				},
 			},
-		})
+		)
 
-		expect(users.objects.length).toEqual(1)
-		expect(users.objects[0].name).toEqual('Jack')
+		expect(findManyUser.objects.length).toEqual(1)
+		expect(findManyUser.objects[0].name).toEqual('Jack')
 
-		const { users: users2 } = await client.request<any>(graphql.users, {
-			where: {
-				phone: {
-					notEqualTo: '+33577223355',
+		const { findManyUser: users2 } = await client.request<any>(
+			graphql.findManyUser,
+			{
+				where: {
+					phone: {
+						notEqualTo: '+33577223355',
+					},
 				},
 			},
-		})
+		)
 
 		expect(users2.objects.length).toEqual(2)
 		expect(users2.objects).toEqual([
@@ -414,7 +447,7 @@ describe('GraphQL : E2E', () => {
 
 	it('should throw an error if a field is required and not provided', async () => {
 		expect(
-			client.request<any>(graphql.createUsers, {
+			client.request<any>(graphql.createManyUser, {
 				input: { fields: [{ age: 23 }] },
 			}),
 		).rejects.toThrow()
@@ -422,14 +455,14 @@ describe('GraphQL : E2E', () => {
 
 	it('should get an object that not exist', async () => {
 		expect(
-			await client.request<any>(graphql.user, {
+			await client.request<any>(graphql.findOneUser, {
 				id: '65356f69ea1fe46431076723',
 			}),
-		).toEqual({ user: null })
+		).toEqual({ findOneUser: null })
 	})
 
 	it('should get an object', async () => {
-		const res = await client.request<any>(graphql.createUser, {
+		const res = await client.request<any>(graphql.createOneUser, {
 			input: {
 				fields: {
 					name: 'CurrentUser',
@@ -438,19 +471,19 @@ describe('GraphQL : E2E', () => {
 			},
 		})
 
-		const { user } = await client.request<any>(graphql.user, {
-			id: res.createUser.id,
+		const { findOneUser } = await client.request<any>(graphql.findOneUser, {
+			id: res.createOneUser.id,
 		})
 
-		expect(user).toEqual({
-			id: res.createUser.id,
+		expect(findOneUser).toEqual({
+			id: res.createOneUser.id,
 			name: 'CurrentUser',
 			age: 99,
 		})
 	})
 
 	it('should get multiple objects', async () => {
-		const res = await client.request<any>(graphql.users, {
+		const res = await client.request<any>(graphql.findManyUser, {
 			input: {
 				where: {
 					name: {
@@ -460,7 +493,7 @@ describe('GraphQL : E2E', () => {
 			},
 		})
 
-		expect(res.users.objects).toEqual([
+		expect(res.findManyUser.objects).toEqual([
 			{
 				id: expect.anything(),
 				name: 'Lucas',
@@ -475,7 +508,7 @@ describe('GraphQL : E2E', () => {
 	})
 
 	it('should create an object', async () => {
-		const res = await client.request<any>(graphql.createUser, {
+		const res = await client.request<any>(graphql.createOneUser, {
 			input: {
 				fields: {
 					name: 'John',
@@ -484,7 +517,7 @@ describe('GraphQL : E2E', () => {
 			},
 		})
 
-		expect(res.createUser).toEqual({
+		expect(res.createOneUser).toEqual({
 			id: expect.anything(),
 			name: 'John',
 			age: 23,
@@ -492,14 +525,14 @@ describe('GraphQL : E2E', () => {
 
 		expect(
 			(
-				await client.request<any>(graphql.users, {
+				await client.request<any>(graphql.findManyUser, {
 					where: {
 						name: {
 							equalTo: 'John',
 						},
 					},
 				})
-			).users.objects,
+			).findManyUser.objects,
 		).toEqual([
 			{
 				id: expect.anything(),
@@ -510,7 +543,7 @@ describe('GraphQL : E2E', () => {
 	})
 
 	it('should create multiple objects', async () => {
-		const res = await client.request<any>(graphql.createUsers, {
+		const res = await client.request<any>(graphql.createManyUser, {
 			input: {
 				fields: [
 					{ name: 'Lucas2', age: 24 },
@@ -519,12 +552,12 @@ describe('GraphQL : E2E', () => {
 			},
 		})
 
-		expect(res.createUsers.objects).toEqual([
+		expect(res.createManyUser.objects).toEqual([
 			{ name: 'Lucas2', age: 24 },
 			{ name: 'Jeanne2', age: 24 },
 		])
 
-		const users = await client.request<any>(graphql.users, {
+		const findManyUser = await client.request<any>(graphql.findManyUser, {
 			where: {
 				name: {
 					equalTo: 'Lucas2',
@@ -532,11 +565,11 @@ describe('GraphQL : E2E', () => {
 			},
 		})
 
-		expect(users.users.objects).toEqual([
+		expect(findManyUser.findManyUser.objects).toEqual([
 			{ id: expect.anything(), name: 'Lucas2', age: 24 },
 		])
 
-		const users2 = await client.request<any>(graphql.users, {
+		const users2 = await client.request<any>(graphql.findManyUser, {
 			where: {
 				age: {
 					equalTo: 24,
@@ -544,18 +577,21 @@ describe('GraphQL : E2E', () => {
 			},
 		})
 
-		expect(users2.users.objects).toEqual([
+		expect(users2.findManyUser.objects).toEqual([
 			{ id: expect.anything(), name: 'Lucas2', age: 24 },
 			{ id: expect.anything(), name: 'Jeanne2', age: 24 },
 		])
 	})
 
 	it('should update one object', async () => {
-		const { users } = await client.request<any>(graphql.users, {})
+		const { findManyUser } = await client.request<any>(
+			graphql.findManyUser,
+			{},
+		)
 
-		const userToUpdate = users.objects[0]
+		const userToUpdate = findManyUser.objects[0]
 
-		const res = await client.request<any>(graphql.updateUser, {
+		const res = await client.request<any>(graphql.updateOneUser, {
 			input: {
 				id: userToUpdate.id,
 				fields: {
@@ -564,14 +600,14 @@ describe('GraphQL : E2E', () => {
 			},
 		})
 
-		expect(res.updateUser).toEqual({
+		expect(res.updateOneUser).toEqual({
 			name: 'NameAfterUpdate',
 			age: userToUpdate.age,
 		})
 	})
 
 	it('should update multiple objects', async () => {
-		const res = await client.request<any>(graphql.updateUsers, {
+		const res = await client.request<any>(graphql.updateManyUser, {
 			input: {
 				fields: {
 					name: 'Tata',
@@ -584,7 +620,7 @@ describe('GraphQL : E2E', () => {
 			},
 		})
 
-		expect(res.updateUsers.objects).toEqual([
+		expect(res.updateManyUser.objects).toEqual([
 			{
 				name: 'Tata',
 				age: 23,
@@ -593,30 +629,36 @@ describe('GraphQL : E2E', () => {
 	})
 
 	it('should delete one object', async () => {
-		const { users } = await client.request<any>(graphql.users, {})
+		const { findManyUser } = await client.request<any>(
+			graphql.findManyUser,
+			{},
+		)
 
-		const userToDelete = users.objects[0]
+		const userToDelete = findManyUser.objects[0]
 
-		expect(users.objects.length).toEqual(2)
+		expect(findManyUser.objects.length).toEqual(2)
 
-		const res = await client.request<any>(graphql.deleteUser, {
+		const res = await client.request<any>(graphql.deleteOneUser, {
 			input: {
 				id: userToDelete.id,
 			},
 		})
 
-		expect(res.deleteUser).toEqual({
+		expect(res.deleteOneUser).toEqual({
 			name: userToDelete.name,
 			age: userToDelete.age,
 		})
 
-		const { users: users2 } = await client.request<any>(graphql.users, {})
+		const { findManyUser: users2 } = await client.request<any>(
+			graphql.findManyUser,
+			{},
+		)
 
 		expect(users2.objects.length).toEqual(1)
 	})
 
 	it('should delete multiple objects', async () => {
-		const res = await client.request<any>(graphql.deleteUsers, {
+		const res = await client.request<any>(graphql.deleteManyUser, {
 			input: {
 				where: {
 					age: {
@@ -626,7 +668,7 @@ describe('GraphQL : E2E', () => {
 			},
 		})
 
-		expect(res.deleteUsers.objects).toEqual([
+		expect(res.deleteManyUser.objects).toEqual([
 			{
 				name: 'Lucas',
 				age: 23,
@@ -637,8 +679,11 @@ describe('GraphQL : E2E', () => {
 			},
 		])
 
-		const { users } = await client.request<any>(graphql.users, {})
+		const { findManyUser } = await client.request<any>(
+			graphql.findManyUser,
+			{},
+		)
 
-		expect(users.objects.length).toEqual(0)
+		expect(findManyUser.objects.length).toEqual(0)
 	})
 })

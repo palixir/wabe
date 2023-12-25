@@ -8,9 +8,9 @@ import {
 } from '../../utils/testHelper'
 
 const graphql = {
-	users: gql`
-		query users($where: UserWhereInput) {
-			users(where: $where) {
+	findManyUser: gql`
+		query findManyUser($where: UserWhereInput) {
+			findManyUser(where: $where) {
 				objects{
 					id
 					name
@@ -21,9 +21,9 @@ const graphql = {
 			}
 		}
 	`,
-	createUsers: gql`
-		mutation createUsers($input: UsersCreateInput!) {
-			createUsers(input: $input) {
+	createManyUser: gql`
+		mutation createManyUser($input: UsersCreateInput!) {
+			createManyUser(input: $input) {
 				objects{
 					id
 					name
@@ -49,7 +49,7 @@ describe('GraphQL : aggregation', () => {
 		port = setup.port
 		client = getGraphqlClient(port)
 
-		await client.request<any>(graphql.createUsers, {
+		await client.request<any>(graphql.createManyUser, {
 			input: {
 				fields: [
 					{
@@ -81,13 +81,13 @@ describe('GraphQL : aggregation', () => {
 
 	it("should support Array's aggregation", async () => {
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					arrayValue: { contains: 'a' },
 				},
 			}),
 		).toEqual({
-			users: {
+			findManyUser: {
 				objects: [
 					{
 						id: expect.any(String),
@@ -101,13 +101,13 @@ describe('GraphQL : aggregation', () => {
 		})
 
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					arrayValue: { notContains: 'a' },
 				},
 			}),
 		).toEqual({
-			users: {
+			findManyUser: {
 				objects: [
 					{
 						id: expect.any(String),
@@ -121,13 +121,13 @@ describe('GraphQL : aggregation', () => {
 		})
 
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					arrayValue: { equalTo: ['a', 'b'] },
 				},
 			}),
 		).toEqual({
-			users: {
+			findManyUser: {
 				objects: [
 					{
 						id: expect.any(String),
@@ -141,13 +141,13 @@ describe('GraphQL : aggregation', () => {
 		})
 
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					arrayValue: { notEqualTo: ['a', 'b'] },
 				},
 			}),
 		).toEqual({
-			users: {
+			findManyUser: {
 				objects: [
 					{
 						id: expect.any(String),
@@ -161,35 +161,35 @@ describe('GraphQL : aggregation', () => {
 		})
 
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					arrayValue: { equalTo: ['z', 'w'] },
 				},
 			}),
 		).toEqual({
-			users: { objects: [] },
+			findManyUser: { objects: [] },
 		})
 
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					arrayValue: { contains: 'z' },
 				},
 			}),
 		).toEqual({
-			users: { objects: [] },
+			findManyUser: { objects: [] },
 		})
 	})
 
 	it("should support DateScalarType's aggregation", async () => {
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					birthDate: { equalTo: now },
 				},
 			}),
 		).toEqual({
-			users: {
+			findManyUser: {
 				objects: [
 					{
 						id: expect.any(String),
@@ -203,13 +203,13 @@ describe('GraphQL : aggregation', () => {
 		})
 
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					birthDate: { notEqualTo: now },
 				},
 			}),
 		).toEqual({
-			users: {
+			findManyUser: {
 				objects: [
 					{
 						id: expect.any(String),
@@ -223,13 +223,13 @@ describe('GraphQL : aggregation', () => {
 		})
 
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					birthDate: { lessThan: new Date(now.getTime() + 1000) },
 				},
 			}),
 		).toEqual({
-			users: {
+			findManyUser: {
 				objects: [
 					{
 						id: expect.any(String),
@@ -243,13 +243,13 @@ describe('GraphQL : aggregation', () => {
 		})
 
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					birthDate: { lessThanOrEqualTo: now },
 				},
 			}),
 		).toEqual({
-			users: {
+			findManyUser: {
 				objects: [
 					{
 						id: expect.any(String),
@@ -263,13 +263,13 @@ describe('GraphQL : aggregation', () => {
 		})
 
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					birthDate: { greaterThan: now },
 				},
 			}),
 		).toEqual({
-			users: {
+			findManyUser: {
 				objects: [
 					{
 						id: expect.any(String),
@@ -283,13 +283,13 @@ describe('GraphQL : aggregation', () => {
 		})
 
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					birthDate: { greaterThanOrEqualTo: now },
 				},
 			}),
 		).toEqual({
-			users: {
+			findManyUser: {
 				objects: [
 					{
 						id: expect.any(String),
@@ -310,13 +310,13 @@ describe('GraphQL : aggregation', () => {
 		})
 
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					birthDate: { in: [now] },
 				},
 			}),
 		).toEqual({
-			users: {
+			findManyUser: {
 				objects: [
 					{
 						id: expect.any(String),
@@ -330,13 +330,13 @@ describe('GraphQL : aggregation', () => {
 		})
 
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					birthDate: { notIn: [now] },
 				},
 			}),
 		).toEqual({
-			users: {
+			findManyUser: {
 				objects: [
 					{
 						id: expect.any(String),
@@ -352,13 +352,13 @@ describe('GraphQL : aggregation', () => {
 
 	it("should support EmailScalayType's aggregation", async () => {
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					email: { equalTo: 'lucas@mail.fr' },
 				},
 			}),
 		).toEqual({
-			users: {
+			findManyUser: {
 				objects: [
 					{
 						id: expect.any(String),
@@ -372,13 +372,13 @@ describe('GraphQL : aggregation', () => {
 		})
 
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					email: { notEqualTo: 'lucas@mail.fr' },
 				},
 			}),
 		).toEqual({
-			users: {
+			findManyUser: {
 				objects: [
 					{
 						id: expect.any(String),
@@ -392,13 +392,13 @@ describe('GraphQL : aggregation', () => {
 		})
 
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					email: { in: ['lucas@mail.fr'] },
 				},
 			}),
 		).toEqual({
-			users: {
+			findManyUser: {
 				objects: [
 					{
 						id: expect.any(String),
@@ -412,13 +412,13 @@ describe('GraphQL : aggregation', () => {
 		})
 
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					email: { notIn: ['lucas@mail.fr'] },
 				},
 			}),
 		).toEqual({
-			users: {
+			findManyUser: {
 				objects: [
 					{
 						id: expect.any(String),
@@ -434,13 +434,13 @@ describe('GraphQL : aggregation', () => {
 
 	it("should support Int's aggregation", async () => {
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					age: { equalTo: 20 },
 				},
 			}),
 		).toEqual({
-			users: {
+			findManyUser: {
 				objects: [
 					{
 						id: expect.any(String),
@@ -454,13 +454,13 @@ describe('GraphQL : aggregation', () => {
 		})
 
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					age: { notEqualTo: 20 },
 				},
 			}),
 		).toEqual({
-			users: {
+			findManyUser: {
 				objects: [
 					{
 						id: expect.any(String),
@@ -474,13 +474,13 @@ describe('GraphQL : aggregation', () => {
 		})
 
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					age: { lessThan: 20 },
 				},
 			}),
 		).toEqual({
-			users: {
+			findManyUser: {
 				objects: [
 					{
 						id: expect.any(String),
@@ -494,13 +494,13 @@ describe('GraphQL : aggregation', () => {
 		})
 
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					age: { lessThanOrEqualTo: 20 },
 				},
 			}),
 		).toEqual({
-			users: {
+			findManyUser: {
 				objects: [
 					{
 						id: expect.any(String),
@@ -521,13 +521,13 @@ describe('GraphQL : aggregation', () => {
 		})
 
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					age: { greaterThan: 18 },
 				},
 			}),
 		).toEqual({
-			users: {
+			findManyUser: {
 				objects: [
 					{
 						id: expect.any(String),
@@ -541,13 +541,13 @@ describe('GraphQL : aggregation', () => {
 		})
 
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					age: { greaterThanOrEqualTo: 18 },
 				},
 			}),
 		).toEqual({
-			users: {
+			findManyUser: {
 				objects: [
 					{
 						id: expect.any(String),
@@ -568,13 +568,13 @@ describe('GraphQL : aggregation', () => {
 		})
 
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					age: { in: [20] },
 				},
 			}),
 		).toEqual({
-			users: {
+			findManyUser: {
 				objects: [
 					{
 						id: expect.any(String),
@@ -588,13 +588,13 @@ describe('GraphQL : aggregation', () => {
 		})
 
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					age: { notIn: [20] },
 				},
 			}),
 		).toEqual({
-			users: {
+			findManyUser: {
 				objects: [
 					{
 						id: expect.any(String),
@@ -610,13 +610,13 @@ describe('GraphQL : aggregation', () => {
 
 	it("should support Boolean's aggregation", async () => {
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					isAdmin: { equalTo: true },
 				},
 			}),
 		).toEqual({
-			users: {
+			findManyUser: {
 				objects: [
 					{
 						id: expect.any(String),
@@ -630,13 +630,13 @@ describe('GraphQL : aggregation', () => {
 		})
 
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					isAdmin: { notEqualTo: true },
 				},
 			}),
 		).toEqual({
-			users: {
+			findManyUser: {
 				objects: [
 					{
 						id: expect.any(String),
@@ -650,13 +650,13 @@ describe('GraphQL : aggregation', () => {
 		})
 
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					isAdmin: { in: [true] },
 				},
 			}),
 		).toEqual({
-			users: {
+			findManyUser: {
 				objects: [
 					{
 						id: expect.any(String),
@@ -670,13 +670,13 @@ describe('GraphQL : aggregation', () => {
 		})
 
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					isAdmin: { notIn: [true] },
 				},
 			}),
 		).toEqual({
-			users: {
+			findManyUser: {
 				objects: [
 					{
 						id: expect.any(String),
@@ -692,13 +692,13 @@ describe('GraphQL : aggregation', () => {
 
 	it("should support Float's aggregation", async () => {
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					floatValue: { equalTo: 1.5 },
 				},
 			}),
 		).toEqual({
-			users: {
+			findManyUser: {
 				objects: [
 					{
 						id: expect.any(String),
@@ -712,13 +712,13 @@ describe('GraphQL : aggregation', () => {
 		})
 
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					floatValue: { notEqualTo: 1.5 },
 				},
 			}),
 		).toEqual({
-			users: {
+			findManyUser: {
 				objects: [
 					{
 						id: expect.any(String),
@@ -732,13 +732,13 @@ describe('GraphQL : aggregation', () => {
 		})
 
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					floatValue: { lessThan: 2.5 },
 				},
 			}),
 		).toEqual({
-			users: {
+			findManyUser: {
 				objects: [
 					{
 						id: expect.any(String),
@@ -752,13 +752,13 @@ describe('GraphQL : aggregation', () => {
 		})
 
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					floatValue: { lessThanOrEqualTo: 2.5 },
 				},
 			}),
 		).toEqual({
-			users: {
+			findManyUser: {
 				objects: [
 					{
 						id: expect.any(String),
@@ -779,13 +779,13 @@ describe('GraphQL : aggregation', () => {
 		})
 
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					floatValue: { greaterThan: 1.5 },
 				},
 			}),
 		).toEqual({
-			users: {
+			findManyUser: {
 				objects: [
 					{
 						id: expect.any(String),
@@ -799,13 +799,13 @@ describe('GraphQL : aggregation', () => {
 		})
 
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					floatValue: { greaterThanOrEqualTo: 2.5 },
 				},
 			}),
 		).toEqual({
-			users: {
+			findManyUser: {
 				objects: [
 					{
 						id: expect.any(String),
@@ -819,13 +819,13 @@ describe('GraphQL : aggregation', () => {
 		})
 
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					floatValue: { in: [1.5] },
 				},
 			}),
 		).toEqual({
-			users: {
+			findManyUser: {
 				objects: [
 					{
 						id: expect.any(String),
@@ -839,13 +839,13 @@ describe('GraphQL : aggregation', () => {
 		})
 
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					floatValue: { notIn: [1.5] },
 				},
 			}),
 		).toEqual({
-			users: {
+			findManyUser: {
 				objects: [
 					{
 						id: expect.any(String),
@@ -861,13 +861,13 @@ describe('GraphQL : aggregation', () => {
 
 	it("should support String's aggregation", async () => {
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					name: { notEqualTo: 'Lucas' },
 				},
 			}),
 		).toEqual({
-			users: {
+			findManyUser: {
 				objects: [
 					{
 						id: expect.any(String),
@@ -881,13 +881,13 @@ describe('GraphQL : aggregation', () => {
 		})
 
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					name: { equalTo: 'Lucas' },
 				},
 			}),
 		).toEqual({
-			users: {
+			findManyUser: {
 				objects: [
 					{
 						id: expect.any(String),
@@ -901,13 +901,13 @@ describe('GraphQL : aggregation', () => {
 		})
 
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					name: { in: ['Lucas'] },
 				},
 			}),
 		).toEqual({
-			users: {
+			findManyUser: {
 				objects: [
 					{
 						id: expect.any(String),
@@ -921,13 +921,13 @@ describe('GraphQL : aggregation', () => {
 		})
 
 		expect(
-			await client.request<any>(graphql.users, {
+			await client.request<any>(graphql.findManyUser, {
 				where: {
 					name: { notIn: ['Lucas'] },
 				},
 			}),
 		).toEqual({
-			users: {
+			findManyUser: {
 				objects: [
 					{
 						id: expect.any(String),
@@ -942,13 +942,16 @@ describe('GraphQL : aggregation', () => {
 	})
 
 	it('should support OR statement', async () => {
-		const { users } = await client.request<any>(graphql.users, {
-			where: {
-				OR: [{ age: { equalTo: 20 } }, { age: { equalTo: 18 } }],
+		const { findManyUser } = await client.request<any>(
+			graphql.findManyUser,
+			{
+				where: {
+					OR: [{ age: { equalTo: 20 } }, { age: { equalTo: 18 } }],
+				},
 			},
-		})
+		)
 
-		expect(users.objects).toEqual([
+		expect(findManyUser.objects).toEqual([
 			{
 				id: expect.any(String),
 				name: 'Lucas',
@@ -965,11 +968,14 @@ describe('GraphQL : aggregation', () => {
 			},
 		])
 
-		const { users: users2 } = await client.request<any>(graphql.users, {
-			where: {
-				OR: [{ age: { equalTo: 20 } }, { age: { equalTo: 19 } }],
+		const { findManyUser: users2 } = await client.request<any>(
+			graphql.findManyUser,
+			{
+				where: {
+					OR: [{ age: { equalTo: 20 } }, { age: { equalTo: 19 } }],
+				},
 			},
-		})
+		)
 
 		expect(users2.objects).toEqual([
 			{
@@ -983,19 +989,28 @@ describe('GraphQL : aggregation', () => {
 	})
 
 	it('should support AND statement', async () => {
-		const { users } = await client.request<any>(graphql.users, {
-			where: {
-				AND: [{ age: { equalTo: 20 } }, { age: { equalTo: 18 } }],
+		const { findManyUser } = await client.request<any>(
+			graphql.findManyUser,
+			{
+				where: {
+					AND: [{ age: { equalTo: 20 } }, { age: { equalTo: 18 } }],
+				},
 			},
-		})
+		)
 
-		expect(users.objects).toEqual([])
+		expect(findManyUser.objects).toEqual([])
 
-		const { users: users2 } = await client.request<any>(graphql.users, {
-			where: {
-				AND: [{ age: { equalTo: 20 } }, { isAdmin: { equalTo: true } }],
+		const { findManyUser: users2 } = await client.request<any>(
+			graphql.findManyUser,
+			{
+				where: {
+					AND: [
+						{ age: { equalTo: 20 } },
+						{ isAdmin: { equalTo: true } },
+					],
+				},
 			},
-		})
+		)
 
 		expect(users2.objects).toEqual([
 			{
