@@ -1,4 +1,3 @@
-import { Document, WithId } from 'mongodb'
 import { WibeSchemaTypes } from '../../../generated/wibe'
 
 type WhereAggregation<T extends keyof WibeSchemaTypes> = {
@@ -97,29 +96,29 @@ export interface DatabaseAdapter {
 
 	getObject<T extends keyof WibeSchemaTypes>(
 		params: GetObjectOptions<T>,
-	): Promise<WithId<Document> | null>
+	): Promise<T>
 	getObjects<T extends keyof WibeSchemaTypes>(
 		params: GetObjectsOptions<T>,
-	): Promise<WithId<any>[]>
+	): Promise<T[]>
 
 	createObject<T extends keyof WibeSchemaTypes>(
 		params: CreateObjectOptions<T>,
-	): Promise<any>
+	): Promise<T>
 	createObjects<T extends keyof WibeSchemaTypes>(
 		params: CreateObjectsOptions<T>,
-	): Promise<any>
+	): Promise<T[]>
 
 	updateObject<T extends keyof WibeSchemaTypes>(
 		params: UpdateObjectOptions<T>,
-	): Promise<any>
+	): Promise<T>
 	updateObjects<T extends keyof WibeSchemaTypes>(
 		params: UpdateObjectsOptions<T>,
-	): Promise<any>
+	): Promise<T[]>
 
 	deleteObject<T extends keyof WibeSchemaTypes>(
 		params: DeleteObjectOptions<T>,
-	): Promise<any>
+	): Promise<T | null>
 	deleteObjects<T extends keyof WibeSchemaTypes>(
 		params: DeleteObjectsOptions<T>,
-	): Promise<any>
+	): Promise<T[]>
 }

@@ -13,8 +13,8 @@
 	},
 	"dependencies": {
 		"@apollo/server": "4.9.4",
-		"@elysiajs/apollo": "0.7.0",
-		"elysia": "0.7.30",
+		"@elysiajs/apollo": "0.8.0",
+		"elysia": "0.8.3",
 		"graphql": "16.8.1",
 		"mongodb": "6.1.0"
 	},

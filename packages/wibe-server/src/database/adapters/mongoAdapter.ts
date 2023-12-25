@@ -53,15 +53,14 @@ export const buildMongoWhereQuery = <T extends keyof WibeSchemaTypes>(
 			}
 
 			if (typeof value === 'object') {
-				const tata = buildMongoWhereQuery(value as WhereType<T>)
-				const entries = Object.entries(tata)
+				const where = buildMongoWhereQuery(value as WhereType<T>)
+				const entries = Object.entries(where)
 
-				if (entries.length > 0) {
+				if (entries.length > 0)
 					return {
 						[`${keyToWrite.toString()}.${entries[0][0]}`]:
 							entries[0][1],
 					}
-				}
 			}
 
 			return acc
@@ -105,20 +104,6 @@ export class MongoAdapter implements DatabaseAdapter {
 
 		const { className, id, fields } = params
 
-		if (fields.includes('*')) {
-			const res = await this.database
-				.collection<any>(className)
-				.findOne({ _id: new ObjectId(id) } as Filter<any>)
-
-			// We standardize the id field
-			if (res?._id) {
-				res.id = res._id.toString()
-				res._id = undefined
-			}
-
-			return res
-		}
-
 		const objectOfFieldsToGet: Record<any, number> = fields.reduce(
 			(acc, prev) => {
 				acc[prev] = 1
@@ -134,7 +119,9 @@ export class MongoAdapter implements DatabaseAdapter {
 		const res = await collection.findOne(
 			{ _id: new ObjectId(id) } as Filter<any>,
 			{
-				projection: { ...objectOfFieldsToGet, _id: isIdInProjection },
+				projection: fields.includes('*')
+					? {}
+					: { ...objectOfFieldsToGet, _id: isIdInProjection },
 			},
 		)
 
@@ -157,29 +144,8 @@ export class MongoAdapter implements DatabaseAdapter {
 
 		const whereBuilded = buildMongoWhereQuery<T>(where)
 
-		if (fields.includes('*')) {
-			const res = await this.database
-				.collection<any>(className)
-				.find(whereBuilded)
-				.limit(limit || 0)
-				.skip(offset || 0)
-				.toArray()
-
-			// We standardize the id field
-			for (const object of res) {
-				if (object._id) {
-					object.id = object._id.toString()
-					// biome-ignore lint/performance/noDelete: <explanation>
-					delete object._id
-				}
-			}
-
-			return res
-		}
-
 		const objectOfFieldsToGet: Record<any, number> = fields.reduce(
 			(acc, prev) => {
-				// if (prev === 'id') prev = '_id'
 				acc[prev] = 1
 
 				return acc
@@ -190,9 +156,11 @@ export class MongoAdapter implements DatabaseAdapter {
 		const collection = this.database.collection<any>(className)
 		const res = await collection
 			.find(whereBuilded, {
-				projection: {
-					...objectOfFieldsToGet,
-				},
+				projection: fields.includes('*')
+					? {}
+					: {
+							...objectOfFieldsToGet,
+					  },
 			})
 			.limit(limit || 0)
 			.skip(offset || 0)
@@ -202,12 +170,11 @@ export class MongoAdapter implements DatabaseAdapter {
 		for (const object of res) {
 			if (object._id) {
 				object.id = object._id.toString()
-				// biome-ignore lint/performance/noDelete: <explanation>
-				delete object._id
+				object._id = undefined
 			}
 		}
 
-		return res
+		return res as T[]
 	}
 
 	async updateObject<T extends keyof WibeSchemaTypes>(
@@ -218,20 +185,14 @@ export class MongoAdapter implements DatabaseAdapter {
 
 		const { className, id, data, fields } = params
 
-		const collection = this.database.collection(className)
-
-		const result = await collection.findOneAndUpdate(
-			{ _id: new ObjectId(id) },
-			{ $set: data },
-		)
-
-		if (!result) throw new Error('Object not found')
-
-		return this.getObject<T>({
+		const res = await this.updateObjects<T>({
 			className,
-			id: result._id.toString(),
+			where: { id: { equalTo: new ObjectId(id) } } as WhereType<T>,
+			data,
 			fields,
 		})
+
+		return res[0]
 	}
 
 	async updateObjects<T extends keyof WibeSchemaTypes>(
@@ -257,10 +218,11 @@ export class MongoAdapter implements DatabaseAdapter {
 		await collection.updateMany(whereBuilded, { $set: data })
 
 		const orStatement = objectsBeforeUpdate.map((object) => ({
+			// @ts-expect-error
 			id: { equalTo: new ObjectId(object.id) },
 		}))
 
-		const res = await this.getObjects<T>({
+		return this.getObjects<T>({
 			className,
 			where: {
 				OR: orStatement,
@@ -269,8 +231,6 @@ export class MongoAdapter implements DatabaseAdapter {
 			offset,
 			limit,
 		})
-
-		return res
 	}
 
 	async createObject<T extends keyof WibeSchemaTypes>(
@@ -281,15 +241,13 @@ export class MongoAdapter implements DatabaseAdapter {
 
 		const { className, data, fields } = params
 
-		const collection = this.database.collection(className)
-
-		const result = await collection.insertOne(data)
-
-		return this.getObject<T>({
+		const res = await this.createObjects<T>({
 			className,
-			id: result.insertedId.toString(),
+			data: [data],
 			fields,
 		})
+
+		return res[0]
 	}
 
 	async createObjects<T extends keyof WibeSchemaTypes>(
@@ -327,19 +285,13 @@ export class MongoAdapter implements DatabaseAdapter {
 
 		const { className, id, fields } = params
 
-		const collection = this.database.collection(className)
-
-		const objectToReturn = await this.getObject<T>({
+		const res = await this.deleteObjects<T>({
 			className,
-			id,
+			where: { id: { equalTo: new ObjectId(id) } } as WhereType<T>,
 			fields,
 		})
 
-		await collection.deleteOne({
-			_id: new ObjectId(id),
-		} as Filter<any>)
-
-		return objectToReturn
+		return res.length === 1 ? res[0] : null
 	}
 
 	async deleteObjects<T extends keyof WibeSchemaTypes>(

@@ -659,7 +659,7 @@ describe('Mongo adapter', () => {
 			fields: ['age'],
 		})
 
-		expect(insertedObject).toEqual({ age: 23 })
+		expect(insertedObject).toEqual({ age: 23, id: expect.anything() })
 
 		const insertedObject2 = await mongoAdapter.createObject<'User'>({
 			className: 'User',
@@ -760,6 +760,7 @@ describe('Mongo adapter', () => {
 
 		expect(updatedObject).toEqual({
 			name: 'Doe',
+			id: expect.anything(),
 		})
 
 		const updatedObject2 = await mongoAdapter.updateObject<'User'>({

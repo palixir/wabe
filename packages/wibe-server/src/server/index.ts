@@ -1,6 +1,5 @@
 import { Elysia } from 'elysia'
 import { apollo } from '@elysiajs/apollo'
-import fs from 'fs'
 import { DatabaseConfig } from '../database'
 import { DatabaseController } from '../database/controllers/DatabaseController'
 import { MongoAdapter } from '../database/adapters/MongoAdapter'
@@ -65,8 +64,7 @@ export class WibeApp {
 			// Generate Wibe types
 			const wibeTypes = wibeSchema.getTypesFromSchema()
 
-			fs.mkdirSync('generated', { recursive: true })
-			fs.writeFileSync('generated/wibe.ts', wibeTypes, {})
+			Bun.write('generated/wibe.ts', wibeTypes)
 		}
 
 		this.server.listen(WibeApp.config.port, () => {
