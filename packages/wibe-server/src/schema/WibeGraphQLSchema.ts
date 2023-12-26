@@ -36,6 +36,31 @@ export class WibeGraphlQLSchema {
 
 	constructor(schemas: Schema) {
 		this.schemas = schemas
+		// TODO: Only push the _User if the user use one of the wibe authentication methods
+		this.schemas.schema.class.push(this.defaultClass())
+	}
+
+	defaultClass(): ClassInterface {
+		return {
+			name: '_User',
+			fields: {
+				providerId: {
+					type: 'String',
+					required: true,
+				},
+				email: {
+					type: 'Email',
+					required: true,
+				},
+				accessToken: {
+					type: 'String',
+					required: true,
+				},
+				refreshToken: {
+					type: 'String',
+				},
+			},
+		}
 	}
 
 	createSchema() {
