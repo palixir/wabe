@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'bun:test'
 import { fail } from 'assert'
-import { closeTests, setupTests } from '../../utils/testHelper'
+import { closeTests, setupTests } from '../../utils/helper'
 import { MongoAdapter, buildMongoWhereQuery } from './MongoAdapter'
 import { WibeApp } from '../../server'
 import { ObjectId } from 'mongodb'

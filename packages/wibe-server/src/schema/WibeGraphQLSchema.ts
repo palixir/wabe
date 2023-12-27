@@ -21,6 +21,7 @@ import {
 	mutationToUpdateObject,
 	queryForMultipleObject,
 	queryForOneObject,
+	signInWithProviderResolver,
 } from '../graphql'
 import {
 	getDefaultInputType,
@@ -58,6 +59,38 @@ export class WibeGraphlQLSchema {
 				},
 				refreshToken: {
 					type: 'String',
+				},
+			},
+			resolvers: {
+				mutations: {
+					signInWithProvider: {
+						// @ts-expect-error
+						type: '_User',
+						args: {
+							// TODO: Create an enum and use it here
+							provider: {
+								type: 'String',
+								required: true,
+							},
+							accessToken: {
+								type: 'String',
+								required: true,
+							},
+							refreshToken: {
+								type: 'String',
+								required: true,
+							},
+							email: {
+								type: 'Email',
+								required: true,
+							},
+							verifiedEmail: {
+								type: 'Boolean',
+								required: true,
+							},
+						},
+						resolve: signInWithProviderResolver,
+					},
 				},
 			},
 		}

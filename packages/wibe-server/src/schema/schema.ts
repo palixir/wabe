@@ -23,6 +23,7 @@ type TypeFieldBase<T, K extends WibeTypes> = {
 
 // TODO: Add tests for defaultValue (need to be update in a before save event)
 // TODO: Add created_at and updated_at fields (need to be update in a before save event)
+// TODO: Add void type for queries and mutations
 export type TypeField =
 	| TypeFieldBase<string, 'String'>
 	| TypeFieldBase<number, 'Int'>

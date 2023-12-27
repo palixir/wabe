@@ -1,11 +1,7 @@
 import { beforeAll, afterAll, describe, it, expect } from 'bun:test'
 import { GraphQLClient, gql } from 'graphql-request'
 import { WibeApp } from '../../server'
-import {
-	closeTests,
-	getGraphqlClient,
-	setupTests,
-} from '../../utils/testHelper'
+import { closeTests, getGraphqlClient, setupTests } from '../../utils/helper'
 
 const graphql = {
 	findManyUser: gql`

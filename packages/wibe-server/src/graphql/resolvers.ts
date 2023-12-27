@@ -183,3 +183,43 @@ export const mutationToDeleteMultipleObjects = async (
 		}),
 	}
 }
+
+export const signInWithProviderResolver = async (
+	root: any,
+	{
+		email,
+		verifiedEmail,
+		provider,
+		refreshToken,
+		accessToken,
+	}: {
+		email: string
+		verifiedEmail: boolean
+		provider: string
+		accessToken: string
+		refreshToken: string
+	},
+	context: any,
+	info: any,
+) => {
+	const { objects } = await queryForMultipleObject(
+		root,
+		{ where: { email: { equalTo: email } } },
+		context,
+		info,
+		'_User',
+	)
+
+	if (objects.length > 1)
+		throw new Error('Multiple users with same email found')
+
+	if (objects.length === 1) {
+		await mutationToUpdateObject(
+			root,
+			{ accessToken, refreshToken },
+			context,
+			info,
+			'_User',
+		)
+	}
+}

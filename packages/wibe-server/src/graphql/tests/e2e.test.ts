@@ -9,11 +9,7 @@ import {
 } from 'bun:test'
 import { WibeApp } from '../../server'
 import { gql } from '@elysiajs/apollo'
-import {
-	closeTests,
-	getGraphqlClient,
-	setupTests,
-} from '../../utils/testHelper'
+import { closeTests, getGraphqlClient, setupTests } from '../../utils/helper'
 import { GraphQLClient } from 'graphql-request'
 
 const graphql = {

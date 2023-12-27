@@ -8,7 +8,7 @@ import {
 	afterAll,
 } from 'bun:test'
 import { MongoAdapter } from '../adapters/MongoAdapter'
-import { closeTests, setupTests } from '../../utils/testHelper'
+import { closeTests, setupTests } from '../../utils/helper'
 import { WibeApp } from '../../server'
 
 describe('DatabaseController', () => {
