@@ -3,32 +3,6 @@ import { WibeApp } from '../../server'
 import { GraphQLClient, gql } from 'graphql-request'
 import { closeTests, getGraphqlClient, setupTests } from '../../utils/helper'
 
-const graphql = {
-	findManyUser: gql`
-        query findManyUser($where: UserWhereInput) {
-            findManyUser(where: $where) {
-				objects {
-					id
-					name
-					birthDate
-					email
-				}
-            }
-        }
-    `,
-	createManyUser: gql`
-        mutation createManyUser($input: UsersCreateInput!) {
-            createManyUser(input: $input) {
-				objects {
-					name
-					birthDate
-					email
-				}
-			}
-        }
-    `,
-}
-
 describe('GraphQL : Scalars', () => {
 	let wibe: WibeApp
 	let port: number
@@ -262,3 +236,29 @@ describe('GraphQL : Scalars', () => {
 		})
 	})
 })
+
+const graphql = {
+	findManyUser: gql`
+        query findManyUser($where: UserWhereInput) {
+            findManyUser(where: $where) {
+				objects {
+					id
+					name
+					birthDate
+					email
+				}
+            }
+        }
+    `,
+	createManyUser: gql`
+        mutation createManyUser($input: UsersCreateInput!) {
+            createManyUser(input: $input) {
+				objects {
+					name
+					birthDate
+					email
+				}
+			}
+        }
+    `,
+}

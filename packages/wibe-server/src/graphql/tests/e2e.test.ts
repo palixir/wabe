@@ -12,94 +12,6 @@ import { gql } from '@elysiajs/apollo'
 import { closeTests, getGraphqlClient, setupTests } from '../../utils/helper'
 import { GraphQLClient } from 'graphql-request'
 
-const graphql = {
-	customQuery: gql`
-		query customQuery($name: String!) {
-			customQuery(name: $name)
-		}
-	`,
-	customMutation: gql`
-		mutation customMutation($a: Int!, $b: Int!) {
-			customMutation(a: $a, b: $b)
-		}
-	`,
-	findOneUser: gql`
-		query findOneUser($id: ID!) {
-			findOneUser(id: $id) {
-				id
-				name
-				age
-			}
-		}
-	`,
-	findManyUser: gql`
-		query findManyUser($where: UserWhereInput, $offset: Int, $limit: Int) {
-			findManyUser(where: $where, offset: $offset, limit: $limit) {
-				objects{
-					id
-					name
-					age
-				}
-			}
-		}
-	`,
-	createOneUser: gql`
-		mutation createOneUser($input: UserCreateInput!) {
-			createOneUser(input: $input) {
-				id
-				name
-				age
-			}
-		}
-	`,
-	createManyUser: gql`
-		mutation createManyUser($input: UsersCreateInput!) {
-			createManyUser(input: $input) {
-				objects{
-					name
-					age
-				}
-			}
-		}
-	`,
-	updateOneUser: gql`
-		mutation updateOneUser($input: UserUpdateInput!) {
-			updateOneUser(input: $input) {
-				name
-				age
-			}
-		}
-	`,
-	updateManyUser: gql`
-		mutation updateManyUser($input: UsersUpdateInput!) {
-			updateManyUser(input: $input) {
-				objects{
-					name
-					age
-				}
-			}
-		}
-	`,
-	deleteOneUser: gql`
-		mutation deleteOneUser($input: UserDeleteInput!) {
-			deleteOneUser(input: $input) {
-				name
-				age
-			}
-		}
-	`,
-	deleteManyUser: gql`
-		mutation deleteManyUser($input: UsersDeleteInput!) {
-			deleteManyUser(input: $input) {
-				objects{
-					name
-					age
-				}
-			}
-		}
-	`,
-}
-
 const cleanUsers = async (client: GraphQLClient) => {
 	const { findManyUser } = await client.request<any>(graphql.findManyUser, {})
 	await Promise.all(
@@ -682,3 +594,91 @@ describe('GraphQL : E2E', () => {
 		expect(findManyUser.objects.length).toEqual(0)
 	})
 })
+
+const graphql = {
+	customQuery: gql`
+		query customQuery($name: String!) {
+			customQuery(name: $name)
+		}
+	`,
+	customMutation: gql`
+		mutation customMutation($a: Int!, $b: Int!) {
+			customMutation(a: $a, b: $b)
+		}
+	`,
+	findOneUser: gql`
+		query findOneUser($id: ID!) {
+			findOneUser(id: $id) {
+				id
+				name
+				age
+			}
+		}
+	`,
+	findManyUser: gql`
+		query findManyUser($where: UserWhereInput, $offset: Int, $limit: Int) {
+			findManyUser(where: $where, offset: $offset, limit: $limit) {
+				objects{
+					id
+					name
+					age
+				}
+			}
+		}
+	`,
+	createOneUser: gql`
+		mutation createOneUser($input: UserCreateInput!) {
+			createOneUser(input: $input) {
+				id
+				name
+				age
+			}
+		}
+	`,
+	createManyUser: gql`
+		mutation createManyUser($input: UsersCreateInput!) {
+			createManyUser(input: $input) {
+				objects{
+					name
+					age
+				}
+			}
+		}
+	`,
+	updateOneUser: gql`
+		mutation updateOneUser($input: UserUpdateInput!) {
+			updateOneUser(input: $input) {
+				name
+				age
+			}
+		}
+	`,
+	updateManyUser: gql`
+		mutation updateManyUser($input: UsersUpdateInput!) {
+			updateManyUser(input: $input) {
+				objects{
+					name
+					age
+				}
+			}
+		}
+	`,
+	deleteOneUser: gql`
+		mutation deleteOneUser($input: UserDeleteInput!) {
+			deleteOneUser(input: $input) {
+				name
+				age
+			}
+		}
+	`,
+	deleteManyUser: gql`
+		mutation deleteManyUser($input: UsersDeleteInput!) {
+			deleteManyUser(input: $input) {
+				objects{
+					name
+					age
+				}
+			}
+		}
+	`,
+}
