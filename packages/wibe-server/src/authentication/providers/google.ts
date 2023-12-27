@@ -1,4 +1,6 @@
+import { gql } from 'graphql-request'
 import { WibeApp } from '../../server'
+import { getGraphqlClient } from '../../utils/helper'
 import { Provider } from '../interface'
 
 export class GoogleProvider implements Provider {
@@ -45,10 +47,27 @@ export class GoogleProvider implements Provider {
 			},
 		)
 
-		const { id, email, verified_email } = await user.json()
+		const { email, verified_email } = await user.json()
 
 		if (!verified_email) throw new Error('Email not verified')
 
-		// TODO : Call the signIn method with upsert request
+		const client = getGraphqlClient(wibeConfig.port)
+
+		await client.request<any>(gql`
+			mutation signInWithProvider {
+				signInWithProvider(
+					email: "${email}"
+					verifiedEmail: ${verified_email}
+					provider: "GOOGLE"
+					refreshToken: "${refresh_token}"
+					accessToken: "${access_token}"
+				)
+			}
+		`)
+
+		return {
+			accessToken: access_token,
+			refreshToken: refresh_token,
+		}
 	}
 }
