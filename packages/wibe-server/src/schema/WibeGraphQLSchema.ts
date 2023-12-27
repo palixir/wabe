@@ -45,12 +45,15 @@ export class WibeGraphlQLSchema {
 		return {
 			name: '_User',
 			fields: {
-				providerId: {
+				provider: {
 					type: 'String',
-					required: true,
 				},
 				email: {
 					type: 'Email',
+					required: true,
+				},
+				verifiedEmail: {
+					type: 'Boolean',
 					required: true,
 				},
 				accessToken: {
@@ -64,8 +67,7 @@ export class WibeGraphlQLSchema {
 			resolvers: {
 				mutations: {
 					signInWithProvider: {
-						// @ts-expect-error
-						type: '_User',
+						type: 'Boolean',
 						args: {
 							// TODO: Create an enum and use it here
 							provider: {

@@ -58,7 +58,11 @@ export class WibeApp {
 			types: [...types.scalars, ...types.enums, ...types.objects],
 		})
 
-		this.server.use(await apollo({ schema }))
+		this.server.use(
+			await apollo({
+				schema,
+			}),
+		)
 
 		if (
 			process.env.NODE_ENV !== 'production' &&
@@ -118,8 +122,6 @@ export class WibeApp {
 				path: '/',
 				expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
 			})
-
-			console.log(userJson)
 
 			// Same with refresh token
 

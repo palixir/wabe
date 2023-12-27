@@ -1,5 +1,7 @@
 import { GraphQLResolveInfo } from 'graphql'
 import { WibeApp } from '..'
+import { getGraphqlClient } from '../utils/helper'
+import { gql } from 'graphql-request'
 
 const getFieldsFromInfo = (info: GraphQLResolveInfo) => {
 	const firstNode = info.fieldNodes[0]
@@ -199,27 +201,49 @@ export const signInWithProviderResolver = async (
 		accessToken: string
 		refreshToken: string
 	},
-	context: any,
-	info: any,
 ) => {
-	const { objects } = await queryForMultipleObject(
-		root,
-		{ where: { email: { equalTo: email } } },
-		context,
-		info,
-		'_User',
-	)
+	const client = getGraphqlClient(WibeApp.config.port)
 
-	if (objects.length > 1)
-		throw new Error('Multiple users with same email found')
-
-	if (objects.length === 1) {
-		await mutationToUpdateObject(
-			root,
-			{ accessToken, refreshToken },
-			context,
-			info,
-			'_User',
+	try {
+		const {
+			findMany_User: { objects },
+		} = await client.request<any>(
+			gql`
+		query findMany_User($where: _UserWhereInput!) {
+			findMany_User(where: $where) {
+					objects {
+						id
+					}
+				}
+			}
+		`,
+			{ where: { email: { equalTo: email } } },
 		)
+
+		if (objects.length > 1)
+			throw new Error('Multiple users with same email found')
+
+		if (objects.length === 1) {
+			await client.request<any>(gql`
+				mutation updateOne_User {
+					updateOne_User(input:{id : "${objects[0].id}", fields: { email: "${email}", verifiedEmail: ${verifiedEmail}, refreshToken: "${refreshToken}", accessToken: "${accessToken}" } }) {
+						id
+					}
+				}
+			`)
+		} else {
+			await client.request<any>(gql`
+				mutation createOne_User {
+					createOne_User(input:{fields: { email: "${email}", verifiedEmail: ${verifiedEmail}, provider: "${provider}", refreshToken: "${refreshToken}", accessToken: "${accessToken}"}}) {
+						id
+					}
+				}
+			`)
+		}
+
+		return true
+	} catch (e) {
+		console.log(e)
+		return false
 	}
 }
