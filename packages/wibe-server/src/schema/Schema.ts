@@ -78,16 +78,6 @@ export type TypeField =
 
 export type SchemaFields = Record<string, TypeField>
 
-export type ResolverCustomOutput =
-	| {
-			type: WibeCustomTypes
-			outputObject: ClassInterface
-	  }
-	| {
-			type: WibeCustomTypes
-			typeValue: WibeTypes
-	  }
-
 export type QueryResolver = {
 	type: WibePrimaryTypes
 	required?: boolean
@@ -107,7 +97,11 @@ export type MutationResolver = {
 		}
 	}
 	resolve: (...args: any) => any
-} & ({ type: WibePrimaryTypes } | ResolverCustomOutput)
+} & (
+	| { type: WibePrimaryTypes }
+	| { type: 'Object'; outputObject: ClassInterface }
+	| { type: 'Array'; typeValue: WibePrimaryTypes }
+)
 
 export type TypeResolver = {
 	queries?: {

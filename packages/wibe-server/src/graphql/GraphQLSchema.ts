@@ -516,6 +516,15 @@ export class GraphQLSchema {
 							}),
 						})
 					}
+
+					if (currentMutation.type === 'Array') {
+						const arrayGraphqlType =
+							graphqlParserWithInput.getGraphqlType({
+								field: currentMutation,
+							})
+
+						return arrayGraphqlType
+					}
 				}
 
 				const outputType = getGraphqlOutputType()

@@ -121,6 +121,43 @@ describe('GraphqlSchema', () => {
 		})
 	})
 
+	it('should return an array in a mutation or query', async () => {
+		const { client, wibeApp } = await createWibeApp({
+			class: [
+				{
+					name: 'TestClass',
+					fields: {
+						field1: {
+							type: 'String',
+						},
+					},
+					resolvers: {
+						mutations: {
+							testMutation: {
+								resolve: () => {
+									return ['test']
+								},
+								type: 'Array',
+								typeValue: 'String',
+							},
+						},
+					},
+				},
+			],
+		})
+
+		const res = await client.request<any>(gql`
+				mutation testMutation {
+					testMutation
+						
+				}
+			`)
+
+		expect(res.testMutation).toEqual(['test'])
+
+		await wibeApp.close()
+	})
+
 	it('should return an object in a mutation or query', async () => {
 		const { client, wibeApp } = await createWibeApp({
 			class: [
