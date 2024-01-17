@@ -3,7 +3,10 @@ import { WibeApp } from '../..'
 import { GoogleProvider } from '../../../authentication/providers/google'
 
 export const googleAuthHandler = async (context: Context) => {
+	if (!WibeApp.config) throw new Error('Wibe config not found')
+
 	const code = context.query.code
+
 	const { authentication: authenticationConfig } = WibeApp.config
 
 	if (!authenticationConfig)
@@ -14,12 +17,14 @@ export const googleAuthHandler = async (context: Context) => {
 	// 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
 	const clientSecret = authenticationConfig.providers.GOOGLE.clientSecret
 
-	if (!code || !clientId)
+	if (!code) throw new Error('Authentication : Google code not found')
+
+	if (!clientId || !clientSecret)
 		throw new Error('Authentication : Google client id or secret not found')
 
-	const googleProvider = new GoogleProvider(clientId, clientSecret)
-
 	try {
+		const googleProvider = new GoogleProvider(clientId, clientSecret)
+
 		const { accessToken, refreshToken } =
 			await googleProvider.validateTokenFromAuthorizationCode(code)
 
@@ -38,9 +43,9 @@ export const googleAuthHandler = async (context: Context) => {
 			expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
 		})
 
-		context.set.redirect = 'http://localhost:5173'
+		context.set.redirect = authenticationConfig.successRedirectPath
 	} catch (e) {
-		console.error(e)
+		// console.error(e)
 		context.set.redirect = authenticationConfig?.failureRedirectPath
 	}
 }
