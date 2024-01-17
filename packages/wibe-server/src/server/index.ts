@@ -7,7 +7,7 @@ import { Schema, SchemaInterface } from '../schema/Schema'
 import { GraphQLObjectType, GraphQLSchema } from 'graphql'
 import { WibeGraphlQLSchema } from '../schema/WibeGraphQLSchema'
 import { AuthenticationConfig } from '../authentication/interface'
-import { googleAuthHandler } from './routes'
+import { WibeRoute, defaultRoutes } from './routes'
 
 interface WibeConfig {
 	port: number
@@ -15,6 +15,7 @@ interface WibeConfig {
 	database: DatabaseConfig
 	codegen?: boolean
 	authentication?: AuthenticationConfig
+	routes?: WibeRoute[]
 }
 
 export class WibeApp {
@@ -30,12 +31,39 @@ export class WibeApp {
 			context.set.status = 200
 		})
 
+		this.loadDefaultRoutes()
+
 		const databaseAdapter = new MongoAdapter({
 			databaseName: database.name,
 			databaseUrl: database.url,
 		})
 
 		WibeApp.databaseController = new DatabaseController(databaseAdapter)
+	}
+
+	async loadDefaultRoutes() {
+		const wibeRoutes = defaultRoutes()
+
+		wibeRoutes.map((route) => {
+			const { method } = route
+
+			switch (method) {
+				case 'GET':
+					this.server.get(route.path, route.handler)
+					break
+				case 'POST':
+					this.server.post(route.path, route.handler)
+					break
+				case 'PUT':
+					this.server.put(route.path, route.handler)
+					break
+				case 'DELETE':
+					this.server.delete(route.path, route.handler)
+					break
+				default:
+					throw new Error('Invalid method for default route')
+			}
+		})
 	}
 
 	async start() {
@@ -75,12 +103,6 @@ export class WibeApp {
 
 			Bun.write('generated/wibe.ts', wibeTypes)
 		}
-
-		/// FOR TESTING
-
-		this.server.get('/auth/test', googleAuthHandler)
-
-		///
 
 		this.server.listen(WibeApp.config.port, () => {
 			console.log(`Server running on port ${WibeApp.config.port}`)

@@ -1,6 +1,6 @@
 import { Context } from 'elysia'
-import { WibeApp } from '.'
-import { GoogleProvider } from '../authentication/providers/google'
+import { WibeApp } from '../..'
+import { GoogleProvider } from '../../../authentication/providers/google'
 
 export const googleAuthHandler = async (context: Context) => {
 	const code = context.query.code
