@@ -1,16 +1,29 @@
-import { describe, it, expect, beforeEach, spyOn, mock } from 'bun:test'
-import { googleAuthHandler } from './googleAuth'
+import {
+	describe,
+	it,
+	expect,
+	beforeEach,
+	spyOn,
+	mock,
+	beforeAll,
+} from 'bun:test'
+import { authHandler } from './authHandler'
 import { WibeApp } from '../..'
-import { GoogleProvider } from '../../../authentication/providers/google'
+import { ProviderEnum } from '../../authentication/interface'
+import { GoogleProvider } from '../../authentication/providers/google'
 
-describe('Google auth handler', () => {
+describe('Auth handler', () => {
+	beforeAll(() => {
+		spyOn(console, 'error').mockImplementation(() => {})
+	})
+
 	beforeEach(() => {
+		// @ts-expect-error
 		WibeApp.config = {
 			port: 3000,
 			authentication: {
 				successRedirectPath: 'successRedirectPath',
 				failureRedirectPath: 'failureRedirectPath',
-				// @ts-expect-error
 				providers: {
 					GOOGLE: {
 						clientId: 'clientId',
@@ -25,14 +38,17 @@ describe('Google auth handler', () => {
 		// @ts-expect-error
 		WibeApp.config = { port: 3000 }
 		expect(
-			googleAuthHandler({ query: { code: 'code' } } as any),
+			authHandler(
+				{ query: { code: 'code' } } as any,
+				ProviderEnum.GOOGLE,
+			),
 		).rejects.toThrow('Authentication config not found')
 	})
 
 	it('should throw an error if no google code provided', async () => {
-		expect(googleAuthHandler({ query: {} } as any)).rejects.toThrow(
-			'Authentication : Google code not found',
-		)
+		expect(
+			authHandler({ query: {} } as any, ProviderEnum.GOOGLE),
+		).rejects.toThrow('Authentication : Authorization code not found')
 	})
 
 	it('should throw an error if the google client id or client secret is not provided ', async () => {
@@ -51,10 +67,11 @@ describe('Google auth handler', () => {
 		}
 
 		expect(
-			googleAuthHandler({ query: { code: 'code' } } as any),
-		).rejects.toThrow(
-			'Authentication : Google client id or secret not found',
-		)
+			authHandler(
+				{ query: { code: 'code' } } as any,
+				ProviderEnum.GOOGLE,
+			),
+		).rejects.toThrow('Authentication : Client id or secret not found')
 
 		WibeApp.config = {
 			port: 3000,
@@ -71,10 +88,11 @@ describe('Google auth handler', () => {
 		}
 
 		expect(
-			googleAuthHandler({ query: { code: 'code' } } as any),
-		).rejects.toThrow(
-			'Authentication : Google client id or secret not found',
-		)
+			authHandler(
+				{ query: { code: 'code' } } as any,
+				ProviderEnum.GOOGLE,
+			),
+		).rejects.toThrow('Authentication : Client id or secret not found')
 	})
 
 	it('should call google provider to check the code and generate access and refresh token', async () => {
@@ -97,7 +115,7 @@ describe('Google auth handler', () => {
 			set: { redirect: '' },
 		} as any
 
-		await googleAuthHandler(context)
+		await authHandler(context, ProviderEnum.GOOGLE)
 
 		expect(spyGoogleProvider).toHaveBeenCalledTimes(1)
 		expect(spyGoogleProvider).toHaveBeenCalledWith('code')
@@ -139,7 +157,7 @@ describe('Google auth handler', () => {
 			set: { redirect: '' },
 		} as any
 
-		await googleAuthHandler(context)
+		await authHandler(context, ProviderEnum.GOOGLE)
 
 		expect(spyGoogleProvider).toHaveBeenCalledTimes(1)
 		expect(spyGoogleProvider).toHaveBeenCalledWith('code')

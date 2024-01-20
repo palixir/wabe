@@ -10,6 +10,8 @@ export class GoogleProvider implements Provider {
 	constructor(clientId: string, clientSecret: string) {
 		this.clientId = clientId
 		this.clientSecret = clientSecret
+
+		console.log('CONSTRUCTOR')
 	}
 
 	async validateTokenFromAuthorizationCode(code: string) {
