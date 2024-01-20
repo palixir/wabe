@@ -24,8 +24,14 @@ export class WibeApp {
 	static config: WibeConfig
 	static databaseController: DatabaseController
 
-	constructor({ port, schema, database, codegen = true }: WibeConfig) {
-		WibeApp.config = { port, schema, database, codegen }
+	constructor({
+		port,
+		schema,
+		database,
+		codegen = true,
+		authentication,
+	}: WibeConfig) {
+		WibeApp.config = { port, schema, database, codegen, authentication }
 
 		this.server = new Elysia().get('/health', (context) => {
 			context.set.status = 200

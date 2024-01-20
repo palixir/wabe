@@ -64,7 +64,7 @@ describe('Authentication: Google', () => {
 					client_id: 'clientId',
 					client_secret: 'clientSecret',
 					grant_type: 'authorization_code',
-					redirect_uri: `http://localhost:${port}/auth/provider/google`,
+					redirect_uri: `http://127.0.0.1:${port}/auth/provider/google`,
 				}),
 				headers: {
 					'Content-Type': 'application/json',

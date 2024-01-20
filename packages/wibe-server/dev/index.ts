@@ -6,6 +6,17 @@ const run = async () => {
 	await runDatabase()
 
 	const wibe = new WibeApp({
+		authentication: {
+			successRedirectPath: 'http://localhost:5173',
+			failureRedirectPath: 'http://localhost:5173',
+			providers: {
+				X: {
+					clientId: 'SVFhTWpONVM4S09TWVB6dF9CZjc6MTpjaQ',
+					clientSecret:
+						'V95bDcUgQgYNqweVRO8RFrqWJxr_yckd_b5Npp-MmEBxMr6KuR',
+				},
+			},
+		},
 		database: {
 			type: DatabaseEnum.Mongo,
 			url: 'mongodb://127.0.0.1:27045',

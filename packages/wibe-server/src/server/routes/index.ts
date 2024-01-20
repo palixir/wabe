@@ -1,5 +1,6 @@
 import { Context } from 'elysia'
 import { googleAuthHandler } from './handlers/googleAuth'
+import { xAuthHandler } from './handlers/xAuth'
 
 export interface WibeRoute {
 	method: 'GET' | 'POST' | 'PUT' | 'DELETE'
@@ -9,8 +10,13 @@ export interface WibeRoute {
 
 export const defaultRoutes = (): WibeRoute[] => [
 	{
-		method: 'POST',
+		method: 'GET',
 		path: '/auth/provider/google',
 		handler: googleAuthHandler,
+	},
+	{
+		method: 'GET',
+		path: '/auth/provider/x',
+		handler: xAuthHandler,
 	},
 ]

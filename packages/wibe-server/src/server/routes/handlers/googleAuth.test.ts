@@ -5,12 +5,12 @@ import { GoogleProvider } from '../../../authentication/providers/google'
 
 describe('Google auth handler', () => {
 	beforeEach(() => {
-		// @ts-expect-error
 		WibeApp.config = {
 			port: 3000,
 			authentication: {
 				successRedirectPath: 'successRedirectPath',
 				failureRedirectPath: 'failureRedirectPath',
+				// @ts-expect-error
 				providers: {
 					GOOGLE: {
 						clientId: 'clientId',

@@ -22,7 +22,7 @@ export class GoogleProvider implements Provider {
 				client_id: this.clientId,
 				client_secret: this.clientSecret,
 				grant_type: 'authorization_code',
-				redirect_uri: `http://localhost:${wibeConfig.port}/auth/provider/google`,
+				redirect_uri: `http://127.0.0.1:${wibeConfig.port}/auth/provider/google`,
 			}),
 			headers: {
 				'Content-Type': 'application/json',
