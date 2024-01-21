@@ -29,7 +29,7 @@ describe('Authentication: Google', () => {
 		await wibe.close()
 	})
 
-	it.only('should validate token from authorization token', async () => {
+	it('should validate token from authorization token', async () => {
 		mockFetch.mockImplementationOnce(() => ({
 			json: () => ({
 				access_token: 'access_token',
@@ -45,47 +45,41 @@ describe('Authentication: Google', () => {
 			}),
 		}))
 
-		try {
-			const res =
-				await googleProvider.validateTokenFromAuthorizationCode(
-					'authorizationCode',
-				)
-
-			console.log(res)
-
-			expect(res).toEqual({
-				accessToken: 'access_token',
-				refreshToken: 'refresh_token',
-			})
-
-			expect(mockFetch).toHaveBeenCalledTimes(2)
-			expect(mockFetch).toHaveBeenCalledWith(
-				'https://oauth2.googleapis.com/token',
-				{
-					method: 'POST',
-					body: JSON.stringify({
-						code: 'authorizationCode',
-						client_id: 'clientId',
-						client_secret: 'clientSecret',
-						grant_type: 'authorization_code',
-						redirect_uri: `http://127.0.0.1:${port}/auth/provider/google`,
-					}),
-					headers: {
-						'Content-Type': 'application/json',
-					},
-				},
+		const res =
+			await googleProvider.validateTokenFromAuthorizationCode(
+				'authorizationCode',
 			)
-			expect(mockFetch).toHaveBeenCalledWith(
-				'https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=access_token',
-				{
-					headers: {
-						Authorization: 'Bearer id_token',
-					},
+
+		expect(res).toEqual({
+			accessToken: 'access_token',
+			refreshToken: 'refresh_token',
+		})
+
+		expect(mockFetch).toHaveBeenCalledTimes(2)
+		expect(mockFetch).toHaveBeenCalledWith(
+			'https://oauth2.googleapis.com/token',
+			{
+				method: 'POST',
+				body: JSON.stringify({
+					code: 'authorizationCode',
+					client_id: 'clientId',
+					client_secret: 'clientSecret',
+					grant_type: 'authorization_code',
+					redirect_uri: `http://127.0.0.1:${port}/auth/provider/google`,
+				}),
+				headers: {
+					'Content-Type': 'application/json',
 				},
-			)
-		} catch (e) {
-			console.error(e)
-		}
+			},
+		)
+		expect(mockFetch).toHaveBeenCalledWith(
+			'https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=access_token',
+			{
+				headers: {
+					Authorization: 'Bearer id_token',
+				},
+			},
+		)
 	})
 
 	it('should throw an error if refresh token is not present', async () => {

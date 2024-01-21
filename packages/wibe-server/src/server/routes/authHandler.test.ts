@@ -6,6 +6,8 @@ import {
 	spyOn,
 	mock,
 	beforeAll,
+	afterAll,
+	afterEach,
 } from 'bun:test'
 import { authHandler } from './authHandler'
 import { WibeApp } from '../..'
@@ -13,8 +15,17 @@ import { ProviderEnum } from '../../authentication/interface'
 import { GoogleProvider } from '../../authentication/providers/google'
 
 describe('Auth handler', () => {
+	const spyGoogleProvider = spyOn(
+		GoogleProvider.prototype,
+		'validateTokenFromAuthorizationCode',
+	)
+
 	beforeAll(() => {
 		spyOn(console, 'error').mockImplementation(() => {})
+	})
+
+	afterAll(() => {
+		spyGoogleProvider.mockRestore()
 	})
 
 	beforeEach(() => {
@@ -32,6 +43,10 @@ describe('Auth handler', () => {
 				},
 			},
 		}
+	})
+
+	afterEach(() => {
+		spyGoogleProvider.mockReset()
 	})
 
 	it('should throw an error if the authentication config is not provided', async () => {
@@ -136,15 +151,10 @@ describe('Auth handler', () => {
 		})
 
 		expect(context.set.redirect).toBe('successRedirectPath')
-
-		spyGoogleProvider.mockReset()
 	})
 
 	it('should redirect to the failure redirect path if something wrong', async () => {
-		const spyGoogleProvider = spyOn(
-			GoogleProvider.prototype,
-			'validateTokenFromAuthorizationCode',
-		).mockRejectedValue(new Error('Something wrong'))
+		spyGoogleProvider.mockRejectedValue(new Error('Something wrong'))
 
 		const spyAddCookie = mock(() => {})
 
@@ -163,7 +173,5 @@ describe('Auth handler', () => {
 		expect(spyGoogleProvider).toHaveBeenCalledWith('code')
 
 		expect(context.set.redirect).toBe('failureRedirectPath')
-
-		spyGoogleProvider.mockReset()
 	})
 })
