@@ -10,8 +10,6 @@ export class GoogleProvider implements Provider {
 	constructor(clientId: string, clientSecret: string) {
 		this.clientId = clientId
 		this.clientSecret = clientSecret
-
-		console.log('CONSTRUCTOR')
 	}
 
 	async validateTokenFromAuthorizationCode(code: string) {
@@ -25,11 +23,14 @@ export class GoogleProvider implements Provider {
 				client_secret: this.clientSecret,
 				grant_type: 'authorization_code',
 				redirect_uri: `http://127.0.0.1:${wibeConfig.port}/auth/provider/google`,
+				code_verifier: 'codeVerifier',
 			}),
 			headers: {
 				'Content-Type': 'application/json',
 			},
 		})
+
+		console.log(res)
 
 		const { access_token, id_token, refresh_token } = await res.json()
 
