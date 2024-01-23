@@ -1,7 +1,8 @@
 import { gql } from 'graphql-request'
 import { WibeApp } from '../../server'
 import { getGraphqlClient } from '../../utils/helper'
-import { Provider } from '../interface'
+import { Provider, ValidateTokenOptions } from '../interface'
+import { AuthenticationProvider } from '../../../generated/wibe'
 
 export class GoogleProvider implements Provider {
 	private clientId: string
@@ -12,7 +13,10 @@ export class GoogleProvider implements Provider {
 		this.clientSecret = clientSecret
 	}
 
-	async validateTokenFromAuthorizationCode(code: string) {
+	async validateTokenFromAuthorizationCode({
+		code,
+		codeVerifier,
+	}: ValidateTokenOptions) {
 		const wibeConfig = WibeApp.config
 
 		const res = await fetch('https://oauth2.googleapis.com/token', {
@@ -23,7 +27,7 @@ export class GoogleProvider implements Provider {
 				client_secret: this.clientSecret,
 				grant_type: 'authorization_code',
 				redirect_uri: `http://127.0.0.1:${wibeConfig.port}/auth/provider/google`,
-				code_verifier: 'codeVerifier',
+				code_verifier: codeVerifier,
 			}),
 			headers: {
 				'Content-Type': 'application/json',
@@ -61,7 +65,7 @@ export class GoogleProvider implements Provider {
 				signInWithProvider(
 					email: "${email}"
 					verifiedEmail: ${verified_email}
-					provider: "GOOGLE"
+					provider: ${AuthenticationProvider.GOOGLE},
 					refreshToken: "${refresh_token}"
 					accessToken: "${access_token}"
 				)

@@ -44,8 +44,13 @@ export const authHandler = async (context: Context, provider: ProviderEnum) => {
 			clientSecret,
 		})
 
+		const codeVerifier = context.cookie.codeVerifier.value as string
+
 		const { accessToken, refreshToken } =
-			await providerAdapter.validateTokenFromAuthorizationCode(code)
+			await providerAdapter.validateTokenFromAuthorizationCode({
+				code,
+				codeVerifier,
+			})
 
 		// Create cookie for access and refresh token
 		context.cookie.accessToken.add({

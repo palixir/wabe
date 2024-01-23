@@ -11,7 +11,13 @@ import {
 	GraphQLOutputType,
 	GraphQLScalarType,
 } from 'graphql'
-import { ClassInterface, Resolver, Schema, TypeField } from './Schema'
+import {
+	ClassInterface,
+	EnumInterface,
+	Resolver,
+	Schema,
+	TypeField,
+} from './Schema'
 import {
 	mutationToCreateMultipleObjects,
 	mutationToCreateObject,
@@ -37,8 +43,20 @@ export class WibeGraphlQLSchema {
 
 	constructor(schemas: Schema) {
 		this.schemas = schemas
+
+		this.schemas.schema.enums?.push(this.defaultEnum())
 		// TODO: Only push the _User if the user use one of the wibe authentication methods
 		this.schemas.schema.class.push(this.defaultClass())
+	}
+
+	defaultEnum(): EnumInterface {
+		return {
+			name: 'AuthenticationProvider',
+			values: {
+				GOOGLE: 'GOOGLE',
+				X: 'X',
+			},
+		}
 	}
 
 	defaultClass(): ClassInterface {
@@ -46,7 +64,7 @@ export class WibeGraphlQLSchema {
 			name: '_User',
 			fields: {
 				provider: {
-					type: 'String',
+					type: 'AuthenticationProvider',
 				},
 				email: {
 					type: 'Email',
@@ -69,9 +87,8 @@ export class WibeGraphlQLSchema {
 					signInWithProvider: {
 						type: 'Boolean',
 						args: {
-							// TODO: Create an enum and use it here
 							provider: {
-								type: 'String',
+								type: 'AuthenticationProvider',
 								required: true,
 							},
 							accessToken: {

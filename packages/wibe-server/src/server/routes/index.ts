@@ -1,4 +1,5 @@
 import { Context } from 'elysia'
+import crypto from 'crypto'
 import { authHandler } from './authHandler'
 import { ProviderEnum } from '../../authentication/interface'
 import { WibeApp } from '..'
@@ -30,11 +31,20 @@ export const defaultRoutes = (): WibeRoute[] => [
 
 				const { authentication } = config
 
-				// const codeVerifier =
-				// 	Math.random().toString(16).slice(2, 15) +
-				// 	Math.random().toString(16).slice(2, 15)
+				const codeVerifier = crypto
+					.randomBytes(32)
+					.toString('base64')
+					.replace(/\+/g, '-')
+					.replace(/\//g, '_')
+					.replace(/=/g, '')
 
-				const codeVerifier = 'codeVerifier'
+				// Create cookie to store code verifier
+				context.cookie.codeVerifier.add({
+					value: codeVerifier,
+					httpOnly: true,
+					path: '/',
+					expires: new Date(Date.now() + 1000 * 60), // 1 minute
+				})
 
 				const codeChallenge = new Bun.SHA256()
 					.update(codeVerifier)
