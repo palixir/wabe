@@ -44,7 +44,9 @@ export class WibeGraphlQLSchema {
 	constructor(schemas: Schema) {
 		this.schemas = schemas
 
-		this.schemas.schema.enums?.push(this.defaultEnum())
+		if (!this.schemas.schema.enums) this.schemas.schema.enums = []
+
+		this.schemas.schema.enums.push(this.defaultEnum())
 		// TODO: Only push the _User if the user use one of the wibe authentication methods
 		this.schemas.schema.class.push(this.defaultClass())
 	}

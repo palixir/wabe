@@ -139,4 +139,6 @@ const run = async () => {
 	await wibe.start()
 }
 
-run()
+run().catch((err) => {
+	console.error(err)
+})

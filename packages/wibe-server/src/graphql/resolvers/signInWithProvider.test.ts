@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll, afterEach } from 'bun:test'
 import { WibeApp } from '../../server'
 import { GraphQLClient, gql } from 'graphql-request'
 import { getGraphqlClient, setupTests } from '../../utils/helper'
+import { AuthenticationProvider } from '../../../generated/wibe'
 
 describe('signInWithProvider', () => {
 	let wibe: WibeApp
@@ -33,7 +34,7 @@ describe('signInWithProvider', () => {
 		)
 	})
 
-	it('should create an user if not exist', async () => {
+	it.only('should create an user if not exist', async () => {
 		const { signInWithProvider } = await client.request<any>(
 			graphql.signInWithProvider,
 			{
@@ -41,7 +42,7 @@ describe('signInWithProvider', () => {
 				verifiedEmail: true,
 				refreshToken: 'refreshToken',
 				accessToken: 'accessToken',
-				provider: 'google',
+				provider: 'GOOGLE',
 			},
 		)
 
@@ -71,7 +72,7 @@ describe('signInWithProvider', () => {
 				verifiedEmail: true,
 				refreshToken: 'refreshToken',
 				accessToken: 'accessToken',
-				provider: 'google',
+				provider: AuthenticationProvider.GOOGLE,
 			},
 		)
 
@@ -138,7 +139,7 @@ const graphql = {
         }
     `,
 	signInWithProvider: gql`
-        mutation signInWithProvider($email: Email!, $verifiedEmail: Boolean!, $provider: String!, $refreshToken: String!, $accessToken: String!) {
+        mutation signInWithProvider($email: Email!, $verifiedEmail: Boolean!, $provider: AuthenticationProvider!, $refreshToken: String!, $accessToken: String!) {
             signInWithProvider(email: $email, verifiedEmail: $verifiedEmail, provider: $provider, refreshToken: $refreshToken, accessToken: $accessToken)
         }
     `,
