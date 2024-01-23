@@ -40,9 +40,9 @@ describe('signInWithProvider', () => {
 			{
 				email: 'email@test.com',
 				verifiedEmail: true,
+				provider: 'GOOGLE',
 				refreshToken: 'refreshToken',
 				accessToken: 'accessToken',
-				provider: 'GOOGLE',
 			},
 		)
 
@@ -72,7 +72,7 @@ describe('signInWithProvider', () => {
 				verifiedEmail: true,
 				refreshToken: 'refreshToken',
 				accessToken: 'accessToken',
-				provider: AuthenticationProvider.GOOGLE,
+				provider: AuthenticationProvider.Google,
 			},
 		)
 
@@ -139,15 +139,27 @@ const graphql = {
         }
     `,
 	signInWithProvider: gql`
-        mutation signInWithProvider($email: Email!, $verifiedEmail: Boolean!, $provider: AuthenticationProvider!, $refreshToken: String!, $accessToken: String!) {
-            signInWithProvider(email: $email, verifiedEmail: $verifiedEmail, provider: $provider, refreshToken: $refreshToken, accessToken: $accessToken)
+        mutation signInWithProvider(
+            $email: Email!
+            $verifiedEmail: Boolean!
+            $provider: AuthenticationProvider!
+            $refreshToken: String!
+            $accessToken: String!
+        ) {
+            signInWithProvider(
+                email: $email
+                verifiedEmail: $verifiedEmail
+                provider: $provider
+                refreshToken: $refreshToken
+                accessToken: $accessToken
+            )
         }
     `,
 	deleteOne_User: gql`
-		mutation deleteOne_User($input: _UserDeleteInput!) {
-			deleteOne_User(input: $input) {
+        mutation deleteOne_User($input: _UserDeleteInput!) {
+            deleteOne_User(input: $input) {
                 id
-			}
-		}
-	`,
+            }
+        }
+    `,
 }

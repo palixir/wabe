@@ -2,7 +2,6 @@ import { gql } from 'graphql-request'
 import { WibeApp } from '../../server'
 import { getGraphqlClient } from '../../utils/helper'
 import { Provider, ValidateTokenOptions } from '../interface'
-import { AuthenticationProvider } from '../../../generated/wibe'
 
 export class GoogleProvider implements Provider {
 	private clientId: string
@@ -65,7 +64,7 @@ export class GoogleProvider implements Provider {
 				signInWithProvider(
 					email: "${email}"
 					verifiedEmail: ${verified_email}
-					provider: ${AuthenticationProvider.GOOGLE},
+					provider: Google,
 					refreshToken: "${refresh_token}"
 					accessToken: "${access_token}"
 				)

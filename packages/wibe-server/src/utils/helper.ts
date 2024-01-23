@@ -130,6 +130,13 @@ export const setupTests = async () => {
 			],
 			enums: [
 				{
+					name: 'AuthenticationProvider',
+					values: {
+						GOOGLE: 'GOOGLE',
+						X: 'X',
+					},
+				},
+				{
 					name: 'Role',
 					values: {
 						Admin: 'Admin',

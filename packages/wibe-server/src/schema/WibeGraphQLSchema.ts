@@ -38,7 +38,7 @@ import {
 } from './utils'
 
 // This class is tested in e2e test in graphql folder
-export class WibeGraphlQLSchema {
+export class WibeGraphQLSchema {
 	private schemas: Schema
 
 	constructor(schemas: Schema) {
@@ -46,7 +46,7 @@ export class WibeGraphlQLSchema {
 
 		if (!this.schemas.schema.enums) this.schemas.schema.enums = []
 
-		this.schemas.schema.enums.push(this.defaultEnum())
+		// this.schemas.schema.enums.push(this.defaultEnum())
 		// TODO: Only push the _User if the user use one of the wibe authentication methods
 		this.schemas.schema.class.push(this.defaultClass())
 	}
