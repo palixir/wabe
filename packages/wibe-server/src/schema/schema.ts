@@ -49,10 +49,7 @@ export type Resolver = {
 	type: WibeTypes
 	required?: boolean
 	args?: {
-		[key: string]: {
-			type: WibeTypes
-			required?: boolean
-		}
+		[key: string]: TypeField
 	}
 	resolve: (...args: any) => any
 }

@@ -46,7 +46,7 @@ export class WibeGraphQLSchema {
 
 		if (!this.schemas.schema.enums) this.schemas.schema.enums = []
 
-		// this.schemas.schema.enums.push(this.defaultEnum())
+		this.schemas.schema.enums.push(this.defaultEnum())
 		// TODO: Only push the _User if the user use one of the wibe authentication methods
 		this.schemas.schema.class.push(this.defaultClass())
 	}
@@ -55,8 +55,7 @@ export class WibeGraphQLSchema {
 		return {
 			name: 'AuthenticationProvider',
 			values: {
-				GOOGLE: 'GOOGLE',
-				X: 'X',
+				Google: 'Google',
 			},
 		}
 	}
@@ -89,25 +88,32 @@ export class WibeGraphQLSchema {
 					signInWithProvider: {
 						type: 'Boolean',
 						args: {
-							provider: {
-								type: 'AuthenticationProvider',
-								required: true,
-							},
-							accessToken: {
-								type: 'String',
-								required: true,
-							},
-							refreshToken: {
-								type: 'String',
-								required: true,
-							},
-							email: {
-								type: 'Email',
-								required: true,
-							},
-							verifiedEmail: {
-								type: 'Boolean',
-								required: true,
+							input: {
+								type: 'Object',
+								object: {
+									name: 'SignInWithProviderInput',
+									fields: {
+										provider: {
+											type: 'AuthenticationProvider',
+											required: true,
+										},
+										email: {
+											type: 'Email',
+											required: true,
+										},
+										verifiedEmail: {
+											type: 'Boolean',
+											required: true,
+										},
+										accessToken: {
+											type: 'String',
+											required: true,
+										},
+										refreshToken: {
+											type: 'String',
+										},
+									},
+								},
 							},
 						},
 						resolve: signInWithProviderResolver,
@@ -266,6 +272,7 @@ export class WibeGraphQLSchema {
 
 		const graphqlFields = fieldsOfObjectKeys.reduce(
 			(acc, fieldName) => {
+				console.log(fieldName)
 				const currentField = fields[fieldName]
 
 				if (currentField.type === 'Object') {
@@ -274,6 +281,7 @@ export class WibeGraphQLSchema {
 						scalars,
 						enums,
 					})
+
 					if (!object)
 						throw new Error(
 							`Failed to create ${currentField.object.name}`,
