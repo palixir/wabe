@@ -10,10 +10,7 @@ export class XProvider implements Provider {
 		this.clientSecret = clientSecret
 	}
 
-	async validateTokenFromAuthorizationCode({
-		code,
-		codeVerifier,
-	}: ValidateTokenOptions) {
+	async validateTokenFromAuthorizationCode({ code }: ValidateTokenOptions) {
 		const wibeConfig = WibeApp.config
 
 		const res = await fetch('https://api.twitter.com/2/oauth2/token', {
@@ -24,7 +21,6 @@ export class XProvider implements Provider {
 				client_secret: this.clientSecret,
 				grant_type: 'authorization_code',
 				redirect_uri: `http://127.0.0.1:${wibeConfig.port}/auth/provider/x`,
-				code_verifier: codeVerifier,
 			}),
 			headers: {
 				Authorization: `Basic ${Buffer.from(

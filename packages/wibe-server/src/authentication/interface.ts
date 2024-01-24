@@ -18,7 +18,6 @@ export interface AuthenticationConfig {
 
 export interface ValidateTokenOptions {
 	code: string
-	codeVerifier: string
 }
 
 export interface Provider {

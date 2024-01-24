@@ -29,7 +29,7 @@ describe('Authentication: Google', () => {
 		await wibe.close()
 	})
 
-	it.skip('should validate token from authorization token', async () => {
+	it('should validate token from authorization token', async () => {
 		mockFetch.mockImplementationOnce(() => ({
 			json: () => ({
 				access_token: 'access_token',
@@ -47,7 +47,6 @@ describe('Authentication: Google', () => {
 
 		const res = await googleProvider.validateTokenFromAuthorizationCode({
 			code: 'authorizationCode',
-			codeVerifier: 'codeVerifier',
 		})
 
 		expect(res).toEqual({
@@ -93,7 +92,6 @@ describe('Authentication: Google', () => {
 		expect(
 			googleProvider.validateTokenFromAuthorizationCode({
 				code: 'authorizationCode',
-				codeVerifier: 'codeVerifier',
 			}),
 		).rejects.toThrow(
 			'Refresh token not found, access_type must be offline',
@@ -110,7 +108,6 @@ describe('Authentication: Google', () => {
 		expect(
 			googleProvider.validateTokenFromAuthorizationCode({
 				code: 'authorizationCode',
-				codeVerifier: 'codeVerifier',
 			}),
 		).rejects.toThrow('Invalid token')
 	})
@@ -125,7 +122,6 @@ describe('Authentication: Google', () => {
 		expect(
 			googleProvider.validateTokenFromAuthorizationCode({
 				code: 'authorizationCode',
-				codeVerifier: 'codeVerifier',
 			}),
 		).rejects.toThrow('Invalid token')
 	})

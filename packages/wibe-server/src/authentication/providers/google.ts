@@ -12,10 +12,7 @@ export class GoogleProvider implements Provider {
 		this.clientSecret = clientSecret
 	}
 
-	async validateTokenFromAuthorizationCode({
-		code,
-		codeVerifier,
-	}: ValidateTokenOptions) {
+	async validateTokenFromAuthorizationCode({ code }: ValidateTokenOptions) {
 		const wibeConfig = WibeApp.config
 
 		const res = await fetch('https://oauth2.googleapis.com/token', {
@@ -26,7 +23,6 @@ export class GoogleProvider implements Provider {
 				client_secret: this.clientSecret,
 				grant_type: 'authorization_code',
 				redirect_uri: `http://127.0.0.1:${wibeConfig.port}/auth/provider/google`,
-				code_verifier: codeVerifier,
 			}),
 			headers: {
 				'Content-Type': 'application/json',

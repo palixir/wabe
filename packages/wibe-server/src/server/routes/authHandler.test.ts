@@ -133,7 +133,9 @@ describe('Auth handler', () => {
 		await authHandler(context, ProviderEnum.GOOGLE)
 
 		expect(spyGoogleProvider).toHaveBeenCalledTimes(1)
-		expect(spyGoogleProvider).toHaveBeenCalledWith('code')
+		expect(spyGoogleProvider).toHaveBeenCalledWith({
+			code: 'code',
+		})
 
 		expect(spyAddCookie).toHaveBeenCalledTimes(2)
 		expect(spyAddCookie).toHaveBeenCalledWith({
@@ -170,8 +172,9 @@ describe('Auth handler', () => {
 		await authHandler(context, ProviderEnum.GOOGLE)
 
 		expect(spyGoogleProvider).toHaveBeenCalledTimes(1)
-		expect(spyGoogleProvider).toHaveBeenCalledWith('code')
-
+		expect(spyGoogleProvider).toHaveBeenCalledWith({
+			code: 'code',
+		})
 		expect(context.set.redirect).toBe('failureRedirectPath')
 	})
 })
