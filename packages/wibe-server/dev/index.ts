@@ -31,7 +31,7 @@ const run = async () => {
 		schema: {
 			class: [
 				{
-					name: 'User',
+					name: '_User',
 					fields: {
 						name: { type: 'String', required: true },
 						age: { type: 'Int' },
@@ -134,6 +134,12 @@ const run = async () => {
 									args.input.a + args.input.b,
 							},
 						},
+					},
+				},
+				{
+					name: 'Post',
+					fields: {
+						name: { type: 'String', required: true },
 					},
 				},
 			],

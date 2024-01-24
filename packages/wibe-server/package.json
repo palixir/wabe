@@ -16,7 +16,8 @@
 		"@elysiajs/apollo": "0.8.0",
 		"elysia": "0.8.9",
 		"graphql": "16.8.1",
-		"mongodb": "6.3.0"
+		"mongodb": "6.3.0",
+		"deepmerge": "4.3.1"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.5.2",

@@ -1,3 +1,4 @@
+import merge from 'deepmerge'
 import {
 	GraphQLEnumType,
 	GraphQLFieldConfig,
@@ -62,28 +63,44 @@ export class WibeGraphQLSchema {
 	}
 
 	defaultClass(): ClassInterface {
-		return {
+		const tata = this.schemas.schema.class.find(
+			(wibeClass) => wibeClass.name === '_User',
+		)
+
+		const _userClassFields = {
+			provider: {
+				type: 'AuthenticationProvider',
+			},
+			email: {
+				type: 'Email',
+				required: true,
+			},
+			verifiedEmail: {
+				type: 'Boolean',
+				required: true,
+			},
+			accessToken: {
+				type: 'String',
+				required: true,
+			},
+			refreshToken: {
+				type: 'String',
+			},
+		}
+
+		const _userClass = {
 			name: '_User',
 			fields: {
-				provider: {
-					type: 'AuthenticationProvider',
-				},
-				email: {
-					type: 'Email',
-					required: true,
-				},
-				verifiedEmail: {
-					type: 'Boolean',
-					required: true,
-				},
-				accessToken: {
-					type: 'String',
-					required: true,
-				},
-				refreshToken: {
-					type: 'String',
-				},
+				..._userClassFields,
 			},
+		}
+
+		if (tata) {
+			_userClass.fields = merge(_userClass.fields, tata.fields)
+		}
+
+		return {
+			...(!tata ? _userClass : {}),
 			resolvers: {
 				mutations: {
 					signInWithProvider: {
@@ -171,7 +188,6 @@ export class WibeGraphQLSchema {
 					scalars,
 					enums,
 				})
-
 				const defaultMutations = this.createDefaultMutationsSchema({
 					className,
 					defaultInputType,
@@ -377,8 +393,12 @@ export class WibeGraphQLSchema {
 					{} as Record<string, any>,
 				)
 
+				const currentKeyWithFirstLetterUpperCase = `${currentKey[0].toUpperCase()}${currentKey.slice(
+					1,
+				)}`
+
 				const graphqlInput = new GraphQLInputObjectType({
-					name: `${currentKey}Input`,
+					name: `${currentKeyWithFirstLetterUpperCase}Input`,
 					fields: inputFields,
 				})
 

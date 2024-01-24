@@ -158,7 +158,7 @@ const graphql = {
     `,
 	signInWithProvider: gql`
         mutation signInWithProvider(
-            $input: signInWithProviderInput!
+            $input: SignInWithProviderInput!
         ) {
             signInWithProvider(
                 input: $input
