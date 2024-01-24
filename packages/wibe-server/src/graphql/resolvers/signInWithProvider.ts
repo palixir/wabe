@@ -5,17 +5,15 @@ import { gql } from 'graphql-request'
 export const signInWithProviderResolver = async (
 	root: any,
 	{
-		email,
-		verifiedEmail,
-		provider,
-		refreshToken,
-		accessToken,
+		input: { email, verifiedEmail, provider, refreshToken, accessToken },
 	}: {
-		email: string
-		verifiedEmail: boolean
-		provider: string
-		accessToken: string
-		refreshToken: string
+		input: {
+			email: string
+			verifiedEmail: boolean
+			provider: string
+			accessToken: string
+			refreshToken: string
+		}
 	},
 ) => {
 	if (!verifiedEmail) throw new Error('Email not verified')
@@ -48,7 +46,7 @@ export const signInWithProviderResolver = async (
 	} else {
 		await client.request<any>(gql`
 				mutation createOne_User {
-					createOne_User(input:{fields: { email: "${email}", verifiedEmail: ${verifiedEmail}, provider: "${provider}", refreshToken: "${refreshToken}", accessToken: "${accessToken}"}}) {
+					createOne_User(input:{fields: { email: "${email}", verifiedEmail: ${verifiedEmail}, provider: ${provider}, refreshToken: "${refreshToken}", accessToken: "${accessToken}"}}) {
 						id
 					}
 				}

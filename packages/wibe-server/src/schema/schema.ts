@@ -45,7 +45,7 @@ export type TypeField =
 
 export type SchemaFields = Record<string, TypeField>
 
-export type Resolver = {
+export type QueryResolver = {
 	type: WibeTypes
 	required?: boolean
 	args?: {
@@ -54,12 +54,23 @@ export type Resolver = {
 	resolve: (...args: any) => any
 }
 
+export type MutationResolver = {
+	type: WibeTypes
+	required?: boolean
+	args?: {
+		input: {
+			[key: string]: TypeField
+		}
+	}
+	resolve: (...args: any) => any
+}
+
 export type TypeResolver = {
 	queries?: {
-		[key: string]: Resolver
+		[key: string]: QueryResolver
 	}
 	mutations?: {
-		[key: string]: Resolver
+		[key: string]: MutationResolver
 	}
 }
 

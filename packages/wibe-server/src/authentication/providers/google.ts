@@ -33,8 +33,6 @@ export class GoogleProvider implements Provider {
 			},
 		})
 
-		console.log(res)
-
 		const { access_token, id_token, refresh_token } = await res.json()
 
 		if (!refresh_token)
@@ -62,11 +60,13 @@ export class GoogleProvider implements Provider {
 		await client.request<any>(gql`
 			mutation signInWithProvider {
 				signInWithProvider(
-					email: "${email}"
-					verifiedEmail: ${verified_email}
-					provider: Google,
-					refreshToken: "${refresh_token}"
-					accessToken: "${access_token}"
+					input:{
+						email: "${email}"
+						verifiedEmail: ${verified_email}
+						provider: Google,
+						refreshToken: "${refresh_token}"
+						accessToken: "${access_token}"
+					}
 				)
 			}
 		`)

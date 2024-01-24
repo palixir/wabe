@@ -319,7 +319,9 @@ describe('GraphQL : E2E', () => {
 		// Test String param is correctly passed
 		expect(
 			client.request<any>(graphql.customMutation, {
-				name: 1.5,
+				input: {
+					name: 1.5,
+				},
 			}),
 		).rejects.toThrow()
 
@@ -339,14 +341,18 @@ describe('GraphQL : E2E', () => {
 		// Test Int param is correctly passed
 		expect(
 			client.request<any>(graphql.customMutation, {
-				a: 1.5,
-				b: 1.5,
+				input: {
+					a: 1.5,
+					b: 1.5,
+				},
 			}),
 		).rejects.toThrow()
 
 		const res = await client.request<any>(graphql.customMutation, {
-			a: 1,
-			b: 1,
+			input: {
+				a: 1,
+				b: 1,
+			},
 		})
 
 		expect(res.customMutation).toEqual(2)
@@ -602,8 +608,8 @@ const graphql = {
 		}
 	`,
 	customMutation: gql`
-		mutation customMutation($a: Int!, $b: Int!) {
-			customMutation(a: $a, b: $b)
+		mutation customMutation($input: customMutationInput!) {
+			customMutation(input: $input)
 		}
 	`,
 	findOneUser: gql`

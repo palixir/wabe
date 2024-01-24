@@ -52,7 +52,7 @@ export const defaultRoutes = (): WibeRoute[] => [
 
 				context.set.redirect = `https://accounts.google.com/o/oauth2/v2/auth?access_type=offline&include_granted_scopes=true&response_type=code&state=state&redirect_uri=http://127.0.0.1:3000/auth/provider/google&client_id=${authentication?.providers.GOOGLE?.clientId}&code_challenge=${codeChallenge}&code_challenge_method=S256&scope=email%20openid`
 			} catch (e) {
-				console.log(e)
+				console.error(e)
 			}
 		},
 	},

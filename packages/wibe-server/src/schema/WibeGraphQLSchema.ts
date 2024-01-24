@@ -14,7 +14,8 @@ import {
 import {
 	ClassInterface,
 	EnumInterface,
-	Resolver,
+	MutationResolver,
+	QueryResolver,
 	Schema,
 	TypeField,
 } from './Schema'
@@ -89,30 +90,24 @@ export class WibeGraphQLSchema {
 						type: 'Boolean',
 						args: {
 							input: {
-								type: 'Object',
-								object: {
-									name: 'SignInWithProviderInput',
-									fields: {
-										provider: {
-											type: 'AuthenticationProvider',
-											required: true,
-										},
-										email: {
-											type: 'Email',
-											required: true,
-										},
-										verifiedEmail: {
-											type: 'Boolean',
-											required: true,
-										},
-										accessToken: {
-											type: 'String',
-											required: true,
-										},
-										refreshToken: {
-											type: 'String',
-										},
-									},
+								provider: {
+									type: 'AuthenticationProvider',
+									required: true,
+								},
+								email: {
+									type: 'Email',
+									required: true,
+								},
+								verifiedEmail: {
+									type: 'Boolean',
+									required: true,
+								},
+								accessToken: {
+									type: 'String',
+									required: true,
+								},
+								refreshToken: {
+									type: 'String',
 								},
 							},
 						},
@@ -164,18 +159,19 @@ export class WibeGraphQLSchema {
 					object,
 					allObjects: objects,
 				})
-				const customQueries = this.createCustomResolvers({
+				const customQueries = this.createCustomQueries({
 					resolvers: current.resolvers?.queries || {},
 					scalars,
 					enums,
 				})
 
 				// Mutations
-				const customMutations = this.createCustomResolvers({
+				const customMutations = this.createCustomMutations({
 					resolvers: current.resolvers?.mutations || {},
 					scalars,
 					enums,
 				})
+
 				const defaultMutations = this.createDefaultMutationsSchema({
 					className,
 					defaultInputType,
@@ -272,7 +268,6 @@ export class WibeGraphQLSchema {
 
 		const graphqlFields = fieldsOfObjectKeys.reduce(
 			(acc, fieldName) => {
-				console.log(fieldName)
 				const currentField = fields[fieldName]
 
 				if (currentField.type === 'Object') {
@@ -346,12 +341,74 @@ export class WibeGraphQLSchema {
 		})
 	}
 
-	createCustomResolvers({
+	createCustomMutations({
 		resolvers,
 		scalars,
 		enums,
 	}: {
-		resolvers: Record<string, Resolver>
+		resolvers: Record<string, MutationResolver>
+		scalars: GraphQLScalarType[]
+		enums: GraphQLEnumType[]
+	}) {
+		const mutationsKeys = Object.keys(resolvers)
+
+		const res = mutationsKeys.reduce(
+			(acc, currentKey) => {
+				const currentMutation = resolvers[currentKey]
+				const required = !!currentMutation.required
+				const input = currentMutation.args?.input || {}
+				const inputKeys = Object.keys(input)
+
+				const inputFields = inputKeys.reduce(
+					(acc, inputKey) => {
+						acc[inputKey] = {
+							type: wrapGraphQLTypeIn({
+								required: !!input[inputKey].required,
+								type: getGraphqlType({
+									field: input[inputKey] as TypeField,
+									scalars,
+									enums,
+								}),
+							}),
+						}
+
+						return acc
+					},
+					{} as Record<string, any>,
+				)
+
+				const graphqlInput = new GraphQLInputObjectType({
+					name: `${currentKey}Input`,
+					fields: inputFields,
+				})
+
+				acc[currentKey] = {
+					type: wrapGraphQLTypeIn({
+						required,
+						type: getGraphqlType({
+							field: currentMutation as TypeField,
+							scalars,
+							enums,
+						}),
+					}) as GraphQLOutputType,
+					args: { input: { type: graphqlInput } },
+					resolve: currentMutation.resolve,
+				}
+
+				return acc
+			},
+			{} as Record<string, GraphQLFieldConfig<any, any, any>>,
+		)
+
+		return res
+	}
+
+	createCustomQueries({
+		resolvers,
+		scalars,
+		enums,
+	}: {
+		resolvers: Record<string, QueryResolver>
 		scalars: GraphQLScalarType[]
 		enums: GraphQLEnumType[]
 	}) {

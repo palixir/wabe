@@ -106,17 +106,19 @@ export const setupTests = async () => {
 							customMutation: {
 								type: 'Int',
 								args: {
-									a: {
-										type: 'Int',
-										required: true,
-									},
-									b: {
-										type: 'Int',
-										required: true,
+									input: {
+										a: {
+											type: 'Int',
+											required: true,
+										},
+										b: {
+											type: 'Int',
+											required: true,
+										},
 									},
 								},
 								resolve: (root: any, args: any) =>
-									args.a + args.b,
+									args.input.a + args.input.b,
 							},
 						},
 					},

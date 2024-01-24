@@ -107,12 +107,31 @@ const run = async () => {
 								type: 'Boolean',
 								required: true,
 								args: {
-									name: {
-										type: 'Int',
-										required: true,
+									input: {
+										name: {
+											type: 'Int',
+											required: true,
+										},
 									},
 								},
 								resolve: () => true,
+							},
+							customMutation: {
+								type: 'Int',
+								args: {
+									input: {
+										a: {
+											type: 'Int',
+											required: true,
+										},
+										b: {
+											type: 'Int',
+											required: true,
+										},
+									},
+								},
+								resolve: (root: any, args: any) =>
+									args.input.a + args.input.b,
 							},
 						},
 					},
