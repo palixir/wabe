@@ -1,4 +1,3 @@
-import merge from 'deepmerge'
 import {
 	GraphQLEnumType,
 	GraphQLFieldConfig,
@@ -18,7 +17,9 @@ import {
 	MutationResolver,
 	QueryResolver,
 	Schema,
+	SchemaFields,
 	TypeField,
+	TypeResolver,
 } from './Schema'
 import {
 	mutationToCreateMultipleObjects,
@@ -63,11 +64,7 @@ export class WibeGraphQLSchema {
 	}
 
 	defaultClass(): ClassInterface {
-		const tata = this.schemas.schema.class.find(
-			(wibeClass) => wibeClass.name === '_User',
-		)
-
-		const _userClassFields = {
+		const defaultUserFields: SchemaFields = {
 			provider: {
 				type: 'AuthenticationProvider',
 			},
@@ -88,49 +85,69 @@ export class WibeGraphQLSchema {
 			},
 		}
 
-		const _userClass = {
-			name: '_User',
-			fields: {
-				..._userClassFields,
+		const defaultResolvers: TypeResolver = {
+			mutations: {
+				signInWithProvider: {
+					type: 'Boolean',
+					args: {
+						input: {
+							provider: {
+								type: 'AuthenticationProvider',
+								required: true,
+							},
+							email: {
+								type: 'Email',
+								required: true,
+							},
+							verifiedEmail: {
+								type: 'Boolean',
+								required: true,
+							},
+							accessToken: {
+								type: 'String',
+								required: true,
+							},
+							refreshToken: {
+								type: 'String',
+							},
+						},
+					},
+					resolve: signInWithProviderResolver,
+				},
 			},
 		}
 
-		if (tata) {
-			_userClass.fields = merge(_userClass.fields, tata.fields)
+		const _userIndex = this.schemas.schema.class.findIndex(
+			(wibeClass) => wibeClass.name === '_User',
+		)
+
+		if (_userIndex !== -1) {
+			const _user = this.schemas.schema.class[_userIndex]
+
+			const newUserObject = {
+				name: _user.name,
+				fields: {
+					..._user.fields,
+					...defaultUserFields,
+				},
+				resolvers: {
+					..._user.resolvers,
+					...defaultResolvers,
+				},
+			}
+
+			delete this.schemas.schema.class[_userIndex]
+
+			return newUserObject
 		}
 
 		return {
-			...(!tata ? _userClass : {}),
+			name: '_User',
+			fields: {
+				...defaultUserFields,
+			},
 			resolvers: {
-				mutations: {
-					signInWithProvider: {
-						type: 'Boolean',
-						args: {
-							input: {
-								provider: {
-									type: 'AuthenticationProvider',
-									required: true,
-								},
-								email: {
-									type: 'Email',
-									required: true,
-								},
-								verifiedEmail: {
-									type: 'Boolean',
-									required: true,
-								},
-								accessToken: {
-									type: 'String',
-									required: true,
-								},
-								refreshToken: {
-									type: 'String',
-								},
-							},
-						},
-						resolve: signInWithProviderResolver,
-					},
-				},
+				...defaultResolvers,
 			},
 		}
 	}

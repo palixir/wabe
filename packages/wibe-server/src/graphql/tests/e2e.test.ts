@@ -608,7 +608,7 @@ const graphql = {
 		}
 	`,
 	customMutation: gql`
-		mutation customMutation($input: customMutationInput!) {
+		mutation customMutation($input: CustomMutationInput!) {
 			customMutation(input: $input)
 		}
 	`,
