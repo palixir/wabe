@@ -130,7 +130,7 @@ const graphql = {
 	createManyUser: gql`
 		mutation createManyUser($input: UsersCreateInput!) {
 			createManyUser(input: $input) {
-				objects{
+				objects {
 					name
 					age
 				}
@@ -138,38 +138,34 @@ const graphql = {
 		}
 	`,
 	createOne_User: gql`
-        mutation createOne_User($input: _UserCreateInput!) {
-            createOne_User(input: $input) {
-                id
-            }
-        }
-    `,
+		mutation createOne_User($input: _UserCreateInput!) {
+			createOne_User(input: $input) {
+				id
+			}
+		}
+	`,
 	findMany_User: gql`
-        query findMany_User($where: _UserWhereInput) {
-            findMany_User(where: $where) {
-                objects {
-                    id
-                    email
-                    accessToken
-                    refreshToken
-                }
-            }
-        }
-    `,
+		query findMany_User($where: _UserWhereInput) {
+			findMany_User(where: $where) {
+				objects {
+					id
+					email
+					accessToken
+					refreshToken
+				}
+			}
+		}
+	`,
 	signInWithProvider: gql`
-        mutation signInWithProvider(
-            $input: SignInWithProviderInput!
-        ) {
-            signInWithProvider(
-                input: $input
-            )
-        }
-    `,
+		mutation signInWithProvider($input: SignInWithProviderInput!) {
+			signInWithProvider(input: $input)
+		}
+	`,
 	deleteOne_User: gql`
-        mutation deleteOne_User($input: _UserDeleteInput!) {
-            deleteOne_User(input: $input) {
-                id
-            }
-        }
-    `,
+		mutation deleteOne_User($input: _UserDeleteInput!) {
+			deleteOne_User(input: $input) {
+				id
+			}
+		}
+	`,
 }

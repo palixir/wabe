@@ -39,6 +39,7 @@ import {
 	getWhereInputType,
 	wrapGraphQLTypeIn,
 } from './utils'
+import { signInResolver } from '../graphql/resolvers/signIn'
 
 // This class is tested in e2e test in graphql folder
 export class WibeGraphQLSchema {
@@ -87,6 +88,21 @@ export class WibeGraphQLSchema {
 
 		const defaultResolvers: TypeResolver = {
 			mutations: {
+				signIn: {
+					type: 'Boolean',
+					args: {
+						input: {
+							email: {
+								type: 'Email',
+								required: true,
+							},
+							password: {
+								type: 'String',
+							},
+						},
+					},
+					resolve: signInResolver,
+				},
 				signInWithProvider: {
 					type: 'Boolean',
 					args: {
@@ -350,7 +366,10 @@ export class WibeGraphQLSchema {
 	createOutputObject({
 		object,
 		wibeClass,
-	}: { object: GraphQLObjectType; wibeClass: ClassInterface }) {
+	}: {
+		object: GraphQLObjectType
+		wibeClass: ClassInterface
+	}) {
 		return new GraphQLObjectType({
 			name: `${wibeClass.name}Output`,
 			fields: () => ({
