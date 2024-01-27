@@ -3,27 +3,27 @@ import { getGraphqlClient } from '../../utils/helper'
 import { gql } from 'graphql-request'
 
 export const signInWithProviderResolver = async (
-	root: any,
-	{
-		input: { email, verifiedEmail, provider, refreshToken, accessToken },
-	}: {
-		input: {
-			email: string
-			verifiedEmail: boolean
-			provider: string
-			accessToken: string
-			refreshToken: string
-		}
-	},
+    root: any,
+    {
+        input: { email, verifiedEmail, provider, refreshToken, accessToken },
+    }: {
+        input: {
+            email: string
+            verifiedEmail: boolean
+            provider: string
+            accessToken: string
+            refreshToken: string
+        }
+    },
 ) => {
-	if (!verifiedEmail) throw new Error('Email not verified')
+    if (!verifiedEmail) throw new Error('Email not verified')
 
-	const client = getGraphqlClient(WibeApp.config.port)
+    const client = getGraphqlClient(WibeApp.config.port)
 
-	const {
-		findMany_User: { objects },
-	} = await client.request<any>(
-		gql`
+    const {
+        findMany_User: { objects },
+    } = await client.request<any>(
+        gql`
 		query findMany_User($where: _UserWhereInput!) {
 			findMany_User(where: $where) {
 					objects {
@@ -32,26 +32,26 @@ export const signInWithProviderResolver = async (
 				}
 			}
 		`,
-		{ where: { email: { equalTo: email } } },
-	)
+        { where: { email: { equalTo: email } } },
+    )
 
-	if (objects.length === 1) {
-		await client.request<any>(gql`
+    if (objects.length === 1) {
+        await client.request<any>(gql`
 				mutation updateOne_User {
 					updateOne_User(input:{id : "${objects[0].id}", fields: { email: "${email}", verifiedEmail: ${verifiedEmail}, refreshToken: "${refreshToken}", accessToken: "${accessToken}" } }) {
 						id
 					}
 				}
 			`)
-	} else {
-		await client.request<any>(gql`
+    } else {
+        await client.request<any>(gql`
 				mutation createOne_User {
 					createOne_User(input:{fields: { email: "${email}", verifiedEmail: ${verifiedEmail}, provider: ${provider}, refreshToken: "${refreshToken}", accessToken: "${accessToken}"}}) {
 						id
 					}
 				}
 			`)
-	}
+    }
 
-	return true
+    return true
 }
