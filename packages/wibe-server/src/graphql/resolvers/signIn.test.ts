@@ -6,8 +6,11 @@ import {
     afterAll,
     beforeEach,
     afterEach,
+    spyOn,
 } from 'bun:test'
 import { GraphQLClient, gql } from 'graphql-request'
+import { Cookie } from 'elysia'
+import * as signInResolver from './signIn'
 import { WibeApp } from '../../server'
 import { getGraphqlClient, setupTests } from '../../utils/helper'
 
@@ -64,45 +67,97 @@ describe('SignIn', () => {
     })
 
     it('should be able to sign in', async () => {
-        const res = await client.request<any>(graphql.signIn, {
+        const spySetCookie = spyOn(Cookie.prototype, 'add')
+
+        const { signIn } = await client.request<any>(graphql.signIn, {
             input: {
                 email: 'email@test.fr',
                 password: 'passwordtest',
             },
         })
+
+        expect(signIn).toEqual(true)
+
+        // For the moment we dont' check the jwt sign of the access and refresh token
+        // the jwt is in the context and we can't access it
+
+        expect(spySetCookie).toHaveBeenCalledTimes(2)
+        expect(spySetCookie).toHaveBeenNthCalledWith(1, {
+            expires: expect.any(Date),
+            httpOnly: true,
+            path: '/',
+            value: expect.any(String),
+            secure: false,
+        })
+
+        expect(spySetCookie).toHaveBeenNthCalledWith(2, {
+            expires: expect.any(Date),
+            httpOnly: true,
+            path: '/',
+            value: expect.any(String),
+            secure: false,
+        })
+
+        spySetCookie.mockReset()
+    })
+
+    it('should not be able to sign in', async () => {
+        const spySetCookie = spyOn(Cookie.prototype, 'add')
+
+        expect(
+            client.request<any>(graphql.signIn, {
+                input: {
+                    email: 'email@test.fr',
+                    password: 'badpassword',
+                },
+            }),
+        ).rejects.toThrow('User not found')
+
+        expect(spySetCookie).toHaveBeenCalledTimes(0)
+
+        expect(
+            client.request<any>(graphql.signIn, {
+                input: {
+                    email: 'bademail@test.fr',
+                    password: 'passwordtest',
+                },
+            }),
+        ).rejects.toThrow('User not found')
+
+        expect(spySetCookie).toHaveBeenCalledTimes(0)
     })
 })
 
 const graphql = {
     signIn: gql`
-    mutation signIn($input: SignInInput!) {
-      signIn(input: $input)
-    }
-  `,
-    createOne_User: gql`
-    mutation createOne_User($input: _UserCreateInput!) {
-      createOne_User(input: $input) {
-        id
-      }
-    }
-  `,
-    findMany_User: gql`
-    query findMany_User($where: _UserWhereInput) {
-      findMany_User(where: $where) {
-        objects {
-          id
-          email
-          accessToken
-          refreshToken
+        mutation signIn($input: SignInInput!) {
+            signIn(input: $input)
         }
-      }
-    }
-  `,
+    `,
+    createOne_User: gql`
+        mutation createOne_User($input: _UserCreateInput!) {
+            createOne_User(input: $input) {
+                id
+            }
+        }
+    `,
+    findMany_User: gql`
+        query findMany_User($where: _UserWhereInput) {
+            findMany_User(where: $where) {
+                objects {
+                    id
+                    email
+                    accessToken
+                    refreshToken
+                }
+            }
+        }
+    `,
     deleteOne_User: gql`
-    mutation deleteOne_User($input: _UserDeleteInput!) {
-      deleteOne_User(input: $input) {
-        id
-      }
-    }
-  `,
+        mutation deleteOne_User($input: _UserDeleteInput!) {
+            deleteOne_User(input: $input) {
+                id
+            }
+        }
+    `,
 }

@@ -73,10 +73,8 @@ export class WibeGraphQLSchema {
                 type: 'Email',
                 required: true,
             },
-            // TODO: Make password not required (passwordless login)
             password: {
                 type: 'String',
-                required: true,
             },
             verifiedEmail: {
                 type: 'Boolean',

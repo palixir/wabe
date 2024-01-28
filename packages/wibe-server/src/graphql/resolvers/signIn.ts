@@ -17,12 +17,6 @@ export const signInResolver = async (
 ) => {
     const client = getGraphqlClient(WibeApp.config.port)
 
-    const hashedPassword = await Bun.password.hash(password, {
-        algorithm: 'argon2id', // OWASP recommandation
-        memoryCost: 20000, // OWASP recommands minimum 19MB
-        timeCost: 2, // OWASP recommands minimum 2 iterations
-    })
-
     const {
         findMany_User: { objects },
     } = await client.request<any>(
@@ -31,41 +25,59 @@ export const signInResolver = async (
                 findMany_User(where: $where) {
                     objects {
                         id
+                        password
                     }
                 }
             }
         `,
         {
             where: {
-                AND: [
-                    { email: { equalTo: email } },
-                    { password: { equalTo: hashedPassword } },
-                ],
+                email: { equalTo: email },
             },
         },
     )
 
-    if (objects.lenght === 0) throw new Error('User not found')
+    if (objects.length === 0) throw new Error('User not found')
+
+    const isPasswordEquals = await Bun.password.verify(
+        password,
+        objects[0].password,
+        'argon2id',
+    )
+
+    if (!isPasswordEquals) throw new Error('User not found')
 
     const wibeKey = WibeApp.config.wibeKey
 
-    console.log(
-        await context.jwt.sign({
-            aud: 'aud',
-            iss: 'iss',
-            sub: 'sub',
-            exp: 123,
-            iat: 123,
-            nbf: 123,
-            jti: 'jti',
-        }),
-    )
+    const fifteenMinutes = new Date(Date.now() + 1000 * 60 * 15)
+    const thirtyDays = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
+
+    const accessToken = await context.jwt.sign({
+        userId: objects[0].id,
+        iat: Date.now(),
+        exp: fifteenMinutes.getTime(),
+    })
+
+    const refreshToken = await context.jwt.sign({
+        userId: objects[0].id,
+        iat: Date.now(),
+        exp: thirtyDays.getTime(),
+    })
 
     context.cookie.access_token.add({
-        value: 'tata',
+        value: accessToken,
         httpOnly: true,
         path: '/',
-        expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+        expires: fifteenMinutes,
+        secure: Bun.env.NODE_ENV === 'production',
+    })
+
+    context.cookie.refresh_token.add({
+        value: refreshToken,
+        httpOnly: true,
+        path: '/',
+        expires: thirtyDays,
+        secure: Bun.env.NODE_ENV === 'production',
     })
 
     return true

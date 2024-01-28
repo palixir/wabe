@@ -10,6 +10,7 @@ describe('Server', () => {
 
         const port = await getPort()
         const wibe = new WibeApp({
+            wibeKey: 'test',
             database: {
                 type: DatabaseEnum.Mongo,
                 url: 'mongodb://127.0.0.1:27045',
