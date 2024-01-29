@@ -37,7 +37,7 @@ describe('GraphQL : Scalars', () => {
                 },
             )
 
-            expect(createManyUser.objects[0].birthDate).toEqual(
+            expect(createManyUser.edges[0].node.birthDate).toEqual(
                 now.toISOString(),
             )
         })
@@ -57,7 +57,7 @@ describe('GraphQL : Scalars', () => {
                 },
             )
 
-            expect(createManyUser.objects[0].birthDate).toEqual(
+            expect(createManyUser.edges[0].node.birthDate).toEqual(
                 now.toISOString(),
             )
         })
@@ -77,7 +77,7 @@ describe('GraphQL : Scalars', () => {
                 },
             )
 
-            expect(createManyUser.objects[0].birthDate).toEqual(
+            expect(createManyUser.edges[0].node.birthDate).toEqual(
                 now.toISOString(),
             )
         })
@@ -97,7 +97,7 @@ describe('GraphQL : Scalars', () => {
                 },
             )
 
-            const birthDate = new Date(createManyUser.objects[0].birthDate)
+            const birthDate = new Date(createManyUser.edges[0].node.birthDate)
             const date = new Date('2023-12-20')
 
             expect(date.getFullYear()).toEqual(birthDate.getFullYear())
@@ -150,7 +150,7 @@ describe('GraphQL : Scalars', () => {
                 },
             )
 
-            expect(createManyUser.objects[0].email).toEqual(
+            expect(createManyUser.edges[0].node.email).toEqual(
                 'jean.doe@gmail.com',
             )
 
@@ -241,11 +241,13 @@ const graphql = {
     findManyUser: gql`
         query findManyUser($where: UserWhereInput) {
             findManyUser(where: $where) {
-				objects {
-					id
-					name
-					birthDate
-					email
+				edges {
+					node{
+                        id
+                        name
+                        birthDate
+                        email
+                    }
 				}
             }
         }
@@ -253,10 +255,12 @@ const graphql = {
     createManyUser: gql`
         mutation createManyUser($input: UsersCreateInput!) {
             createManyUser(input: $input) {
-				objects {
-					name
-					birthDate
-					email
+				edges {
+					node{
+                        name
+                        birthDate
+                        email
+                    }
 				}
 			}
         }

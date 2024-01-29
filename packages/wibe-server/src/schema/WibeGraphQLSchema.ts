@@ -35,7 +35,7 @@ import {
 import {
     getDefaultInputType,
     getGraphqlType,
-    getOutputType,
+    getConnectionType,
     getUpdateInputType,
     getWhereInputType,
     wrapGraphQLTypeIn,
@@ -383,10 +383,17 @@ export class WibeGraphQLSchema {
         object: GraphQLObjectType
         wibeClass: ClassInterface
     }) {
-        return new GraphQLObjectType({
-            name: `${wibeClass.name}Output`,
+        const edges = new GraphQLObjectType({
+            name: `${wibeClass.name}Edge`,
             fields: () => ({
-                objects: { type: new GraphQLList(object) },
+                node: { type: object },
+            }),
+        })
+
+        return new GraphQLObjectType({
+            name: `${wibeClass.name}Connection`,
+            fields: () => ({
+                edges: { type: new GraphQLList(edges) },
             }),
         })
     }
@@ -548,7 +555,9 @@ export class WibeGraphQLSchema {
                     queryForOneObject(root, args, ctx, info, className),
             },
             [`findMany${className}`]: {
-                type: new GraphQLNonNull(getOutputType({ object, allObjects })),
+                type: new GraphQLNonNull(
+                    getConnectionType({ object, allObjects }),
+                ),
                 args: {
                     where: { type: whereInputType },
                     offset: { type: GraphQLInt },
@@ -633,7 +642,9 @@ export class WibeGraphQLSchema {
                     mutationToCreateObject(root, args, ctx, info, className),
             },
             [`createMany${className}`]: {
-                type: new GraphQLNonNull(getOutputType({ object, allObjects })),
+                type: new GraphQLNonNull(
+                    getConnectionType({ object, allObjects }),
+                ),
                 args: { input: { type: createsInputType } },
                 resolve: (root, args, ctx, info) =>
                     mutationToCreateMultipleObjects(
@@ -651,7 +662,9 @@ export class WibeGraphQLSchema {
                     mutationToUpdateObject(root, args, ctx, info, className),
             },
             [`updateMany${className}`]: {
-                type: new GraphQLNonNull(getOutputType({ object, allObjects })),
+                type: new GraphQLNonNull(
+                    getConnectionType({ object, allObjects }),
+                ),
                 args: { input: { type: updatesInputType } },
                 resolve: (root, args, ctx, info) =>
                     mutationToUpdateMultipleObjects(
@@ -673,7 +686,9 @@ export class WibeGraphQLSchema {
                     mutationToDeleteObject(root, args, ctx, info, className),
             },
             [`deleteMany${className}`]: {
-                type: new GraphQLNonNull(getOutputType({ object, allObjects })),
+                type: new GraphQLNonNull(
+                    getConnectionType({ object, allObjects }),
+                ),
                 args: { input: { type: deletesInputType } },
                 resolve: (root, args, ctx, info) =>
                     mutationToDeleteMultipleObjects(

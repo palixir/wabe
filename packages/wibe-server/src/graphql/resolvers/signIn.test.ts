@@ -57,9 +57,9 @@ describe('SignIn', () => {
         )
 
         await Promise.all(
-            findMany_User.objects.map((user: any) =>
+            findMany_User.edges.map(({ node }: { node: any }) =>
                 client.request<any>(graphql.deleteOne_User, {
-                    input: { id: user.id },
+                    input: { id: node.id },
                 }),
             ),
         )
@@ -76,7 +76,7 @@ describe('SignIn', () => {
         })
 
         const {
-            findMany_User: { objects },
+            findMany_User: { edges },
         } = await client.request<any>(graphql.findMany_User, {
             where: {
                 email: { equalTo: 'email@test.fr' },
@@ -85,10 +85,10 @@ describe('SignIn', () => {
 
         expect(signIn).toEqual(true)
 
-        expect(objects.length).toEqual(1)
-        expect(objects[0].email).toEqual('email@test.fr')
-        expect(objects[0].accessToken).toEqual(expect.any(String))
-        expect(objects[0].refreshToken).toEqual(expect.any(String))
+        expect(edges.length).toEqual(1)
+        expect(edges[0].node.email).toEqual('email@test.fr')
+        expect(edges[0].node.accessToken).toEqual(expect.any(String))
+        expect(edges[0].node.refreshToken).toEqual(expect.any(String))
 
         // For the moment we dont' check the jwt sign of the access and refresh token
         // the jwt is in the context and we can't access it
@@ -156,11 +156,13 @@ const graphql = {
     findMany_User: gql`
         query findMany_User($where: _UserWhereInput) {
             findMany_User(where: $where) {
-                objects {
+                edges {
+                    node{
                     id
                     email
                     accessToken
                     refreshToken
+                    }
                 }
             }
         }

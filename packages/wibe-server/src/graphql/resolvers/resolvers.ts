@@ -4,17 +4,18 @@ import { WibeApp } from '../..'
 const getFieldsFromInfo = (info: GraphQLResolveInfo) => {
     const firstNode = info.fieldNodes[0]
 
-    const objectsNode = firstNode.selectionSet?.selections.find(
+    const edgesNode = firstNode.selectionSet?.selections.find(
         // @ts-expect-error
-        (selection) => selection.name.value === 'objects',
+        (selection) => selection.name.value === 'edges',
     )
 
-    if (objectsNode)
+    if (edgesNode) {
         // @ts-expect-error
-        return firstNode.selectionSet?.selections[0].selectionSet?.selections.map(
+        return firstNode.selectionSet?.selections[0].selectionSet?.selections[0].selectionSet.selections.map(
             // @ts-expect-error
             (selection) => selection.name.value,
         )
+    }
 
     return firstNode.selectionSet?.selections.map(
         // @ts-expect-error
@@ -51,14 +52,18 @@ export const queryForMultipleObject = async (
 
     if (!fields) throw new Error('No fields provided')
 
+    const objects = await WibeApp.databaseController.getObjects<any>({
+        className,
+        where,
+        fields,
+        offset,
+        limit,
+    })
+
     return {
-        objects: await WibeApp.databaseController.getObjects<any>({
-            className,
-            where,
-            fields,
-            offset,
-            limit,
-        }),
+        edges: objects.map((object: any) => ({
+            node: object,
+        })),
     }
 }
 
@@ -91,14 +96,16 @@ export const mutationToCreateMultipleObjects = async (
 
     if (!fields) throw new Error('No fields provided')
 
+    const objects = await WibeApp.databaseController.createObjects<any>({
+        className,
+        data: args.input?.fields,
+        fields,
+        offset: args.input?.offset,
+        limit: args.input?.limit,
+    })
+
     return {
-        objects: await WibeApp.databaseController.createObjects<any>({
-            className,
-            data: args.input?.fields,
-            fields,
-            offset: args.input?.offset,
-            limit: args.input?.limit,
-        }),
+        edges: objects.map((object: any) => ({ node: object })),
     }
 }
 
@@ -132,19 +139,21 @@ export const mutationToUpdateMultipleObjects = async (
 
     if (!fields) throw new Error('No fields provided')
 
+    const objects = await WibeApp.databaseController.updateObjects<any>({
+        className,
+        where: args.input?.where,
+        data: args.input?.fields,
+        fields,
+        offset: args.input?.offset,
+        limit: args.input?.limit,
+    })
+
     return {
-        objects: await WibeApp.databaseController.updateObjects<any>({
-            className,
-            where: args.input?.where,
-            data: args.input?.fields,
-            fields,
-            offset: args.input?.offset,
-            limit: args.input?.limit,
-        }),
+        edges: objects.map((object: any) => ({ node: object })),
     }
 }
 
-export const mutationToDeleteObject = (
+export const mutationToDeleteObject = async (
     _: any,
     args: any,
     ___: any,
@@ -173,13 +182,15 @@ export const mutationToDeleteMultipleObjects = async (
 
     if (!fields) throw new Error('No fields provided')
 
+    const objects = await WibeApp.databaseController.deleteObjects<any>({
+        className,
+        where: args.input?.where,
+        fields,
+        offset: args.input?.offset,
+        limit: args.input?.limit,
+    })
+
     return {
-        objects: await WibeApp.databaseController.deleteObjects<any>({
-            className,
-            where: args.input?.where,
-            fields,
-            offset: args.input?.offset,
-            limit: args.input?.limit,
-        }),
+        edges: objects.map((object: any) => ({ node: object })),
     }
 }

@@ -26,9 +26,9 @@ describe('signInWithProvider', () => {
             {},
         )
         await Promise.all(
-            findMany_User.objects.map((user: any) =>
+            findMany_User.edges.map(({ node }: { node: any }) =>
                 client.request<any>(graphql.deleteOne_User, {
-                    input: { id: user.id },
+                    input: { id: node.id },
                 }),
             ),
         )
@@ -51,7 +51,7 @@ describe('signInWithProvider', () => {
         expect(signInWithProvider).toEqual(true)
 
         const {
-            findMany_User: { objects },
+            findMany_User: { edges },
         } = await client.request<any>(graphql.findMany_User, {
             where: {
                 email: {
@@ -60,10 +60,10 @@ describe('signInWithProvider', () => {
             },
         })
 
-        expect(objects.length).toEqual(1)
-        expect(objects[0].email).toEqual('email@test.com')
-        expect(objects[0].accessToken).toEqual('accessToken')
-        expect(objects[0].refreshToken).toEqual('refreshToken')
+        expect(edges.length).toEqual(1)
+        expect(edges[0].node.email).toEqual('email@test.com')
+        expect(edges[0].node.accessToken).toEqual('accessToken')
+        expect(edges[0].node.refreshToken).toEqual('refreshToken')
     })
 
     it('should update the authentication field of an _User if the _User already exist', async () => {
@@ -96,7 +96,7 @@ describe('signInWithProvider', () => {
         expect(signInWithProvider2).toEqual(true)
 
         const {
-            findMany_User: { objects },
+            findMany_User: { edges },
         } = await client.request<any>(graphql.findMany_User, {
             where: {
                 email: {
@@ -105,10 +105,10 @@ describe('signInWithProvider', () => {
             },
         })
 
-        expect(objects.length).toEqual(1)
-        expect(objects[0].email).toEqual('email@test.com')
-        expect(objects[0].accessToken).toEqual('accessToken2')
-        expect(objects[0].refreshToken).toEqual('refreshToken2')
+        expect(edges.length).toEqual(1)
+        expect(edges[0].node.email).toEqual('email@test.com')
+        expect(edges[0].node.accessToken).toEqual('accessToken2')
+        expect(edges[0].node.refreshToken).toEqual('refreshToken2')
     })
 
     it('should throw an error if the email is not verified', async () => {
@@ -130,9 +130,10 @@ const graphql = {
     createManyUser: gql`
 		mutation createManyUser($input: UsersCreateInput!) {
 			createManyUser(input: $input) {
-				objects {
-					name
+				edges {
+				node{	name
 					age
+                }
 				}
 			}
 		}
@@ -147,11 +148,12 @@ const graphql = {
     findMany_User: gql`
 		query findMany_User($where: _UserWhereInput) {
 			findMany_User(where: $where) {
-				objects {
-					id
+				edges {
+					node{id
 					email
 					accessToken
 					refreshToken
+                    }
 				}
 			}
 		}

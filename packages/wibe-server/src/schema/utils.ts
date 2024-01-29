@@ -336,16 +336,16 @@ export const getWhereInputType = ({
     return whereInputType
 }
 
-export const getOutputType = ({
+export const getConnectionType = ({
     allObjects,
     object,
 }: { allObjects: GraphQLObjectType[]; object: GraphQLObjectType }) => {
     // We search in all object the corresponding output object
-    const outputObject = allObjects.find(
-        (o) => o.name === `${object.name}Output`,
+    const connection = allObjects.find(
+        (o) => o.name === `${object.name}Connection`,
     )
-    if (!outputObject)
-        throw new Error(`Output type not found for ${object.name}`)
+    if (!connection)
+        throw new Error(`Connection type not found for ${object.name}`)
 
-    return outputObject
+    return connection
 }

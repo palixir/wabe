@@ -3,7 +3,7 @@ import { getGraphqlClient } from '../../utils/helper'
 import { gql } from 'graphql-request'
 
 export const signInWithProviderResolver = async (
-    root: any,
+    _: any,
     {
         input: { email, verifiedEmail, provider, refreshToken, accessToken },
     }: {
@@ -21,13 +21,15 @@ export const signInWithProviderResolver = async (
     const client = getGraphqlClient(WibeApp.config.port)
 
     const {
-        findMany_User: { objects },
+        findMany_User: { edges },
     } = await client.request<any>(
         gql`
 		query findMany_User($where: _UserWhereInput!) {
 			findMany_User(where: $where) {
-					objects {
+					edges {
+                        node{
 						id
+                        }
 					}
 				}
 			}
@@ -35,10 +37,10 @@ export const signInWithProviderResolver = async (
         { where: { email: { equalTo: email } } },
     )
 
-    if (objects.length === 1) {
+    if (edges.length === 1) {
         await client.request<any>(gql`
 				mutation updateOne_User {
-					updateOne_User(input:{id : "${objects[0].id}", fields: { email: "${email}", verifiedEmail: ${verifiedEmail}, refreshToken: "${refreshToken}", accessToken: "${accessToken}" } }) {
+					updateOne_User(input:{id : "${edges[0].node.id}", fields: { email: "${email}", verifiedEmail: ${verifiedEmail}, refreshToken: "${refreshToken}", accessToken: "${accessToken}" } }) {
 						id
 					}
 				}

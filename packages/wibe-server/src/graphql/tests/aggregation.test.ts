@@ -7,12 +7,14 @@ const graphql = {
     findManyUser: gql`
 		query findManyUser($where: UserWhereInput) {
 			findManyUser(where: $where) {
-				objects{
-					id
-					name
-					age
-					isAdmin
-					floatValue
+				edges{
+                    node{
+    					id
+                        name
+                        age
+                        isAdmin
+                        floatValue
+                    }
 				}
 			}
 		}
@@ -20,12 +22,14 @@ const graphql = {
     createManyUser: gql`
 		mutation createManyUser($input: UsersCreateInput!) {
 			createManyUser(input: $input) {
-				objects{
-					id
-					name
-					age
-					isAdmin
-					floatValue
+				edges{
+					node{
+                        id
+                        name
+                        age
+                        isAdmin
+                        floatValue
+                    }
 				}
 			}
 		}
@@ -84,13 +88,15 @@ describe('GraphQL : aggregation', () => {
             }),
         ).toEqual({
             findManyUser: {
-                objects: [
+                edges: [
                     {
-                        id: expect.any(String),
-                        name: 'Lucas',
-                        age: 20,
-                        isAdmin: true,
-                        floatValue: 1.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Lucas',
+                            age: 20,
+                            isAdmin: true,
+                            floatValue: 1.5,
+                        },
                     },
                 ],
             },
@@ -104,13 +110,15 @@ describe('GraphQL : aggregation', () => {
             }),
         ).toEqual({
             findManyUser: {
-                objects: [
+                edges: [
                     {
-                        id: expect.any(String),
-                        name: 'Jeanne',
-                        age: 18,
-                        isAdmin: false,
-                        floatValue: 2.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Jeanne',
+                            age: 18,
+                            isAdmin: false,
+                            floatValue: 2.5,
+                        },
                     },
                 ],
             },
@@ -124,13 +132,15 @@ describe('GraphQL : aggregation', () => {
             }),
         ).toEqual({
             findManyUser: {
-                objects: [
+                edges: [
                     {
-                        id: expect.any(String),
-                        name: 'Lucas',
-                        age: 20,
-                        isAdmin: true,
-                        floatValue: 1.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Lucas',
+                            age: 20,
+                            isAdmin: true,
+                            floatValue: 1.5,
+                        },
                     },
                 ],
             },
@@ -144,13 +154,15 @@ describe('GraphQL : aggregation', () => {
             }),
         ).toEqual({
             findManyUser: {
-                objects: [
+                edges: [
                     {
-                        id: expect.any(String),
-                        name: 'Jeanne',
-                        age: 18,
-                        isAdmin: false,
-                        floatValue: 2.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Jeanne',
+                            age: 18,
+                            isAdmin: false,
+                            floatValue: 2.5,
+                        },
                     },
                 ],
             },
@@ -163,7 +175,7 @@ describe('GraphQL : aggregation', () => {
                 },
             }),
         ).toEqual({
-            findManyUser: { objects: [] },
+            findManyUser: { edges: [] },
         })
 
         expect(
@@ -173,7 +185,7 @@ describe('GraphQL : aggregation', () => {
                 },
             }),
         ).toEqual({
-            findManyUser: { objects: [] },
+            findManyUser: { edges: [] },
         })
     })
 
@@ -186,13 +198,15 @@ describe('GraphQL : aggregation', () => {
             }),
         ).toEqual({
             findManyUser: {
-                objects: [
+                edges: [
                     {
-                        id: expect.any(String),
-                        name: 'Lucas',
-                        age: 20,
-                        isAdmin: true,
-                        floatValue: 1.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Lucas',
+                            age: 20,
+                            isAdmin: true,
+                            floatValue: 1.5,
+                        },
                     },
                 ],
             },
@@ -206,13 +220,15 @@ describe('GraphQL : aggregation', () => {
             }),
         ).toEqual({
             findManyUser: {
-                objects: [
+                edges: [
                     {
-                        id: expect.any(String),
-                        name: 'Jeanne',
-                        age: 18,
-                        isAdmin: false,
-                        floatValue: 2.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Jeanne',
+                            age: 18,
+                            isAdmin: false,
+                            floatValue: 2.5,
+                        },
                     },
                 ],
             },
@@ -226,13 +242,15 @@ describe('GraphQL : aggregation', () => {
             }),
         ).toEqual({
             findManyUser: {
-                objects: [
+                edges: [
                     {
-                        id: expect.any(String),
-                        name: 'Lucas',
-                        age: 20,
-                        isAdmin: true,
-                        floatValue: 1.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Lucas',
+                            age: 20,
+                            isAdmin: true,
+                            floatValue: 1.5,
+                        },
                     },
                 ],
             },
@@ -246,13 +264,15 @@ describe('GraphQL : aggregation', () => {
             }),
         ).toEqual({
             findManyUser: {
-                objects: [
+                edges: [
                     {
-                        id: expect.any(String),
-                        name: 'Lucas',
-                        age: 20,
-                        isAdmin: true,
-                        floatValue: 1.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Lucas',
+                            age: 20,
+                            isAdmin: true,
+                            floatValue: 1.5,
+                        },
                     },
                 ],
             },
@@ -266,13 +286,15 @@ describe('GraphQL : aggregation', () => {
             }),
         ).toEqual({
             findManyUser: {
-                objects: [
+                edges: [
                     {
-                        id: expect.any(String),
-                        name: 'Jeanne',
-                        age: 18,
-                        isAdmin: false,
-                        floatValue: 2.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Jeanne',
+                            age: 18,
+                            isAdmin: false,
+                            floatValue: 2.5,
+                        },
                     },
                 ],
             },
@@ -286,20 +308,24 @@ describe('GraphQL : aggregation', () => {
             }),
         ).toEqual({
             findManyUser: {
-                objects: [
+                edges: [
                     {
-                        id: expect.any(String),
-                        name: 'Lucas',
-                        age: 20,
-                        isAdmin: true,
-                        floatValue: 1.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Lucas',
+                            age: 20,
+                            isAdmin: true,
+                            floatValue: 1.5,
+                        },
                     },
                     {
-                        id: expect.any(String),
-                        name: 'Jeanne',
-                        age: 18,
-                        isAdmin: false,
-                        floatValue: 2.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Jeanne',
+                            age: 18,
+                            isAdmin: false,
+                            floatValue: 2.5,
+                        },
                     },
                 ],
             },
@@ -313,13 +339,15 @@ describe('GraphQL : aggregation', () => {
             }),
         ).toEqual({
             findManyUser: {
-                objects: [
+                edges: [
                     {
-                        id: expect.any(String),
-                        name: 'Lucas',
-                        age: 20,
-                        isAdmin: true,
-                        floatValue: 1.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Lucas',
+                            age: 20,
+                            isAdmin: true,
+                            floatValue: 1.5,
+                        },
                     },
                 ],
             },
@@ -333,13 +361,15 @@ describe('GraphQL : aggregation', () => {
             }),
         ).toEqual({
             findManyUser: {
-                objects: [
+                edges: [
                     {
-                        id: expect.any(String),
-                        name: 'Jeanne',
-                        age: 18,
-                        isAdmin: false,
-                        floatValue: 2.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Jeanne',
+                            age: 18,
+                            isAdmin: false,
+                            floatValue: 2.5,
+                        },
                     },
                 ],
             },
@@ -355,13 +385,15 @@ describe('GraphQL : aggregation', () => {
             }),
         ).toEqual({
             findManyUser: {
-                objects: [
+                edges: [
                     {
-                        id: expect.any(String),
-                        name: 'Lucas',
-                        age: 20,
-                        isAdmin: true,
-                        floatValue: 1.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Lucas',
+                            age: 20,
+                            isAdmin: true,
+                            floatValue: 1.5,
+                        },
                     },
                 ],
             },
@@ -375,13 +407,15 @@ describe('GraphQL : aggregation', () => {
             }),
         ).toEqual({
             findManyUser: {
-                objects: [
+                edges: [
                     {
-                        id: expect.any(String),
-                        name: 'Jeanne',
-                        age: 18,
-                        isAdmin: false,
-                        floatValue: 2.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Jeanne',
+                            age: 18,
+                            isAdmin: false,
+                            floatValue: 2.5,
+                        },
                     },
                 ],
             },
@@ -395,13 +429,15 @@ describe('GraphQL : aggregation', () => {
             }),
         ).toEqual({
             findManyUser: {
-                objects: [
+                edges: [
                     {
-                        id: expect.any(String),
-                        name: 'Lucas',
-                        age: 20,
-                        isAdmin: true,
-                        floatValue: 1.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Lucas',
+                            age: 20,
+                            isAdmin: true,
+                            floatValue: 1.5,
+                        },
                     },
                 ],
             },
@@ -415,13 +451,15 @@ describe('GraphQL : aggregation', () => {
             }),
         ).toEqual({
             findManyUser: {
-                objects: [
+                edges: [
                     {
-                        id: expect.any(String),
-                        name: 'Jeanne',
-                        age: 18,
-                        isAdmin: false,
-                        floatValue: 2.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Jeanne',
+                            age: 18,
+                            isAdmin: false,
+                            floatValue: 2.5,
+                        },
                     },
                 ],
             },
@@ -437,13 +475,15 @@ describe('GraphQL : aggregation', () => {
             }),
         ).toEqual({
             findManyUser: {
-                objects: [
+                edges: [
                     {
-                        id: expect.any(String),
-                        name: 'Lucas',
-                        age: 20,
-                        isAdmin: true,
-                        floatValue: 1.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Lucas',
+                            age: 20,
+                            isAdmin: true,
+                            floatValue: 1.5,
+                        },
                     },
                 ],
             },
@@ -457,13 +497,15 @@ describe('GraphQL : aggregation', () => {
             }),
         ).toEqual({
             findManyUser: {
-                objects: [
+                edges: [
                     {
-                        id: expect.any(String),
-                        name: 'Jeanne',
-                        age: 18,
-                        isAdmin: false,
-                        floatValue: 2.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Jeanne',
+                            age: 18,
+                            isAdmin: false,
+                            floatValue: 2.5,
+                        },
                     },
                 ],
             },
@@ -477,13 +519,15 @@ describe('GraphQL : aggregation', () => {
             }),
         ).toEqual({
             findManyUser: {
-                objects: [
+                edges: [
                     {
-                        id: expect.any(String),
-                        name: 'Jeanne',
-                        age: 18,
-                        isAdmin: false,
-                        floatValue: 2.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Jeanne',
+                            age: 18,
+                            isAdmin: false,
+                            floatValue: 2.5,
+                        },
                     },
                 ],
             },
@@ -497,20 +541,24 @@ describe('GraphQL : aggregation', () => {
             }),
         ).toEqual({
             findManyUser: {
-                objects: [
+                edges: [
                     {
-                        id: expect.any(String),
-                        name: 'Lucas',
-                        age: 20,
-                        isAdmin: true,
-                        floatValue: 1.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Lucas',
+                            age: 20,
+                            isAdmin: true,
+                            floatValue: 1.5,
+                        },
                     },
                     {
-                        id: expect.any(String),
-                        name: 'Jeanne',
-                        age: 18,
-                        isAdmin: false,
-                        floatValue: 2.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Jeanne',
+                            age: 18,
+                            isAdmin: false,
+                            floatValue: 2.5,
+                        },
                     },
                 ],
             },
@@ -524,13 +572,15 @@ describe('GraphQL : aggregation', () => {
             }),
         ).toEqual({
             findManyUser: {
-                objects: [
+                edges: [
                     {
-                        id: expect.any(String),
-                        name: 'Lucas',
-                        age: 20,
-                        isAdmin: true,
-                        floatValue: 1.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Lucas',
+                            age: 20,
+                            isAdmin: true,
+                            floatValue: 1.5,
+                        },
                     },
                 ],
             },
@@ -544,20 +594,24 @@ describe('GraphQL : aggregation', () => {
             }),
         ).toEqual({
             findManyUser: {
-                objects: [
+                edges: [
                     {
-                        id: expect.any(String),
-                        name: 'Lucas',
-                        age: 20,
-                        isAdmin: true,
-                        floatValue: 1.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Lucas',
+                            age: 20,
+                            isAdmin: true,
+                            floatValue: 1.5,
+                        },
                     },
                     {
-                        id: expect.any(String),
-                        name: 'Jeanne',
-                        age: 18,
-                        isAdmin: false,
-                        floatValue: 2.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Jeanne',
+                            age: 18,
+                            isAdmin: false,
+                            floatValue: 2.5,
+                        },
                     },
                 ],
             },
@@ -571,13 +625,15 @@ describe('GraphQL : aggregation', () => {
             }),
         ).toEqual({
             findManyUser: {
-                objects: [
+                edges: [
                     {
-                        id: expect.any(String),
-                        name: 'Lucas',
-                        age: 20,
-                        isAdmin: true,
-                        floatValue: 1.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Lucas',
+                            age: 20,
+                            isAdmin: true,
+                            floatValue: 1.5,
+                        },
                     },
                 ],
             },
@@ -591,13 +647,15 @@ describe('GraphQL : aggregation', () => {
             }),
         ).toEqual({
             findManyUser: {
-                objects: [
+                edges: [
                     {
-                        id: expect.any(String),
-                        name: 'Jeanne',
-                        age: 18,
-                        isAdmin: false,
-                        floatValue: 2.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Jeanne',
+                            age: 18,
+                            isAdmin: false,
+                            floatValue: 2.5,
+                        },
                     },
                 ],
             },
@@ -613,13 +671,15 @@ describe('GraphQL : aggregation', () => {
             }),
         ).toEqual({
             findManyUser: {
-                objects: [
+                edges: [
                     {
-                        id: expect.any(String),
-                        name: 'Lucas',
-                        age: 20,
-                        isAdmin: true,
-                        floatValue: 1.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Lucas',
+                            age: 20,
+                            isAdmin: true,
+                            floatValue: 1.5,
+                        },
                     },
                 ],
             },
@@ -633,13 +693,15 @@ describe('GraphQL : aggregation', () => {
             }),
         ).toEqual({
             findManyUser: {
-                objects: [
+                edges: [
                     {
-                        id: expect.any(String),
-                        name: 'Jeanne',
-                        age: 18,
-                        isAdmin: false,
-                        floatValue: 2.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Jeanne',
+                            age: 18,
+                            isAdmin: false,
+                            floatValue: 2.5,
+                        },
                     },
                 ],
             },
@@ -653,13 +715,15 @@ describe('GraphQL : aggregation', () => {
             }),
         ).toEqual({
             findManyUser: {
-                objects: [
+                edges: [
                     {
-                        id: expect.any(String),
-                        name: 'Lucas',
-                        age: 20,
-                        isAdmin: true,
-                        floatValue: 1.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Lucas',
+                            age: 20,
+                            isAdmin: true,
+                            floatValue: 1.5,
+                        },
                     },
                 ],
             },
@@ -673,13 +737,15 @@ describe('GraphQL : aggregation', () => {
             }),
         ).toEqual({
             findManyUser: {
-                objects: [
+                edges: [
                     {
-                        id: expect.any(String),
-                        name: 'Jeanne',
-                        age: 18,
-                        isAdmin: false,
-                        floatValue: 2.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Jeanne',
+                            age: 18,
+                            isAdmin: false,
+                            floatValue: 2.5,
+                        },
                     },
                 ],
             },
@@ -695,13 +761,15 @@ describe('GraphQL : aggregation', () => {
             }),
         ).toEqual({
             findManyUser: {
-                objects: [
+                edges: [
                     {
-                        id: expect.any(String),
-                        name: 'Lucas',
-                        age: 20,
-                        isAdmin: true,
-                        floatValue: 1.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Lucas',
+                            age: 20,
+                            isAdmin: true,
+                            floatValue: 1.5,
+                        },
                     },
                 ],
             },
@@ -715,13 +783,15 @@ describe('GraphQL : aggregation', () => {
             }),
         ).toEqual({
             findManyUser: {
-                objects: [
+                edges: [
                     {
-                        id: expect.any(String),
-                        name: 'Jeanne',
-                        age: 18,
-                        isAdmin: false,
-                        floatValue: 2.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Jeanne',
+                            age: 18,
+                            isAdmin: false,
+                            floatValue: 2.5,
+                        },
                     },
                 ],
             },
@@ -735,13 +805,15 @@ describe('GraphQL : aggregation', () => {
             }),
         ).toEqual({
             findManyUser: {
-                objects: [
+                edges: [
                     {
-                        id: expect.any(String),
-                        name: 'Lucas',
-                        age: 20,
-                        isAdmin: true,
-                        floatValue: 1.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Lucas',
+                            age: 20,
+                            isAdmin: true,
+                            floatValue: 1.5,
+                        },
                     },
                 ],
             },
@@ -755,20 +827,24 @@ describe('GraphQL : aggregation', () => {
             }),
         ).toEqual({
             findManyUser: {
-                objects: [
+                edges: [
                     {
-                        id: expect.any(String),
-                        name: 'Lucas',
-                        age: 20,
-                        isAdmin: true,
-                        floatValue: 1.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Lucas',
+                            age: 20,
+                            isAdmin: true,
+                            floatValue: 1.5,
+                        },
                     },
                     {
-                        id: expect.any(String),
-                        name: 'Jeanne',
-                        age: 18,
-                        isAdmin: false,
-                        floatValue: 2.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Jeanne',
+                            age: 18,
+                            isAdmin: false,
+                            floatValue: 2.5,
+                        },
                     },
                 ],
             },
@@ -782,13 +858,15 @@ describe('GraphQL : aggregation', () => {
             }),
         ).toEqual({
             findManyUser: {
-                objects: [
+                edges: [
                     {
-                        id: expect.any(String),
-                        name: 'Jeanne',
-                        age: 18,
-                        isAdmin: false,
-                        floatValue: 2.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Jeanne',
+                            age: 18,
+                            isAdmin: false,
+                            floatValue: 2.5,
+                        },
                     },
                 ],
             },
@@ -802,13 +880,15 @@ describe('GraphQL : aggregation', () => {
             }),
         ).toEqual({
             findManyUser: {
-                objects: [
+                edges: [
                     {
-                        id: expect.any(String),
-                        name: 'Jeanne',
-                        age: 18,
-                        isAdmin: false,
-                        floatValue: 2.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Jeanne',
+                            age: 18,
+                            isAdmin: false,
+                            floatValue: 2.5,
+                        },
                     },
                 ],
             },
@@ -822,13 +902,15 @@ describe('GraphQL : aggregation', () => {
             }),
         ).toEqual({
             findManyUser: {
-                objects: [
+                edges: [
                     {
-                        id: expect.any(String),
-                        name: 'Lucas',
-                        age: 20,
-                        isAdmin: true,
-                        floatValue: 1.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Lucas',
+                            age: 20,
+                            isAdmin: true,
+                            floatValue: 1.5,
+                        },
                     },
                 ],
             },
@@ -842,13 +924,15 @@ describe('GraphQL : aggregation', () => {
             }),
         ).toEqual({
             findManyUser: {
-                objects: [
+                edges: [
                     {
-                        id: expect.any(String),
-                        name: 'Jeanne',
-                        age: 18,
-                        isAdmin: false,
-                        floatValue: 2.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Jeanne',
+                            age: 18,
+                            isAdmin: false,
+                            floatValue: 2.5,
+                        },
                     },
                 ],
             },
@@ -864,13 +948,15 @@ describe('GraphQL : aggregation', () => {
             }),
         ).toEqual({
             findManyUser: {
-                objects: [
+                edges: [
                     {
-                        id: expect.any(String),
-                        name: 'Jeanne',
-                        age: 18,
-                        isAdmin: false,
-                        floatValue: 2.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Jeanne',
+                            age: 18,
+                            isAdmin: false,
+                            floatValue: 2.5,
+                        },
                     },
                 ],
             },
@@ -884,13 +970,15 @@ describe('GraphQL : aggregation', () => {
             }),
         ).toEqual({
             findManyUser: {
-                objects: [
+                edges: [
                     {
-                        id: expect.any(String),
-                        name: 'Lucas',
-                        age: 20,
-                        isAdmin: true,
-                        floatValue: 1.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Lucas',
+                            age: 20,
+                            isAdmin: true,
+                            floatValue: 1.5,
+                        },
                     },
                 ],
             },
@@ -904,13 +992,15 @@ describe('GraphQL : aggregation', () => {
             }),
         ).toEqual({
             findManyUser: {
-                objects: [
+                edges: [
                     {
-                        id: expect.any(String),
-                        name: 'Lucas',
-                        age: 20,
-                        isAdmin: true,
-                        floatValue: 1.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Lucas',
+                            age: 20,
+                            isAdmin: true,
+                            floatValue: 1.5,
+                        },
                     },
                 ],
             },
@@ -924,13 +1014,15 @@ describe('GraphQL : aggregation', () => {
             }),
         ).toEqual({
             findManyUser: {
-                objects: [
+                edges: [
                     {
-                        id: expect.any(String),
-                        name: 'Jeanne',
-                        age: 18,
-                        isAdmin: false,
-                        floatValue: 2.5,
+                        node: {
+                            id: expect.any(String),
+                            name: 'Jeanne',
+                            age: 18,
+                            isAdmin: false,
+                            floatValue: 2.5,
+                        },
                     },
                 ],
             },
@@ -947,20 +1039,24 @@ describe('GraphQL : aggregation', () => {
             },
         )
 
-        expect(findManyUser.objects).toEqual([
+        expect(findManyUser.edges).toEqual([
             {
-                id: expect.any(String),
-                name: 'Lucas',
-                age: 20,
-                isAdmin: true,
-                floatValue: 1.5,
+                node: {
+                    id: expect.any(String),
+                    name: 'Lucas',
+                    age: 20,
+                    isAdmin: true,
+                    floatValue: 1.5,
+                },
             },
             {
-                id: expect.any(String),
-                name: 'Jeanne',
-                age: 18,
-                isAdmin: false,
-                floatValue: 2.5,
+                node: {
+                    id: expect.any(String),
+                    name: 'Jeanne',
+                    age: 18,
+                    isAdmin: false,
+                    floatValue: 2.5,
+                },
             },
         ])
 
@@ -973,13 +1069,15 @@ describe('GraphQL : aggregation', () => {
             },
         )
 
-        expect(users2.objects).toEqual([
+        expect(users2.edges).toEqual([
             {
-                id: expect.any(String),
-                name: 'Lucas',
-                age: 20,
-                isAdmin: true,
-                floatValue: 1.5,
+                node: {
+                    id: expect.any(String),
+                    name: 'Lucas',
+                    age: 20,
+                    isAdmin: true,
+                    floatValue: 1.5,
+                },
             },
         ])
     })
@@ -994,7 +1092,7 @@ describe('GraphQL : aggregation', () => {
             },
         )
 
-        expect(findManyUser.objects).toEqual([])
+        expect(findManyUser.edges).toEqual([])
 
         const { findManyUser: users2 } = await client.request<any>(
             graphql.findManyUser,
@@ -1008,13 +1106,15 @@ describe('GraphQL : aggregation', () => {
             },
         )
 
-        expect(users2.objects).toEqual([
+        expect(users2.edges).toEqual([
             {
-                id: expect.any(String),
-                name: 'Lucas',
-                age: 20,
-                isAdmin: true,
-                floatValue: 1.5,
+                node: {
+                    id: expect.any(String),
+                    name: 'Lucas',
+                    age: 20,
+                    isAdmin: true,
+                    floatValue: 1.5,
+                },
             },
         ])
     })

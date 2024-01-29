@@ -1,35 +1,35 @@
 {
-  "name": "wibe-server",
-  "version": "0.0.1",
-  "description": "wibe-server",
-  "scripts": {
-    "generate:types": "dts-bundle-generator index.ts -o lib/index.d.ts",
-    "build": "bun build index.ts --minify --target=bun --outdir lib && bun run generate:types",
-    "dev": "bun run --watch dev/index.ts",
-    "test": "bun test --watch",
-    "test:only": "bun test --watch --only",
-    "linter": "biome lint ./src/**/*.ts",
-    "formater": "biome format --write ./src"
-  },
-  "dependencies": {
-    "@apollo/server": "4.10.0",
-    "@elysiajs/apollo": "0.8.0",
-    "@elysiajs/jwt": "0.8.0",
-    "elysia": "0.8.14",
-    "graphql": "16.8.1",
-    "mongodb": "6.3.0"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "1.5.2",
-    "@parcel/watcher": "2.3.0",
-    "@types/bun": "1.0.2",
-    "@types/uuid": "9.0.6",
-    "dts-bundle-generator": "8.0.1",
-    "get-port": "7.0.0",
-    "graphql-request": "6.1.0",
-    "typescript": "5.3.3",
-    "uuid": "9.0.1",
-    "wait-on": "7.2.0",
-    "wibe-mongodb-launcher": "workspace:*"
-  }
+    "name": "wibe-server",
+    "version": "0.0.1",
+    "description": "wibe-server",
+    "scripts": {
+        "generate:types": "dts-bundle-generator index.ts -o lib/index.d.ts",
+        "build": "bun build index.ts --minify --target=bun --outdir lib && bun run generate:types",
+        "dev": "bun run --watch dev/index.ts",
+        "test": "bun test --watch",
+        "test:only": "bun test --watch --only",
+        "linter": "biome lint ./src/**/*.ts",
+        "formatter": "biome format --write ./src"
+    },
+    "dependencies": {
+        "@apollo/server": "4.10.0",
+        "@elysiajs/apollo": "0.8.0",
+        "@elysiajs/jwt": "0.8.0",
+        "elysia": "0.8.14",
+        "graphql": "16.8.1",
+        "mongodb": "6.3.0"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "1.5.3",
+        "@parcel/watcher": "2.3.0",
+        "@types/bun": "1.0.2",
+        "@types/uuid": "9.0.6",
+        "dts-bundle-generator": "8.0.1",
+        "get-port": "7.0.0",
+        "graphql-request": "6.1.0",
+        "typescript": "5.3.3",
+        "uuid": "9.0.1",
+        "wait-on": "7.2.0",
+        "wibe-mongodb-launcher": "workspace:*"
+    }
 }
