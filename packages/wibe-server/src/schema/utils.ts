@@ -137,6 +137,70 @@ export const getWhereInputFromType = ({
     return templateWhereInput[wibeType as WibeDefaultTypesWithoutObject]
 }
 
+// TODO : Refactor this function an getDefaultInputType because the code is the same except for required
+export const getUpdateInputType = ({
+    fields,
+    fieldsOfObjectKeys,
+    objects,
+    scalars,
+    enums,
+    className,
+}: {
+    className: string
+    fieldsOfObjectKeys: string[]
+    fields: SchemaFields
+    objects: GraphQLObjectType[]
+    scalars: GraphQLScalarType[]
+    enums: GraphQLEnumType[]
+}) => {
+    const defaultInputType = new GraphQLInputObjectType({
+        name: `${className}UpdateFieldsInput`,
+        fields: () => {
+            return fieldsOfObjectKeys.reduce(
+                (acc, fieldName) => {
+                    const currentField = fields[fieldName]
+
+                    if (currentField.type === 'Object') {
+                        acc[fieldName] = {
+                            type: wrapGraphQLTypeIn({
+                                required: false,
+                                type: getUpdateInputType({
+                                    fields: currentField.object.fields,
+                                    fieldsOfObjectKeys: Object.keys(
+                                        currentField.object.fields,
+                                    ),
+                                    objects,
+                                    scalars,
+                                    enums,
+                                    className: currentField.object.name,
+                                }),
+                            }),
+                        }
+
+                        return acc
+                    }
+
+                    acc[fieldName] = {
+                        type: wrapGraphQLTypeIn({
+                            required: false,
+                            type: getGraphqlType({
+                                field: currentField,
+                                scalars,
+                                enums,
+                            }),
+                        }),
+                    }
+
+                    return acc
+                },
+                {} as Record<string, any>,
+            )
+        },
+    })
+
+    return defaultInputType
+}
+
 export const getDefaultInputType = ({
     fields,
     fieldsOfObjectKeys,

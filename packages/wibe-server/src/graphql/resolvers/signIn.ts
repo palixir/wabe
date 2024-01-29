@@ -4,7 +4,7 @@ import { getGraphqlClient } from '../../utils/helper'
 import { Context } from '../interface'
 
 export const signInResolver = async (
-    root: any,
+    _: any,
     {
         input: { email, password },
     }: {
@@ -47,8 +47,6 @@ export const signInResolver = async (
 
     if (!isPasswordEquals) throw new Error('User not found')
 
-    const wibeKey = WibeApp.config.wibeKey
-
     const fifteenMinutes = new Date(Date.now() + 1000 * 60 * 15)
     const thirtyDays = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
 
@@ -63,6 +61,25 @@ export const signInResolver = async (
         iat: Date.now(),
         exp: thirtyDays.getTime(),
     })
+
+    await client.request<any>(
+        gql`
+            mutation updateOne_User($input: _UserUpdateInput!) {
+                updateOne_User(input: $input) {
+                    id
+                }
+            }
+        `,
+        {
+            input: {
+                id: objects[0].id,
+                fields: {
+                    refreshToken,
+                    accessToken,
+                },
+            },
+        },
+    )
 
     context.cookie.access_token.add({
         value: accessToken,

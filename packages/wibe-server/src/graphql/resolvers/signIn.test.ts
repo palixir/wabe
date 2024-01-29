@@ -10,7 +10,6 @@ import {
 } from 'bun:test'
 import { GraphQLClient, gql } from 'graphql-request'
 import { Cookie } from 'elysia'
-import * as signInResolver from './signIn'
 import { WibeApp } from '../../server'
 import { getGraphqlClient, setupTests } from '../../utils/helper'
 
@@ -76,7 +75,20 @@ describe('SignIn', () => {
             },
         })
 
+        const {
+            findMany_User: { objects },
+        } = await client.request<any>(graphql.findMany_User, {
+            where: {
+                email: { equalTo: 'email@test.fr' },
+            },
+        })
+
         expect(signIn).toEqual(true)
+
+        expect(objects.length).toEqual(1)
+        expect(objects[0].email).toEqual('email@test.fr')
+        expect(objects[0].accessToken).toEqual(expect.any(String))
+        expect(objects[0].refreshToken).toEqual(expect.any(String))
 
         // For the moment we dont' check the jwt sign of the access and refresh token
         // the jwt is in the context and we can't access it

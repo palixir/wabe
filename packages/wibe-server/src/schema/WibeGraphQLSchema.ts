@@ -36,6 +36,7 @@ import {
     getDefaultInputType,
     getGraphqlType,
     getOutputType,
+    getUpdateInputType,
     getWhereInputType,
     wrapGraphQLTypeIn,
 } from './utils'
@@ -99,6 +100,7 @@ export class WibeGraphQLSchema {
                             },
                             password: {
                                 type: 'String',
+                                required: true,
                             },
                         },
                     },
@@ -191,6 +193,15 @@ export class WibeGraphQLSchema {
                     className,
                 })
 
+                const defaultUpdateInputType = getUpdateInputType({
+                    fields,
+                    fieldsOfObjectKeys,
+                    objects,
+                    scalars,
+                    enums,
+                    className,
+                })
+
                 const whereInputType = getWhereInputType({
                     fields,
                     fieldsOfObjectKeys,
@@ -228,6 +239,7 @@ export class WibeGraphQLSchema {
                     whereInputType,
                     object,
                     allObjects: objects,
+                    defaultUpdateInputType,
                 })
 
                 const defaultQueriesKeys = Object.keys(defaultQueries)
@@ -552,11 +564,13 @@ export class WibeGraphQLSchema {
         className,
         object,
         defaultInputType,
+        defaultUpdateInputType,
         whereInputType,
         allObjects,
     }: {
         className: string
         defaultInputType: GraphQLInputObjectType
+        defaultUpdateInputType: GraphQLInputObjectType
         whereInputType: GraphQLInputObjectType
         object: GraphQLObjectType
         allObjects: GraphQLObjectType[]
@@ -583,14 +597,14 @@ export class WibeGraphQLSchema {
             name: `${className}UpdateInput`,
             fields: () => ({
                 id: { type: GraphQLID },
-                fields: { type: defaultInputType },
+                fields: { type: defaultUpdateInputType },
             }),
         })
 
         const updatesInputType = new GraphQLInputObjectType({
             name: `${className}sUpdateInput`,
             fields: () => ({
-                fields: { type: defaultInputType },
+                fields: { type: defaultUpdateInputType },
                 where: { type: whereInputType },
                 offset: { type: GraphQLInt },
                 limit: { type: GraphQLInt },
