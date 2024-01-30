@@ -10,6 +10,7 @@ import {
 import { Cookie } from 'elysia'
 import { GraphQLClient, gql } from 'graphql-request'
 import { getGraphqlClient, setupTests } from '../../utils/helper'
+import { WibeApp } from '../../server'
 
 describe('SignUp', () => {
     let wibe: WibeApp
