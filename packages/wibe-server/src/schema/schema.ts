@@ -23,7 +23,6 @@ type TypeFieldBase<T, K extends WibeTypes> = {
 
 // TODO: Add tests for defaultValue (need to be update in a before save event)
 // TODO: Add created_at and updated_at fields (need to be update in a before save event)
-// TODO: Add void type for queries and mutations
 export type TypeField =
     | TypeFieldBase<string, 'String'>
     | TypeFieldBase<number, 'Int'>
@@ -111,7 +110,10 @@ const wibeTypeToTypeScriptType: Record<any, string> = {
 const getTypescriptFromWibeType = ({
     type,
     enums,
-}: { type: WibeTypes; enums: EnumInterface[] }) => {
+}: {
+    type: WibeTypes
+    enums: EnumInterface[]
+}) => {
     const isEnum = enums.find((enumType) => enumType.name === type)
     if (isEnum) return type
 

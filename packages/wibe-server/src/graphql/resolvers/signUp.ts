@@ -3,7 +3,7 @@ import { WibeApp } from '../../server'
 import { getGraphqlClient } from '../../utils/helper'
 import { Context } from '../interface'
 
-export const signInResolver = async (
+export const signUpResolver = async (
     _: any,
     {
         input: { email, password },
@@ -39,27 +39,40 @@ export const signInResolver = async (
         },
     )
 
-    if (edges.length === 0) throw new Error('User not found')
+    if (edges.length > 0) throw new Error('User already exist')
 
-    const isPasswordEquals = await Bun.password.verify(
-        password,
-        edges[0].node.password,
-        'argon2id',
-    )
-
-    if (!isPasswordEquals) throw new Error('User not found')
+    // TODO : Add possibility to configure the password lenght and check if the lenght is correct
+    const hashedPassword = await Bun.password.hash(password, 'argon2id')
 
     const fifteenMinutes = new Date(Date.now() + 1000 * 60 * 15)
     const thirtyDays = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
 
+    const { createOne_User: user } = await client.request<any>(
+        gql`
+            mutation createOne_User($input: _UserCreateInput!) {
+                createOne_User(input: $input) {
+                    id
+                }
+            }
+        `,
+        {
+            input: {
+                fields: {
+                    email,
+                    password: hashedPassword,
+                },
+            },
+        },
+    )
+
     const accessToken = await context.jwt.sign({
-        userId: edges[0].node.id,
+        userId: user.id,
         iat: Date.now(),
         exp: fifteenMinutes.getTime(),
     })
 
     const refreshToken = await context.jwt.sign({
-        userId: edges[0].node.id,
+        userId: user.id,
         iat: Date.now(),
         exp: thirtyDays.getTime(),
     })
@@ -74,7 +87,7 @@ export const signInResolver = async (
         `,
         {
             input: {
-                id: edges[0].node.id,
+                id: user.id,
                 fields: {
                     refreshToken,
                     accessToken,
@@ -88,6 +101,7 @@ export const signInResolver = async (
         httpOnly: true,
         path: '/',
         expires: fifteenMinutes,
+        // TODO : Check for implements csrf token for sub-domain protection
         sameSite: 'strict',
         secure: Bun.env.NODE_ENV === 'production',
     })
