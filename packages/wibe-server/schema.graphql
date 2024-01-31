@@ -1,0 +1,348 @@
+scalar Phone
+scalar ID
+scalar String
+scalar Int
+scalar Boolean
+scalar Date
+scalar Email
+scalar Any 
+
+enum Role {
+	Admin,
+	Member
+}
+
+enum AuthenticationProvider {
+	Google
+} 
+
+type Post { 
+	id: ID,
+	name: String!
+}
+
+type PostConnection { 
+	edges: PostEdge
+}
+
+type PostEdge { 
+	node: Post
+}
+
+type _User { 
+	id: ID,
+	name: String!,
+	age: Int,
+	isCool: Boolean,
+	birthDate: Date!,
+	phone: Phone,
+	role: Role,
+	address: Address,
+	object: Object,
+	provider: AuthenticationProvider,
+	email: Email!,
+	password: String,
+	verifiedEmail: Boolean,
+	accessToken: String,
+	refreshToken: String
+}
+
+type Address { 
+	id: ID,
+	address1: String,
+	address2: String,
+	postalCode: Int,
+	city: String,
+	country: String
+}
+
+type Object { 
+	id: ID,
+	objectOfObject: ObjectOfObject
+}
+
+type ObjectOfObject { 
+	id: ID,
+	name: String
+}
+
+type _UserConnection { 
+	edges: _UserEdge
+}
+
+type _UserEdge { 
+	node: _User
+}
+
+type Query {
+	findOnePost(id: ID): Post
+	findManyPost(where: PostWhereInput, offset: Int, limit: Int): PostConnection!
+	findOne_User(id: ID): _User
+	findMany_User(where: _UserWhereInput, offset: Int, limit: Int): _UserConnection!
+	helloWorld(name: String!): String
+}
+
+input PostWhereInput { 
+	name: StringWhereInput,
+	OR: [PostWhereInput],
+	AND: [PostWhereInput] 
+} 
+
+input StringWhereInput { 
+	equalTo: String,
+	notEqualTo: String,
+	in: [String],
+	notIn: [String] 
+} 
+
+input _UserWhereInput { 
+	name: StringWhereInput,
+	age: IntWhereInput,
+	isCool: BooleanWhereInput,
+	birthDate: DateWhereInput,
+	phone: Phone,
+	role: AnyWhereInput,
+	address: AddressWhereInput,
+	object: ObjectWhereInput,
+	provider: AnyWhereInput,
+	email: EmailWhereInput,
+	password: StringWhereInput,
+	verifiedEmail: BooleanWhereInput,
+	accessToken: StringWhereInput,
+	refreshToken: StringWhereInput,
+	OR: [_UserWhereInput],
+	AND: [_UserWhereInput] 
+} 
+
+input IntWhereInput { 
+	equalTo: Int,
+	notEqualTo: Int,
+	lessThan: Int,
+	lessThanOrEqualTo: Int,
+	greaterThan: Int,
+	greaterThanOrEqualTo: Int,
+	in: [Int],
+	notIn: [Int] 
+} 
+
+input BooleanWhereInput { 
+	equalTo: Boolean,
+	notEqualTo: Boolean,
+	in: [Boolean],
+	notIn: [Boolean] 
+} 
+
+input DateWhereInput { 
+	equalTo: Date,
+	notEqualTo: Date,
+	in: [Date],
+	notIn: [Date],
+	lessThan: Date,
+	lessThanOrEqualTo: Date,
+	greaterThan: Date,
+	greaterThanOrEqualTo: Date 
+} 
+
+input AnyWhereInput { 
+	equalTo: Any,
+	notEqualTo: Any 
+} 
+
+input AddressWhereInput { 
+	address1: StringWhereInput,
+	address2: StringWhereInput,
+	postalCode: IntWhereInput,
+	city: StringWhereInput,
+	country: StringWhereInput,
+	OR: [AddressWhereInput],
+	AND: [AddressWhereInput] 
+} 
+
+input ObjectWhereInput { 
+	objectOfObject: ObjectOfObjectWhereInput,
+	OR: [ObjectWhereInput],
+	AND: [ObjectWhereInput] 
+} 
+
+input ObjectOfObjectWhereInput { 
+	name: StringWhereInput,
+	OR: [ObjectOfObjectWhereInput],
+	AND: [ObjectOfObjectWhereInput] 
+} 
+
+input EmailWhereInput { 
+	equalTo: Email,
+	notEqualTo: Email,
+	in: [Email],
+	notIn: [Email] 
+} 
+
+type Mutation {
+	createOnePost(input: PostCreateInput): Post!
+	createManyPost(input: PostsCreateInput): PostConnection!
+	updateOnePost(input: PostUpdateInput): Post!
+	updateManyPost(input: PostsUpdateInput): PostConnection!
+	deleteOnePost(input: PostDeleteInput): Post!
+	deleteManyPost(input: PostsDeleteInput): PostConnection!
+	createOne_User(input: _UserCreateInput): _User!
+	createMany_User(input: _UsersCreateInput): _UserConnection!
+	updateOne_User(input: _UserUpdateInput): _User!
+	updateMany_User(input: _UsersUpdateInput): _UserConnection!
+	deleteOne_User(input: _UserDeleteInput): _User!
+	deleteMany_User(input: _UsersDeleteInput): _UserConnection!
+	signUp(input: SignUpInput): Boolean
+	signIn(input: SignInInput): Boolean
+	signInWithProvider(input: SignInWithProviderInput): Boolean
+}
+
+input PostCreateInput { 
+	fields: PostInput 
+} 
+
+input PostInput { 
+	name: [String]! 
+} 
+
+input PostsCreateInput { 
+	fields: [PostInput]!,
+	offset: Int,
+	limit: Int 
+} 
+
+input PostUpdateInput { 
+	id: ID,
+	fields: PostUpdateFieldsInput 
+} 
+
+input PostUpdateFieldsInput { 
+	name: String 
+} 
+
+input PostsUpdateInput { 
+	fields: PostUpdateFieldsInput,
+	where: PostWhereInput,
+	offset: Int,
+	limit: Int 
+} 
+
+input PostDeleteInput { 
+	id: ID 
+} 
+
+input PostsDeleteInput { 
+	where: PostWhereInput 
+} 
+
+input _UserCreateInput { 
+	fields: _UserInput 
+} 
+
+input _UserInput { 
+	name: [String]!,
+	age: Int,
+	isCool: Boolean,
+	birthDate: [Date]!,
+	phone: Phone,
+	role: Role,
+	address: AddressInput,
+	object: ObjectInput,
+	provider: AuthenticationProvider,
+	email: [Email]!,
+	password: String,
+	verifiedEmail: Boolean,
+	accessToken: String,
+	refreshToken: String 
+} 
+
+input AddressInput { 
+	address1: String,
+	address2: String,
+	postalCode: Int,
+	city: String,
+	country: String 
+} 
+
+input ObjectInput { 
+	objectOfObject: ObjectOfObjectInput 
+} 
+
+input ObjectOfObjectInput { 
+	name: String 
+} 
+
+input _UsersCreateInput { 
+	fields: [_UserInput]!,
+	offset: Int,
+	limit: Int 
+} 
+
+input _UserUpdateInput { 
+	id: ID,
+	fields: _UserUpdateFieldsInput 
+} 
+
+input _UserUpdateFieldsInput { 
+	name: String,
+	age: Int,
+	isCool: Boolean,
+	birthDate: Date,
+	phone: Phone,
+	role: Role,
+	address: AddressUpdateFieldsInput,
+	object: ObjectUpdateFieldsInput,
+	provider: AuthenticationProvider,
+	email: Email,
+	password: String,
+	verifiedEmail: Boolean,
+	accessToken: String,
+	refreshToken: String 
+} 
+
+input AddressUpdateFieldsInput { 
+	address1: String,
+	address2: String,
+	postalCode: Int,
+	city: String,
+	country: String 
+} 
+
+input ObjectUpdateFieldsInput { 
+	objectOfObject: ObjectOfObjectUpdateFieldsInput 
+} 
+
+input ObjectOfObjectUpdateFieldsInput { 
+	name: String 
+} 
+
+input _UsersUpdateInput { 
+	fields: _UserUpdateFieldsInput,
+	where: _UserWhereInput,
+	offset: Int,
+	limit: Int 
+} 
+
+input _UserDeleteInput { 
+	id: ID 
+} 
+
+input _UsersDeleteInput { 
+	where: _UserWhereInput 
+} 
+
+input SignUpInput { 
+	email: [Email]!,
+	password: [String]! 
+} 
+
+input SignInInput { 
+	email: [Email]!,
+	password: [String]! 
+} 
+
+input SignInWithProviderInput { 
+	provider: [AuthenticationProvider]!,
+	email: [Email]!,
+	verifiedEmail: [Boolean]!,
+	accessToken: [String]!,
+	refreshToken: String 
+}  
