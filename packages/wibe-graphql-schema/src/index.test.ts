@@ -63,7 +63,11 @@ const mockFetch = mock(() => ({
                                     name: null,
                                     kind: 'LIST',
                                     ofType: {
-                                        name: 'UserConnection',
+                                        name: null,
+                                        kind: 'NON_NULL',
+                                        ofType: {
+                                            name: 'UserConnection',
+                                        },
                                     },
                                 },
                                 args: [
@@ -104,6 +108,72 @@ const mockFetch = mock(() => ({
                                         description: 'The name of the user',
                                         type: {
                                             name: 'String',
+                                            kind: 'SCALAR',
+                                        },
+                                    },
+                                ],
+                            },
+                            {
+                                name: 'createManyUser',
+                                description: 'Create a list of users',
+                                type: {
+                                    name: null,
+                                    kind: 'NON_NULL',
+                                    ofType: {
+                                        name: null,
+                                        kind: 'LIST',
+                                        ofType: {
+                                            name: null,
+                                            kind: 'NON_NULL',
+                                            ofType: {
+                                                name: 'User',
+                                            },
+                                        },
+                                    },
+                                },
+                                args: [
+                                    {
+                                        name: 'name',
+                                        description: 'The name of the user',
+                                        type: {
+                                            name: 'String',
+                                            kind: 'SCALAR',
+                                        },
+                                    },
+                                    {
+                                        name: 'age',
+                                        description: 'The age of the user',
+                                        type: {
+                                            name: 'Int',
+                                            kind: 'SCALAR',
+                                        },
+                                    },
+                                ],
+                            },
+                            {
+                                name: 'createManyUserWithOnlyTypeRequired',
+                                description: 'Create a list of users',
+                                type: {
+                                    name: null,
+                                    kind: 'NON_NULL',
+                                    ofType: {
+                                        name: 'User',
+                                    },
+                                },
+                                args: [
+                                    {
+                                        name: 'name',
+                                        description: 'The name of the user',
+                                        type: {
+                                            name: 'String',
+                                            kind: 'SCALAR',
+                                        },
+                                    },
+                                    {
+                                        name: 'age',
+                                        description: 'The age of the user',
+                                        type: {
+                                            name: 'Int',
                                             kind: 'SCALAR',
                                         },
                                     },
@@ -179,22 +249,17 @@ global.fetch = mockFetch
 
 describe('GetGraphqlSchema', () => {
     it('should return a valid json graphql schema', async () => {
-        const { enums, scalars, types } = await getGraphqlSchema(
+        const { enums, scalars, queries, mutations } = await getGraphqlSchema(
             'http://localhost:3000/graphql',
         )
 
-        expect(scalars).toEqual(['scalar Phone', 'scalar Email'])
-        expect(enums).toEqual([
-            'enum Role {\n\tAdmin,\n\tUser\n}',
-            'enum Provider {\n\tGoogle,\n\tX\n}',
-        ])
+        const schemas = [
+            enums.join('\n'),
+            scalars.join('\n'),
+            queries,
+            mutations,
+        ].flat()
 
-        expect(types).toEqual([
-            'type Query {\n\tfindOneUser(id: ID): User\n\tfindManyUser(where: UserWhereInput): [UserConnection]!\n}',
-            'type Mutation {\n\tcreateOneUser(age: Int, name: String): User\n}',
-            'type User {\n\tid: ID\n\tname: String\n}',
-            'type UserConnection {\n\tedges: UserEdge\n}',
-            'input UserWhereInput {\n\tid: ID\n\tname: String\n}',
-        ])
+        expect(schemas).toMatchSnapshot()
     })
 })
