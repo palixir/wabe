@@ -111,6 +111,22 @@ const mockFetch = mock(() => ({
                                             kind: 'SCALAR',
                                         },
                                     },
+                                    {
+                                        name: 'nonNullArrayOfNonNullType',
+                                        type: {
+                                            kind: 'NON_NULL',
+                                            ofType: {
+                                                kind: 'LIST',
+                                                ofType: {
+                                                    kind: 'NON_NULL',
+                                                    ofType: {
+                                                        kind: 'SCALAR',
+                                                        name: 'String',
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    },
                                 ],
                             },
                             {
@@ -237,6 +253,22 @@ const mockFetch = mock(() => ({
                                     kind: 'SCALAR',
                                 },
                             },
+                            {
+                                name: 'nonNullListOfNonNullInput',
+                                type: {
+                                    kind: 'NON_NULL',
+                                    ofType: {
+                                        kind: 'LIST',
+                                        ofType: {
+                                            kind: 'NON_NULL',
+                                            ofType: {
+                                                kind: 'String',
+                                                name: 'NonNullField',
+                                            },
+                                        },
+                                    },
+                                },
+                            },
                         ],
                     },
                 ],
@@ -249,15 +281,16 @@ global.fetch = mockFetch
 
 describe('GetGraphqlSchema', () => {
     it('should return a valid json graphql schema', async () => {
-        const { enums, scalars, queries, mutations } = await getGraphqlSchema(
-            'http://localhost:3000/graphql',
-        )
+        const { enums, scalars, queries, mutations, inputObjects, objects } =
+            await getGraphqlSchema('http://localhost:3000/graphql')
 
         const schemas = [
-            enums.join('\n'),
-            scalars.join('\n'),
+            enums,
+            scalars,
             queries,
             mutations,
+            objects,
+            inputObjects,
         ].flat()
 
         expect(schemas).toMatchSnapshot()

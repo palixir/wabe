@@ -31,6 +31,28 @@ interface Type {
 const getDescription = (description: string | null) =>
     `${description ? '"""\n\t' : ''}${description ? description : ''}${description ? '\n\t"""\n\t' : ''}`
 
+const constructField = (field: InputField | Field | Args) => {
+    const nameOfType =
+        field.type.name ||
+        field.type?.ofType?.name ||
+        field.type.ofType?.ofType?.name ||
+        field.type.ofType?.ofType?.ofType?.name
+
+    const isOutputRequired = field.type.kind === 'NON_NULL'
+    const isOutputTypeArray =
+        field.type.kind === 'LIST' || field.type.ofType?.kind === 'LIST'
+
+    if (isOutputTypeArray) {
+        const isTypeOfArrayRequired = isOutputRequired
+            ? field.type.ofType?.ofType?.kind === 'NON_NULL'
+            : field.type.ofType?.kind === 'NON_NULL'
+
+        return `[${nameOfType}${isTypeOfArrayRequired ? '!' : ''}]${isOutputRequired ? '!' : ''}`
+    }
+
+    return `${nameOfType}${isOutputRequired ? '!' : ''}`
+}
+
 const getScalars = (types: Type[]) => {
     return types
         .filter((type) => type.kind === 'SCALAR')
@@ -68,20 +90,10 @@ const getQueriesOrMutations = (types: Type[], kind: 'Query' | 'Mutation') => {
                     : arg.type?.ofType?.name
                 const argKind = arg.type.kind
 
-                return `${argName}: ${argType}${argKind === 'NON_NULL' ? '!' : ''}`
+                return `${argName}: ${constructField(arg)}`
             })
 
-            // We can have an array of required elements
-            const nameOfType =
-                field.type.name ||
-                field.type?.ofType?.name ||
-                field.type.ofType?.ofType?.name ||
-                field.type.ofType?.ofType?.ofType?.name
-
-            const kindOfType = field.type.kind
-            const kindOfArray = field.type.ofType?.ofType?.kind
-
-            return `${queryDescription}${queryName}(${args.join(', ')}): [${nameOfType}${kindOfType === 'NON_NULL' ? '!' : ''}]${kindOfArray === 'NON_NULL' ? '!' : ''}`
+            return `${queryDescription}${queryName}(${args.join(', ')}): ${constructField(field)}`
         },
     )
 
@@ -97,22 +109,9 @@ const getInputObjects = (types: Type[]) => {
         const inputObjectName = inputObject.name
         const inputObjectDescription = getDescription(inputObject.description)
 
-        const fields = inputObject.inputFields.map((field) => {
-            const fieldName = field.name
-            const fieldType = field.type.name
-                ? field.type.name
-                : field.type?.ofType?.name
-            const fieldKind = field.type.kind
-
-            if (fieldKind === 'LIST') {
-                const nameOfType = field.type?.ofType?.name
-                const kindOfType = field.type?.ofType?.kind
-
-                return `${fieldName}: [${nameOfType}${kindOfType === 'NON_NULL' ? '!' : ''}]`
-            }
-
-            return `${fieldName}: ${fieldType}${fieldKind === 'NON_NULL' ? '!' : ''}`
-        })
+        const fields = inputObject.inputFields.map(
+            (field) => `${field.name}: ${constructField(field)}`,
+        )
 
         return `${inputObjectDescription}input ${inputObjectName} {\n\t${fields.join('\n\t')}\n}`
     })
@@ -127,25 +126,14 @@ const getObjects = (types: Type[]) => {
         const objectName = object.name
         const objectDescription = getDescription(object.description)
 
-        const fields = object.fields.map((field) => {
-            const fieldName = field.name
-            const fieldType = field.type.name
-                ? field.type.name
-                : field.type?.ofType?.name
-            const fieldKind = field.type.kind
-
-            if (fieldKind === 'LIST') {
-                const nameOfType = field.type?.ofType?.name
-                const kindOfType = field.type?.ofType?.kind
-
-                return `${fieldName}: [${nameOfType}${kindOfType === 'NON_NULL' ? '!' : ''}]`
-            }
-
-            return `${fieldName}: ${fieldType}${fieldKind === 'NON_NULL' ? '!' : ''}`
-        })
+        const fields = object.fields.map(
+            (field) => `${field.name}: ${constructField(field)}`,
+        )
 
         return `${objectDescription}type ${objectName} {\n\t${fields.join('\n\t')}\n}`
     })
+
+    return allObjects.join('\n')
 }
 
 export const getGraphqlSchema = async (urlEndpoint: string) => {

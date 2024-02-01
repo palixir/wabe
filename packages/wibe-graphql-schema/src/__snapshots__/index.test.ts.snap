@@ -6,26 +6,26 @@ exports[`GetGraphqlSchema should return a valid json graphql schema 1`] = `
 "enum Role {
 	Admin,
 	User
-}
-enum Provider {
+}"
+,
+  
+"enum Provider {
 	Google,
 	X
 }"
 ,
-  
-"scalar Phone
-scalar Email"
-,
+  "scalar Phone",
+  "scalar Email",
   
 "type Query {
 	"""
 	Get a user by id
 	"""
-	findOneUser(id: ID): [User]
+	findOneUser(id: ID): User
 	"""
 	Get a list of users
 	"""
-	findManyUser(where: UserWhereInput): [UserConnection]
+	findManyUser(where: UserWhereInput): [UserConnection!]
 }"
 ,
   
@@ -33,7 +33,7 @@ scalar Email"
 	"""
 	Create a user
 	"""
-	createOneUser(age: Int, name: String): [User]
+	createOneUser(age: Int, name: String, nonNullArrayOfNonNullType: [String!]!): User
 	"""
 	Create a list of users
 	"""
@@ -41,7 +41,32 @@ scalar Email"
 	"""
 	Create a list of users
 	"""
-	createManyUserWithOnlyTypeRequired(name: String, age: Int): [User!]
+	createManyUserWithOnlyTypeRequired(name: String, age: Int): User!
+}"
+,
+  
+"type Query {
+	findOneUser: User
+	findManyUser: [UserConnection!]
+}
+type Mutation {
+	createOneUser: User
+	createManyUser: [User!]!
+	createManyUserWithOnlyTypeRequired: User!
+}
+type User {
+	id: ID
+	name: String
+}
+type UserConnection {
+	edges: UserEdge
+}"
+,
+  
+"input UserWhereInput {
+	id: ID
+	name: String
+	nonNullListOfNonNullInput: [NonNullField!]!
 }"
 ,
 ]
