@@ -18,6 +18,7 @@ export type WibeTypes = WibeSchemaScalars | WibeSchemaEnums | WibeDefaultTypes
 type TypeFieldBase<T, K extends WibeTypes> = {
     type: K | WibeSchemaScalars | WibeSchemaEnums
     required?: boolean
+    description?: string
     defaultValue?: T
 }
 
@@ -33,12 +34,14 @@ export type TypeField =
     | {
           type: 'Array'
           required?: boolean
+          description?: string
           defaultValue?: any[]
           typeValue: WibeTypes
       }
     | {
           type: 'Object'
           required?: boolean
+          description?: string
           object: ClassInterface
       }
 
@@ -47,6 +50,7 @@ export type SchemaFields = Record<string, TypeField>
 export type QueryResolver = {
     type: WibeTypes
     required?: boolean
+    description?: string
     args?: {
         [key: string]: TypeField
     }
@@ -56,6 +60,7 @@ export type QueryResolver = {
 export type MutationResolver = {
     type: WibeTypes
     required?: boolean
+    description?: string
     args?: {
         input: {
             [key: string]: TypeField
@@ -76,6 +81,7 @@ export type TypeResolver = {
 export interface ClassInterface {
     name: string
     fields: SchemaFields
+    description?: string
     resolvers?: TypeResolver
 }
 
@@ -90,6 +96,7 @@ export interface ScalarInterface {
 export interface EnumInterface {
     name: string
     values: Record<string, string>
+    description?: string
 }
 
 export interface SchemaInterface {

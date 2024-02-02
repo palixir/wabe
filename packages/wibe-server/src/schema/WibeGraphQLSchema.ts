@@ -42,6 +42,7 @@ import {
 } from './utils'
 import { signUpResolver } from '../graphql/resolvers/signUp'
 import { signInResolver } from '../graphql/resolvers/signIn'
+import { generateSchema } from './generate'
 
 // This class is tested in e2e test in graphql folder
 export class WibeGraphQLSchema {
@@ -293,6 +294,8 @@ export class WibeGraphQLSchema {
             },
         )
 
+        generateSchema({ ...queriesAndMutations, scalars, enums, objects })
+
         return { ...queriesAndMutations, scalars, enums, objects }
     }
 
@@ -323,7 +326,7 @@ export class WibeGraphQLSchema {
                 )
 
                 return new GraphQLEnumType({
-                    name: wibeEnum.name,
+                    ...wibeEnum,
                     values,
                 })
             }) || []
@@ -340,7 +343,7 @@ export class WibeGraphQLSchema {
         scalars: GraphQLScalarType[]
         enums: GraphQLEnumType[]
     }) {
-        const { name, fields } = wibeClass
+        const { name, fields, description } = wibeClass
 
         const fieldsOfObjectKeys = Object.keys(fields)
         const className = name.replace(' ', '')
@@ -386,6 +389,7 @@ export class WibeGraphQLSchema {
 
         return new GraphQLObjectType({
             name: className,
+            description,
             fields: () => ({
                 id: { type: GraphQLID },
                 ...graphqlFields,
@@ -441,7 +445,7 @@ export class WibeGraphQLSchema {
     }) {
         const mutationsKeys = Object.keys(resolvers)
 
-        const res = mutationsKeys.reduce(
+        return mutationsKeys.reduce(
             (acc, currentKey) => {
                 const currentMutation = resolvers[currentKey]
                 const required = !!currentMutation.required
@@ -485,6 +489,7 @@ export class WibeGraphQLSchema {
                         }),
                     }) as GraphQLOutputType,
                     args: { input: { type: graphqlInput } },
+                    description: currentMutation.description,
                     resolve: currentMutation.resolve,
                 }
 
@@ -492,8 +497,6 @@ export class WibeGraphQLSchema {
             },
             {} as Record<string, GraphQLFieldConfig<any, any, any>>,
         )
-
-        return res
     }
 
     createCustomQueries({
@@ -542,6 +545,7 @@ export class WibeGraphQLSchema {
                         }),
                     }) as GraphQLOutputType,
                     args,
+                    description: currentQuery.description,
                     resolve: currentQuery.resolve,
                 }
 
@@ -567,6 +571,7 @@ export class WibeGraphQLSchema {
         return {
             [`findOne${className}`]: {
                 type: object,
+                description: object.description,
                 args: { id: { type: GraphQLID } },
                 resolve: (root, args, ctx, info) =>
                     queryForOneObject(root, args, ctx, info, className),
@@ -575,6 +580,7 @@ export class WibeGraphQLSchema {
                 type: new GraphQLNonNull(
                     getConnectionType({ object, allObjects }),
                 ),
+                description: object.description,
                 args: {
                     where: { type: whereInputType },
                     offset: { type: GraphQLInt },
@@ -654,6 +660,7 @@ export class WibeGraphQLSchema {
         const mutations: Record<string, GraphQLFieldConfig<any, any, any>> = {
             [`createOne${className}`]: {
                 type: new GraphQLNonNull(object),
+                description: object.description,
                 args: { input: { type: createInputType } },
                 resolve: (root, args, ctx, info) =>
                     mutationToCreateObject(root, args, ctx, info, className),
@@ -662,6 +669,7 @@ export class WibeGraphQLSchema {
                 type: new GraphQLNonNull(
                     getConnectionType({ object, allObjects }),
                 ),
+                description: object.description,
                 args: { input: { type: createsInputType } },
                 resolve: (root, args, ctx, info) =>
                     mutationToCreateMultipleObjects(
@@ -674,6 +682,7 @@ export class WibeGraphQLSchema {
             },
             [`updateOne${className}`]: {
                 type: new GraphQLNonNull(object),
+                description: object.description,
                 args: { input: { type: updateInputType } },
                 resolve: (root, args, ctx, info) =>
                     mutationToUpdateObject(root, args, ctx, info, className),
@@ -682,6 +691,7 @@ export class WibeGraphQLSchema {
                 type: new GraphQLNonNull(
                     getConnectionType({ object, allObjects }),
                 ),
+                description: object.description,
                 args: { input: { type: updatesInputType } },
                 resolve: (root, args, ctx, info) =>
                     mutationToUpdateMultipleObjects(
@@ -694,6 +704,7 @@ export class WibeGraphQLSchema {
             },
             [`deleteOne${className}`]: {
                 type: new GraphQLNonNull(object),
+                description: object.description,
                 args: {
                     input: {
                         type: deleteInputType,
@@ -706,6 +717,7 @@ export class WibeGraphQLSchema {
                 type: new GraphQLNonNull(
                     getConnectionType({ object, allObjects }),
                 ),
+                description: object.description,
                 args: { input: { type: deletesInputType } },
                 resolve: (root, args, ctx, info) =>
                     mutationToDeleteMultipleObjects(
