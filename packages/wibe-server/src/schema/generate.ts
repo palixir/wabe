@@ -3,12 +3,16 @@ import {
     GraphQLEnumType,
     GraphQLObjectType,
     GraphQLScalarType,
+    GraphQLInputObjectType,
 } from 'graphql'
 
 const getDescription = ({
     description,
     indentLevel = 1,
-}: { description?: string | null; indentLevel?: 1 | 2 }) => {
+}: {
+    description?: string | null
+    indentLevel?: 1 | 2
+}) => {
     return description
         ? `"""\n${indentLevel === 2 ? '\t' : ''}${description}\n${
               indentLevel === 2 ? '\t' : ''
@@ -34,7 +38,13 @@ const getEnums = (enums: GraphQLEnumType[]) => {
     })
 }
 
-const getObjects = (objects: GraphQLObjectType<any, any>[]) => {
+const getObjectsTypes = ({
+    objects,
+    kind,
+}: {
+    objects: GraphQLObjectType[] | GraphQLInputObjectType[]
+    kind: 'type' | 'input'
+}) => {
     return objects.map((object) => {
         const fields = Object.keys(object.getFields()).map((field) => {
             const type = object.getFields()[field].type
@@ -42,9 +52,9 @@ const getObjects = (objects: GraphQLObjectType<any, any>[]) => {
             return `${field}: ${type}`
         })
 
-        return `${getDescription({ description: object.description })}type ${
+        return `${getDescription({ description: object.description })}${kind} ${
             object.name
-        } {\n\t${fields.join(',\n\t')}\n}`
+        } {\n\t${fields.join('\n\t')}\n}`
     })
 }
 
@@ -87,7 +97,9 @@ export const generateSchema = ({
     objects,
     queries,
     mutations,
+    input,
 }: {
+    input: Record<string, GraphQLInputObjectType>
     scalars: GraphQLScalarType<any, any>[]
     enums: GraphQLEnumType[]
     objects: GraphQLObjectType<any, any>[]
@@ -96,7 +108,10 @@ export const generateSchema = ({
 }) => {
     const scalarsTypes = getScalars(scalars || [])
     const enumsTypes = getEnums(enums || [])
-    const objectsTypes = getObjects(objects || [])
+    const objectsTypes = getObjectsTypes({
+        objects: objects || [],
+        kind: 'type',
+    })
     const queriesTypes = getQueriesOrMutations({
         queriesOrMutations: queries,
         kind: 'Query',
@@ -105,6 +120,21 @@ export const generateSchema = ({
         queriesOrMutations: mutations,
         kind: 'Mutation',
     })
+    const inputTypes = getObjectsTypes({
+        kind: 'input',
+        objects: Object.values(input),
+    })
 
-    console.log(queriesTypes)
+    Bun.write(
+        'tata.graphql',
+        `${scalarsTypes.join('\n\n')}\n\n${enumsTypes.join(
+            '\n\n',
+        )}\n\n${objectsTypes.join('\n\n')}\n\n${inputTypes.join(
+            '\n\n',
+        )}\n\n${queriesTypes}\n\n${mutationsTypes}`,
+    )
+
+    return `${scalarsTypes.join('\n')}\n${enumsTypes.join(
+        '\n',
+    )}\n${objectsTypes.join('\n')}\n${queriesTypes}\n${mutationsTypes}`
 }

@@ -163,6 +163,7 @@ export class WibeGraphQLSchema {
 
             const newUserObject = {
                 name: _user.name,
+                description: _user.description,
                 fields: {
                     ..._user.fields,
                     ...defaultUserFields,
@@ -196,7 +197,7 @@ export class WibeGraphQLSchema {
         const enums = this.createEnums()
         const objects = this.createObjects({ scalars, enums })
 
-        const queriesAndMutations = this.schemas.schema.class.reduce(
+        const queriesAndMutationsAndInput = this.schemas.schema.class.reduce(
             (previous, current) => {
                 const fields = current.fields
                 const className = current.name.replace(' ', '')
@@ -286,17 +287,28 @@ export class WibeGraphQLSchema {
                         customMutations[customMutationsKeys[key]]
                 }
 
+                previous.input[whereInputType.name] = whereInputType
+                previous.input[defaultInputType.name] = defaultInputType
+                previous.input[defaultUpdateInputType.name] =
+                    defaultUpdateInputType
+
                 return previous
             },
-            { queries: {}, mutations: {} } as {
+            { input: {}, queries: {}, mutations: {} } as {
+                input: Record<string, GraphQLInputObjectType>
                 queries: Record<string, GraphQLFieldConfig<any, any, any>>
                 mutations: Record<string, GraphQLFieldConfig<any, any, any>>
             },
         )
 
-        generateSchema({ ...queriesAndMutations, scalars, enums, objects })
+        generateSchema({
+            ...queriesAndMutationsAndInput,
+            scalars,
+            enums,
+            objects,
+        })
 
-        return { ...queriesAndMutations, scalars, enums, objects }
+        return { ...queriesAndMutationsAndInput, scalars, enums, objects }
     }
 
     createScalars() {
