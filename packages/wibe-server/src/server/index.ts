@@ -131,6 +131,7 @@ export class WibeApp {
             const wibeTypes = wibeSchema.getTypesFromSchema()
 
             Bun.write('generated/wibe.ts', wibeTypes)
+            Bun.write('generated/schema.graphql', types.stringSchema)
         }
 
         this.server.listen(WibeApp.config.port, () => {

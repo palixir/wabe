@@ -32,9 +32,9 @@ type WibeDefaultTypesWithoutArrayAndObject = Exclude<
     'Array'
 >
 
-const templateTypeToGraphqlType: Record<
+export const templateScalarType: Record<
     WibeDefaultTypesWithoutArrayAndObject,
-    GraphQLType
+    GraphQLScalarType
 > = {
     String: GraphQLString,
     Int: GraphQLInt,
@@ -44,7 +44,7 @@ const templateTypeToGraphqlType: Record<
     Email: EmailScalarType,
 }
 
-const templateWhereInput: Record<
+export const templateWhereInput: Record<
     Exclude<WibeDefaultTypes, 'Object'>,
     GraphQLInputObjectType
 > = {
@@ -67,11 +67,7 @@ export const wrapGraphQLTypeIn = ({
 
 // For the moment we not support array of array (for sql database it's tricky)
 // Don't export this function
-const getGraphqlTypeFromTemplate = ({
-    field,
-}: {
-    field: TypeField
-}) => {
+const getGraphqlTypeFromTemplate = ({ field }: { field: TypeField }) => {
     if (field.type === 'Array') {
         if (!field.typeValue) throw new Error('Type value not found')
         if (field.typeValue === 'Array')
@@ -79,14 +75,14 @@ const getGraphqlTypeFromTemplate = ({
 
         // We can cast because we exclude scalars and enums before in getGraphqlType
         return new GraphQLList(
-            templateTypeToGraphqlType[
+            templateScalarType[
                 field.typeValue as WibeDefaultTypesWithoutArrayAndObject
             ],
         )
     }
 
     // We can cast because we exclude scalars and enums before in getGraphqlType
-    return templateTypeToGraphqlType[
+    return templateScalarType[
         field.type as WibeDefaultTypesWithoutArrayAndObject
     ]
 }
@@ -339,7 +335,10 @@ export const getWhereInputType = ({
 export const getConnectionType = ({
     allObjects,
     object,
-}: { allObjects: GraphQLObjectType[]; object: GraphQLObjectType }) => {
+}: {
+    allObjects: GraphQLObjectType[]
+    object: GraphQLObjectType
+}) => {
     // We search in all object the corresponding output object
     const connection = allObjects.find(
         (o) => o.name === `${object.name}Connection`,

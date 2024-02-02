@@ -3,6 +3,36 @@ Phone custom scalar type
 """
 scalar Phone
 
+"""
+The `String` scalar type represents textual data, represented as UTF-8 character sequences. The String type is most often used by GraphQL to represent free-form human-readable text.
+"""
+scalar String
+
+"""
+The `Int` scalar type represents non-fractional signed whole numeric values. Int can represent values between -(2^31) and 2^31 - 1.
+"""
+scalar Int
+
+"""
+The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](https://en.wikipedia.org/wiki/IEEE_floating_point).
+"""
+scalar Float
+
+"""
+The `Boolean` scalar type represents `true` or `false`.
+"""
+scalar Boolean
+
+"""
+Date scalar type
+"""
+scalar Date
+
+"""
+Email scalar type
+"""
+scalar Email
+
 enum Role {
 	Admin,
 	Member
@@ -111,6 +141,67 @@ input _UserUpdateFieldsInput {
 	verifiedEmail: Boolean
 	accessToken: String
 	refreshToken: String
+}
+
+input StringWhereInput {
+	equalTo: String
+	notEqualTo: String
+	in: [String]
+	notIn: [String]
+}
+
+input IntWhereInput {
+	equalTo: Int
+	notEqualTo: Int
+	lessThan: Int
+	lessThanOrEqualTo: Int
+	greaterThan: Int
+	greaterThanOrEqualTo: Int
+	in: [Int]
+	notIn: [Int]
+}
+
+input FloatWhereInput {
+	equalTo: Float
+	notEqualTo: Float
+	lessThan: Float
+	lessThanOrEqualTo: Float
+	greaterThan: Float
+	greaterThanOrEqualTo: Float
+	in: [Float]
+	notIn: [Float]
+}
+
+input BooleanWhereInput {
+	equalTo: Boolean
+	notEqualTo: Boolean
+	in: [Boolean]
+	notIn: [Boolean]
+}
+
+input DateWhereInput {
+	equalTo: Date
+	notEqualTo: Date
+	in: [Date]
+	notIn: [Date]
+	lessThan: Date
+	lessThanOrEqualTo: Date
+	greaterThan: Date
+	greaterThanOrEqualTo: Date
+}
+
+input EmailWhereInput {
+	equalTo: Email
+	notEqualTo: Email
+	in: [Email]
+	notIn: [Email]
+}
+
+input ArrayWhereInput {
+	equalTo: Any
+	notEqualTo: Any
+	contains: Any
+	notContains: Any
 }
 
 type Query {

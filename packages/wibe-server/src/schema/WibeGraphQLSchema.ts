@@ -301,14 +301,20 @@ export class WibeGraphQLSchema {
             },
         )
 
-        generateSchema({
+        const stringSchema = generateSchema({
             ...queriesAndMutationsAndInput,
             scalars,
             enums,
             objects,
         })
 
-        return { ...queriesAndMutationsAndInput, scalars, enums, objects }
+        return {
+            ...queriesAndMutationsAndInput,
+            scalars,
+            enums,
+            objects,
+            stringSchema,
+        }
     }
 
     createScalars() {

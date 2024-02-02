@@ -5,6 +5,7 @@ import {
     GraphQLScalarType,
     GraphQLInputObjectType,
 } from 'graphql'
+import { templateScalarType, templateWhereInput } from './utils'
 
 const getDescription = ({
     description,
@@ -106,7 +107,10 @@ export const generateSchema = ({
     queries: Record<string, GraphQLFieldConfig<any, any>>
     mutations: Record<string, GraphQLFieldConfig<any, any>>
 }) => {
-    const scalarsTypes = getScalars(scalars || [])
+    const scalarsTypes = getScalars([
+        ...scalars,
+        ...Object.values(templateScalarType),
+    ])
     const enumsTypes = getEnums(enums || [])
     const objectsTypes = getObjectsTypes({
         objects: objects || [],
@@ -122,19 +126,15 @@ export const generateSchema = ({
     })
     const inputTypes = getObjectsTypes({
         kind: 'input',
-        objects: Object.values(input),
+        objects: [
+            ...Object.values(input),
+            ...Object.values(templateWhereInput),
+        ],
     })
 
-    Bun.write(
-        'tata.graphql',
-        `${scalarsTypes.join('\n\n')}\n\n${enumsTypes.join(
-            '\n\n',
-        )}\n\n${objectsTypes.join('\n\n')}\n\n${inputTypes.join(
-            '\n\n',
-        )}\n\n${queriesTypes}\n\n${mutationsTypes}`,
-    )
-
-    return `${scalarsTypes.join('\n')}\n${enumsTypes.join(
-        '\n',
-    )}\n${objectsTypes.join('\n')}\n${queriesTypes}\n${mutationsTypes}`
+    return `${scalarsTypes.join('\n\n')}\n\n${enumsTypes.join(
+        '\n\n',
+    )}\n\n${objectsTypes.join('\n\n')}\n\n${inputTypes.join(
+        '\n\n',
+    )}\n\n${queriesTypes}\n\n${mutationsTypes}`
 }
