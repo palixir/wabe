@@ -113,12 +113,7 @@ export class WibeApp {
         this.server.use(
             await apollo({
                 schema,
-                context: async (context) => {
-                    return {
-                        cookie: context.cookie,
-                        jwt: context.jwt,
-                    }
-                },
+                context: async (context) => context,
             }),
         )
 

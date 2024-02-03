@@ -30,49 +30,45 @@ export class DatabaseController {
         return this.adapter.createClass(className)
     }
 
-    async getObject<T extends keyof WibeSchemaTypes>(
-        params: GetObjectOptions<T>,
-    ) {
+    async getObject<T extends WibeSchemaTypes>(params: GetObjectOptions<T>) {
         return this.adapter.getObject(params)
     }
 
-    async getObjects<T extends keyof WibeSchemaTypes>(
-        params: GetObjectsOptions<T>,
-    ) {
+    async getObjects<T extends WibeSchemaTypes>(params: GetObjectsOptions<T>) {
         return this.adapter.getObjects(params)
     }
 
-    async createObject<T extends keyof WibeSchemaTypes>(
+    async createObject<T extends WibeSchemaTypes>(
         params: CreateObjectOptions<T>,
     ) {
         return this.adapter.createObject(params)
     }
 
-    async createObjects<T extends keyof WibeSchemaTypes>(
+    async createObjects<T extends WibeSchemaTypes>(
         params: CreateObjectsOptions<T>,
     ) {
         return this.adapter.createObjects(params)
     }
 
-    async updateObject<T extends keyof WibeSchemaTypes>(
+    async updateObject<T extends WibeSchemaTypes>(
         params: UpdateObjectOptions<T>,
     ) {
         return this.adapter.updateObject(params)
     }
 
-    async updateObjects<T extends keyof WibeSchemaTypes>(
+    async updateObjects<T extends WibeSchemaTypes>(
         params: UpdateObjectsOptions<T>,
     ) {
         return this.adapter.updateObjects(params)
     }
 
-    async deleteObject<T extends keyof WibeSchemaTypes>(
+    async deleteObject<T extends WibeSchemaTypes>(
         params: DeleteObjectOptions<T>,
     ) {
         return this.adapter.deleteObject(params)
     }
 
-    async deleteObjects<T extends keyof WibeSchemaTypes>(
+    async deleteObjects<T extends WibeSchemaTypes>(
         params: DeleteObjectsOptions<T>,
     ) {
         return this.adapter.deleteObjects(params)

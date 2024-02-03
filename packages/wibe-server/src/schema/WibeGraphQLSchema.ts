@@ -3,7 +3,6 @@ import {
     GraphQLFieldConfig,
     GraphQLID,
     GraphQLInputObjectType,
-    GraphQLInputType,
     GraphQLInt,
     GraphQLInterfaceType,
     GraphQLList,
@@ -43,7 +42,6 @@ import {
 } from './utils'
 import { signUpResolver } from '../graphql/resolvers/signUp'
 import { signInResolver } from '../graphql/resolvers/signIn'
-import { generateSchema } from './generate'
 
 // This class is tested in e2e test in graphql folder
 export class WibeGraphQLSchema {

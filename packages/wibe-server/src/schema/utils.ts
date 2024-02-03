@@ -37,7 +37,6 @@ export const templateScalarType: Record<
     WibeDefaultTypesWithoutArrayAndObject,
     GraphQLScalarType
 > = {
-    Any: AnyScalarType,
     String: GraphQLString,
     Int: GraphQLInt,
     Float: GraphQLFloat,

@@ -170,7 +170,7 @@ export class Schema {
             )
 
             const type = `export type ${schema.name} = ${JSON.stringify(
-                fieldsRes,
+                { id: 'string', ...fieldsRes },
                 null,
                 2,
             )}`

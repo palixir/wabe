@@ -1,7 +1,7 @@
-import { WibeSchemaTypes } from '../../../generated/wibe'
+import { WibeSchemaTypes, _User } from '../../../generated/wibe'
 
-type WhereAggregation<T extends keyof WibeSchemaTypes> = {
-    [key in keyof WibeSchemaTypes[T] | 'id']: {
+type WhereAggregation<T extends WibeSchemaTypes> = {
+    [key in keyof T | 'id']: {
         equalTo?: any
         notEqualTo?: any
         greaterThan?: any
@@ -15,12 +15,12 @@ type WhereAggregation<T extends keyof WibeSchemaTypes> = {
     }
 }
 
-type WhereConditional<T extends keyof WibeSchemaTypes> = {
+type WhereConditional<T extends WibeSchemaTypes> = {
     OR?: Array<WhereType<T>>
     AND?: Array<WhereType<T>>
 }
 
-export type WhereType<T extends keyof WibeSchemaTypes> = Partial<
+export type WhereType<T extends WibeSchemaTypes> = Partial<
     WhereAggregation<T>
 > &
     WhereConditional<T>
@@ -30,95 +30,104 @@ export interface AdapterOptions {
     databaseName: string
 }
 
-export interface GetObjectOptions<T extends keyof WibeSchemaTypes> {
+export type FieldTata<T> = Partial<Pick<T, keyof T>>
+
+export interface GetObjectOptions<T extends WibeSchemaTypes> {
     className: string
     id: string
-    fields: Array<keyof WibeSchemaTypes[T] | '*' | 'id'>
+    fields: Array<keyof T | '*' | 'id'>
 }
 
-export interface GetObjectsOptions<T extends keyof WibeSchemaTypes> {
+export interface GetObjectsOptions<T extends WibeSchemaTypes> {
     className: string
     where?: WhereType<T>
-    fields: Array<keyof WibeSchemaTypes[T] | '*' | 'id'>
+    fields: Array<keyof T | '*' | 'id'>
     offset?: number
     limit?: number
 }
 
-export interface CreateObjectOptions<T extends keyof WibeSchemaTypes> {
+export interface CreateObjectOptions<T extends WibeSchemaTypes> {
     className: string
     data: Record<string, any>
-    fields: Array<keyof WibeSchemaTypes[T] | '*' | 'id'>
+    fields: Array<keyof T | '*' | 'id'>
 }
-export interface CreateObjectsOptions<T extends keyof WibeSchemaTypes> {
+export interface CreateObjectsOptions<T extends WibeSchemaTypes> {
     className: string
     data: Array<Record<string, any>>
-    fields: Array<keyof WibeSchemaTypes[T] | '*' | 'id'>
+    fields: Array<keyof T | '*' | 'id'>
     offset?: number
     limit?: number
 }
 
-export interface UpdateObjectOptions<T extends keyof WibeSchemaTypes> {
+export interface UpdateObjectOptions<T extends WibeSchemaTypes> {
     className: string
     id: string
     data: Record<string, any>
-    fields: Array<keyof WibeSchemaTypes[T] | '*' | 'id'>
+    fields: Array<keyof T | '*' | 'id'>
 }
 
-export interface UpdateObjectsOptions<T extends keyof WibeSchemaTypes> {
+export interface UpdateObjectsOptions<T extends WibeSchemaTypes> {
     className: string
     where: WhereType<T>
     data: Record<string, any>
-    fields: Array<keyof WibeSchemaTypes[T] | '*' | 'id'>
+    fields: Array<keyof T | '*' | 'id'>
     offset?: number
     limit?: number
 }
 
-export interface DeleteObjectOptions<T extends keyof WibeSchemaTypes> {
+export interface DeleteObjectOptions<T extends WibeSchemaTypes> {
     className: string
     id: string
-    fields: Array<keyof WibeSchemaTypes[T] | '*' | 'id'>
+    fields: Array<keyof T | '*' | 'id'>
 }
 
-export interface DeleteObjectsOptions<T extends keyof WibeSchemaTypes> {
+export interface DeleteObjectsOptions<T extends WibeSchemaTypes> {
     className: string
     where: WhereType<T>
-    fields: Array<keyof WibeSchemaTypes[T] | '*' | 'id'>
+    fields: Array<keyof T | '*' | 'id'>
     offset?: number
     limit?: number
 }
 
-// TODO : Type the return of the functions
+const toto = <T extends WibeSchemaTypes, K extends Array<keyof T>>(): Pick<
+    T,
+    K[number]
+> => {}
+
+const res = toto<_User, ['name', 'age']>()
+res.age
+
 export interface DatabaseAdapter {
     connect(): Promise<any>
     close(): Promise<any>
 
     createClass(className: string): Promise<any>
 
-    getObject<T extends keyof WibeSchemaTypes>(
+    getObject<T extends WibeSchemaTypes>(
         params: GetObjectOptions<T>,
-    ): Promise<T>
-    getObjects<T extends keyof WibeSchemaTypes>(
+    ): Promise<FieldTata<T> | null>
+    getObjects<T extends WibeSchemaTypes>(
         params: GetObjectsOptions<T>,
-    ): Promise<T[]>
+    ): Promise<Partial<T>[]>
 
-    createObject<T extends keyof WibeSchemaTypes>(
+    createObject<T extends WibeSchemaTypes>(
         params: CreateObjectOptions<T>,
-    ): Promise<T>
-    createObjects<T extends keyof WibeSchemaTypes>(
+    ): Promise<Partial<T>>
+    createObjects<T extends WibeSchemaTypes>(
         params: CreateObjectsOptions<T>,
-    ): Promise<T[]>
+    ): Promise<Partial<T>[]>
 
-    updateObject<T extends keyof WibeSchemaTypes>(
+    updateObject<T extends WibeSchemaTypes>(
         params: UpdateObjectOptions<T>,
-    ): Promise<T>
-    updateObjects<T extends keyof WibeSchemaTypes>(
+    ): Promise<Partial<T>>
+    updateObjects<T extends WibeSchemaTypes>(
         params: UpdateObjectsOptions<T>,
-    ): Promise<T[]>
+    ): Promise<Partial<T>[]>
 
-    deleteObject<T extends keyof WibeSchemaTypes>(
+    deleteObject<T extends WibeSchemaTypes>(
         params: DeleteObjectOptions<T>,
-    ): Promise<T | null>
-    deleteObjects<T extends keyof WibeSchemaTypes>(
+    ): Promise<Partial<T> | null>
+    deleteObjects<T extends WibeSchemaTypes>(
         params: DeleteObjectsOptions<T>,
-    ): Promise<T[]>
+    ): Promise<Partial<T>[]>
 }

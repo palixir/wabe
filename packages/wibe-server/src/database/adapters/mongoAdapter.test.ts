@@ -4,6 +4,7 @@ import { closeTests, setupTests } from '../../utils/helper'
 import { MongoAdapter, buildMongoWhereQuery } from './MongoAdapter'
 import { WibeApp } from '../../server'
 import { ObjectId } from 'mongodb'
+import { _User } from '../../../generated/wibe'
 
 describe('Mongo adapter', () => {
     let mongoAdapter: MongoAdapter
@@ -30,8 +31,8 @@ describe('Mongo adapter', () => {
     })
 
     it('should getObjects using id and not _id', async () => {
-        const insertedObjects = await mongoAdapter.createObjects<'User'>({
-            className: 'User',
+        const insertedObjects = await mongoAdapter.createObjects<_User>({
+            className: '_User',
             data: [
                 {
                     name: 'Lucas',
@@ -47,8 +48,8 @@ describe('Mongo adapter', () => {
 
         if (!insertedObjects) fail()
 
-        const res = await mongoAdapter.getObjects<'User'>({
-            className: 'User',
+        const res = await mongoAdapter.getObjects<_User>({
+            className: '_User',
             where: {
                 id: { equalTo: new ObjectId(insertedObjects[0].id) },
             },
@@ -266,7 +267,7 @@ describe('Mongo adapter', () => {
         expect(res[0].name).toEqual('John2')
         expect(res[1].name).toEqual('John3')
 
-        const res2 = await mongoAdapter.deleteObjects<'User'>({
+        const res2 = await mongoAdapter.deleteObjects<_User>({
             className: 'Test1',
             where: {
                 OR: [
@@ -288,14 +289,14 @@ describe('Mongo adapter', () => {
     it('should create class', async () => {
         expect((await mongoAdapter.database?.collections())?.length).toBe(0)
 
-        await mongoAdapter.createClass('User')
+        await mongoAdapter.createClass('_User')
 
         const collections = await mongoAdapter.database?.collections()
 
         if (!collections) fail()
 
         expect((await mongoAdapter.database?.collections())?.length).toBe(1)
-        expect(collections[0].collectionName).toBe('User')
+        expect(collections[0].collectionName).toBe('_User')
     })
 
     it('should get the _id of an object', async () => {
@@ -332,7 +333,7 @@ describe('Mongo adapter', () => {
         )
         cloneMongoAdapter.database = undefined
 
-        expect(cloneMongoAdapter.createClass('User')).rejects.toThrow(
+        expect(cloneMongoAdapter.createClass('_User')).rejects.toThrow(
             'Connection to database is not established',
         )
     })
@@ -437,7 +438,7 @@ describe('Mongo adapter', () => {
             fields: ['name'],
         })
 
-        await mongoAdapter.createObject<'User'>({
+        await mongoAdapter.createObject<_User>({
             className: 'Test3',
             data: {
                 name: 'John2',
@@ -448,7 +449,7 @@ describe('Mongo adapter', () => {
 
         // OR statement
         expect(
-            await mongoAdapter.getObjects<'User'>({
+            await mongoAdapter.getObjects<_User>({
                 className: 'Test3',
                 fields: ['*'],
                 where: {
@@ -476,7 +477,7 @@ describe('Mongo adapter', () => {
         ])
 
         expect(
-            await mongoAdapter.getObjects<'User'>({
+            await mongoAdapter.getObjects<_User>({
                 className: 'Test3',
                 fields: ['*'],
                 where: {
@@ -500,7 +501,7 @@ describe('Mongo adapter', () => {
 
         // AND statement
         expect(
-            await mongoAdapter.getObjects<'User'>({
+            await mongoAdapter.getObjects<_User>({
                 className: 'Test3',
                 fields: ['*'],
                 where: {
@@ -523,7 +524,7 @@ describe('Mongo adapter', () => {
         ])
 
         expect(
-            await mongoAdapter.getObjects<'User'>({
+            await mongoAdapter.getObjects<_User>({
                 className: 'Test3',
                 fields: ['*'],
                 where: {
@@ -541,7 +542,7 @@ describe('Mongo adapter', () => {
 
         // Equal to statement
         expect(
-            await mongoAdapter.getObjects<'User'>({
+            await mongoAdapter.getObjects<_User>({
                 className: 'Test3',
                 fields: ['*'],
                 where: {
@@ -641,7 +642,7 @@ describe('Mongo adapter', () => {
 
     it("should return null if the object doesn't exist", async () => {
         expect(
-            await mongoAdapter.getObject<'User'>({
+            await mongoAdapter.getObject<_User>({
                 className: 'Collection1',
                 id: '5f9b3b3b3b3b3b3b3b3b3b3b',
                 fields: ['name'],
@@ -650,8 +651,8 @@ describe('Mongo adapter', () => {
     })
 
     it('should create object and return the created object', async () => {
-        const insertedObject = await mongoAdapter.createObject<'User'>({
-            className: 'User',
+        const insertedObject = await mongoAdapter.createObject<_User>({
+            className: '_User',
             data: {
                 name: 'Lucas',
                 age: 23,
@@ -661,8 +662,8 @@ describe('Mongo adapter', () => {
 
         expect(insertedObject).toEqual({ age: 23, id: expect.anything() })
 
-        const insertedObject2 = await mongoAdapter.createObject<'User'>({
-            className: 'User',
+        const insertedObject2 = await mongoAdapter.createObject<_User>({
+            className: '_User',
             data: {
                 name: 'Lucas2',
                 age: 24,
@@ -678,8 +679,8 @@ describe('Mongo adapter', () => {
     })
 
     it('should create multiple objects and return an array of the created object', async () => {
-        const insertedObjects = await mongoAdapter.createObjects<'User'>({
-            className: 'User',
+        const insertedObjects = await mongoAdapter.createObjects<_User>({
+            className: '_User',
             data: [
                 {
                     name: 'Lucas3',
@@ -706,8 +707,8 @@ describe('Mongo adapter', () => {
     })
 
     it('should create multiple objects and return an array of the created object with * fields', async () => {
-        const insertedObjects = await mongoAdapter.createObjects<'User'>({
-            className: 'User',
+        const insertedObjects = await mongoAdapter.createObjects<_User>({
+            className: '_User',
             data: [
                 {
                     name: 'Lucas3',
@@ -736,8 +737,8 @@ describe('Mongo adapter', () => {
     })
 
     it('should update object', async () => {
-        const insertedObject = await mongoAdapter.createObject<'User'>({
-            className: 'User',
+        const insertedObject = await mongoAdapter.createObject<_User>({
+            className: '_User',
             data: {
                 name: 'John',
                 age: 20,
@@ -749,8 +750,8 @@ describe('Mongo adapter', () => {
 
         const id = insertedObject.id
 
-        const updatedObject = await mongoAdapter.updateObject<'User'>({
-            className: 'User',
+        const updatedObject = await mongoAdapter.updateObject<_User>({
+            className: '_User',
             id: id.toString(),
             data: { name: 'Doe' },
             fields: ['name'],
@@ -763,8 +764,8 @@ describe('Mongo adapter', () => {
             id: expect.anything(),
         })
 
-        const updatedObject2 = await mongoAdapter.updateObject<'User'>({
-            className: 'User',
+        const updatedObject2 = await mongoAdapter.updateObject<_User>({
+            className: '_User',
             id: id.toString(),
             data: { name: 'Doe' },
             fields: ['*'],
@@ -780,8 +781,8 @@ describe('Mongo adapter', () => {
     })
 
     it('should update multiple objects', async () => {
-        const insertedObjects = await mongoAdapter.createObjects<'User'>({
-            className: 'User',
+        const insertedObjects = await mongoAdapter.createObjects<_User>({
+            className: '_User',
             data: [
                 {
                     name: 'Lucas',
@@ -797,8 +798,8 @@ describe('Mongo adapter', () => {
 
         if (!insertedObjects) fail()
 
-        const updatedObjects = await mongoAdapter.updateObjects<'User'>({
-            className: 'User',
+        const updatedObjects = await mongoAdapter.updateObjects<_User>({
+            className: '_User',
             where: {
                 name: { equalTo: 'Lucas' },
             },
@@ -814,8 +815,8 @@ describe('Mongo adapter', () => {
             },
         ])
 
-        const updatedObjects2 = await mongoAdapter.updateObjects<'User'>({
-            className: 'User',
+        const updatedObjects2 = await mongoAdapter.updateObjects<_User>({
+            className: '_User',
             where: {
                 age: { greaterThanOrEqualTo: 20 },
             },
@@ -838,8 +839,8 @@ describe('Mongo adapter', () => {
     })
 
     it('should update the same field of an objet that which we use in the where field', async () => {
-        const insertedObject = await mongoAdapter.createObject<'User'>({
-            className: 'User',
+        const insertedObject = await mongoAdapter.createObject<_User>({
+            className: '_User',
             data: {
                 name: 'John',
                 age: 20,
@@ -849,8 +850,8 @@ describe('Mongo adapter', () => {
 
         if (!insertedObject) fail()
 
-        const updatedObjects = await mongoAdapter.updateObjects<'User'>({
-            className: 'User',
+        const updatedObjects = await mongoAdapter.updateObjects<_User>({
+            className: '_User',
             data: { name: 'Doe' },
             where: {
                 name: {
@@ -869,8 +870,8 @@ describe('Mongo adapter', () => {
     })
 
     it('should delete one object', async () => {
-        const insertedObject = await mongoAdapter.createObject<'User'>({
-            className: 'User',
+        const insertedObject = await mongoAdapter.createObject<_User>({
+            className: '_User',
             data: {
                 name: 'John',
                 age: 20,
@@ -882,8 +883,8 @@ describe('Mongo adapter', () => {
 
         const id = insertedObject.id
 
-        const deletedObject = await mongoAdapter.deleteObject<'User'>({
-            className: 'User',
+        const deletedObject = await mongoAdapter.deleteObject<_User>({
+            className: '_User',
             id: id.toString(),
             fields: ['*'],
         })
@@ -898,8 +899,8 @@ describe('Mongo adapter', () => {
     })
 
     it("should not delete an user that doesn't exist", async () => {
-        const res = await mongoAdapter.deleteObject<'User'>({
-            className: 'User',
+        const res = await mongoAdapter.deleteObject<_User>({
+            className: '_User',
             id: '5f9b3b3b3b3b3b3b3b3b3b3b',
             fields: ['*'],
         })
@@ -908,8 +909,8 @@ describe('Mongo adapter', () => {
     })
 
     it('should delete multiple object', async () => {
-        await mongoAdapter.createObject<'User'>({
-            className: 'User',
+        await mongoAdapter.createObject<_User>({
+            className: '_User',
             data: {
                 name: 'John',
                 age: 18,
@@ -917,8 +918,8 @@ describe('Mongo adapter', () => {
             fields: ['*'],
         })
 
-        await mongoAdapter.createObject<'User'>({
-            className: 'User',
+        await mongoAdapter.createObject<_User>({
+            className: '_User',
             data: {
                 name: 'Lucas',
                 age: 18,
@@ -926,15 +927,15 @@ describe('Mongo adapter', () => {
             fields: ['*'],
         })
 
-        const deletedObject = await mongoAdapter.deleteObjects<'User'>({
-            className: 'User',
+        const deletedObjects = await mongoAdapter.deleteObjects<_User>({
+            className: '_User',
             where: { age: { equalTo: 18 } },
             fields: ['*'],
         })
 
-        if (!deletedObject) fail()
+        if (!deletedObjects) fail()
 
-        expect(deletedObject).toEqual([
+        expect(deletedObjects).toEqual([
             {
                 id: expect.anything(),
                 name: 'John',
@@ -949,7 +950,7 @@ describe('Mongo adapter', () => {
     })
 
     it('should build where query for mongo adapter', () => {
-        const where = buildMongoWhereQuery<'User'>({
+        const where = buildMongoWhereQuery<_User>({
             name: { equalTo: 'John' },
             age: { greaterThan: 20 },
             OR: [
