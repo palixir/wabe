@@ -5,7 +5,7 @@ import { DatabaseConfig } from '../database'
 import { DatabaseController } from '../database/controllers/DatabaseController'
 import { MongoAdapter } from '../database/adapters/MongoAdapter'
 import { Schema, SchemaInterface } from '../schema/Schema'
-import { GraphQLObjectType, GraphQLSchema } from 'graphql'
+import { GraphQLObjectType, GraphQLSchema, printSchema } from 'graphql'
 import { WibeGraphQLSchema } from '../schema/WibeGraphQLSchema'
 import { AuthenticationConfig } from '../authentication/interface'
 import { WibeRoute, defaultRoutes } from './routes'
@@ -131,7 +131,7 @@ export class WibeApp {
             const wibeTypes = wibeSchema.getTypesFromSchema()
 
             Bun.write('generated/wibe.ts', wibeTypes)
-            Bun.write('generated/schema.graphql', types.stringSchema)
+            Bun.write('generated/schema.graphql', printSchema(schema))
         }
 
         this.server.listen(WibeApp.config.port, () => {

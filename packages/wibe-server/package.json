@@ -9,7 +9,8 @@
         "test": "bun test --watch",
         "test:only": "bun test --watch --only",
         "linter": "biome lint ./src/**/*.ts",
-        "formatter": "biome format --write ./src"
+        "formatter": "biome format --write ./src",
+        "codegen": "graphql-codegen --config codegen.ts"
     },
     "dependencies": {
         "@apollo/server": "4.10.0",
@@ -21,6 +22,7 @@
     },
     "devDependencies": {
         "@biomejs/biome": "1.5.3",
+        "@graphql-codegen/cli": "5.0.0",
         "@parcel/watcher": "2.3.0",
         "@types/bun": "1.0.2",
         "@types/uuid": "9.0.6",
@@ -30,6 +32,8 @@
         "typescript": "5.3.3",
         "uuid": "9.0.1",
         "wait-on": "7.2.0",
-        "wibe-mongodb-launcher": "workspace:*"
+        "wibe-mongodb-launcher": "workspace:*",
+        "@graphql-codegen/typescript": "4.0.1",
+        "@graphql-codegen/typescript-resolvers": "4.0.1"
     }
 }

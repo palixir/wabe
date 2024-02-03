@@ -3,6 +3,7 @@ import {
     GraphQLFieldConfig,
     GraphQLID,
     GraphQLInputObjectType,
+    GraphQLInputType,
     GraphQLInt,
     GraphQLInterfaceType,
     GraphQLList,
@@ -287,33 +288,19 @@ export class WibeGraphQLSchema {
                         customMutations[customMutationsKeys[key]]
                 }
 
-                previous.input[whereInputType.name] = whereInputType
-                previous.input[defaultInputType.name] = defaultInputType
-                previous.input[defaultUpdateInputType.name] =
-                    defaultUpdateInputType
-
                 return previous
             },
-            { input: {}, queries: {}, mutations: {} } as {
-                input: Record<string, GraphQLInputObjectType>
+            { queries: {}, mutations: {} } as {
                 queries: Record<string, GraphQLFieldConfig<any, any, any>>
                 mutations: Record<string, GraphQLFieldConfig<any, any, any>>
             },
         )
-
-        const stringSchema = generateSchema({
-            ...queriesAndMutationsAndInput,
-            scalars,
-            enums,
-            objects,
-        })
 
         return {
             ...queriesAndMutationsAndInput,
             scalars,
             enums,
             objects,
-            stringSchema,
         }
     }
 

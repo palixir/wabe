@@ -13,6 +13,7 @@ import {
 } from 'graphql'
 import { SchemaFields, TypeField, WibeDefaultTypes, WibeTypes } from './Schema'
 import {
+    AnyScalarType,
     AnyWhereInput,
     ArrayWhereInput,
     BooleanWhereInput,
@@ -36,6 +37,7 @@ export const templateScalarType: Record<
     WibeDefaultTypesWithoutArrayAndObject,
     GraphQLScalarType
 > = {
+    Any: AnyScalarType,
     String: GraphQLString,
     Int: GraphQLInt,
     Float: GraphQLFloat,
