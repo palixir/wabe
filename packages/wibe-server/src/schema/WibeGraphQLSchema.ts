@@ -42,6 +42,7 @@ import {
 } from './utils'
 import { signUpResolver } from '../graphql/resolvers/signUp'
 import { signInResolver } from '../graphql/resolvers/signIn'
+import { WibeSchemaTypes } from '../../generated/wibe'
 
 // This class is tested in e2e test in graphql folder
 export class WibeGraphQLSchema {
@@ -577,7 +578,13 @@ export class WibeGraphQLSchema {
                 description: object.description,
                 args: { id: { type: GraphQLID } },
                 resolve: (root, args, ctx, info) =>
-                    queryForOneObject(root, args, ctx, info, className),
+                    queryForOneObject(
+                        root,
+                        args,
+                        ctx,
+                        info,
+                        className as keyof WibeSchemaTypes,
+                    ),
             },
             [`findMany${className}`]: {
                 type: new GraphQLNonNull(
@@ -590,7 +597,13 @@ export class WibeGraphQLSchema {
                     limit: { type: GraphQLInt },
                 },
                 resolve: (root, args, ctx, info) =>
-                    queryForMultipleObject(root, args, ctx, info, className),
+                    queryForMultipleObject(
+                        root,
+                        args,
+                        ctx,
+                        info,
+                        className as keyof WibeSchemaTypes,
+                    ),
             },
         } as Record<string, GraphQLFieldConfig<any, any, any>>
     }
@@ -666,7 +679,13 @@ export class WibeGraphQLSchema {
                 description: object.description,
                 args: { input: { type: createInputType } },
                 resolve: (root, args, ctx, info) =>
-                    mutationToCreateObject(root, args, ctx, info, className),
+                    mutationToCreateObject(
+                        root,
+                        args,
+                        ctx,
+                        info,
+                        className as keyof WibeSchemaTypes,
+                    ),
             },
             [`createMany${className}`]: {
                 type: new GraphQLNonNull(
@@ -680,7 +699,7 @@ export class WibeGraphQLSchema {
                         args,
                         ctx,
                         info,
-                        className,
+                        className as keyof WibeSchemaTypes,
                     ),
             },
             [`updateOne${className}`]: {
@@ -688,7 +707,13 @@ export class WibeGraphQLSchema {
                 description: object.description,
                 args: { input: { type: updateInputType } },
                 resolve: (root, args, ctx, info) =>
-                    mutationToUpdateObject(root, args, ctx, info, className),
+                    mutationToUpdateObject(
+                        root,
+                        args,
+                        ctx,
+                        info,
+                        className as keyof WibeSchemaTypes,
+                    ),
             },
             [`updateMany${className}`]: {
                 type: new GraphQLNonNull(
@@ -702,7 +727,7 @@ export class WibeGraphQLSchema {
                         args,
                         ctx,
                         info,
-                        className,
+                        className as keyof WibeSchemaTypes,
                     ),
             },
             [`deleteOne${className}`]: {
@@ -714,7 +739,13 @@ export class WibeGraphQLSchema {
                     },
                 },
                 resolve: (root, args, ctx, info) =>
-                    mutationToDeleteObject(root, args, ctx, info, className),
+                    mutationToDeleteObject(
+                        root,
+                        args,
+                        ctx,
+                        info,
+                        className as keyof WibeSchemaTypes,
+                    ),
             },
             [`deleteMany${className}`]: {
                 type: new GraphQLNonNull(
@@ -728,7 +759,7 @@ export class WibeGraphQLSchema {
                         args,
                         ctx,
                         info,
-                        className,
+                        className as keyof WibeSchemaTypes,
                     ),
             },
         }

@@ -23,7 +23,7 @@ describe('GraphQL : Scalars', () => {
 
     describe('Date', () => {
         it('should create a date with JavaScript Date', async () => {
-            const { createManyUser } = await client.request(
+            const { createManyUser } = await client.request<any>(
                 graphql.createManyUser,
                 {
                     input: {
@@ -43,7 +43,7 @@ describe('GraphQL : Scalars', () => {
         })
 
         it('should create a date with timestamp in number', async () => {
-            const { createManyUser } = await client.request(
+            const { createManyUser } = await client.request<any>(
                 graphql.createManyUser,
                 {
                     input: {
@@ -63,7 +63,7 @@ describe('GraphQL : Scalars', () => {
         })
 
         it('should create a date with iso string', async () => {
-            const { createManyUser } = await client.request(
+            const { createManyUser } = await client.request<any>(
                 graphql.createManyUser,
                 {
                     input: {
@@ -83,7 +83,7 @@ describe('GraphQL : Scalars', () => {
         })
 
         it('should create a date with partial date', async () => {
-            const { createManyUser } = await client.request(
+            const { createManyUser } = await client.request<any>(
                 graphql.createManyUser,
                 {
                     input: {
@@ -136,7 +136,7 @@ describe('GraphQL : Scalars', () => {
 
     describe('Email', () => {
         it('should create an email', async () => {
-            const { createManyUser } = await client.request(
+            const { createManyUser } = await client.request<any>(
                 graphql.createManyUser,
                 {
                     input: {

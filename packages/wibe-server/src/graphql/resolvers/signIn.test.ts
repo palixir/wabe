@@ -36,7 +36,7 @@ describe('SignIn', () => {
             timeCost: 2, // OWASP recommands minimum 2 iterations
         })
 
-        await client.request(graphql.createOne_User, {
+        await client.request<any>(graphql.createOne_User, {
             input: {
                 fields: {
                     email: 'email@test.fr',
@@ -47,15 +47,18 @@ describe('SignIn', () => {
     })
 
     afterEach(async () => {
-        const { findMany_User } = await client.request(graphql.findMany_User, {
-            where: {
-                email: { equalTo: 'email@test.fr' },
+        const { findMany_User } = await client.request<any>(
+            graphql.findMany_User,
+            {
+                where: {
+                    email: { equalTo: 'email@test.fr' },
+                },
             },
-        })
+        )
 
         await Promise.all(
             findMany_User.edges.map(({ node }: { node: any }) =>
-                client.request(graphql.deleteOne_User, {
+                client.request<any>(graphql.deleteOne_User, {
                     input: { id: node.id },
                 }),
             ),
@@ -65,7 +68,7 @@ describe('SignIn', () => {
     it('should be able to sign in', async () => {
         const spySetCookie = spyOn(Cookie.prototype, 'add')
 
-        const { signIn } = await client.request(graphql.signIn, {
+        const { signIn } = await client.request<any>(graphql.signIn, {
             input: {
                 email: 'email@test.fr',
                 password: 'passwordtest',
@@ -74,7 +77,7 @@ describe('SignIn', () => {
 
         const {
             findMany_User: { edges },
-        } = await client.request(graphql.findMany_User, {
+        } = await client.request<any>(graphql.findMany_User, {
             where: {
                 email: { equalTo: 'email@test.fr' },
             },
@@ -116,7 +119,7 @@ describe('SignIn', () => {
         const spySetCookie = spyOn(Cookie.prototype, 'add')
 
         expect(
-            client.request(graphql.signIn, {
+            client.request<any>(graphql.signIn, {
                 input: {
                     email: 'email@test.fr',
                     password: 'badpassword',
@@ -127,7 +130,7 @@ describe('SignIn', () => {
         expect(spySetCookie).toHaveBeenCalledTimes(0)
 
         expect(
-            client.request(graphql.signIn, {
+            client.request<any>(graphql.signIn, {
                 input: {
                     email: 'bademail@test.fr',
                     password: 'passwordtest',

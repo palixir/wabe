@@ -21,13 +21,13 @@ describe('signInWithProvider', () => {
     })
 
     afterEach(async () => {
-        const { findMany_User } = await client.request(
+        const { findMany_User } = await client.request<any>(
             graphql.findMany_User,
             {},
         )
         await Promise.all(
             findMany_User.edges.map(({ node }: { node: any }) =>
-                client.request(graphql.deleteOne_User, {
+                client.request<any>(graphql.deleteOne_User, {
                     input: { id: node.id },
                 }),
             ),
@@ -35,7 +35,7 @@ describe('signInWithProvider', () => {
     })
 
     it('should create an user if not exist', async () => {
-        const { signInWithProvider } = await client.request(
+        const { signInWithProvider } = await client.request<any>(
             graphql.signInWithProvider,
             {
                 input: {
@@ -52,7 +52,7 @@ describe('signInWithProvider', () => {
 
         const {
             findMany_User: { edges },
-        } = await client.request(graphql.findMany_User, {
+        } = await client.request<any>(graphql.findMany_User, {
             where: {
                 email: {
                     equalTo: 'email@test.com',
@@ -67,7 +67,7 @@ describe('signInWithProvider', () => {
     })
 
     it('should update the authentication field of an _User if the _User already exist', async () => {
-        const { signInWithProvider } = await client.request(
+        const { signInWithProvider } = await client.request<any>(
             graphql.signInWithProvider,
             {
                 input: {
@@ -83,7 +83,7 @@ describe('signInWithProvider', () => {
         expect(signInWithProvider).toEqual(true)
 
         const { signInWithProvider: signInWithProvider2 } =
-            await client.request(graphql.signInWithProvider, {
+            await client.request<any>(graphql.signInWithProvider, {
                 input: {
                     email: 'email@test.com',
                     verifiedEmail: true,
@@ -97,7 +97,7 @@ describe('signInWithProvider', () => {
 
         const {
             findMany_User: { edges },
-        } = await client.request(graphql.findMany_User, {
+        } = await client.request<any>(graphql.findMany_User, {
             where: {
                 email: {
                     equalTo: 'email@test.com',
@@ -113,7 +113,7 @@ describe('signInWithProvider', () => {
 
     it('should throw an error if the email is not verified', async () => {
         expect(
-            client.request(graphql.signInWithProvider, {
+            client.request<any>(graphql.signInWithProvider, {
                 input: {
                     email: 'email@test.com',
                     verifiedEmail: false,

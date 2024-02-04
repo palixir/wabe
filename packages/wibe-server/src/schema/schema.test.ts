@@ -49,9 +49,7 @@ describe('Schema', () => {
     it('should write schema types in output file', () => {
         const output = schema.getTypesFromSchema()
 
-        expect(output).toEqual(
-            `export type Collection1 = {\n  name: string,\n  age: number,\n  isReady: boolean\n}\n\nexport type WibeSchemaScalars = "Phone" | "Email"\n\nexport enum Role {\n	Admin = 'admin',\n	Member = 'member',\n}\n\nexport type WibeSchemaEnums = "Role"\n\nexport type WibeSchemaTypes = {\n  Collection1: Collection1\n}`,
-        )
+        expect(output).toMatchSnapshot()
     })
 
     it("should throw an error if the scalar doesn't exist", async () => {

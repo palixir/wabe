@@ -1,0 +1,23 @@
+// Bun Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Schema should write schema types in output file 1`] = `
+"export type Collection1 = {
+  id: string,
+  name: string,
+  age: number,
+  isReady: boolean
+}
+
+export type WibeSchemaScalars = "Phone" | "Email"
+
+export enum Role {
+	Admin = 'admin',
+	Member = 'member',
+}
+
+export type WibeSchemaEnums = "Role"
+
+export type WibeSchemaTypes = {
+  Collection1: Collection1
+}"
+`;

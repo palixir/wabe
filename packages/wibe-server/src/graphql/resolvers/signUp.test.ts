@@ -29,14 +29,14 @@ describe('SignUp', () => {
     })
 
     afterEach(async () => {
-        const { findMany_User } = await client.request(
+        const { findMany_User } = await client.request<any>(
             graphql.findMany_User,
             {},
         )
 
         await Promise.all(
             findMany_User.edges.map(({ node }: { node: any }) =>
-                client.request(graphql.deleteOne_User, {
+                client.request<any>(graphql.deleteOne_User, {
                     input: { id: node.id },
                 }),
             ),
@@ -46,7 +46,7 @@ describe('SignUp', () => {
     it('should be able to signUp an user', async () => {
         const spySetCookie = spyOn(Cookie.prototype, 'add')
 
-        const { signUp } = await client.request(graphql.signUp, {
+        const { signUp } = await client.request<any>(graphql.signUp, {
             input: {
                 email: 'email@test.fr',
                 password: 'passwordtest',
@@ -55,7 +55,7 @@ describe('SignUp', () => {
 
         expect(signUp).toEqual(true)
 
-        const { findMany_User: users } = await client.request(
+        const { findMany_User: users } = await client.request<any>(
             graphql.findMany_User,
             {
                 where: {
@@ -99,7 +99,7 @@ describe('SignUp', () => {
     it('should not be able to signUp an user with an email already exist', async () => {
         const spySetCookie = spyOn(Cookie.prototype, 'add')
 
-        const { signUp } = await client.request(graphql.signUp, {
+        const { signUp } = await client.request<any>(graphql.signUp, {
             input: {
                 email: 'email@test.fr',
                 password: 'passwordtest',
@@ -111,7 +111,7 @@ describe('SignUp', () => {
         spySetCookie.mockReset()
 
         expect(
-            client.request(graphql.signUp, {
+            client.request<any>(graphql.signUp, {
                 input: {
                     email: 'email@test.fr',
                     password: 'passwordtest',
