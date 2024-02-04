@@ -395,7 +395,7 @@ export class WibeGraphQLSchema {
             name: className,
             description,
             fields: () => ({
-                id: { type: GraphQLID },
+                id: { type: new GraphQLNonNull(GraphQLID) },
                 ...graphqlFields,
             }),
         })

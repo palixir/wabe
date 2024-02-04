@@ -11,7 +11,7 @@ enum AuthenticationProvider {
 }
 
 type Post {
-  id: ID
+  id: ID!
   name: String!
 }
 
@@ -25,7 +25,7 @@ type PostEdge {
 
 """User class"""
 type _User {
-  id: ID
+  id: ID!
   name: String!
   age: Int
   isCool: Boolean
@@ -46,7 +46,7 @@ type _User {
 scalar Date
 
 type Address {
-  id: ID
+  id: ID!
   address1: String
   address2: String
   postalCode: Int
@@ -55,12 +55,12 @@ type Address {
 }
 
 type Object {
-  id: ID
+  id: ID!
   objectOfObject: ObjectOfObject
 }
 
 type ObjectOfObject {
-  id: ID
+  id: ID!
   name: String
 }
 
