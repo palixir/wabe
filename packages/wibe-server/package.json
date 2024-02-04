@@ -6,8 +6,8 @@
         "generate:types": "tsc --project tsconfig.json",
         "build": "bun build index.ts --minify --target=bun --outdir lib && bun run generate:types",
         "dev": "bun run --watch dev/index.ts",
-        "test": "bun test --watch",
-        "test:only": "bun test --watch --only",
+        "test": "bun test src --watch",
+        "test:only": "bun test src --watch --only",
         "linter": "biome lint ./src/**/*.ts",
         "formatter": "biome format --write ./src",
         "codegen": "graphql-codegen --config codegen.ts"
