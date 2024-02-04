@@ -1,7 +1,4 @@
-import {
-    type WibeSchemaEnums,
-    type WibeSchemaScalars,
-} from '../../generated/wibe'
+import { WibeSchemaScalars, WibeSchemaEnums } from '../../generated/graphql'
 
 export type WibeDefaultTypes =
     | 'String'
@@ -135,97 +132,5 @@ export class Schema {
 
     constructor(schema: SchemaInterface) {
         this.schema = schema
-    }
-
-    getTypesFromSchema() {
-        const wibeClassTypes = this.schema.class.map((schema) => {
-            const fields = Object.keys(schema.fields)
-
-            const firstTypeScriptType = getTypescriptFromWibeType({
-                type: schema.fields[fields[0]].type,
-                enums: this.schema.enums || [],
-            })
-
-            const fieldsRes = fields.reduce(
-                (prev, current) => {
-                    const wibeSchemaType = schema.fields[current].type
-                    const typeScriptType = getTypescriptFromWibeType({
-                        type: wibeSchemaType,
-                        enums: this.schema.enums || [],
-                    })
-
-                    if (!typeScriptType)
-                        throw new Error(`Invalid type: ${wibeSchemaType}`)
-
-                    prev[current] = getTypescriptFromWibeType({
-                        type: wibeSchemaType,
-                        enums: this.schema.enums || [],
-                    })
-
-                    return prev
-                },
-                {
-                    [fields[0]]: firstTypeScriptType,
-                },
-            )
-
-            const type = `export type ${schema.name} = ${JSON.stringify(
-                { id: 'string', ...fieldsRes },
-                null,
-                2,
-            )}`
-
-            return type.replaceAll('"', '')
-        })
-
-        const listOfScalars =
-            this.schema.scalars?.map((scalar) => `"${scalar.name}"`) || []
-
-        const wibeScalarType = `export type WibeSchemaScalars = ${listOfScalars.join(
-            ' | ',
-        )}`
-
-        const wibeEnumsTypes =
-            this.schema.enums?.map((wibeEnum) => {
-                const values = wibeEnum.values
-
-                const enumString = Object.keys(values)
-                    .map((key) => {
-                        return `\t${key} = '${values[key]}',`
-                    })
-                    .join('\n')
-
-                return `export enum ${wibeEnum.name} {\n${enumString}\n}`
-            }) || []
-
-        const wibeEnumsGlobalTypes =
-            this.schema.enums?.map((wibeEnum) => `"${wibeEnum.name}"`) || []
-
-        const wibeEnumsGlobalTypesString = `export type WibeSchemaEnums = ${wibeEnumsGlobalTypes.join(
-            ' | ',
-        )}`
-
-        const allNames = this.schema.class.map((schema) => schema.name)
-        const globalWibeType = allNames.reduce(
-            (prev, current) => {
-                prev[current] = current
-                return prev
-            },
-            { [allNames[0]]: allNames[0] },
-        )
-
-        const globalWibeTypeString = `export type WibeSchemaTypes = ${JSON.stringify(
-            globalWibeType,
-            null,
-            2,
-        )}`
-
-        return [
-            ...wibeClassTypes,
-            wibeScalarType,
-            ...wibeEnumsTypes,
-            wibeEnumsGlobalTypesString,
-            globalWibeTypeString.replaceAll('"', ''),
-        ].join('\n\n')
     }
 }

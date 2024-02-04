@@ -122,10 +122,41 @@ export class WibeApp {
             process.env.NODE_ENV !== 'test' &&
             WibeApp.config.codegen
         ) {
-            // Generate Wibe types
-            const wibeTypes = wibeSchema.getTypesFromSchema()
+            // Scalars
+            const listOfScalars =
+                wibeSchema.schema.scalars?.map(
+                    (scalar) => `"${scalar.name}"`,
+                ) || []
+            const wibeScalarType = `export type WibeSchemaScalars = ${listOfScalars.join(
+                ' | ',
+            )}`
 
-            Bun.write('generated/wibe.ts', wibeTypes)
+            // Enums
+            const wibeEnumsGlobalTypes =
+                wibeSchema.schema.enums?.map(
+                    (wibeEnum) => `"${wibeEnum.name}"`,
+                ) || []
+
+            const wibeEnumsGlobalTypesString = `export type WibeSchemaEnums = ${wibeEnumsGlobalTypes.join(
+                ' | ',
+            )}`
+
+            // Types
+            const allNames = wibeSchema.schema.class
+                .map((schema) => `${schema.name}: ${schema.name}`)
+                .filter((schema) => schema)
+
+            const globalWibeTypeString = `export type WibeSchemaTypes = {\n\t${allNames.join(',\n\t')}\n}`
+
+            const contentOfCodegenFile = await Bun.file(
+                'generated/graphql.ts',
+            ).text()
+
+            if (!contentOfCodegenFile.includes('WibeSchemaTypes'))
+                Bun.write(
+                    'generated/graphql.ts',
+                    `${contentOfCodegenFile}\n\n${wibeScalarType}\n\n${wibeEnumsGlobalTypesString}\n\n${globalWibeTypeString}`,
+                )
             Bun.write('generated/schema.graphql', printSchema(schema))
         }
 

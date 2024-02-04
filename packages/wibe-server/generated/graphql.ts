@@ -1033,3 +1033,13 @@ export type Resolvers<ContextType = any> = {
     _UserConnection?: _UserConnectionResolvers<ContextType>
     _UserEdge?: _UserEdgeResolvers<ContextType>
 }
+
+
+export type WibeSchemaScalars = "Phone"
+
+export type WibeSchemaEnums = "Role" | "AuthenticationProvider"
+
+export type WibeSchemaTypes = {
+	Post: Post,
+	_User: _User
+}

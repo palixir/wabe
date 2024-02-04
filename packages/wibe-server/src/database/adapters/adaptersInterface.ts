@@ -1,4 +1,4 @@
-import { WibeSchemaTypes, _User } from '../../../generated/wibe'
+import { WibeSchemaTypes, _User } from '../../../generated/graphql'
 
 type WhereAggregation<T extends keyof WibeSchemaTypes> = {
     [key in keyof WibeSchemaTypes[T] | 'id']: {

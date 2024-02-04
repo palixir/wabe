@@ -4,7 +4,7 @@ import { closeTests, setupTests } from '../../utils/helper'
 import { MongoAdapter, buildMongoWhereQuery } from './MongoAdapter'
 import { WibeApp } from '../../server'
 import { ObjectId } from 'mongodb'
-import { _User } from '../../../generated/wibe'
+import { _User } from '../../../generated/graphql'
 
 describe('Mongo adapter', () => {
     let mongoAdapter: MongoAdapter
