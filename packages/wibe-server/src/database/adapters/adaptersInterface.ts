@@ -1,7 +1,7 @@
 import { WibeSchemaTypes, _User } from '../../../generated/wibe'
 
 type WhereAggregation<T extends keyof WibeSchemaTypes> = {
-    [key in keyof T | 'id']: {
+    [key in keyof WibeSchemaTypes[T] | 'id']: {
         equalTo?: any
         notEqualTo?: any
         greaterThan?: any
@@ -29,8 +29,6 @@ export interface AdapterOptions {
     databaseUrl: string
     databaseName: string
 }
-
-export type FieldTata<T> = Partial<Pick<T, keyof T>>
 
 export interface GetObjectOptions<
     T extends keyof WibeSchemaTypes,
@@ -86,7 +84,7 @@ export interface UpdateObjectsOptions<
     K extends keyof WibeSchemaTypes[T],
 > {
     className: T
-    where: WhereType<T, K>
+    where: WhereType<T>
     data: Record<string, any>
     fields?: Array<K>
     offset?: number
