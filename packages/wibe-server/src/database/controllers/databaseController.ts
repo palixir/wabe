@@ -33,7 +33,7 @@ export class DatabaseController {
     async getObject<
         T extends keyof WibeSchemaTypes,
         K extends keyof WibeSchemaTypes[T],
-    >(params: GetObjectOptions<T>) {
+    >(params: GetObjectOptions<T, K>) {
         return this.adapter.getObject(params)
     }
 

@@ -10,14 +10,10 @@ import {
     UpdateObjectsOptions,
     DeleteObjectsOptions,
     WhereType,
-    FieldTata,
 } from './adaptersInterface'
 import { WibeSchemaTypes } from '../../../generated/wibe'
 
-export const buildMongoWhereQuery = <
-    T extends keyof WibeSchemaTypes,
-    K extends keyof WibeSchemaTypes[T],
->(
+export const buildMongoWhereQuery = <T extends keyof WibeSchemaTypes>(
     where?: WhereType<T>,
 ): Record<string, any> => {
     if (!where) return {}
@@ -103,13 +99,15 @@ export class MongoAdapter implements DatabaseAdapter {
     async getObject<
         T extends keyof WibeSchemaTypes,
         K extends keyof WibeSchemaTypes[T],
-    >(params: GetObjectOptions<T, K>): Promise<FieldTata<T> | null> {
+    >(
+        params: GetObjectOptions<T, K>,
+    ): Promise<Pick<WibeSchemaTypes[T], K> | null> {
         if (!this.database)
             throw new Error('Connection to database is not established')
 
         const { className, id, fields } = params
 
-        const objectOfFieldsToGet: Record<any, number> = fields.reduce(
+        const objectOfFieldsToGet = fields?.reduce(
             (acc, prev) => {
                 acc[prev] = 1
                 return acc
@@ -117,16 +115,17 @@ export class MongoAdapter implements DatabaseAdapter {
             {} as Record<any, number>,
         )
 
-        const isIdInProjection = fields.includes('id')
+        // @ts-expect-error
+        const isIdInProjection = fields?.includes('id')
 
         const collection = this.database.collection<any>(className)
 
         const res = await collection.findOne(
             { _id: new ObjectId(id) } as Filter<any>,
             {
-                projection: fields.includes('*')
-                    ? {}
-                    : { ...objectOfFieldsToGet, _id: isIdInProjection },
+                projection: fields
+                    ? { ...objectOfFieldsToGet, _id: isIdInProjection }
+                    : {},
             },
         )
 
@@ -150,7 +149,7 @@ export class MongoAdapter implements DatabaseAdapter {
 
         const whereBuilded = buildMongoWhereQuery<T>(where)
 
-        const objectOfFieldsToGet: Record<any, number> = fields.reduce(
+        const objectOfFieldsToGet = fields?.reduce(
             (acc, prev) => {
                 acc[prev] = 1
 
@@ -162,11 +161,11 @@ export class MongoAdapter implements DatabaseAdapter {
         const collection = this.database.collection<any>(className)
         const res = await collection
             .find(whereBuilded, {
-                projection: fields.includes('*')
-                    ? {}
-                    : {
+                projection: fields
+                    ? {
                           ...objectOfFieldsToGet,
-                      },
+                      }
+                    : {},
             })
             .limit(limit || 0)
             .skip(offset || 0)
@@ -180,7 +179,7 @@ export class MongoAdapter implements DatabaseAdapter {
             }
         }
 
-        return res as T[]
+        return res
     }
 
     async updateObject<
@@ -192,7 +191,7 @@ export class MongoAdapter implements DatabaseAdapter {
 
         const { className, id, data, fields } = params
 
-        const res = await this.updateObjects<T>({
+        const res = await this.updateObjects({
             className,
             where: { id: { equalTo: new ObjectId(id) } } as WhereType<T>,
             data,
@@ -217,7 +216,7 @@ export class MongoAdapter implements DatabaseAdapter {
 
         const collection = this.database.collection(className)
 
-        const objectsBeforeUpdate = await this.getObjects<T>({
+        const objectsBeforeUpdate = await this.getObjects({
             className,
             where,
             fields: ['id'],
@@ -231,7 +230,7 @@ export class MongoAdapter implements DatabaseAdapter {
             id: { equalTo: new ObjectId(object.id) },
         }))
 
-        return this.getObjects<T>({
+        return this.getObjects({
             className,
             where: {
                 OR: orStatement,
@@ -251,7 +250,7 @@ export class MongoAdapter implements DatabaseAdapter {
 
         const { className, data, fields } = params
 
-        const res = await this.createObjects<T>({
+        const res = await this.createObjects({
             className,
             data: [data],
             fields,
@@ -263,7 +262,9 @@ export class MongoAdapter implements DatabaseAdapter {
     async createObjects<
         T extends keyof WibeSchemaTypes,
         K extends keyof WibeSchemaTypes[T],
-    >(params: CreateObjectsOptions<T>): Promise<Pick<WibeSchemaTypes[T], K>[]> {
+    >(
+        params: CreateObjectsOptions<T, K>,
+    ): Promise<Pick<WibeSchemaTypes[T], K>[]> {
         if (!this.database)
             throw new Error('Connection to database is not established')
 
@@ -279,7 +280,7 @@ export class MongoAdapter implements DatabaseAdapter {
             }),
         )
 
-        return this.getObjects<T>({
+        return this.getObjects({
             className,
             where: { OR: orStatement } as WhereType<T>,
             fields,
@@ -299,7 +300,7 @@ export class MongoAdapter implements DatabaseAdapter {
 
         const { className, id, fields } = params
 
-        const res = await this.deleteObjects<T>({
+        const res = await this.deleteObjects({
             className,
             where: { id: { equalTo: new ObjectId(id) } } as WhereType<T>,
             fields,
@@ -319,11 +320,11 @@ export class MongoAdapter implements DatabaseAdapter {
 
         const { className, where, fields, limit, offset } = params
 
-        const whereBuilded = buildMongoWhereQuery<T>(where)
+        const whereBuilded = buildMongoWhereQuery(where)
 
         const collection = this.database.collection(className)
 
-        const objectsBeforeDelete = await this.getObjects<T>({
+        const objectsBeforeDelete = await this.getObjects({
             className,
             where,
             fields,
