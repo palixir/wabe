@@ -30,47 +30,59 @@ export class DatabaseController {
         return this.adapter.createClass(className)
     }
 
-    async getObject<T extends WibeSchemaTypes>(params: GetObjectOptions<T>) {
+    async getObject<
+        T extends keyof WibeSchemaTypes,
+        K extends keyof WibeSchemaTypes[T],
+    >(params: GetObjectOptions<T>) {
         return this.adapter.getObject(params)
     }
 
-    async getObjects<T extends WibeSchemaTypes>(params: GetObjectsOptions<T>) {
+    async getObjects<
+        T extends keyof WibeSchemaTypes,
+        K extends keyof WibeSchemaTypes[T],
+    >(params: GetObjectsOptions<T, K>) {
         return this.adapter.getObjects(params)
     }
 
-    async createObject<T extends WibeSchemaTypes>(
-        params: CreateObjectOptions<T>,
-    ) {
+    async createObject<
+        T extends keyof WibeSchemaTypes,
+        K extends keyof WibeSchemaTypes[T],
+    >(params: CreateObjectOptions<T, K>) {
         return this.adapter.createObject(params)
     }
 
-    async createObjects<T extends WibeSchemaTypes>(
-        params: CreateObjectsOptions<T>,
-    ) {
+    async createObjects<
+        T extends keyof WibeSchemaTypes,
+        K extends keyof WibeSchemaTypes[T],
+    >(params: CreateObjectsOptions<T, K>) {
         return this.adapter.createObjects(params)
     }
 
-    async updateObject<T extends WibeSchemaTypes>(
-        params: UpdateObjectOptions<T>,
-    ) {
+    async updateObject<
+        T extends keyof WibeSchemaTypes,
+        K extends keyof WibeSchemaTypes[T],
+    >(params: UpdateObjectOptions<T, K>) {
         return this.adapter.updateObject(params)
     }
 
-    async updateObjects<T extends WibeSchemaTypes>(
-        params: UpdateObjectsOptions<T>,
-    ) {
+    async updateObjects<
+        T extends keyof WibeSchemaTypes,
+        K extends keyof WibeSchemaTypes[T],
+    >(params: UpdateObjectsOptions<T, K>) {
         return this.adapter.updateObjects(params)
     }
 
-    async deleteObject<T extends WibeSchemaTypes>(
-        params: DeleteObjectOptions<T>,
-    ) {
+    async deleteObject<
+        T extends keyof WibeSchemaTypes,
+        K extends keyof WibeSchemaTypes[T],
+    >(params: DeleteObjectOptions<T, K>) {
         return this.adapter.deleteObject(params)
     }
 
-    async deleteObjects<T extends WibeSchemaTypes>(
-        params: DeleteObjectsOptions<T>,
-    ) {
+    async deleteObjects<
+        T extends keyof WibeSchemaTypes,
+        K extends keyof WibeSchemaTypes[T],
+    >(params: DeleteObjectsOptions<T, K>) {
         return this.adapter.deleteObjects(params)
     }
 }

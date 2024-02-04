@@ -14,7 +14,10 @@ import {
 } from './adaptersInterface'
 import { WibeSchemaTypes } from '../../../generated/wibe'
 
-export const buildMongoWhereQuery = <T extends WibeSchemaTypes>(
+export const buildMongoWhereQuery = <
+    T extends keyof WibeSchemaTypes,
+    K extends keyof WibeSchemaTypes[T],
+>(
     where?: WhereType<T>,
 ): Record<string, any> => {
     if (!where) return {}
@@ -97,9 +100,10 @@ export class MongoAdapter implements DatabaseAdapter {
         await this.database.createCollection(className)
     }
 
-    async getObject<T extends WibeSchemaTypes>(
-        params: GetObjectOptions<T>,
-    ): Promise<FieldTata<T>> {
+    async getObject<
+        T extends keyof WibeSchemaTypes,
+        K extends keyof WibeSchemaTypes[T],
+    >(params: GetObjectOptions<T, K>): Promise<FieldTata<T> | null> {
         if (!this.database)
             throw new Error('Connection to database is not established')
 
@@ -135,9 +139,10 @@ export class MongoAdapter implements DatabaseAdapter {
         return res
     }
 
-    async getObjects<T extends WibeSchemaTypes>(
-        params: GetObjectsOptions<T>,
-    ): Promise<Partial<T>[]> {
+    async getObjects<
+        T extends keyof WibeSchemaTypes,
+        K extends keyof WibeSchemaTypes[T],
+    >(params: GetObjectsOptions<T, K>): Promise<Pick<WibeSchemaTypes[T], K>[]> {
         if (!this.database)
             throw new Error('Connection to database is not established')
 
@@ -178,9 +183,10 @@ export class MongoAdapter implements DatabaseAdapter {
         return res as T[]
     }
 
-    async updateObject<T extends WibeSchemaTypes>(
-        params: UpdateObjectOptions<T>,
-    ): Promise<Partial<T>> {
+    async updateObject<
+        T extends keyof WibeSchemaTypes,
+        K extends keyof WibeSchemaTypes[T],
+    >(params: UpdateObjectOptions<T, K>): Promise<Pick<WibeSchemaTypes[T], K>> {
         if (!this.database)
             throw new Error('Connection to database is not established')
 
@@ -196,9 +202,12 @@ export class MongoAdapter implements DatabaseAdapter {
         return res[0]
     }
 
-    async updateObjects<T extends WibeSchemaTypes>(
-        params: UpdateObjectsOptions<T>,
-    ): Promise<Partial<T>[]> {
+    async updateObjects<
+        T extends keyof WibeSchemaTypes,
+        K extends keyof WibeSchemaTypes[T],
+    >(
+        params: UpdateObjectsOptions<T, K>,
+    ): Promise<Pick<WibeSchemaTypes[T], K>[]> {
         if (!this.database)
             throw new Error('Connection to database is not established')
 
@@ -233,9 +242,10 @@ export class MongoAdapter implements DatabaseAdapter {
         })
     }
 
-    async createObject<T extends WibeSchemaTypes>(
-        params: CreateObjectOptions<T>,
-    ): Promise<Partial<T>> {
+    async createObject<
+        T extends keyof WibeSchemaTypes,
+        K extends keyof WibeSchemaTypes[T],
+    >(params: CreateObjectOptions<T, K>): Promise<Pick<WibeSchemaTypes[T], K>> {
         if (!this.database)
             throw new Error('Connection to database is not established')
 
@@ -250,9 +260,10 @@ export class MongoAdapter implements DatabaseAdapter {
         return res[0]
     }
 
-    async createObjects<T extends WibeSchemaTypes>(
-        params: CreateObjectsOptions<T>,
-    ): Promise<Partial<T>[]> {
+    async createObjects<
+        T extends keyof WibeSchemaTypes,
+        K extends keyof WibeSchemaTypes[T],
+    >(params: CreateObjectsOptions<T>): Promise<Pick<WibeSchemaTypes[T], K>[]> {
         if (!this.database)
             throw new Error('Connection to database is not established')
 
@@ -277,9 +288,12 @@ export class MongoAdapter implements DatabaseAdapter {
         })
     }
 
-    async deleteObject<T extends WibeSchemaTypes>(
-        params: GetObjectOptions<T>,
-    ): Promise<Partial<T> | null> {
+    async deleteObject<
+        T extends keyof WibeSchemaTypes,
+        K extends keyof WibeSchemaTypes[T],
+    >(
+        params: GetObjectOptions<T, K>,
+    ): Promise<Pick<WibeSchemaTypes[T], K> | null> {
         if (!this.database)
             throw new Error('Connection to database is not established')
 
@@ -294,9 +308,12 @@ export class MongoAdapter implements DatabaseAdapter {
         return res.length === 1 ? res[0] : null
     }
 
-    async deleteObjects<T extends WibeSchemaTypes>(
-        params: DeleteObjectsOptions<T>,
-    ): Promise<Partial<T>[]> {
+    async deleteObjects<
+        T extends keyof WibeSchemaTypes,
+        K extends keyof WibeSchemaTypes[T],
+    >(
+        params: DeleteObjectsOptions<T, K>,
+    ): Promise<Pick<WibeSchemaTypes[T], K>[]> {
         if (!this.database)
             throw new Error('Connection to database is not established')
 

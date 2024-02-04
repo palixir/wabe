@@ -1,5 +1,6 @@
 import { GraphQLResolveInfo } from 'graphql'
 import { WibeApp } from '../..'
+import { WibeSchemaTypes } from '../../../generated/wibe'
 
 const getFieldsFromInfo = (info: GraphQLResolveInfo) => {
     const firstNode = info.fieldNodes[0]
@@ -28,13 +29,13 @@ export const queryForOneObject = (
     { id }: any,
     __: any,
     info: GraphQLResolveInfo,
-    className: string,
+    className: keyof WibeSchemaTypes,
 ) => {
     const fields = getFieldsFromInfo(info)
 
     if (!fields) throw new Error('No fields provided')
 
-    return WibeApp.databaseController.getObject<any>({
+    return WibeApp.databaseController.getObject({
         className,
         id,
         fields,
@@ -46,13 +47,13 @@ export const queryForMultipleObject = async (
     { where, offset, limit }: any,
     ___: any,
     info: GraphQLResolveInfo,
-    className: string,
+    className: keyof WibeSchemaTypes,
 ) => {
     const fields = getFieldsFromInfo(info)
 
     if (!fields) throw new Error('No fields provided')
 
-    const objects = await WibeApp.databaseController.getObjects<any>({
+    const objects = await WibeApp.databaseController.getObjects({
         className,
         where,
         fields,
@@ -72,13 +73,13 @@ export const mutationToCreateObject = (
     args: any,
     ___: any,
     info: GraphQLResolveInfo,
-    className: string,
+    className: keyof WibeSchemaTypes,
 ) => {
     const fields = getFieldsFromInfo(info)
 
     if (!fields) throw new Error('No fields provided')
 
-    return WibeApp.databaseController.createObject<any>({
+    return WibeApp.databaseController.createObject({
         className,
         data: args.input?.fields,
         fields,
@@ -90,13 +91,13 @@ export const mutationToCreateMultipleObjects = async (
     args: any,
     ___: any,
     info: GraphQLResolveInfo,
-    className: string,
+    className: keyof WibeSchemaTypes,
 ) => {
     const fields = getFieldsFromInfo(info)
 
     if (!fields) throw new Error('No fields provided')
 
-    const objects = await WibeApp.databaseController.createObjects<any>({
+    const objects = await WibeApp.databaseController.createObjects({
         className,
         data: args.input?.fields,
         fields,
@@ -114,13 +115,13 @@ export const mutationToUpdateObject = (
     args: any,
     ___: any,
     info: GraphQLResolveInfo,
-    className: string,
+    className: keyof WibeSchemaTypes,
 ) => {
     const fields = getFieldsFromInfo(info)
 
     if (!fields) throw new Error('No fields provided')
 
-    return WibeApp.databaseController.updateObject<any>({
+    return WibeApp.databaseController.updateObject({
         className,
         id: args.input?.id,
         data: args.input?.fields,
@@ -133,13 +134,13 @@ export const mutationToUpdateMultipleObjects = async (
     args: any,
     ___: any,
     info: GraphQLResolveInfo,
-    className: string,
+    className: keyof WibeSchemaTypes,
 ) => {
     const fields = getFieldsFromInfo(info)
 
     if (!fields) throw new Error('No fields provided')
 
-    const objects = await WibeApp.databaseController.updateObjects<any>({
+    const objects = await WibeApp.databaseController.updateObjects({
         className,
         where: args.input?.where,
         data: args.input?.fields,
@@ -158,13 +159,13 @@ export const mutationToDeleteObject = async (
     args: any,
     ___: any,
     info: GraphQLResolveInfo,
-    className: string,
+    className: keyof WibeSchemaTypes,
 ) => {
     const fields = getFieldsFromInfo(info)
 
     if (!fields) throw new Error('No fields provided')
 
-    return WibeApp.databaseController.deleteObject<any>({
+    return WibeApp.databaseController.deleteObject({
         className,
         id: args.input?.id,
         fields,
@@ -176,13 +177,13 @@ export const mutationToDeleteMultipleObjects = async (
     args: any,
     ___: any,
     info: GraphQLResolveInfo,
-    className: string,
+    className: keyof WibeSchemaTypes,
 ) => {
     const fields = getFieldsFromInfo(info)
 
     if (!fields) throw new Error('No fields provided')
 
-    const objects = await WibeApp.databaseController.deleteObjects<any>({
+    const objects = await WibeApp.databaseController.deleteObjects({
         className,
         where: args.input?.where,
         fields,

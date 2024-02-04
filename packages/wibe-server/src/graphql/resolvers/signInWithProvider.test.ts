@@ -21,13 +21,13 @@ describe('signInWithProvider', () => {
     })
 
     afterEach(async () => {
-        const { findMany_User } = await client.request<any>(
+        const { findMany_User } = await client.request(
             graphql.findMany_User,
             {},
         )
         await Promise.all(
             findMany_User.edges.map(({ node }: { node: any }) =>
-                client.request<any>(graphql.deleteOne_User, {
+                client.request(graphql.deleteOne_User, {
                     input: { id: node.id },
                 }),
             ),
@@ -35,7 +35,7 @@ describe('signInWithProvider', () => {
     })
 
     it('should create an user if not exist', async () => {
-        const { signInWithProvider } = await client.request<any>(
+        const { signInWithProvider } = await client.request(
             graphql.signInWithProvider,
             {
                 input: {
@@ -52,7 +52,7 @@ describe('signInWithProvider', () => {
 
         const {
             findMany_User: { edges },
-        } = await client.request<any>(graphql.findMany_User, {
+        } = await client.request(graphql.findMany_User, {
             where: {
                 email: {
                     equalTo: 'email@test.com',
@@ -67,7 +67,7 @@ describe('signInWithProvider', () => {
     })
 
     it('should update the authentication field of an _User if the _User already exist', async () => {
-        const { signInWithProvider } = await client.request<any>(
+        const { signInWithProvider } = await client.request(
             graphql.signInWithProvider,
             {
                 input: {
@@ -83,7 +83,7 @@ describe('signInWithProvider', () => {
         expect(signInWithProvider).toEqual(true)
 
         const { signInWithProvider: signInWithProvider2 } =
-            await client.request<any>(graphql.signInWithProvider, {
+            await client.request(graphql.signInWithProvider, {
                 input: {
                     email: 'email@test.com',
                     verifiedEmail: true,
@@ -97,7 +97,7 @@ describe('signInWithProvider', () => {
 
         const {
             findMany_User: { edges },
-        } = await client.request<any>(graphql.findMany_User, {
+        } = await client.request(graphql.findMany_User, {
             where: {
                 email: {
                     equalTo: 'email@test.com',
@@ -113,7 +113,7 @@ describe('signInWithProvider', () => {
 
     it('should throw an error if the email is not verified', async () => {
         expect(
-            client.request<any>(graphql.signInWithProvider, {
+            client.request(graphql.signInWithProvider, {
                 input: {
                     email: 'email@test.com',
                     verifiedEmail: false,
@@ -128,46 +128,48 @@ describe('signInWithProvider', () => {
 
 const graphql = {
     createManyUser: gql`
-		mutation createManyUser($input: UsersCreateInput!) {
-			createManyUser(input: $input) {
-				edges {
-				node{	name
-					age
-                }
-				}
-			}
-		}
-	`,
-    createOne_User: gql`
-		mutation createOne_User($input: _UserCreateInput!) {
-			createOne_User(input: $input) {
-				id
-			}
-		}
-	`,
-    findMany_User: gql`
-		query findMany_User($where: _UserWhereInput) {
-			findMany_User(where: $where) {
-				edges {
-					node{id
-					email
-					accessToken
-					refreshToken
+        mutation createManyUser($input: UsersCreateInput!) {
+            createManyUser(input: $input) {
+                edges {
+                    node {
+                        name
+                        age
                     }
-				}
-			}
-		}
-	`,
+                }
+            }
+        }
+    `,
+    createOne_User: gql`
+        mutation createOne_User($input: _UserCreateInput!) {
+            createOne_User(input: $input) {
+                id
+            }
+        }
+    `,
+    findMany_User: gql`
+        query findMany_User($where: _UserWhereInput) {
+            findMany_User(where: $where) {
+                edges {
+                    node {
+                        id
+                        email
+                        accessToken
+                        refreshToken
+                    }
+                }
+            }
+        }
+    `,
     signInWithProvider: gql`
-		mutation signInWithProvider($input: SignInWithProviderInput!) {
-			signInWithProvider(input: $input)
-		}
-	`,
+        mutation signInWithProvider($input: SignInWithProviderInput!) {
+            signInWithProvider(input: $input)
+        }
+    `,
     deleteOne_User: gql`
-		mutation deleteOne_User($input: _UserDeleteInput!) {
-			deleteOne_User(input: $input) {
-				id
-			}
-		}
-	`,
+        mutation deleteOne_User($input: _UserDeleteInput!) {
+            deleteOne_User(input: $input) {
+                id
+            }
+        }
+    `,
 }
