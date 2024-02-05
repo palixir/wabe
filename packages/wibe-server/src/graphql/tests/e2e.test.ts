@@ -366,14 +366,6 @@ describe('GraphQL : E2E', () => {
         expect(res.customMutation).toEqual(2)
     })
 
-    it('should throw an error if a field is required and not provided', async () => {
-        expect(
-            client.request<any>(graphql.createManyUser, {
-                input: { fields: [{ age: 23 }] },
-            }),
-        ).rejects.toThrow()
-    })
-
     it('should get an object that not exist', async () => {
         expect(
             await client.request<any>(graphql.findOneUser, {

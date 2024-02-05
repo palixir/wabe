@@ -1,4 +1,4 @@
-import { WibeSchemaTypes } from '../../../generated/graphql'
+import { WibeSchemaTypes } from '../../../generated/wibe'
 import {
     CreateObjectOptions,
     CreateObjectsOptions,

@@ -1,6 +1,6 @@
 import { GraphQLResolveInfo } from 'graphql'
 import { WibeApp } from '../..'
-import { WibeSchemaTypes } from '../../../generated/graphql'
+import { WibeSchemaTypes } from '../../../generated/wibe'
 
 const getFieldsFromInfo = (info: GraphQLResolveInfo) => {
     const firstNode = info.fieldNodes[0]

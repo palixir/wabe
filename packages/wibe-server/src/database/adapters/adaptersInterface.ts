@@ -1,4 +1,4 @@
-import { WibeSchemaTypes, _User } from '../../../generated/graphql'
+import { WibeSchemaTypes, _User } from '../../../generated/wibe'
 
 type WhereAggregation<T extends keyof WibeSchemaTypes> = {
     [key in keyof WibeSchemaTypes[T] | 'id']: {
@@ -126,12 +126,16 @@ export interface DatabaseAdapter {
     getObjects<
         T extends keyof WibeSchemaTypes,
         K extends keyof WibeSchemaTypes[T],
-    >(params: GetObjectsOptions<T, K>): Promise<Pick<WibeSchemaTypes[T], K>[]>
+    >(
+        params: GetObjectsOptions<T, K>,
+    ): Promise<Pick<WibeSchemaTypes[T], K>[]>
 
     createObject<
         T extends keyof WibeSchemaTypes,
         K extends keyof WibeSchemaTypes[T],
-    >(params: CreateObjectOptions<T, K>): Promise<Pick<WibeSchemaTypes[T], K>>
+    >(
+        params: CreateObjectOptions<T, K>,
+    ): Promise<Pick<WibeSchemaTypes[T], K>>
     createObjects<
         T extends keyof WibeSchemaTypes,
         K extends keyof WibeSchemaTypes[T],
@@ -142,7 +146,9 @@ export interface DatabaseAdapter {
     updateObject<
         T extends keyof WibeSchemaTypes,
         K extends keyof WibeSchemaTypes[T],
-    >(params: UpdateObjectOptions<T, K>): Promise<Pick<WibeSchemaTypes[T], K>>
+    >(
+        params: UpdateObjectOptions<T, K>,
+    ): Promise<Pick<WibeSchemaTypes[T], K>>
     updateObjects<
         T extends keyof WibeSchemaTypes,
         K extends keyof WibeSchemaTypes[T],
