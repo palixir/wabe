@@ -40,6 +40,7 @@ import {
     getWhereInputType,
     wrapGraphQLTypeIn,
 } from './utils'
+import { signOutResolver } from '../graphql/resolvers/signOut'
 import { signUpResolver } from '../graphql/resolvers/signUp'
 import { signInResolver } from '../graphql/resolvers/signIn'
 import { WibeSchemaTypes } from '../../generated/wibe'
@@ -92,6 +93,18 @@ export class WibeGraphQLSchema {
 
         const defaultResolvers: TypeResolver = {
             mutations: {
+                signOut: {
+                    type: 'Boolean',
+                    resolve: signOutResolver,
+                    args: {
+                        input: {
+                            email: {
+                                type: 'Email',
+                                required: true,
+                            },
+                        },
+                    },
+                },
                 signUp: {
                     type: 'Boolean',
                     args: {
