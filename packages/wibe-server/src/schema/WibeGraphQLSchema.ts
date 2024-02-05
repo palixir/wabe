@@ -411,7 +411,7 @@ export class WibeGraphQLSchema {
         const edges = new GraphQLObjectType({
             name: `${wibeClass.name}Edge`,
             fields: () => ({
-                node: { type: object },
+                node: { type: new GraphQLNonNull(object) },
             }),
         })
 

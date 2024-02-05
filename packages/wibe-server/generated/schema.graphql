@@ -20,16 +20,16 @@ type PostConnection {
 }
 
 type PostEdge {
-  node: Post
+  node: Post!
 }
 
 """User class"""
 type _User {
   id: ID!
-  name: String!
+  name: String
   age: Int
   isCool: Boolean
-  birthDate: Date!
+  birthDate: Date
   phone: Phone
   role: Role
   address: Address
@@ -72,7 +72,7 @@ type _UserConnection {
 }
 
 type _UserEdge {
-  node: _User
+  node: _User!
 }
 
 type Query {
@@ -262,10 +262,10 @@ input _UserCreateInput {
 }
 
 input _UserInput {
-  name: String!
+  name: String
   age: Int
   isCool: Boolean
-  birthDate: Date!
+  birthDate: Date
   phone: Phone
   role: Role
   address: AddressInput

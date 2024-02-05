@@ -1,7 +1,5 @@
-import { gql } from 'graphql-request'
-import { WibeApp } from '../../server'
-import { getGraphqlClient } from '../../utils/helper'
 import { Context } from '../interface'
+import { getClient } from '../../utils'
 
 export const signInResolver = async (
     _: any,
@@ -15,35 +13,20 @@ export const signInResolver = async (
     },
     context: Context,
 ) => {
-    const client = getGraphqlClient(WibeApp.config.port)
+    const client = getClient()
 
     const {
         findMany_User: { edges },
-    } = await client.request<any>(
-        gql`
-            query findMany_User($where: _UserWhereInput!) {
-                findMany_User(where: $where) {
-                    edges {
-                        node {
-                            id
-                            password
-                        }
-                    }
-                }
-            }
-        `,
-        {
-            where: {
-                email: { equalTo: email },
-            },
-        },
-    )
+    } = await client.findMany_User({ where: { email: { equalTo: email } } })
 
-    if (edges.length === 0) throw new Error('User not found')
+    if (!edges || !edges[0]) throw new Error('User not found')
+
+    const userPassword = edges[0].node.password
+    if (!userPassword) throw new Error('User not found')
 
     const isPasswordEquals = await Bun.password.verify(
         password,
-        edges[0].node.password,
+        userPassword,
         'argon2id',
     )
 
@@ -64,24 +47,15 @@ export const signInResolver = async (
         exp: thirtyDays.getTime(),
     })
 
-    await client.request<any>(
-        gql`
-            mutation updateOne_User($input: _UserUpdateInput!) {
-                updateOne_User(input: $input) {
-                    id
-                }
-            }
-        `,
-        {
-            input: {
-                id: edges[0].node.id,
-                fields: {
-                    refreshToken,
-                    accessToken,
-                },
+    await client.updateOne_User({
+        input: {
+            id: edges[0].node.id,
+            fields: {
+                refreshToken,
+                accessToken,
             },
         },
-    )
+    })
 
     context.cookie.access_token.add({
         value: accessToken,

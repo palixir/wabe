@@ -29,7 +29,7 @@ export const setupTests = async () => {
                 {
                     name: 'User',
                     fields: {
-                        name: { type: 'String', required: true },
+                        name: { type: 'String' },
                         age: { type: 'Int' },
                         isAdmin: { type: 'Boolean' },
                         floatValue: { type: 'Float' },

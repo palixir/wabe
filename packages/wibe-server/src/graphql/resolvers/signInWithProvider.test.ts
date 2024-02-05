@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll, afterEach } from 'bun:test'
 import { WibeApp } from '../../server'
 import { GraphQLClient, gql } from 'graphql-request'
 import { getGraphqlClient, setupTests } from '../../utils/helper'
-import { AuthenticationProvider } from '../../../generated/graphql'
+import { AuthenticationProvider } from '../../../generated/wibe'
 
 describe('signInWithProvider', () => {
     let wibe: WibeApp

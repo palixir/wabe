@@ -146,15 +146,16 @@ export class WibeApp {
                 .map((schema) => `${schema.name}: ${schema.name}`)
                 .filter((schema) => schema)
 
-            const globalWibeTypeString = `export type WibeSchemaTypes = {\n\t${allNames.join(',\n\t')}\n}`
+            const globalWibeTypeString = `export type WibeSchemaTypes = {\n\t${allNames.join(
+                ',\n\t',
+            )}\n}`
 
-            const contentOfCodegenFile = await Bun.file(
-                'generated/graphql.ts',
-            ).text()
+            const contentOfCodegenFile =
+                await Bun.file('generated/wibe.ts').text()
 
             if (!contentOfCodegenFile.includes('WibeSchemaTypes'))
                 Bun.write(
-                    'generated/graphql.ts',
+                    'generated/wibe.ts',
                     `${contentOfCodegenFile}\n\n${wibeScalarType}\n\n${wibeEnumsGlobalTypesString}\n\n${globalWibeTypeString}`,
                 )
             Bun.write('generated/schema.graphql', printSchema(schema))

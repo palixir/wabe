@@ -3,171 +3,170 @@ import { WibeApp } from '../src'
 import { DatabaseEnum } from '../src/database'
 
 const run = async () => {
-    await runDatabase()
+  await runDatabase()
 
-    const wibe = new WibeApp({
-        wibeKey:
-            '0uwFvUxM$ceFuF1aEtTtZMa7DUN2NZudqgY5ve5W*QCyb58cwMj9JeoaV@d#%29v&aJzswuudVU1%nAT+rxS0Bh&OkgBYc0PH18*',
-        authentication: {
-            successRedirectPath: 'http://localhost:5173',
-            failureRedirectPath: 'http://localhost:5173',
-            providers: {
-                X: {
-                    clientId: 'SVFhTWpONVM4S09TWVB6dF9CZjc6MTpjaQ',
-                    clientSecret:
-                        'V95bDcUgQgYNqweVRO8RFrqWJxr_yckd_b5Npp-MmEBxMr6KuR',
-                },
-                GOOGLE: {
-                    clientId:
-                        '296431040556-4jh84e5s264rmrgnh8bmegb0kl550teg.apps.googleusercontent.com',
-                    clientSecret: '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',
-                },
+  const wibe = new WibeApp({
+    wibeKey:
+      '0uwFvUxM$ceFuF1aEtTtZMa7DUN2NZudqgY5ve5W*QCyb58cwMj9JeoaV@d#%29v&aJzswuudVU1%nAT+rxS0Bh&OkgBYc0PH18*',
+    authentication: {
+      successRedirectPath: 'http://localhost:5173',
+      failureRedirectPath: 'http://localhost:5173',
+      providers: {
+        X: {
+          clientId: 'SVFhTWpONVM4S09TWVB6dF9CZjc6MTpjaQ',
+          clientSecret:
+            'V95bDcUgQgYNqweVRO8RFrqWJxr_yckd_b5Npp-MmEBxMr6KuR',
+        },
+        GOOGLE: {
+          clientId:
+            '296431040556-4jh84e5s264rmrgnh8bmegb0kl550teg.apps.googleusercontent.com',
+          clientSecret: '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',
+        },
+      },
+    },
+    database: {
+      type: DatabaseEnum.Mongo,
+      url: 'mongodb://127.0.0.1:27045',
+      name: 'Wibe',
+    },
+    port: 3000,
+    schema: {
+      class: [
+        {
+          name: '_User',
+          description: 'User class',
+          fields: {
+            name: { type: 'String' },
+            age: { type: 'Int' },
+            isCool: { type: 'Boolean' },
+            birthDate: {
+              type: 'Date',
             },
+            phone: {
+              type: 'Phone',
+            },
+            role: {
+              type: 'Role',
+            },
+            address: {
+              type: 'Object',
+              object: {
+                name: 'Address',
+                fields: {
+                  address1: {
+                    type: 'String',
+                  },
+                  address2: {
+                    type: 'String',
+                  },
+                  postalCode: {
+                    type: 'Int',
+                  },
+                  city: {
+                    type: 'String',
+                  },
+                  country: {
+                    type: 'String',
+                  },
+                },
+              },
+            },
+            object: {
+              type: 'Object',
+              object: {
+                name: 'Object',
+                fields: {
+                  objectOfObject: {
+                    type: 'Object',
+                    object: {
+                      name: 'ObjectOfObject',
+                      fields: {
+                        name: {
+                          type: 'String',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          resolvers: {
+            queries: {
+              helloWorld: {
+                type: 'String',
+                description: 'Hello world description',
+                args: {
+                  name: {
+                    type: 'String',
+                    required: true,
+                  },
+                },
+                resolve: () => 'Hello World',
+              },
+            },
+            mutations: {
+              createMutation: {
+                type: 'Boolean',
+                required: true,
+                args: {
+                  input: {
+                    name: {
+                      type: 'Int',
+                      required: true,
+                    },
+                  },
+                },
+                resolve: () => true,
+              },
+              customMutation: {
+                type: 'Int',
+                args: {
+                  input: {
+                    a: {
+                      type: 'Int',
+                      required: true,
+                    },
+                    b: {
+                      type: 'Int',
+                      required: true,
+                    },
+                  },
+                },
+                resolve: (root: any, args: any) =>
+                  args.input.a + args.input.b,
+              },
+            },
+          },
         },
-        database: {
-            type: DatabaseEnum.Mongo,
-            url: 'mongodb://127.0.0.1:27045',
-            name: 'Wibe',
+        {
+          name: 'Post',
+          fields: {
+            name: { type: 'String', required: true },
+          },
         },
-        port: 3000,
-        schema: {
-            class: [
-                {
-                    name: '_User',
-                    description: 'User class',
-                    fields: {
-                        name: { type: 'String', required: true },
-                        age: { type: 'Int' },
-                        isCool: { type: 'Boolean' },
-                        birthDate: {
-                            type: 'Date',
-                            required: true,
-                        },
-                        phone: {
-                            type: 'Phone',
-                        },
-                        role: {
-                            type: 'Role',
-                        },
-                        address: {
-                            type: 'Object',
-                            object: {
-                                name: 'Address',
-                                fields: {
-                                    address1: {
-                                        type: 'String',
-                                    },
-                                    address2: {
-                                        type: 'String',
-                                    },
-                                    postalCode: {
-                                        type: 'Int',
-                                    },
-                                    city: {
-                                        type: 'String',
-                                    },
-                                    country: {
-                                        type: 'String',
-                                    },
-                                },
-                            },
-                        },
-                        object: {
-                            type: 'Object',
-                            object: {
-                                name: 'Object',
-                                fields: {
-                                    objectOfObject: {
-                                        type: 'Object',
-                                        object: {
-                                            name: 'ObjectOfObject',
-                                            fields: {
-                                                name: {
-                                                    type: 'String',
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                    resolvers: {
-                        queries: {
-                            helloWorld: {
-                                type: 'String',
-                                description: 'Hello world description',
-                                args: {
-                                    name: {
-                                        type: 'String',
-                                        required: true,
-                                    },
-                                },
-                                resolve: () => 'Hello World',
-                            },
-                        },
-                        mutations: {
-                            createMutation: {
-                                type: 'Boolean',
-                                required: true,
-                                args: {
-                                    input: {
-                                        name: {
-                                            type: 'Int',
-                                            required: true,
-                                        },
-                                    },
-                                },
-                                resolve: () => true,
-                            },
-                            customMutation: {
-                                type: 'Int',
-                                args: {
-                                    input: {
-                                        a: {
-                                            type: 'Int',
-                                            required: true,
-                                        },
-                                        b: {
-                                            type: 'Int',
-                                            required: true,
-                                        },
-                                    },
-                                },
-                                resolve: (root: any, args: any) =>
-                                    args.input.a + args.input.b,
-                            },
-                        },
-                    },
-                },
-                {
-                    name: 'Post',
-                    fields: {
-                        name: { type: 'String', required: true },
-                    },
-                },
-            ],
-            scalars: [
-                {
-                    name: 'Phone',
-                    description: 'Phone custom scalar type',
-                },
-            ],
-            enums: [
-                {
-                    name: 'Role',
-                    values: {
-                        Admin: 'Admin',
-                        Member: 'Member',
-                    },
-                },
-            ],
+      ],
+      scalars: [
+        {
+          name: 'Phone',
+          description: 'Phone custom scalar type',
         },
-    })
+      ],
+      enums: [
+        {
+          name: 'Role',
+          values: {
+            Admin: 'Admin',
+            Member: 'Member',
+          },
+        },
+      ],
+    },
+  })
 
-    await wibe.start()
+  await wibe.start()
 }
 
 run().catch((err) => {
-    console.error(err)
+  console.error(err)
 })

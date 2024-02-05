@@ -1,39 +1,40 @@
 {
-    "name": "wibe-server",
-    "version": "0.0.1",
-    "description": "wibe-server",
-    "scripts": {
-        "generate:types": "tsc --project tsconfig.json",
-        "build": "bun build index.ts --minify --target=bun --outdir lib && bun run generate:types",
-        "dev": "bun run --watch dev/index.ts",
-        "test": "bun test src --watch",
-        "test:only": "bun test src --watch --only",
-        "linter": "biome lint ./src/**/*.ts",
-        "formatter": "biome format --write ./src",
-        "codegen": "graphql-codegen --config codegen.ts"
-    },
-    "dependencies": {
-        "@apollo/server": "4.10.0",
-        "@elysiajs/apollo": "0.8.0",
-        "@elysiajs/graphql-yoga": "^0.8.0",
-        "@elysiajs/jwt": "0.8.0",
-        "elysia": "0.8.14",
-        "graphql": "16.8.1",
-        "mongodb": "6.3.0"
-    },
-    "devDependencies": {
-        "@biomejs/biome": "1.5.3",
-        "@graphql-codegen/cli": "5.0.0",
-        "@graphql-codegen/typescript": "4.0.1",
-        "@graphql-codegen/typescript-resolvers": "4.0.1",
-        "@parcel/watcher": "2.3.0",
-        "@types/bun": "1.0.2",
-        "@types/uuid": "9.0.6",
-        "get-port": "7.0.0",
-        "graphql-request": "6.1.0",
-        "typescript": "5.3.3",
-        "uuid": "9.0.1",
-        "wait-on": "7.2.0",
-        "wibe-mongodb-launcher": "workspace:*"
-    }
+  "name": "wibe-server",
+  "version": "0.0.1",
+  "description": "wibe-server",
+  "scripts": {
+    "generate:types": "tsc --project tsconfig.json",
+    "build": "bun build index.ts --minify --target=bun --outdir lib && bun run generate:types",
+    "dev": "bun run --watch dev/index.ts",
+    "test": "bun test src --watch",
+    "test:only": "bun test src --watch --only",
+    "linter": "biome lint ./src/**/*.ts",
+    "formatter": "biome format --write ./src",
+    "codegen": "graphql-codegen --config codegen.ts"
+  },
+  "dependencies": {
+    "@apollo/server": "4.10.0",
+    "@elysiajs/apollo": "0.8.0",
+    "@elysiajs/graphql-yoga": "^0.8.0",
+    "@elysiajs/jwt": "0.8.0",
+    "elysia": "0.8.14",
+    "graphql": "16.8.1",
+    "mongodb": "6.3.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.5.3",
+    "@graphql-codegen/cli": "5.0.0",
+    "@graphql-codegen/typescript": "4.0.1",
+    "@graphql-codegen/typescript-graphql-request": "6.2.0",
+    "@graphql-codegen/typescript-operations": "4.0.1",
+    "@parcel/watcher": "2.3.0",
+    "@types/bun": "1.0.2",
+    "@types/uuid": "9.0.6",
+    "get-port": "7.0.0",
+    "graphql-request": "6.1.0",
+    "typescript": "5.3.3",
+    "uuid": "9.0.1",
+    "wait-on": "7.2.0",
+    "wibe-mongodb-launcher": "workspace:*"
+  }
 }
