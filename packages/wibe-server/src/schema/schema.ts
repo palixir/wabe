@@ -1,4 +1,4 @@
-import { WibeSchemaScalars, WibeSchemaEnums } from '../../generated/graphql'
+import { WibeSchemaScalars, WibeSchemaEnums } from '../../generated/wibe'
 
 export type WibeDefaultTypes =
     | 'String'

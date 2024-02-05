@@ -1,7 +1,5 @@
-import { gql } from 'graphql-request'
-import { WibeApp } from '../../server'
-import { getGraphqlClient } from '../../utils/helper'
 import { Context } from '../interface'
+import { getClient } from '../../utils'
 
 export const signUpResolver = async (
     _: any,
@@ -15,55 +13,28 @@ export const signUpResolver = async (
     },
     context: Context,
 ) => {
-    const client = getGraphqlClient(WibeApp.config.port)
+    const client = getClient()
 
     const {
         findMany_User: { edges },
-    } = await client.request<any>(
-        gql`
-            query findMany_User($where: _UserWhereInput!) {
-                findMany_User(where: $where) {
-                    edges {
-                        node {
-                            id
-                            password
-                        }
-                    }
-                }
-            }
-        `,
-        {
-            where: {
-                email: { equalTo: email },
-            },
-        },
-    )
+    } = await client.findMany_User({ where: { email: { equalTo: email } } })
 
-    if (edges.length > 0) throw new Error('User already exist')
+    if (edges && edges.length > 0) throw new Error('User already exist')
 
-    // TODO : Add possibility to configure the password lenght and check if the lenght is correct
+    // TODO : Add possibility to configure the password length and check if the length is correct
     const hashedPassword = await Bun.password.hash(password, 'argon2id')
 
     const fifteenMinutes = new Date(Date.now() + 1000 * 60 * 15)
     const thirtyDays = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
 
-    const { createOne_User: user } = await client.request<any>(
-        gql`
-            mutation createOne_User($input: _UserCreateInput!) {
-                createOne_User(input: $input) {
-                    id
-                }
-            }
-        `,
-        {
-            input: {
-                fields: {
-                    email,
-                    password: hashedPassword,
-                },
+    const { createOne_User: user } = await client.createOne_User({
+        input: {
+            fields: {
+                email,
+                password: hashedPassword,
             },
         },
-    )
+    })
 
     const accessToken = await context.jwt.sign({
         userId: user.id,
@@ -77,24 +48,9 @@ export const signUpResolver = async (
         exp: thirtyDays.getTime(),
     })
 
-    await client.request<any>(
-        gql`
-            mutation updateOne_User($input: _UserUpdateInput!) {
-                updateOne_User(input: $input) {
-                    id
-                }
-            }
-        `,
-        {
-            input: {
-                id: user.id,
-                fields: {
-                    refreshToken,
-                    accessToken,
-                },
-            },
-        },
-    )
+    await client.updateOne_User({
+        input: { id: user.id, fields: { refreshToken, accessToken } },
+    })
 
     context.cookie.access_token.add({
         value: accessToken,

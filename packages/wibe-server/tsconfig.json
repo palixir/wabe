@@ -10,6 +10,6 @@
         "outDir": "lib",
         "declaration": true
     },
-    "exclude": ["node_modules", "lib"],
+    "exclude": ["node_modules", "lib", "**/*.test.ts"],
     "include": ["src"]
 }

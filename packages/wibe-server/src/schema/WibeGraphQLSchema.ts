@@ -42,7 +42,7 @@ import {
 } from './utils'
 import { signUpResolver } from '../graphql/resolvers/signUp'
 import { signInResolver } from '../graphql/resolvers/signIn'
-import { WibeSchemaTypes } from '../../generated/graphql'
+import { WibeSchemaTypes } from '../../generated/wibe'
 
 // This class is tested in e2e test in graphql folder
 export class WibeGraphQLSchema {

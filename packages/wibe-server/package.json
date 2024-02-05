@@ -4,7 +4,7 @@
     "description": "wibe-server",
     "scripts": {
         "generate:types": "tsc --project tsconfig.json",
-        "build": "bun build index.ts --minify --target=bun --outdir lib && bun run generate:types",
+        "build": "bun run generate:types",
         "dev": "bun codegen && bun run --watch dev/index.ts",
         "test": "bun test src --watch",
         "test:only": "bun test src --watch --only",
