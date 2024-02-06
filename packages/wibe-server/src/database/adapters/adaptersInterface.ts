@@ -55,7 +55,7 @@ export interface CreateObjectOptions<
     K extends keyof WibeSchemaTypes[T],
 > {
     className: T
-    data: Record<string, any>
+    data: Record<K, any>
     fields?: Array<K>
 }
 export interface CreateObjectsOptions<
@@ -63,7 +63,7 @@ export interface CreateObjectsOptions<
     K extends keyof WibeSchemaTypes[T],
 > {
     className: T
-    data: Array<Record<string, any>>
+    data: Array<Record<K, any>>
     fields?: Array<K>
     offset?: number
     limit?: number
@@ -75,7 +75,7 @@ export interface UpdateObjectOptions<
 > {
     className: T
     id: string
-    data: Record<string, any>
+    data: Record<K, any>
     fields?: Array<K>
 }
 
@@ -85,7 +85,7 @@ export interface UpdateObjectsOptions<
 > {
     className: T
     where: WhereType<T>
-    data: Record<string, any>
+    data: Record<K, any>
     fields?: Array<K>
     offset?: number
     limit?: number
@@ -126,16 +126,12 @@ export interface DatabaseAdapter {
     getObjects<
         T extends keyof WibeSchemaTypes,
         K extends keyof WibeSchemaTypes[T],
-    >(
-        params: GetObjectsOptions<T, K>,
-    ): Promise<Pick<WibeSchemaTypes[T], K>[]>
+    >(params: GetObjectsOptions<T, K>): Promise<Pick<WibeSchemaTypes[T], K>[]>
 
     createObject<
         T extends keyof WibeSchemaTypes,
         K extends keyof WibeSchemaTypes[T],
-    >(
-        params: CreateObjectOptions<T, K>,
-    ): Promise<Pick<WibeSchemaTypes[T], K>>
+    >(params: CreateObjectOptions<T, K>): Promise<Pick<WibeSchemaTypes[T], K>>
     createObjects<
         T extends keyof WibeSchemaTypes,
         K extends keyof WibeSchemaTypes[T],
@@ -146,9 +142,7 @@ export interface DatabaseAdapter {
     updateObject<
         T extends keyof WibeSchemaTypes,
         K extends keyof WibeSchemaTypes[T],
-    >(
-        params: UpdateObjectOptions<T, K>,
-    ): Promise<Pick<WibeSchemaTypes[T], K>>
+    >(params: UpdateObjectOptions<T, K>): Promise<Pick<WibeSchemaTypes[T], K>>
     updateObjects<
         T extends keyof WibeSchemaTypes,
         K extends keyof WibeSchemaTypes[T],

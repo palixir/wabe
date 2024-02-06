@@ -29,18 +29,21 @@ type _User {
   name: String
   age: Int
   isCool: Boolean
+  email: Email!
   birthDate: Date
   phone: Phone
   role: Role
   address: Address
   object: Object
   provider: AuthenticationProvider
-  email: Email!
   password: String
   verifiedEmail: Boolean
   accessToken: String
   refreshToken: String
 }
+
+"""Email scalar type"""
+scalar Email
 
 """Date scalar type"""
 scalar Date
@@ -63,9 +66,6 @@ type ObjectOfObject {
   id: ID!
   name: String
 }
-
-"""Email scalar type"""
-scalar Email
 
 type _UserConnection {
   edges: [_UserEdge]
@@ -106,13 +106,13 @@ input _UserWhereInput {
   name: StringWhereInput
   age: IntWhereInput
   isCool: BooleanWhereInput
+  email: EmailWhereInput
   birthDate: DateWhereInput
   phone: Phone
   role: AnyWhereInput
   address: AddressWhereInput
   object: ObjectWhereInput
   provider: AnyWhereInput
-  email: EmailWhereInput
   password: StringWhereInput
   verifiedEmail: BooleanWhereInput
   accessToken: StringWhereInput
@@ -137,6 +137,13 @@ input BooleanWhereInput {
   notEqualTo: Boolean
   in: [Boolean]
   notIn: [Boolean]
+}
+
+input EmailWhereInput {
+  equalTo: Email
+  notEqualTo: Email
+  in: [Email]
+  notIn: [Email]
 }
 
 input DateWhereInput {
@@ -182,13 +189,6 @@ input ObjectOfObjectWhereInput {
   AND: [ObjectOfObjectWhereInput]
 }
 
-input EmailWhereInput {
-  equalTo: Email
-  notEqualTo: Email
-  in: [Email]
-  notIn: [Email]
-}
-
 type Mutation {
   createOnePost(input: PostCreateInput): Post!
   createManyPost(input: PostsCreateInput): PostConnection!
@@ -214,6 +214,7 @@ type Mutation {
 
   """User class"""
   deleteMany_User(input: _UsersDeleteInput): _UserConnection!
+  signOut(input: SignOutInput): Boolean
   signUp(input: SignUpInput): Boolean
   signIn(input: SignInInput): Boolean
   signInWithProvider(input: SignInWithProviderInput): Boolean
@@ -265,13 +266,13 @@ input _UserInput {
   name: String
   age: Int
   isCool: Boolean
+  email: Email!
   birthDate: Date
   phone: Phone
   role: Role
   address: AddressInput
   object: ObjectInput
   provider: AuthenticationProvider
-  email: Email!
   password: String
   verifiedEmail: Boolean
   accessToken: String
@@ -309,13 +310,13 @@ input _UserUpdateFieldsInput {
   name: String
   age: Int
   isCool: Boolean
+  email: Email
   birthDate: Date
   phone: Phone
   role: Role
   address: AddressUpdateFieldsInput
   object: ObjectUpdateFieldsInput
   provider: AuthenticationProvider
-  email: Email
   password: String
   verifiedEmail: Boolean
   accessToken: String
@@ -351,6 +352,10 @@ input _UserDeleteInput {
 
 input _UsersDeleteInput {
   where: _UserWhereInput
+}
+
+input SignOutInput {
+  email: Email!
 }
 
 input SignUpInput {

@@ -1,5 +1,14 @@
 import { WibeSchemaTypes } from '../../../generated/wibe'
 import {
+    HookAfterDelete,
+    HookAfterInsert,
+    HookAfterUpdate,
+    HookBeforeDelete,
+    HookBeforeInsert,
+    HookBeforeUpdate,
+} from '../../hooks'
+import { WibeApp } from '../../server'
+import {
     CreateObjectOptions,
     CreateObjectsOptions,
     DatabaseAdapter,
@@ -48,7 +57,17 @@ export class DatabaseController {
         T extends keyof WibeSchemaTypes,
         K extends keyof WibeSchemaTypes[T],
     >(params: CreateObjectOptions<T, K>) {
-        return this.adapter.createObject(params)
+        WibeApp.eventEmitter.emit(
+            'beforeInsert',
+            params as HookBeforeInsert<T, K>,
+        )
+        const insertedObject = await this.adapter.createObject(params)
+        WibeApp.eventEmitter.emit('afterInsert', {
+            ...params,
+            insertedObject,
+        } as HookAfterInsert<T, K>)
+
+        return insertedObject
     }
 
     async createObjects<
@@ -62,7 +81,17 @@ export class DatabaseController {
         T extends keyof WibeSchemaTypes,
         K extends keyof WibeSchemaTypes[T],
     >(params: UpdateObjectOptions<T, K>) {
-        return this.adapter.updateObject(params)
+        WibeApp.eventEmitter.emit(
+            'beforeUpdate',
+            params as HookBeforeUpdate<T, K>,
+        )
+        const updatedObject = await this.adapter.updateObject(params)
+        WibeApp.eventEmitter.emit('afterUpdate', {
+            ...params,
+            updatedObject,
+        } as HookAfterUpdate<T, K>)
+
+        return updatedObject
     }
 
     async updateObjects<
@@ -76,7 +105,17 @@ export class DatabaseController {
         T extends keyof WibeSchemaTypes,
         K extends keyof WibeSchemaTypes[T],
     >(params: DeleteObjectOptions<T, K>) {
-        return this.adapter.deleteObject(params)
+        WibeApp.eventEmitter.emit(
+            'beforeDelete',
+            params as HookBeforeDelete<T, K>,
+        )
+        const deletedObject = await this.adapter.deleteObject(params)
+        WibeApp.eventEmitter.emit('afterDelete', {
+            ...params,
+            deletedObject,
+        } as HookAfterDelete<T, K>)
+
+        return deletedObject
     }
 
     async deleteObjects<

@@ -9,6 +9,7 @@ import { GraphQLObjectType, GraphQLSchema, printSchema } from 'graphql'
 import { WibeGraphQLSchema } from '../schema/WibeGraphQLSchema'
 import { AuthenticationConfig } from '../authentication/interface'
 import { WibeRoute, defaultRoutes } from './routes'
+import { WibeEmitter } from '../event'
 
 interface WibeConfig {
     port: number
@@ -25,6 +26,7 @@ export class WibeApp {
 
     static config: WibeConfig
     static databaseController: DatabaseController
+    static eventEmitter: WibeEmitter
 
     constructor({
         port,
@@ -55,6 +57,7 @@ export class WibeApp {
         })
 
         WibeApp.databaseController = new DatabaseController(databaseAdapter)
+        WibeApp.eventEmitter = new WibeEmitter()
     }
 
     async loadDefaultRoutes() {
