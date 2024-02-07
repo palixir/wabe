@@ -10,6 +10,8 @@ import { WibeGraphQLSchema } from '../schema/WibeGraphQLSchema'
 import { AuthenticationConfig } from '../authentication/interface'
 import { WibeRoute, defaultRoutes } from './routes'
 import { WibeEmitter } from '../event'
+import { Hook } from '../hooks'
+import { generateWibeFile } from './generateWibeFile'
 
 interface WibeConfig {
     port: number
@@ -19,6 +21,7 @@ interface WibeConfig {
     authentication?: AuthenticationConfig
     routes?: WibeRoute[]
     wibeKey: string
+    hooks?: Hook[]
 }
 
 export class WibeApp {
@@ -35,6 +38,7 @@ export class WibeApp {
         codegen = true,
         authentication,
         wibeKey,
+        hooks,
     }: WibeConfig) {
         WibeApp.config = {
             port,
@@ -43,6 +47,7 @@ export class WibeApp {
             codegen,
             authentication,
             wibeKey,
+            hooks,
         }
 
         this.server = new Elysia().get('/health', (context) => {
@@ -125,41 +130,17 @@ export class WibeApp {
             process.env.NODE_ENV !== 'test' &&
             WibeApp.config.codegen
         ) {
-            // Scalars
-            const listOfScalars =
-                wibeSchema.schema.scalars?.map(
-                    (scalar) => `"${scalar.name}"`,
-                ) || []
-            const wibeScalarType = `export type WibeSchemaScalars = ${listOfScalars.join(
-                ' | ',
-            )}`
-
-            // Enums
-            const wibeEnumsGlobalTypes =
-                wibeSchema.schema.enums?.map(
-                    (wibeEnum) => `"${wibeEnum.name}"`,
-                ) || []
-
-            const wibeEnumsGlobalTypesString = `export type WibeSchemaEnums = ${wibeEnumsGlobalTypes.join(
-                ' | ',
-            )}`
-
-            // Types
-            const allNames = wibeSchema.schema.class
-                .map((schema) => `${schema.name}: ${schema.name}`)
-                .filter((schema) => schema)
-
-            const globalWibeTypeString = `export type WibeSchemaTypes = {\n\t${allNames.join(
-                ',\n\t',
-            )}\n}`
-
             const contentOfCodegenFile =
                 await Bun.file('generated/wibe.ts').text()
 
             if (!contentOfCodegenFile.includes('WibeSchemaTypes'))
                 Bun.write(
                     'generated/wibe.ts',
-                    `${contentOfCodegenFile}\n\n${wibeScalarType}\n\n${wibeEnumsGlobalTypesString}\n\n${globalWibeTypeString}`,
+                    `${contentOfCodegenFile}\n\n${generateWibeFile({
+                        scalars: wibeSchema.schema.scalars,
+                        enums: wibeSchema.schema.enums,
+                        schemas: wibeSchema.schema.class,
+                    })}`,
                 )
             Bun.write('generated/schema.graphql', printSchema(schema))
         }

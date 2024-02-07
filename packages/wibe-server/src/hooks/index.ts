@@ -1,4 +1,5 @@
 import { WibeSchemaTypes } from '../../generated/wibe'
+import { WibeApp } from '../server'
 
 export enum HookTrigger {
     BeforeInsert = 'beforeInsert',
@@ -60,5 +61,9 @@ export interface HookAfterDelete<
 
 export interface Hook {
     trigger: HookTrigger
-    listener: (...args: any[]) => void
+    callback: (...args: any[]) => void
+}
+
+export const computeHooks = (hooks: Hook[]) => {
+    hooks.map((hook) => WibeApp.eventEmitter.on(hook.trigger, hook.callback))
 }
