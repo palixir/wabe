@@ -1,11 +1,5 @@
 import { WibeSchemaTypes } from '../../../generated/wibe'
 import {
-  HookAfterDelete,
-  HookAfterInsert,
-  HookAfterUpdate,
-  HookBeforeDelete,
-  HookBeforeInsert,
-  HookBeforeUpdate,
   HookTrigger,
 } from '../../hooks'
 import { HookObject } from '../../hooks/HookObject'
@@ -21,6 +15,28 @@ import {
   UpdateObjectOptions,
   UpdateObjectsOptions,
 } from '../adapters/adaptersInterface'
+
+export const _findHooksAndExecute = async <
+  T extends keyof WibeSchemaTypes,
+  K extends keyof WibeSchemaTypes[T],
+>({
+  className,
+  data,
+  hookTrigger,
+}: { hookTrigger: HookTrigger, className: T, data: Record<K, WibeSchemaTypes[T][K]> }) => {
+  const hookObject = new HookObject({
+    className,
+    data,
+  })
+
+  const hooksToCompute =
+    WibeApp.config.hooks?.filter((hook) => hook.trigger === hookTrigger) ||
+    []
+
+  await Promise.all(hooksToCompute.map((hook) => hook.callback && hook.callback(hookObject)))
+
+  return hookObject.getData()
+}
 
 export class DatabaseController {
   public adapter: DatabaseAdapter
@@ -59,18 +75,22 @@ export class DatabaseController {
     T extends keyof WibeSchemaTypes,
     K extends keyof WibeSchemaTypes[T],
   >(params: CreateObjectOptions<T, K>) {
-    const hookObject = new HookObject({
+    const hookObjectData = await _findHooksAndExecute({
+      hookTrigger: HookTrigger.BeforeInsert,
       className: params.className,
       data: params.data,
     })
 
-    const hooksToCompute = WibeApp.config.hooks?.filter(
-      (hook) => hook.trigger === HookTrigger.BeforeInsert,
-    ) || []
+    const insertedObject = await this.adapter.createObject({
+      ...params,
+      data: hookObjectData,
+    })
 
-    await Promise.all(hooksToCompute.map((hook) => hook.callback(hookObject)))
-
-    const insertedObject = await this.adapter.createObject(params)
+    await _findHooksAndExecute({
+      hookTrigger: HookTrigger.AfterInsert,
+      className: params.className,
+      data: hookObjectData,
+    })
 
     return insertedObject
   }

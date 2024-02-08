@@ -1,175 +1,120 @@
 import {
-    describe,
-    it,
-    expect,
-    spyOn,
-    beforeAll,
-    afterAll,
-    afterEach,
+  describe,
+  it,
+  expect,
+  spyOn,
+  beforeAll,
+  afterAll,
+  mock
 } from 'bun:test'
 import { MongoAdapter } from '../adapters/MongoAdapter'
 import { closeTests, setupTests } from '../../utils/helper'
 import { WibeApp } from '../../server'
-import { CreateObjectOptions } from '../adapters/adaptersInterface'
+import * as databaseController from './DatabaseController'
+import { HookTrigger } from '../../hooks'
 
 describe('DatabaseController', () => {
-    let wibe: WibeApp
-    let spyWibeEmitterEmit: any
+  let wibe: WibeApp
 
-    beforeAll(async () => {
-        const setup = await setupTests()
-        wibe = setup.wibe
-        spyWibeEmitterEmit = spyOn(WibeApp.eventEmitter, 'emit')
+  beforeAll(async () => {
+    const setup = await setupTests()
+    wibe = setup.wibe
+  })
+
+  afterAll(async () => {
+    await closeTests(wibe)
+  })
+
+  it('should call adapter for createClass', async () => {
+    const spyMongoAdapterCreateClass = spyOn(
+      MongoAdapter.prototype,
+      'createClass',
+    ).mockResolvedValue()
+
+    await WibeApp.databaseController.createClass('Collection1')
+
+    expect(spyMongoAdapterCreateClass).toHaveBeenCalledTimes(1)
+  })
+
+  it("should find and execute all the hook", async () => {
+    const mockCallbackOne = mock(() => { })
+    const mockCallbackTwo = mock(() => { })
+
+    WibeApp.config.hooks = [
+      {
+        trigger: HookTrigger.BeforeInsert,
+        callback: mockCallbackOne as any
+      },
+      {
+        trigger: HookTrigger.AfterInsert,
+        callback: mockCallbackTwo as any
+      }
+    ]
+
+    await databaseController._findHooksAndExecute({
+      className: '_User',
+      data: {
+        name: 'tata'
+      },
+      hookTrigger: HookTrigger.BeforeInsert
     })
 
-    afterAll(async () => {
-        await closeTests(wibe)
+    expect(mockCallbackTwo).toHaveBeenCalledTimes(0)
+    expect(mockCallbackOne).toHaveBeenCalledTimes(1)
+    expect(mockCallbackOne).toHaveBeenCalledWith({
+      className: '_User',
+      data: {
+        name: 'tata'
+      }
     })
 
-    afterEach(() => {
-        spyWibeEmitterEmit.mockReset()
+    await databaseController._findHooksAndExecute({
+      className: '_User',
+      data: {
+        id: 'id' as any
+      },
+      hookTrigger: HookTrigger.AfterInsert
     })
 
-    it('should call adapter for createClass', async () => {
-        const spyMongoAdapterCreateClass = spyOn(
-            MongoAdapter.prototype,
-            'createClass',
-        ).mockResolvedValue()
+    expect(mockCallbackTwo).toHaveBeenCalledTimes(1)
+    expect(mockCallbackTwo).toHaveBeenCalledWith({
+      className: '_User',
+      data: {
+        id: 'id'
+      }
+    })
+  })
 
-        await WibeApp.databaseController.createClass('Collection1')
+  it("should call hook on createObject", async () => {
+    const spy_findHooksAndExecute = spyOn(
+      databaseController,
+      '_findHooksAndExecute').mockResolvedValue({
+        _id: 'id'
+      } as any)
 
-        expect(spyMongoAdapterCreateClass).toHaveBeenCalledTimes(1)
+    await WibeApp.databaseController.createObject({
+      className: '_User',
+      data: {
+        name: 'John Doe',
+      }
     })
 
-    it('should call wibeEmitter on createObject', async () => {
-        const spyMongoAdapterCreateObject = spyOn(
-            MongoAdapter.prototype,
-            'createObject',
-        ).mockResolvedValue({
-            id: '123',
-            name: 'test',
-        } as any)
-
-        await WibeApp.databaseController.createObject({
-            className: '_User',
-            data: {
-                name: 'test',
-                age: 20,
-            },
-            fields: ['name', 'age'],
-        } as CreateObjectOptions<any, any>)
-
-        expect(spyWibeEmitterEmit).toHaveBeenCalledTimes(2)
-
-        expect(spyWibeEmitterEmit).toHaveBeenNthCalledWith(1, 'beforeInsert', {
-            className: '_User',
-            data: {
-                name: 'test',
-                age: 20,
-            },
-            fields: ['name', 'age'],
-        })
-
-        expect(spyWibeEmitterEmit).toHaveBeenNthCalledWith(2, 'afterInsert', {
-            className: '_User',
-            data: {
-                name: 'test',
-                age: 20,
-            },
-            fields: ['name', 'age'],
-            insertedObject: {
-                id: '123',
-                name: 'test',
-            },
-        })
-
-        expect(spyMongoAdapterCreateObject).toHaveBeenCalledTimes(1)
-
-        spyWibeEmitterEmit.mockReset()
-        spyMongoAdapterCreateObject.mockRestore()
+    expect(spy_findHooksAndExecute).toHaveBeenCalledTimes(2)
+    expect(spy_findHooksAndExecute).toHaveBeenNthCalledWith(1, {
+      hookTrigger: 'beforeInsert',
+      className: '_User',
+      data: {
+        name: 'John Doe',
+      }
+    })
+    expect(spy_findHooksAndExecute).toHaveBeenNthCalledWith(2, {
+      hookTrigger: 'afterInsert',
+      className: '_User',
+      data: {
+        _id: 'id',
+      }
     })
 
-    it('should call wibeEmitter on updateObject', async () => {
-        const spyMongoAdapterUpdateObject = spyOn(
-            MongoAdapter.prototype,
-            'updateObject',
-        ).mockResolvedValue({
-            id: '123',
-            name: 'test',
-        } as any)
-
-        await WibeApp.databaseController.updateObject({
-            className: '_User',
-            id: '123',
-            data: {
-                name: 'test',
-                age: 20,
-            },
-            fields: ['name', 'age'],
-        })
-
-        expect(spyWibeEmitterEmit).toHaveBeenCalledTimes(2)
-
-        expect(spyWibeEmitterEmit).toHaveBeenNthCalledWith(1, 'beforeUpdate', {
-            className: '_User',
-            id: '123',
-            data: {
-                name: 'test',
-                age: 20,
-            },
-            fields: ['name', 'age'],
-        })
-
-        expect(spyWibeEmitterEmit).toHaveBeenNthCalledWith(2, 'afterUpdate', {
-            className: '_User',
-            id: '123',
-            data: {
-                name: 'test',
-                age: 20,
-            },
-            fields: ['name', 'age'],
-            updatedObject: {
-                id: '123',
-                name: 'test',
-            },
-        })
-
-        expect(spyMongoAdapterUpdateObject).toHaveBeenCalledTimes(1)
-
-        spyMongoAdapterUpdateObject.mockRestore()
-    })
-
-    it('should call wibeEmitter on deleteObject', async () => {
-        const spyMongoAdapterDeleteObject = spyOn(
-            MongoAdapter.prototype,
-            'deleteObject',
-        ).mockResolvedValue({
-            id: '123',
-            name: 'test',
-        })
-
-        await WibeApp.databaseController.deleteObject({
-            className: '_User',
-            id: '123',
-        })
-
-        expect(spyWibeEmitterEmit).toHaveBeenCalledTimes(2)
-
-        expect(spyWibeEmitterEmit).toHaveBeenNthCalledWith(1, 'beforeDelete', {
-            className: '_User',
-            id: '123',
-        })
-        expect(spyWibeEmitterEmit).toHaveBeenNthCalledWith(2, 'afterDelete', {
-            className: '_User',
-            id: '123',
-            deletedObject: {
-                id: '123',
-                name: 'test',
-            },
-        })
-
-        expect(spyMongoAdapterDeleteObject).toHaveBeenCalledTimes(1)
-
-        spyMongoAdapterDeleteObject.mockRestore()
-    })
+    spy_findHooksAndExecute.mockRestore()
+  })
 })
