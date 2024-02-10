@@ -10,7 +10,10 @@ export class HookObject<
     constructor({
         data,
         className,
-    }: { className: T; data: Record<K, WibeSchemaTypes[T][K]> }) {
+    }: {
+        className: T
+        data: Record<K, WibeSchemaTypes[T][K]>
+    }) {
         this.data = data
         this.className = className
     }

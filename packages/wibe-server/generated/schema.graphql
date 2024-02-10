@@ -40,6 +40,8 @@ type _User {
   verifiedEmail: Boolean
   accessToken: String
   refreshToken: String
+  createdAt: Date
+  updatedAt: Date
 }
 
 """Email scalar type"""
@@ -117,6 +119,8 @@ input _UserWhereInput {
   verifiedEmail: BooleanWhereInput
   accessToken: StringWhereInput
   refreshToken: StringWhereInput
+  createdAt: DateWhereInput
+  updatedAt: DateWhereInput
   OR: [_UserWhereInput]
   AND: [_UserWhereInput]
 }
@@ -277,6 +281,8 @@ input _UserInput {
   verifiedEmail: Boolean
   accessToken: String
   refreshToken: String
+  createdAt: Date
+  updatedAt: Date
 }
 
 input AddressInput {
@@ -321,6 +327,8 @@ input _UserUpdateFieldsInput {
   verifiedEmail: Boolean
   accessToken: String
   refreshToken: String
+  createdAt: Date
+  updatedAt: Date
 }
 
 input AddressUpdateFieldsInput {

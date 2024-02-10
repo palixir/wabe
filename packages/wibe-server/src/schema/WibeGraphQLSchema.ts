@@ -89,6 +89,13 @@ export class WibeGraphQLSchema {
             refreshToken: {
                 type: 'String',
             },
+            // TODO : Automatically put this two fields for each class
+            createdAt: {
+                type: 'Date',
+            },
+            updatedAt: {
+                type: 'Date',
+            },
         }
 
         const defaultResolvers: TypeResolver = {
