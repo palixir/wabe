@@ -1,14 +1,18 @@
-import type { CodegenConfig } from '@graphql-codegen/cli';
+import type { CodegenConfig } from '@graphql-codegen/cli'
 
 const config: CodegenConfig = {
-  overwrite: true,
-  schema: "./generated/schema.graphql",
-  generates: {
-    "./generated/wibe.ts": {
-      plugins: ["typescript", "typescript-operations", 'typescript-graphql-request'],
-      documents: "./src/**/*.graphql",
-    }
-  }
-};
+    overwrite: true,
+    schema: './generated/schema.graphql',
+    generates: {
+        './generated/wibe.ts': {
+            plugins: [
+                'typescript',
+                'typescript-operations',
+                'typescript-graphql-request',
+            ],
+            documents: './src/**/*.graphql',
+        },
+    },
+}
 
-export default config;
+export default config

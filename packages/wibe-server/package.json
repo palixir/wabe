@@ -22,7 +22,6 @@
         "mongodb": "6.3.0"
     },
     "devDependencies": {
-        "@biomejs/biome": "1.5.3",
         "@graphql-codegen/cli": "5.0.0",
         "@graphql-codegen/typescript": "4.0.1",
         "@graphql-codegen/typescript-graphql-request": "6.2.0",

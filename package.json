@@ -1,9 +1,15 @@
 {
-  "name": "main",
-  "version": "1.0.0",
-  "devDependencies": { "@graphql-codegen/typescript-resolvers": "^4.0.1" },
-  "private": true,
-  "workspaces": [
-    "packages/*"
-  ]
+    "name": "main",
+    "version": "1.0.0",
+    "devDependencies": {
+        "@biomejs/biome": "^1.5.3",
+        "husky": "9.0.10"
+    },
+    "private": true,
+    "workspaces": ["packages/*"],
+    "scripts": {
+        "prepare": "husky",
+        "linter": "biome lint ./packages/**/*.ts",
+        "formatter": "biome format --write ./packages/"
+    }
 }
