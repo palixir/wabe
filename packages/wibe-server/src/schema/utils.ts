@@ -13,7 +13,6 @@ import {
 } from 'graphql'
 import { SchemaFields, TypeField, WibeDefaultTypes, WibeTypes } from './Schema'
 import {
-    AnyScalarType,
     AnyWhereInput,
     ArrayWhereInput,
     BooleanWhereInput,

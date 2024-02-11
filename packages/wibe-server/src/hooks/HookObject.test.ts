@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'bun:test'
 import { HookObject } from './HookObject'
-import { _User } from '../../generated/wibe'
 
 describe('HookObject', () => {
     it('should get data correctly', () => {

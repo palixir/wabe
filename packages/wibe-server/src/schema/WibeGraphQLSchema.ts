@@ -56,7 +56,9 @@ export class WibeGraphQLSchema {
 
         this.schemas.schema.enums.push(this.defaultEnum())
         // TODO: Only push the _User if the user use one of the wibe authentication methods
+
         this.schemas.schema.class.push(this.defaultClass())
+        console.log(this.schemas.schema.class)
     }
 
     defaultEnum(): EnumInterface {
@@ -189,12 +191,18 @@ export class WibeGraphQLSchema {
                     ...defaultUserFields,
                 },
                 resolvers: {
-                    ..._user.resolvers,
-                    ...defaultResolvers,
+                    queries: {
+                        ..._user.resolvers?.queries,
+                        ...defaultResolvers.queries,
+                    },
+                    mutations: {
+                        ..._user.resolvers?.mutations,
+                        ...defaultResolvers.mutations,
+                    },
                 },
             }
 
-            delete this.schemas.schema.class[_userIndex]
+            // delete this.schemas.schema.class[_userIndex]
 
             return newUserObject
         }

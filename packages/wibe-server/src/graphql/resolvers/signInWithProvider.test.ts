@@ -128,7 +128,7 @@ describe('signInWithProvider', () => {
 
 const graphql = {
     createManyUser: gql`
-        mutation createManyUser($input: UsersCreateInput!) {
+        mutation createManyUser($input: _UsersCreateInput!) {
             createManyUser(input: $input) {
                 edges {
                     node {

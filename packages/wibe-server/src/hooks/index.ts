@@ -2,6 +2,7 @@ import { WibeSchemaTypes } from '../../generated/wibe'
 import { HookObject } from './HookObject'
 import {
     defaultBeforeInsertForCreatedAt,
+    defaultBeforeInsertForDefaultValue,
     defaultBeforeUpdateForUpdatedAt,
 } from './defaultHooks'
 
@@ -43,6 +44,11 @@ export const defaultHooks: Hook<any, any>[] = [
         trigger: HookTrigger.BeforeInsert,
         priority: 1,
         callback: defaultBeforeInsertForCreatedAt,
+    },
+    {
+        trigger: HookTrigger.BeforeInsert,
+        priority: 1,
+        callback: defaultBeforeInsertForDefaultValue,
     },
     {
         trigger: HookTrigger.BeforeUpdate,

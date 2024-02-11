@@ -218,6 +218,8 @@ type Mutation {
 
   """User class"""
   deleteMany_User(input: _UsersDeleteInput): _UserConnection!
+  createMutation(input: CreateMutationInput): Boolean!
+  customMutation(input: CustomMutationInput): Int
   signOut(input: SignOutInput): Boolean
   signUp(input: SignUpInput): Boolean
   signIn(input: SignInInput): Boolean
@@ -360,6 +362,15 @@ input _UserDeleteInput {
 
 input _UsersDeleteInput {
   where: _UserWhereInput
+}
+
+input CreateMutationInput {
+  name: Int!
+}
+
+input CustomMutationInput {
+  a: Int!
+  b: Int!
 }
 
 input SignOutInput {

@@ -76,6 +76,21 @@ describe('Default hooks', () => {
             expect(updatedAt.getFullYear()).toEqual(now.getFullYear())
         })
     })
+
+    describe('Default value', () => {
+        it('should add the value if a default value is defined in schema but not specified', async () => {
+            const { createOne_User } = await client.request<any>(
+                graphql.createOne_User,
+                {
+                    input: {
+                        fields: {
+                            email: 'email@test.fr',
+                        },
+                    },
+                },
+            )
+        })
+    })
 })
 
 const graphql = {
@@ -83,6 +98,7 @@ const graphql = {
         mutation createUser($input: _UserCreateInput!) {
             createOne_User(input: $input) {
                 id
+                isAdmin
                 createdAt
                 updatedAt
             }
