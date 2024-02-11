@@ -3,13 +3,11 @@
     "version": "1.0.0",
     "devDependencies": {
         "@biomejs/biome": "1.5.3",
-        "husky": "9.0.10",
-        "lint-staged": "15.2.2"
+        "husky": "9.0.10"
     },
     "private": true,
     "workspaces": ["packages/*"],
     "scripts": {
-        "prepare": "husky",
         "pre-commit": "biome lint ./packages/**/*.ts && biome format --write ./packages/"
     }
 }
