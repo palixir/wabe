@@ -3,7 +3,6 @@ import { GraphQLClient } from 'graphql-request'
 import { WibeApp } from '../server'
 import { DatabaseEnum } from '../database'
 import getPort from 'get-port'
-import { HookTrigger } from '../hooks'
 
 export const getGraphqlClient = (port: number): GraphQLClient => {
     const client = new GraphQLClient(`http://127.0.0.1:${port}/graphql`)
@@ -25,16 +24,6 @@ export const setupTests = async () => {
             name: databaseId,
         },
         port,
-        hooks: [
-            {
-                trigger: HookTrigger.BeforeInsert,
-                listener: (data) => {},
-            },
-            {
-                trigger: HookTrigger.AfterDelete,
-                listener: (data) => {},
-            },
-        ],
         schema: {
             class: [
                 {

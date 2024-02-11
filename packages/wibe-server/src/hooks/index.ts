@@ -31,16 +31,22 @@ export type Hook<
     trigger: HookTrigger
     // If the className is undefined the hook is called on each class
     className?: T
+    // The priority of the hook. The lower the number the earlier the hook is called
+    // The priority 0 is for the security hooks
+    // The default priority is 1
+    priority: number
     callback: (hookObject: HookObject<T, K>) => Promise<void> | void
 }
 
 export const defaultHooks: Hook<any, any>[] = [
     {
         trigger: HookTrigger.BeforeInsert,
+        priority: 1,
         callback: defaultBeforeInsertForCreatedAt,
     },
     {
         trigger: HookTrigger.BeforeUpdate,
+        priority: 1,
         callback: defaultBeforeUpdateForUpdatedAt,
     },
 ]

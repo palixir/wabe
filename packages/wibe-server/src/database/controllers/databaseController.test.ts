@@ -7,12 +7,12 @@ import {
     afterAll,
     mock,
 } from 'bun:test'
+import { ObjectId } from 'mongodb'
 import { MongoAdapter } from '../adapters/MongoAdapter'
 import { closeTests, setupTests } from '../../utils/helper'
 import { WibeApp } from '../../server'
 import * as databaseController from './DatabaseController'
 import { HookTrigger } from '../../hooks'
-import { ObjectId } from 'mongodb'
 
 describe('DatabaseController', () => {
     let wibe: WibeApp
@@ -44,10 +44,12 @@ describe('DatabaseController', () => {
         WibeApp.config.hooks = [
             {
                 trigger: HookTrigger.BeforeInsert,
+                priority: 1,
                 callback: mockCallbackOne as any,
             },
             {
                 trigger: HookTrigger.AfterInsert,
+                priority: 1,
                 callback: mockCallbackTwo as any,
             },
         ]
@@ -94,11 +96,13 @@ describe('DatabaseController', () => {
             {
                 trigger: HookTrigger.BeforeInsert,
                 className: '_User',
+                priority: 1,
                 callback: mockCallbackOne as any,
             },
             {
                 trigger: HookTrigger.AfterInsert,
                 className: 'Tata',
+                priority: 1,
                 callback: mockCallbackTwo as any,
             },
         ]
@@ -131,6 +135,7 @@ describe('DatabaseController', () => {
         expect(mockCallbackTwo).toHaveBeenCalledTimes(0)
 
         await databaseController._findHooksAndExecute({
+            // @ts-expect-error
             className: 'Tata',
             data: {
                 id: 'id' as any,
@@ -139,6 +144,42 @@ describe('DatabaseController', () => {
         })
 
         expect(mockCallbackTwo).toHaveBeenCalledTimes(1)
+    })
+
+    it('should find and execute all the hooks and respect the priorities', async () => {
+        const spy_findHooksByPriority = spyOn(
+            databaseController,
+            '_findHooksByPriority',
+        )
+
+        const mockCallbackOne = mock(() => {})
+        const mockCallbackTwo = mock(() => {})
+
+        WibeApp.config.hooks = [
+            {
+                trigger: HookTrigger.BeforeInsert,
+                priority: 0,
+                callback: mockCallbackOne,
+            },
+            {
+                trigger: HookTrigger.BeforeInsert,
+                priority: 1,
+                callback: mockCallbackTwo,
+            },
+        ]
+
+        await databaseController._findHooksAndExecute({
+            className: '_User',
+            data: {
+                name: 'tata',
+            },
+            hookTrigger: HookTrigger.BeforeInsert,
+        })
+
+        expect(mockCallbackOne).toHaveBeenCalledTimes(1)
+        expect(mockCallbackTwo).toHaveBeenCalledTimes(1)
+        expect(spy_findHooksByPriority.mock.calls[0][0].priority).toEqual(0)
+        expect(spy_findHooksByPriority.mock.calls[1][0].priority).toEqual(1)
     })
 
     it('should call hook on createObject', async () => {

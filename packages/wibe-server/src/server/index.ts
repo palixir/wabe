@@ -20,7 +20,7 @@ interface WibeConfig {
     authentication?: AuthenticationConfig
     routes?: WibeRoute[]
     wibeKey: string
-    hooks?: Hook[]
+    hooks?: Hook<any, any>[]
 }
 
 export class WibeApp {

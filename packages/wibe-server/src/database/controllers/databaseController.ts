@@ -14,6 +14,22 @@ import {
     UpdateObjectsOptions,
 } from '../adapters/adaptersInterface'
 
+export const _findHooksByPriority = async <T extends keyof WibeSchemaTypes>({
+    className,
+    hookTrigger,
+    priority,
+}: {
+    hookTrigger: HookTrigger
+    className: T
+    priority: number
+}) =>
+    WibeApp.config.hooks?.filter(
+        (hook) =>
+            hook.trigger === hookTrigger &&
+            hook.priority === priority &&
+            (className === hook.className || !hook.className),
+    ) || []
+
 export const _findHooksAndExecute = async <
     T extends keyof WibeSchemaTypes,
     K extends keyof WibeSchemaTypes[T],
@@ -31,18 +47,28 @@ export const _findHooksAndExecute = async <
         data,
     })
 
-    const hooksToCompute =
-        WibeApp.config.hooks?.filter(
-            (hook) =>
-                hook.trigger === hookTrigger &&
-                (className === hook.className || !hook.className),
-        ) || []
+    const listOfPriorities =
+        WibeApp.config.hooks
+            ?.reduce((acc, hook) => {
+                if (!acc.includes(hook.priority)) acc.push(hook.priority)
 
-    await Promise.all(
-        hooksToCompute.map(
-            (hook) => hook.callback && hook.callback(hookObject),
-        ),
-    )
+                return acc
+            }, [] as number[])
+            .sort((a, b) => a - b) || []
+
+    // We need reduce here to keep the order of the hooks
+    // Priority 0, then 1 etc...
+    await listOfPriorities.reduce(async (_, priority) => {
+        const hooksToCompute = await _findHooksByPriority({
+            className,
+            hookTrigger,
+            priority,
+        })
+
+        await Promise.all(
+            hooksToCompute.map((hook) => hook.callback(hookObject)),
+        )
+    }, Promise.resolve())
 
     return hookObject.getData()
 }
