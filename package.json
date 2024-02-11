@@ -8,6 +8,12 @@
     "private": true,
     "workspaces": ["packages/*"],
     "scripts": {
-        "pre-commit": "biome lint ./packages/**/*.ts && biome format --write ./packages/"
+        "prepare": "husky"
+    },
+    "lint-staged": {
+        "*": [
+            "biome lint ./packages/**/*.ts",
+            "biome format --write ./packages/**/*.ts"
+        ]
     }
 }
