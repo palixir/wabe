@@ -9,7 +9,7 @@
     "test": "bun test src --watch",
     "test:only": "bun test src --watch --only",
     "linter": "biome lint ./src/**/*.ts",
-    "formatter": "biome format --write ./src",
+    "formatter": "biome format --write .",
     "codegen": "graphql-codegen --config codegen.ts"
   },
   "dependencies": {

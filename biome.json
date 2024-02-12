@@ -1,33 +1,38 @@
 {
-    "$schema": "https://biomejs.dev/schemas/1.4.1/schema.json",
-    "files": {
-        "ignore": ["**/lib/**/*.ts", "**/lib/**/*.js", "**/node_modules/**"],
-        "ignoreUnknown": true
-    },
-    "organizeImports": {
-        "enabled": true
-    },
-    "linter": {
-        "enabled": true,
-        "rules": {
-            "recommended": true,
-            "suspicious": {
-                "noExplicitAny": "off"
-            },
-            "nursery": {
-                "noUnusedImports": "error"
-            }
-        }
-    },
-    "formatter": {
-        "enabled": true,
-        "indentWidth": 4,
-        "indentStyle": "space"
-    },
-    "javascript": {
-        "formatter": {
-            "quoteStyle": "single",
-            "semicolons": "asNeeded"
-        }
-    }
+	"$schema": "https://biomejs.dev/schemas/1.4.1/schema.json",
+	"files": {
+		"ignore": ["**/lib/**/*.ts", "**/lib/**/*.js", "**/node_modules/**"],
+		"ignoreUnknown": true
+	},
+	"organizeImports": {
+		"enabled": true
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true,
+			"suspicious": {
+				"noExplicitAny": "off"
+			},
+			"nursery": {
+				"noUnusedImports": "error"
+			}
+		}
+	},
+	"json": {
+		"formatter": {
+			"indentWidth": 4
+		}
+	},
+	"formatter": {
+		"enabled": true,
+		"indentWidth": 4,
+		"indentStyle": "tab"
+	},
+	"javascript": {
+		"formatter": {
+			"quoteStyle": "single",
+			"semicolons": "asNeeded"
+		}
+	}
 }

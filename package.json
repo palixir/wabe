@@ -16,7 +16,7 @@
   "lint-staged": {
     "*": [
       "biome lint ./packages/**/*.ts",
-      "biome format --write ./packages/**/*.ts"
+      "biome format --write ."
     ]
   }
 }
