@@ -136,7 +136,29 @@ export class DatabaseController {
 		K extends keyof WibeSchemaTypes[T],
 		W extends keyof WibeSchemaTypes[T],
 	>(params: CreateObjectsOptions<T, K, W>) {
-		return this.adapter.createObjects(params)
+		const hookObjectsData = await Promise.all(
+			params.data.map((data) =>
+				_findHooksAndExecute({
+					hookTrigger: HookTrigger.BeforeInsert,
+					className: params.className,
+					data,
+				}),
+			),
+		)
+
+		const insertedObjects = await this.adapter.createObjects(params)
+
+		await Promise.all(
+			hookObjectsData.map(async (hookObjectData) =>
+				_findHooksAndExecute({
+					hookTrigger: HookTrigger.AfterInsert,
+					className: params.className,
+					data: hookObjectData,
+				}),
+			),
+		)
+
+		return insertedObjects
 	}
 
 	async updateObject<
@@ -166,7 +188,21 @@ export class DatabaseController {
 		K extends keyof WibeSchemaTypes[T],
 		W extends keyof WibeSchemaTypes[T],
 	>(params: UpdateObjectsOptions<T, K, W>) {
-		return this.adapter.updateObjects(params)
+		const hookObjectData = await _findHooksAndExecute({
+			hookTrigger: HookTrigger.BeforeUpdate,
+			className: params.className,
+			data: params.data,
+		})
+
+		const updatedObjects = await this.adapter.updateObjects(params)
+
+		await _findHooksAndExecute({
+			hookTrigger: HookTrigger.AfterUpdate,
+			className: params.className,
+			data: hookObjectData,
+		})
+
+		return updatedObjects
 	}
 
 	async deleteObject<
@@ -194,6 +230,22 @@ export class DatabaseController {
 		T extends keyof WibeSchemaTypes,
 		K extends keyof WibeSchemaTypes[T],
 	>(params: DeleteObjectsOptions<T, K>) {
-		return this.adapter.deleteObjects(params)
+		// TODO : Refactor this to add all the object deleted on before
+		// We can need them to execute some tasks before the delete
+		const hookObjectData = await _findHooksAndExecute({
+			hookTrigger: HookTrigger.BeforeDelete,
+			className: params.className,
+			data: {},
+		})
+
+		const deletedObjects = await this.adapter.deleteObjects(params)
+
+		await _findHooksAndExecute({
+			hookTrigger: HookTrigger.AfterDelete,
+			className: params.className,
+			data: hookObjectData,
+		})
+
+		return deletedObjects
 	}
 }

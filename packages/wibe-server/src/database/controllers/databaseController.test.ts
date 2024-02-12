@@ -216,6 +216,61 @@ describe('DatabaseController', () => {
 		spy_findHooksAndExecute.mockRestore()
 	})
 
+	it('should call hook on createObjects', async () => {
+		const spy_findHooksAndExecute = spyOn(
+			databaseController,
+			'_findHooksAndExecute',
+		)
+
+		await WibeApp.databaseController.createObjects({
+			className: '_User',
+			data: [
+				{
+					name: 'John Doe',
+				},
+				{
+					name: 'John Doe2',
+				},
+			],
+		})
+
+		expect(spy_findHooksAndExecute).toHaveBeenCalledTimes(4)
+		expect(spy_findHooksAndExecute).toHaveBeenNthCalledWith(1, {
+			hookTrigger: 'beforeInsert',
+			className: '_User',
+			data: {
+				name: 'John Doe',
+				_id: expect.any(ObjectId),
+			},
+		})
+		expect(spy_findHooksAndExecute).toHaveBeenNthCalledWith(2, {
+			hookTrigger: 'beforeInsert',
+			className: '_User',
+			data: {
+				name: 'John Doe2',
+				_id: expect.any(ObjectId),
+			},
+		})
+		expect(spy_findHooksAndExecute).toHaveBeenNthCalledWith(3, {
+			hookTrigger: 'afterInsert',
+			className: '_User',
+			data: {
+				name: 'John Doe',
+				_id: expect.any(ObjectId),
+			},
+		})
+		expect(spy_findHooksAndExecute).toHaveBeenNthCalledWith(4, {
+			hookTrigger: 'afterInsert',
+			className: '_User',
+			data: {
+				name: 'John Doe2',
+				_id: expect.any(ObjectId),
+			},
+		})
+
+		spy_findHooksAndExecute.mockRestore()
+	})
+
 	it('should call hook on updateObject', async () => {
 		const spy_findHooksAndExecute = spyOn(
 			databaseController,
@@ -229,13 +284,13 @@ describe('DatabaseController', () => {
 			},
 		})
 
-		spy_findHooksAndExecute.mockReset()
+		spy_findHooksAndExecute.mockClear()
 
 		await WibeApp.databaseController.updateObject({
 			className: '_User',
 			id: res.id,
 			data: {
-				name: 'John Doe',
+				name: 'John Doe after update',
 			},
 		})
 
@@ -244,12 +299,66 @@ describe('DatabaseController', () => {
 			hookTrigger: 'beforeUpdate',
 			className: '_User',
 			data: {
-				name: 'John Doe',
+				name: 'John Doe after update',
 			},
 		})
 		expect(spy_findHooksAndExecute).toHaveBeenNthCalledWith(2, {
 			hookTrigger: 'afterUpdate',
 			className: '_User',
+			data: {
+				name: 'John Doe after update',
+			},
+		})
+
+		spy_findHooksAndExecute.mockRestore()
+	})
+
+	it('should call hook on updateObjects', async () => {
+		const spy_findHooksAndExecute = spyOn(
+			databaseController,
+			'_findHooksAndExecute',
+		)
+
+		await WibeApp.databaseController.createObject({
+			className: '_User',
+			data: {
+				name: 'John Doe',
+			},
+		})
+
+		await WibeApp.databaseController.createObject({
+			className: '_User',
+			data: {
+				name: 'John Doe',
+			},
+		})
+
+		spy_findHooksAndExecute.mockClear()
+
+		await WibeApp.databaseController.updateObjects({
+			className: '_User',
+			where: {
+				name: { equalTo: 'John Doe' },
+			},
+			data: {
+				name: 'John Doe after update',
+			},
+		})
+
+		expect(spy_findHooksAndExecute).toHaveBeenCalledTimes(2)
+		expect(spy_findHooksAndExecute).toHaveBeenNthCalledWith(1, {
+			hookTrigger: 'beforeUpdate',
+			className: '_User',
+			data: {
+				name: 'John Doe after update',
+			},
+		})
+		expect(spy_findHooksAndExecute).toHaveBeenNthCalledWith(2, {
+			hookTrigger: 'afterUpdate',
+			className: '_User',
+			data: {
+				name: 'John Doe after update',
+			},
 		})
 
 		spy_findHooksAndExecute.mockRestore()
@@ -268,7 +377,7 @@ describe('DatabaseController', () => {
 			},
 		})
 
-		spy_findHooksAndExecute.mockReset()
+		spy_findHooksAndExecute.mockClear()
 
 		await WibeApp.databaseController.deleteObject({
 			className: '_User',
@@ -284,6 +393,51 @@ describe('DatabaseController', () => {
 		expect(spy_findHooksAndExecute).toHaveBeenNthCalledWith(2, {
 			hookTrigger: 'afterDelete',
 			className: '_User',
+			data: {},
+		})
+
+		spy_findHooksAndExecute.mockRestore()
+	})
+
+	it('should call hook on deleteObjects', async () => {
+		const spy_findHooksAndExecute = spyOn(
+			databaseController,
+			'_findHooksAndExecute',
+		)
+
+		await WibeApp.databaseController.createObject({
+			className: '_User',
+			data: {
+				name: 'John Doe',
+			},
+		})
+
+		await WibeApp.databaseController.createObject({
+			className: '_User',
+			data: {
+				name: 'John Doe',
+			},
+		})
+
+		spy_findHooksAndExecute.mockClear()
+
+		await WibeApp.databaseController.deleteObjects({
+			className: '_User',
+			where: {
+				name: { equalTo: 'John Doe' },
+			},
+		})
+
+		expect(spy_findHooksAndExecute).toHaveBeenCalledTimes(2)
+		expect(spy_findHooksAndExecute).toHaveBeenNthCalledWith(1, {
+			hookTrigger: 'beforeDelete',
+			className: '_User',
+			data: {},
+		})
+		expect(spy_findHooksAndExecute).toHaveBeenNthCalledWith(2, {
+			hookTrigger: 'afterDelete',
+			className: '_User',
+			data: {},
 		})
 
 		spy_findHooksAndExecute.mockRestore()
