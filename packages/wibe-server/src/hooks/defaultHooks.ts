@@ -1,4 +1,5 @@
 import { WibeSchemaTypes } from '../../generated/wibe'
+import { WibeApp } from '../server'
 import { HookObject } from './HookObject'
 
 export const defaultBeforeInsertForCreatedAt = <
@@ -17,15 +18,23 @@ export const defaultBeforeInsertForDefaultValue = <
 >(
     object: HookObject<T, K>,
 ) => {
-    // TODO : Clear class first element is empty
-    // const schemaClass = WibeApp.config.schema.class.find(
-    //     (schema) => schema.name === object.className,
-    // )
-    // const allFields = Object.keys(schemaClass?.fields)
-    // const res = allFields.map((field) => {
-    //     return schemaClass?.fields[field].defaultValue
-    // })
-    // console.log(res)
+    const schemaClass = WibeApp.config.schema.class.find(
+        (schema) => schema.name === object.className,
+    )
+
+    if (!schemaClass) throw new Error('Class not found in schema')
+
+    const allFields = Object.keys(schemaClass.fields)
+
+    allFields.map((field) => {
+        // @ts-expect-error
+        if (!object.get({ field }))
+            // @ts-expect-error
+            object.set({
+                field,
+                value: schemaClass?.fields[field].defaultValue,
+            })
+    })
 }
 
 export const defaultBeforeUpdateForUpdatedAt = <

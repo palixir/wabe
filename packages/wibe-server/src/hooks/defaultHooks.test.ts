@@ -89,6 +89,24 @@ describe('Default hooks', () => {
                     },
                 },
             )
+
+            expect(createOne_User.isAdmin).toBe(false)
+        })
+
+        it('should not add a default value if a value is specified', async () => {
+            const { createOne_User } = await client.request<any>(
+                graphql.createOne_User,
+                {
+                    input: {
+                        fields: {
+                            isAdmin: true,
+                            email: 'email@test.fr',
+                        },
+                    },
+                },
+            )
+
+            expect(createOne_User.isAdmin).toBe(true)
         })
     })
 })

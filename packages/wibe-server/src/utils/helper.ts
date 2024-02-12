@@ -4,6 +4,9 @@ import { WibeApp } from '../server'
 import { DatabaseEnum } from '../database'
 import getPort from 'get-port'
 
+export const notEmpty = <T>(value: T | null | undefined): value is T =>
+    value !== null && value !== undefined
+
 export const getGraphqlClient = (port: number): GraphQLClient => {
     const client = new GraphQLClient(`http://127.0.0.1:${port}/graphql`)
 
@@ -31,7 +34,7 @@ export const setupTests = async () => {
                     fields: {
                         name: { type: 'String' },
                         age: { type: 'Int' },
-                        isAdmin: { type: 'Boolean' },
+                        isAdmin: { type: 'Boolean', defaultValue: false },
                         floatValue: { type: 'Float' },
                         birthDate: { type: 'Date' },
                         arrayValue: {

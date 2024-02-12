@@ -1,4 +1,8 @@
 import { WibeSchemaScalars, WibeSchemaEnums } from '../../generated/wibe'
+import { signInResolver } from '../graphql/resolvers/signIn'
+import { signInWithProviderResolver } from '../graphql/resolvers/signInWithProvider'
+import { signOutResolver } from '../graphql/resolvers/signOut'
+import { signUpResolver } from '../graphql/resolvers/signUp'
 
 export type WibeDefaultTypes =
     | 'String'
@@ -19,7 +23,6 @@ type TypeFieldBase<T, K extends WibeTypes> = {
     defaultValue?: T
 }
 
-// TODO: Add tests for defaultValue (need to be update in a before save event)
 export type TypeField =
     | TypeFieldBase<string, 'String'>
     | TypeFieldBase<number, 'Int'>
@@ -101,35 +104,179 @@ export interface SchemaInterface {
     enums?: EnumInterface[]
 }
 
-const wibeTypeToTypeScriptType: Record<any, string> = {
-    String: 'string',
-    Int: 'number',
-    Float: 'number',
-    Boolean: 'boolean',
-    Date: 'Date',
-    Array: 'any[]',
-}
-
-const getTypescriptFromWibeType = ({
-    type,
-    enums,
-}: {
-    type: WibeTypes
-    enums: EnumInterface[]
-}) => {
-    const isEnum = enums.find((enumType) => enumType.name === type)
-    if (isEnum) return type
-
-    const typeScriptType = wibeTypeToTypeScriptType[type]
-    if (!typeScriptType) return 'any'
-
-    return typeScriptType
-}
-
 export class Schema {
     public schema: SchemaInterface
 
     constructor(schema: SchemaInterface) {
-        this.schema = schema
+        this.schema = {
+            ...schema,
+            class: this.defaultClass(schema),
+            enums: [...(schema.enums || []), ...this.defaultEnum()],
+        }
+    }
+
+    defaultEnum(): EnumInterface[] {
+        return [
+            {
+                name: 'AuthenticationProvider',
+                values: {
+                    Google: 'Google',
+                },
+            },
+        ]
+    }
+
+    defaultClass(schema: SchemaInterface): ClassInterface[] {
+        const defaultUserFields: SchemaFields = {
+            provider: {
+                type: 'AuthenticationProvider',
+            },
+            email: {
+                type: 'Email',
+                required: true,
+            },
+            password: {
+                type: 'String',
+            },
+            verifiedEmail: {
+                type: 'Boolean',
+            },
+            accessToken: {
+                type: 'String',
+            },
+            refreshToken: {
+                type: 'String',
+            },
+            // TODO : Automatically put this two fields for each class
+            createdAt: {
+                type: 'Date',
+            },
+            updatedAt: {
+                type: 'Date',
+            },
+        }
+
+        const defaultResolvers: TypeResolver = {
+            mutations: {
+                signOut: {
+                    type: 'Boolean',
+                    resolve: signOutResolver,
+                    args: {
+                        input: {
+                            email: {
+                                type: 'Email',
+                                required: true,
+                            },
+                        },
+                    },
+                },
+                signUp: {
+                    type: 'Boolean',
+                    args: {
+                        input: {
+                            email: {
+                                type: 'Email',
+                                required: true,
+                            },
+                            password: {
+                                type: 'String',
+                                required: true,
+                            },
+                        },
+                    },
+                    resolve: signUpResolver,
+                },
+                signIn: {
+                    type: 'Boolean',
+                    args: {
+                        input: {
+                            email: {
+                                type: 'Email',
+                                required: true,
+                            },
+                            password: {
+                                type: 'String',
+                                required: true,
+                            },
+                        },
+                    },
+                    resolve: signInResolver,
+                },
+                signInWithProvider: {
+                    type: 'Boolean',
+                    args: {
+                        input: {
+                            provider: {
+                                type: 'AuthenticationProvider',
+                                required: true,
+                            },
+                            email: {
+                                type: 'Email',
+                                required: true,
+                            },
+                            verifiedEmail: {
+                                type: 'Boolean',
+                                required: true,
+                            },
+                            accessToken: {
+                                type: 'String',
+                                required: true,
+                            },
+                            refreshToken: {
+                                type: 'String',
+                            },
+                        },
+                    },
+                    resolve: signInWithProviderResolver,
+                },
+            },
+        }
+
+        const _userIndex = schema.class.findIndex(
+            (wibeClass) => wibeClass.name === '_User',
+        )
+
+        if (_userIndex !== -1) {
+            const _user = schema.class[_userIndex]
+
+            const newUserObject = {
+                name: _user.name,
+                description: _user.description,
+                fields: {
+                    ..._user.fields,
+                    ...defaultUserFields,
+                },
+                resolvers: {
+                    queries: {
+                        ..._user.resolvers?.queries,
+                        ...defaultResolvers.queries,
+                    },
+                    mutations: {
+                        ..._user.resolvers?.mutations,
+                        ...defaultResolvers.mutations,
+                    },
+                },
+            }
+
+            const newArrayOfClassWithoutThe_User = [
+                ...schema.class.slice(0, _userIndex),
+                ...schema.class.slice(_userIndex + 1),
+            ]
+
+            return [...newArrayOfClassWithoutThe_User, newUserObject]
+        }
+
+        return [
+            ...schema.class,
+            {
+                name: '_User',
+                fields: {
+                    ...defaultUserFields,
+                },
+                resolvers: {
+                    ...defaultResolvers,
+                },
+            },
+        ]
     }
 }
