@@ -3,12 +3,11 @@
   "version": "0.0.1",
   "description": "wibe-server",
   "scripts": {
-    "generate:types": "tsc --project tsconfig.json",
-    "build": "bun run generate:types",
+    "build": "tsc --project tsconfig.build.json",
     "dev": "bun codegen && bun run --watch dev/index.ts",
     "test": "bun test src --watch",
     "test:only": "bun test src --watch --only",
-    "linter": "biome lint ./src/**/*.ts",
+    "linter": "biome lint ./src/**/*.ts --no-errors-on-unmatched",
     "formatter": "biome format --write .",
     "codegen": "graphql-codegen --config codegen.ts"
   },
