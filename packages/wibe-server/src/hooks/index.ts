@@ -1,17 +1,14 @@
 import { WibeSchemaTypes } from '../../generated/wibe'
 import { HookObject } from './HookObject'
-import {
-	defaultBeforeInsertForCreatedAt,
-	defaultBeforeInsertForDefaultValue,
-	defaultBeforeUpdateForUpdatedAt,
-} from './defaultHooks'
+// import {
+//   defaultBeforeInsertForCreatedAt,
+//   defaultBeforeInsertForDefaultValue,
+//   defaultBeforeUpdateForUpdatedAt,
+// } from './defaultHooks'
 
-export enum HookTrigger {
-	BeforeInsert = 'beforeInsert',
+export enum OperationType {
 	AfterInsert = 'afterInsert',
-	BeforeUpdate = 'beforeUpdate',
 	AfterUpdate = 'afterUpdate',
-	BeforeDelete = 'beforeDelete',
 	AfterDelete = 'afterDelete',
 }
 
@@ -29,7 +26,7 @@ export type Hook<
 	T extends keyof WibeSchemaTypes,
 	K extends keyof WibeSchemaTypes[T],
 > = {
-	trigger: HookTrigger
+	operationType: OperationType
 	// If the className is undefined the hook is called on each class
 	className?: T
 	// The priority of the hook. The lower the number the earlier the hook is called
@@ -40,19 +37,19 @@ export type Hook<
 }
 
 export const defaultHooks: Hook<any, any>[] = [
-	{
-		trigger: HookTrigger.BeforeInsert,
-		priority: 1,
-		callback: defaultBeforeInsertForCreatedAt,
-	},
-	{
-		trigger: HookTrigger.BeforeInsert,
-		priority: 1,
-		callback: defaultBeforeInsertForDefaultValue,
-	},
-	{
-		trigger: HookTrigger.BeforeUpdate,
-		priority: 1,
-		callback: defaultBeforeUpdateForUpdatedAt,
-	},
+	// {
+	//   trigger: HookTrigger.BeforeInsert,
+	//   priority: 1,
+	//   callback: defaultBeforeInsertForCreatedAt,
+	// },
+	// {
+	//   trigger: HookTrigger.BeforeInsert,
+	//   priority: 1,
+	//   callback: defaultBeforeInsertForDefaultValue,
+	// },
+	// {
+	//   trigger: HookTrigger.BeforeUpdate,
+	//   priority: 1,
+	//   callback: defaultBeforeUpdateForUpdatedAt,
+	// },
 ]

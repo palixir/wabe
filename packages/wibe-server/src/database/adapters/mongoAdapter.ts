@@ -1,347 +1,402 @@
-import { Db, Filter, MongoClient, ObjectId } from 'mongodb'
+import { ChangeStream, ChangeStreamDocument, Document, Db, Filter, MongoClient, ObjectId } from 'mongodb'
 import {
-	AdapterOptions,
-	DatabaseAdapter,
-	GetObjectOptions,
-	CreateObjectOptions,
-	UpdateObjectOptions,
-	GetObjectsOptions,
-	CreateObjectsOptions,
-	UpdateObjectsOptions,
-	DeleteObjectsOptions,
-	WhereType,
+  AdapterOptions,
+  DatabaseAdapter,
+  GetObjectOptions,
+  CreateObjectOptions,
+  UpdateObjectOptions,
+  GetObjectsOptions,
+  CreateObjectsOptions,
+  UpdateObjectsOptions,
+  DeleteObjectsOptions,
+  WhereType,
 } from './adaptersInterface'
 import { WibeSchemaTypes } from '../../../generated/wibe'
+import { _findHooksAndExecute } from './utils'
 
 export const buildMongoWhereQuery = <T extends keyof WibeSchemaTypes>(
-	where?: WhereType<T>,
+  where?: WhereType<T>,
 ): Record<string, any> => {
-	if (!where) return {}
+  if (!where) return {}
 
-	const objectKeys = Object.keys(where) as Array<keyof WhereType<T>>
+  const objectKeys = Object.keys(where) as Array<keyof WhereType<T>>
 
-	return objectKeys.reduce(
-		(acc, key) => {
-			const value = where[key]
+  return objectKeys.reduce(
+    (acc, key) => {
+      const value = where[key]
 
-			const keyToWrite = key === 'id' ? '_id' : key
+      const keyToWrite = key === 'id' ? '_id' : key
 
-			if (value?.contains) acc[keyToWrite] = value.contains
-			if (value?.notContains) acc[keyToWrite] = { $ne: value.notContains }
-			if (value?.equalTo) acc[keyToWrite] = value.equalTo
-			if (value?.notEqualTo) acc[keyToWrite] = { $ne: value.notEqualTo }
+      if (value?.contains) acc[keyToWrite] = value.contains
+      if (value?.notContains) acc[keyToWrite] = { $ne: value.notContains }
+      if (value?.equalTo) acc[keyToWrite] = value.equalTo
+      if (value?.notEqualTo) acc[keyToWrite] = { $ne: value.notEqualTo }
 
-			if (value?.greaterThan) acc[keyToWrite] = { $gt: value.greaterThan }
-			if (value?.greaterThanOrEqualTo)
-				acc[keyToWrite] = { $gte: value.greaterThanOrEqualTo }
+      if (value?.greaterThan) acc[keyToWrite] = { $gt: value.greaterThan }
+      if (value?.greaterThanOrEqualTo)
+        acc[keyToWrite] = { $gte: value.greaterThanOrEqualTo }
 
-			if (value?.lessThan) acc[keyToWrite] = { $lt: value.lessThan }
-			if (value?.lessThanOrEqualTo)
-				acc[keyToWrite] = { $lte: value.lessThanOrEqualTo }
+      if (value?.lessThan) acc[keyToWrite] = { $lt: value.lessThan }
+      if (value?.lessThanOrEqualTo)
+        acc[keyToWrite] = { $lte: value.lessThanOrEqualTo }
 
-			if (value?.in) acc[keyToWrite] = { $in: value.in }
-			if (value?.notIn) acc[keyToWrite] = { $nin: value.notIn }
+      if (value?.in) acc[keyToWrite] = { $in: value.in }
+      if (value?.notIn) acc[keyToWrite] = { $nin: value.notIn }
 
-			if (value && keyToWrite === 'OR') {
-				acc.$or = where.OR?.map((or) => buildMongoWhereQuery(or))
-				return acc
-			}
+      if (value && keyToWrite === 'OR') {
+        acc.$or = where.OR?.map((or) => buildMongoWhereQuery(or))
+        return acc
+      }
 
-			if (value && keyToWrite === 'AND') {
-				acc.$and = where.AND?.map((and) => buildMongoWhereQuery(and))
-				return acc
-			}
+      if (value && keyToWrite === 'AND') {
+        acc.$and = where.AND?.map((and) => buildMongoWhereQuery(and))
+        return acc
+      }
 
-			if (typeof value === 'object') {
-				const where = buildMongoWhereQuery(value as WhereType<T>)
-				const entries = Object.entries(where)
+      if (typeof value === 'object') {
+        const where = buildMongoWhereQuery(value as WhereType<T>)
+        const entries = Object.entries(where)
 
-				if (entries.length > 0)
-					return {
-						[`${keyToWrite.toString()}.${entries[0][0]}`]:
-							entries[0][1],
-					}
-			}
+        if (entries.length > 0)
+          return {
+            [`${keyToWrite.toString()}.${entries[0][0]}`]:
+              entries[0][1],
+          }
+      }
 
-			return acc
-		},
-		{} as Record<any, any>,
-	)
+      return acc
+    },
+    {} as Record<any, any>,
+  )
+}
+
+const getDocumentDataFromOperationType = <
+  T extends keyof WibeSchemaTypes,
+  K extends keyof WibeSchemaTypes[T],
+>(change: ChangeStreamDocument<Document>): Record<K, WibeSchemaTypes[T][K]> => {
+  switch (change.operationType) {
+    case 'insert':
+      const data = change.fullDocument
+      data.id = data._id.toString()
+      data._id = undefined
+
+      // @ts-expect-error
+      return data
+    case 'update':
+      // Here we can force because we use the options { fullDocument: "updateLookup" }
+      // This option is check in tests
+      const updatedData = change.fullDocument!
+      updatedData.id = updatedData._id.toString()
+      updatedData._id = undefined
+
+      // @ts-expect-error
+      return updatedData
+    case 'delete':
+      // @ts-expect-error
+      return { id: change._id.toString() }
+    default:
+      // @ts-expect-error
+      return {}
+  }
 }
 
 export class MongoAdapter implements DatabaseAdapter {
-	public options: AdapterOptions
-	private client: MongoClient
-	public database?: Db
+  public options: AdapterOptions
+  public database?: Db
+  private client: MongoClient
+  private streams: Array<ChangeStream<Document, ChangeStreamDocument<Document>>> = []
 
-	constructor(options: AdapterOptions) {
-		this.options = options
-		this.client = new MongoClient(options.databaseUrl)
-	}
+  constructor(options: AdapterOptions) {
+    this.options = options
+    this.client = new MongoClient(options.databaseUrl)
+  }
 
-	async connect() {
-		const client = await this.client.connect()
-		this.database = client.db(this.options.databaseName)
-		return client
-	}
+  async connect() {
+    const client = await this.client.connect()
+    this.database = client.db(this.options.databaseName)
+    return client
+  }
 
-	async close() {
-		return this.client.close()
-	}
+  async close() {
+    for (const stream of this.streams) {
+      stream.close()
+    }
 
-	async createClass(className: string) {
-		if (!this.database)
-			throw new Error('Connection to database is not established')
+    return this.client.close()
+  }
 
-		await this.database.createCollection(className)
-	}
+  async createClass(className: string) {
+    if (!this.database)
+      throw new Error('Connection to database is not established')
 
-	async getObject<
-		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T],
-	>(
-		params: GetObjectOptions<T, K>,
-	): Promise<Pick<WibeSchemaTypes[T], K> | null> {
-		if (!this.database)
-			throw new Error('Connection to database is not established')
+    const collection = await this.database.createCollection(className)
 
-		const { className, id, fields } = params
+    const streams = collection.watch([], { fullDocument: "updateLookup" })
+    this.streams.push(streams)
 
-		const objectOfFieldsToGet = fields?.reduce(
-			(acc, prev) => {
-				acc[prev] = 1
-				return acc
-			},
-			{} as Record<any, number>,
-		)
+    streams.on('change', (change) => {
+      const data = getDocumentDataFromOperationType(
+        change
+      )
 
-		// @ts-expect-error
-		const isIdInProjection = fields?.includes('id')
+      _findHooksAndExecute({
+        className: className as keyof WibeSchemaTypes,
+        operationType: change.operationType,
+        // @ts-expect-error
+        executionTime: change.wallTime,
+        data: data || {}
+      })
+    })
 
-		const collection = this.database.collection<any>(className)
+    return collection
+  }
 
-		const res = await collection.findOne(
-			{ _id: new ObjectId(id) } as Filter<any>,
-			{
-				projection: fields
-					? { ...objectOfFieldsToGet, _id: isIdInProjection }
-					: {},
-			},
-		)
+  async getObject<
+    T extends keyof WibeSchemaTypes,
+    K extends keyof WibeSchemaTypes[T],
+  >(
+    params: GetObjectOptions<T, K>,
+  ): Promise<Pick<WibeSchemaTypes[T], K> | null> {
+    if (!this.database)
+      throw new Error('Connection to database is not established')
 
-		// We standardize the id field
-		if (res?._id) {
-			res.id = res._id.toString()
-			res._id = undefined
-		}
+    const { className, id, fields } = params
 
-		return res
-	}
+    const objectOfFieldsToGet = fields?.reduce(
+      (acc, prev) => {
+        acc[prev] = 1
+        return acc
+      },
+      {} as Record<any, number>,
+    )
 
-	async getObjects<
-		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T],
-	>(params: GetObjectsOptions<T, K>): Promise<Pick<WibeSchemaTypes[T], K>[]> {
-		if (!this.database)
-			throw new Error('Connection to database is not established')
+    // @ts-expect-error
+    const isIdInProjection = fields?.includes('id')
 
-		const { className, fields, where, offset, limit } = params
+    const collection = this.database.collection<any>(className)
 
-		const whereBuilded = buildMongoWhereQuery<T>(where)
+    const res = await collection.findOne(
+      { _id: new ObjectId(id) } as Filter<any>,
+      {
+        projection: fields
+          ? { ...objectOfFieldsToGet, _id: isIdInProjection }
+          : {},
+      },
+    )
 
-		const objectOfFieldsToGet = fields?.reduce(
-			(acc, prev) => {
-				acc[prev] = 1
+    // We standardize the id field
+    if (res?._id) {
+      res.id = res._id.toString()
+      res._id = undefined
+    }
 
-				return acc
-			},
-			{} as Record<any, number>,
-		)
+    return res
+  }
 
-		const collection = this.database.collection<any>(className)
-		const res = await collection
-			.find(whereBuilded, {
-				projection: fields
-					? {
-							...objectOfFieldsToGet,
-					  }
-					: {},
-			})
-			.limit(limit || 0)
-			.skip(offset || 0)
-			.toArray()
+  async getObjects<
+    T extends keyof WibeSchemaTypes,
+    K extends keyof WibeSchemaTypes[T],
+  >(params: GetObjectsOptions<T, K>): Promise<Pick<WibeSchemaTypes[T], K>[]> {
+    if (!this.database)
+      throw new Error('Connection to database is not established')
 
-		// We standardize the id field
-		for (const object of res) {
-			if (object._id) {
-				object.id = object._id.toString()
-				object._id = undefined
-			}
-		}
+    const { className, fields, where, offset, limit } = params
 
-		return res
-	}
+    const whereBuilded = buildMongoWhereQuery<T>(where)
 
-	async updateObject<
-		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T],
-		W extends keyof WibeSchemaTypes[T],
-	>(
-		params: UpdateObjectOptions<T, K, W>,
-	): Promise<Pick<WibeSchemaTypes[T], K>> {
-		if (!this.database)
-			throw new Error('Connection to database is not established')
+    const objectOfFieldsToGet = fields?.reduce(
+      (acc, prev) => {
+        acc[prev] = 1
 
-		const { className, id, data, fields } = params
+        return acc
+      },
+      {} as Record<any, number>,
+    )
 
-		const res = await this.updateObjects({
-			className,
-			where: { id: { equalTo: new ObjectId(id) } } as WhereType<T>,
-			data,
-			fields,
-		})
+    const collection = this.database.collection<any>(className)
+    const res = await collection
+      .find(whereBuilded, {
+        projection: fields
+          ? {
+            ...objectOfFieldsToGet,
+          }
+          : {},
+      })
+      .limit(limit || 0)
+      .skip(offset || 0)
+      .toArray()
 
-		return res[0]
-	}
+    // We standardize the id field
+    for (const object of res) {
+      if (object._id) {
+        object.id = object._id.toString()
+        object._id = undefined
+      }
+    }
 
-	async updateObjects<
-		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T],
-		W extends keyof WibeSchemaTypes[T],
-	>(
-		params: UpdateObjectsOptions<T, K, W>,
-	): Promise<Pick<WibeSchemaTypes[T], K>[]> {
-		if (!this.database)
-			throw new Error('Connection to database is not established')
+    return res
+  }
 
-		const { className, where, data, fields, offset, limit } = params
+  async updateObject<
+    T extends keyof WibeSchemaTypes,
+    K extends keyof WibeSchemaTypes[T],
+    W extends keyof WibeSchemaTypes[T],
+  >(
+    params: UpdateObjectOptions<T, K, W>,
+  ): Promise<Pick<WibeSchemaTypes[T], K>> {
+    if (!this.database)
+      throw new Error('Connection to database is not established')
 
-		const whereBuilded = buildMongoWhereQuery<T>(where)
+    const { className, id, data, fields } = params
 
-		const collection = this.database.collection(className)
+    const res = await this.updateObjects({
+      className,
+      where: { id: { equalTo: new ObjectId(id) } } as WhereType<T>,
+      data,
+      fields,
+    })
 
-		const objectsBeforeUpdate = await this.getObjects({
-			className,
-			where,
-			fields: ['id'],
-			offset,
-			limit,
-		})
+    return res[0]
+  }
 
-		await collection.updateMany(whereBuilded, { $set: data })
+  async updateObjects<
+    T extends keyof WibeSchemaTypes,
+    K extends keyof WibeSchemaTypes[T],
+    W extends keyof WibeSchemaTypes[T],
+  >(
+    params: UpdateObjectsOptions<T, K, W>,
+  ): Promise<Pick<WibeSchemaTypes[T], K>[]> {
+    if (!this.database)
+      throw new Error('Connection to database is not established')
 
-		const orStatement = objectsBeforeUpdate.map((object) => ({
-			id: { equalTo: new ObjectId(object.id) },
-		}))
+    const { className, where, data, fields, offset, limit } = params
 
-		return this.getObjects({
-			className,
-			where: {
-				OR: orStatement,
-			} as WhereType<T>,
-			fields,
-			offset,
-			limit,
-		})
-	}
+    const whereBuilded = buildMongoWhereQuery<T>(where)
 
-	async createObject<
-		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T],
-		W extends keyof WibeSchemaTypes[T],
-	>(
-		params: CreateObjectOptions<T, K, W>,
-	): Promise<Pick<WibeSchemaTypes[T], K>> {
-		if (!this.database)
-			throw new Error('Connection to database is not established')
+    const collection = this.database.collection(className)
 
-		const { className, data, fields } = params
+    const objectsBeforeUpdate = await this.getObjects({
+      className,
+      where,
+      fields: ['id'],
+      offset,
+      limit,
+    })
 
-		const res = await this.createObjects({
-			className,
-			data: [data],
-			fields,
-		})
+    await collection.updateMany(whereBuilded, { $set: data })
 
-		return res[0]
-	}
+    const orStatement = objectsBeforeUpdate.map((object) => ({
+      id: { equalTo: new ObjectId(object.id) },
+    }))
 
-	async createObjects<
-		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T],
-		W extends keyof WibeSchemaTypes[T],
-	>(
-		params: CreateObjectsOptions<T, K, W>,
-	): Promise<Pick<WibeSchemaTypes[T], K>[]> {
-		if (!this.database)
-			throw new Error('Connection to database is not established')
+    return this.getObjects({
+      className,
+      where: {
+        OR: orStatement,
+      } as WhereType<T>,
+      fields,
+      offset,
+      limit,
+    })
+  }
 
-		const { className, data, fields, offset, limit } = params
+  async createObject<
+    T extends keyof WibeSchemaTypes,
+    K extends keyof WibeSchemaTypes[T],
+    W extends keyof WibeSchemaTypes[T],
+  >(
+    params: CreateObjectOptions<T, K, W>,
+  ): Promise<Pick<WibeSchemaTypes[T], K>> {
+    if (!this.database)
+      throw new Error('Connection to database is not established')
 
-		const collection = this.database.collection(className)
+    const { className, data, fields } = params
 
-		const res = await collection.insertMany(data, {})
+    const res = await this.createObjects({
+      className,
+      data: [data],
+      fields,
+    })
 
-		const orStatement = Object.entries(res.insertedIds).map(
-			([, value]) => ({
-				id: { equalTo: value },
-			}),
-		)
+    return res[0]
+  }
 
-		return this.getObjects({
-			className,
-			where: { OR: orStatement } as WhereType<T>,
-			fields,
-			offset,
-			limit,
-		})
-	}
+  async createObjects<
+    T extends keyof WibeSchemaTypes,
+    K extends keyof WibeSchemaTypes[T],
+    W extends keyof WibeSchemaTypes[T],
+  >(
+    params: CreateObjectsOptions<T, K, W>,
+  ): Promise<Pick<WibeSchemaTypes[T], K>[]> {
+    if (!this.database)
+      throw new Error('Connection to database is not established')
 
-	async deleteObject<
-		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T],
-	>(
-		params: GetObjectOptions<T, K>,
-	): Promise<Pick<WibeSchemaTypes[T], K> | null> {
-		if (!this.database)
-			throw new Error('Connection to database is not established')
+    const { className, data, fields, offset, limit } = params
 
-		const { className, id, fields } = params
+    const collection = this.database.collection(className)
 
-		const res = await this.deleteObjects({
-			className,
-			where: { id: { equalTo: new ObjectId(id) } } as WhereType<T>,
-			fields,
-		})
+    const res = await collection.insertMany(data, {})
 
-		return res.length === 1 ? res[0] : null
-	}
+    const orStatement = Object.entries(res.insertedIds).map(
+      ([, value]) => ({
+        id: { equalTo: value },
+      }),
+    )
 
-	async deleteObjects<
-		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T],
-	>(
-		params: DeleteObjectsOptions<T, K>,
-	): Promise<Pick<WibeSchemaTypes[T], K>[]> {
-		if (!this.database)
-			throw new Error('Connection to database is not established')
+    return this.getObjects({
+      className,
+      where: { OR: orStatement } as WhereType<T>,
+      fields,
+      offset,
+      limit,
+    })
+  }
 
-		const { className, where, fields, limit, offset } = params
+  async deleteObject<
+    T extends keyof WibeSchemaTypes,
+    K extends keyof WibeSchemaTypes[T],
+  >(
+    params: GetObjectOptions<T, K>,
+  ): Promise<Pick<WibeSchemaTypes[T], K> | null> {
+    if (!this.database)
+      throw new Error('Connection to database is not established')
 
-		const whereBuilded = buildMongoWhereQuery(where)
+    const { className, id, fields } = params
 
-		const collection = this.database.collection(className)
+    const res = await this.deleteObjects({
+      className,
+      where: { id: { equalTo: new ObjectId(id) } } as WhereType<T>,
+      fields,
+    })
 
-		const objectsBeforeDelete = await this.getObjects({
-			className,
-			where,
-			fields,
-			limit,
-			offset,
-		})
+    return res.length === 1 ? res[0] : null
+  }
 
-		await collection.deleteMany(whereBuilded)
+  async deleteObjects<
+    T extends keyof WibeSchemaTypes,
+    K extends keyof WibeSchemaTypes[T],
+  >(
+    params: DeleteObjectsOptions<T, K>,
+  ): Promise<Pick<WibeSchemaTypes[T], K>[]> {
+    if (!this.database)
+      throw new Error('Connection to database is not established')
 
-		return objectsBeforeDelete
-	}
+    const { className, where, fields, limit, offset } = params
+
+    const whereBuilded = buildMongoWhereQuery(where)
+
+    const collection = this.database.collection(className)
+
+    const objectsBeforeDelete = await this.getObjects({
+      className,
+      where,
+      fields,
+      limit,
+      offset,
+    })
+
+    await collection.deleteMany(whereBuilded)
+
+    return objectsBeforeDelete
+  }
 }

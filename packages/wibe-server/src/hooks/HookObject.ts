@@ -6,16 +6,20 @@ export class HookObject<
 > {
 	private data: Record<K, WibeSchemaTypes[T][K]>
 	public className: T
+	public executionTime?: number
 
 	constructor({
 		data,
 		className,
+		executionTime,
 	}: {
 		className: T
+		executionTime?: number
 		data: Record<K, WibeSchemaTypes[T][K]>
 	}) {
 		this.data = data
 		this.className = className
+		this.executionTime = executionTime
 	}
 
 	get({ field }: { field: K }) {
