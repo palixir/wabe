@@ -15,16 +15,6 @@ export enum OperationType {
 	BeforeDelete = 'beforeDelete',
 }
 
-export interface ObjectTrigger<
-	T extends keyof WibeSchemaTypes,
-	K extends keyof WibeSchemaTypes[T],
-> {
-	_data: Readonly<Record<K, WibeSchemaTypes[T][K]>>
-	get: (options: { field: K }) => Readonly<WibeSchemaTypes[T][K]>
-	set: (options: { field: K; value: WibeSchemaTypes[T][K] }) => void
-	className: Readonly<T>
-}
-
 export type Hook<
 	T extends keyof WibeSchemaTypes,
 	K extends keyof WibeSchemaTypes[T],
