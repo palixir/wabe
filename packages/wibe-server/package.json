@@ -8,7 +8,7 @@
         "test": "bun test src --watch",
         "test:only": "bun test src --watch --only",
         "linter": "biome lint ./src/**/**/*.ts --config-path=../../ --no-errors-on-unmatched",
-        "formatter": "biome format --write .",
+        "formatter": "biome format --config-path=../../ --write .",
         "codegen": "graphql-codegen --config codegen.ts"
     },
     "dependencies": {

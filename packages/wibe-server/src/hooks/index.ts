@@ -1,15 +1,18 @@
 import { WibeSchemaTypes } from '../../generated/wibe'
 import { HookObject } from './HookObject'
-// import {
-//   defaultBeforeInsertForCreatedAt,
-//   defaultBeforeInsertForDefaultValue,
-//   defaultBeforeUpdateForUpdatedAt,
-// } from './defaultHooks'
+import {
+	defaultBeforeInsertForCreatedAt,
+	defaultBeforeInsertForDefaultValue,
+	defaultBeforeUpdateForUpdatedAt,
+} from './defaultHooks'
 
 export enum OperationType {
 	AfterInsert = 'afterInsert',
 	AfterUpdate = 'afterUpdate',
 	AfterDelete = 'afterDelete',
+	BeforeInsert = 'beforeInsert',
+	BeforeUpdate = 'beforeUpdate',
+	BeforeDelete = 'beforeDelete',
 }
 
 export interface ObjectTrigger<
@@ -37,19 +40,19 @@ export type Hook<
 }
 
 export const defaultHooks: Hook<any, any>[] = [
-	// {
-	//   trigger: HookTrigger.BeforeInsert,
-	//   priority: 1,
-	//   callback: defaultBeforeInsertForCreatedAt,
-	// },
-	// {
-	//   trigger: HookTrigger.BeforeInsert,
-	//   priority: 1,
-	//   callback: defaultBeforeInsertForDefaultValue,
-	// },
-	// {
-	//   trigger: HookTrigger.BeforeUpdate,
-	//   priority: 1,
-	//   callback: defaultBeforeUpdateForUpdatedAt,
-	// },
+	{
+		operationType: OperationType.BeforeInsert,
+		priority: 1,
+		callback: defaultBeforeInsertForCreatedAt,
+	},
+	{
+		operationType: OperationType.BeforeInsert,
+		priority: 1,
+		callback: defaultBeforeInsertForDefaultValue,
+	},
+	{
+		operationType: OperationType.BeforeUpdate,
+		priority: 1,
+		callback: defaultBeforeUpdateForUpdatedAt,
+	},
 ]

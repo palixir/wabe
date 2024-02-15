@@ -24,5 +24,7 @@ describe('DatabaseController', () => {
 		await WibeApp.databaseController.createClassIfNotExist('Collection1')
 
 		expect(spyMongoAdapterCreateClass).toHaveBeenCalledTimes(1)
+
+		spyMongoAdapterCreateClass.mockRestore()
 	})
 })
