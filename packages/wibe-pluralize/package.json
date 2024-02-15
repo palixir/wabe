@@ -1,0 +1,15 @@
+{
+  "name": "wibe-pluralize",
+  "version": "0.0.1",
+  "license": "MIT",
+  "main": "src/index.ts",
+  "description": "Package to pluralize a word in english",
+  "scripts": {
+    "start": "bun index.ts",
+    "build": "tsc --project tsconfig.json"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/bun": "1.0.0"
+  }
+}

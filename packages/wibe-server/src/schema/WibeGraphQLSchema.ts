@@ -1,3 +1,4 @@
+import { pluralize } from 'wibe-pluralize'
 import {
 	GraphQLEnumType,
 	GraphQLFieldConfig,
@@ -443,8 +444,7 @@ export class WibeGraphQLSchema {
 						className as keyof WibeSchemaTypes,
 					),
 			},
-			// TODO : Use the pluralize library to pluralize the className
-			[`${classNameInLowerCase}s`]: {
+			[pluralize(classNameInLowerCase)]: {
 				type: new GraphQLNonNull(
 					getConnectionType({ object, allObjects }),
 				),
@@ -545,7 +545,7 @@ export class WibeGraphQLSchema {
 						className as keyof WibeSchemaTypes,
 					),
 			},
-			[`create${className}s`]: {
+			[`create${pluralize(className)}`]: {
 				type: new GraphQLNonNull(
 					getConnectionType({ object, allObjects }),
 				),
@@ -573,7 +573,7 @@ export class WibeGraphQLSchema {
 						className as keyof WibeSchemaTypes,
 					),
 			},
-			[`update${className}s`]: {
+			[`update${pluralize(className)}`]: {
 				type: new GraphQLNonNull(
 					getConnectionType({ object, allObjects }),
 				),
@@ -605,7 +605,7 @@ export class WibeGraphQLSchema {
 						className as keyof WibeSchemaTypes,
 					),
 			},
-			[`delete${className}s`]: {
+			[`delete${pluralize(className)}`]: {
 				type: new GraphQLNonNull(
 					getConnectionType({ object, allObjects }),
 				),
