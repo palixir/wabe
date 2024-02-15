@@ -16,8 +16,8 @@ export const signInResolver = async (
 	const client = getClient()
 
 	const {
-		findMany_User: { edges },
-	} = await client.findMany_User({ where: { email: { equalTo: email } } })
+		_users: { edges },
+	} = await client._users({ where: { email: { equalTo: email } } })
 
 	if (!edges || !edges[0]) throw new Error('User not found')
 
@@ -47,7 +47,7 @@ export const signInResolver = async (
 		exp: thirtyDays.getTime(),
 	})
 
-	await client.updateOne_User({
+	await client.update_User({
 		input: {
 			id: edges[0].node.id,
 			fields: {

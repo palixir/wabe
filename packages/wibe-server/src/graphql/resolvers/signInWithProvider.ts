@@ -20,18 +20,18 @@ export const signInWithProviderResolver = async (
 	const client = getClient()
 
 	const {
-		findMany_User: { edges },
-	} = await client.findMany_User({ where: { email: { equalTo: email } } })
+		_users: { edges },
+	} = await client._users({ where: { email: { equalTo: email } } })
 
 	if (edges && edges.length === 1 && edges[0]) {
-		await client.updateOne_User({
+		await client.update_User({
 			input: {
 				id: edges[0].node.id,
 				fields: { email, verifiedEmail, refreshToken, accessToken },
 			},
 		})
 	} else {
-		await client.createOne_User({
+		await client.create_User({
 			input: {
 				fields: {
 					email,

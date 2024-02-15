@@ -23,8 +23,8 @@ describe('GraphQL : Scalars', () => {
 
 	describe('Date', () => {
 		it('should create a date with JavaScript Date', async () => {
-			const { createMany_User } = await client.request<any>(
-				graphql.createMany_User,
+			const { create_Users } = await client.request<any>(
+				graphql.create_Users,
 				{
 					input: {
 						fields: [
@@ -38,14 +38,14 @@ describe('GraphQL : Scalars', () => {
 				},
 			)
 
-			expect(createMany_User.edges[0].node.birthDate).toEqual(
+			expect(create_Users.edges[0].node.birthDate).toEqual(
 				now.toISOString(),
 			)
 		})
 
 		it('should create a date with timestamp in number', async () => {
-			const { createMany_User } = await client.request<any>(
-				graphql.createMany_User,
+			const { create_Users } = await client.request<any>(
+				graphql.create_Users,
 				{
 					input: {
 						fields: [
@@ -59,14 +59,14 @@ describe('GraphQL : Scalars', () => {
 				},
 			)
 
-			expect(createMany_User.edges[0].node.birthDate).toEqual(
+			expect(create_Users.edges[0].node.birthDate).toEqual(
 				now.toISOString(),
 			)
 		})
 
 		it('should create a date with iso string', async () => {
-			const { createMany_User } = await client.request<any>(
-				graphql.createMany_User,
+			const { create_Users } = await client.request<any>(
+				graphql.create_Users,
 				{
 					input: {
 						fields: [
@@ -80,14 +80,14 @@ describe('GraphQL : Scalars', () => {
 				},
 			)
 
-			expect(createMany_User.edges[0].node.birthDate).toEqual(
+			expect(create_Users.edges[0].node.birthDate).toEqual(
 				now.toISOString(),
 			)
 		})
 
 		it('should create a date with partial date', async () => {
-			const { createMany_User } = await client.request<any>(
-				graphql.createMany_User,
+			const { create_Users } = await client.request<any>(
+				graphql.create_Users,
 				{
 					input: {
 						fields: [
@@ -101,7 +101,7 @@ describe('GraphQL : Scalars', () => {
 				},
 			)
 
-			const birthDate = new Date(createMany_User.edges[0].node.birthDate)
+			const birthDate = new Date(create_Users.edges[0].node.birthDate)
 			const date = new Date('2023-12-20')
 
 			expect(date.getFullYear()).toEqual(birthDate.getFullYear())
@@ -111,7 +111,7 @@ describe('GraphQL : Scalars', () => {
 
 		it('should not create a date with invalid string', async () => {
 			expect(
-				client.request(graphql.createMany_User, {
+				client.request(graphql.create_Users, {
 					input: {
 						fields: [
 							{
@@ -124,7 +124,7 @@ describe('GraphQL : Scalars', () => {
 			).rejects.toThrow('Invalid date')
 
 			expect(
-				client.request(graphql.createMany_User, {
+				client.request(graphql.create_Users, {
 					input: {
 						fields: [
 							{
@@ -140,8 +140,8 @@ describe('GraphQL : Scalars', () => {
 
 	describe('Email', () => {
 		it('should create an email', async () => {
-			const { createMany_User } = await client.request<any>(
-				graphql.createMany_User,
+			const { create_Users } = await client.request<any>(
+				graphql.create_Users,
 				{
 					input: {
 						fields: [
@@ -154,12 +154,12 @@ describe('GraphQL : Scalars', () => {
 				},
 			)
 
-			expect(createMany_User.edges[0].node.email).toEqual(
+			expect(create_Users.edges[0].node.email).toEqual(
 				'jean.doe@gmail.com',
 			)
 
 			expect(
-				client.request(graphql.createMany_User, {
+				client.request(graphql.create_Users, {
 					input: {
 						fields: [
 							{
@@ -172,7 +172,7 @@ describe('GraphQL : Scalars', () => {
 			).resolves.toEqual(expect.anything())
 
 			expect(
-				client.request(graphql.createMany_User, {
+				client.request(graphql.create_Users, {
 					input: {
 						fields: [
 							{
@@ -187,7 +187,7 @@ describe('GraphQL : Scalars', () => {
 
 		it('should not create an invalid email', async () => {
 			expect(
-				client.request(graphql.createMany_User, {
+				client.request(graphql.create_Users, {
 					input: {
 						fields: [
 							{
@@ -200,7 +200,7 @@ describe('GraphQL : Scalars', () => {
 			).rejects.toThrow('Invalid email')
 
 			expect(
-				client.request(graphql.createMany_User, {
+				client.request(graphql.create_Users, {
 					input: {
 						fields: [
 							{
@@ -213,7 +213,7 @@ describe('GraphQL : Scalars', () => {
 			).rejects.toThrow('Invalid email')
 
 			expect(
-				client.request(graphql.createMany_User, {
+				client.request(graphql.create_Users, {
 					input: {
 						fields: [
 							{
@@ -226,7 +226,7 @@ describe('GraphQL : Scalars', () => {
 			).rejects.toThrow('Invalid email')
 
 			expect(
-				client.request(graphql.createMany_User, {
+				client.request(graphql.create_Users, {
 					input: {
 						fields: [
 							{
@@ -242,9 +242,9 @@ describe('GraphQL : Scalars', () => {
 })
 
 const graphql = {
-	findMany_User: gql`
-        query findMany_User($where: _UserWhereInput) {
-            findMany_User(where: $where) {
+	_users: gql`
+        query _users($where: _UserWhereInput) {
+            _users(where: $where) {
                 edges {
                     node {
                         id
@@ -256,9 +256,9 @@ const graphql = {
             }
         }
     `,
-	createMany_User: gql`
-        mutation createMany_User($input: _UsersCreateInput!) {
-            createMany_User(input: $input) {
+	create_Users: gql`
+        mutation create_Users($input: _UsersCreateInput!) {
+            create_Users(input: $input) {
                 edges {
                     node {
                         name

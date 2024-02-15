@@ -36,7 +36,7 @@ describe('SignOut', () => {
 			timeCost: 2, // OWASP recommands minimum 2 iterations
 		})
 
-		await client.request<any>(graphql.createOne_User, {
+		await client.request<any>(graphql.create_User, {
 			input: {
 				fields: {
 					email: 'email@test.fr',
@@ -47,18 +47,15 @@ describe('SignOut', () => {
 	})
 
 	afterEach(async () => {
-		const { findMany_User } = await client.request<any>(
-			graphql.findMany_User,
-			{
-				where: {
-					email: { equalTo: 'email@test.fr' },
-				},
+		const { _users } = await client.request<any>(graphql._users, {
+			where: {
+				email: { equalTo: 'email@test.fr' },
 			},
-		)
+		})
 
 		await Promise.all(
-			findMany_User.edges.map(({ node }: { node: any }) =>
-				client.request<any>(graphql.deleteOne_User, {
+			_users.edges.map(({ node }: { node: any }) =>
+				client.request<any>(graphql.delete_User, {
 					input: { id: node.id },
 				}),
 			),
@@ -76,8 +73,8 @@ describe('SignOut', () => {
 		})
 
 		const {
-			findMany_User: { edges },
-		} = await client.request<any>(graphql.findMany_User, {
+			_users: { edges },
+		} = await client.request<any>(graphql._users, {
 			where: {
 				email: { equalTo: 'email@test.fr' },
 			},
@@ -96,8 +93,8 @@ describe('SignOut', () => {
 		expect(signOut).toEqual(true)
 
 		const {
-			findMany_User: { edges: edges2 },
-		} = await client.request<any>(graphql.findMany_User, {
+			_users: { edges: edges2 },
+		} = await client.request<any>(graphql._users, {
 			where: {
 				email: { equalTo: 'email@test.fr' },
 			},
@@ -139,16 +136,16 @@ const graphql = {
             signIn(input: $input)
         }
     `,
-	createOne_User: gql`
-        mutation createOne_User($input: _UserCreateInput!) {
-            createOne_User(input: $input) {
+	create_User: gql`
+        mutation create_User($input: _UserCreateInput!) {
+            create_User(input: $input) {
                 id
             }
         }
     `,
-	findMany_User: gql`
-        query findMany_User($where: _UserWhereInput) {
-            findMany_User(where: $where) {
+	_users: gql`
+        query _users($where: _UserWhereInput) {
+            _users(where: $where) {
                 edges {
                     node {
                         id
@@ -160,9 +157,9 @@ const graphql = {
             }
         }
     `,
-	deleteOne_User: gql`
-        mutation deleteOne_User($input: _UserDeleteInput!) {
-            deleteOne_User(input: $input) {
+	delete_User: gql`
+        mutation delete_User($input: _UserDeleteInput!) {
+            delete_User(input: $input) {
                 id
             }
         }

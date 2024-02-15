@@ -1,5 +1,5 @@
- query findMany_User($where: _UserWhereInput!) {
-    findMany_User(where: $where) {
+ query _users($where: _UserWhereInput!) {
+    _users(where: $where) {
         edges {
             node {
                 id
@@ -9,14 +9,14 @@
     }
 }
 
-mutation updateOne_User($input: _UserUpdateInput!) {
-    updateOne_User(input: $input) {
+mutation update_User($input: _UserUpdateInput!) {
+    update_User(input: $input) {
         id
     }
 }
 
-mutation createOne_User($input: _UserCreateInput!) {
-	createOne_User(input: $input) {
+mutation create_User($input: _UserCreateInput!) {
+	create_User(input: $input) {
 		id
 	}
 }

@@ -17,7 +17,8 @@
     "@elysiajs/jwt": "0.8.0",
     "elysia": "0.8.14",
     "graphql": "16.8.1",
-    "mongodb": "6.3.0"
+    "mongodb": "6.3.0",
+    "pluralize": "8.0.0"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "5.0.0",

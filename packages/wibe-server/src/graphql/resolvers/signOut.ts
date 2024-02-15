@@ -15,14 +15,14 @@ export const signOutResolver = async (
 	const client = getClient()
 
 	const {
-		findMany_User: { edges },
-	} = await client.findMany_User({ where: { email: { equalTo: email } } })
+		_users: { edges },
+	} = await client._users({ where: { email: { equalTo: email } } })
 
 	if (!edges || !edges[0]) throw new Error('User not found')
 
 	const user = edges[0].node
 
-	await client.updateOne_User({
+	await client.update_User({
 		input: {
 			id: user.id,
 			fields: {

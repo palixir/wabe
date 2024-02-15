@@ -428,8 +428,9 @@ export class WibeGraphQLSchema {
 		object: GraphQLObjectType
 		allObjects: GraphQLObjectType[]
 	}) {
+		const classNameInLowerCase = className.toLowerCase()
 		return {
-			[`findOne${className}`]: {
+			[classNameInLowerCase]: {
 				type: object,
 				description: object.description,
 				args: { id: { type: GraphQLID } },
@@ -442,7 +443,8 @@ export class WibeGraphQLSchema {
 						className as keyof WibeSchemaTypes,
 					),
 			},
-			[`findMany${className}`]: {
+			// TODO : Use the pluralize library to pluralize the className
+			[`${classNameInLowerCase}s`]: {
 				type: new GraphQLNonNull(
 					getConnectionType({ object, allObjects }),
 				),
@@ -530,7 +532,7 @@ export class WibeGraphQLSchema {
 		})
 
 		const mutations: Record<string, GraphQLFieldConfig<any, any, any>> = {
-			[`createOne${className}`]: {
+			[`create${className}`]: {
 				type: new GraphQLNonNull(object),
 				description: object.description,
 				args: { input: { type: createInputType } },
@@ -543,7 +545,7 @@ export class WibeGraphQLSchema {
 						className as keyof WibeSchemaTypes,
 					),
 			},
-			[`createMany${className}`]: {
+			[`create${className}s`]: {
 				type: new GraphQLNonNull(
 					getConnectionType({ object, allObjects }),
 				),
@@ -558,7 +560,7 @@ export class WibeGraphQLSchema {
 						className as keyof WibeSchemaTypes,
 					),
 			},
-			[`updateOne${className}`]: {
+			[`update${className}`]: {
 				type: new GraphQLNonNull(object),
 				description: object.description,
 				args: { input: { type: updateInputType } },
@@ -571,7 +573,7 @@ export class WibeGraphQLSchema {
 						className as keyof WibeSchemaTypes,
 					),
 			},
-			[`updateMany${className}`]: {
+			[`update${className}s`]: {
 				type: new GraphQLNonNull(
 					getConnectionType({ object, allObjects }),
 				),
@@ -586,7 +588,7 @@ export class WibeGraphQLSchema {
 						className as keyof WibeSchemaTypes,
 					),
 			},
-			[`deleteOne${className}`]: {
+			[`delete${className}`]: {
 				type: new GraphQLNonNull(object),
 				description: object.description,
 				args: {
@@ -603,7 +605,7 @@ export class WibeGraphQLSchema {
 						className as keyof WibeSchemaTypes,
 					),
 			},
-			[`deleteMany${className}`]: {
+			[`delete${className}s`]: {
 				type: new GraphQLNonNull(
 					getConnectionType({ object, allObjects }),
 				),

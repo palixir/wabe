@@ -29,14 +29,11 @@ describe('SignUp', () => {
 	})
 
 	afterEach(async () => {
-		const { findMany_User } = await client.request<any>(
-			graphql.findMany_User,
-			{},
-		)
+		const { _users } = await client.request<any>(graphql._users, {})
 
 		await Promise.all(
-			findMany_User.edges.map(({ node }: { node: any }) =>
-				client.request<any>(graphql.deleteOne_User, {
+			_users.edges.map(({ node }: { node: any }) =>
+				client.request<any>(graphql.delete_User, {
 					input: { id: node.id },
 				}),
 			),
@@ -55,14 +52,11 @@ describe('SignUp', () => {
 
 		expect(signUp).toEqual(true)
 
-		const { findMany_User: users } = await client.request<any>(
-			graphql.findMany_User,
-			{
-				where: {
-					email: { equalTo: 'email@test.fr' },
-				},
+		const { _users: users } = await client.request<any>(graphql._users, {
+			where: {
+				email: { equalTo: 'email@test.fr' },
 			},
-		)
+		})
 
 		const isPasswordEquals = await Bun.password.verify(
 			'passwordtest',
@@ -124,9 +118,9 @@ describe('SignUp', () => {
 })
 
 const graphql = {
-	findMany_User: gql`
-        query findMany_User($where: _UserWhereInput) {
-            findMany_User(where: $where) {
+	_users: gql`
+        query _users($where: _UserWhereInput) {
+            _users(where: $where) {
                 edges {
                     node {
                         id
@@ -144,9 +138,9 @@ const graphql = {
             signUp(input: $input)
         }
     `,
-	deleteOne_User: gql`
-        mutation deleteOne_User($input: _UserDeleteInput!) {
-            deleteOne_User(input: $input) {
+	delete_User: gql`
+        mutation delete_User($input: _UserDeleteInput!) {
+            delete_User(input: $input) {
                 id
             }
         }

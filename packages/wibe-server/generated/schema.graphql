@@ -78,14 +78,14 @@ type _UserEdge {
 }
 
 type Query {
-  findOnePost(id: ID): Post
-  findManyPost(where: PostWhereInput, offset: Int, limit: Int): PostConnection!
+  post(id: ID): Post
+  posts(where: PostWhereInput, offset: Int, limit: Int): PostConnection!
 
   """User class"""
-  findOne_User(id: ID): _User
+  _user(id: ID): _User
 
   """User class"""
-  findMany_User(where: _UserWhereInput, offset: Int, limit: Int): _UserConnection!
+  _users(where: _UserWhereInput, offset: Int, limit: Int): _UserConnection!
 
   """Hello world description"""
   helloWorld(name: String!): String
@@ -194,30 +194,30 @@ input ObjectOfObjectWhereInput {
 }
 
 type Mutation {
-  createOnePost(input: PostCreateInput): Post!
-  createManyPost(input: PostsCreateInput): PostConnection!
-  updateOnePost(input: PostUpdateInput): Post!
-  updateManyPost(input: PostsUpdateInput): PostConnection!
-  deleteOnePost(input: PostDeleteInput): Post!
-  deleteManyPost(input: PostsDeleteInput): PostConnection!
+  createPost(input: PostCreateInput): Post!
+  createPosts(input: PostsCreateInput): PostConnection!
+  updatePost(input: PostUpdateInput): Post!
+  updatePosts(input: PostsUpdateInput): PostConnection!
+  deletePost(input: PostDeleteInput): Post!
+  deletePosts(input: PostsDeleteInput): PostConnection!
 
   """User class"""
-  createOne_User(input: _UserCreateInput): _User!
+  create_User(input: _UserCreateInput): _User!
 
   """User class"""
-  createMany_User(input: _UsersCreateInput): _UserConnection!
+  create_Users(input: _UsersCreateInput): _UserConnection!
 
   """User class"""
-  updateOne_User(input: _UserUpdateInput): _User!
+  update_User(input: _UserUpdateInput): _User!
 
   """User class"""
-  updateMany_User(input: _UsersUpdateInput): _UserConnection!
+  update_Users(input: _UsersUpdateInput): _UserConnection!
 
   """User class"""
-  deleteOne_User(input: _UserDeleteInput): _User!
+  delete_User(input: _UserDeleteInput): _User!
 
   """User class"""
-  deleteMany_User(input: _UsersDeleteInput): _UserConnection!
+  delete_Users(input: _UsersDeleteInput): _UserConnection!
   createMutation(input: CreateMutationInput): Boolean!
   customMutation(input: CustomMutationInput): Int
   signOut(input: SignOutInput): Boolean

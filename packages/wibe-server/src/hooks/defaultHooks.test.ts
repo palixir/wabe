@@ -23,8 +23,8 @@
 
 // 	describe('CreatedAt and UpdatedAt', () => {
 // 		it('should add createdAt value', async () => {
-// 			const { createOne_User } = await client.request<any>(
-// 				graphql.createOne_User,
+// 			const { create_User } = await client.request<any>(
+// 				graphql.create_User,
 // 				{
 // 					input: {
 // 						fields: {
@@ -34,19 +34,19 @@
 // 				},
 // 			)
 
-// 			const createdAt = new Date(createOne_User.createdAt)
+// 			const createdAt = new Date(create_User.createdAt)
 
 // 			// Don't test hours to avoid flaky
 // 			expect(createdAt.getDay()).toEqual(now.getDay())
 // 			expect(createdAt.getMonth()).toEqual(now.getMonth())
 // 			expect(createdAt.getFullYear()).toEqual(now.getFullYear())
 
-// 			expect(createOne_User.updatedAt).toBeNull()
+// 			expect(create_User.updatedAt).toBeNull()
 // 		})
 
 // 		it('shoud add updatedAt value', async () => {
-// 			const { createOne_User } = await client.request<any>(
-// 				graphql.createOne_User,
+// 			const { create_User } = await client.request<any>(
+// 				graphql.create_User,
 // 				{
 // 					input: {
 // 						fields: {
@@ -56,11 +56,11 @@
 // 				},
 // 			)
 
-// 			const { updateOne_User } = await client.request<any>(
-// 				graphql.updateOne_User,
+// 			const { update_User } = await client.request<any>(
+// 				graphql.update_User,
 // 				{
 // 					input: {
-// 						id: createOne_User.id,
+// 						id: create_User.id,
 // 						fields: {
 // 							email: 'email2@test.fr',
 // 						},
@@ -68,7 +68,7 @@
 // 				},
 // 			)
 
-// 			const updatedAt = new Date(updateOne_User.updatedAt)
+// 			const updatedAt = new Date(update_User.updatedAt)
 
 // 			// Don't test hours to avoid flaky
 // 			expect(updatedAt.getDay()).toEqual(now.getDay())
@@ -79,8 +79,8 @@
 
 // 	describe('Default value', () => {
 // 		it('should add the value if a default value is defined in schema but not specified', async () => {
-// 			const { createOne_User } = await client.request<any>(
-// 				graphql.createOne_User,
+// 			const { create_User } = await client.request<any>(
+// 				graphql.create_User,
 // 				{
 // 					input: {
 // 						fields: {
@@ -90,12 +90,12 @@
 // 				},
 // 			)
 
-// 			expect(createOne_User.isAdmin).toBe(false)
+// 			expect(create_User.isAdmin).toBe(false)
 // 		})
 
 // 		it('should not add a default value if a value is specified', async () => {
-// 			const { createOne_User } = await client.request<any>(
-// 				graphql.createOne_User,
+// 			const { create_User } = await client.request<any>(
+// 				graphql.create_User,
 // 				{
 // 					input: {
 // 						fields: {
@@ -106,15 +106,15 @@
 // 				},
 // 			)
 
-// 			expect(createOne_User.isAdmin).toBe(true)
+// 			expect(create_User.isAdmin).toBe(true)
 // 		})
 // 	})
 // })
 
 // const graphql = {
-// 	createOne_User: gql`
+// 	create_User: gql`
 //         mutation createUser($input: _UserCreateInput!) {
-//             createOne_User(input: $input) {
+//             create_User(input: $input) {
 //                 id
 //                 isAdmin
 //                 createdAt
@@ -122,9 +122,9 @@
 //             }
 //         }
 //     `,
-// 	updateOne_User: gql`
+// 	update_User: gql`
 //         mutation updateUser($input: _UserUpdateInput!) {
-//             updateOne_User(input: $input) {
+//             update_User(input: $input) {
 //                 id
 //                 createdAt
 //                 updatedAt
