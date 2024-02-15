@@ -6,7 +6,6 @@ import {
 	afterAll,
 	beforeEach,
 	spyOn,
-	mock,
 } from 'bun:test'
 import { fail } from 'assert'
 import { closeTests, setupTests } from '../../utils/helper'
@@ -41,31 +40,17 @@ describe('Mongo adapter', () => {
 	it('should create class', async () => {
 		if (!mongoAdapter.database) fail()
 
-		const mockWatchOn = mock(() => {})
-		const mockWatchClose = mock(() => {})
-		const mockWatch = mock(() => ({
-			on: mockWatchOn,
-			close: mockWatchClose,
-		}))
-
 		const spyCollection = spyOn(
 			mongoAdapter.database,
-			'createCollection',
-		).mockReturnValue({
-			watch: mockWatch,
-		} as any)
+			'collection',
+		).mockReturnValue({} as any)
 
-		await mongoAdapter.createClass('_User')
+		await mongoAdapter.createClassIfNotExist('_User')
 
 		expect(spyCollection).toHaveBeenCalledTimes(1)
 		expect(spyCollection).toHaveBeenCalledWith('_User')
-		expect(mockWatch).toHaveBeenCalledTimes(1)
-		expect(mockWatch).toHaveBeenCalledWith([], {
-			fullDocument: 'updateLookup',
-		})
-		expect(mockWatchOn).toHaveBeenCalledTimes(1)
-		expect(mockWatchOn).toHaveBeenCalledWith('change', expect.any(Function))
-		expect(mockWatchClose).toHaveBeenCalledTimes(0)
+
+		spyCollection.mockRestore()
 	})
 
 	it("should not create class if it's not connected", async () => {
@@ -75,9 +60,9 @@ describe('Mongo adapter', () => {
 		)
 		cloneMongoAdapter.database = undefined
 
-		expect(cloneMongoAdapter.createClass('_User')).rejects.toThrow(
-			'Connection to database is not established',
-		)
+		expect(
+			cloneMongoAdapter.createClassIfNotExist('_User'),
+		).rejects.toThrow('Connection to database is not established')
 	})
 
 	it('should getObjects using id and not _id', async () => {

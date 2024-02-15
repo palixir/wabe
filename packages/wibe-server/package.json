@@ -1,38 +1,38 @@
 {
-  "name": "wibe-server",
-  "version": "0.0.1",
-  "description": "wibe-server",
-  "scripts": {
-    "build": "tsc --project tsconfig.build.json",
-    "dev": "bun codegen && bun run --watch dev/index.ts",
-    "test": "bun test src --watch",
-    "test:only": "bun test src --watch --only",
-    "linter": "biome lint ./src/**/*.ts --no-errors-on-unmatched",
-    "formatter": "biome format --write .",
-    "codegen": "graphql-codegen --config codegen.ts"
-  },
-  "dependencies": {
-    "@apollo/server": "4.10.0",
-    "@elysiajs/apollo": "0.8.0",
-    "@elysiajs/jwt": "0.8.0",
-    "elysia": "0.8.14",
-    "graphql": "16.8.1",
-    "mongodb": "6.3.0"
-  },
-  "devDependencies": {
-    "@graphql-codegen/cli": "5.0.0",
-    "@graphql-codegen/typescript": "4.0.1",
-    "@graphql-codegen/typescript-graphql-request": "6.2.0",
-    "@graphql-codegen/typescript-operations": "4.0.1",
-    "@parcel/watcher": "2.3.0",
-    "@types/bun": "1.0.2",
-    "@types/uuid": "9.0.6",
-    "get-port": "7.0.0",
-    "graphql-request": "6.1.0",
-    "typescript": "5.3.3",
-    "uuid": "9.0.1",
-    "wait-on": "7.2.0",
-    "wibe-pluralize": "workspace:*",
-    "wibe-mongodb-launcher": "workspace:*"
-  }
+    "name": "wibe-server",
+    "version": "0.0.1",
+    "description": "wibe-server",
+    "scripts": {
+        "build": "tsc --project tsconfig.build.json",
+        "dev": "bun codegen && bun run --watch dev/index.ts",
+        "test": "bun test src --watch",
+        "test:only": "bun test src --watch --only",
+        "linter": "biome lint ./src/**/**/*.ts --config-path=../../ --no-errors-on-unmatched",
+        "formatter": "biome format --write .",
+        "codegen": "graphql-codegen --config codegen.ts"
+    },
+    "dependencies": {
+        "@apollo/server": "4.10.0",
+        "@elysiajs/apollo": "0.8.0",
+        "@elysiajs/jwt": "0.8.0",
+        "elysia": "0.8.14",
+        "graphql": "16.8.1",
+        "mongodb": "6.3.0"
+    },
+    "devDependencies": {
+        "@graphql-codegen/cli": "5.0.0",
+        "@graphql-codegen/typescript": "4.0.1",
+        "@graphql-codegen/typescript-graphql-request": "6.2.0",
+        "@graphql-codegen/typescript-operations": "4.0.1",
+        "@parcel/watcher": "2.3.0",
+        "@types/bun": "1.0.2",
+        "@types/uuid": "9.0.6",
+        "get-port": "7.0.0",
+        "graphql-request": "6.1.0",
+        "typescript": "5.3.3",
+        "uuid": "9.0.1",
+        "wait-on": "7.2.0",
+        "wibe-pluralize": "workspace:*",
+        "wibe-mongodb-launcher": "workspace:*"
+    }
 }

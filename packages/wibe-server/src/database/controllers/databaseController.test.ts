@@ -18,10 +18,10 @@ describe('DatabaseController', () => {
 	it('should call adapter for createClass', async () => {
 		const spyMongoAdapterCreateClass = spyOn(
 			MongoAdapter.prototype,
-			'createClass',
-		).mockResolvedValue()
+			'createClassIfNotExist',
+		).mockResolvedValue({} as any)
 
-		await WibeApp.databaseController.createClass('Collection1')
+		await WibeApp.databaseController.createClassIfNotExist('Collection1')
 
 		expect(spyMongoAdapterCreateClass).toHaveBeenCalledTimes(1)
 	})

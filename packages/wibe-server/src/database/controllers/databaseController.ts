@@ -26,8 +26,8 @@ export class DatabaseController {
 		return this.adapter.close()
 	}
 
-	async createClass(className: string) {
-		return this.adapter.createClass(className)
+	async createClassIfNotExist(className: string) {
+		return this.adapter.createClassIfNotExist(className)
 	}
 
 	async getObject<

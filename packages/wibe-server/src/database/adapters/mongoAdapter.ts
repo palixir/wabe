@@ -20,7 +20,6 @@ import {
 	WhereType,
 } from './adaptersInterface'
 import { WibeSchemaTypes } from '../../../generated/wibe'
-import { _findHooksAndExecute } from './utils'
 
 export const buildMongoWhereQuery = <T extends keyof WibeSchemaTypes>(
 	where?: WhereType<T>,
@@ -78,38 +77,6 @@ export const buildMongoWhereQuery = <T extends keyof WibeSchemaTypes>(
 	)
 }
 
-const getDocumentDataFromOperationType = <
-	T extends keyof WibeSchemaTypes,
-	K extends keyof WibeSchemaTypes[T],
->(
-	change: ChangeStreamDocument<Document>,
-): Record<K, WibeSchemaTypes[T][K]> => {
-	switch (change.operationType) {
-		case 'insert':
-			const data = change.fullDocument
-			data.id = data._id.toString()
-			data._id = undefined
-
-			// @ts-expect-error
-			return data
-		case 'update':
-			// Here we can force because we use the options { fullDocument: "updateLookup" }
-			// This option is check in tests
-			const updatedData = change.fullDocument!
-			updatedData.id = updatedData._id.toString()
-			updatedData._id = undefined
-
-			// @ts-expect-error
-			return updatedData
-		case 'delete':
-			// @ts-expect-error
-			return { id: change._id.toString() }
-		default:
-			// @ts-expect-error
-			return {}
-	}
-}
-
 export class MongoAdapter implements DatabaseAdapter {
 	public options: AdapterOptions
 	public database?: Db
@@ -137,26 +104,11 @@ export class MongoAdapter implements DatabaseAdapter {
 		return this.client.close()
 	}
 
-	async createClass(className: string) {
+	async createClassIfNotExist(className: string) {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 
-		const collection = await this.database.createCollection(className)
-
-		const streams = collection.watch([], { fullDocument: 'updateLookup' })
-		this.streams.push(streams)
-
-		streams.on('change', (change) => {
-			const data = getDocumentDataFromOperationType(change)
-
-			_findHooksAndExecute({
-				className: className as keyof WibeSchemaTypes,
-				operationType: change.operationType,
-				// @ts-expect-error
-				executionTime: change.wallTime,
-				data: data || {},
-			})
-		})
+		const collection = this.database.collection(className)
 
 		return collection
 	}
@@ -181,9 +133,9 @@ export class MongoAdapter implements DatabaseAdapter {
 		)
 
 		// @ts-expect-error
-		const isIdInProjection = fields?.includes('id')
+		const isIdInProjection = fields?.includes('id') || !fields
 
-		const collection = this.database.collection<any>(className)
+		const collection = await this.createClassIfNotExist(className)
 
 		const res = await collection.findOne(
 			{ _id: new ObjectId(id) } as Filter<any>,
@@ -194,13 +146,14 @@ export class MongoAdapter implements DatabaseAdapter {
 			},
 		)
 
-		// We standardize the id field
-		if (res?._id) {
-			res.id = res._id.toString()
-			res._id = undefined
-		}
+		if (!res) return null
 
-		return res
+		const { _id, ...resultWithout_Id } = res
+
+		return {
+			...resultWithout_Id,
+			...(isIdInProjection ? { id: _id.toString() } : undefined),
+		} as Pick<WibeSchemaTypes[T], K>
 	}
 
 	async getObjects<
@@ -223,7 +176,11 @@ export class MongoAdapter implements DatabaseAdapter {
 			{} as Record<any, number>,
 		)
 
-		const collection = this.database.collection<any>(className)
+		// @ts-expect-error
+		const isIdInProjection = fields?.includes('id') || !fields
+
+		const collection = await this.createClassIfNotExist(className)
+
 		const res = await collection
 			.find(whereBuilded, {
 				projection: fields
@@ -236,15 +193,14 @@ export class MongoAdapter implements DatabaseAdapter {
 			.skip(offset || 0)
 			.toArray()
 
-		// We standardize the id field
-		for (const object of res) {
-			if (object._id) {
-				object.id = object._id.toString()
-				object._id = undefined
-			}
-		}
+		return res.map((object) => {
+			const { _id, ...resultWithout_Id } = object
 
-		return res
+			return {
+				...resultWithout_Id,
+				...(isIdInProjection ? { id: _id.toString() } : undefined),
+			} as Pick<WibeSchemaTypes[T], K>
+		})
 	}
 
 	async updateObject<
@@ -283,7 +239,7 @@ export class MongoAdapter implements DatabaseAdapter {
 
 		const whereBuilded = buildMongoWhereQuery<T>(where)
 
-		const collection = this.database.collection(className)
+		const collection = await this.createClassIfNotExist(className)
 
 		const objectsBeforeUpdate = await this.getObjects({
 			className,
@@ -343,7 +299,7 @@ export class MongoAdapter implements DatabaseAdapter {
 
 		const { className, data, fields, offset, limit } = params
 
-		const collection = this.database.collection(className)
+		const collection = await this.createClassIfNotExist(className)
 
 		const res = await collection.insertMany(data, {})
 
@@ -395,7 +351,7 @@ export class MongoAdapter implements DatabaseAdapter {
 
 		const whereBuilded = buildMongoWhereQuery(where)
 
-		const collection = this.database.collection(className)
+		const collection = await this.createClassIfNotExist(className)
 
 		const objectsBeforeDelete = await this.getObjects({
 			className,

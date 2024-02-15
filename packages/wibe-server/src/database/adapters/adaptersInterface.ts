@@ -119,7 +119,7 @@ export interface DatabaseAdapter {
 	connect(): Promise<any>
 	close(): Promise<any>
 
-	createClass(className: string): Promise<any>
+	createClassIfNotExist(className: string): Promise<any>
 
 	getObject<
 		T extends keyof WibeSchemaTypes,
