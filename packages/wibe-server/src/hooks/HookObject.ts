@@ -1,36 +1,48 @@
-import { WibeSchemaTypes } from '../../generated/wibe'
+import { OperationType } from '.'
+import { WibeSchemaTypes, _User } from '../../generated/wibe'
 
 export class HookObject<
 	T extends keyof WibeSchemaTypes,
 	K extends keyof WibeSchemaTypes[T],
 > {
-	private data: Record<K, WibeSchemaTypes[T][K]>
+	public user: _User
 	public className: T
-	public executionTime?: number
+	private data?: Record<K, any>
+	private operationType: OperationType
 
 	constructor({
 		data,
 		className,
-		executionTime,
+		user,
+		operationType,
 	}: {
+		user: _User
 		className: T
-		executionTime?: number
-		data: Record<K, WibeSchemaTypes[T][K]>
+		data: Record<K, any>
+		operationType: OperationType
 	}) {
+		this.user = user
 		this.data = data
 		this.className = className
-		this.executionTime = executionTime
+		this.operationType = operationType
 	}
 
 	get({ field }: { field: K }) {
-		return this.data[field]
+		return this.data?.[field]
 	}
 
-	set({ field, value }: { field: K; value: WibeSchemaTypes[T][K] }) {
+	set({ field, value }: { field: K; value: any }) {
+		if (!this.operationType.includes('before'))
+			throw new Error(
+				'Cannot set data in a hook that is not a before hook',
+			)
+
+		if (!this.data) return
+
 		this.data[field] = value
 	}
 
-	getData(): Readonly<Record<K, WibeSchemaTypes[T][K]>> {
+	getData() {
 		return this.data
 	}
 }

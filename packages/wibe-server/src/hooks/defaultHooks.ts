@@ -12,6 +12,16 @@ export const defaultBeforeInsertForCreatedAt = <
 	object.set({ field: 'createdAt', value: new Date() })
 }
 
+export const defaultBeforeUpdateForUpdatedAt = <
+	T extends keyof WibeSchemaTypes,
+	K extends keyof WibeSchemaTypes[T],
+>(
+	object: HookObject<T, K>,
+) => {
+	// @ts-expect-error
+	object.set({ field: 'updatedAt', value: new Date() })
+}
+
 export const defaultBeforeInsertForDefaultValue = <
 	T extends keyof WibeSchemaTypes,
 	K extends keyof WibeSchemaTypes[T],
@@ -36,14 +46,4 @@ export const defaultBeforeInsertForDefaultValue = <
 				value: schemaClass?.fields[field].defaultValue,
 			})
 	})
-}
-
-export const defaultBeforeUpdateForUpdatedAt = <
-	T extends keyof WibeSchemaTypes,
-	K extends keyof WibeSchemaTypes[T],
->(
-	object: HookObject<T, K>,
-) => {
-	// @ts-expect-error
-	object.set({ field: 'updatedAt', value: new Date() })
 }

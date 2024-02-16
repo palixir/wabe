@@ -1,4 +1,5 @@
 import { WibeSchemaTypes } from '../../../generated/wibe'
+import { Context } from '../../graphql/interface'
 
 type WhereAggregation<T extends keyof WibeSchemaTypes> = {
 	[key in keyof WibeSchemaTypes[T] | 'id']: {
@@ -58,6 +59,7 @@ export interface CreateObjectOptions<
 	className: T
 	data: Record<W, any>
 	fields?: Array<K>
+	context: Context
 }
 export interface CreateObjectsOptions<
 	T extends keyof WibeSchemaTypes,
@@ -69,6 +71,7 @@ export interface CreateObjectsOptions<
 	fields?: Array<K>
 	offset?: number
 	limit?: number
+	context: Context
 }
 
 export interface UpdateObjectOptions<
@@ -80,6 +83,7 @@ export interface UpdateObjectOptions<
 	id: string
 	data: Record<W, any>
 	fields?: Array<K>
+	context: Context
 }
 
 export interface UpdateObjectsOptions<
@@ -93,6 +97,7 @@ export interface UpdateObjectsOptions<
 	fields?: Array<K>
 	offset?: number
 	limit?: number
+	context: Context
 }
 
 export interface DeleteObjectOptions<
@@ -102,6 +107,7 @@ export interface DeleteObjectOptions<
 	className: T
 	id: string
 	fields?: Array<K>
+	context: Context
 }
 
 export interface DeleteObjectsOptions<
@@ -113,6 +119,7 @@ export interface DeleteObjectsOptions<
 	fields?: Array<K>
 	offset?: number
 	limit?: number
+	context: Context
 }
 
 export interface DatabaseAdapter {

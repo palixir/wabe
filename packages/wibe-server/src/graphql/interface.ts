@@ -1,5 +1,6 @@
 import { JWTPayloadSpec } from '@elysiajs/jwt'
 import { Cookie } from 'elysia'
+import { _User } from '../../generated/wibe'
 
 export interface Context {
 	cookie: Record<string, Cookie<any>>
@@ -10,4 +11,5 @@ export interface Context {
 		) => Promise<string>
 		verify: (payload: string) => Promise<false | JWTPayloadSpec>
 	}
+	user: _User
 }

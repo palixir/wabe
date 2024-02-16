@@ -126,7 +126,17 @@ export class WibeApp {
 		this.server.use(
 			await apollo({
 				schema,
-				context: async (context) => context,
+				context: (context) =>
+					Promise.resolve({
+						...context,
+						// TODO : For the moment we are using fake user
+						// Need to request the user in database and get information
+						// from the token. Here we need to use a cache to avoid a lot of request
+						user: {
+							id: 'fakeId',
+							email: 'fakeEmail',
+						},
+					}),
 			}),
 		)
 
