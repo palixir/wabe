@@ -690,9 +690,21 @@ describe('Mongo adapter', () => {
 			context: { user: {} } as any,
 		})
 
-		expect(spyFindHooksAndExecute).toHaveBeenCalledTimes(1)
-		expect(spyFindHooksAndExecute).toHaveBeenCalledWith({
+		expect(spyFindHooksAndExecute).toHaveBeenCalledTimes(2)
+		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
 			operationType: hooks.OperationType.BeforeInsert,
+			className: '_User',
+			data: [
+				{
+					name: 'Lucas',
+					age: 23,
+				},
+			],
+			user: {},
+		})
+
+		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
+			operationType: hooks.OperationType.AfterInsert,
 			className: '_User',
 			data: [
 				{
@@ -739,9 +751,25 @@ describe('Mongo adapter', () => {
 			context: { user: {} } as any,
 		})
 
-		expect(spyFindHooksAndExecute).toHaveBeenCalledTimes(1)
-		expect(spyFindHooksAndExecute).toHaveBeenCalledWith({
+		expect(spyFindHooksAndExecute).toHaveBeenCalledTimes(2)
+		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
 			operationType: hooks.OperationType.BeforeInsert,
+			className: '_User',
+			data: [
+				{
+					name: 'Lucas3',
+					age: 23,
+				},
+				{
+					name: 'Lucas4',
+					age: 24,
+				},
+			],
+			user: {},
+		})
+
+		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
+			operationType: hooks.OperationType.AfterInsert,
 			className: '_User',
 			data: [
 				{
@@ -825,9 +853,19 @@ describe('Mongo adapter', () => {
 
 		if (!updatedObject) fail()
 
-		expect(spyFindHooksAndExecute).toHaveBeenCalledTimes(1)
-		expect(spyFindHooksAndExecute).toHaveBeenCalledWith({
+		expect(spyFindHooksAndExecute).toHaveBeenCalledTimes(2)
+		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
 			operationType: hooks.OperationType.BeforeUpdate,
+			className: '_User',
+			data: [
+				{
+					name: 'Doe',
+				},
+			],
+			user: {},
+		})
+		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
+			operationType: hooks.OperationType.AfterUpdate,
 			className: '_User',
 			data: [
 				{
@@ -889,9 +927,19 @@ describe('Mongo adapter', () => {
 			context: { user: {} } as any,
 		})
 
-		expect(spyFindHooksAndExecute).toHaveBeenCalledTimes(1)
-		expect(spyFindHooksAndExecute).toHaveBeenCalledWith({
+		expect(spyFindHooksAndExecute).toHaveBeenCalledTimes(2)
+		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
 			operationType: hooks.OperationType.BeforeUpdate,
+			className: '_User',
+			data: [
+				{
+					age: 21,
+				},
+			],
+			user: {},
+		})
+		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
+			operationType: hooks.OperationType.AfterUpdate,
 			className: '_User',
 			data: [
 				{
@@ -990,9 +1038,15 @@ describe('Mongo adapter', () => {
 
 		if (!deletedObject) fail()
 
-		expect(spyFindHooksAndExecute).toHaveBeenCalledTimes(1)
-		expect(spyFindHooksAndExecute).toHaveBeenCalledWith({
+		expect(spyFindHooksAndExecute).toHaveBeenCalledTimes(2)
+		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
 			operationType: hooks.OperationType.BeforeDelete,
+			className: '_User',
+			data: [],
+			user: {},
+		})
+		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
+			operationType: hooks.OperationType.AfterDelete,
 			className: '_User',
 			data: [],
 			user: {},
@@ -1045,9 +1099,15 @@ describe('Mongo adapter', () => {
 
 		if (!deletedObjects) fail()
 
-		expect(spyFindHooksAndExecute).toHaveBeenCalledTimes(1)
-		expect(spyFindHooksAndExecute).toHaveBeenCalledWith({
+		expect(spyFindHooksAndExecute).toHaveBeenCalledTimes(2)
+		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
 			operationType: hooks.OperationType.BeforeDelete,
+			className: '_User',
+			data: [],
+			user: {},
+		})
+		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
+			operationType: hooks.OperationType.AfterDelete,
 			className: '_User',
 			data: [],
 			user: {},

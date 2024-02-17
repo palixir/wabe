@@ -10,6 +10,8 @@ export const defaultBeforeInsertForCreatedAt = <
 ) => {
 	// @ts-expect-error
 	object.set({ field: 'createdAt', value: new Date() })
+	// @ts-expect-error
+	object.set({ field: 'updatedAt', value: new Date() })
 }
 
 export const defaultBeforeUpdateForUpdatedAt = <

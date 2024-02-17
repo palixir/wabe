@@ -250,6 +250,13 @@ export class MongoAdapter implements DatabaseAdapter {
 
 		const res = await collection.insertMany(arrayOfComputedData, {})
 
+		await findHooksAndExecute({
+			className,
+			user: context.user,
+			data,
+			operationType: OperationType.AfterInsert,
+		})
+
 		const orStatement = Object.entries(res.insertedIds).map(
 			([, value]) => ({
 				id: { equalTo: value },
@@ -324,6 +331,13 @@ export class MongoAdapter implements DatabaseAdapter {
 			$set: arrayOfComputedData[0],
 		})
 
+		await findHooksAndExecute({
+			className,
+			user: context.user,
+			data: [data],
+			operationType: OperationType.AfterUpdate,
+		})
+
 		const orStatement = objectsBeforeUpdate.map((object) => ({
 			id: { equalTo: new ObjectId(object.id) },
 		}))
@@ -391,6 +405,13 @@ export class MongoAdapter implements DatabaseAdapter {
 		})
 
 		await collection.deleteMany(whereBuilded)
+
+		await findHooksAndExecute({
+			className,
+			user: context.user,
+			data: [],
+			operationType: OperationType.AfterDelete,
+		})
 
 		return objectsBeforeDelete
 	}

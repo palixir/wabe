@@ -22,6 +22,25 @@ describe('HookObject', () => {
 		expect(hookObject.get({ field: 'age' })).toEqual(30)
 	})
 
+	it('should create a clone of the data', () => {
+		const userData = { name: 'John Doe', age: 30 }
+
+		const hookObject = new HookObject({
+			className: '_User',
+			data: userData,
+			user: {
+				id: '1',
+				email: 'email@test.fr',
+			},
+			operationType: OperationType.BeforeInsert,
+		})
+
+		hookObject.set({ field: 'name', value: 'tata' })
+
+		expect(hookObject.get({ field: 'name' })).toEqual('tata')
+		expect(userData.name).toEqual('John Doe')
+	})
+
 	it('should set data correctly', () => {
 		const userData = { name: 'John Doe', age: 30 }
 

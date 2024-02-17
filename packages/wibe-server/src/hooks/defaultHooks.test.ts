@@ -22,7 +22,7 @@ describe('Default hooks', () => {
 	})
 
 	describe('CreatedAt and UpdatedAt', () => {
-		it('should add createdAt value', async () => {
+		it('should add createdAt and updatedAt value on insert operation type', async () => {
 			const { create_User } = await client.request<any>(
 				graphql.create_User,
 				{
@@ -35,16 +35,19 @@ describe('Default hooks', () => {
 			)
 
 			const createdAt = new Date(create_User.createdAt)
+			const updatedAt = new Date(create_User.updatedAt)
 
-			// Don't test hours to avoid flaky
+			// Don't test hours/minutes to avoid flaky
 			expect(createdAt.getDay()).toEqual(now.getDay())
 			expect(createdAt.getMonth()).toEqual(now.getMonth())
 			expect(createdAt.getFullYear()).toEqual(now.getFullYear())
 
-			expect(create_User.updatedAt).toBeNull()
+			expect(updatedAt.getDay()).toEqual(now.getDay())
+			expect(updatedAt.getMonth()).toEqual(now.getMonth())
+			expect(updatedAt.getFullYear()).toEqual(now.getFullYear())
 		})
 
-		it('shoud add updatedAt value', async () => {
+		it('shoud add updatedAt value on update operation type', async () => {
 			const { create_User } = await client.request<any>(
 				graphql.create_User,
 				{
