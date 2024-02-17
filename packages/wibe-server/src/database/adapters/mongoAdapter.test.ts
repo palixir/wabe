@@ -890,8 +890,6 @@ describe('Mongo adapter', () => {
 
 		if (!updatedObject2) fail()
 
-		console.log(updatedObject2.id)
-
 		expect(updatedObject2).toEqual({
 			id: expect.any(String),
 			name: 'Doe',
