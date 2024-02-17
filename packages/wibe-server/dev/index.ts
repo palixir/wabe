@@ -23,18 +23,18 @@ const run = async () => {
                     clientSecret: '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',
                 },
             },
-            customAuthenticationMethods: [
-                {
-                    name: 'CustomProvider',
-                    input: {
-                        email: { type: 'Email', required: true },
-                        password: { type: 'String', required: true },
-                    },
-                    callback: async () => {
-                        return true
-                    },
-                },
-            ],
+            // customAuthenticationMethods: [
+            //     {
+            //         name: 'CustomProvider',
+            //         input: {
+            //             email: { type: 'Email', required: true },
+            //             password: { type: 'String', required: true },
+            //         },
+            //         callback: async () => {
+            //             return true
+            //         },
+            //     },
+            // ],
         },
         database: {
             type: DatabaseEnum.Mongo,
