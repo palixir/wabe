@@ -18,6 +18,7 @@ import {
 	UpdateObjectsOptions,
 	DeleteObjectsOptions,
 	WhereType,
+	DeleteObjectOptions,
 } from './adaptersInterface'
 import { WibeSchemaTypes } from '../../../generated/wibe'
 import { OperationType, findHooksAndExecute } from '../../hooks'
@@ -242,9 +243,8 @@ export class MongoAdapter implements DatabaseAdapter {
 
 		const arrayOfComputedData = await findHooksAndExecute({
 			className,
-			// @ts-expect-error
 			data,
-			context,
+			user: context.user,
 			operationType: OperationType.BeforeInsert,
 		})
 
@@ -307,9 +307,8 @@ export class MongoAdapter implements DatabaseAdapter {
 
 		const arrayOfComputedData = await findHooksAndExecute({
 			className,
-			// @ts-expect-error
+			user: context.user,
 			data: [data],
-			context,
 			operationType: OperationType.BeforeUpdate,
 		})
 
@@ -344,7 +343,7 @@ export class MongoAdapter implements DatabaseAdapter {
 		T extends keyof WibeSchemaTypes,
 		K extends keyof WibeSchemaTypes[T],
 	>(
-		params: GetObjectOptions<T, K>,
+		params: DeleteObjectOptions<T, K>,
 	): Promise<Pick<WibeSchemaTypes[T], K> | null> {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
@@ -382,6 +381,13 @@ export class MongoAdapter implements DatabaseAdapter {
 			fields,
 			limit,
 			offset,
+		})
+
+		await findHooksAndExecute({
+			className,
+			user: context.user,
+			data: [],
+			operationType: OperationType.BeforeDelete,
 		})
 
 		await collection.deleteMany(whereBuilded)

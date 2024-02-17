@@ -6,16 +6,20 @@ import {
 	afterAll,
 	beforeEach,
 	spyOn,
+	afterEach,
 } from 'bun:test'
 import { fail } from 'assert'
+import { ObjectId } from 'mongodb'
 import { closeTests, setupTests } from '../../utils/helper'
 import { MongoAdapter, buildMongoWhereQuery } from './MongoAdapter'
 import { WibeApp } from '../../server'
-import { ObjectId } from 'mongodb'
+import * as hooks from '../../hooks'
 
 describe('Mongo adapter', () => {
 	let mongoAdapter: MongoAdapter
 	let wibe: WibeApp
+
+	const spyFindHooksAndExecute = spyOn(hooks, 'findHooksAndExecute')
 
 	beforeAll(async () => {
 		const setup = await setupTests()
@@ -35,6 +39,10 @@ describe('Mongo adapter', () => {
 			await Promise.all(
 				collections?.map((collection) => collection.drop()),
 			)
+	})
+
+	afterEach(() => {
+		spyFindHooksAndExecute.mockClear()
 	})
 
 	it('should create class', async () => {
@@ -79,6 +87,7 @@ describe('Mongo adapter', () => {
 				},
 			],
 			fields: ['name', 'id'],
+			context: { user: {} } as any,
 		})
 
 		if (!insertedObjects) fail()
@@ -119,6 +128,7 @@ describe('Mongo adapter', () => {
 				},
 			],
 			fields: ['name', 'id'],
+			context: { user: {} } as any,
 		})
 
 		const res = await mongoAdapter.getObjects({
@@ -160,6 +170,7 @@ describe('Mongo adapter', () => {
 			],
 			fields: ['name', 'id'],
 			limit: 2,
+			context: { user: {} } as any,
 		})
 
 		expect(res.length).toEqual(2)
@@ -194,6 +205,7 @@ describe('Mongo adapter', () => {
 			],
 			fields: ['name', 'id'],
 			limit: -2,
+			context: { user: {} } as any,
 		})
 
 		expect(res.length).toEqual(2)
@@ -225,6 +237,7 @@ describe('Mongo adapter', () => {
 				],
 				fields: ['name', 'id'],
 				offset: -2,
+				context: { user: {} } as any,
 			}),
 		).rejects.toThrow(
 			"BSON field 'skip' value must be >= 0, actual value '-2'",
@@ -257,6 +270,7 @@ describe('Mongo adapter', () => {
 				},
 			],
 			fields: ['name', 'id'],
+			context: { user: {} } as any,
 		})
 
 		const res = await mongoAdapter.getObjects({
@@ -295,6 +309,7 @@ describe('Mongo adapter', () => {
 			fields: ['name', 'id'],
 			limit: 2,
 			offset: 2,
+			context: { user: {} } as any,
 		})
 
 		expect(res.length).toEqual(2)
@@ -313,6 +328,7 @@ describe('Mongo adapter', () => {
 			fields: ['name'],
 			limit: 2,
 			offset: 1,
+			context: { user: {} } as any,
 		})
 
 		expect(res2.length).toEqual(2)
@@ -328,6 +344,7 @@ describe('Mongo adapter', () => {
 				age: 20,
 			},
 			fields: ['name', 'id'],
+			context: { user: {} } as any,
 		})
 
 		const res = await mongoAdapter.getObject({
@@ -356,6 +373,7 @@ describe('Mongo adapter', () => {
 				age: 20,
 			},
 			fields: ['name', 'id'],
+			context: { user: {} } as any,
 		})
 
 		if (!insertedObject) fail()
@@ -390,6 +408,7 @@ describe('Mongo adapter', () => {
 				age: 20,
 			},
 			fields: ['name'],
+			context: { user: {} } as any,
 		})
 
 		await mongoAdapter.createObject({
@@ -399,6 +418,7 @@ describe('Mongo adapter', () => {
 				age: 20,
 			},
 			fields: ['name'],
+			context: { user: {} } as any,
 		})
 
 		const objects2 = await mongoAdapter.getObjects({
@@ -446,6 +466,7 @@ describe('Mongo adapter', () => {
 				age: 20,
 			},
 			fields: ['name'],
+			context: { user: {} } as any,
 		})
 
 		await mongoAdapter.createObject({
@@ -455,6 +476,7 @@ describe('Mongo adapter', () => {
 				age: 20,
 			},
 			fields: ['name'],
+			context: { user: {} } as any,
 		})
 
 		// OR statement
@@ -665,6 +687,20 @@ describe('Mongo adapter', () => {
 				age: 23,
 			},
 			fields: ['age', 'id', 'age'],
+			context: { user: {} } as any,
+		})
+
+		expect(spyFindHooksAndExecute).toHaveBeenCalledTimes(1)
+		expect(spyFindHooksAndExecute).toHaveBeenCalledWith({
+			operationType: hooks.OperationType.BeforeInsert,
+			className: '_User',
+			data: [
+				{
+					name: 'Lucas',
+					age: 23,
+				},
+			],
+			user: {},
 		})
 
 		expect(insertedObject).toEqual({ age: 23, id: expect.anything() })
@@ -676,6 +712,7 @@ describe('Mongo adapter', () => {
 				age: 24,
 			},
 			fields: ['name', 'id', 'age'],
+			context: { user: {} } as any,
 		})
 
 		expect(insertedObject2).toEqual({
@@ -699,6 +736,24 @@ describe('Mongo adapter', () => {
 				},
 			],
 			fields: ['name', 'id'],
+			context: { user: {} } as any,
+		})
+
+		expect(spyFindHooksAndExecute).toHaveBeenCalledTimes(1)
+		expect(spyFindHooksAndExecute).toHaveBeenCalledWith({
+			operationType: hooks.OperationType.BeforeInsert,
+			className: '_User',
+			data: [
+				{
+					name: 'Lucas3',
+					age: 23,
+				},
+				{
+					name: 'Lucas4',
+					age: 24,
+				},
+			],
+			user: {},
 		})
 
 		expect(insertedObjects).toEqual([
@@ -727,6 +782,7 @@ describe('Mongo adapter', () => {
 				},
 			],
 			fields: ['name', 'id', 'age'],
+			context: { user: {} } as any,
 		})
 
 		expect(insertedObjects).toEqual([
@@ -750,20 +806,36 @@ describe('Mongo adapter', () => {
 				name: 'John',
 				age: 20,
 			},
+			context: { user: {} } as any,
 		})
 
 		if (!insertedObject) fail()
 
 		const id = insertedObject.id
 
+		spyFindHooksAndExecute.mockClear()
+
 		const updatedObject = await mongoAdapter.updateObject({
 			className: '_User',
 			id: id.toString(),
 			data: { name: 'Doe' },
 			fields: ['name', 'id'],
+			context: { user: {} } as any,
 		})
 
 		if (!updatedObject) fail()
+
+		expect(spyFindHooksAndExecute).toHaveBeenCalledTimes(1)
+		expect(spyFindHooksAndExecute).toHaveBeenCalledWith({
+			operationType: hooks.OperationType.BeforeUpdate,
+			className: '_User',
+			data: [
+				{
+					name: 'Doe',
+				},
+			],
+			user: {},
+		})
 
 		expect(updatedObject).toEqual({
 			name: 'Doe',
@@ -775,6 +847,7 @@ describe('Mongo adapter', () => {
 			id: id.toString(),
 			data: { name: 'Doe' },
 			fields: ['name', 'id', 'age'],
+			context: { user: {} } as any,
 		})
 
 		if (!updatedObject2) fail()
@@ -799,9 +872,12 @@ describe('Mongo adapter', () => {
 					age: 20,
 				},
 			],
+			context: { user: {} } as any,
 		})
 
 		if (!insertedObjects) fail()
+
+		spyFindHooksAndExecute.mockClear()
 
 		const updatedObjects = await mongoAdapter.updateObjects({
 			className: '_User',
@@ -810,6 +886,19 @@ describe('Mongo adapter', () => {
 			},
 			data: { age: 21 },
 			fields: ['name', 'id', 'age'],
+			context: { user: {} } as any,
+		})
+
+		expect(spyFindHooksAndExecute).toHaveBeenCalledTimes(1)
+		expect(spyFindHooksAndExecute).toHaveBeenCalledWith({
+			operationType: hooks.OperationType.BeforeUpdate,
+			className: '_User',
+			data: [
+				{
+					age: 21,
+				},
+			],
+			user: {},
 		})
 
 		expect(updatedObjects).toEqual([
@@ -827,6 +916,7 @@ describe('Mongo adapter', () => {
 			},
 			data: { age: 23 },
 			fields: ['name', 'id', 'age'],
+			context: { user: {} } as any,
 		})
 
 		expect(updatedObjects2).toEqual([
@@ -850,6 +940,7 @@ describe('Mongo adapter', () => {
 				name: 'John',
 				age: 20,
 			},
+			context: { user: {} } as any,
 		})
 
 		if (!insertedObject) fail()
@@ -863,6 +954,7 @@ describe('Mongo adapter', () => {
 				},
 			},
 			fields: ['age', 'id'],
+			context: { user: {} } as any,
 		})
 
 		expect(updatedObjects).toEqual([
@@ -880,19 +972,31 @@ describe('Mongo adapter', () => {
 				name: 'John',
 				age: 20,
 			},
+			context: { user: {} } as any,
 		})
 
 		if (!insertedObject) fail()
 
 		const id = insertedObject.id
 
+		spyFindHooksAndExecute.mockClear()
+
 		const deletedObject = await mongoAdapter.deleteObject({
 			className: '_User',
 			id: id.toString(),
 			fields: ['name', 'id', 'age'],
+			context: { user: {} } as any,
 		})
 
 		if (!deletedObject) fail()
+
+		expect(spyFindHooksAndExecute).toHaveBeenCalledTimes(1)
+		expect(spyFindHooksAndExecute).toHaveBeenCalledWith({
+			operationType: hooks.OperationType.BeforeDelete,
+			className: '_User',
+			data: [],
+			user: {},
+		})
 
 		expect(deletedObject).toEqual({
 			id: expect.anything(),
@@ -905,6 +1009,7 @@ describe('Mongo adapter', () => {
 		const res = await mongoAdapter.deleteObject({
 			className: '_User',
 			id: '5f9b3b3b3b3b3b3b3b3b3b3b',
+			context: { user: {} } as any,
 		})
 
 		expect(res).toEqual(null)
@@ -917,6 +1022,7 @@ describe('Mongo adapter', () => {
 				name: 'John',
 				age: 18,
 			},
+			context: { user: {} } as any,
 		})
 
 		await mongoAdapter.createObject({
@@ -925,15 +1031,27 @@ describe('Mongo adapter', () => {
 				name: 'Lucas',
 				age: 18,
 			},
+			context: { user: {} } as any,
 		})
+
+		spyFindHooksAndExecute.mockClear()
 
 		const deletedObjects = await mongoAdapter.deleteObjects({
 			className: '_User',
 			where: { age: { equalTo: 18 } },
 			fields: ['name', 'id', 'age'],
+			context: { user: {} } as any,
 		})
 
 		if (!deletedObjects) fail()
+
+		expect(spyFindHooksAndExecute).toHaveBeenCalledTimes(1)
+		expect(spyFindHooksAndExecute).toHaveBeenCalledWith({
+			operationType: hooks.OperationType.BeforeDelete,
+			className: '_User',
+			data: [],
+			user: {},
+		})
 
 		expect(deletedObjects).toEqual([
 			{

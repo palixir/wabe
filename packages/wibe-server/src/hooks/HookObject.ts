@@ -22,7 +22,7 @@ export class HookObject<
 		operationType: OperationType
 	}) {
 		this.user = user
-		this.data = data
+		this.data = Object.assign({}, data)
 		this.className = className
 		this.operationType = operationType
 	}
