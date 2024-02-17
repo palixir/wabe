@@ -429,11 +429,11 @@ describe('Mongo adapter', () => {
 		expect(objects2.length).toEqual(2)
 		expect(objects2).toEqual([
 			{
-				id: expect.anything(),
+				id: expect.any(String),
 				name: 'John1',
 			},
 			{
-				id: expect.anything(),
+				id: expect.any(String),
 				name: 'John2',
 			},
 		])
@@ -446,12 +446,12 @@ describe('Mongo adapter', () => {
 		expect(objects3.length).toEqual(2)
 		expect(objects3).toEqual([
 			{
-				id: expect.anything(),
+				id: expect.any(String),
 				name: 'John1',
 				age: 20,
 			},
 			{
-				id: expect.anything(),
+				id: expect.any(String),
 				name: 'John2',
 				age: 20,
 			},
@@ -497,12 +497,12 @@ describe('Mongo adapter', () => {
 			}),
 		).toEqual([
 			{
-				id: expect.anything(),
+				id: expect.any(String),
 				name: 'John1',
 				age: 20,
 			},
 			{
-				id: expect.anything(),
+				id: expect.any(String),
 				name: 'John2',
 				age: 20,
 			},
@@ -525,7 +525,7 @@ describe('Mongo adapter', () => {
 			}),
 		).toEqual([
 			{
-				id: expect.anything(),
+				id: expect.any(String),
 				name: 'John1',
 				age: 20,
 			},
@@ -549,7 +549,7 @@ describe('Mongo adapter', () => {
 			}),
 		).toEqual([
 			{
-				id: expect.anything(),
+				id: expect.any(String),
 				name: 'John1',
 				age: 20,
 			},
@@ -582,7 +582,7 @@ describe('Mongo adapter', () => {
 			}),
 		).toEqual([
 			{
-				id: expect.anything(),
+				id: expect.any(String),
 				name: 'John1',
 				age: 20,
 			},
@@ -608,7 +608,7 @@ describe('Mongo adapter', () => {
 			}),
 		).toEqual([
 			{
-				id: expect.anything(),
+				id: expect.any(String),
 				name: 'John2',
 				age: 20,
 			},
@@ -635,12 +635,12 @@ describe('Mongo adapter', () => {
 			}),
 		).toEqual([
 			{
-				id: expect.anything(),
+				id: expect.any(String),
 				name: 'John1',
 				age: 20,
 			},
 			{
-				id: expect.anything(),
+				id: expect.any(String),
 				name: 'John2',
 				age: 20,
 			},
@@ -657,12 +657,12 @@ describe('Mongo adapter', () => {
 			}),
 		).toEqual([
 			{
-				id: expect.anything(),
+				id: expect.any(String),
 				name: 'John1',
 				age: 20,
 			},
 			{
-				id: expect.anything(),
+				id: expect.any(String),
 				name: 'John2',
 				age: 20,
 			},
@@ -694,7 +694,7 @@ describe('Mongo adapter', () => {
 		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
 			operationType: hooks.OperationType.BeforeInsert,
 			className: '_User',
-			data: [
+			fields: [
 				{
 					name: 'Lucas',
 					age: 23,
@@ -706,7 +706,7 @@ describe('Mongo adapter', () => {
 		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
 			operationType: hooks.OperationType.AfterInsert,
 			className: '_User',
-			data: [
+			fields: [
 				{
 					name: 'Lucas',
 					age: 23,
@@ -715,7 +715,7 @@ describe('Mongo adapter', () => {
 			user: {},
 		})
 
-		expect(insertedObject).toEqual({ age: 23, id: expect.anything() })
+		expect(insertedObject).toEqual({ age: 23, id: expect.any(String) })
 
 		const insertedObject2 = await mongoAdapter.createObject({
 			className: '_User',
@@ -729,7 +729,7 @@ describe('Mongo adapter', () => {
 
 		expect(insertedObject2).toEqual({
 			age: 24,
-			id: expect.anything(),
+			id: expect.any(String),
 			name: 'Lucas2',
 		})
 	})
@@ -755,7 +755,7 @@ describe('Mongo adapter', () => {
 		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
 			operationType: hooks.OperationType.BeforeInsert,
 			className: '_User',
-			data: [
+			fields: [
 				{
 					name: 'Lucas3',
 					age: 23,
@@ -771,7 +771,7 @@ describe('Mongo adapter', () => {
 		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
 			operationType: hooks.OperationType.AfterInsert,
 			className: '_User',
-			data: [
+			fields: [
 				{
 					name: 'Lucas3',
 					age: 23,
@@ -786,11 +786,11 @@ describe('Mongo adapter', () => {
 
 		expect(insertedObjects).toEqual([
 			{
-				id: expect.anything(),
+				id: expect.any(String),
 				name: 'Lucas3',
 			},
 			{
-				id: expect.anything(),
+				id: expect.any(String),
 				name: 'Lucas4',
 			},
 		])
@@ -815,12 +815,12 @@ describe('Mongo adapter', () => {
 
 		expect(insertedObjects).toEqual([
 			{
-				id: expect.anything(),
+				id: expect.any(String),
 				name: 'Lucas3',
 				age: 23,
 			},
 			{
-				id: expect.anything(),
+				id: expect.any(String),
 				name: 'Lucas4',
 				age: 24,
 			},
@@ -857,7 +857,7 @@ describe('Mongo adapter', () => {
 		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
 			operationType: hooks.OperationType.BeforeUpdate,
 			className: '_User',
-			data: [
+			fields: [
 				{
 					name: 'Doe',
 				},
@@ -867,7 +867,7 @@ describe('Mongo adapter', () => {
 		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
 			operationType: hooks.OperationType.AfterUpdate,
 			className: '_User',
-			data: [
+			fields: [
 				{
 					name: 'Doe',
 				},
@@ -877,7 +877,7 @@ describe('Mongo adapter', () => {
 
 		expect(updatedObject).toEqual({
 			name: 'Doe',
-			id: expect.anything(),
+			id: expect.any(String),
 		})
 
 		const updatedObject2 = await mongoAdapter.updateObject({
@@ -890,8 +890,10 @@ describe('Mongo adapter', () => {
 
 		if (!updatedObject2) fail()
 
+		console.log(updatedObject2.id)
+
 		expect(updatedObject2).toEqual({
-			id: expect.anything(),
+			id: expect.any(String),
 			name: 'Doe',
 			age: 20,
 		})
@@ -931,7 +933,7 @@ describe('Mongo adapter', () => {
 		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
 			operationType: hooks.OperationType.BeforeUpdate,
 			className: '_User',
-			data: [
+			fields: [
 				{
 					age: 21,
 				},
@@ -941,7 +943,7 @@ describe('Mongo adapter', () => {
 		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
 			operationType: hooks.OperationType.AfterUpdate,
 			className: '_User',
-			data: [
+			fields: [
 				{
 					age: 21,
 				},
@@ -951,7 +953,7 @@ describe('Mongo adapter', () => {
 
 		expect(updatedObjects).toEqual([
 			{
-				id: expect.anything(),
+				id: expect.any(String),
 				name: 'Lucas',
 				age: 21,
 			},
@@ -969,12 +971,12 @@ describe('Mongo adapter', () => {
 
 		expect(updatedObjects2).toEqual([
 			{
-				id: expect.anything(),
+				id: expect.any(String),
 				name: 'Lucas',
 				age: 23,
 			},
 			{
-				id: expect.anything(),
+				id: expect.any(String),
 				name: 'Lucas1',
 				age: 23,
 			},
@@ -1007,7 +1009,7 @@ describe('Mongo adapter', () => {
 
 		expect(updatedObjects).toEqual([
 			{
-				id: expect.anything(),
+				id: expect.any(String),
 				age: 20,
 			},
 		])
@@ -1042,18 +1044,18 @@ describe('Mongo adapter', () => {
 		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
 			operationType: hooks.OperationType.BeforeDelete,
 			className: '_User',
-			data: [],
+			fields: [],
 			user: {},
 		})
 		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
 			operationType: hooks.OperationType.AfterDelete,
 			className: '_User',
-			data: [],
+			fields: [],
 			user: {},
 		})
 
 		expect(deletedObject).toEqual({
-			id: expect.anything(),
+			id: expect.any(String),
 			name: 'John',
 			age: 20,
 		})
@@ -1103,24 +1105,24 @@ describe('Mongo adapter', () => {
 		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
 			operationType: hooks.OperationType.BeforeDelete,
 			className: '_User',
-			data: [],
+			fields: [],
 			user: {},
 		})
 		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
 			operationType: hooks.OperationType.AfterDelete,
 			className: '_User',
-			data: [],
+			fields: [],
 			user: {},
 		})
 
 		expect(deletedObjects).toEqual([
 			{
-				id: expect.anything(),
+				id: expect.any(String),
 				name: 'John',
 				age: 18,
 			},
 			{
-				id: expect.anything(),
+				id: expect.any(String),
 				name: 'Lucas',
 				age: 18,
 			},

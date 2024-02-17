@@ -27,7 +27,7 @@ describe('Hooks', () => {
 
 		await index.findHooksAndExecute({
 			className: '_User',
-			data: [
+			fields: [
 				{
 					name: 'tata',
 				},
@@ -68,7 +68,7 @@ describe('Hooks', () => {
 
 		await index.findHooksAndExecute({
 			className: '_User',
-			data: [
+			fields: [
 				{
 					name: 'tata',
 				},

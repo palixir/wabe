@@ -71,12 +71,14 @@ export const findHooksAndExecute = async <
 >({
 	className,
 	operationType,
-	data,
+	fields,
+	id,
 	user,
 }: {
 	className: T
 	operationType: OperationType
-	data: Array<Record<K, any>>
+	fields: Array<Record<K, any>>
+	id?: string
 	user: _User
 }) => {
 	const listOfPriorities =
@@ -90,10 +92,10 @@ export const findHooksAndExecute = async <
 
 	// We need to keep the order of the data but we need to execute the hooks in parallel
 	const computedResult = await Promise.all(
-		data.map(async (dataForOneObject, index) => {
+		fields.map(async (dataForOneObject, index) => {
 			const hookObject = new HookObject({
 				className,
-				data: dataForOneObject,
+				object: { fields: dataForOneObject, id },
 				operationType,
 				user,
 			})
@@ -112,7 +114,7 @@ export const findHooksAndExecute = async <
 				)
 			}, Promise.resolve())
 
-			return { index, data: hookObject.getData() }
+			return { index, data: hookObject.getObject().fields }
 		}),
 	)
 

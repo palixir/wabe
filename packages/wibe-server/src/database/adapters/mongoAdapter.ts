@@ -243,7 +243,7 @@ export class MongoAdapter implements DatabaseAdapter {
 
 		const arrayOfComputedData = await findHooksAndExecute({
 			className,
-			data,
+			fields: data,
 			user: context.user,
 			operationType: OperationType.BeforeInsert,
 		})
@@ -253,7 +253,7 @@ export class MongoAdapter implements DatabaseAdapter {
 		await findHooksAndExecute({
 			className,
 			user: context.user,
-			data,
+			fields: data,
 			operationType: OperationType.AfterInsert,
 		})
 
@@ -315,7 +315,7 @@ export class MongoAdapter implements DatabaseAdapter {
 		const arrayOfComputedData = await findHooksAndExecute({
 			className,
 			user: context.user,
-			data: [data],
+			fields: [data],
 			operationType: OperationType.BeforeUpdate,
 		})
 
@@ -334,7 +334,7 @@ export class MongoAdapter implements DatabaseAdapter {
 		await findHooksAndExecute({
 			className,
 			user: context.user,
-			data: [data],
+			fields: [data],
 			operationType: OperationType.AfterUpdate,
 		})
 
@@ -400,7 +400,7 @@ export class MongoAdapter implements DatabaseAdapter {
 		await findHooksAndExecute({
 			className,
 			user: context.user,
-			data: [],
+			fields: [],
 			operationType: OperationType.BeforeDelete,
 		})
 
@@ -409,7 +409,7 @@ export class MongoAdapter implements DatabaseAdapter {
 		await findHooksAndExecute({
 			className,
 			user: context.user,
-			data: [],
+			fields: [],
 			operationType: OperationType.AfterDelete,
 		})
 

@@ -8,7 +8,7 @@ describe('HookObject', () => {
 
 		const hookObject = new HookObject({
 			className: '_User',
-			data: userData,
+			object: { fields: userData },
 			user: {
 				id: '1',
 				email: 'email@test.fr',
@@ -27,7 +27,7 @@ describe('HookObject', () => {
 
 		const hookObject = new HookObject({
 			className: '_User',
-			data: userData,
+			object: { fields: userData },
 			user: {
 				id: '1',
 				email: 'email@test.fr',
@@ -46,7 +46,7 @@ describe('HookObject', () => {
 
 		const hookObject = new HookObject({
 			className: '_User',
-			data: userData,
+			object: { fields: userData },
 			operationType: OperationType.BeforeInsert,
 			user: {
 				id: '1',
@@ -65,7 +65,7 @@ describe('HookObject', () => {
 
 		const hookObject = new HookObject({
 			className: '_User',
-			data: userData,
+			object: { fields: userData },
 			operationType: OperationType.AfterInsert,
 			user: {
 				id: '1',
