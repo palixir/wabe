@@ -101,6 +101,7 @@ input StringWhereInput {
   notIn: [String]
 }
 
+"""User class"""
 input _UserWhereInput {
   name: StringWhereInput
   age: IntWhereInput
@@ -243,7 +244,7 @@ input PostUpdateInput {
 }
 
 input PostUpdateFieldsInput {
-  name: String!
+  name: String
 }
 
 input PostsUpdateInput {
@@ -265,6 +266,7 @@ input _UserCreateInput {
   fields: _UserInput
 }
 
+"""User class"""
 input _UserInput {
   name: String
   age: Int
@@ -311,14 +313,17 @@ input _UserUpdateInput {
   fields: _UserUpdateFieldsInput
 }
 
+"""User class"""
 input _UserUpdateFieldsInput {
   name: String
   age: Int
   isCool: Boolean
-  email: Email!
+  email: Email
   birthDate: Date
   phone: Phone
   role: Role
+  address: AddressUpdateFieldsInput
+  object: ObjectUpdateFieldsInput
   provider: AuthenticationProvider
   password: String
   verifiedEmail: Boolean
@@ -326,6 +331,22 @@ input _UserUpdateFieldsInput {
   refreshToken: String
   createdAt: Date
   updatedAt: Date
+}
+
+input AddressUpdateFieldsInput {
+  address1: String
+  address2: String
+  postalCode: Int
+  city: String
+  country: String
+}
+
+input ObjectUpdateFieldsInput {
+  objectOfObject: ObjectOfObjectUpdateFieldsInput
+}
+
+input ObjectOfObjectUpdateFieldsInput {
+  name: String
 }
 
 input _UsersUpdateInput {

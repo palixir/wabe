@@ -1,4 +1,3 @@
-import { pluralize } from 'wibe-pluralize'
 import {
 	GraphQLEnumType,
 	GraphQLFieldConfig,
@@ -12,13 +11,7 @@ import {
 	GraphQLOutputType,
 	GraphQLScalarType,
 } from 'graphql'
-import {
-	ClassInterface,
-	MutationResolver,
-	QueryResolver,
-	Schema,
-	TypeField,
-} from './Schema'
+import { pluralize } from 'wibe-pluralize'
 import {
 	mutationToCreateMultipleObjects,
 	mutationToCreateObject,
@@ -30,14 +23,21 @@ import {
 	queryForOneObject,
 } from '../graphql'
 import {
-	getDefaultInputType,
-	getGraphqlType,
+	ClassInterface,
+	MutationResolver,
+	QueryResolver,
+	Schema,
+	TypeField,
+} from './Schema'
+import {
 	getConnectionType,
-	getUpdateInputType,
-	getWhereInputType,
-	wrapGraphQLTypeIn,
-	parseWibeObject,
+	getGraphqlObjectFromWibeInputObject,
+	getGraphqlObjectFromWibeWhereInputObject,
+	getGraphqlObjectFromWibeUpdateInputObject,
 	getGraphqlObjectFromWibeObject,
+	getGraphqlType,
+	parseWibeObject,
+	wrapGraphQLTypeIn,
 } from './utils'
 
 // This class is tested in e2e test in graphql folder
@@ -53,7 +53,19 @@ export class WibeGraphQLSchema {
 
 		const scalars = this.createScalars()
 		const enums = this.createEnums()
+
+		const allObjects = this.createAllObjects({ scalars, enums })
+
 		const objects = this.createObjects({ scalars, enums })
+		const inputObjects = this.createInputObjects({ scalars, enums })
+		const updateInputObjects = this.createUpdateInputObjects({
+			scalars,
+			enums,
+		})
+		const whereInputObjects = this.createWhereInputObjects({
+			scalars,
+			enums,
+		})
 
 		const queriesAndMutationsAndInput = this.schemas.schema.class.reduce(
 			(previous, current) => {
@@ -61,32 +73,19 @@ export class WibeGraphQLSchema {
 				const className = current.name.replace(' ', '')
 				const fieldsOfObjectKeys = Object.keys(fields)
 
-				const defaultInputType = getDefaultInputType({
-					fields,
-					fieldsOfObjectKeys,
-					objects,
-					scalars,
-					enums,
-					className,
-				})
+				const defaultInputType = inputObjects.find((inputObject) =>
+					inputObject.name.includes(className),
+				)
 
-				const defaultUpdateInputType = getUpdateInputType({
-					fields,
-					fieldsOfObjectKeys,
-					objects,
-					scalars,
-					enums,
-					className,
-				})
+				const defaultUpdateInputType = updateInputObjects.find(
+					(updateInputObject) =>
+						updateInputObject.name.includes(className),
+				)
 
-				const whereInputType = getWhereInputType({
-					fields,
-					fieldsOfObjectKeys,
-					objects,
-					scalars,
-					enums,
-					className,
-				})
+				const whereInputType = whereInputObjects.find(
+					(whereInputObject) =>
+						whereInputObject.name.includes(className),
+				)
 
 				const object = objects.find((o) => o.name === className)
 				if (!object) throw new Error(`Object ${className} not found`)
@@ -236,6 +235,139 @@ export class WibeGraphQLSchema {
 		})
 	}
 
+	createInputObject({
+		wibeClass,
+		scalars,
+		enums,
+	}: {
+		wibeClass: ClassInterface
+		scalars: GraphQLScalarType[]
+		enums: GraphQLEnumType[]
+	}) {
+		const { name, fields, description } = wibeClass
+
+		const nameWithoutSpace = name.replace(' ', '')
+
+		const graphqlFields = getGraphqlObjectFromWibeInputObject({
+			scalars,
+			enums,
+			object: fields,
+		})
+
+		const fieldsKey = Object.keys(graphqlFields)
+
+		const graphqlFieldsOfTheObject = fieldsKey.reduce(
+			(acc, key) => {
+				const field = graphqlFields[key]
+
+				acc[key] = field
+
+				return acc
+			},
+			{} as Record<string, GraphQLFieldConfig<any, any, any>>,
+		)
+
+		const inputObject = new GraphQLInputObjectType({
+			name: `${nameWithoutSpace}Input`,
+			description,
+			fields: graphqlFieldsOfTheObject,
+		})
+
+		return inputObject
+	}
+
+	createUpdateInputObject({
+		wibeClass,
+		scalars,
+		enums,
+	}: {
+		wibeClass: ClassInterface
+		scalars: GraphQLScalarType[]
+		enums: GraphQLEnumType[]
+	}) {
+		const { name, fields, description } = wibeClass
+
+		const nameWithoutSpace = name.replace(' ', '')
+
+		const graphqlFields = getGraphqlObjectFromWibeUpdateInputObject({
+			scalars,
+			enums,
+			object: fields,
+		})
+
+		const fieldsKey = Object.keys(graphqlFields)
+
+		const graphqlFieldsOfTheObject = fieldsKey.reduce(
+			(acc, key) => {
+				const field = graphqlFields[key]
+
+				acc[key] = field
+
+				return acc
+			},
+			{} as Record<string, GraphQLFieldConfig<any, any, any>>,
+		)
+
+		const inputObject = new GraphQLInputObjectType({
+			name: `${nameWithoutSpace}UpdateFieldsInput`,
+			description,
+			fields: graphqlFieldsOfTheObject,
+		})
+
+		return inputObject
+	}
+
+	createWhereInputObject({
+		wibeClass,
+		scalars,
+		enums,
+	}: {
+		wibeClass: ClassInterface
+		scalars: GraphQLScalarType[]
+		enums: GraphQLEnumType[]
+	}) {
+		const { name, fields, description } = wibeClass
+
+		const nameWithoutSpace = name.replace(' ', '')
+
+		const graphqlFields = getGraphqlObjectFromWibeWhereInputObject({
+			scalars,
+			enums,
+			object: fields,
+		})
+
+		const fieldsKey = Object.keys(graphqlFields)
+
+		const graphqlFieldsOfTheObject = fieldsKey.reduce(
+			(acc, key) => {
+				const field = graphqlFields[key]
+
+				acc[key] = field
+
+				return acc
+			},
+			{} as Record<string, GraphQLFieldConfig<any, any, any>>,
+		)
+
+		const inputObject = new GraphQLInputObjectType({
+			name: `${nameWithoutSpace}WhereInput`,
+			description,
+			fields: () => ({
+				...graphqlFieldsOfTheObject,
+				...{
+					OR: {
+						type: new GraphQLList(inputObject),
+					},
+					AND: {
+						type: new GraphQLList(inputObject),
+					},
+				},
+			}),
+		})
+
+		return inputObject
+	}
+
 	createOutputObject({
 		object,
 		wibeClass,
@@ -258,6 +390,44 @@ export class WibeGraphQLSchema {
 		})
 	}
 
+	createAllObjects({
+		scalars,
+		enums,
+	}: {
+		scalars: GraphQLScalarType[]
+		enums: GraphQLEnumType[]
+	}) {
+		return this.schemas.schema.class.map((wibeClass) => {
+			const object = this.createObject({ scalars, enums, wibeClass })
+			const outputObject = this.createOutputObject({ object, wibeClass })
+			const inputObject = this.createInputObject({
+				scalars,
+				enums,
+				wibeClass,
+			})
+			const updateInputObject = this.createUpdateInputObject({
+				scalars,
+				enums,
+				wibeClass,
+			})
+			const whereInputObject = this.createWhereInputObject({
+				scalars,
+				enums,
+				wibeClass,
+			})
+
+			return {
+				[wibeClass]: {
+					object,
+					outputObject,
+					inputObject,
+					updateInputObject,
+					whereInputObject,
+				},
+			}
+		})
+	}
+
 	createObjects({
 		scalars,
 		enums,
@@ -270,6 +440,54 @@ export class WibeGraphQLSchema {
 			const outputObject = this.createOutputObject({ object, wibeClass })
 
 			return [object, outputObject]
+		})
+	}
+
+	createInputObjects({
+		scalars,
+		enums,
+	}: {
+		scalars: GraphQLScalarType[]
+		enums: GraphQLEnumType[]
+	}) {
+		return this.schemas.schema.class.flatMap((wibeClass) => {
+			return this.createInputObject({
+				scalars,
+				enums,
+				wibeClass,
+			})
+		})
+	}
+
+	createUpdateInputObjects({
+		scalars,
+		enums,
+	}: {
+		scalars: GraphQLScalarType[]
+		enums: GraphQLEnumType[]
+	}) {
+		return this.schemas.schema.class.flatMap((wibeClass) => {
+			return this.createUpdateInputObject({
+				scalars,
+				enums,
+				wibeClass,
+			})
+		})
+	}
+
+	createWhereInputObjects({
+		scalars,
+		enums,
+	}: {
+		scalars: GraphQLScalarType[]
+		enums: GraphQLEnumType[]
+	}) {
+		return this.schemas.schema.class.flatMap((wibeClass) => {
+			return this.createWhereInputObject({
+				scalars,
+				enums,
+				wibeClass,
+			})
 		})
 	}
 
