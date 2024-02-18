@@ -28,7 +28,10 @@ import {
 	Schema,
 	TypeField,
 } from './Schema'
-import { WibeGraphQLParser, WibeGraphQLParserFactory } from './utils'
+import {
+	WibeGraphQLParser,
+	WibeGraphQLParserFactory,
+} from './wibeGraphqlParser'
 import { WibeSchemaTypes } from '../../generated/wibe'
 
 // This class is tested in e2e test in graphql folder
