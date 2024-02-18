@@ -72,7 +72,7 @@ describe('GraphqlSchema utils', () => {
 			wibeObject: {
 				description: 'A simple object',
 				required: true,
-				object: {
+				objectToParse: {
 					name: 'SimpleObject',
 					fields: {
 						name: { type: 'String', required: true },
@@ -105,7 +105,7 @@ describe('GraphqlSchema utils', () => {
 			wibeObject: {
 				description: 'A recursive object',
 				required: true,
-				object: {
+				objectToParse: {
 					name: 'RecursiveObject',
 					fields: {
 						subObject: {

@@ -42,19 +42,17 @@ type WibeDefaultTypesWithoutArrayAndObject = Exclude<
 	'Array'
 >
 
-type ParseObjectCallback = ({
-	wibeObject: { required, description, object },
-	scalars,
-	enums,
-}: {
+type ParseObjectOptions = {
 	wibeObject: {
 		required?: boolean
 		description?: string
-		object: ClassInterface
+		objectToParse: ClassInterface
 	}
 	scalars: GraphQLScalarType[]
 	enums: GraphQLEnumType[]
-}) => any
+}
+
+type ParseObjectCallback = (options: ParseObjectOptions) => any
 
 export const templateScalarType: Record<
 	WibeDefaultTypesWithoutArrayAndObject,
@@ -162,7 +160,7 @@ const _getGraphqlFields = ({
 						wibeObject: {
 							required: currentField.required,
 							description: currentField.description,
-							object: currentField.object,
+							objectToParse: currentField.object,
 						},
 						scalars,
 						enums,
@@ -195,27 +193,19 @@ const _getGraphqlFields = ({
 }
 
 export const parseWibeObject = ({
-	wibeObject: { required, description, object },
+	wibeObject: { required, description, objectToParse },
 	scalars,
 	enums,
-}: {
-	wibeObject: {
-		required?: boolean
-		description?: string
-		object: ClassInterface
-	}
-	scalars: GraphQLScalarType[]
-	enums: GraphQLEnumType[]
-}) => {
+}: ParseObjectOptions) => {
 	const graphqlFields = _getGraphqlFields({
-		object,
+		object: objectToParse,
 		scalars,
 		enums,
 		callBackForObjectType: parseWibeObject,
 	})
 
 	const graphqlObject = new GraphQLObjectType({
-		name: object.name,
+		name: objectToParse.name,
 		description: description,
 		fields: graphqlFields,
 	})
@@ -224,27 +214,19 @@ export const parseWibeObject = ({
 }
 
 export const parseWibeInputObject = ({
-	wibeObject: { required, description, object },
+	wibeObject: { required, description, objectToParse },
 	scalars,
 	enums,
-}: {
-	wibeObject: {
-		required?: boolean
-		description?: string
-		object: ClassInterface
-	}
-	scalars: GraphQLScalarType[]
-	enums: GraphQLEnumType[]
-}) => {
+}: ParseObjectOptions) => {
 	const graphqlFields = _getGraphqlFields({
-		object,
+		object: objectToParse,
 		scalars,
 		enums,
 		callBackForObjectType: parseWibeInputObject,
 	})
 
 	const graphqlObject = new GraphQLInputObjectType({
-		name: `${object.name}Input`,
+		name: `${objectToParse.name}Input`,
 		description: description,
 		fields: graphqlFields,
 	})
@@ -253,20 +235,12 @@ export const parseWibeInputObject = ({
 }
 
 export const parseWibeUpdateInputObject = ({
-	wibeObject: { required, description, object },
+	wibeObject: { required, description, objectToParse },
 	scalars,
 	enums,
-}: {
-	wibeObject: {
-		required?: boolean
-		description?: string
-		object: ClassInterface
-	}
-	scalars: GraphQLScalarType[]
-	enums: GraphQLEnumType[]
-}) => {
+}: ParseObjectOptions) => {
 	const graphqlFields = _getGraphqlFields({
-		object,
+		object: objectToParse,
 		scalars,
 		enums,
 		callBackForObjectType: parseWibeUpdateInputObject,
@@ -274,7 +248,7 @@ export const parseWibeUpdateInputObject = ({
 	})
 
 	const graphqlObject = new GraphQLInputObjectType({
-		name: `${object.name}UpdateFieldsInput`,
+		name: `${objectToParse.name}UpdateFieldsInput`,
 		description: description,
 		fields: graphqlFields,
 	})
@@ -283,20 +257,12 @@ export const parseWibeUpdateInputObject = ({
 }
 
 export const parseWibeWhereInputObject = ({
-	wibeObject: { required, description, object },
+	wibeObject: { required, description, objectToParse },
 	scalars,
 	enums,
-}: {
-	wibeObject: {
-		required?: boolean
-		description?: string
-		object: ClassInterface
-	}
-	scalars: GraphQLScalarType[]
-	enums: GraphQLEnumType[]
-}) => {
+}: ParseObjectOptions) => {
 	const graphqlFields = _getGraphqlFields({
-		object,
+		object: objectToParse,
 		scalars,
 		enums,
 		callBackForObjectType: parseWibeWhereInputObject,
@@ -306,7 +272,7 @@ export const parseWibeWhereInputObject = ({
 
 	// @ts-expect-error
 	const graphqlObject = new GraphQLInputObjectType({
-		name: `${object.name}WhereInput`,
+		name: `${objectToParse.name}WhereInput`,
 		description: description,
 		fields: () => ({
 			...graphqlFields,
@@ -322,71 +288,6 @@ export const parseWibeWhereInputObject = ({
 	})
 
 	return required ? new GraphQLNonNull(graphqlObject) : graphqlObject
-}
-
-const _getGraphqlObjectFactory = ({
-	object,
-	scalars,
-	enums,
-	callback,
-	forceRequiredToFalse = false,
-	isWhereType = false,
-}: {
-	object: Record<string, TypeField>
-	scalars: GraphQLScalarType[]
-	enums: GraphQLEnumType[]
-	forceRequiredToFalse?: boolean
-	isWhereType?: boolean
-	callback: ({
-		wibeObject: { required, description, object },
-		scalars,
-		enums,
-	}: {
-		wibeObject: {
-			required?: boolean
-			description?: string
-			object: ClassInterface
-		}
-		scalars: GraphQLScalarType[]
-		enums: GraphQLEnumType[]
-	}) => any
-}) => {
-	const keysOfObject = Object.keys(object)
-
-	return keysOfObject.reduce(
-		(acc, key) => {
-			const currentField = object[key]
-
-			if (currentField.type === 'Object') {
-				acc[key] = {
-					type: callback({
-						wibeObject: currentField,
-						scalars,
-						enums,
-					}),
-				}
-
-				return acc
-			}
-
-			const graphqlType = getGraphqlType({
-				field: currentField,
-				scalars,
-				enums,
-				isWhereType,
-			})
-
-			acc[key] = {
-				type:
-					currentField.required && !forceRequiredToFalse
-						? new GraphQLNonNull(graphqlType)
-						: graphqlType,
-			}
-
-			return acc
-		},
-		{} as Record<string, any>,
-	)
 }
 
 const _graphqlObjectFactory: Record<
@@ -430,6 +331,7 @@ export const WibeGraphQLParser = ({
 	enums: GraphQLEnumType[]
 	graphqlObjectType: GraphqlObjectType
 }) => {
+	// Get Graphql object from a schema fields passed in WibeGraphqlParser
 	const getGraphqlObject = () => {
 		const { callback, forceRequiredToFalse, isWhereType } =
 			_graphqlObjectFactory[graphqlObjectType]
@@ -443,7 +345,10 @@ export const WibeGraphQLParser = ({
 				if (currentField.type === 'Object') {
 					acc[key] = {
 						type: callback({
-							wibeObject: currentField,
+							wibeObject: {
+								...currentField,
+								objectToParse: currentField.object,
+							},
 							scalars,
 							enums,
 						}),
