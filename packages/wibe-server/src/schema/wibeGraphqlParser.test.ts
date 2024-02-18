@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test'
-import { WibeGraphQLParser } from './utils'
+import { WibeGraphQLParser } from './wibeGraphqlParser'
 import {
 	GraphQLNonNull,
 	GraphQLNullableType,
