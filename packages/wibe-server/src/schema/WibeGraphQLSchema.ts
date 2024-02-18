@@ -28,7 +28,7 @@ import {
 	Schema,
 	TypeField,
 } from './Schema'
-import { WibeGraphQLParser, getGraphqlType } from './utils'
+import { WibeGraphQLParser } from './utils'
 import { WibeSchemaTypes } from '../../generated/wibe'
 
 // This class is tested in e2e test in graphql folder
@@ -461,10 +461,8 @@ export class WibeGraphQLSchema {
 					fields: graphqlInputFields,
 				})
 
-				const graphqlType = getGraphqlType({
+				const graphqlType = wibeGraphqlParser.getGraphqlType({
 					field: currentMutation as TypeField,
-					scalars,
-					enums,
 				}) as GraphQLOutputType
 
 				acc[currentKey] = {
@@ -506,10 +504,8 @@ export class WibeGraphQLSchema {
 
 				const graphqlArgs = wibeGraphqlParser.getGraphqlObject()
 
-				const graphqlType = getGraphqlType({
+				const graphqlType = wibeGraphqlParser.getGraphqlType({
 					field: currentQuery as TypeField,
-					scalars,
-					enums,
 				}) as GraphQLOutputType
 
 				acc[currentKey] = {

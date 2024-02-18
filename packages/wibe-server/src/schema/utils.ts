@@ -100,37 +100,6 @@ const _getGraphqlTypeFromTemplate = ({ field }: { field: TypeField }) => {
 	]
 }
 
-export const getGraphqlType = ({
-	scalars,
-	enums,
-	field,
-	isWhereType = false,
-}: {
-	field: TypeField
-	scalars: GraphQLScalarType[]
-	enums: GraphQLEnumType[]
-	isWhereType?: boolean
-}) => {
-	const scalarExist = scalars.find((scalar) => scalar.name === field.type)
-	const enumExist = enums.find((e) => e.name === field.type)
-
-	if (isWhereType) {
-		if (!Object.keys(templateWhereInput).includes(field.type))
-			return AnyWhereInput
-
-		return templateWhereInput[field.type as WibeDefaultTypesWithoutObject]
-	}
-
-	if (scalarExist) return scalarExist
-	if (enumExist) return enumExist
-
-	const graphqlType = _getGraphqlTypeFromTemplate({ field })
-
-	if (!graphqlType) throw new Error(`${field.type} not exist in schema`)
-
-	return graphqlType
-}
-
 export const WibeGraphQLParser = ({
 	schemaFields,
 	scalars,
@@ -142,6 +111,9 @@ export const WibeGraphQLParser = ({
 	enums: GraphQLEnumType[]
 	graphqlObjectType: GraphqlObjectType
 }) => {
+	/*
+	Get graphql fields from a wibe object
+	*/
 	const _getGraphqlFields = ({
 		objectToParse,
 		callBackForObjectType,
@@ -175,8 +147,6 @@ export const WibeGraphQLParser = ({
 
 				const graphqlType = getGraphqlType({
 					field: currentField,
-					scalars,
-					enums,
 					isWhereType,
 				})
 
@@ -195,6 +165,11 @@ export const WibeGraphQLParser = ({
 		return graphqlFields
 	}
 
+	// ------------------ Parsers ------------------
+
+	/*
+	Parse simple object
+	*/
 	const _parseWibeObject = ({
 		wibeObject: { required, description, objectToParse },
 	}: ParseObjectOptions) => {
@@ -212,6 +187,9 @@ export const WibeGraphQLParser = ({
 		return required ? new GraphQLNonNull(graphqlObject) : graphqlObject
 	}
 
+	/*
+	Parse input object
+	*/
 	const _parseWibeInputObject = ({
 		wibeObject: { required, description, objectToParse },
 	}: ParseObjectOptions) => {
@@ -229,6 +207,9 @@ export const WibeGraphQLParser = ({
 		return required ? new GraphQLNonNull(graphqlObject) : graphqlObject
 	}
 
+	/*
+	Parse update input object
+	*/
 	const _parseWibeUpdateInputObject = ({
 		wibeObject: { required, description, objectToParse },
 	}: ParseObjectOptions) => {
@@ -247,6 +228,9 @@ export const WibeGraphQLParser = ({
 		return required ? new GraphQLNonNull(graphqlObject) : graphqlObject
 	}
 
+	/*
+	Parse where input object
+	*/
 	const _parseWibeWhereInputObject = ({
 		wibeObject: { required, description, objectToParse },
 	}: ParseObjectOptions) => {
@@ -307,6 +291,38 @@ export const WibeGraphQLParser = ({
 		},
 	}
 
+	/*
+	Get the right graphql type for a field
+	*/
+	const getGraphqlType = ({
+		field,
+		isWhereType = false,
+	}: {
+		field: TypeField
+		isWhereType?: boolean
+	}) => {
+		const scalarExist = scalars.find((scalar) => scalar.name === field.type)
+		const enumExist = enums.find((e) => e.name === field.type)
+
+		if (isWhereType) {
+			if (!Object.keys(templateWhereInput).includes(field.type))
+				return AnyWhereInput
+
+			return templateWhereInput[
+				field.type as WibeDefaultTypesWithoutObject
+			]
+		}
+
+		if (scalarExist) return scalarExist
+		if (enumExist) return enumExist
+
+		const graphqlType = _getGraphqlTypeFromTemplate({ field })
+
+		if (!graphqlType) throw new Error(`${field.type} not exist in schema`)
+
+		return graphqlType
+	}
+
 	// Get Graphql object from a schema fields passed in WibeGraphqlParser
 	const getGraphqlObject = () => {
 		const { callback, forceRequiredToFalse, isWhereType } =
@@ -333,8 +349,6 @@ export const WibeGraphQLParser = ({
 
 				const graphqlType = getGraphqlType({
 					field: currentField,
-					scalars,
-					enums,
 					isWhereType,
 				})
 
@@ -352,6 +366,7 @@ export const WibeGraphQLParser = ({
 	}
 
 	return {
+		getGraphqlType,
 		getGraphqlObject,
 		_parseWibeObject,
 		_parseWibeInputObject,
