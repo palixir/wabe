@@ -15,14 +15,6 @@ type Post {
   name: String!
 }
 
-type PostConnection {
-  edges: [PostEdge]
-}
-
-type PostEdge {
-  node: Post!
-}
-
 """User class"""
 type _User {
   id: ID!
@@ -66,14 +58,6 @@ type ObjectOfObject {
   name: String
 }
 
-type _UserConnection {
-  edges: [_UserEdge]
-}
-
-type _UserEdge {
-  node: _User!
-}
-
 type Query {
   post(id: ID): Post
   posts(where: PostWhereInput, offset: Int, limit: Int): PostConnection!
@@ -88,6 +72,14 @@ type Query {
   helloWorld(name: String!): String
 }
 
+type PostConnection {
+  edges: [PostEdge]
+}
+
+type PostEdge {
+  node: Post!
+}
+
 input PostWhereInput {
   name: StringWhereInput
   OR: [PostWhereInput]
@@ -99,6 +91,14 @@ input StringWhereInput {
   notEqualTo: String
   in: [String]
   notIn: [String]
+}
+
+type _UserConnection {
+  edges: [_UserEdge]
+}
+
+type _UserEdge {
+  node: _User!
 }
 
 """User class"""

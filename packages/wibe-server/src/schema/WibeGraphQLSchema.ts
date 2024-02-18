@@ -4,11 +4,9 @@ import {
 	GraphQLID,
 	GraphQLInputObjectType,
 	GraphQLInt,
-	GraphQLInterfaceType,
 	GraphQLList,
 	GraphQLNonNull,
 	GraphQLObjectType,
-	GraphQLOutputType,
 	GraphQLScalarType,
 } from 'graphql'
 import { pluralize } from 'wibe-pluralize'
@@ -56,8 +54,6 @@ export class WibeGraphQLSchema {
 
 		const allObjects = this.createAllObjects({ scalars, enums })
 
-		const objects = this.createObjects({ scalars, enums })
-
 		// return {
 		// 	[wibeClass]: {
 		// 		object,
@@ -68,29 +64,28 @@ export class WibeGraphQLSchema {
 		// 	},
 		// }
 
-		const queriesAndMutationsAndInput = this.schemas.schema.class.reduce(
-			(previous, current) => {
+		const queriesMutationAndObjects = this.schemas.schema.class.reduce(
+			(acc, current) => {
 				const fields = current.fields
 				const className = current.name.replace(' ', '')
 				const fieldsOfObjectKeys = Object.keys(fields)
 
 				const {
 					[className]: {
+						object,
 						inputObject: defaultInputType,
 						updateInputObject: defaultUpdateInputType,
 						whereInputObject: whereInputType,
+						connectionObject,
 					},
 				} = allObjects.find((object) => object[className] !== undefined)
-
-				const object = objects.find((o) => o.name === className)
-				if (!object) throw new Error(`Object ${className} not found`)
 
 				// Queries
 				const defaultQueries = this.createDefaultQueriesSchema({
 					className,
 					whereInputType,
 					object,
-					allObjects: objects,
+					connectionObject,
 				})
 				const customQueries = this.createCustomQueries({
 					resolvers: current.resolvers?.queries || {},
@@ -109,7 +104,7 @@ export class WibeGraphQLSchema {
 					defaultInputType,
 					whereInputType,
 					object,
-					allObjects: objects,
+					connectionObject,
 					defaultUpdateInputType,
 				})
 
@@ -120,38 +115,42 @@ export class WibeGraphQLSchema {
 
 				// Loop to avoid O(n)² complexity of spread on accumulator
 				for (const key in defaultQueriesKeys) {
-					previous.queries[defaultQueriesKeys[key]] =
+					acc.queries[defaultQueriesKeys[key]] =
 						defaultQueries[defaultQueriesKeys[key]]
 				}
 
 				for (const key in customQueriesKeys) {
-					previous.queries[customQueriesKeys[key]] =
+					acc.queries[customQueriesKeys[key]] =
 						customQueries[customQueriesKeys[key]]
 				}
 
 				for (const key in defaultMutationsKeys) {
-					previous.mutations[defaultMutationsKeys[key]] =
+					acc.mutations[defaultMutationsKeys[key]] =
 						defaultMutations[defaultMutationsKeys[key]]
 				}
 
 				for (const key in customMutationsKeys) {
-					previous.mutations[customMutationsKeys[key]] =
+					acc.mutations[customMutationsKeys[key]] =
 						customMutations[customMutationsKeys[key]]
 				}
 
-				return previous
+				acc.objects.push(object)
+
+				return acc
 			},
-			{ queries: {}, mutations: {} } as {
+			{ queries: {}, mutations: {}, objects: [] } as {
 				queries: Record<string, GraphQLFieldConfig<any, any, any>>
 				mutations: Record<string, GraphQLFieldConfig<any, any, any>>
+				objects: Array<GraphQLObjectType>
 			},
 		)
 
 		return {
-			...queriesAndMutationsAndInput,
+			queries: queriesMutationAndObjects.queries,
+			mutations: queriesMutationAndObjects.mutations,
 			scalars,
 			enums,
-			objects,
+			objects: queriesMutationAndObjects.objects,
 		}
 	}
 
@@ -370,19 +369,21 @@ export class WibeGraphQLSchema {
 		object: GraphQLObjectType
 		wibeClass: ClassInterface
 	}) {
-		const edges = new GraphQLObjectType({
+		const edgeObject = new GraphQLObjectType({
 			name: `${wibeClass.name}Edge`,
 			fields: () => ({
 				node: { type: new GraphQLNonNull(object) },
 			}),
 		})
 
-		return new GraphQLObjectType({
+		const connectionObject = new GraphQLObjectType({
 			name: `${wibeClass.name}Connection`,
 			fields: () => ({
-				edges: { type: new GraphQLList(edges) },
+				edges: { type: new GraphQLList(edgeObject) },
 			}),
 		})
+
+		return { edgeObject, connectionObject }
 	}
 
 	createAllObjects({
@@ -394,7 +395,10 @@ export class WibeGraphQLSchema {
 	}) {
 		return this.schemas.schema.class.map((wibeClass) => {
 			const object = this.createObject({ scalars, enums, wibeClass })
-			const outputObject = this.createOutputObject({ object, wibeClass })
+			const { edgeObject, connectionObject } = this.createOutputObject({
+				object,
+				wibeClass,
+			})
 			const inputObject = this.createInputObject({
 				scalars,
 				enums,
@@ -414,27 +418,13 @@ export class WibeGraphQLSchema {
 			return {
 				[wibeClass.name]: {
 					object,
-					outputObject,
+					edgeObject,
+					connectionObject,
 					inputObject,
 					updateInputObject,
 					whereInputObject,
 				},
 			}
-		})
-	}
-
-	createObjects({
-		scalars,
-		enums,
-	}: {
-		scalars: GraphQLScalarType[]
-		enums: GraphQLEnumType[]
-	}) {
-		return this.schemas.schema.class.flatMap((wibeClass) => {
-			const object = this.createObject({ scalars, enums, wibeClass })
-			const outputObject = this.createOutputObject({ object, wibeClass })
-
-			return [object, outputObject]
 		})
 	}
 
@@ -535,12 +525,12 @@ export class WibeGraphQLSchema {
 		className,
 		whereInputType,
 		object,
-		allObjects,
+		connectionObject,
 	}: {
 		className: string
 		whereInputType: GraphQLInputObjectType
 		object: GraphQLObjectType
-		allObjects: GraphQLObjectType[]
+		connectionObject: GraphQLObjectType
 	}) {
 		const classNameInLowerCase = className.toLowerCase()
 		return {
@@ -558,9 +548,7 @@ export class WibeGraphQLSchema {
 					),
 			},
 			[pluralize(classNameInLowerCase)]: {
-				type: new GraphQLNonNull(
-					getConnectionType({ object, allObjects }),
-				),
+				type: new GraphQLNonNull(connectionObject),
 				description: object.description,
 				args: {
 					where: { type: whereInputType },
@@ -585,14 +573,14 @@ export class WibeGraphQLSchema {
 		defaultInputType,
 		defaultUpdateInputType,
 		whereInputType,
-		allObjects,
+		connectionObject,
 	}: {
 		className: string
 		defaultInputType: GraphQLInputObjectType
 		defaultUpdateInputType: GraphQLInputObjectType
 		whereInputType: GraphQLInputObjectType
 		object: GraphQLObjectType
-		allObjects: GraphQLObjectType[]
+		connectionObject: GraphQLObjectType
 	}) {
 		const createInputType = new GraphQLInputObjectType({
 			name: `${className}CreateInput`,
@@ -659,9 +647,7 @@ export class WibeGraphQLSchema {
 					),
 			},
 			[`create${pluralize(className)}`]: {
-				type: new GraphQLNonNull(
-					getConnectionType({ object, allObjects }),
-				),
+				type: new GraphQLNonNull(connectionObject),
 				description: object.description,
 				args: { input: { type: createsInputType } },
 				resolve: (root, args, ctx, info) =>
@@ -687,9 +673,7 @@ export class WibeGraphQLSchema {
 					),
 			},
 			[`update${pluralize(className)}`]: {
-				type: new GraphQLNonNull(
-					getConnectionType({ object, allObjects }),
-				),
+				type: new GraphQLNonNull(connectionObject),
 				description: object.description,
 				args: { input: { type: updatesInputType } },
 				resolve: (root, args, ctx, info) =>
@@ -719,9 +703,7 @@ export class WibeGraphQLSchema {
 					),
 			},
 			[`delete${pluralize(className)}`]: {
-				type: new GraphQLNonNull(
-					getConnectionType({ object, allObjects }),
-				),
+				type: new GraphQLNonNull(connectionObject),
 				description: object.description,
 				args: { input: { type: deletesInputType } },
 				resolve: (root, args, ctx, info) =>
