@@ -189,14 +189,12 @@ export class WibeGraphQLSchema {
 			graphqlObjectType: 'Object',
 		})
 
-		const graphqlFields = wibeGraphqlParserWithInput.getGraphqlFields()
-
 		return new GraphQLObjectType({
 			name: nameWithoutSpace,
 			description,
 			fields: () => ({
 				id: { type: new GraphQLNonNull(GraphQLID) },
-				...graphqlFields,
+				...wibeGraphqlParserWithInput.getGraphqlFields(),
 			}),
 		})
 	}
@@ -217,15 +215,11 @@ export class WibeGraphQLSchema {
 			graphqlObjectType: 'InputObject',
 		})
 
-		const graphqlFields = wibeGraphqlParserWithInput.getGraphqlFields()
-
-		const inputObject = new GraphQLInputObjectType({
+		return new GraphQLInputObjectType({
 			name: `${nameWithoutSpace}Input`,
 			description,
-			fields: graphqlFields,
+			fields: wibeGraphqlParserWithInput.getGraphqlFields(),
 		})
-
-		return inputObject
 	}
 
 	createUpdateInputObject({
@@ -244,15 +238,11 @@ export class WibeGraphQLSchema {
 			graphqlObjectType: 'UpdateFieldsInput',
 		})
 
-		const graphqlFields = wibeGraphqlParserWithInput.getGraphqlFields()
-
-		const inputObject = new GraphQLInputObjectType({
+		return new GraphQLInputObjectType({
 			name: `${nameWithoutSpace}UpdateFieldsInput`,
 			description,
-			fields: graphqlFields,
+			fields: wibeGraphqlParserWithInput.getGraphqlFields(),
 		})
-
-		return inputObject
 	}
 
 	createWhereInputObject({
@@ -372,17 +362,14 @@ export class WibeGraphQLSchema {
 					graphqlObjectType: 'Object',
 				})
 
-				const graphqlInputFields =
-					wibeGraphqlParserWithInput.getGraphqlFields()
-
-				const graphqlInput = new GraphQLInputObjectType({
-					name: `${currentKeyWithFirstLetterUpperCase}Input`,
-					fields: graphqlInputFields,
-				})
-
 				const graphqlType = wibeGraphqlParserWithInput.getGraphqlType({
 					field: currentMutation as TypeField,
 				}) as GraphQLOutputType
+
+				const graphqlInput = new GraphQLInputObjectType({
+					name: `${currentKeyWithFirstLetterUpperCase}Input`,
+					fields: wibeGraphqlParserWithInput.getGraphqlFields(),
+				})
 
 				acc[currentKey] = {
 					type: required
@@ -417,9 +404,6 @@ export class WibeGraphQLSchema {
 					graphqlObjectType: 'Object',
 				})
 
-				const graphqlArgs =
-					wibeGraphqlParserWithInput.getGraphqlFields()
-
 				const graphqlType = wibeGraphqlParserWithInput.getGraphqlType({
 					field: currentQuery as TypeField,
 				}) as GraphQLOutputType
@@ -428,7 +412,7 @@ export class WibeGraphQLSchema {
 					type: required
 						? new GraphQLNonNull(graphqlType)
 						: graphqlType,
-					args: graphqlArgs,
+					args: wibeGraphqlParserWithInput.getGraphqlFields(),
 					description: currentQuery.description,
 					resolve: currentQuery.resolve,
 				}
