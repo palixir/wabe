@@ -28,14 +28,11 @@ import {
 	TypeField,
 } from './Schema'
 import {
-	getConnectionType,
 	getGraphqlObjectFromWibeInputObject,
 	getGraphqlObjectFromWibeWhereInputObject,
 	getGraphqlObjectFromWibeUpdateInputObject,
 	getGraphqlObjectFromWibeObject,
 	getGraphqlType,
-	parseWibeObject,
-	wrapGraphQLTypeIn,
 } from './utils'
 
 // This class is tested in e2e test in graphql folder
@@ -51,24 +48,16 @@ export class WibeGraphQLSchema {
 
 		const scalars = this.createScalars()
 		const enums = this.createEnums()
-
 		const allObjects = this.createAllObjects({ scalars, enums })
-
-		// return {
-		// 	[wibeClass]: {
-		// 		object,
-		// 		outputObject,
-		// 		inputObject,
-		// 		updateInputObject,
-		// 		whereInputObject,
-		// 	},
-		// }
 
 		const queriesMutationAndObjects = this.schemas.schema.class.reduce(
 			(acc, current) => {
-				const fields = current.fields
 				const className = current.name.replace(' ', '')
-				const fieldsOfObjectKeys = Object.keys(fields)
+
+				const currentObject = allObjects.find(
+					(object) => object[className] !== undefined,
+				)
+				if (!currentObject) throw new Error('Object not found')
 
 				const {
 					[className]: {
@@ -78,7 +67,7 @@ export class WibeGraphQLSchema {
 						whereInputObject: whereInputType,
 						connectionObject,
 					},
-				} = allObjects.find((object) => object[className] !== undefined)
+				} = currentObject
 
 				// Queries
 				const defaultQueries = this.createDefaultQueriesSchema({

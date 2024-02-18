@@ -1,7 +1,6 @@
 import {
 	GraphQLBoolean,
 	GraphQLEnumType,
-	GraphQLFieldConfig,
 	GraphQLFloat,
 	GraphQLInputObjectType,
 	GraphQLInt,
@@ -14,7 +13,6 @@ import {
 } from 'graphql'
 import {
 	ClassInterface,
-	SchemaFields,
 	TypeField,
 	WibeDefaultTypes,
 	WibeTypes,
@@ -38,9 +36,6 @@ type WibeDefaultTypesWithoutArrayAndObject = Exclude<
 	WibeDefaultTypesWithoutObject,
 	'Array'
 >
-
-const graphqlObjects: Array<GraphQLObjectType> = []
-const graphqlInputObjects: Array<GraphQLInputObjectType> = []
 
 export const templateScalarType: Record<
 	WibeDefaultTypesWithoutArrayAndObject,
@@ -66,14 +61,6 @@ export const templateWhereInput: Record<
 	Email: EmailWhereInput,
 	Array: ArrayWhereInput,
 }
-
-export const wrapGraphQLTypeIn = ({
-	required,
-	type,
-}: {
-	required: boolean
-	type: GraphQLType
-}) => (required ? new GraphQLNonNull(type) : type)
 
 // For the moment we not support array of array (for sql database it's tricky)
 // Don't export this function
@@ -102,15 +89,24 @@ export const getGraphqlType = ({
 	scalars,
 	enums,
 	field,
+	isWhereType = false,
 }: {
 	field: TypeField
 	scalars: GraphQLScalarType[]
 	enums: GraphQLEnumType[]
+	isWhereType?: boolean
 }) => {
 	const scalarExist = scalars.find((scalar) => scalar.name === field.type)
-	if (scalarExist) return scalarExist
-
 	const enumExist = enums.find((e) => e.name === field.type)
+
+	if (isWhereType) {
+		if (!Object.keys(templateWhereInput).includes(field.type))
+			return AnyWhereInput
+
+		return templateWhereInput[field.type as WibeDefaultTypesWithoutObject]
+	}
+
+	if (scalarExist) return scalarExist
 	if (enumExist) return enumExist
 
 	const graphqlType = _getGraphqlTypeFromTemplate({ field })
@@ -120,59 +116,30 @@ export const getGraphqlType = ({
 	return graphqlType
 }
 
-export const getWhereInputFromType = ({
-	wibeType,
-	scalars,
-	enums,
-}: {
-	wibeType: WibeTypes
-	scalars: GraphQLScalarType[]
-	enums: GraphQLEnumType[]
-}) => {
-	if (!Object.keys(templateWhereInput).includes(wibeType)) {
-		const scalarExist = scalars.find((scalar) => scalar.name === wibeType)
-		if (scalarExist) return scalarExist
-
-		const enumExist = enums.find((e) => e.name === wibeType)
-
-		if (!scalarExist && !enumExist)
-			throw new Error(`${wibeType} not exist in schema`)
-
-		return AnyWhereInput
-	}
-
-	return templateWhereInput[wibeType as WibeDefaultTypesWithoutObject]
-}
-
-export const getConnectionType = ({
-	allObjects,
+const _getGraphqlFields = ({
 	object,
-}: {
-	allObjects: GraphQLObjectType[]
-	object: GraphQLObjectType
-}) => {
-	// We search in all object the corresponding output object
-	const connection = allObjects.find(
-		(o) => o.name === `${object.name}Connection`,
-	)
-	if (!connection)
-		throw new Error(`Connection type not found for ${object.name}`)
-
-	return connection
-}
-
-export const parseWibeObject = ({
-	wibeObject: { required, description, object },
 	scalars,
 	enums,
+	callBackForObjectType,
+	forceRequiredToFalse = false,
 }: {
-	wibeObject: {
-		required?: boolean
-		description?: string
-		object: ClassInterface
-	}
+	object: ClassInterface
 	scalars: GraphQLScalarType[]
 	enums: GraphQLEnumType[]
+	forceRequiredToFalse?: boolean
+	callBackForObjectType: ({
+		wibeObject: { required, description, object },
+		scalars,
+		enums,
+	}: {
+		wibeObject: {
+			required?: boolean
+			description?: string
+			object: ClassInterface
+		}
+		scalars: GraphQLScalarType[]
+		enums: GraphQLEnumType[]
+	}) => any
 }) => {
 	const fields = object.fields
 
@@ -182,7 +149,7 @@ export const parseWibeObject = ({
 
 			if (currentField.type === 'Object') {
 				acc[key] = {
-					type: parseWibeObject({
+					type: callBackForObjectType({
 						wibeObject: {
 							required: currentField.required,
 							description: currentField.description,
@@ -203,9 +170,10 @@ export const parseWibeObject = ({
 			})
 
 			acc[key] = {
-				type: currentField.required
-					? new GraphQLNonNull(graphqlType)
-					: graphqlType,
+				type:
+					currentField.required && !forceRequiredToFalse
+						? new GraphQLNonNull(graphqlType)
+						: graphqlType,
 			}
 
 			return acc
@@ -213,12 +181,33 @@ export const parseWibeObject = ({
 		{} as Record<string, any>,
 	)
 
+	return graphqlFields
+}
+
+export const parseWibeObject = ({
+	wibeObject: { required, description, object },
+	scalars,
+	enums,
+}: {
+	wibeObject: {
+		required?: boolean
+		description?: string
+		object: ClassInterface
+	}
+	scalars: GraphQLScalarType[]
+	enums: GraphQLEnumType[]
+}) => {
+	const graphqlFields = _getGraphqlFields({
+		object,
+		scalars,
+		enums,
+		callBackForObjectType: parseWibeObject,
+	})
+
 	const graphqlObject = new GraphQLObjectType({
 		name: object.name,
 		description: description,
-		fields: () => ({
-			...graphqlFields,
-		}),
+		fields: graphqlFields,
 	})
 
 	return required ? new GraphQLNonNull(graphqlObject) : graphqlObject
@@ -237,51 +226,17 @@ export const parseWibeInputObject = ({
 	scalars: GraphQLScalarType[]
 	enums: GraphQLEnumType[]
 }) => {
-	const fields = object.fields
-
-	const graphqlFields = Object.keys(fields).reduce(
-		(acc, key) => {
-			const currentField = fields[key]
-
-			if (currentField.type === 'Object') {
-				acc[key] = {
-					type: parseWibeInputObject({
-						wibeObject: {
-							required: currentField.required,
-							description: currentField.description,
-							object: currentField.object,
-						},
-						scalars,
-						enums,
-					}),
-				}
-
-				return acc
-			}
-
-			const graphqlType = getGraphqlType({
-				field: currentField,
-				scalars,
-				enums,
-			})
-
-			acc[key] = {
-				type: currentField.required
-					? new GraphQLNonNull(graphqlType)
-					: graphqlType,
-			}
-
-			return acc
-		},
-		{} as Record<string, any>,
-	)
+	const graphqlFields = _getGraphqlFields({
+		object,
+		scalars,
+		enums,
+		callBackForObjectType: parseWibeInputObject,
+	})
 
 	const graphqlObject = new GraphQLInputObjectType({
 		name: `${object.name}Input`,
 		description: description,
-		fields: () => ({
-			...graphqlFields,
-		}),
+		fields: graphqlFields,
 	})
 
 	return required ? new GraphQLNonNull(graphqlObject) : graphqlObject
@@ -300,42 +255,13 @@ export const parseWibeUpdateInputObject = ({
 	scalars: GraphQLScalarType[]
 	enums: GraphQLEnumType[]
 }) => {
-	const fields = object.fields
-
-	const graphqlFields = Object.keys(fields).reduce(
-		(acc, key) => {
-			const currentField = fields[key]
-
-			if (currentField.type === 'Object') {
-				acc[key] = {
-					type: parseWibeUpdateInputObject({
-						wibeObject: {
-							required: false,
-							description: currentField.description,
-							object: currentField.object,
-						},
-						scalars,
-						enums,
-					}),
-				}
-
-				return acc
-			}
-
-			const graphqlType = getGraphqlType({
-				field: currentField,
-				scalars,
-				enums,
-			})
-
-			acc[key] = {
-				type: graphqlType,
-			}
-
-			return acc
-		},
-		{} as Record<string, any>,
-	)
+	const graphqlFields = _getGraphqlFields({
+		object,
+		scalars,
+		enums,
+		callBackForObjectType: parseWibeUpdateInputObject,
+		forceRequiredToFalse: true,
+	})
 
 	const graphqlObject = new GraphQLInputObjectType({
 		name: `${object.name}UpdateFieldsInput`,
@@ -383,10 +309,11 @@ export const parseWibeWhereInputObject = ({
 				return acc
 			}
 
-			const graphqlType = getWhereInputFromType({
-				wibeType: currentField.type,
+			const graphqlType = getGraphqlType({
+				field: currentField,
 				scalars,
 				enums,
+				isWhereType: true,
 			})
 
 			acc[key] = {
@@ -398,6 +325,7 @@ export const parseWibeWhereInputObject = ({
 		{} as Record<string, any>,
 	)
 
+	// @ts-expect-error
 	const graphqlObject = new GraphQLInputObjectType({
 		name: `${object.name}WhereInput`,
 		description: description,
@@ -417,24 +345,40 @@ export const parseWibeWhereInputObject = ({
 	return required ? new GraphQLNonNull(graphqlObject) : graphqlObject
 }
 
-export const getGraphqlObjectFromWibeObject = ({
+const _getGraphqlObjectFactory = ({
 	object,
 	scalars,
 	enums,
+	callback,
+	forceRequiredToFalse = false,
 }: {
 	object: Record<string, TypeField>
 	scalars: GraphQLScalarType[]
 	enums: GraphQLEnumType[]
+	forceRequiredToFalse?: boolean
+	callback: ({
+		wibeObject: { required, description, object },
+		scalars,
+		enums,
+	}: {
+		wibeObject: {
+			required?: boolean
+			description?: string
+			object: ClassInterface
+		}
+		scalars: GraphQLScalarType[]
+		enums: GraphQLEnumType[]
+	}) => any
 }) => {
 	const keysOfObject = Object.keys(object)
 
-	const res = keysOfObject.reduce(
+	return keysOfObject.reduce(
 		(acc, key) => {
 			const currentField = object[key]
 
 			if (currentField.type === 'Object') {
 				acc[key] = {
-					type: parseWibeObject({
+					type: callback({
 						wibeObject: currentField,
 						scalars,
 						enums,
@@ -451,17 +395,33 @@ export const getGraphqlObjectFromWibeObject = ({
 			})
 
 			acc[key] = {
-				type: currentField.required
-					? new GraphQLNonNull(graphqlType)
-					: graphqlType,
+				type:
+					currentField.required && !forceRequiredToFalse
+						? new GraphQLNonNull(graphqlType)
+						: graphqlType,
 			}
 
 			return acc
 		},
 		{} as Record<string, any>,
 	)
+}
 
-	return res
+export const getGraphqlObjectFromWibeObject = ({
+	object,
+	scalars,
+	enums,
+}: {
+	object: Record<string, TypeField>
+	scalars: GraphQLScalarType[]
+	enums: GraphQLEnumType[]
+}) => {
+	return _getGraphqlObjectFactory({
+		object,
+		scalars,
+		enums,
+		callback: parseWibeObject,
+	})
 }
 
 export const getGraphqlObjectFromWibeInputObject = ({
@@ -473,42 +433,12 @@ export const getGraphqlObjectFromWibeInputObject = ({
 	scalars: GraphQLScalarType[]
 	enums: GraphQLEnumType[]
 }) => {
-	const keysOfObject = Object.keys(object)
-
-	const res = keysOfObject.reduce(
-		(acc, key) => {
-			const currentField = object[key]
-
-			if (currentField.type === 'Object') {
-				acc[key] = {
-					type: parseWibeInputObject({
-						wibeObject: currentField,
-						scalars,
-						enums,
-					}),
-				}
-
-				return acc
-			}
-
-			const graphqlType = getGraphqlType({
-				field: currentField,
-				scalars,
-				enums,
-			})
-
-			acc[key] = {
-				type: currentField.required
-					? new GraphQLNonNull(graphqlType)
-					: graphqlType,
-			}
-
-			return acc
-		},
-		{} as Record<string, any>,
-	)
-
-	return res
+	return _getGraphqlObjectFactory({
+		object,
+		scalars,
+		enums,
+		callback: parseWibeInputObject,
+	})
 }
 
 export const getGraphqlObjectFromWibeUpdateInputObject = ({
@@ -520,40 +450,13 @@ export const getGraphqlObjectFromWibeUpdateInputObject = ({
 	scalars: GraphQLScalarType[]
 	enums: GraphQLEnumType[]
 }) => {
-	const keysOfObject = Object.keys(object)
-
-	const res = keysOfObject.reduce(
-		(acc, key) => {
-			const currentField = object[key]
-
-			if (currentField.type === 'Object') {
-				acc[key] = {
-					type: parseWibeUpdateInputObject({
-						wibeObject: currentField,
-						scalars,
-						enums,
-					}),
-				}
-
-				return acc
-			}
-
-			const graphqlType = getGraphqlType({
-				field: currentField,
-				scalars,
-				enums,
-			})
-
-			acc[key] = {
-				type: graphqlType,
-			}
-
-			return acc
-		},
-		{} as Record<string, any>,
-	)
-
-	return res
+	return _getGraphqlObjectFactory({
+		object,
+		scalars,
+		enums,
+		callback: parseWibeUpdateInputObject,
+		forceRequiredToFalse: true,
+	})
 }
 
 export const getGraphqlObjectFromWibeWhereInputObject = ({
@@ -583,10 +486,11 @@ export const getGraphqlObjectFromWibeWhereInputObject = ({
 				return acc
 			}
 
-			const graphqlType = getWhereInputFromType({
-				wibeType: currentField.type,
+			const graphqlType = getGraphqlType({
+				field: currentField,
 				scalars,
 				enums,
+				isWhereType: true,
 			})
 
 			acc[key] = {

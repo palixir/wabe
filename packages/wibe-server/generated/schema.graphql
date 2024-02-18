@@ -108,7 +108,7 @@ input _UserWhereInput {
   isCool: BooleanWhereInput
   email: EmailWhereInput
   birthDate: DateWhereInput
-  phone: Phone
+  phone: AnyWhereInput
   role: AnyWhereInput
   address: AddressWhereInput
   object: ObjectWhereInput
