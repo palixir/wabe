@@ -1,6 +1,7 @@
 import {
 	GraphQLBoolean,
 	GraphQLEnumType,
+	GraphQLFieldConfig,
 	GraphQLFloat,
 	GraphQLInputObjectType,
 	GraphQLInt,
@@ -100,7 +101,31 @@ const _getGraphqlTypeFromTemplate = ({ field }: { field: TypeField }) => {
 	]
 }
 
-export const WibeGraphQLParser =
+export interface WibeGraphQLParserFactory {
+	(options: {
+		graphqlObjectType: GraphqlObjectType
+		schemaFields: SchemaFields
+	}): {
+		_parseWibeObject(options: ParseObjectOptions): any
+		_parseWibeWhereInputObject(options: ParseObjectOptions): any
+		_parseWibeInputObject(options: ParseObjectOptions): any
+		_parseWibeUpdateInputObject(options: ParseObjectOptions): any
+		getGraphqlType(options: {
+			field: TypeField
+			isWhereType?: boolean
+		}): any
+		getGraphqlFields(): any
+	}
+}
+
+export interface WibeGraphQLParserOptions {
+	(options: {
+		scalars: GraphQLScalarType[]
+		enums: GraphQLEnumType[]
+	}): WibeGraphQLParserFactory
+}
+
+export const WibeGraphQLParser: WibeGraphQLParserOptions =
 	({
 		scalars,
 		enums,
@@ -116,8 +141,8 @@ export const WibeGraphQLParser =
 		schemaFields: SchemaFields
 	}) => {
 		/*
-	Get graphql fields from a wibe object
-	*/
+          Get graphql fields from a wibe object
+          */
 		const _getGraphqlFields = ({
 			objectToParse,
 			callBackForObjectType,
@@ -172,8 +197,8 @@ export const WibeGraphQLParser =
 		// ------------------ Parsers ------------------
 
 		/*
-	Parse simple object
-	*/
+          Parse simple object
+          */
 		const _parseWibeObject = ({
 			wibeObject: { required, description, objectToParse },
 		}: ParseObjectOptions) => {
@@ -192,8 +217,8 @@ export const WibeGraphQLParser =
 		}
 
 		/*
-	Parse input object
-	*/
+          Parse input object
+          */
 		const _parseWibeInputObject = ({
 			wibeObject: { required, description, objectToParse },
 		}: ParseObjectOptions) => {
@@ -212,8 +237,8 @@ export const WibeGraphQLParser =
 		}
 
 		/*
-	Parse update input object
-	*/
+          Parse update input object
+          */
 		const _parseWibeUpdateInputObject = ({
 			wibeObject: { required, description, objectToParse },
 		}: ParseObjectOptions) => {
@@ -233,8 +258,8 @@ export const WibeGraphQLParser =
 		}
 
 		/*
-	Parse where input object
-	*/
+          Parse where input object
+          */
 		const _parseWibeWhereInputObject = ({
 			wibeObject: { required, description, objectToParse },
 		}: ParseObjectOptions) => {
@@ -296,8 +321,8 @@ export const WibeGraphQLParser =
 		}
 
 		/*
-	Get the right graphql type for a field
-	*/
+          Get the good graphql type for a field
+          */
 		const getGraphqlType = ({
 			field,
 			isWhereType = false,
@@ -330,14 +355,16 @@ export const WibeGraphQLParser =
 			return graphqlType
 		}
 
-		// Get Graphql object from a schema fields passed in WibeGraphqlParser
-		const getGraphqlObject = () => {
+		/*
+          Get Graphql object from a schema fields passed in WibeGraphqlParser
+          */
+		const getGraphqlFields = () => {
 			const { callback, forceRequiredToFalse, isWhereType } =
 				_graphqlObjectFactory[graphqlObjectType]
 
 			const keysOfObject = Object.keys(schemaFields)
 
-			return keysOfObject.reduce(
+			const rawFields = keysOfObject.reduce(
 				(acc, key) => {
 					const currentField = schemaFields[key]
 
@@ -370,11 +397,26 @@ export const WibeGraphQLParser =
 				},
 				{} as Record<string, any>,
 			)
+
+			const fieldsKey = Object.keys(rawFields)
+
+			const graphqlFieldsOfTheObject = fieldsKey.reduce(
+				(acc, key) => {
+					const field = rawFields[key]
+
+					acc[key] = field
+
+					return acc
+				},
+				{} as Record<string, GraphQLFieldConfig<any, any, any>>,
+			)
+
+			return graphqlFieldsOfTheObject
 		}
 
 		return {
 			getGraphqlType,
-			getGraphqlObject,
+			getGraphqlFields,
 			_parseWibeObject,
 			_parseWibeInputObject,
 			_parseWibeUpdateInputObject,

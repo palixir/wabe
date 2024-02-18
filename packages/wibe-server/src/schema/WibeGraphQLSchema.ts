@@ -28,7 +28,7 @@ import {
 	Schema,
 	TypeField,
 } from './Schema'
-import { WibeGraphQLParser } from './utils'
+import { WibeGraphQLParser, WibeGraphQLParserFactory } from './utils'
 import { WibeSchemaTypes } from '../../generated/wibe'
 
 // This class is tested in e2e test in graphql folder
@@ -189,27 +189,14 @@ export class WibeGraphQLSchema {
 			graphqlObjectType: 'Object',
 		})
 
-		const graphqlFields = wibeGraphqlParserWithInput.getGraphqlObject()
-
-		const fieldsKey = Object.keys(graphqlFields)
-
-		const graphqlFieldsOfTheObject = fieldsKey.reduce(
-			(acc, key) => {
-				const field = graphqlFields[key]
-
-				acc[key] = field
-
-				return acc
-			},
-			{} as Record<string, GraphQLFieldConfig<any, any, any>>,
-		)
+		const graphqlFields = wibeGraphqlParserWithInput.getGraphqlFields()
 
 		return new GraphQLObjectType({
 			name: nameWithoutSpace,
 			description,
 			fields: () => ({
 				id: { type: new GraphQLNonNull(GraphQLID) },
-				...graphqlFieldsOfTheObject,
+				...graphqlFields,
 			}),
 		})
 	}
@@ -230,26 +217,12 @@ export class WibeGraphQLSchema {
 			graphqlObjectType: 'InputObject',
 		})
 
-		const graphqlFields = wibeGraphqlParserWithInput.getGraphqlObject()
-
-		const fieldsKey = Object.keys(graphqlFields)
-
-		const graphqlFieldsOfTheObject = fieldsKey.reduce(
-			(acc, key) => {
-				const field = graphqlFields[key]
-
-				acc[key] = field
-
-				return acc
-			},
-			{} as Record<string, GraphQLFieldConfig<any, any, any>>,
-		)
+		const graphqlFields = wibeGraphqlParserWithInput.getGraphqlFields()
 
 		const inputObject = new GraphQLInputObjectType({
 			name: `${nameWithoutSpace}Input`,
 			description,
-			// @ts-expect-error
-			fields: graphqlFieldsOfTheObject,
+			fields: graphqlFields,
 		})
 
 		return inputObject
@@ -271,26 +244,12 @@ export class WibeGraphQLSchema {
 			graphqlObjectType: 'UpdateFieldsInput',
 		})
 
-		const graphqlFields = wibeGraphqlParserWithInput.getGraphqlObject()
-
-		const fieldsKey = Object.keys(graphqlFields)
-
-		const graphqlFieldsOfTheObject = fieldsKey.reduce(
-			(acc, key) => {
-				const field = graphqlFields[key]
-
-				acc[key] = field
-
-				return acc
-			},
-			{} as Record<string, GraphQLFieldConfig<any, any, any>>,
-		)
+		const graphqlFields = wibeGraphqlParserWithInput.getGraphqlFields()
 
 		const inputObject = new GraphQLInputObjectType({
 			name: `${nameWithoutSpace}UpdateFieldsInput`,
 			description,
-			// @ts-expect-error
-			fields: graphqlFieldsOfTheObject,
+			fields: graphqlFields,
 		})
 
 		return inputObject
@@ -312,27 +271,14 @@ export class WibeGraphQLSchema {
 			graphqlObjectType: 'WhereInputObject',
 		})
 
-		const graphqlFields = wibeGraphqlParserWithInput.getGraphqlObject()
-
-		const fieldsKey = Object.keys(graphqlFields)
-
-		const graphqlFieldsOfTheObject = fieldsKey.reduce(
-			(acc, key) => {
-				const field = graphqlFields[key]
-
-				acc[key] = field
-
-				return acc
-			},
-			{} as Record<string, GraphQLFieldConfig<any, any, any>>,
-		)
+		const graphqlFields = wibeGraphqlParserWithInput.getGraphqlFields()
 
 		// @ts-expect-error
 		const inputObject = new GraphQLInputObjectType({
 			name: `${nameWithoutSpace}WhereInput`,
 			description,
 			fields: () => ({
-				...graphqlFieldsOfTheObject,
+				...graphqlFields,
 				...{
 					OR: {
 						type: new GraphQLList(inputObject),
@@ -409,7 +355,7 @@ export class WibeGraphQLSchema {
 		wibeGraphqlParser,
 	}: {
 		resolvers: Record<string, MutationResolver>
-		wibeGraphqlParser: any
+		wibeGraphqlParser: WibeGraphQLParserFactory
 	}) {
 		return Object.keys(resolvers).reduce(
 			(acc, currentKey) => {
@@ -427,7 +373,7 @@ export class WibeGraphQLSchema {
 				})
 
 				const graphqlInputFields =
-					wibeGraphqlParserWithInput.getGraphqlObject()
+					wibeGraphqlParserWithInput.getGraphqlFields()
 
 				const graphqlInput = new GraphQLInputObjectType({
 					name: `${currentKeyWithFirstLetterUpperCase}Input`,
@@ -458,7 +404,7 @@ export class WibeGraphQLSchema {
 		wibeGraphqlParser,
 	}: {
 		resolvers: Record<string, QueryResolver>
-		wibeGraphqlParser: any
+		wibeGraphqlParser: WibeGraphQLParserFactory
 	}) {
 		return Object.keys(resolvers).reduce(
 			(acc, currentKey) => {
@@ -472,7 +418,7 @@ export class WibeGraphQLSchema {
 				})
 
 				const graphqlArgs =
-					wibeGraphqlParserWithInput.getGraphqlObject()
+					wibeGraphqlParserWithInput.getGraphqlFields()
 
 				const graphqlType = wibeGraphqlParserWithInput.getGraphqlType({
 					field: currentQuery as TypeField,

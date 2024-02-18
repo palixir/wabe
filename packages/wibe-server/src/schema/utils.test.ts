@@ -168,7 +168,7 @@ describe('GraphqlSchema utils', () => {
 				name: { type: 'String', required: true },
 			},
 			graphqlObjectType: 'Object',
-		}).getGraphqlObject()
+		}).getGraphqlFields()
 
 		expect(simpleObject).toEqual({
 			name: {
@@ -196,7 +196,7 @@ describe('GraphqlSchema utils', () => {
 				},
 			},
 			graphqlObjectType: 'Object',
-		}).getGraphqlObject()
+		}).getGraphqlFields()
 
 		const expectedGraphqlObject = new GraphQLObjectType({
 			name: 'SubObject',
