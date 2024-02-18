@@ -57,15 +57,16 @@ export class WibeGraphQLSchema {
 		const allObjects = this.createAllObjects({ scalars, enums })
 
 		const objects = this.createObjects({ scalars, enums })
-		const inputObjects = this.createInputObjects({ scalars, enums })
-		const updateInputObjects = this.createUpdateInputObjects({
-			scalars,
-			enums,
-		})
-		const whereInputObjects = this.createWhereInputObjects({
-			scalars,
-			enums,
-		})
+
+		// return {
+		// 	[wibeClass]: {
+		// 		object,
+		// 		outputObject,
+		// 		inputObject,
+		// 		updateInputObject,
+		// 		whereInputObject,
+		// 	},
+		// }
 
 		const queriesAndMutationsAndInput = this.schemas.schema.class.reduce(
 			(previous, current) => {
@@ -73,19 +74,13 @@ export class WibeGraphQLSchema {
 				const className = current.name.replace(' ', '')
 				const fieldsOfObjectKeys = Object.keys(fields)
 
-				const defaultInputType = inputObjects.find((inputObject) =>
-					inputObject.name.includes(className),
-				)
-
-				const defaultUpdateInputType = updateInputObjects.find(
-					(updateInputObject) =>
-						updateInputObject.name.includes(className),
-				)
-
-				const whereInputType = whereInputObjects.find(
-					(whereInputObject) =>
-						whereInputObject.name.includes(className),
-				)
+				const {
+					[className]: {
+						inputObject: defaultInputType,
+						updateInputObject: defaultUpdateInputType,
+						whereInputObject: whereInputType,
+					},
+				} = allObjects.find((object) => object[className] !== undefined)
 
 				const object = objects.find((o) => o.name === className)
 				if (!object) throw new Error(`Object ${className} not found`)
@@ -417,7 +412,7 @@ export class WibeGraphQLSchema {
 			})
 
 			return {
-				[wibeClass]: {
+				[wibeClass.name]: {
 					object,
 					outputObject,
 					inputObject,
@@ -440,54 +435,6 @@ export class WibeGraphQLSchema {
 			const outputObject = this.createOutputObject({ object, wibeClass })
 
 			return [object, outputObject]
-		})
-	}
-
-	createInputObjects({
-		scalars,
-		enums,
-	}: {
-		scalars: GraphQLScalarType[]
-		enums: GraphQLEnumType[]
-	}) {
-		return this.schemas.schema.class.flatMap((wibeClass) => {
-			return this.createInputObject({
-				scalars,
-				enums,
-				wibeClass,
-			})
-		})
-	}
-
-	createUpdateInputObjects({
-		scalars,
-		enums,
-	}: {
-		scalars: GraphQLScalarType[]
-		enums: GraphQLEnumType[]
-	}) {
-		return this.schemas.schema.class.flatMap((wibeClass) => {
-			return this.createUpdateInputObject({
-				scalars,
-				enums,
-				wibeClass,
-			})
-		})
-	}
-
-	createWhereInputObjects({
-		scalars,
-		enums,
-	}: {
-		scalars: GraphQLScalarType[]
-		enums: GraphQLEnumType[]
-	}) {
-		return this.schemas.schema.class.flatMap((wibeClass) => {
-			return this.createWhereInputObject({
-				scalars,
-				enums,
-				wibeClass,
-			})
 		})
 	}
 
