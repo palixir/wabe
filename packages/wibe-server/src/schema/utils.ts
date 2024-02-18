@@ -48,8 +48,6 @@ type ParseObjectOptions = {
 		description?: string
 		objectToParse: ClassInterface
 	}
-	scalars: GraphQLScalarType[]
-	enums: GraphQLEnumType[]
 }
 
 type ParseObjectCallback = (options: ParseObjectOptions) => any
@@ -133,193 +131,6 @@ export const getGraphqlType = ({
 	return graphqlType
 }
 
-const _getGraphqlFields = ({
-	object,
-	scalars,
-	enums,
-	callBackForObjectType,
-	forceRequiredToFalse = false,
-	isWhereType = false,
-}: {
-	object: ClassInterface
-	scalars: GraphQLScalarType[]
-	enums: GraphQLEnumType[]
-	forceRequiredToFalse?: boolean
-	isWhereType?: boolean
-	callBackForObjectType: ParseObjectCallback
-}) => {
-	const fields = object.fields
-
-	const graphqlFields = Object.keys(fields).reduce(
-		(acc, key) => {
-			const currentField = fields[key]
-
-			if (currentField.type === 'Object') {
-				acc[key] = {
-					type: callBackForObjectType({
-						wibeObject: {
-							required: currentField.required,
-							description: currentField.description,
-							objectToParse: currentField.object,
-						},
-						scalars,
-						enums,
-					}),
-				}
-
-				return acc
-			}
-
-			const graphqlType = getGraphqlType({
-				field: currentField,
-				scalars,
-				enums,
-				isWhereType,
-			})
-
-			acc[key] = {
-				type:
-					currentField.required && !forceRequiredToFalse
-						? new GraphQLNonNull(graphqlType)
-						: graphqlType,
-			}
-
-			return acc
-		},
-		{} as Record<string, any>,
-	)
-
-	return graphqlFields
-}
-
-export const parseWibeObject = ({
-	wibeObject: { required, description, objectToParse },
-	scalars,
-	enums,
-}: ParseObjectOptions) => {
-	const graphqlFields = _getGraphqlFields({
-		object: objectToParse,
-		scalars,
-		enums,
-		callBackForObjectType: parseWibeObject,
-	})
-
-	const graphqlObject = new GraphQLObjectType({
-		name: objectToParse.name,
-		description: description,
-		fields: graphqlFields,
-	})
-
-	return required ? new GraphQLNonNull(graphqlObject) : graphqlObject
-}
-
-export const parseWibeInputObject = ({
-	wibeObject: { required, description, objectToParse },
-	scalars,
-	enums,
-}: ParseObjectOptions) => {
-	const graphqlFields = _getGraphqlFields({
-		object: objectToParse,
-		scalars,
-		enums,
-		callBackForObjectType: parseWibeInputObject,
-	})
-
-	const graphqlObject = new GraphQLInputObjectType({
-		name: `${objectToParse.name}Input`,
-		description: description,
-		fields: graphqlFields,
-	})
-
-	return required ? new GraphQLNonNull(graphqlObject) : graphqlObject
-}
-
-export const parseWibeUpdateInputObject = ({
-	wibeObject: { required, description, objectToParse },
-	scalars,
-	enums,
-}: ParseObjectOptions) => {
-	const graphqlFields = _getGraphqlFields({
-		object: objectToParse,
-		scalars,
-		enums,
-		callBackForObjectType: parseWibeUpdateInputObject,
-		forceRequiredToFalse: true,
-	})
-
-	const graphqlObject = new GraphQLInputObjectType({
-		name: `${objectToParse.name}UpdateFieldsInput`,
-		description: description,
-		fields: graphqlFields,
-	})
-
-	return required ? new GraphQLNonNull(graphqlObject) : graphqlObject
-}
-
-export const parseWibeWhereInputObject = ({
-	wibeObject: { required, description, objectToParse },
-	scalars,
-	enums,
-}: ParseObjectOptions) => {
-	const graphqlFields = _getGraphqlFields({
-		object: objectToParse,
-		scalars,
-		enums,
-		callBackForObjectType: parseWibeWhereInputObject,
-		forceRequiredToFalse: true,
-		isWhereType: true,
-	})
-
-	// @ts-expect-error
-	const graphqlObject = new GraphQLInputObjectType({
-		name: `${objectToParse.name}WhereInput`,
-		description: description,
-		fields: () => ({
-			...graphqlFields,
-			...{
-				OR: {
-					type: new GraphQLList(graphqlObject),
-				},
-				AND: {
-					type: new GraphQLList(graphqlObject),
-				},
-			},
-		}),
-	})
-
-	return required ? new GraphQLNonNull(graphqlObject) : graphqlObject
-}
-
-const _graphqlObjectFactory: Record<
-	GraphqlObjectType,
-	{
-		callback: ParseObjectCallback
-		isWhereType: boolean
-		forceRequiredToFalse: boolean
-	}
-> = {
-	Object: {
-		callback: parseWibeObject,
-		isWhereType: false,
-		forceRequiredToFalse: false,
-	},
-	InputObject: {
-		callback: parseWibeInputObject,
-		isWhereType: false,
-		forceRequiredToFalse: false,
-	},
-	UpdateFieldsInput: {
-		callback: parseWibeUpdateInputObject,
-		isWhereType: false,
-		forceRequiredToFalse: true,
-	},
-	WhereInputObject: {
-		callback: parseWibeWhereInputObject,
-		isWhereType: true,
-		forceRequiredToFalse: true,
-	},
-}
-
 export const WibeGraphQLParser = ({
 	schemaFields,
 	scalars,
@@ -331,6 +142,171 @@ export const WibeGraphQLParser = ({
 	enums: GraphQLEnumType[]
 	graphqlObjectType: GraphqlObjectType
 }) => {
+	const _getGraphqlFields = ({
+		objectToParse,
+		callBackForObjectType,
+		forceRequiredToFalse = false,
+		isWhereType = false,
+	}: {
+		objectToParse: ClassInterface
+		forceRequiredToFalse?: boolean
+		isWhereType?: boolean
+		callBackForObjectType: ParseObjectCallback
+	}) => {
+		const fields = objectToParse.fields
+
+		const graphqlFields = Object.keys(fields).reduce(
+			(acc, key) => {
+				const currentField = fields[key]
+
+				if (currentField.type === 'Object') {
+					acc[key] = {
+						type: callBackForObjectType({
+							wibeObject: {
+								required: currentField.required,
+								description: currentField.description,
+								objectToParse: currentField.object,
+							},
+						}),
+					}
+
+					return acc
+				}
+
+				const graphqlType = getGraphqlType({
+					field: currentField,
+					scalars,
+					enums,
+					isWhereType,
+				})
+
+				acc[key] = {
+					type:
+						currentField.required && !forceRequiredToFalse
+							? new GraphQLNonNull(graphqlType)
+							: graphqlType,
+				}
+
+				return acc
+			},
+			{} as Record<string, any>,
+		)
+
+		return graphqlFields
+	}
+
+	const _parseWibeObject = ({
+		wibeObject: { required, description, objectToParse },
+	}: ParseObjectOptions) => {
+		const graphqlFields = _getGraphqlFields({
+			objectToParse,
+			callBackForObjectType: _parseWibeObject,
+		})
+
+		const graphqlObject = new GraphQLObjectType({
+			name: objectToParse.name,
+			description: description,
+			fields: graphqlFields,
+		})
+
+		return required ? new GraphQLNonNull(graphqlObject) : graphqlObject
+	}
+
+	const _parseWibeInputObject = ({
+		wibeObject: { required, description, objectToParse },
+	}: ParseObjectOptions) => {
+		const graphqlFields = _getGraphqlFields({
+			objectToParse,
+			callBackForObjectType: _parseWibeInputObject,
+		})
+
+		const graphqlObject = new GraphQLInputObjectType({
+			name: `${objectToParse.name}Input`,
+			description: description,
+			fields: graphqlFields,
+		})
+
+		return required ? new GraphQLNonNull(graphqlObject) : graphqlObject
+	}
+
+	const _parseWibeUpdateInputObject = ({
+		wibeObject: { required, description, objectToParse },
+	}: ParseObjectOptions) => {
+		const graphqlFields = _getGraphqlFields({
+			objectToParse,
+			callBackForObjectType: _parseWibeUpdateInputObject,
+			forceRequiredToFalse: true,
+		})
+
+		const graphqlObject = new GraphQLInputObjectType({
+			name: `${objectToParse.name}UpdateFieldsInput`,
+			description: description,
+			fields: graphqlFields,
+		})
+
+		return required ? new GraphQLNonNull(graphqlObject) : graphqlObject
+	}
+
+	const _parseWibeWhereInputObject = ({
+		wibeObject: { required, description, objectToParse },
+	}: ParseObjectOptions) => {
+		const graphqlFields = _getGraphqlFields({
+			objectToParse,
+			callBackForObjectType: _parseWibeWhereInputObject,
+			forceRequiredToFalse: true,
+			isWhereType: true,
+		})
+
+		// @ts-expect-error
+		const graphqlObject = new GraphQLInputObjectType({
+			name: `${objectToParse.name}WhereInput`,
+			description: description,
+			fields: () => ({
+				...graphqlFields,
+				...{
+					OR: {
+						type: new GraphQLList(graphqlObject),
+					},
+					AND: {
+						type: new GraphQLList(graphqlObject),
+					},
+				},
+			}),
+		})
+
+		return required ? new GraphQLNonNull(graphqlObject) : graphqlObject
+	}
+
+	const _graphqlObjectFactory: Record<
+		GraphqlObjectType,
+		{
+			callback: ParseObjectCallback
+			isWhereType: boolean
+			forceRequiredToFalse: boolean
+		}
+	> = {
+		Object: {
+			callback: _parseWibeObject,
+			isWhereType: false,
+			forceRequiredToFalse: false,
+		},
+		InputObject: {
+			callback: _parseWibeInputObject,
+			isWhereType: false,
+			forceRequiredToFalse: false,
+		},
+		UpdateFieldsInput: {
+			callback: _parseWibeUpdateInputObject,
+			isWhereType: false,
+			forceRequiredToFalse: true,
+		},
+		WhereInputObject: {
+			callback: _parseWibeWhereInputObject,
+			isWhereType: true,
+			forceRequiredToFalse: true,
+		},
+	}
+
 	// Get Graphql object from a schema fields passed in WibeGraphqlParser
 	const getGraphqlObject = () => {
 		const { callback, forceRequiredToFalse, isWhereType } =
@@ -349,8 +325,6 @@ export const WibeGraphQLParser = ({
 								...currentField,
 								objectToParse: currentField.object,
 							},
-							scalars,
-							enums,
 						}),
 					}
 
@@ -377,5 +351,11 @@ export const WibeGraphQLParser = ({
 		)
 	}
 
-	return { getGraphqlObject }
+	return {
+		getGraphqlObject,
+		_parseWibeObject,
+		_parseWibeInputObject,
+		_parseWibeUpdateInputObject,
+		_parseWibeWhereInputObject,
+	}
 }

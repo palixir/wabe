@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test'
-import { WibeGraphQLParser, parseWibeObject } from './utils'
+import { WibeGraphQLParser } from './utils'
 import {
 	GraphQLNonNull,
 	GraphQLNullableType,
@@ -66,9 +66,13 @@ const deepCompareGraphQLObjects = (
 
 describe('GraphqlSchema utils', () => {
 	it('should parse a wibe object', () => {
-		const simpleObject = parseWibeObject({
-			scalars: [],
+		const wibeGraphqlParser = WibeGraphQLParser({
 			enums: [],
+			scalars: [],
+			graphqlObjectType: {} as any,
+			schemaFields: {} as any,
+		})
+		const simpleObject = wibeGraphqlParser._parseWibeObject({
 			wibeObject: {
 				description: 'A simple object',
 				required: true,
@@ -99,9 +103,14 @@ describe('GraphqlSchema utils', () => {
 	})
 
 	it('should parse a recursive wibe object', () => {
-		const recursiveObject = parseWibeObject({
-			scalars: [],
+		const wibeGraphqlParser = WibeGraphQLParser({
 			enums: [],
+			scalars: [],
+			graphqlObjectType: {} as any,
+			schemaFields: {} as any,
+		})
+
+		const recursiveObject = wibeGraphqlParser._parseWibeObject({
 			wibeObject: {
 				description: 'A recursive object',
 				required: true,
