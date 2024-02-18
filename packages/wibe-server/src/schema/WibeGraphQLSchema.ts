@@ -7,6 +7,7 @@ import {
 	GraphQLList,
 	GraphQLNonNull,
 	GraphQLObjectType,
+	GraphQLOutputType,
 	GraphQLScalarType,
 } from 'graphql'
 import { pluralize } from 'wibe-pluralize'
@@ -28,6 +29,7 @@ import {
 	TypeField,
 } from './Schema'
 import { getGraphqlType, getGraphqlObject } from './utils'
+import { WibeSchemaTypes } from '../../generated/wibe'
 
 // This class is tested in e2e test in graphql folder
 export class WibeGraphQLSchema {
@@ -249,6 +251,7 @@ export class WibeGraphQLSchema {
 		const inputObject = new GraphQLInputObjectType({
 			name: `${nameWithoutSpace}Input`,
 			description,
+			// @ts-expect-error
 			fields: graphqlFieldsOfTheObject,
 		})
 
@@ -291,6 +294,7 @@ export class WibeGraphQLSchema {
 		const inputObject = new GraphQLInputObjectType({
 			name: `${nameWithoutSpace}UpdateFieldsInput`,
 			description,
+			// @ts-expect-error
 			fields: graphqlFieldsOfTheObject,
 		})
 
@@ -330,6 +334,7 @@ export class WibeGraphQLSchema {
 			{} as Record<string, GraphQLFieldConfig<any, any, any>>,
 		)
 
+		// @ts-expect-error
 		const inputObject = new GraphQLInputObjectType({
 			name: `${nameWithoutSpace}WhereInput`,
 			description,
@@ -450,7 +455,7 @@ export class WibeGraphQLSchema {
 					field: currentMutation as TypeField,
 					scalars,
 					enums,
-				})
+				}) as GraphQLOutputType
 
 				acc[currentKey] = {
 					type: required
@@ -493,7 +498,7 @@ export class WibeGraphQLSchema {
 					field: currentQuery as TypeField,
 					scalars,
 					enums,
-				})
+				}) as GraphQLOutputType
 
 				acc[currentKey] = {
 					type: required
