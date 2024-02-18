@@ -27,13 +27,7 @@ import {
 	Schema,
 	TypeField,
 } from './Schema'
-import {
-	getGraphqlObjectFromWibeInputObject,
-	getGraphqlObjectFromWibeWhereInputObject,
-	getGraphqlObjectFromWibeUpdateInputObject,
-	getGraphqlObjectFromWibeObject,
-	getGraphqlType,
-} from './utils'
+import { getGraphqlType, getGraphqlObject } from './utils'
 
 // This class is tested in e2e test in graphql folder
 export class WibeGraphQLSchema {
@@ -189,10 +183,11 @@ export class WibeGraphQLSchema {
 
 		const nameWithoutSpace = name.replace(' ', '')
 
-		const graphqlFields = getGraphqlObjectFromWibeObject({
+		const graphqlFields = getGraphqlObject({
 			scalars,
 			enums,
 			object: fields,
+			graphqlObjectType: 'Object',
 		})
 
 		const fieldsKey = Object.keys(graphqlFields)
@@ -231,10 +226,11 @@ export class WibeGraphQLSchema {
 
 		const nameWithoutSpace = name.replace(' ', '')
 
-		const graphqlFields = getGraphqlObjectFromWibeInputObject({
+		const graphqlFields = getGraphqlObject({
 			scalars,
 			enums,
 			object: fields,
+			graphqlObjectType: 'InputObject',
 		})
 
 		const fieldsKey = Object.keys(graphqlFields)
@@ -272,10 +268,11 @@ export class WibeGraphQLSchema {
 
 		const nameWithoutSpace = name.replace(' ', '')
 
-		const graphqlFields = getGraphqlObjectFromWibeUpdateInputObject({
+		const graphqlFields = getGraphqlObject({
 			scalars,
 			enums,
 			object: fields,
+			graphqlObjectType: 'UpdateFieldsInput',
 		})
 
 		const fieldsKey = Object.keys(graphqlFields)
@@ -313,10 +310,11 @@ export class WibeGraphQLSchema {
 
 		const nameWithoutSpace = name.replace(' ', '')
 
-		const graphqlFields = getGraphqlObjectFromWibeWhereInputObject({
+		const graphqlFields = getGraphqlObject({
 			scalars,
 			enums,
 			object: fields,
+			graphqlObjectType: 'WhereInputObject',
 		})
 
 		const fieldsKey = Object.keys(graphqlFields)
@@ -436,10 +434,11 @@ export class WibeGraphQLSchema {
 					1,
 				)}`
 
-				const graphqlInputFields = getGraphqlObjectFromWibeObject({
+				const graphqlInputFields = getGraphqlObject({
 					enums,
 					scalars,
 					object: input,
+					graphqlObjectType: 'Object',
 				})
 
 				const graphqlInput = new GraphQLInputObjectType({
@@ -483,10 +482,11 @@ export class WibeGraphQLSchema {
 				const required = !!currentQuery.required
 				const currentArgs = currentQuery.args || {}
 
-				const graphqlArgs = getGraphqlObjectFromWibeObject({
+				const graphqlArgs = getGraphqlObject({
 					enums,
 					scalars,
 					object: currentArgs,
+					graphqlObjectType: 'Object',
 				})
 
 				const graphqlType = getGraphqlType({

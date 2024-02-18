@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test'
-import { getGraphqlObjectFromWibeObject, parseWibeObject } from './utils'
+import { getGraphqlObject, parseWibeObject } from './utils'
 import {
 	GraphQLNonNull,
 	GraphQLNullableType,
@@ -147,12 +147,13 @@ describe('GraphqlSchema utils', () => {
 	})
 
 	it('should create an graphql object from simple object', () => {
-		const simpleObject = getGraphqlObjectFromWibeObject({
+		const simpleObject = getGraphqlObject({
 			object: {
 				name: { type: 'String', required: true },
 			},
 			scalars: [],
 			enums: [],
+			graphqlObjectType: 'Object',
 		})
 
 		expect(simpleObject).toEqual({
@@ -163,7 +164,7 @@ describe('GraphqlSchema utils', () => {
 	})
 
 	it('should create an graphql object from recursive object', () => {
-		const recursiveObject = getGraphqlObjectFromWibeObject({
+		const recursiveObject = getGraphqlObject({
 			object: {
 				subObject: {
 					type: 'Object',
@@ -177,6 +178,7 @@ describe('GraphqlSchema utils', () => {
 			},
 			scalars: [],
 			enums: [],
+			graphqlObjectType: 'Object',
 		})
 
 		const expectedGraphqlObject = new GraphQLObjectType({
