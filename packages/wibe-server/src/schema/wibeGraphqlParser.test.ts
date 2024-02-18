@@ -64,7 +64,7 @@ const deepCompareGraphQLObjects = (
 	return true
 }
 
-describe('GraphqlSchema utils', () => {
+describe('WibeGraphqlParser', () => {
 	it('should parse a wibe object', () => {
 		const wibeGraphqlParser = WibeGraphQLParser({
 			enums: [],

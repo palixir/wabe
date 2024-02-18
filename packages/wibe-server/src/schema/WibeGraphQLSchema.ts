@@ -34,7 +34,7 @@ import {
 } from './wibeGraphqlParser'
 import { WibeSchemaTypes } from '../../generated/wibe'
 
-// This class is tested in e2e test in graphql folder
+// This class is tested in the graphql.test.ts file
 export class WibeGraphQLSchema {
 	private schemas: Schema
 
@@ -362,7 +362,7 @@ export class WibeGraphQLSchema {
 
 				const wibeGraphqlParserWithInput = wibeGraphqlParser({
 					schemaFields: input,
-					graphqlObjectType: 'Object',
+					graphqlObjectType: 'InputObject',
 				})
 
 				const graphqlType = wibeGraphqlParserWithInput.getGraphqlType({

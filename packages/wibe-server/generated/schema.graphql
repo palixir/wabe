@@ -218,6 +218,7 @@ type Mutation {
   delete_Users(input: _UsersDeleteInput): _UserConnection!
   createMutation(input: CreateMutationInput): Boolean!
   customMutation(input: CustomMutationInput): Int
+  secondCustomMutation(input: SecondCustomMutationInput): Int
   signOut(input: SignOutInput): Boolean
   signUp(input: SignUpInput): Boolean
   signIn(input: SignInInput): Boolean
@@ -369,6 +370,15 @@ input CreateMutationInput {
 }
 
 input CustomMutationInput {
+  a: Int!
+  b: Int!
+}
+
+input SecondCustomMutationInput {
+  sum: SumInput
+}
+
+input SumInput {
   a: Int!
   b: Int!
 }

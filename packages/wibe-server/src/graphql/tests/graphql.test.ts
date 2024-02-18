@@ -352,6 +352,28 @@ describe('GraphQL : E2E', () => {
 		expect(res.customMutation).toEqual(2)
 	})
 
+	it('should create recursive mutation correctly (with sub input)', async () => {
+		expect(
+			client.request<any>(graphql.secondCustomMutation, {
+				input: {
+					a: 1,
+					b: 1,
+				},
+			}),
+		).rejects.toThrow()
+
+		const res = await client.request<any>(graphql.secondCustomMutation, {
+			input: {
+				sum: {
+					a: 1,
+					b: 1,
+				},
+			},
+		})
+
+		expect(res.secondCustomMutation).toEqual(2)
+	})
+
 	it('should get an object that not exist', async () => {
 		expect(
 			await client.request<any>(graphql._user, {
@@ -591,100 +613,102 @@ describe('GraphQL : E2E', () => {
 
 const graphql = {
 	customQuery: gql`
-        query customQuery($name: String!) {
-            customQuery(name: $name)
-        }
-    `,
+		query customQuery($name: String!) {
+			customQuery(name: $name)
+		}
+	`,
 	customMutation: gql`
-        mutation customMutation($input: CustomMutationInput!) {
-            customMutation(input: $input)
-        }
-    `,
+		mutation customMutation($input: CustomMutationInput!) {
+			customMutation(input: $input)
+		}
+	`,
+	secondCustomMutation: gql`
+		mutation secondCustomMutation($input: SecondCustomMutationInput!) {
+			secondCustomMutation(input: $input)
+		}
+	`,
+
 	_user: gql`
-        query _user($id: ID!) {
-            _user(id: $id) {
-                id
-                name
-                age
-            }
-        }
-    `,
+		query _user($id: ID!) {
+			_user(id: $id) {
+				id
+				name
+				age
+			}
+		}
+	`,
 	_users: gql`
-        query _users(
-            $where: _UserWhereInput
-            $offset: Int
-            $limit: Int
-        ) {
-            _users(where: $where, offset: $offset, limit: $limit) {
-                edges {
-                    node {
-                        id
-                        name
-                        age
-                    }
-                }
-            }
-        }
-    `,
+		query _users($where: _UserWhereInput, $offset: Int, $limit: Int) {
+			_users(where: $where, offset: $offset, limit: $limit) {
+				edges {
+					node {
+						id
+						name
+						age
+					}
+				}
+			}
+		}
+	`,
 	create_User: gql`
-        mutation create_User($input: _UserCreateInput!) {
-            create_User(input: $input) {
-                id
-                name
-                age
-            }
-        }
-    `,
+		mutation create_User($input: _UserCreateInput!) {
+			create_User(input: $input) {
+				id
+				name
+				age
+			}
+		}
+	`,
 	create_Users: gql`
-        mutation create_Users($input: _UsersCreateInput!) {
-            create_Users(input: $input) {
-                edges {
-                    node {
-                        name
-                        age
-                    }
-                }
-            }
-        }
-    `,
+		mutation create_Users($input: _UsersCreateInput!) {
+			create_Users(input: $input) {
+				edges {
+					node {
+						name
+						age
+					}
+				}
+			}
+		}
+	`,
 	update_User: gql`
-        mutation update_User($input: _UserUpdateInput!) {
-            update_User(input: $input) {
-                name
-                age
-            }
-        }
-    `,
+		mutation update_User($input: _UserUpdateInput!) {
+			update_User(input: $input) {
+				name
+				age
+			}
+		}
+	`,
 	update_Users: gql`
-        mutation update_Users($input: _UsersUpdateInput!) {
-            update_Users(input: $input) {
-                edges {
-                    node {
-                        name
-                        age
-                    }
-                }
-            }
-        }
-    `,
+		mutation update_Users($input: _UsersUpdateInput!) {
+			update_Users(input: $input) {
+				edges {
+					node {
+						name
+						age
+					}
+				}
+			}
+		}
+	`,
 	delete_User: gql`
-        mutation delete_User($input: _UserDeleteInput!) {
-            delete_User(input: $input) {
-                name
-                age
-            }
-        }
-    `,
+		mutation delete_User($input: _UserDeleteInput!) {
+			delete_User(input: $input) {
+				name
+				age
+			}
+		}
+	`,
 	delete_Users: gql`
-        mutation delete_Users($input: _UsersDeleteInput!) {
-            delete_Users(input: $input) {
-                edges {
-                    node {
-                        name
-                        age
-                    }
-                }
-            }
-        }
-    `,
+		mutation delete_Users($input: _UsersDeleteInput!) {
+			delete_Users(input: $input) {
+				edges {
+					node {
+						name
+						age
+					}
+				}
+			}
+		}
+	`,
 }
