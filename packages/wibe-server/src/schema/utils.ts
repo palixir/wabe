@@ -10,7 +10,12 @@ import {
 	GraphQLScalarType,
 	GraphQLString,
 } from 'graphql'
-import { ClassInterface, TypeField, WibeDefaultTypes } from './Schema'
+import {
+	ClassInterface,
+	SchemaFields,
+	TypeField,
+	WibeDefaultTypes,
+} from './Schema'
 import {
 	AnyWhereInput,
 	ArrayWhereInput,
@@ -414,20 +419,58 @@ const _graphqlObjectFactory: Record<
 	},
 }
 
-export const getGraphqlObject = ({
-	object,
+export const WibeGraphQLParser = ({
+	schemaFields,
 	scalars,
 	enums,
 	graphqlObjectType,
 }: {
-	object: Record<string, TypeField>
+	schemaFields: SchemaFields
 	scalars: GraphQLScalarType[]
 	enums: GraphQLEnumType[]
 	graphqlObjectType: GraphqlObjectType
-}) =>
-	_getGraphqlObjectFactory({
-		object,
-		scalars,
-		enums,
-		..._graphqlObjectFactory[graphqlObjectType],
-	})
+}) => {
+	const getGraphqlObject = () => {
+		const { callback, forceRequiredToFalse, isWhereType } =
+			_graphqlObjectFactory[graphqlObjectType]
+
+		const keysOfObject = Object.keys(schemaFields)
+
+		return keysOfObject.reduce(
+			(acc, key) => {
+				const currentField = schemaFields[key]
+
+				if (currentField.type === 'Object') {
+					acc[key] = {
+						type: callback({
+							wibeObject: currentField,
+							scalars,
+							enums,
+						}),
+					}
+
+					return acc
+				}
+
+				const graphqlType = getGraphqlType({
+					field: currentField,
+					scalars,
+					enums,
+					isWhereType,
+				})
+
+				acc[key] = {
+					type:
+						currentField.required && !forceRequiredToFalse
+							? new GraphQLNonNull(graphqlType)
+							: graphqlType,
+				}
+
+				return acc
+			},
+			{} as Record<string, any>,
+		)
+	}
+
+	return { getGraphqlObject }
+}
