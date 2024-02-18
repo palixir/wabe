@@ -100,277 +100,284 @@ const _getGraphqlTypeFromTemplate = ({ field }: { field: TypeField }) => {
 	]
 }
 
-export const WibeGraphQLParser = ({
-	schemaFields,
-	scalars,
-	enums,
-	graphqlObjectType,
-}: {
-	schemaFields: SchemaFields
-	scalars: GraphQLScalarType[]
-	enums: GraphQLEnumType[]
-	graphqlObjectType: GraphqlObjectType
-}) => {
-	/*
+export const WibeGraphQLParser =
+	({
+		scalars,
+		enums,
+	}: {
+		scalars: GraphQLScalarType[]
+		enums: GraphQLEnumType[]
+	}) =>
+	({
+		graphqlObjectType,
+		schemaFields,
+	}: {
+		graphqlObjectType: GraphqlObjectType
+		schemaFields: SchemaFields
+	}) => {
+		/*
 	Get graphql fields from a wibe object
 	*/
-	const _getGraphqlFields = ({
-		objectToParse,
-		callBackForObjectType,
-		forceRequiredToFalse = false,
-		isWhereType = false,
-	}: {
-		objectToParse: ClassInterface
-		forceRequiredToFalse?: boolean
-		isWhereType?: boolean
-		callBackForObjectType: ParseObjectCallback
-	}) => {
-		const fields = objectToParse.fields
+		const _getGraphqlFields = ({
+			objectToParse,
+			callBackForObjectType,
+			forceRequiredToFalse = false,
+			isWhereType = false,
+		}: {
+			objectToParse: ClassInterface
+			forceRequiredToFalse?: boolean
+			isWhereType?: boolean
+			callBackForObjectType: ParseObjectCallback
+		}) => {
+			const fields = objectToParse.fields
 
-		const graphqlFields = Object.keys(fields).reduce(
-			(acc, key) => {
-				const currentField = fields[key]
+			const graphqlFields = Object.keys(fields).reduce(
+				(acc, key) => {
+					const currentField = fields[key]
 
-				if (currentField.type === 'Object') {
+					if (currentField.type === 'Object') {
+						acc[key] = {
+							type: callBackForObjectType({
+								wibeObject: {
+									required: currentField.required,
+									description: currentField.description,
+									objectToParse: currentField.object,
+								},
+							}),
+						}
+
+						return acc
+					}
+
+					const graphqlType = getGraphqlType({
+						field: currentField,
+						isWhereType,
+					})
+
 					acc[key] = {
-						type: callBackForObjectType({
-							wibeObject: {
-								required: currentField.required,
-								description: currentField.description,
-								objectToParse: currentField.object,
-							},
-						}),
+						type:
+							currentField.required && !forceRequiredToFalse
+								? new GraphQLNonNull(graphqlType)
+								: graphqlType,
 					}
 
 					return acc
-				}
+				},
+				{} as Record<string, any>,
+			)
 
-				const graphqlType = getGraphqlType({
-					field: currentField,
-					isWhereType,
-				})
+			return graphqlFields
+		}
 
-				acc[key] = {
-					type:
-						currentField.required && !forceRequiredToFalse
-							? new GraphQLNonNull(graphqlType)
-							: graphqlType,
-				}
+		// ------------------ Parsers ------------------
 
-				return acc
-			},
-			{} as Record<string, any>,
-		)
-
-		return graphqlFields
-	}
-
-	// ------------------ Parsers ------------------
-
-	/*
+		/*
 	Parse simple object
 	*/
-	const _parseWibeObject = ({
-		wibeObject: { required, description, objectToParse },
-	}: ParseObjectOptions) => {
-		const graphqlFields = _getGraphqlFields({
-			objectToParse,
-			callBackForObjectType: _parseWibeObject,
-		})
+		const _parseWibeObject = ({
+			wibeObject: { required, description, objectToParse },
+		}: ParseObjectOptions) => {
+			const graphqlFields = _getGraphqlFields({
+				objectToParse,
+				callBackForObjectType: _parseWibeObject,
+			})
 
-		const graphqlObject = new GraphQLObjectType({
-			name: objectToParse.name,
-			description: description,
-			fields: graphqlFields,
-		})
+			const graphqlObject = new GraphQLObjectType({
+				name: objectToParse.name,
+				description: description,
+				fields: graphqlFields,
+			})
 
-		return required ? new GraphQLNonNull(graphqlObject) : graphqlObject
-	}
+			return required ? new GraphQLNonNull(graphqlObject) : graphqlObject
+		}
 
-	/*
+		/*
 	Parse input object
 	*/
-	const _parseWibeInputObject = ({
-		wibeObject: { required, description, objectToParse },
-	}: ParseObjectOptions) => {
-		const graphqlFields = _getGraphqlFields({
-			objectToParse,
-			callBackForObjectType: _parseWibeInputObject,
-		})
+		const _parseWibeInputObject = ({
+			wibeObject: { required, description, objectToParse },
+		}: ParseObjectOptions) => {
+			const graphqlFields = _getGraphqlFields({
+				objectToParse,
+				callBackForObjectType: _parseWibeInputObject,
+			})
 
-		const graphqlObject = new GraphQLInputObjectType({
-			name: `${objectToParse.name}Input`,
-			description: description,
-			fields: graphqlFields,
-		})
+			const graphqlObject = new GraphQLInputObjectType({
+				name: `${objectToParse.name}Input`,
+				description: description,
+				fields: graphqlFields,
+			})
 
-		return required ? new GraphQLNonNull(graphqlObject) : graphqlObject
-	}
+			return required ? new GraphQLNonNull(graphqlObject) : graphqlObject
+		}
 
-	/*
+		/*
 	Parse update input object
 	*/
-	const _parseWibeUpdateInputObject = ({
-		wibeObject: { required, description, objectToParse },
-	}: ParseObjectOptions) => {
-		const graphqlFields = _getGraphqlFields({
-			objectToParse,
-			callBackForObjectType: _parseWibeUpdateInputObject,
-			forceRequiredToFalse: true,
-		})
+		const _parseWibeUpdateInputObject = ({
+			wibeObject: { required, description, objectToParse },
+		}: ParseObjectOptions) => {
+			const graphqlFields = _getGraphqlFields({
+				objectToParse,
+				callBackForObjectType: _parseWibeUpdateInputObject,
+				forceRequiredToFalse: true,
+			})
 
-		const graphqlObject = new GraphQLInputObjectType({
-			name: `${objectToParse.name}UpdateFieldsInput`,
-			description: description,
-			fields: graphqlFields,
-		})
+			const graphqlObject = new GraphQLInputObjectType({
+				name: `${objectToParse.name}UpdateFieldsInput`,
+				description: description,
+				fields: graphqlFields,
+			})
 
-		return required ? new GraphQLNonNull(graphqlObject) : graphqlObject
-	}
+			return required ? new GraphQLNonNull(graphqlObject) : graphqlObject
+		}
 
-	/*
+		/*
 	Parse where input object
 	*/
-	const _parseWibeWhereInputObject = ({
-		wibeObject: { required, description, objectToParse },
-	}: ParseObjectOptions) => {
-		const graphqlFields = _getGraphqlFields({
-			objectToParse,
-			callBackForObjectType: _parseWibeWhereInputObject,
-			forceRequiredToFalse: true,
-			isWhereType: true,
-		})
+		const _parseWibeWhereInputObject = ({
+			wibeObject: { required, description, objectToParse },
+		}: ParseObjectOptions) => {
+			const graphqlFields = _getGraphqlFields({
+				objectToParse,
+				callBackForObjectType: _parseWibeWhereInputObject,
+				forceRequiredToFalse: true,
+				isWhereType: true,
+			})
 
-		// @ts-expect-error
-		const graphqlObject = new GraphQLInputObjectType({
-			name: `${objectToParse.name}WhereInput`,
-			description: description,
-			fields: () => ({
-				...graphqlFields,
-				...{
-					OR: {
-						type: new GraphQLList(graphqlObject),
+			// @ts-expect-error
+			const graphqlObject = new GraphQLInputObjectType({
+				name: `${objectToParse.name}WhereInput`,
+				description: description,
+				fields: () => ({
+					...graphqlFields,
+					...{
+						OR: {
+							type: new GraphQLList(graphqlObject),
+						},
+						AND: {
+							type: new GraphQLList(graphqlObject),
+						},
 					},
-					AND: {
-						type: new GraphQLList(graphqlObject),
-					},
-				},
-			}),
-		})
+				}),
+			})
 
-		return required ? new GraphQLNonNull(graphqlObject) : graphqlObject
-	}
-
-	const _graphqlObjectFactory: Record<
-		GraphqlObjectType,
-		{
-			callback: ParseObjectCallback
-			isWhereType: boolean
-			forceRequiredToFalse: boolean
+			return required ? new GraphQLNonNull(graphqlObject) : graphqlObject
 		}
-	> = {
-		Object: {
-			callback: _parseWibeObject,
-			isWhereType: false,
-			forceRequiredToFalse: false,
-		},
-		InputObject: {
-			callback: _parseWibeInputObject,
-			isWhereType: false,
-			forceRequiredToFalse: false,
-		},
-		UpdateFieldsInput: {
-			callback: _parseWibeUpdateInputObject,
-			isWhereType: false,
-			forceRequiredToFalse: true,
-		},
-		WhereInputObject: {
-			callback: _parseWibeWhereInputObject,
-			isWhereType: true,
-			forceRequiredToFalse: true,
-		},
-	}
 
-	/*
+		const _graphqlObjectFactory: Record<
+			GraphqlObjectType,
+			{
+				callback: ParseObjectCallback
+				isWhereType: boolean
+				forceRequiredToFalse: boolean
+			}
+		> = {
+			Object: {
+				callback: _parseWibeObject,
+				isWhereType: false,
+				forceRequiredToFalse: false,
+			},
+			InputObject: {
+				callback: _parseWibeInputObject,
+				isWhereType: false,
+				forceRequiredToFalse: false,
+			},
+			UpdateFieldsInput: {
+				callback: _parseWibeUpdateInputObject,
+				isWhereType: false,
+				forceRequiredToFalse: true,
+			},
+			WhereInputObject: {
+				callback: _parseWibeWhereInputObject,
+				isWhereType: true,
+				forceRequiredToFalse: true,
+			},
+		}
+
+		/*
 	Get the right graphql type for a field
 	*/
-	const getGraphqlType = ({
-		field,
-		isWhereType = false,
-	}: {
-		field: TypeField
-		isWhereType?: boolean
-	}) => {
-		const scalarExist = scalars.find((scalar) => scalar.name === field.type)
-		const enumExist = enums.find((e) => e.name === field.type)
+		const getGraphqlType = ({
+			field,
+			isWhereType = false,
+		}: {
+			field: TypeField
+			isWhereType?: boolean
+		}) => {
+			const scalarExist = scalars.find(
+				(scalar) => scalar.name === field.type,
+			)
+			const enumExist = enums.find((e) => e.name === field.type)
 
-		if (isWhereType) {
-			if (!Object.keys(templateWhereInput).includes(field.type))
-				return AnyWhereInput
+			if (isWhereType) {
+				if (!Object.keys(templateWhereInput).includes(field.type))
+					return AnyWhereInput
 
-			return templateWhereInput[
-				field.type as WibeDefaultTypesWithoutObject
-			]
+				return templateWhereInput[
+					field.type as WibeDefaultTypesWithoutObject
+				]
+			}
+
+			if (scalarExist) return scalarExist
+			if (enumExist) return enumExist
+
+			const graphqlType = _getGraphqlTypeFromTemplate({ field })
+
+			if (!graphqlType)
+				throw new Error(`${field.type} not exist in schema`)
+
+			return graphqlType
 		}
 
-		if (scalarExist) return scalarExist
-		if (enumExist) return enumExist
+		// Get Graphql object from a schema fields passed in WibeGraphqlParser
+		const getGraphqlObject = () => {
+			const { callback, forceRequiredToFalse, isWhereType } =
+				_graphqlObjectFactory[graphqlObjectType]
 
-		const graphqlType = _getGraphqlTypeFromTemplate({ field })
+			const keysOfObject = Object.keys(schemaFields)
 
-		if (!graphqlType) throw new Error(`${field.type} not exist in schema`)
+			return keysOfObject.reduce(
+				(acc, key) => {
+					const currentField = schemaFields[key]
 
-		return graphqlType
-	}
+					if (currentField.type === 'Object') {
+						acc[key] = {
+							type: callback({
+								wibeObject: {
+									...currentField,
+									objectToParse: currentField.object,
+								},
+							}),
+						}
 
-	// Get Graphql object from a schema fields passed in WibeGraphqlParser
-	const getGraphqlObject = () => {
-		const { callback, forceRequiredToFalse, isWhereType } =
-			_graphqlObjectFactory[graphqlObjectType]
+						return acc
+					}
 
-		const keysOfObject = Object.keys(schemaFields)
+					const graphqlType = getGraphqlType({
+						field: currentField,
+						isWhereType,
+					})
 
-		return keysOfObject.reduce(
-			(acc, key) => {
-				const currentField = schemaFields[key]
-
-				if (currentField.type === 'Object') {
 					acc[key] = {
-						type: callback({
-							wibeObject: {
-								...currentField,
-								objectToParse: currentField.object,
-							},
-						}),
+						type:
+							currentField.required && !forceRequiredToFalse
+								? new GraphQLNonNull(graphqlType)
+								: graphqlType,
 					}
 
 					return acc
-				}
+				},
+				{} as Record<string, any>,
+			)
+		}
 
-				const graphqlType = getGraphqlType({
-					field: currentField,
-					isWhereType,
-				})
-
-				acc[key] = {
-					type:
-						currentField.required && !forceRequiredToFalse
-							? new GraphQLNonNull(graphqlType)
-							: graphqlType,
-				}
-
-				return acc
-			},
-			{} as Record<string, any>,
-		)
+		return {
+			getGraphqlType,
+			getGraphqlObject,
+			_parseWibeObject,
+			_parseWibeInputObject,
+			_parseWibeUpdateInputObject,
+			_parseWibeWhereInputObject,
+		}
 	}
-
-	return {
-		getGraphqlType,
-		getGraphqlObject,
-		_parseWibeObject,
-		_parseWibeInputObject,
-		_parseWibeUpdateInputObject,
-		_parseWibeWhereInputObject,
-	}
-}

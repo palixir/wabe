@@ -69,10 +69,11 @@ describe('GraphqlSchema utils', () => {
 		const wibeGraphqlParser = WibeGraphQLParser({
 			enums: [],
 			scalars: [],
+		})
+		const simpleObject = wibeGraphqlParser({
 			graphqlObjectType: {} as any,
 			schemaFields: {} as any,
-		})
-		const simpleObject = wibeGraphqlParser._parseWibeObject({
+		})._parseWibeObject({
 			wibeObject: {
 				description: 'A simple object',
 				required: true,
@@ -106,11 +107,12 @@ describe('GraphqlSchema utils', () => {
 		const wibeGraphqlParser = WibeGraphQLParser({
 			enums: [],
 			scalars: [],
-			graphqlObjectType: {} as any,
-			schemaFields: {} as any,
 		})
 
-		const recursiveObject = wibeGraphqlParser._parseWibeObject({
+		const recursiveObject = wibeGraphqlParser({
+			graphqlObjectType: {} as any,
+			schemaFields: {} as any,
+		})._parseWibeObject({
 			wibeObject: {
 				description: 'A recursive object',
 				required: true,
@@ -157,15 +159,16 @@ describe('GraphqlSchema utils', () => {
 
 	it('should create an graphql object from simple object', () => {
 		const wibeGraphqlParser = WibeGraphQLParser({
+			scalars: [],
+			enums: [],
+		})
+
+		const simpleObject = wibeGraphqlParser({
 			schemaFields: {
 				name: { type: 'String', required: true },
 			},
-			scalars: [],
-			enums: [],
 			graphqlObjectType: 'Object',
-		})
-
-		const simpleObject = wibeGraphqlParser.getGraphqlObject()
+		}).getGraphqlObject()
 
 		expect(simpleObject).toEqual({
 			name: {
@@ -176,6 +179,11 @@ describe('GraphqlSchema utils', () => {
 
 	it('should create an graphql object from recursive object', () => {
 		const wibeGraphqlParser = WibeGraphQLParser({
+			scalars: [],
+			enums: [],
+		})
+
+		const recursiveObject = wibeGraphqlParser({
 			schemaFields: {
 				subObject: {
 					type: 'Object',
@@ -187,12 +195,8 @@ describe('GraphqlSchema utils', () => {
 					},
 				},
 			},
-			scalars: [],
-			enums: [],
 			graphqlObjectType: 'Object',
-		})
-
-		const recursiveObject = wibeGraphqlParser.getGraphqlObject()
+		}).getGraphqlObject()
 
 		const expectedGraphqlObject = new GraphQLObjectType({
 			name: 'SubObject',
