@@ -74,16 +74,15 @@ describe('WibeGraphqlParser', () => {
 			graphqlObjectType: {} as any,
 			schemaFields: {} as any,
 		})._parseWibeObject({
-			wibeObject: {
-				description: 'A simple object',
-				required: true,
-				objectToParse: {
-					name: 'SimpleObject',
-					fields: {
-						name: { type: 'String', required: true },
-					},
+			description: 'A simple object',
+			required: true,
+			objectToParse: {
+				name: 'SimpleObject',
+				fields: {
+					name: { type: 'String', required: true },
 				},
 			},
+			nameOfTheObject: 'SimpleObject',
 		})
 
 		const expectedObject = new GraphQLNonNull(
@@ -113,24 +112,23 @@ describe('WibeGraphqlParser', () => {
 			graphqlObjectType: {} as any,
 			schemaFields: {} as any,
 		})._parseWibeObject({
-			wibeObject: {
-				description: 'A recursive object',
-				required: true,
-				objectToParse: {
-					name: 'RecursiveObject',
-					fields: {
-						subObject: {
-							type: 'Object',
-							object: {
-								name: 'SubObject',
-								fields: {
-									name: { type: 'String', required: true },
-								},
+			description: 'A recursive object',
+			required: true,
+			objectToParse: {
+				name: 'RecursiveObject',
+				fields: {
+					subObject: {
+						type: 'Object',
+						object: {
+							name: 'SubObject',
+							fields: {
+								name: { type: 'String', required: true },
 							},
 						},
 					},
 				},
 			},
+			nameOfTheObject: 'RecursiveObject',
 		})
 
 		const expectedObject = new GraphQLNonNull(
@@ -140,7 +138,7 @@ describe('WibeGraphqlParser', () => {
 				fields: {
 					subObject: {
 						type: new GraphQLObjectType({
-							name: 'SubObject',
+							name: 'RecursiveObjectSubObject',
 							fields: {
 								name: {
 									type: new GraphQLNonNull(GraphQLString),
@@ -168,7 +166,7 @@ describe('WibeGraphqlParser', () => {
 				name: { type: 'String', required: true },
 			},
 			graphqlObjectType: 'Object',
-		}).getGraphqlFields()
+		}).getGraphqlFields('SimpleObject')
 
 		expect(simpleObject).toEqual({
 			name: {
@@ -196,10 +194,10 @@ describe('WibeGraphqlParser', () => {
 				},
 			},
 			graphqlObjectType: 'Object',
-		}).getGraphqlFields()
+		}).getGraphqlFields('SimpleObject')
 
 		const expectedGraphqlObject = new GraphQLObjectType({
-			name: 'SubObject',
+			name: 'SimpleObjectSubObject',
 			fields: {
 				name: {
 					type: new GraphQLNonNull(GraphQLString),

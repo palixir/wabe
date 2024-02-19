@@ -372,6 +372,19 @@ describe('GraphQL : E2E', () => {
 		})
 
 		expect(res.secondCustomMutation).toEqual(2)
+
+		const res2 = await client.request<any>(graphql.thirdCustomMutation, {
+			input: {
+				subObject: {
+					sum: {
+						a: 1,
+						b: 1,
+					},
+				},
+			},
+		})
+
+		expect(res2.thirdCustomMutation).toEqual(2)
 	})
 
 	it('should get an object that not exist', async () => {
@@ -627,7 +640,11 @@ const graphql = {
 			secondCustomMutation(input: $input)
 		}
 	`,
-
+	thirdCustomMutation: gql`
+		mutation thirdCustomMutation($input: ThirdCustomMutationInput!) {
+			thirdCustomMutation(input: $input)
+		}
+	`,
 	_user: gql`
 		query _user($id: ID!) {
 			_user(id: $id) {

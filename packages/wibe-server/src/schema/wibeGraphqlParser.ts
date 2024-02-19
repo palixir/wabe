@@ -44,11 +44,10 @@ type WibeDefaultTypesWithoutArrayAndObject = Exclude<
 >
 
 type ParseObjectOptions = {
-	wibeObject: {
-		required?: boolean
-		description?: string
-		objectToParse: ClassInterface
-	}
+	required?: boolean
+	description?: string
+	objectToParse: ClassInterface
+	nameOfTheObject: string
 }
 
 type ParseObjectCallback = (options: ParseObjectOptions) => any
@@ -123,7 +122,7 @@ export interface WibeGraphQLParserFactory {
 			field: TypeField
 			isWhereType?: boolean
 		}): any
-		getGraphqlFields(): any
+		getGraphqlFields(nameOfTheObject: string): any
 	}
 }
 
@@ -135,16 +134,18 @@ export const WibeGraphQLParser: WibeGraphQLParserConstructor =
 	({ scalars, enums }: WibeGraphQLParserConstructorOptions) =>
 	({ graphqlObjectType, schemaFields }: WibeGraphQLParserFactoryOptions) => {
 		// Get graphql fields from a wibe object
-		const _getGraphqlFields = ({
+		const _getGraphqlFieldsFromAnObject = ({
 			objectToParse,
 			callBackForObjectType,
 			forceRequiredToFalse = false,
 			isWhereType = false,
+			nameOfTheObject,
 		}: {
 			objectToParse: ClassInterface
 			forceRequiredToFalse?: boolean
 			isWhereType?: boolean
 			callBackForObjectType: ParseObjectCallback
+			nameOfTheObject: string
 		}) => {
 			const fields = objectToParse.fields
 
@@ -152,14 +153,17 @@ export const WibeGraphQLParser: WibeGraphQLParserConstructor =
 				(acc, key) => {
 					const currentField = fields[key]
 
+					const keyWithFirstLetterUppercase = `${key
+						.charAt(0)
+						.toUpperCase()}${key.slice(1)}`
+
 					if (currentField.type === 'Object') {
 						acc[key] = {
 							type: callBackForObjectType({
-								wibeObject: {
-									required: currentField.required,
-									description: currentField.description,
-									objectToParse: currentField.object,
-								},
+								required: currentField.required,
+								description: currentField.description,
+								objectToParse: currentField.object,
+								nameOfTheObject: `${nameOfTheObject}${keyWithFirstLetterUppercase}`,
 							}),
 						}
 
@@ -190,15 +194,19 @@ export const WibeGraphQLParser: WibeGraphQLParserConstructor =
 
 		// Parse simple object
 		const _parseWibeObject = ({
-			wibeObject: { required, description, objectToParse },
+			required,
+			description,
+			objectToParse,
+			nameOfTheObject,
 		}: ParseObjectOptions) => {
-			const graphqlFields = _getGraphqlFields({
+			const graphqlFields = _getGraphqlFieldsFromAnObject({
 				objectToParse,
 				callBackForObjectType: _parseWibeObject,
+				nameOfTheObject,
 			})
 
 			const graphqlObject = new GraphQLObjectType({
-				name: objectToParse.name,
+				name: nameOfTheObject,
 				description: description,
 				fields: graphqlFields,
 			})
@@ -208,15 +216,19 @@ export const WibeGraphQLParser: WibeGraphQLParserConstructor =
 
 		// Parse input object
 		const _parseWibeInputObject = ({
-			wibeObject: { required, description, objectToParse },
+			required,
+			description,
+			objectToParse,
+			nameOfTheObject,
 		}: ParseObjectOptions) => {
-			const graphqlFields = _getGraphqlFields({
+			const graphqlFields = _getGraphqlFieldsFromAnObject({
 				objectToParse,
 				callBackForObjectType: _parseWibeInputObject,
+				nameOfTheObject,
 			})
 
 			const graphqlObject = new GraphQLInputObjectType({
-				name: `${objectToParse.name}Input`,
+				name: `${nameOfTheObject}Input`,
 				description: description,
 				fields: graphqlFields,
 			})
@@ -226,16 +238,20 @@ export const WibeGraphQLParser: WibeGraphQLParserConstructor =
 
 		// Parse update input object
 		const _parseWibeUpdateInputObject = ({
-			wibeObject: { required, description, objectToParse },
+			required,
+			description,
+			objectToParse,
+			nameOfTheObject,
 		}: ParseObjectOptions) => {
-			const graphqlFields = _getGraphqlFields({
+			const graphqlFields = _getGraphqlFieldsFromAnObject({
 				objectToParse,
 				callBackForObjectType: _parseWibeUpdateInputObject,
 				forceRequiredToFalse: true,
+				nameOfTheObject,
 			})
 
 			const graphqlObject = new GraphQLInputObjectType({
-				name: `${objectToParse.name}UpdateFieldsInput`,
+				name: `${nameOfTheObject}UpdateFieldsInput`,
 				description: description,
 				fields: graphqlFields,
 			})
@@ -245,18 +261,22 @@ export const WibeGraphQLParser: WibeGraphQLParserConstructor =
 
 		// Parse where input object
 		const _parseWibeWhereInputObject = ({
-			wibeObject: { required, description, objectToParse },
+			required,
+			description,
+			objectToParse,
+			nameOfTheObject,
 		}: ParseObjectOptions) => {
-			const graphqlFields = _getGraphqlFields({
+			const graphqlFields = _getGraphqlFieldsFromAnObject({
 				objectToParse,
 				callBackForObjectType: _parseWibeWhereInputObject,
 				forceRequiredToFalse: true,
 				isWhereType: true,
+				nameOfTheObject,
 			})
 
 			// @ts-expect-error
 			const graphqlObject = new GraphQLInputObjectType({
-				name: `${objectToParse.name}WhereInput`,
+				name: `${nameOfTheObject}WhereInput`,
 				description: description,
 				fields: () => ({
 					...graphqlFields,
@@ -338,7 +358,7 @@ export const WibeGraphQLParser: WibeGraphQLParserConstructor =
 		}
 
 		// Get Graphql object from a schema fields passed in WibeGraphqlParser
-		const getGraphqlFields = () => {
+		const getGraphqlFields = (nameOfTheObject: string) => {
 			const { callback, forceRequiredToFalse, isWhereType } =
 				_graphqlObjectFactory[graphqlObjectType]
 
@@ -348,13 +368,16 @@ export const WibeGraphQLParser: WibeGraphQLParserConstructor =
 				(acc, key) => {
 					const currentField = schemaFields[key]
 
+					const keyWithFirstLetterUpperCase = `${key
+						.charAt(0)
+						.toUpperCase()}${key.slice(1)}`
+
 					if (currentField.type === 'Object') {
 						acc[key] = {
 							type: callback({
-								wibeObject: {
-									...currentField,
-									objectToParse: currentField.object,
-								},
+								...currentField,
+								objectToParse: currentField.object,
+								nameOfTheObject: `${nameOfTheObject}${keyWithFirstLetterUpperCase}`,
 							}),
 						}
 

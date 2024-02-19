@@ -178,16 +178,16 @@ export class WibeGraphQLSchema {
 
 	createObject({
 		wibeClass,
-		wibeGraphlParser,
+		wibeGraphqlParser,
 	}: {
 		wibeClass: ClassInterface
-		wibeGraphlParser: any
+		wibeGraphqlParser: WibeGraphQLParserFactory
 	}) {
 		const { name, fields, description } = wibeClass
 
 		const nameWithoutSpace = name.replace(' ', '')
 
-		const wibeGraphqlParserWithInput = wibeGraphlParser({
+		const wibeGraphqlParserWithInput = wibeGraphqlParser({
 			schemaFields: fields,
 			graphqlObjectType: 'Object',
 		})
@@ -197,23 +197,25 @@ export class WibeGraphQLSchema {
 			description,
 			fields: () => ({
 				id: { type: new GraphQLNonNull(GraphQLID) },
-				...wibeGraphqlParserWithInput.getGraphqlFields(),
+				...wibeGraphqlParserWithInput.getGraphqlFields(
+					nameWithoutSpace,
+				),
 			}),
 		})
 	}
 
 	createInputObject({
 		wibeClass,
-		wibeGraphlParser,
+		wibeGraphqlParser,
 	}: {
 		wibeClass: ClassInterface
-		wibeGraphlParser: any
+		wibeGraphqlParser: WibeGraphQLParserFactory
 	}) {
 		const { name, fields, description } = wibeClass
 
 		const nameWithoutSpace = name.replace(' ', '')
 
-		const wibeGraphqlParserWithInput = wibeGraphlParser({
+		const wibeGraphqlParserWithInput = wibeGraphqlParser({
 			schemaFields: fields,
 			graphqlObjectType: 'InputObject',
 		})
@@ -221,22 +223,24 @@ export class WibeGraphQLSchema {
 		return new GraphQLInputObjectType({
 			name: `${nameWithoutSpace}Input`,
 			description,
-			fields: wibeGraphqlParserWithInput.getGraphqlFields(),
+			fields: wibeGraphqlParserWithInput.getGraphqlFields(
+				nameWithoutSpace,
+			),
 		})
 	}
 
 	createUpdateInputObject({
 		wibeClass,
-		wibeGraphlParser,
+		wibeGraphqlParser,
 	}: {
 		wibeClass: ClassInterface
-		wibeGraphlParser: any
+		wibeGraphqlParser: WibeGraphQLParserFactory
 	}) {
 		const { name, fields, description } = wibeClass
 
 		const nameWithoutSpace = name.replace(' ', '')
 
-		const wibeGraphqlParserWithInput = wibeGraphlParser({
+		const wibeGraphqlParserWithInput = wibeGraphqlParser({
 			schemaFields: fields,
 			graphqlObjectType: 'UpdateFieldsInput',
 		})
@@ -244,34 +248,36 @@ export class WibeGraphQLSchema {
 		return new GraphQLInputObjectType({
 			name: `${nameWithoutSpace}UpdateFieldsInput`,
 			description,
-			fields: wibeGraphqlParserWithInput.getGraphqlFields(),
+			fields: wibeGraphqlParserWithInput.getGraphqlFields(
+				nameWithoutSpace,
+			),
 		})
 	}
 
 	createWhereInputObject({
 		wibeClass,
-		wibeGraphlParser,
+		wibeGraphqlParser,
 	}: {
 		wibeClass: ClassInterface
-		wibeGraphlParser: any
+		wibeGraphqlParser: WibeGraphQLParserFactory
 	}) {
 		const { name, fields, description } = wibeClass
 
 		const nameWithoutSpace = name.replace(' ', '')
 
-		const wibeGraphqlParserWithInput = wibeGraphlParser({
+		const wibeGraphqlParserWithInput = wibeGraphqlParser({
 			schemaFields: fields,
 			graphqlObjectType: 'WhereInputObject',
 		})
-
-		const graphqlFields = wibeGraphqlParserWithInput.getGraphqlFields()
 
 		// @ts-expect-error
 		const inputObject = new GraphQLInputObjectType({
 			name: `${nameWithoutSpace}WhereInput`,
 			description,
 			fields: () => ({
-				...graphqlFields,
+				...wibeGraphqlParserWithInput.getGraphqlFields(
+					nameWithoutSpace,
+				),
 				...{
 					OR: {
 						type: new GraphQLList(inputObject),
@@ -310,23 +316,23 @@ export class WibeGraphQLSchema {
 		return { edgeObject, connectionObject }
 	}
 
-	createAllObjects(wibeGraphlParser: any) {
+	createAllObjects(wibeGraphqlParser: WibeGraphQLParserFactory) {
 		return this.schemas.schema.class.map((wibeClass) => {
-			const object = this.createObject({ wibeGraphlParser, wibeClass })
+			const object = this.createObject({ wibeGraphqlParser, wibeClass })
 			const { edgeObject, connectionObject } = this.createOutputObject({
 				object,
 				wibeClass,
 			})
 			const inputObject = this.createInputObject({
-				wibeGraphlParser,
+				wibeGraphqlParser,
 				wibeClass,
 			})
 			const updateInputObject = this.createUpdateInputObject({
-				wibeGraphlParser,
+				wibeGraphqlParser,
 				wibeClass,
 			})
 			const whereInputObject = this.createWhereInputObject({
-				wibeGraphlParser,
+				wibeGraphqlParser,
 				wibeClass,
 			})
 
@@ -371,7 +377,9 @@ export class WibeGraphQLSchema {
 
 				const graphqlInput = new GraphQLInputObjectType({
 					name: `${currentKeyWithFirstLetterUpperCase}Input`,
-					fields: wibeGraphqlParserWithInput.getGraphqlFields(),
+					fields: wibeGraphqlParserWithInput.getGraphqlFields(
+						currentKeyWithFirstLetterUpperCase,
+					),
 				})
 
 				acc[currentKey] = {
@@ -415,7 +423,9 @@ export class WibeGraphQLSchema {
 					type: required
 						? new GraphQLNonNull(graphqlType)
 						: graphqlType,
-					args: wibeGraphqlParserWithInput.getGraphqlFields(),
+					args: wibeGraphqlParserWithInput.getGraphqlFields(
+						currentKey,
+					),
 					description: currentQuery.description,
 					resolve: currentQuery.resolve,
 				}

@@ -25,8 +25,8 @@ type _User {
   birthDate: Date
   phone: Phone
   role: Role
-  address: Address
-  object: Object
+  address: _UserAddress
+  object: _UserObject
   provider: AuthenticationProvider
   password: String
   verifiedEmail: Boolean
@@ -42,7 +42,7 @@ scalar Email
 """Date scalar type"""
 scalar Date
 
-type Address {
+type _UserAddress {
   address1: String
   address2: String
   postalCode: Int
@@ -50,11 +50,11 @@ type Address {
   country: String
 }
 
-type Object {
-  objectOfObject: ObjectOfObject
+type _UserObject {
+  objectOfObject: _UserObjectObjectOfObject
 }
 
-type ObjectOfObject {
+type _UserObjectObjectOfObject {
   name: String
 }
 
@@ -110,8 +110,8 @@ input _UserWhereInput {
   birthDate: DateWhereInput
   phone: AnyWhereInput
   role: AnyWhereInput
-  address: AddressWhereInput
-  object: ObjectWhereInput
+  address: _UserAddressWhereInput
+  object: _UserObjectWhereInput
   provider: AnyWhereInput
   password: StringWhereInput
   verifiedEmail: BooleanWhereInput
@@ -169,26 +169,26 @@ The Any scalar type is used in operations and types that involve any type of val
 """
 scalar Any
 
-input AddressWhereInput {
+input _UserAddressWhereInput {
   address1: StringWhereInput
   address2: StringWhereInput
   postalCode: IntWhereInput
   city: StringWhereInput
   country: StringWhereInput
-  OR: [AddressWhereInput]
-  AND: [AddressWhereInput]
+  OR: [_UserAddressWhereInput]
+  AND: [_UserAddressWhereInput]
 }
 
-input ObjectWhereInput {
-  objectOfObject: ObjectOfObjectWhereInput
-  OR: [ObjectWhereInput]
-  AND: [ObjectWhereInput]
+input _UserObjectWhereInput {
+  objectOfObject: _UserObjectObjectOfObjectWhereInput
+  OR: [_UserObjectWhereInput]
+  AND: [_UserObjectWhereInput]
 }
 
-input ObjectOfObjectWhereInput {
+input _UserObjectObjectOfObjectWhereInput {
   name: StringWhereInput
-  OR: [ObjectOfObjectWhereInput]
-  AND: [ObjectOfObjectWhereInput]
+  OR: [_UserObjectObjectOfObjectWhereInput]
+  AND: [_UserObjectObjectOfObjectWhereInput]
 }
 
 type Mutation {
@@ -276,8 +276,8 @@ input _UserInput {
   birthDate: Date
   phone: Phone
   role: Role
-  address: AddressInput
-  object: ObjectInput
+  address: _UserAddressInput
+  object: _UserObjectInput
   provider: AuthenticationProvider
   password: String
   verifiedEmail: Boolean
@@ -287,7 +287,7 @@ input _UserInput {
   updatedAt: Date
 }
 
-input AddressInput {
+input _UserAddressInput {
   address1: String
   address2: String
   postalCode: Int
@@ -295,11 +295,11 @@ input AddressInput {
   country: String
 }
 
-input ObjectInput {
-  objectOfObject: ObjectOfObjectInput
+input _UserObjectInput {
+  objectOfObject: _UserObjectObjectOfObjectInput
 }
 
-input ObjectOfObjectInput {
+input _UserObjectObjectOfObjectInput {
   name: String
 }
 
@@ -323,8 +323,8 @@ input _UserUpdateFieldsInput {
   birthDate: Date
   phone: Phone
   role: Role
-  address: AddressUpdateFieldsInput
-  object: ObjectUpdateFieldsInput
+  address: _UserAddressUpdateFieldsInput
+  object: _UserObjectUpdateFieldsInput
   provider: AuthenticationProvider
   password: String
   verifiedEmail: Boolean
@@ -334,7 +334,7 @@ input _UserUpdateFieldsInput {
   updatedAt: Date
 }
 
-input AddressUpdateFieldsInput {
+input _UserAddressUpdateFieldsInput {
   address1: String
   address2: String
   postalCode: Int
@@ -342,11 +342,11 @@ input AddressUpdateFieldsInput {
   country: String
 }
 
-input ObjectUpdateFieldsInput {
-  objectOfObject: ObjectOfObjectUpdateFieldsInput
+input _UserObjectUpdateFieldsInput {
+  objectOfObject: _UserObjectObjectOfObjectUpdateFieldsInput
 }
 
-input ObjectOfObjectUpdateFieldsInput {
+input _UserObjectObjectOfObjectUpdateFieldsInput {
   name: String
 }
 
@@ -375,10 +375,10 @@ input CustomMutationInput {
 }
 
 input SecondCustomMutationInput {
-  sum: SumInput
+  sum: SecondCustomMutationSumInput
 }
 
-input SumInput {
+input SecondCustomMutationSumInput {
   a: Int!
   b: Int!
 }

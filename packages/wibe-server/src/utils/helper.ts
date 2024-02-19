@@ -150,6 +150,40 @@ export const setupTests = async () => {
 								resolve: (_: any, args: any) =>
 									args.input.sum.a + args.input.sum.b,
 							},
+							thirdCustomMutation: {
+								type: 'Int',
+								args: {
+									input: {
+										subObject: {
+											type: 'Object',
+											object: {
+												name: 'SubObject',
+												fields: {
+													sum: {
+														type: 'Object',
+														object: {
+															name: 'Sum',
+															fields: {
+																a: {
+																	type: 'Int',
+																	required: true,
+																},
+																b: {
+																	type: 'Int',
+																	required: true,
+																},
+															},
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+								resolve: (_: any, args: any) =>
+									args.input.subObject.sum.a +
+									args.input.subObject.sum.b,
+							},
 						},
 					},
 				},
