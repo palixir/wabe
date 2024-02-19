@@ -74,6 +74,7 @@ describe('Schema', () => {
 						signIn: expect.any(Object),
 						signUp: expect.any(Object),
 						signInWithProvider: expect.any(Object),
+						signInWith: expect.any(Object),
 					},
 					queries: {
 						toto: {
