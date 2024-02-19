@@ -1,4 +1,5 @@
 import { WibeSchemaScalars, WibeSchemaEnums } from '../../generated/wibe'
+import { signInWithResolver } from '../authentication/signInWithResolver'
 import { signInResolver } from '../graphql/resolvers/signIn'
 import { signInWithProviderResolver } from '../graphql/resolvers/signInWithProvider'
 import { signOutResolver } from '../graphql/resolvers/signOut'
@@ -158,6 +159,31 @@ export class Schema {
 
 		const defaultResolvers: TypeResolver = {
 			mutations: {
+				signInWith: {
+					type: 'Boolean',
+					args: {
+						input: {
+							emailPassword: {
+								type: 'Object',
+								object: {
+									name: 'EmailPassword',
+									fields: {
+										email: {
+											type: 'Email',
+											required: true,
+										},
+										password: {
+											type: 'String',
+											required: true,
+										},
+									},
+								},
+							},
+						},
+					},
+					// TODO : Create the resolve
+					resolve: signInWithResolver,
+				},
 				signOut: {
 					type: 'Boolean',
 					resolve: signOutResolver,

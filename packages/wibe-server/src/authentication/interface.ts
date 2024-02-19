@@ -11,18 +11,24 @@ export interface ProviderConfig {
 	clientSecret: string
 }
 
+export interface CustomAuthenticationEvents {
+	// TODO : Add onOTP
+	// TODO : Type the input with graphql input
+	onSignUp: (input: Record<string, any>, context: Context) => Promise<boolean>
+	onLogin: (input: Record<string, any>, context: Context) => Promise<boolean>
+}
+
 export interface CustomAuthenticationMethods<T = Record<string, TypeField>> {
 	name: string
 	input: T
-	// TODO : Type the input with graphql input
-	callback: (input: T, context: Context) => Promise<boolean>
+	events: CustomAuthenticationEvents
 }
 
 export interface AuthenticationConfig {
 	successRedirectPath: string
 	failureRedirectPath: string
 	providers: Partial<Record<ProviderEnum, ProviderConfig>>
-	// customAuthenticationMethods: CustomAuthenticationMethods[]
+	customAuthenticationMethods: CustomAuthenticationMethods[]
 }
 
 // Example of url to request in front end : https://accounts.google.com/o/oauth2/auth?client_id=${client_id}&redirect_uri=${'http://localhost:3000/auth/test'}&scope=${'email'}&response_type=code&access_type=offline
