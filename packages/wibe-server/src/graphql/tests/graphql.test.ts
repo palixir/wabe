@@ -39,8 +39,8 @@ describe('GraphQL : E2E', () => {
 		await client.request<any>(graphql.create_Users, {
 			input: {
 				fields: [
-					{ name: 'Lucas', age: 23, email: 'email@test.fr' },
-					{ name: 'Jeanne', age: 23, email: 'email@test.fr' },
+					{ name: 'Lucas', age: 23 },
+					{ name: 'Jeanne', age: 23 },
 				],
 			},
 		})
@@ -62,17 +62,16 @@ describe('GraphQL : E2E', () => {
 				fields: [
 					{
 						name: 'Toto1',
-						email: 'email@test.fr',
 					},
-					{ name: 'Toto2', email: 'email@test.fr' },
-					{ name: 'Toto3', email: 'email@test.fr' },
-					{ name: 'Toto4', email: 'email@test.fr' },
-					{ name: 'Toto5', email: 'email@test.fr' },
-					{ name: 'Toto6', email: 'email@test.fr' },
-					{ name: 'Toto7', email: 'email@test.fr' },
-					{ name: 'Toto8', email: 'email@test.fr' },
-					{ name: 'Toto9', email: 'email@test.fr' },
-					{ name: 'Toto10', email: 'email@test.fr' },
+					{ name: 'Toto2' },
+					{ name: 'Toto3' },
+					{ name: 'Toto4' },
+					{ name: 'Toto5' },
+					{ name: 'Toto6' },
+					{ name: 'Toto7' },
+					{ name: 'Toto8' },
+					{ name: 'Toto9' },
+					{ name: 'Toto10' },
 				],
 				offset: 0,
 				limit: 5,
@@ -103,12 +102,10 @@ describe('GraphQL : E2E', () => {
 							city: 'Paris',
 							country: 'France',
 						},
-						email: 'email@test.fr',
 					},
 					{
 						name: 'Jeanne',
 						age: 23,
-						email: 'email@test.fr',
 					},
 				],
 			},
@@ -164,7 +161,6 @@ describe('GraphQL : E2E', () => {
 								name: 'object',
 							},
 						},
-						email: 'email@test.fr',
 					},
 				],
 			},
@@ -211,9 +207,7 @@ describe('GraphQL : E2E', () => {
 	it('should create user with custom enum (Role)', async () => {
 		await client.request<any>(graphql.create_Users, {
 			input: {
-				fields: [
-					{ name: 'Jack', role: 'Admin', email: 'email@test.fr' },
-				],
+				fields: [{ name: 'Jack', role: 'Admin' }],
 			},
 		})
 
@@ -262,7 +256,6 @@ describe('GraphQL : E2E', () => {
 					{
 						name: 'Jack',
 						phone: '+33577223355',
-						email: 'email@test.fr',
 					},
 				],
 			},
@@ -401,7 +394,6 @@ describe('GraphQL : E2E', () => {
 				fields: {
 					name: 'CurrentUser',
 					age: 99,
-					email: 'email@test.fr',
 				},
 			},
 		})
@@ -452,7 +444,6 @@ describe('GraphQL : E2E', () => {
 				fields: {
 					name: 'John',
 					age: 23,
-					email: 'email@test.fr',
 				},
 			},
 		})
@@ -488,8 +479,8 @@ describe('GraphQL : E2E', () => {
 		const res = await client.request<any>(graphql.create_Users, {
 			input: {
 				fields: [
-					{ name: 'Lucas2', age: 24, email: 'email@test.fr' },
-					{ name: 'Jeanne2', age: 24, email: 'email@test.fr' },
+					{ name: 'Lucas2', age: 24 },
+					{ name: 'Jeanne2', age: 24 },
 				],
 			},
 		})

@@ -1,5 +1,6 @@
 import { SignInWithInput } from '../../generated/wibe'
 import { Context } from '../graphql/interface'
+import { WibeApp } from '../server'
 import { getClient } from '../utils'
 
 export const signInWithResolver = async (
@@ -11,6 +12,12 @@ export const signInWithResolver = async (
 	},
 	context: Context,
 ) => {
+	const customAuthenticationConfig =
+		WibeApp.config.authentication?.customAuthenticationMethods
+
+	if (!customAuthenticationConfig)
+		throw new Error('No custom authentication methods found')
+
 	const client = getClient()
 
 	const authenticationMethods = Object.keys(input)
@@ -20,13 +27,17 @@ export const signInWithResolver = async (
 
 	const authenticationMethod = authenticationMethods[0]
 
-	switch (authenticationMethod) {
-		case 'emailPassword': {
-			break
-		}
-		default:
-			throw new Error('Invalid authentication method')
-	}
+	const goodAuthenticationMethod = customAuthenticationConfig.find(
+		(method) =>
+			method.name.toLowerCase() === authenticationMethod.toLowerCase(),
+	)
+
+	if (!goodAuthenticationMethod)
+		throw new Error('No custom authentication methods found')
+
+	const { events } = goodAuthenticationMethod
+
+	console.log(events)
 
 	return true
 }

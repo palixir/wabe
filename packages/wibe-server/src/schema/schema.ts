@@ -134,19 +134,9 @@ export class Schema {
 			},
 			email: {
 				type: 'Email',
-				required: true,
-			},
-			password: {
-				type: 'String',
 			},
 			verifiedEmail: {
 				type: 'Boolean',
-			},
-			accessToken: {
-				type: 'String',
-			},
-			refreshToken: {
-				type: 'String',
 			},
 			// TODO : Automatically put this two fields for each class
 			createdAt: {
@@ -168,7 +158,7 @@ export class Schema {
 								object: {
 									name: 'EmailPassword',
 									fields: {
-										email: {
+										identifier: {
 											type: 'Email',
 											required: true,
 										},
@@ -181,7 +171,6 @@ export class Schema {
 							},
 						},
 					},
-					// TODO : Create the resolve
 					resolve: signInWithResolver,
 				},
 				signOut: {

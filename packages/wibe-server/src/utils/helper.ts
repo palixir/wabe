@@ -26,6 +26,25 @@ export const setupTests = async () => {
 			url: 'mongodb://127.0.0.1:27045',
 			name: databaseId,
 		},
+		authentication: {
+			customAuthenticationMethods: [
+				{
+					name: 'EmailPassword',
+					input: {
+						email: { type: 'Email', required: true },
+						password: { type: 'String', required: true },
+					},
+					events: {
+						onSignUp: async (input, context) => {
+							return true
+						},
+						onLogin: async (input, context) => {
+							return true
+						},
+					},
+				},
+			],
+		},
 		port,
 		schema: {
 			class: [

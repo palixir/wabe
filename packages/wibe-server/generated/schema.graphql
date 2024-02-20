@@ -21,17 +21,14 @@ type _User {
   name: String
   age: Int
   isCool: Boolean
-  email: Email!
+  email: Email
   birthDate: Date
   phone: Phone
   role: Role
   address: _UserAddress
   object: _UserObject
   provider: AuthenticationProvider
-  password: String
   verifiedEmail: Boolean
-  accessToken: String
-  refreshToken: String
   createdAt: Date
   updatedAt: Date
 }
@@ -113,10 +110,7 @@ input _UserWhereInput {
   address: _UserAddressWhereInput
   object: _UserObjectWhereInput
   provider: AnyWhereInput
-  password: StringWhereInput
   verifiedEmail: BooleanWhereInput
-  accessToken: StringWhereInput
-  refreshToken: StringWhereInput
   createdAt: DateWhereInput
   updatedAt: DateWhereInput
   OR: [_UserWhereInput]
@@ -273,17 +267,14 @@ input _UserInput {
   name: String
   age: Int
   isCool: Boolean
-  email: Email!
+  email: Email
   birthDate: Date
   phone: Phone
   role: Role
   address: _UserAddressInput
   object: _UserObjectInput
   provider: AuthenticationProvider
-  password: String
   verifiedEmail: Boolean
-  accessToken: String
-  refreshToken: String
   createdAt: Date
   updatedAt: Date
 }
@@ -327,10 +318,7 @@ input _UserUpdateFieldsInput {
   address: _UserAddressUpdateFieldsInput
   object: _UserObjectUpdateFieldsInput
   provider: AuthenticationProvider
-  password: String
   verifiedEmail: Boolean
-  accessToken: String
-  refreshToken: String
   createdAt: Date
   updatedAt: Date
 }
@@ -389,7 +377,7 @@ input SignInWithInput {
 }
 
 input SignInWithEmailPasswordInput {
-  email: Email!
+  identifier: Email!
   password: String!
 }
 
