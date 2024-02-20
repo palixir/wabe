@@ -4,6 +4,7 @@ import { signInResolver } from '../graphql/resolvers/signIn'
 import { signInWithProviderResolver } from '../graphql/resolvers/signInWithProvider'
 import { signOutResolver } from '../graphql/resolvers/signOut'
 import { signUpResolver } from '../graphql/resolvers/signUp'
+import { WibeApp } from '../server'
 
 export type WibeDefaultTypes =
 	| 'String'
@@ -128,6 +129,19 @@ export class Schema {
 	}
 
 	defaultClass(schema: SchemaInterface): ClassInterface[] {
+		const customAuthenticationConfig =
+			WibeApp.config.authentication?.customAuthenticationMethods || []
+
+		const allAuthenticationProviders = customAuthenticationConfig.reduce(
+			(acc, authenticationMethod) => {
+				acc[authenticationMethod.name] = authenticationMethod.name
+				return acc
+			},
+			{},
+		)
+
+		console.log(allAuthenticationProviders)
+
 		const defaultUserFields: SchemaFields = {
 			provider: {
 				type: 'AuthenticationProvider',
