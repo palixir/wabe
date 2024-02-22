@@ -27,7 +27,7 @@ const run = async () => {
 				{
 					name: 'EmailPassword',
 					input: {
-						email: { type: 'Email', required: true },
+						identifier: { type: 'Email', required: true },
 						password: { type: 'String', required: true },
 					},
 					events: {

@@ -1,9 +1,6 @@
 import { WibeSchemaScalars, WibeSchemaEnums } from '../../generated/wibe'
 import { signInWithResolver } from '../authentication/signInWithResolver'
-import { signInResolver } from '../graphql/resolvers/signIn'
-import { signInWithProviderResolver } from '../graphql/resolvers/signInWithProvider'
 import { signOutResolver } from '../graphql/resolvers/signOut'
-import { signUpResolver } from '../graphql/resolvers/signUp'
 import { WibeApp } from '../server'
 
 export type WibeDefaultTypes =
@@ -132,17 +129,44 @@ export class Schema {
 		const customAuthenticationConfig =
 			WibeApp.config.authentication?.customAuthenticationMethods || []
 
-		const allAuthenticationProviders = customAuthenticationConfig.reduce(
+		const allAuthenticationMethods = customAuthenticationConfig.reduce(
 			(acc, authenticationMethod) => {
-				acc[authenticationMethod.name] = authenticationMethod.name
+				if (
+					!Object.keys(authenticationMethod.input).includes(
+						'identifier',
+					)
+				)
+					throw new Error(
+						`${authenticationMethod.name} authentication method must have an 'identifier' field.`,
+					)
+
+				acc[authenticationMethod.name] = {
+					type: 'Object',
+					object: {
+						name: authenticationMethod.name,
+						fields: {
+							...authenticationMethod.input,
+						},
+					},
+				}
+
 				return acc
 			},
-			{},
+			{} as SchemaFields,
 		)
 
-		console.log(allAuthenticationProviders)
+		const authenticationObject = {
+			type: 'Object',
+			object: {
+				name: 'Authentication',
+				fields: {
+					...allAuthenticationMethods,
+				},
+			},
+		} as TypeField
 
 		const defaultUserFields: SchemaFields = {
+			authentication: authenticationObject,
 			provider: {
 				type: 'AuthenticationProvider',
 			},
@@ -167,22 +191,7 @@ export class Schema {
 					type: 'Boolean',
 					args: {
 						input: {
-							emailPassword: {
-								type: 'Object',
-								object: {
-									name: 'EmailPassword',
-									fields: {
-										identifier: {
-											type: 'Email',
-											required: true,
-										},
-										password: {
-											type: 'String',
-											required: true,
-										},
-									},
-								},
-							},
+							authentication: authenticationObject,
 						},
 					},
 					resolve: signInWithResolver,
@@ -198,65 +207,6 @@ export class Schema {
 							},
 						},
 					},
-				},
-				signUp: {
-					type: 'Boolean',
-					args: {
-						input: {
-							email: {
-								type: 'Email',
-								required: true,
-							},
-							password: {
-								type: 'String',
-								required: true,
-							},
-						},
-					},
-					resolve: signUpResolver,
-				},
-				signIn: {
-					type: 'Boolean',
-					args: {
-						input: {
-							email: {
-								type: 'Email',
-								required: true,
-							},
-							password: {
-								type: 'String',
-								required: true,
-							},
-						},
-					},
-					resolve: signInResolver,
-				},
-				signInWithProvider: {
-					type: 'Boolean',
-					args: {
-						input: {
-							provider: {
-								type: 'AuthenticationProvider',
-								required: true,
-							},
-							email: {
-								type: 'Email',
-								required: true,
-							},
-							verifiedEmail: {
-								type: 'Boolean',
-								required: true,
-							},
-							accessToken: {
-								type: 'String',
-								required: true,
-							},
-							refreshToken: {
-								type: 'String',
-							},
-						},
-					},
-					resolve: signInWithProviderResolver,
 				},
 			},
 		}

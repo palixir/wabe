@@ -27,6 +27,7 @@ type _User {
   role: Role
   address: _UserAddress
   object: _UserObject
+  authentication: _UserAuthentication
   provider: AuthenticationProvider
   verifiedEmail: Boolean
   createdAt: Date
@@ -53,6 +54,15 @@ type _UserObject {
 
 type _UserObjectObjectOfObject {
   name: String
+}
+
+type _UserAuthentication {
+  EmailPassword: _UserAuthenticationEmailPassword
+}
+
+type _UserAuthenticationEmailPassword {
+  identifier: Email!
+  password: String!
 }
 
 type Query {
@@ -109,6 +119,7 @@ input _UserWhereInput {
   role: AnyWhereInput
   address: _UserAddressWhereInput
   object: _UserObjectWhereInput
+  authentication: _UserAuthenticationWhereInput
   provider: AnyWhereInput
   verifiedEmail: BooleanWhereInput
   createdAt: DateWhereInput
@@ -185,6 +196,19 @@ input _UserObjectObjectOfObjectWhereInput {
   AND: [_UserObjectObjectOfObjectWhereInput]
 }
 
+input _UserAuthenticationWhereInput {
+  EmailPassword: _UserAuthenticationEmailPasswordWhereInput
+  OR: [_UserAuthenticationWhereInput]
+  AND: [_UserAuthenticationWhereInput]
+}
+
+input _UserAuthenticationEmailPasswordWhereInput {
+  identifier: EmailWhereInput
+  password: StringWhereInput
+  OR: [_UserAuthenticationEmailPasswordWhereInput]
+  AND: [_UserAuthenticationEmailPasswordWhereInput]
+}
+
 type Mutation {
   createPost(input: PostCreateInput): Post!
   createPosts(input: PostsCreateInput): PostConnection!
@@ -215,9 +239,6 @@ type Mutation {
   secondCustomMutation(input: SecondCustomMutationInput): Int
   signInWith(input: SignInWithInput): Boolean
   signOut(input: SignOutInput): Boolean
-  signUp(input: SignUpInput): Boolean
-  signIn(input: SignInInput): Boolean
-  signInWithProvider(input: SignInWithProviderInput): Boolean
 }
 
 input PostCreateInput {
@@ -273,6 +294,7 @@ input _UserInput {
   role: Role
   address: _UserAddressInput
   object: _UserObjectInput
+  authentication: _UserAuthenticationInput
   provider: AuthenticationProvider
   verifiedEmail: Boolean
   createdAt: Date
@@ -293,6 +315,15 @@ input _UserObjectInput {
 
 input _UserObjectObjectOfObjectInput {
   name: String
+}
+
+input _UserAuthenticationInput {
+  EmailPassword: _UserAuthenticationEmailPasswordInput
+}
+
+input _UserAuthenticationEmailPasswordInput {
+  identifier: Email!
+  password: String!
 }
 
 input _UsersCreateInput {
@@ -317,6 +348,7 @@ input _UserUpdateFieldsInput {
   role: Role
   address: _UserAddressUpdateFieldsInput
   object: _UserObjectUpdateFieldsInput
+  authentication: _UserAuthenticationUpdateFieldsInput
   provider: AuthenticationProvider
   verifiedEmail: Boolean
   createdAt: Date
@@ -337,6 +369,15 @@ input _UserObjectUpdateFieldsInput {
 
 input _UserObjectObjectOfObjectUpdateFieldsInput {
   name: String
+}
+
+input _UserAuthenticationUpdateFieldsInput {
+  EmailPassword: _UserAuthenticationEmailPasswordUpdateFieldsInput
+}
+
+input _UserAuthenticationEmailPasswordUpdateFieldsInput {
+  identifier: Email
+  password: String
 }
 
 input _UsersUpdateInput {
@@ -373,32 +414,18 @@ input SecondCustomMutationSumInput {
 }
 
 input SignInWithInput {
-  emailPassword: SignInWithEmailPasswordInput
+  authentication: SignInWithAuthenticationInput
 }
 
-input SignInWithEmailPasswordInput {
+input SignInWithAuthenticationInput {
+  EmailPassword: SignInWithAuthenticationEmailPasswordInput
+}
+
+input SignInWithAuthenticationEmailPasswordInput {
   identifier: Email!
   password: String!
 }
 
 input SignOutInput {
   email: Email!
-}
-
-input SignUpInput {
-  email: Email!
-  password: String!
-}
-
-input SignInInput {
-  email: Email!
-  password: String!
-}
-
-input SignInWithProviderInput {
-  provider: AuthenticationProvider!
-  email: Email!
-  verifiedEmail: Boolean!
-  accessToken: String!
-  refreshToken: String
 }
