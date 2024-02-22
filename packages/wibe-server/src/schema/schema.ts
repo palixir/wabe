@@ -166,7 +166,9 @@ export class Schema {
 		} as TypeField
 
 		const defaultUserFields: SchemaFields = {
-			authentication: authenticationObject,
+			...(customAuthenticationConfig.length > 0
+				? { authentication: authenticationObject }
+				: {}),
 			provider: {
 				type: 'AuthenticationProvider',
 			},
@@ -187,15 +189,19 @@ export class Schema {
 
 		const defaultResolvers: TypeResolver = {
 			mutations: {
-				signInWith: {
-					type: 'Boolean',
-					args: {
-						input: {
-							authentication: authenticationObject,
-						},
-					},
-					resolve: signInWithResolver,
-				},
+				...(allAuthenticationMethods.length > 0
+					? {
+							signInWith: {
+								type: 'Boolean',
+								args: {
+									input: {
+										authentication: authenticationObject,
+									},
+								},
+								resolve: signInWithResolver,
+							},
+					  }
+					: {}),
 				signOut: {
 					type: 'Boolean',
 					resolve: signOutResolver,
