@@ -157,7 +157,6 @@ export class Schema {
 
 		const authenticationObject = {
 			type: 'Object',
-			required: true,
 			object: {
 				name: 'Authentication',
 				fields: {
