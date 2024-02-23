@@ -1,30 +1,106 @@
-import { describe, expect, it, beforeAll, afterAll } from 'bun:test'
-import { getGraphqlClient, setupTests } from '../utils/helper'
+import { describe, expect, it, beforeEach, mock } from 'bun:test'
 import { WibeApp } from '../server'
-import { GraphQLClient, gql } from 'graphql-request'
+import { signInWithResolver } from './signInWithResolver'
+import { Context } from '../graphql/interface'
 
 describe('SignInWith', () => {
-	let wibe: WibeApp
-	let port: number
-	let client: GraphQLClient
+	const mockOnLogin = mock(() => Promise.resolve(true))
+	const mockOnSignUp = mock(() => Promise.resolve(true))
+	const mockGetObjects = mock(() => [])
 
-	beforeAll(async () => {
-		const setup = await setupTests()
-		wibe = setup.wibe
-		port = setup.port
-		client = getGraphqlClient(port)
+	const mockDatabaseController = {
+		getObjects: mockGetObjects,
+	}
+
+	beforeEach(() => {
+		mockGetObjects.mockClear()
+		mockOnLogin.mockClear()
+		mockOnSignUp.mockClear()
+
+		// @ts-expect-error
+		WibeApp.databaseController = mockDatabaseController
+		// @ts-expect-error
+		WibeApp.config = {
+			authentication: {
+				customAuthenticationMethods: [
+					{
+						name: 'emailPassword',
+						input: {
+							identifier: { type: 'Email', required: true },
+							password: { type: 'String', required: true },
+						},
+						events: {
+							onSignUp: mockOnSignUp,
+							onLogin: mockOnLogin,
+						},
+					},
+				],
+			},
+		}
 	})
 
-	afterAll(async () => {
-		await wibe.close()
-	})
-
-	it.skip('should throw an error if no custom authentication configuration is provided', async () => {
-		const authenticationConfig = WibeApp.config.authentication
+	it('should throw an error if no custom authentication configuration is provided', async () => {
 		WibeApp.config.authentication = undefined
 
 		expect(
-			client.request(graphql.signInWith, {
+			signInWithResolver(
+				{},
+				{
+					input: {
+						authentication: {
+							emailPassword: {
+								identifier: 'email@test.fr',
+								password: 'password',
+							},
+						},
+					},
+				},
+				{} as Context,
+			),
+		).rejects.toThrow('No custom authentication methods found')
+	})
+
+	it('should throw an error if a custom authentication is provided but not in the custom authentication config', async () => {
+		WibeApp.config.authentication = {
+			customAuthenticationMethods: [
+				{
+					name: 'phonePassword',
+					input: {
+						identifier: { type: 'Email', required: true },
+						password: { type: 'String', required: true },
+					},
+					events: {
+						onSignUp: mockOnSignUp,
+						onLogin: mockOnLogin,
+					},
+				},
+			],
+		}
+
+		expect(
+			signInWithResolver(
+				{},
+				{
+					input: {
+						authentication: {
+							emailPassword: {
+								identifier: 'email@test.fr',
+								password: 'password',
+							},
+						},
+					},
+				},
+				{} as Context,
+			),
+		).rejects.toThrow('No available custom authentication methods found')
+	})
+
+	it('should signInWith email and password when the user already exist', async () => {
+		mockGetObjects.mockReturnValueOnce([{} as never])
+
+		const res = await signInWithResolver(
+			{},
+			{
 				input: {
 					authentication: {
 						emailPassword: {
@@ -33,16 +109,46 @@ describe('SignInWith', () => {
 						},
 					},
 				},
-			}),
-		).rejects.toThrow('No custom authentication methods found')
+			},
+			{} as Context,
+		)
 
-		WibeApp.config.authentication = authenticationConfig
+		expect(res).toBe(true)
+		expect(mockOnLogin).toHaveBeenCalledTimes(1)
+		expect(mockOnLogin).toHaveBeenCalledWith(
+			{
+				authentication: {
+					emailPassword: {
+						identifier: 'email@test.fr',
+						password: 'password',
+					},
+				},
+			},
+			expect.anything(),
+		)
+
+		expect(mockGetObjects).toHaveBeenCalledTimes(1)
+		expect(mockGetObjects).toHaveBeenCalledWith({
+			className: '_User',
+			where: {
+				authentication: {
+					emailPassword: {
+						identifier: { equalTo: 'email@test.fr' },
+					},
+				},
+			},
+		})
+
+		expect(mockOnSignUp).toHaveBeenCalledTimes(0)
 	})
 
-	it('should signInWith email and password', async () => {
-		await client.request(graphql.createUser, {
-			input: {
-				fields: {
+	it('should signInWith email and password when the user not exist', async () => {
+		mockGetObjects.mockReturnValueOnce([])
+
+		const res = await signInWithResolver(
+			{},
+			{
+				input: {
 					authentication: {
 						emailPassword: {
 							identifier: 'email@test.fr',
@@ -51,10 +157,14 @@ describe('SignInWith', () => {
 					},
 				},
 			},
-		})
+			{} as Context,
+		)
 
-		const res = await client.request(graphql.signInWith, {
-			input: {
+		expect(res).toBe(true)
+
+		expect(mockOnSignUp).toHaveBeenCalledTimes(1)
+		expect(mockOnSignUp).toHaveBeenCalledWith(
+			{
 				authentication: {
 					emailPassword: {
 						identifier: 'email@test.fr',
@@ -62,21 +172,42 @@ describe('SignInWith', () => {
 					},
 				},
 			},
+			expect.anything(),
+		)
+
+		expect(mockGetObjects).toHaveBeenCalledTimes(1)
+		expect(mockGetObjects).toHaveBeenCalledWith({
+			className: '_User',
+			where: {
+				authentication: {
+					emailPassword: {
+						identifier: { equalTo: 'email@test.fr' },
+					},
+				},
+			},
 		})
+
+		expect(mockOnLogin).toHaveBeenCalledTimes(0)
+	})
+
+	it('should throw an error if more than on user is equal to the identifier', async () => {
+		mockGetObjects.mockReturnValueOnce([{} as never, {} as never])
+
+		expect(
+			signInWithResolver(
+				{},
+				{
+					input: {
+						authentication: {
+							emailPassword: {
+								identifier: 'email@test.fr',
+								password: 'password',
+							},
+						},
+					},
+				},
+				{} as Context,
+			),
+		).rejects.toThrow('Multiple users found with the same identifier')
 	})
 })
-
-const graphql = {
-	createUser: gql`
-		mutation createUser($input: _UserCreateInput!) {
-			create_User(input: $input) {
-				id
-			}
-		}
-	`,
-	signInWith: gql`
-		mutation signInWith($input: SignInWithInput!) {
-			signInWith(input: $input)
-		}
-	`,
-}
