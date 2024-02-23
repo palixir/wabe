@@ -1,7 +1,6 @@
 import { SignInWithInput } from '../../generated/wibe'
 import { Context } from '../graphql/interface'
 import { WibeApp } from '../server'
-import { getClient } from '../utils'
 
 export const signInWithResolver = async (
 	_: any,
@@ -18,26 +17,51 @@ export const signInWithResolver = async (
 	if (!customAuthenticationConfig)
 		throw new Error('No custom authentication methods found')
 
-	const client = getClient()
+	const authenticationMethods = Object.keys(input.authentication || {})
 
-	const authenticationMethods = Object.keys(input)
-
+	// We check if the client don't use multiple authentication methods at the same time
 	if (authenticationMethods.length > 1)
 		throw new Error('Only one authentication method at the time is allowed')
 
 	const authenticationMethod = authenticationMethods[0]
 
-	const goodAuthenticationMethod = customAuthenticationConfig.find(
+	// We check if the authentication method is valid
+	const validAuthentication = customAuthenticationConfig.find(
 		(method) =>
 			method.name.toLowerCase() === authenticationMethod.toLowerCase(),
 	)
 
-	if (!goodAuthenticationMethod)
-		throw new Error('No custom authentication methods found')
+	if (!validAuthentication)
+		throw new Error('No available custom authentication methods found')
 
-	const { events } = goodAuthenticationMethod
+	const { events } = validAuthentication
 
-	console.log(events)
+	const inputOfTheGoodAuthenticationMethod =
+		// @ts-expect-error
+		input.authentication[authenticationMethod]
+
+	// We need to use directly the databaseController because
+	// we don't know the type of the identifier (email, phone, username, etc.)
+	// So we can't use graphql api
+	const userWithIdentifier = await WibeApp.databaseController.getObjects({
+		className: '_User',
+		where: {
+			authentication: {
+				// @ts-expect-error
+				emailPassword: {
+					identifier: {
+						equalTo: inputOfTheGoodAuthenticationMethod.identifier,
+					},
+				},
+			},
+		},
+	})
+
+	if (userWithIdentifier.length > 1)
+		throw new Error('Multiple users found with the same identifier')
+
+	if (userWithIdentifier.length === 0) events.onSignUp(input, context)
+	else events.onLogin(input, context)
 
 	return true
 }

@@ -25,7 +25,7 @@ const run = async () => {
 			},
 			customAuthenticationMethods: [
 				{
-					name: 'EmailPassword',
+					name: 'emailPassword',
 					input: {
 						identifier: { type: 'Email', required: true },
 						password: { type: 'String', required: true },

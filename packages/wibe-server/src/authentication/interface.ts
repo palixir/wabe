@@ -25,9 +25,9 @@ export interface CustomAuthenticationMethods<T = Record<string, TypeField>> {
 }
 
 export interface AuthenticationConfig {
-	successRedirectPath: string
-	failureRedirectPath: string
-	providers: Partial<Record<ProviderEnum, ProviderConfig>>
+	successRedirectPath?: string
+	failureRedirectPath?: string
+	providers?: Partial<Record<ProviderEnum, ProviderConfig>>
 	customAuthenticationMethods: CustomAuthenticationMethods[]
 }
 

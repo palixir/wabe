@@ -157,6 +157,7 @@ export class Schema {
 
 		const authenticationObject = {
 			type: 'Object',
+			required: true,
 			object: {
 				name: 'Authentication',
 				fields: {
@@ -189,7 +190,7 @@ export class Schema {
 
 		const defaultResolvers: TypeResolver = {
 			mutations: {
-				...(allAuthenticationMethods.length > 0
+				...(customAuthenticationConfig.length > 0
 					? {
 							signInWith: {
 								type: 'Boolean',
