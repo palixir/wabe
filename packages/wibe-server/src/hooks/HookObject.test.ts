@@ -8,18 +8,14 @@ describe('HookObject', () => {
 
 		const hookObject = new HookObject({
 			className: '_User',
-			object: { fields: userData },
-			user: {
-				id: '1',
-				email: 'email@test.fr',
-			},
+			object: userData as any,
 			operationType: OperationType.BeforeInsert,
 		})
 
 		expect(hookObject.className).toEqual('_User')
 
-		expect(hookObject.get({ field: 'name' })).toEqual('John Doe')
-		expect(hookObject.get({ field: 'age' })).toEqual(30)
+		expect(hookObject.get('name')).toEqual('John Doe')
+		expect(hookObject.get('age')).toEqual(30)
 	})
 
 	it('should create a clone of the data', () => {
@@ -27,17 +23,13 @@ describe('HookObject', () => {
 
 		const hookObject = new HookObject({
 			className: '_User',
-			object: { fields: userData },
-			user: {
-				id: '1',
-				email: 'email@test.fr',
-			},
+			object: userData as any,
 			operationType: OperationType.BeforeInsert,
 		})
 
 		hookObject.set({ field: 'name', value: 'tata' })
 
-		expect(hookObject.get({ field: 'name' })).toEqual('tata')
+		expect(hookObject.get('name')).toEqual('tata')
 		expect(userData.name).toEqual('John Doe')
 	})
 
@@ -46,18 +38,14 @@ describe('HookObject', () => {
 
 		const hookObject = new HookObject({
 			className: '_User',
-			object: { fields: userData },
+			object: userData as any,
 			operationType: OperationType.BeforeInsert,
-			user: {
-				id: '1',
-				email: 'email@test.fr',
-			},
 		})
 
 		hookObject.set({ field: 'name', value: 'tata' })
 
-		expect(hookObject.get({ field: 'name' })).toEqual('tata')
-		expect(hookObject.get({ field: 'age' })).toEqual(30)
+		expect(hookObject.get('name')).toEqual('tata')
+		expect(hookObject.get('age')).toEqual(30)
 	})
 
 	it('should not set data for an after hook', () => {
@@ -65,19 +53,15 @@ describe('HookObject', () => {
 
 		const hookObject = new HookObject({
 			className: '_User',
-			object: { fields: userData },
+			object: userData as any,
 			operationType: OperationType.AfterInsert,
-			user: {
-				id: '1',
-				email: 'email@test.fr',
-			},
 		})
 
 		expect(() => hookObject.set({ field: 'name', value: 'tata' })).toThrow(
 			'Cannot set data in a hook that is not a before hook',
 		)
 
-		expect(hookObject.get({ field: 'name' })).toEqual('John Doe')
-		expect(hookObject.get({ field: 'age' })).toEqual(30)
+		expect(hookObject.get('name')).toEqual('John Doe')
+		expect(hookObject.get('age')).toEqual(30)
 	})
 })

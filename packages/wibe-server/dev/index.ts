@@ -31,11 +31,11 @@ const run = async () => {
 						password: { type: 'String', required: true },
 					},
 					events: {
-						onSignUp: async (input, context) => {
-							return true
+						onSignUp: async () => {
+							return {}
 						},
-						onLogin: async (input, context) => {
-							return true
+						onLogin: async () => {
+							return {}
 						},
 					},
 				},
