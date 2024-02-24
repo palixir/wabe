@@ -16,9 +16,9 @@ describe('SignInWith', () => {
 			refreshToken: 'refreshToken',
 		}),
 	)
-	const mockGetObjects = mock(() => Promise.resolve([]))
-	const mockCreateObject = mock(() => Promise.resolve({}))
-	const mockUpdateObject = mock(() => Promise.resolve({}))
+	const mockGetObjects = mock()
+	const mockCreateObject = mock()
+	const mockUpdateObject = mock()
 
 	const mockDatabaseController = {
 		getObjects: mockGetObjects,
@@ -128,7 +128,30 @@ describe('SignInWith', () => {
 		).rejects.toThrow('No available custom authentication methods found')
 	})
 
+	it('should throw an error if more than on user is equal to the identifier', async () => {
+		mockGetObjects.mockReturnValueOnce([{} as never, {} as never])
+
+		expect(
+			signInWithResolver(
+				{},
+				{
+					input: {
+						authentication: {
+							emailPassword: {
+								identifier: 'email@test.fr',
+								password: 'password',
+							},
+						},
+					},
+				},
+				{} as Context,
+			),
+		).rejects.toThrow('Multiple users found with the same identifier')
+	})
+
 	it('should signInWith email and password when the user already exist', async () => {
+		const mockAddCookie = mock()
+
 		mockGetObjects.mockReturnValueOnce([{ id: 'id' } as never])
 
 		const res = await signInWithResolver(
@@ -143,7 +166,16 @@ describe('SignInWith', () => {
 					},
 				},
 			},
-			{} as Context,
+			{
+				cookie: {
+					access_token: {
+						add: mockAddCookie,
+					},
+					refresh_token: {
+						add: mockAddCookie,
+					},
+				},
+			} as Context,
 		)
 
 		expect(res).toBe(true)
@@ -190,10 +222,31 @@ describe('SignInWith', () => {
 			],
 		})
 
+		expect(mockAddCookie).toHaveBeenCalledTimes(2)
+		expect(mockAddCookie).toHaveBeenNthCalledWith(1, {
+			expires: expect.any(Date),
+			httpOnly: true,
+			path: '/',
+			value: expect.any(String),
+			sameSite: 'strict',
+			secure: false,
+		})
+
+		expect(mockAddCookie).toHaveBeenNthCalledWith(2, {
+			expires: expect.any(Date),
+			httpOnly: true,
+			path: '/',
+			value: expect.any(String),
+			sameSite: 'strict',
+			secure: false,
+		})
+
 		expect(mockOnSignUp).toHaveBeenCalledTimes(0)
 	})
 
 	it('should signInWith email and password when the user not exist', async () => {
+		const mockAddCookie = mock()
+
 		mockGetObjects.mockReturnValueOnce([])
 
 		const res = await signInWithResolver(
@@ -208,7 +261,16 @@ describe('SignInWith', () => {
 					},
 				},
 			},
-			{} as Context,
+			{
+				cookie: {
+					access_token: {
+						add: mockAddCookie,
+					},
+					refresh_token: {
+						add: mockAddCookie,
+					},
+				},
+			} as Context,
 		)
 
 		expect(res).toBe(true)
@@ -255,27 +317,25 @@ describe('SignInWith', () => {
 			],
 		})
 
+		expect(mockAddCookie).toHaveBeenCalledTimes(2)
+		expect(mockAddCookie).toHaveBeenNthCalledWith(1, {
+			expires: expect.any(Date),
+			httpOnly: true,
+			path: '/',
+			value: expect.any(String),
+			sameSite: 'strict',
+			secure: false,
+		})
+
+		expect(mockAddCookie).toHaveBeenNthCalledWith(2, {
+			expires: expect.any(Date),
+			httpOnly: true,
+			path: '/',
+			value: expect.any(String),
+			sameSite: 'strict',
+			secure: false,
+		})
+
 		expect(mockOnLogin).toHaveBeenCalledTimes(0)
-	})
-
-	it('should throw an error if more than on user is equal to the identifier', async () => {
-		mockGetObjects.mockReturnValueOnce([{} as never, {} as never])
-
-		expect(
-			signInWithResolver(
-				{},
-				{
-					input: {
-						authentication: {
-							emailPassword: {
-								identifier: 'email@test.fr',
-								password: 'password',
-							},
-						},
-					},
-				},
-				{} as Context,
-			),
-		).rejects.toThrow('Multiple users found with the same identifier')
 	})
 })

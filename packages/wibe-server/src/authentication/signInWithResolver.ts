@@ -102,5 +102,31 @@ export const signInWithResolver = async (
 		})
 	}
 
+	if (accessToken) {
+		const fifteenMinutes = new Date(Date.now() + 1000 * 60 * 15)
+		context.cookie.access_token.add({
+			value: accessToken,
+			httpOnly: true,
+			path: '/',
+			expires: fifteenMinutes,
+			// TODO : Check for implements csrf token for sub-domain protection
+			sameSite: 'strict',
+			secure: Bun.env.NODE_ENV === 'production',
+		})
+	}
+
+	if (refreshToken) {
+		const thirtyDays = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
+
+		context.cookie.refresh_token.add({
+			value: refreshToken,
+			httpOnly: true,
+			path: '/',
+			expires: thirtyDays,
+			sameSite: 'strict',
+			secure: Bun.env.NODE_ENV === 'production',
+		})
+	}
+
 	return true
 }
