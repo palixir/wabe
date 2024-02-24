@@ -4,7 +4,21 @@ import { WibeApp } from '../server'
 import { DatabaseEnum } from '../database'
 import getPort from 'get-port'
 
-export const notEmpty = <T>(value: T | null | undefined): value is T =>
+type NotNill<T> = T extends null | undefined ? never : T
+
+type Primitive = undefined | null | boolean | string | number | Function
+
+export type DeepRequired<T> = T extends Primitive
+	? NotNill<T>
+	: {
+			[P in keyof T]-?: T[P] extends Array<infer U>
+				? Array<DeepRequired<U>>
+				: T[P] extends ReadonlyArray<infer U2>
+					? DeepRequired<U2>
+					: DeepRequired<T[P]>
+		}
+
+export const notEmpty = <T,>(value: T | null | undefined): value is T =>
 	value !== null && value !== undefined
 
 export const getGraphqlClient = (port: number): GraphQLClient => {
@@ -185,11 +199,13 @@ export const setupTests = async () => {
 															fields: {
 																a: {
 																	type: 'Int',
-																	required: true,
+																	required:
+																		true,
 																},
 																b: {
 																	type: 'Int',
-																	required: true,
+																	required:
+																		true,
 																},
 															},
 														},

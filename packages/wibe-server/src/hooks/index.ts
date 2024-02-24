@@ -3,6 +3,7 @@ import { WibeApp } from '../server'
 import { notEmpty } from '../utils/helper'
 import { HookObject } from './HookObject'
 import {
+	defaultAfterInsertToCallSignUpEvent,
 	defaultBeforeInsertForCreatedAt,
 	defaultBeforeInsertForDefaultValue,
 	defaultBeforeUpdateForUpdatedAt,
@@ -28,7 +29,10 @@ export type Hook<
 	// The priority 0 is for the security hooks
 	// The default priority is 1
 	priority: number
-	callback: (hookObject: HookObject<T, K>) => Promise<void> | void
+	callback: (
+		hookObject: HookObject<T, K>,
+		context: Context,
+	) => Promise<void> | void
 }
 
 export const defaultHooks: Hook<any, any>[] = [
@@ -46,6 +50,12 @@ export const defaultHooks: Hook<any, any>[] = [
 		operationType: OperationType.BeforeUpdate,
 		priority: 1,
 		callback: defaultBeforeUpdateForUpdatedAt,
+	},
+	{
+		operationType: OperationType.AfterInsert,
+		className: '_User',
+		priority: 1,
+		callback: defaultAfterInsertToCallSignUpEvent,
 	},
 ]
 
@@ -74,12 +84,14 @@ export const findHooksAndExecute = async <
 	fields,
 	id,
 	user,
+	context,
 }: {
 	className: T
 	operationType: OperationType
 	fields: Array<Record<K, any>>
 	id?: string
 	user: _User
+	context: Context
 }) => {
 	const listOfPriorities =
 		WibeApp.config.hooks
@@ -110,7 +122,9 @@ export const findHooksAndExecute = async <
 				})
 
 				await Promise.all(
-					hooksToCompute.map((hook) => hook.callback(hookObject)),
+					hooksToCompute.map((hook) =>
+						hook.callback(hookObject, context),
+					),
 				)
 			}, Promise.resolve())
 
@@ -123,3 +137,14 @@ export const findHooksAndExecute = async <
 		.map(({ data }) => data)
 		.filter(notEmpty)
 }
+
+/*
+before :
+ - Get les valeurs modifiés ou insérés
+ - Avoir le user qui a fait la request
+ - Modifier ou ajouter des valeurs
+
+after:
+- Résultat de la requête
+- User qui a fait la request
+*/

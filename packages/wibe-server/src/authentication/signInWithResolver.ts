@@ -20,7 +20,7 @@ export const signInWithResolver = async (
 	const authenticationMethods = Object.keys(input.authentication || {})
 
 	// We check if the client don't use multiple authentication methods at the same time
-	if (authenticationMethods.length > 1)
+	if (authenticationMethods.length > 1 || authenticationMethods.length === 0)
 		throw new Error('Only one authentication method at the time is allowed')
 
 	const authenticationMethod = authenticationMethods[0]
@@ -65,11 +65,9 @@ export const signInWithResolver = async (
 
 	const isSignUp = userWithIdentifier.length === 0
 
-	const { accessToken, refreshToken } = isSignUp
-		? await events.onSignUp(input, context)
-		: await events.onLogin(input, context)
-
 	if (isSignUp) {
+		// If the user is not found, the onSignUp event will be called on afterInsert hook
+		// In this way we also get the event when we use the create_User mutation
 		await WibeApp.databaseController.createObject({
 			className: '_User',
 			data: [
@@ -79,28 +77,34 @@ export const signInWithResolver = async (
 							...inputOfTheGoodAuthenticationMethod,
 						},
 					},
-					accessToken,
-					refreshToken,
 				},
 			],
 		})
-	} else {
-		await WibeApp.databaseController.updateObject({
-			className: '_User',
-			id: userWithIdentifier[0].id,
-			data: [
-				{
-					authentication: {
-						[authenticationMethod]: {
-							...inputOfTheGoodAuthenticationMethod,
-						},
-					},
-					accessToken,
-					refreshToken,
-				},
-			],
-		})
+
+		return true
 	}
+
+	const { accessToken, refreshToken } = await events.onLogin({
+		input,
+		context,
+		userId: userWithIdentifier[0].id,
+	})
+
+	await WibeApp.databaseController.updateObject({
+		className: '_User',
+		id: userWithIdentifier[0].id,
+		data: [
+			{
+				authentication: {
+					[authenticationMethod]: {
+						...inputOfTheGoodAuthenticationMethod,
+					},
+				},
+				accessToken,
+				refreshToken,
+			},
+		],
+	})
 
 	if (accessToken) {
 		const fifteenMinutes = new Date(Date.now() + 1000 * 60 * 15)

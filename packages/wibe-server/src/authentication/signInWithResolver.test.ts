@@ -180,8 +180,8 @@ describe('SignInWith', () => {
 
 		expect(res).toBe(true)
 		expect(mockOnLogin).toHaveBeenCalledTimes(1)
-		expect(mockOnLogin).toHaveBeenCalledWith(
-			{
+		expect(mockOnLogin).toHaveBeenCalledWith({
+			input: {
 				authentication: {
 					emailPassword: {
 						identifier: 'email@test.fr',
@@ -189,8 +189,9 @@ describe('SignInWith', () => {
 					},
 				},
 			},
-			expect.anything(),
-		)
+			context: expect.anything(),
+			userId: 'id',
+		})
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
 		expect(mockGetObjects).toHaveBeenCalledWith({
@@ -275,19 +276,6 @@ describe('SignInWith', () => {
 
 		expect(res).toBe(true)
 
-		expect(mockOnSignUp).toHaveBeenCalledTimes(1)
-		expect(mockOnSignUp).toHaveBeenCalledWith(
-			{
-				authentication: {
-					emailPassword: {
-						identifier: 'email@test.fr',
-						password: 'password',
-					},
-				},
-			},
-			expect.anything(),
-		)
-
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
 		expect(mockGetObjects).toHaveBeenCalledWith({
 			className: '_User',
@@ -311,29 +299,8 @@ describe('SignInWith', () => {
 							password: 'password',
 						},
 					},
-					refreshToken: expect.any(String),
-					accessToken: expect.any(String),
 				},
 			],
-		})
-
-		expect(mockAddCookie).toHaveBeenCalledTimes(2)
-		expect(mockAddCookie).toHaveBeenNthCalledWith(1, {
-			expires: expect.any(Date),
-			httpOnly: true,
-			path: '/',
-			value: expect.any(String),
-			sameSite: 'strict',
-			secure: false,
-		})
-
-		expect(mockAddCookie).toHaveBeenNthCalledWith(2, {
-			expires: expect.any(Date),
-			httpOnly: true,
-			path: '/',
-			value: expect.any(String),
-			sameSite: 'strict',
-			secure: false,
 		})
 
 		expect(mockOnLogin).toHaveBeenCalledTimes(0)

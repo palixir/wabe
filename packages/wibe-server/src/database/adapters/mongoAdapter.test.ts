@@ -701,6 +701,7 @@ describe('Mongo adapter', () => {
 				},
 			],
 			user: {},
+			context: expect.any(Object),
 		})
 
 		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
@@ -713,6 +714,7 @@ describe('Mongo adapter', () => {
 				},
 			],
 			user: {},
+			context: expect.any(Object),
 		})
 
 		expect(insertedObject).toEqual({ age: 23, id: expect.any(String) })
@@ -766,6 +768,7 @@ describe('Mongo adapter', () => {
 				},
 			],
 			user: {},
+			context: expect.any(Object),
 		})
 
 		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
@@ -782,6 +785,7 @@ describe('Mongo adapter', () => {
 				},
 			],
 			user: {},
+			context: expect.any(Object),
 		})
 
 		expect(insertedObjects).toEqual([
@@ -863,6 +867,7 @@ describe('Mongo adapter', () => {
 				},
 			],
 			user: {},
+			context: expect.any(Object),
 		})
 		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
 			operationType: hooks.OperationType.AfterUpdate,
@@ -873,6 +878,7 @@ describe('Mongo adapter', () => {
 				},
 			],
 			user: {},
+			context: expect.any(Object),
 		})
 
 		expect(updatedObject).toEqual({
@@ -937,6 +943,7 @@ describe('Mongo adapter', () => {
 				},
 			],
 			user: {},
+			context: expect.any(Object),
 		})
 		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
 			operationType: hooks.OperationType.AfterUpdate,
@@ -947,6 +954,7 @@ describe('Mongo adapter', () => {
 				},
 			],
 			user: {},
+			context: expect.any(Object),
 		})
 
 		expect(updatedObjects).toEqual([
@@ -1044,12 +1052,14 @@ describe('Mongo adapter', () => {
 			className: '_User',
 			fields: [],
 			user: {},
+			context: expect.any(Object),
 		})
 		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
 			operationType: hooks.OperationType.AfterDelete,
 			className: '_User',
 			fields: [],
 			user: {},
+			context: expect.any(Object),
 		})
 
 		expect(deletedObject).toEqual({
@@ -1105,12 +1115,14 @@ describe('Mongo adapter', () => {
 			className: '_User',
 			fields: [],
 			user: {},
+			context: expect.any(Object),
 		})
 		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
 			operationType: hooks.OperationType.AfterDelete,
 			className: '_User',
 			fields: [],
 			user: {},
+			context: expect.any(Object),
 		})
 
 		expect(deletedObjects).toEqual([

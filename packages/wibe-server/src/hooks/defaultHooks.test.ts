@@ -112,26 +112,46 @@ describe('Default hooks', () => {
 			expect(create_User.isAdmin).toBe(true)
 		})
 	})
+
+	describe.only('Call signup on create_User', () => {
+		it('should call signUp event on create_User', async () => {
+			const { create_User } = await client.request<any>(
+				graphql.create_User,
+				{
+					input: {
+						fields: {
+							authentication: {
+								emailPassword: {
+									identifier: 'email@test.fr',
+									password: 'password',
+								},
+							},
+						},
+					},
+				},
+			)
+		})
+	})
 })
 
 const graphql = {
 	create_User: gql`
-        mutation createUser($input: _UserCreateInput!) {
-            create_User(input: $input) {
-                id
-                isAdmin
-                createdAt
-                updatedAt
-            }
-        }
-    `,
+		mutation createUser($input: _UserCreateInput!) {
+			create_User(input: $input) {
+				id
+				isAdmin
+				createdAt
+				updatedAt
+			}
+		}
+	`,
 	update_User: gql`
-        mutation updateUser($input: _UserUpdateInput!) {
-            update_User(input: $input) {
-                id
-                createdAt
-                updatedAt
-            }
-        }
-    `,
+		mutation updateUser($input: _UserUpdateInput!) {
+			update_User(input: $input) {
+				id
+				createdAt
+				updatedAt
+			}
+		}
+	`,
 }

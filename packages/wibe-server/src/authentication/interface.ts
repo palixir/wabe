@@ -16,15 +16,19 @@ export interface AuthenticationCallbackOutput {
 	accessToken?: string
 }
 
+export interface AuthenticationEventsOptions {
+	userId: string
+	input: Record<string, any>
+	context: Context
+}
+
 export interface CustomAuthenticationEvents {
 	// TODO : Add onOTP
 	onSignUp: (
-		input: Record<string, any>,
-		context: Context,
+		options: AuthenticationEventsOptions,
 	) => Promise<AuthenticationCallbackOutput>
 	onLogin: (
-		input: Record<string, any>,
-		context: Context,
+		options: AuthenticationEventsOptions,
 	) => Promise<AuthenticationCallbackOutput>
 }
 

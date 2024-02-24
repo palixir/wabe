@@ -188,7 +188,7 @@ export class MongoAdapter implements DatabaseAdapter {
 				projection: fields
 					? {
 							...objectOfFieldsToGet,
-					  }
+						}
 					: {},
 			})
 			.limit(limit || 0)
@@ -246,16 +246,10 @@ export class MongoAdapter implements DatabaseAdapter {
 			fields: data,
 			user: context.user,
 			operationType: OperationType.BeforeInsert,
+			context,
 		})
 
 		const res = await collection.insertMany(arrayOfComputedData, {})
-
-		await findHooksAndExecute({
-			className,
-			user: context.user,
-			fields: data,
-			operationType: OperationType.AfterInsert,
-		})
 
 		const orStatement = Object.entries(res.insertedIds).map(
 			([, value]) => ({
@@ -263,13 +257,23 @@ export class MongoAdapter implements DatabaseAdapter {
 			}),
 		)
 
-		return this.getObjects({
+		const allObjects = await this.getObjects({
 			className,
 			where: { OR: orStatement } as WhereType<T>,
 			fields,
 			offset,
 			limit,
 		})
+
+		await findHooksAndExecute({
+			className,
+			user: context.user,
+			fields: data,
+			operationType: OperationType.AfterInsert,
+			context,
+		})
+
+		return allObjects
 	}
 
 	async updateObject<
@@ -317,6 +321,7 @@ export class MongoAdapter implements DatabaseAdapter {
 			user: context.user,
 			fields: [data],
 			operationType: OperationType.BeforeUpdate,
+			context,
 		})
 
 		const objectsBeforeUpdate = await this.getObjects({
@@ -336,6 +341,7 @@ export class MongoAdapter implements DatabaseAdapter {
 			user: context.user,
 			fields: [data],
 			operationType: OperationType.AfterUpdate,
+			context,
 		})
 
 		const orStatement = objectsBeforeUpdate.map((object) => ({
@@ -402,6 +408,7 @@ export class MongoAdapter implements DatabaseAdapter {
 			user: context.user,
 			fields: [],
 			operationType: OperationType.BeforeDelete,
+			context,
 		})
 
 		await collection.deleteMany(whereBuilded)
@@ -411,6 +418,7 @@ export class MongoAdapter implements DatabaseAdapter {
 			user: context.user,
 			fields: [],
 			operationType: OperationType.AfterDelete,
+			context,
 		})
 
 		return objectsBeforeDelete
