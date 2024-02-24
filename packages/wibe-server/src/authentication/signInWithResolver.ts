@@ -40,6 +40,9 @@ export const signInWithResolver = async (
 		// @ts-expect-error
 		input.authentication[authenticationMethod]
 
+	if (!inputOfTheGoodAuthenticationMethod.identifier)
+		throw new Error('No identifier provided')
+
 	// We need to use directly the databaseController because
 	// we don't know the type of the identifier (email, phone, username, etc.)
 	// So we can't use graphql api
@@ -48,7 +51,7 @@ export const signInWithResolver = async (
 		where: {
 			authentication: {
 				// @ts-expect-error
-				emailPassword: {
+				[authenticationMethod]: {
 					identifier: {
 						equalTo: inputOfTheGoodAuthenticationMethod.identifier,
 					},
@@ -60,8 +63,38 @@ export const signInWithResolver = async (
 	if (userWithIdentifier.length > 1)
 		throw new Error('Multiple users found with the same identifier')
 
-	if (userWithIdentifier.length === 0) events.onSignUp(input, context)
-	else events.onLogin(input, context)
+	if (userWithIdentifier.length === 0) {
+		await WibeApp.databaseController.createObject({
+			className: '_User',
+			data: [
+				{
+					authentication: {
+						[authenticationMethod]: {
+							...inputOfTheGoodAuthenticationMethod,
+						},
+					},
+				},
+			],
+		})
+
+		events.onSignUp(input, context)
+	} else {
+		await WibeApp.databaseController.updateObject({
+			className: '_User',
+			id: userWithIdentifier[0].id,
+			data: [
+				{
+					authentication: {
+						[authenticationMethod]: {
+							...inputOfTheGoodAuthenticationMethod,
+						},
+					},
+				},
+			],
+		})
+
+		events.onLogin(input, context)
+	}
 
 	return true
 }

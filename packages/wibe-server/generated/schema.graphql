@@ -27,7 +27,7 @@ type _User {
   role: Role
   address: _UserAddress
   object: _UserObject
-  authentication: _UserAuthentication!
+  authentication: _UserAuthentication
   provider: AuthenticationProvider
   verifiedEmail: Boolean
   createdAt: Date
@@ -119,7 +119,7 @@ input _UserWhereInput {
   role: AnyWhereInput
   address: _UserAddressWhereInput
   object: _UserObjectWhereInput
-  authentication: _UserAuthenticationWhereInput!
+  authentication: _UserAuthenticationWhereInput
   provider: AnyWhereInput
   verifiedEmail: BooleanWhereInput
   createdAt: DateWhereInput
@@ -294,7 +294,7 @@ input _UserInput {
   role: Role
   address: _UserAddressInput
   object: _UserObjectInput
-  authentication: _UserAuthenticationInput!
+  authentication: _UserAuthenticationInput
   provider: AuthenticationProvider
   verifiedEmail: Boolean
   createdAt: Date
@@ -348,7 +348,7 @@ input _UserUpdateFieldsInput {
   role: Role
   address: _UserAddressUpdateFieldsInput
   object: _UserObjectUpdateFieldsInput
-  authentication: _UserAuthenticationUpdateFieldsInput!
+  authentication: _UserAuthenticationUpdateFieldsInput
   provider: AuthenticationProvider
   verifiedEmail: Boolean
   createdAt: Date
@@ -414,7 +414,7 @@ input SecondCustomMutationSumInput {
 }
 
 input SignInWithInput {
-  authentication: SignInWithAuthenticationInput!
+  authentication: SignInWithAuthenticationInput
 }
 
 input SignInWithAuthenticationInput {
