@@ -26,15 +26,15 @@ export const signInWithResolver = async (
 	const authenticationMethod = authenticationMethods[0]
 
 	// We check if the authentication method is valid
-	const validAuthentication = customAuthenticationConfig.find(
+	const validAuthenticationMethod = customAuthenticationConfig.find(
 		(method) =>
 			method.name.toLowerCase() === authenticationMethod.toLowerCase(),
 	)
 
-	if (!validAuthentication)
+	if (!validAuthenticationMethod)
 		throw new Error('No available custom authentication methods found')
 
-	const { events } = validAuthentication
+	const { events } = validAuthenticationMethod
 
 	const inputOfTheGoodAuthenticationMethod =
 		// @ts-expect-error
@@ -63,7 +63,13 @@ export const signInWithResolver = async (
 	if (userWithIdentifier.length > 1)
 		throw new Error('Multiple users found with the same identifier')
 
-	if (userWithIdentifier.length === 0) {
+	const isSignUp = userWithIdentifier.length === 0
+
+	const { accessToken, refreshToken } = isSignUp
+		? await events.onSignUp(input, context)
+		: await events.onLogin(input, context)
+
+	if (isSignUp) {
 		await WibeApp.databaseController.createObject({
 			className: '_User',
 			data: [
@@ -73,11 +79,11 @@ export const signInWithResolver = async (
 							...inputOfTheGoodAuthenticationMethod,
 						},
 					},
+					accessToken,
+					refreshToken,
 				},
 			],
 		})
-
-		events.onSignUp(input, context)
 	} else {
 		await WibeApp.databaseController.updateObject({
 			className: '_User',
@@ -89,11 +95,11 @@ export const signInWithResolver = async (
 							...inputOfTheGoodAuthenticationMethod,
 						},
 					},
+					accessToken,
+					refreshToken,
 				},
 			],
 		})
-
-		events.onLogin(input, context)
 	}
 
 	return true

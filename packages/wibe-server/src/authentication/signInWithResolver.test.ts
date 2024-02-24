@@ -4,8 +4,18 @@ import { signInWithResolver } from './signInWithResolver'
 import { Context } from '../graphql/interface'
 
 describe('SignInWith', () => {
-	const mockOnLogin = mock(() => Promise.resolve(true))
-	const mockOnSignUp = mock(() => Promise.resolve(true))
+	const mockOnLogin = mock(() =>
+		Promise.resolve({
+			accessToken: 'accessToken',
+			refreshToken: 'refreshToken',
+		}),
+	)
+	const mockOnSignUp = mock(() =>
+		Promise.resolve({
+			accessToken: 'accessToken',
+			refreshToken: 'refreshToken',
+		}),
+	)
 	const mockGetObjects = mock(() => Promise.resolve([]))
 	const mockCreateObject = mock(() => Promise.resolve({}))
 	const mockUpdateObject = mock(() => Promise.resolve({}))
@@ -174,6 +184,8 @@ describe('SignInWith', () => {
 							password: 'password',
 						},
 					},
+					refreshToken: 'refreshToken',
+					accessToken: 'accessToken',
 				},
 			],
 		})
@@ -237,6 +249,8 @@ describe('SignInWith', () => {
 							password: 'password',
 						},
 					},
+					refreshToken: expect.any(String),
+					accessToken: expect.any(String),
 				},
 			],
 		})

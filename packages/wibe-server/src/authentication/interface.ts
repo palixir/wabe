@@ -11,11 +11,21 @@ export interface ProviderConfig {
 	clientSecret: string
 }
 
+export interface AuthenticationCallbackOutput {
+	refreshToken?: string
+	accessToken?: string
+}
+
 export interface CustomAuthenticationEvents {
 	// TODO : Add onOTP
-	// TODO : Type the input with graphql input
-	onSignUp: (input: Record<string, any>, context: Context) => Promise<boolean>
-	onLogin: (input: Record<string, any>, context: Context) => Promise<boolean>
+	onSignUp: (
+		input: Record<string, any>,
+		context: Context,
+	) => Promise<AuthenticationCallbackOutput>
+	onLogin: (
+		input: Record<string, any>,
+		context: Context,
+	) => Promise<AuthenticationCallbackOutput>
 }
 
 export interface CustomAuthenticationMethods<T = Record<string, TypeField>> {

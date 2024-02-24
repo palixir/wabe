@@ -178,6 +178,12 @@ export class Schema {
 			verifiedEmail: {
 				type: 'Boolean',
 			},
+			refreshToken: {
+				type: 'String',
+			},
+			accessToken: {
+				type: 'String',
+			},
 			// TODO : Automatically put this two fields for each class
 			createdAt: {
 				type: 'Date',

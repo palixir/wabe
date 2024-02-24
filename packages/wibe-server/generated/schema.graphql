@@ -30,6 +30,8 @@ type _User {
   authentication: _UserAuthentication
   provider: AuthenticationProvider
   verifiedEmail: Boolean
+  refreshToken: String
+  accessToken: String
   createdAt: Date
   updatedAt: Date
 }
@@ -122,6 +124,8 @@ input _UserWhereInput {
   authentication: _UserAuthenticationWhereInput
   provider: AnyWhereInput
   verifiedEmail: BooleanWhereInput
+  refreshToken: StringWhereInput
+  accessToken: StringWhereInput
   createdAt: DateWhereInput
   updatedAt: DateWhereInput
   OR: [_UserWhereInput]
@@ -297,6 +301,8 @@ input _UserInput {
   authentication: _UserAuthenticationInput
   provider: AuthenticationProvider
   verifiedEmail: Boolean
+  refreshToken: String
+  accessToken: String
   createdAt: Date
   updatedAt: Date
 }
@@ -351,6 +357,8 @@ input _UserUpdateFieldsInput {
   authentication: _UserAuthenticationUpdateFieldsInput
   provider: AuthenticationProvider
   verifiedEmail: Boolean
+  refreshToken: String
+  accessToken: String
   createdAt: Date
   updatedAt: Date
 }
