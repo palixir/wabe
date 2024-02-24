@@ -2,6 +2,7 @@ import { describe, expect, it, spyOn, mock } from 'bun:test'
 import * as index from './index'
 import { WibeApp } from '../server'
 import { OperationType } from './index'
+import { Context } from '../graphql/interface'
 
 describe('Hooks', () => {
 	it('should find and execute all the hooks and respect the priorities', async () => {
@@ -27,16 +28,18 @@ describe('Hooks', () => {
 
 		await index.findHooksAndExecute({
 			className: '_User',
-			fields: [
+			data: [
 				{
 					name: 'tata',
 				},
 			],
 			operationType: OperationType.BeforeInsert,
-			user: {
-				id: 'fakeId',
-				email: 'fakeEmail',
-			},
+			context: {
+				user: {
+					id: 'fakeId',
+					email: 'fakeEmail',
+				},
+			} as Context,
 		})
 
 		expect(mockCallbackOne).toHaveBeenCalledTimes(1)
@@ -68,16 +71,18 @@ describe('Hooks', () => {
 
 		await index.findHooksAndExecute({
 			className: '_User',
-			fields: [
+			data: [
 				{
 					name: 'tata',
 				},
 			],
 			operationType: OperationType.BeforeInsert,
-			user: {
-				id: 'fakeId',
-				email: 'fakeEmail',
-			},
+			context: {
+				user: {
+					id: 'fakeId',
+					email: 'fakeEmail',
+				},
+			} as Context,
 		})
 
 		expect(mockCallbackOne).toHaveBeenCalledTimes(1)

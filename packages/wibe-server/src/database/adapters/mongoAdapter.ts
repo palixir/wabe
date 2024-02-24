@@ -243,8 +243,7 @@ export class MongoAdapter implements DatabaseAdapter {
 
 		const arrayOfComputedData = await findHooksAndExecute({
 			className,
-			fields: data,
-			user: context.user,
+			data,
 			operationType: OperationType.BeforeInsert,
 			context,
 		})
@@ -267,8 +266,7 @@ export class MongoAdapter implements DatabaseAdapter {
 
 		await findHooksAndExecute({
 			className,
-			user: context.user,
-			fields: data,
+			data: allObjects,
 			operationType: OperationType.AfterInsert,
 			context,
 		})
@@ -318,8 +316,7 @@ export class MongoAdapter implements DatabaseAdapter {
 
 		const arrayOfComputedData = await findHooksAndExecute({
 			className,
-			user: context.user,
-			fields: [data],
+			data: [data],
 			operationType: OperationType.BeforeUpdate,
 			context,
 		})
@@ -336,19 +333,11 @@ export class MongoAdapter implements DatabaseAdapter {
 			$set: arrayOfComputedData[0],
 		})
 
-		await findHooksAndExecute({
-			className,
-			user: context.user,
-			fields: [data],
-			operationType: OperationType.AfterUpdate,
-			context,
-		})
-
 		const orStatement = objectsBeforeUpdate.map((object) => ({
 			id: { equalTo: new ObjectId(object.id) },
 		}))
 
-		return this.getObjects({
+		const objects = await this.getObjects({
 			className,
 			where: {
 				OR: orStatement,
@@ -357,6 +346,15 @@ export class MongoAdapter implements DatabaseAdapter {
 			offset,
 			limit,
 		})
+
+		await findHooksAndExecute({
+			className,
+			data: objects,
+			operationType: OperationType.AfterUpdate,
+			context,
+		})
+
+		return objects
 	}
 
 	async deleteObject<
@@ -405,8 +403,7 @@ export class MongoAdapter implements DatabaseAdapter {
 
 		await findHooksAndExecute({
 			className,
-			user: context.user,
-			fields: [],
+			data: objectsBeforeDelete,
 			operationType: OperationType.BeforeDelete,
 			context,
 		})
@@ -415,8 +412,7 @@ export class MongoAdapter implements DatabaseAdapter {
 
 		await findHooksAndExecute({
 			className,
-			user: context.user,
-			fields: [],
+			data: objectsBeforeDelete,
 			operationType: OperationType.AfterDelete,
 			context,
 		})

@@ -1,36 +1,17 @@
-import { WibeSchemaTypes } from '../../generated/wibe'
 import { Context } from '../graphql/interface'
 import { WibeApp } from '../server'
 import { HookObject } from './HookObject'
 
-export const defaultBeforeInsertForCreatedAt = <
-	T extends keyof WibeSchemaTypes,
-	K extends keyof WibeSchemaTypes[T],
->(
-	object: HookObject<T, K>,
-) => {
-	// @ts-expect-error
+export const defaultBeforeInsertForCreatedAt = (object: HookObject<any>) => {
 	object.set({ field: 'createdAt', value: new Date() })
-	// @ts-expect-error
 	object.set({ field: 'updatedAt', value: new Date() })
 }
 
-export const defaultBeforeUpdateForUpdatedAt = <
-	T extends keyof WibeSchemaTypes,
-	K extends keyof WibeSchemaTypes[T],
->(
-	object: HookObject<T, K>,
-) => {
-	// @ts-expect-error
+export const defaultBeforeUpdateForUpdatedAt = (object: HookObject<any>) => {
 	object.set({ field: 'updatedAt', value: new Date() })
 }
 
-export const defaultBeforeInsertForDefaultValue = <
-	T extends keyof WibeSchemaTypes,
-	K extends keyof WibeSchemaTypes[T],
->(
-	object: HookObject<T, K>,
-) => {
+export const defaultBeforeInsertForDefaultValue = (object: HookObject<any>) => {
 	const schemaClass = WibeApp.config.schema.class.find(
 		(schema) => schema.name === object.className,
 	)
@@ -40,10 +21,8 @@ export const defaultBeforeInsertForDefaultValue = <
 	const allFields = Object.keys(schemaClass.fields)
 
 	allFields.map((field) => {
-		// @ts-expect-error
-		if (!object.get({ field }))
+		if (!object.get(field))
 			object.set({
-				// @ts-expect-error
 				field,
 				// @ts-expect-error
 				value: schemaClass?.fields[field].defaultValue,
@@ -51,15 +30,12 @@ export const defaultBeforeInsertForDefaultValue = <
 	})
 }
 
-export const defaultAfterInsertToCallSignUpEvent = async <
-	T extends keyof WibeSchemaTypes,
-	K extends keyof WibeSchemaTypes[T],
->(
-	object: HookObject<T, K>,
+export const defaultAfterInsertToCallSignUpEvent = async (
+	object: HookObject<'_User'>,
 	context: Context,
 ) => {
 	// TODO : Redondant code with signInWithResolver need refactoring
-	const authenticationObject = object.get({ field: 'authentication' })
+	const authenticationObject = object.get('authentication')
 
 	if (!authenticationObject) return
 
@@ -87,6 +63,6 @@ export const defaultAfterInsertToCallSignUpEvent = async <
 	await onSignUp({
 		context,
 		input: authenticationObject,
-		userId: 'userId',
+		userId: object.get('id'),
 	})
 }

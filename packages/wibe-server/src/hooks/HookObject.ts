@@ -1,51 +1,36 @@
 import { OperationType } from '.'
 import { WibeSchemaTypes, _User } from '../../generated/wibe'
 
-export interface ObjectInterface<
-	T extends keyof WibeSchemaTypes,
-	K extends keyof WibeSchemaTypes[T],
-> {
-	fields: Record<K, any>
-	id?: string
-}
-
-export class HookObject<
-	T extends keyof WibeSchemaTypes,
-	K extends keyof WibeSchemaTypes[T],
-> {
-	public user: _User
+export class HookObject<T extends keyof WibeSchemaTypes> {
 	public className: T
-	private object: ObjectInterface<T, K>
+	private object: Record<keyof WibeSchemaTypes[T], any>
 	private operationType: OperationType
 
 	constructor({
 		object,
 		className,
-		user,
 		operationType,
 	}: {
-		user: _User
 		className: T
-		object: ObjectInterface<T, K>
+		object: Record<keyof WibeSchemaTypes[T], any>
 		operationType: OperationType
 	}) {
-		this.user = user
-		this.object = { ...object, fields: Object.assign({}, object.fields) }
+		this.object = Object.assign({}, object)
 		this.className = className
 		this.operationType = operationType
 	}
 
-	get({ field }: { field: K }) {
-		return this.object.fields?.[field]
+	get(field: keyof WibeSchemaTypes[T]) {
+		return this.object?.[field]
 	}
 
-	set({ field, value }: { field: K; value: any }) {
+	set({ field, value }: { field: keyof WibeSchemaTypes[T]; value: any }) {
 		if (!this.operationType.includes('before'))
 			throw new Error(
 				'Cannot set data in a hook that is not a before hook',
 			)
 
-		this.object.fields[field] = value
+		this.object[field] = value
 	}
 
 	getObject() {

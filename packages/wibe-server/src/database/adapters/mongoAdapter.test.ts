@@ -686,7 +686,7 @@ describe('Mongo adapter', () => {
 				name: 'Lucas',
 				age: 23,
 			},
-			fields: ['age', 'id', 'age'],
+			fields: ['age', 'id'],
 			context: { user: {} } as any,
 		})
 
@@ -694,26 +694,24 @@ describe('Mongo adapter', () => {
 		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
 			operationType: hooks.OperationType.BeforeInsert,
 			className: '_User',
-			fields: [
+			data: [
 				{
 					name: 'Lucas',
 					age: 23,
 				},
 			],
-			user: {},
 			context: expect.any(Object),
 		})
 
 		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
 			operationType: hooks.OperationType.AfterInsert,
 			className: '_User',
-			fields: [
+			data: [
 				{
-					name: 'Lucas',
 					age: 23,
+					id: expect.any(String),
 				},
 			],
-			user: {},
 			context: expect.any(Object),
 		})
 
@@ -757,7 +755,7 @@ describe('Mongo adapter', () => {
 		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
 			operationType: hooks.OperationType.BeforeInsert,
 			className: '_User',
-			fields: [
+			data: [
 				{
 					name: 'Lucas3',
 					age: 23,
@@ -767,24 +765,22 @@ describe('Mongo adapter', () => {
 					age: 24,
 				},
 			],
-			user: {},
 			context: expect.any(Object),
 		})
 
 		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
 			operationType: hooks.OperationType.AfterInsert,
 			className: '_User',
-			fields: [
+			data: [
 				{
 					name: 'Lucas3',
-					age: 23,
+					id: expect.any(String),
 				},
 				{
 					name: 'Lucas4',
-					age: 24,
+					id: expect.any(String),
 				},
 			],
-			user: {},
 			context: expect.any(Object),
 		})
 
@@ -861,23 +857,22 @@ describe('Mongo adapter', () => {
 		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
 			operationType: hooks.OperationType.BeforeUpdate,
 			className: '_User',
-			fields: [
+			data: [
 				{
 					name: 'Doe',
 				},
 			],
-			user: {},
 			context: expect.any(Object),
 		})
 		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
 			operationType: hooks.OperationType.AfterUpdate,
 			className: '_User',
-			fields: [
+			data: [
 				{
 					name: 'Doe',
+					id: expect.any(String),
 				},
 			],
-			user: {},
 			context: expect.any(Object),
 		})
 
@@ -937,23 +932,23 @@ describe('Mongo adapter', () => {
 		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
 			operationType: hooks.OperationType.BeforeUpdate,
 			className: '_User',
-			fields: [
+			data: [
 				{
 					age: 21,
 				},
 			],
-			user: {},
 			context: expect.any(Object),
 		})
 		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
 			operationType: hooks.OperationType.AfterUpdate,
 			className: '_User',
-			fields: [
+			data: [
 				{
 					age: 21,
+					name: 'Lucas',
+					id: expect.any(String),
 				},
 			],
-			user: {},
 			context: expect.any(Object),
 		})
 
@@ -1050,15 +1045,19 @@ describe('Mongo adapter', () => {
 		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
 			operationType: hooks.OperationType.BeforeDelete,
 			className: '_User',
-			fields: [],
-			user: {},
+			data: [
+				{
+					id: expect.any(String),
+					name: 'John',
+					age: 20,
+				},
+			],
 			context: expect.any(Object),
 		})
 		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
 			operationType: hooks.OperationType.AfterDelete,
 			className: '_User',
-			fields: [],
-			user: {},
+			data: [{ id: expect.any(String), name: 'John', age: 20 }],
 			context: expect.any(Object),
 		})
 
@@ -1113,15 +1112,35 @@ describe('Mongo adapter', () => {
 		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
 			operationType: hooks.OperationType.BeforeDelete,
 			className: '_User',
-			fields: [],
-			user: {},
+			data: [
+				{
+					id: expect.any(String),
+					name: 'John',
+					age: 18,
+				},
+				{
+					id: expect.any(String),
+					name: 'Lucas',
+					age: 18,
+				},
+			],
 			context: expect.any(Object),
 		})
 		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
 			operationType: hooks.OperationType.AfterDelete,
 			className: '_User',
-			fields: [],
-			user: {},
+			data: [
+				{
+					id: expect.any(String),
+					name: 'John',
+					age: 18,
+				},
+				{
+					id: expect.any(String),
+					name: 'Lucas',
+					age: 18,
+				},
+			],
 			context: expect.any(Object),
 		})
 

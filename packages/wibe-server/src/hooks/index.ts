@@ -1,4 +1,5 @@
 import { WibeSchemaTypes, _User } from '../../generated/wibe'
+import { Context } from '../graphql/interface'
 import { WibeApp } from '../server'
 import { notEmpty } from '../utils/helper'
 import { HookObject } from './HookObject'
@@ -75,22 +76,15 @@ export const _findHooksByPriority = async <T extends keyof WibeSchemaTypes>({
 			(className === hook.className || !hook.className),
 	) || []
 
-export const findHooksAndExecute = async <
-	T extends keyof WibeSchemaTypes,
-	K extends keyof WibeSchemaTypes[T],
->({
+export const findHooksAndExecute = async ({
 	className,
 	operationType,
-	fields,
-	id,
-	user,
+	data,
 	context,
 }: {
-	className: T
+	className: keyof WibeSchemaTypes
 	operationType: OperationType
-	fields: Array<Record<K, any>>
-	id?: string
-	user: _User
+	data: Array<Record<string, any>>
 	context: Context
 }) => {
 	const listOfPriorities =
@@ -104,12 +98,11 @@ export const findHooksAndExecute = async <
 
 	// We need to keep the order of the data but we need to execute the hooks in parallel
 	const computedResult = await Promise.all(
-		fields.map(async (dataForOneObject, index) => {
+		data.map(async (dataForOneObject, index) => {
 			const hookObject = new HookObject({
 				className,
-				object: { fields: dataForOneObject, id },
+				object: dataForOneObject,
 				operationType,
-				user,
 			})
 
 			// We need reduce here to keep the order of the hooks
@@ -128,7 +121,7 @@ export const findHooksAndExecute = async <
 				)
 			}, Promise.resolve())
 
-			return { index, data: hookObject.getObject().fields }
+			return { index, data: hookObject.getObject() }
 		}),
 	)
 
