@@ -185,12 +185,8 @@ describe('SignInWith', () => {
 		expect(mockOnLogin).toHaveBeenCalledTimes(1)
 		expect(mockOnLogin).toHaveBeenCalledWith({
 			input: {
-				authentication: {
-					emailPassword: {
-						identifier: 'email@test.fr',
-						password: 'password',
-					},
-				},
+				identifier: 'email@test.fr',
+				password: 'password',
 			},
 			context: expect.anything(),
 			user: { id: 'id' },
@@ -256,6 +252,15 @@ describe('SignInWith', () => {
 		)
 
 		expect(res).toBe(true)
+		expect(mockOnSignUp).toHaveBeenCalledTimes(1)
+		expect(mockOnSignUp).toHaveBeenCalledWith({
+			input: {
+				identifier: 'email@test.fr',
+				password: 'password',
+			},
+			context: expect.anything(),
+			user: { id: 'id' },
+		})
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
 		expect(mockGetObjects).toHaveBeenCalledWith({

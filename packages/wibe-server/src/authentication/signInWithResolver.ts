@@ -91,15 +91,15 @@ export const signInWithResolver = async (
 
 	const elementsToSave = isSignUp
 		? await events.onSignUp({
-				input,
+				input: inputOfTheGoodAuthenticationMethod,
 				context,
 				user,
-			})
+		  })
 		: await events.onLogin({
-				input,
+				input: inputOfTheGoodAuthenticationMethod,
 				context,
 				user,
-			})
+		  })
 
 	await WibeApp.databaseController.updateObject({
 		className: '_User',

@@ -1,4 +1,3 @@
-import { WibeApp } from '../../server'
 import { AuthenticationEventsOptions } from '../interface'
 
 export const emailPasswordOnSignUp = async ({
@@ -21,16 +20,13 @@ export const emailPasswordOnSignUp = async ({
 		exp: thirtyDays.getTime(),
 	})
 
-	const hashedPassword = await Bun.password.hash(
-		input.authentication.emailPassword.password,
-		'argon2id',
-	)
+	const hashedPassword = await Bun.password.hash(input.password, 'argon2id')
 
 	return {
 		accessToken,
 		refreshToken,
 		password: hashedPassword,
-		identifier: 'email@test.fr',
+		identifier: input.identifier,
 	}
 }
 
@@ -39,16 +35,17 @@ export const emailPasswordOnLogin = async ({
 	user,
 	context,
 }: AuthenticationEventsOptions) => {
-	const databaseUserPassword = user.authentication?.emailPassword?.password
-	const inputPasword = input.authentication.emailPassword.password
-
 	const isPasswordEquals = await Bun.password.verify(
-		inputPasword,
-		databaseUserPassword,
+		input.password,
+		user.authentication?.emailPassword?.password,
 		'argon2id',
 	)
 
-	if (!isPasswordEquals) throw new Error('Invalid authentication credentials')
+	if (
+		!isPasswordEquals ||
+		input.identifier !== user.authentication?.emailPassword?.identifier
+	)
+		throw new Error('Invalid authentication credentials')
 
 	const fifteenMinutes = new Date(Date.now() + 1000 * 60 * 15)
 	const thirtyDays = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
@@ -87,7 +84,7 @@ export const emailPasswordOnLogin = async ({
 	return {
 		accessToken,
 		refreshToken,
-		password: 'password',
-		identifier: 'email@test.fr',
+		password: user.authentication?.emailPassword?.password,
+		identifier: input.identifier,
 	}
 }
