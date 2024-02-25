@@ -16,9 +16,9 @@ describe('SignInWith', () => {
 			refreshToken: 'refreshToken',
 		}),
 	)
-	const mockGetObjects = mock()
-	const mockCreateObject = mock()
-	const mockUpdateObject = mock()
+	const mockGetObjects = mock(() => Promise.resolve([{}]))
+	const mockCreateObject = mock(() => Promise.resolve({}))
+	const mockUpdateObject = mock(() => Promise.resolve({}))
 
 	const mockDatabaseController = {
 		getObjects: mockGetObjects,
@@ -28,6 +28,8 @@ describe('SignInWith', () => {
 
 	beforeEach(() => {
 		mockGetObjects.mockClear()
+		mockCreateObject.mockClear()
+		mockUpdateObject.mockClear()
 		mockOnLogin.mockClear()
 		mockOnSignUp.mockClear()
 
@@ -61,7 +63,8 @@ describe('SignInWith', () => {
 					input: {
 						authentication: {
 							emailPassword: {
-								email: 'email@test.fr',
+								// @ts-expect-error
+								invalididentifier: 'email@test.fr',
 								password: 'password',
 							},
 						},
@@ -129,7 +132,7 @@ describe('SignInWith', () => {
 	})
 
 	it('should throw an error if more than on user is equal to the identifier', async () => {
-		mockGetObjects.mockReturnValueOnce([{} as never, {} as never])
+		mockGetObjects.mockResolvedValueOnce([{}, {}])
 
 		expect(
 			signInWithResolver(
@@ -150,9 +153,9 @@ describe('SignInWith', () => {
 	})
 
 	it('should signInWith email and password when the user already exist', async () => {
-		const mockAddCookie = mock()
+		const mockAddCookie = mock(() => {})
 
-		mockGetObjects.mockReturnValueOnce([{ id: 'id' } as never])
+		mockGetObjects.mockResolvedValueOnce([{ id: 'id' } as never])
 
 		const res = await signInWithResolver(
 			{},
@@ -175,7 +178,7 @@ describe('SignInWith', () => {
 						add: mockAddCookie,
 					},
 				},
-			} as Context,
+			} as any,
 		)
 
 		expect(res).toBe(true)
@@ -211,12 +214,6 @@ describe('SignInWith', () => {
 			id: 'id',
 			data: [
 				{
-					authentication: {
-						emailPassword: {
-							identifier: 'email@test.fr',
-							password: 'password',
-						},
-					},
 					refreshToken: 'refreshToken',
 					accessToken: 'accessToken',
 				},
@@ -246,9 +243,9 @@ describe('SignInWith', () => {
 	})
 
 	it('should signInWith email and password when the user not exist', async () => {
-		const mockAddCookie = mock()
+		const mockAddCookie = mock(() => {})
 
-		mockGetObjects.mockReturnValueOnce([])
+		mockGetObjects.mockResolvedValueOnce([])
 
 		const res = await signInWithResolver(
 			{},
@@ -271,7 +268,7 @@ describe('SignInWith', () => {
 						add: mockAddCookie,
 					},
 				},
-			} as Context,
+			} as any,
 		)
 
 		expect(res).toBe(true)

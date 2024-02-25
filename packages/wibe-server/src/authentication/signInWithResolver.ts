@@ -50,7 +50,6 @@ export const signInWithResolver = async (
 		className: '_User',
 		where: {
 			authentication: {
-				// @ts-expect-error
 				[authenticationMethod]: {
 					identifier: {
 						equalTo: inputOfTheGoodAuthenticationMethod.identifier,
@@ -70,6 +69,7 @@ export const signInWithResolver = async (
 		// In this way we also get the event when we use the create_User mutation
 		await WibeApp.databaseController.createObject({
 			className: '_User',
+			// @ts-expect-error
 			data: [
 				{
 					authentication: {
@@ -93,13 +93,9 @@ export const signInWithResolver = async (
 	await WibeApp.databaseController.updateObject({
 		className: '_User',
 		id: userWithIdentifier[0].id,
+		// @ts-expect-error
 		data: [
 			{
-				authentication: {
-					[authenticationMethod]: {
-						...inputOfTheGoodAuthenticationMethod,
-					},
-				},
 				accessToken,
 				refreshToken,
 			},
