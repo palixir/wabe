@@ -1,4 +1,4 @@
-import { WibeSchemaTypes, _User } from '../../generated/wibe'
+import { WibeSchemaTypes } from '../../generated/wibe'
 import { Context } from '../graphql/interface'
 import { WibeApp } from '../server'
 import { notEmpty } from '../utils/helper'
@@ -19,10 +19,7 @@ export enum OperationType {
 	BeforeDelete = 'beforeDelete',
 }
 
-export type Hook<
-	T extends keyof WibeSchemaTypes,
-	K extends keyof WibeSchemaTypes[T],
-> = {
+export type Hook<T extends keyof WibeSchemaTypes> = {
 	operationType: OperationType
 	// If the className is undefined the hook is called on each class
 	className?: T
@@ -31,12 +28,12 @@ export type Hook<
 	// The default priority is 1
 	priority: number
 	callback: (
-		hookObject: HookObject<T, K>,
+		hookObject: HookObject<T>,
 		context: Context,
 	) => Promise<void> | void
 }
 
-export const defaultHooks: Hook<any, any>[] = [
+export const defaultHooks: Hook<any>[] = [
 	{
 		operationType: OperationType.BeforeInsert,
 		priority: 1,
