@@ -1,6 +1,4 @@
 import { WibeSchemaScalars, WibeSchemaEnums } from '../../generated/wibe'
-import { CustomAuthenticationMethods } from '../authentication/interface'
-import { emailPasswordOnLogin } from '../authentication/methods/emailPassword'
 import { signInWithResolver } from '../authentication/signInWithResolver'
 import { signOutResolver } from '../graphql/resolvers/signOut'
 import { WibeApp } from '../server'
@@ -203,7 +201,7 @@ export class Schema {
 								},
 								resolve: signInWithResolver,
 							},
-						}
+					  }
 					: {}),
 				signOut: {
 					type: 'Boolean',

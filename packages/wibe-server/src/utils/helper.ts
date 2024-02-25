@@ -14,11 +14,11 @@ export type DeepRequired<T> = T extends Primitive
 			[P in keyof T]-?: T[P] extends Array<infer U>
 				? Array<DeepRequired<U>>
 				: T[P] extends ReadonlyArray<infer U2>
-					? DeepRequired<U2>
-					: DeepRequired<T[P]>
-		}
+				  ? DeepRequired<U2>
+				  : DeepRequired<T[P]>
+	  }
 
-export const notEmpty = <T,>(value: T | null | undefined): value is T =>
+export const notEmpty = <T>(value: T | null | undefined): value is T =>
 	value !== null && value !== undefined
 
 export const getGraphqlClient = (port: number): GraphQLClient => {
@@ -180,13 +180,11 @@ export const setupTests = async () => {
 															fields: {
 																a: {
 																	type: 'Int',
-																	required:
-																		true,
+																	required: true,
 																},
 																b: {
 																	type: 'Int',
-																	required:
-																		true,
+																	required: true,
 																},
 															},
 														},
