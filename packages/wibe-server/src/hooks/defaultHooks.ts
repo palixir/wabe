@@ -56,16 +56,6 @@ export const defaultAfterInsertToCallSignUpEvent = async (
 
 	const authenticationMethod = authenticationMethods[0]
 
-	const validAuthenticationMethod =
-		WibeApp.config.authentication?.customAuthenticationMethods.find(
-			(method) =>
-				method.name.toLowerCase() ===
-				authenticationMethod.toLowerCase(),
-		)
-
-	if (!validAuthenticationMethod)
-		throw new Error('No available custom authentication methods found')
-
 	const {
 		events: { onSignUp },
 	} = validAuthenticationMethod

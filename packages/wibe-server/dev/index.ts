@@ -23,23 +23,6 @@ const run = async () => {
 					clientSecret: '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',
 				},
 			},
-			customAuthenticationMethods: [
-				{
-					name: 'emailPassword',
-					input: {
-						identifier: { type: 'Email', required: true },
-						password: { type: 'String', required: true },
-					},
-					events: {
-						onSignUp: async () => {
-							return {}
-						},
-						onLogin: async () => {
-							return {}
-						},
-					},
-				},
-			],
 		},
 		database: {
 			type: DatabaseEnum.Mongo,

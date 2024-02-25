@@ -9,6 +9,7 @@ import { GraphQLObjectType, GraphQLSchema, printSchema } from 'graphql'
 import { WibeGraphQLSchema } from '../schema/WibeGraphQLSchema'
 import { AuthenticationConfig } from '../authentication/interface'
 import { WibeRoute, defaultRoutes } from './routes'
+import { defaultAuthenticationMethods } from '../authentication'
 import { Hook, defaultHooks } from '../hooks'
 import { generateWibeFile } from './generateWibeFile'
 
@@ -52,25 +53,34 @@ export class WibeApp {
 			context.set.status = 200
 		})
 
-		this.loadDefaultRoutes()
-		this.loadHooks()
-
 		const databaseAdapter = new MongoAdapter({
 			databaseName: database.name,
 			databaseUrl: database.url,
 		})
 
 		WibeApp.databaseController = new DatabaseController(databaseAdapter)
+
+		this.loadDefaultRoutes()
+		this.loadHooks()
+		this.loadAuthenticationMethods()
 	}
 
-	async loadHooks() {
+	loadAuthenticationMethods() {
+		WibeApp.config.authentication.customAuthenticationMethods = [
+			...defaultAuthenticationMethods,
+			...(WibeApp.config.authentication.customAuthenticationMethods ||
+				[]),
+		]
+	}
+
+	loadHooks() {
 		WibeApp.config.hooks = [
 			...defaultHooks,
 			...(WibeApp.config.hooks || []),
 		]
 	}
 
-	async loadDefaultRoutes() {
+	loadDefaultRoutes() {
 		const wibeRoutes = defaultRoutes()
 
 		wibeRoutes.map((route) => {

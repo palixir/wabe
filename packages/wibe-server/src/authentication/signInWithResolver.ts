@@ -70,15 +70,13 @@ export const signInWithResolver = async (
 		await WibeApp.databaseController.createObject({
 			className: '_User',
 			// @ts-expect-error
-			data: [
-				{
-					authentication: {
-						[authenticationMethod]: {
-							...inputOfTheGoodAuthenticationMethod,
-						},
+			data: {
+				authentication: {
+					[authenticationMethod]: {
+						...inputOfTheGoodAuthenticationMethod,
 					},
 				},
-			],
+			},
 		})
 
 		return true
@@ -87,7 +85,7 @@ export const signInWithResolver = async (
 	const { accessToken, refreshToken } = await events.onLogin({
 		input,
 		context,
-		userId: userWithIdentifier[0].id,
+		user: userWithIdentifier[0],
 	})
 
 	await WibeApp.databaseController.updateObject({

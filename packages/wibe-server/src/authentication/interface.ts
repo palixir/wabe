@@ -1,3 +1,4 @@
+import { _User } from '../../generated/wibe'
 import { Context } from '../graphql/interface'
 import { TypeField } from '../schema'
 
@@ -17,7 +18,7 @@ export interface AuthenticationCallbackOutput {
 }
 
 export interface AuthenticationEventsOptions {
-	userId: string
+	user: _User
 	input: Record<string, any>
 	context: Context
 }

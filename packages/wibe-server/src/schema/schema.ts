@@ -1,4 +1,6 @@
 import { WibeSchemaScalars, WibeSchemaEnums } from '../../generated/wibe'
+import { CustomAuthenticationMethods } from '../authentication/interface'
+import { emailPasswordOnLogin } from '../authentication/methods/emailPassword'
 import { signInWithResolver } from '../authentication/signInWithResolver'
 import { signOutResolver } from '../graphql/resolvers/signOut'
 import { WibeApp } from '../server'
@@ -107,6 +109,7 @@ export class Schema {
 	public schema: SchemaInterface
 
 	constructor(schema: SchemaInterface) {
+		// TODO : Add default scalars here
 		this.schema = {
 			...schema,
 			class: this.defaultClass(schema),
@@ -206,7 +209,7 @@ export class Schema {
 								},
 								resolve: signInWithResolver,
 							},
-					  }
+						}
 					: {}),
 				signOut: {
 					type: 'Boolean',

@@ -1227,4 +1227,39 @@ describe('Mongo adapter', () => {
 
 		expect(where).toEqual({})
 	})
+
+	it('should request sub object in object', async () => {
+		await mongoAdapter.createObject({
+			className: '_User',
+			context: {} as any,
+			data: {
+				authentication: {
+					emailPassword: {
+						identifier: 'email@test.fr',
+						password: 'password',
+					},
+				},
+			},
+		})
+
+		const res = await mongoAdapter.getObjects({
+			className: '_User',
+			where: {
+				authentication: {
+					// @ts-expect-error
+					emailPassword: {
+						identifier: { equalTo: 'email@test.fr' },
+					},
+				},
+			},
+		})
+
+		expect(res.length).toEqual(1)
+		expect(res[0].authentication?.emailPassword?.identifier).toEqual(
+			'email@test.fr',
+		)
+		expect(res[0].authentication?.emailPassword?.password).toEqual(
+			'password',
+		)
+	})
 })

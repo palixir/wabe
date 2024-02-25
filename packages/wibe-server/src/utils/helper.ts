@@ -14,11 +14,11 @@ export type DeepRequired<T> = T extends Primitive
 			[P in keyof T]-?: T[P] extends Array<infer U>
 				? Array<DeepRequired<U>>
 				: T[P] extends ReadonlyArray<infer U2>
-				  ? DeepRequired<U2>
-				  : DeepRequired<T[P]>
-	  }
+					? DeepRequired<U2>
+					: DeepRequired<T[P]>
+		}
 
-export const notEmpty = <T>(value: T | null | undefined): value is T =>
+export const notEmpty = <T,>(value: T | null | undefined): value is T =>
 	value !== null && value !== undefined
 
 export const getGraphqlClient = (port: number): GraphQLClient => {
@@ -39,25 +39,6 @@ export const setupTests = async () => {
 			type: DatabaseEnum.Mongo,
 			url: 'mongodb://127.0.0.1:27045',
 			name: databaseId,
-		},
-		authentication: {
-			customAuthenticationMethods: [
-				{
-					name: 'emailPassword',
-					input: {
-						identifier: { type: 'Email', required: true },
-						password: { type: 'String', required: true },
-					},
-					events: {
-						onSignUp: async () => {
-							return {}
-						},
-						onLogin: async () => {
-							return {}
-						},
-					},
-				},
-			],
 		},
 		port,
 		schema: {
@@ -199,11 +180,13 @@ export const setupTests = async () => {
 															fields: {
 																a: {
 																	type: 'Int',
-																	required: true,
+																	required:
+																		true,
 																},
 																b: {
 																	type: 'Int',
-																	required: true,
+																	required:
+																		true,
 																},
 															},
 														},
