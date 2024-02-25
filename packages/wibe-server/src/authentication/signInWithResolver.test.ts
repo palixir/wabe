@@ -212,31 +212,14 @@ describe('SignInWith', () => {
 		expect(mockUpdateObject).toHaveBeenCalledWith({
 			className: '_User',
 			id: 'id',
-			data: [
-				{
-					refreshToken: 'refreshToken',
-					accessToken: 'accessToken',
+			data: {
+				authentication: {
+					emailPassword: {
+						accessToken: 'accessToken',
+						refreshToken: 'refreshToken',
+					},
 				},
-			],
-		})
-
-		expect(mockAddCookie).toHaveBeenCalledTimes(2)
-		expect(mockAddCookie).toHaveBeenNthCalledWith(1, {
-			expires: expect.any(Date),
-			httpOnly: true,
-			path: '/',
-			value: expect.any(String),
-			sameSite: 'strict',
-			secure: false,
-		})
-
-		expect(mockAddCookie).toHaveBeenNthCalledWith(2, {
-			expires: expect.any(Date),
-			httpOnly: true,
-			path: '/',
-			value: expect.any(String),
-			sameSite: 'strict',
-			secure: false,
+			},
 		})
 
 		expect(mockOnSignUp).toHaveBeenCalledTimes(0)
@@ -246,6 +229,7 @@ describe('SignInWith', () => {
 		const mockAddCookie = mock(() => {})
 
 		mockGetObjects.mockResolvedValueOnce([])
+		mockCreateObject.mockResolvedValueOnce({ id: 'id' })
 
 		const res = await signInWithResolver(
 			{},
@@ -293,6 +277,20 @@ describe('SignInWith', () => {
 					emailPassword: {
 						identifier: 'email@test.fr',
 						password: 'password',
+					},
+				},
+			},
+		})
+
+		expect(mockUpdateObject).toHaveBeenCalledTimes(1)
+		expect(mockUpdateObject).toHaveBeenCalledWith({
+			className: '_User',
+			id: 'id',
+			data: {
+				authentication: {
+					emailPassword: {
+						accessToken: 'accessToken',
+						refreshToken: 'refreshToken',
 					},
 				},
 			},

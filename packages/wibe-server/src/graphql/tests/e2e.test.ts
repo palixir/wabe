@@ -39,22 +39,22 @@ describe('GraphQL : E2E', () => {
 		await closeTests(wibe)
 	})
 
+	beforeEach(async () => {
+		await client.request<any>(graphql.create_Users, {
+			input: {
+				fields: [
+					{ name: 'Lucas', age: 23 },
+					{ name: 'Jeanne', age: 23 },
+				],
+			},
+		})
+	})
+
+	afterEach(async () => {
+		await cleanUsers(client)
+	})
+
 	describe('Default requests', () => {
-		beforeEach(async () => {
-			await client.request<any>(graphql.create_Users, {
-				input: {
-					fields: [
-						{ name: 'Lucas', age: 23 },
-						{ name: 'Jeanne', age: 23 },
-					],
-				},
-			})
-		})
-
-		afterEach(async () => {
-			await cleanUsers(client)
-		})
-
 		it("should use pagination with 'offset' and 'limit' arguments", async () => {
 			await cleanUsers(client)
 
@@ -672,7 +672,7 @@ describe('GraphQL : E2E', () => {
 		})
 	})
 
-	describe.only('Authentication mutations', () => {
+	describe('Authentication mutations', () => {
 		it('should signIn with emailPassword if the password is correct', async () => {
 			const { signInWith } = await client.request<any>(
 				graphql.signInWith,

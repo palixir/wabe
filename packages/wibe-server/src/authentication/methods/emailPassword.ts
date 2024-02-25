@@ -21,10 +21,15 @@ export const emailPasswordOnSignUp = async ({
 		exp: thirtyDays.getTime(),
 	})
 
+	const hashedPassword = await Bun.password.hash(
+		input.authentication.emailPassword.password,
+		'argon2id',
+	)
+
 	return {
 		accessToken,
 		refreshToken,
-		password: 'password',
+		password: hashedPassword,
 		identifier: 'email@test.fr',
 	}
 }
@@ -37,8 +42,13 @@ export const emailPasswordOnLogin = async ({
 	const databaseUserPassword = user.authentication?.emailPassword?.password
 	const inputPasword = input.authentication.emailPassword.password
 
-	if (databaseUserPassword !== inputPasword)
-		throw new Error('Invalid authentication credentials')
+	const isPasswordEquals = await Bun.password.verify(
+		inputPasword,
+		databaseUserPassword,
+		'argon2id',
+	)
+
+	if (!isPasswordEquals) throw new Error('Invalid authentication credentials')
 
 	const fifteenMinutes = new Date(Date.now() + 1000 * 60 * 15)
 	const thirtyDays = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)

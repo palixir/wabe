@@ -2,6 +2,47 @@ import { SignInWithInput } from '../../generated/wibe'
 import { Context } from '../graphql/interface'
 import { WibeApp } from '../server'
 
+const getOrCreateObjectIfNotExist = async ({
+	authenticationMethod,
+	inputOfTheGoodAuthenticationMethod,
+}: {
+	authenticationMethod: string
+	inputOfTheGoodAuthenticationMethod: any
+}) => {
+	const userWithIdentifier = await WibeApp.databaseController.getObjects({
+		className: '_User',
+		where: {
+			authentication: {
+				[authenticationMethod]: {
+					identifier: {
+						equalTo: inputOfTheGoodAuthenticationMethod.identifier,
+					},
+				},
+			},
+		},
+	})
+
+	if (userWithIdentifier.length > 1)
+		throw new Error('Multiple users found with the same identifier')
+
+	if (userWithIdentifier.length === 1)
+		return { user: userWithIdentifier[0], isSignUp: false }
+
+	const user = await WibeApp.databaseController.createObject({
+		className: '_User',
+		// @ts-expect-error
+		data: {
+			authentication: {
+				[authenticationMethod]: {
+					...inputOfTheGoodAuthenticationMethod,
+				},
+			},
+		},
+	})
+
+	return { user, isSignUp: true }
+}
+
 export const signInWithResolver = async (
 	_: any,
 	{
@@ -43,65 +84,35 @@ export const signInWithResolver = async (
 	if (!inputOfTheGoodAuthenticationMethod.identifier)
 		throw new Error('No identifier provided')
 
-	// We need to use directly the databaseController because
-	// we don't know the type of the identifier (email, phone, username, etc.)
-	// So we can't use graphql api
-	const userWithIdentifier = await WibeApp.databaseController.getObjects({
+	const { user, isSignUp } = await getOrCreateObjectIfNotExist({
+		authenticationMethod,
+		inputOfTheGoodAuthenticationMethod,
+	})
+
+	const elementsToSave = isSignUp
+		? await events.onSignUp({
+				input,
+				context,
+				user,
+			})
+		: await events.onLogin({
+				input,
+				context,
+				user,
+			})
+
+	await WibeApp.databaseController.updateObject({
 		className: '_User',
-		where: {
+		id: user.id,
+		// @ts-expect-error
+		data: {
 			authentication: {
 				[authenticationMethod]: {
-					identifier: {
-						equalTo: inputOfTheGoodAuthenticationMethod.identifier,
-					},
+					...(elementsToSave || {}),
 				},
 			},
 		},
 	})
-
-	if (userWithIdentifier.length > 1)
-		throw new Error('Multiple users found with the same identifier')
-
-	const isSignUp = userWithIdentifier.length === 0
-
-	if (isSignUp) {
-		const createdObject = await WibeApp.databaseController.createObject({
-			className: '_User',
-			// @ts-expect-error
-			data: {
-				authentication: {
-					[authenticationMethod]: {
-						...inputOfTheGoodAuthenticationMethod,
-					},
-				},
-			},
-		})
-
-		await events.onSignUp({
-			input,
-			context,
-			user: createdObject,
-		})
-	} else {
-		const elementsToSave = await events.onLogin({
-			input,
-			context,
-			user: userWithIdentifier[0],
-		})
-
-		await WibeApp.databaseController.updateObject({
-			className: '_User',
-			id: userWithIdentifier[0].id,
-			// @ts-expect-error
-			data: {
-				authentication: {
-					[authenticationMethod]: {
-						...(elementsToSave || {}),
-					},
-				},
-			},
-		})
-	}
 
 	return true
 }

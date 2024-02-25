@@ -1,17 +1,17 @@
- query _users($where: _UserWhereInput!) {
-    _users(where: $where) {
-        edges {
-            node {
-                id
-            }
-        }
-    }
+query _users($where: _UserWhereInput!) {
+	_users(where: $where) {
+		edges {
+			node {
+				id
+			}
+		}
+	}
 }
 
 mutation update_User($input: _UserUpdateInput!) {
-    update_User(input: $input) {
-        id
-    }
+	update_User(input: $input) {
+		id
+	}
 }
 
 mutation create_User($input: _UserCreateInput!) {
