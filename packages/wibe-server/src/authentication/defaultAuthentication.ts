@@ -1,5 +1,8 @@
 import { CustomAuthenticationMethods } from './interface'
-import { emailPasswordOnLogin } from './methods/emailPassword'
+import {
+	emailPasswordOnLogin,
+	emailPasswordOnSignUp,
+} from './methods/emailPassword'
 
 export const defaultAuthenticationMethods: CustomAuthenticationMethods[] = [
 	{
@@ -13,10 +16,16 @@ export const defaultAuthenticationMethods: CustomAuthenticationMethods[] = [
 				type: 'String',
 				required: true,
 			},
+			accessToken: {
+				type: 'String',
+			},
+			refreshToken: {
+				type: 'String',
+			},
 		},
 		events: {
 			onLogin: emailPasswordOnLogin,
-			onSignUp: () => Promise.resolve({}),
+			onSignUp: emailPasswordOnSignUp,
 		},
 	},
 ]

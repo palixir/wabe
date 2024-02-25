@@ -188,7 +188,7 @@ export class MongoAdapter implements DatabaseAdapter {
 				projection: fields
 					? {
 							...objectOfFieldsToGet,
-					  }
+						}
 					: {},
 			})
 			.limit(limit || 0)

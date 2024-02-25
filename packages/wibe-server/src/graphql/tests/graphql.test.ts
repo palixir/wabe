@@ -673,7 +673,7 @@ describe('GraphQL : E2E', () => {
 	})
 
 	describe.only('Authentication mutations', () => {
-		it('should signIn with emailPassword', async () => {
+		it('should signIn with emailPassword if the password is correct', async () => {
 			const { signInWith } = await client.request<any>(
 				graphql.signInWith,
 				{
@@ -697,15 +697,43 @@ describe('GraphQL : E2E', () => {
 						authentication: {
 							emailPassword: {
 								identifier: 'email@test.fr',
-								password: 'invalidpassword',
+								password: 'password',
 							},
 						},
 					},
 				},
 			)
 
-			expect(signInWith2).toEqual(false)
+			expect(signInWith2).toEqual(true)
 		})
+	})
+
+	it('should not signIn with emailPassword if the password is incorrect', async () => {
+		const { signInWith } = await client.request<any>(graphql.signInWith, {
+			input: {
+				authentication: {
+					emailPassword: {
+						identifier: 'email@test.fr',
+						password: 'password',
+					},
+				},
+			},
+		})
+
+		expect(signInWith).toEqual(true)
+
+		expect(
+			client.request<any>(graphql.signInWith, {
+				input: {
+					authentication: {
+						emailPassword: {
+							identifier: 'email@test.fr',
+							password: 'invalidpassword',
+						},
+					},
+				},
+			}),
+		).rejects.toThrow('Invalid authentication credentials')
 	})
 })
 

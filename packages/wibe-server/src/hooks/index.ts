@@ -4,7 +4,6 @@ import { WibeApp } from '../server'
 import { notEmpty } from '../utils/helper'
 import { HookObject } from './HookObject'
 import {
-	defaultAfterInsertToCallSignUpEvent,
 	defaultBeforeInsertForCreatedAt,
 	defaultBeforeInsertForDefaultValue,
 	defaultBeforeUpdateForUpdatedAt,
@@ -48,12 +47,6 @@ export const defaultHooks: Hook<any>[] = [
 		operationType: OperationType.BeforeUpdate,
 		priority: 1,
 		callback: defaultBeforeUpdateForUpdatedAt,
-	},
-	{
-		operationType: OperationType.AfterInsert,
-		className: '_User',
-		priority: 1,
-		callback: defaultAfterInsertToCallSignUpEvent,
 	},
 ]
 

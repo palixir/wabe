@@ -65,9 +65,7 @@ export const signInWithResolver = async (
 	const isSignUp = userWithIdentifier.length === 0
 
 	if (isSignUp) {
-		// If the user is not found, the onSignUp event will be called on afterInsert hook
-		// In this way we also get the event when we use the create_User mutation
-		await WibeApp.databaseController.createObject({
+		const createdObject = await WibeApp.databaseController.createObject({
 			className: '_User',
 			// @ts-expect-error
 			data: {
@@ -79,50 +77,29 @@ export const signInWithResolver = async (
 			},
 		})
 
-		return true
-	}
-
-	const { accessToken, refreshToken } = await events.onLogin({
-		input,
-		context,
-		user: userWithIdentifier[0],
-	})
-
-	await WibeApp.databaseController.updateObject({
-		className: '_User',
-		id: userWithIdentifier[0].id,
-		// @ts-expect-error
-		data: [
-			{
-				accessToken,
-				refreshToken,
-			},
-		],
-	})
-
-	if (accessToken) {
-		const fifteenMinutes = new Date(Date.now() + 1000 * 60 * 15)
-		context.cookie.access_token.add({
-			value: accessToken,
-			httpOnly: true,
-			path: '/',
-			expires: fifteenMinutes,
-			// TODO : Check for implements csrf token for sub-domain protection
-			sameSite: 'strict',
-			secure: Bun.env.NODE_ENV === 'production',
+		await events.onSignUp({
+			input,
+			context,
+			user: createdObject,
 		})
-	}
+	} else {
+		const elementsToSave = await events.onLogin({
+			input,
+			context,
+			user: userWithIdentifier[0],
+		})
 
-	if (refreshToken) {
-		const thirtyDays = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
-
-		context.cookie.refresh_token.add({
-			value: refreshToken,
-			httpOnly: true,
-			path: '/',
-			expires: thirtyDays,
-			sameSite: 'strict',
-			secure: Bun.env.NODE_ENV === 'production',
+		await WibeApp.databaseController.updateObject({
+			className: '_User',
+			id: userWithIdentifier[0].id,
+			// @ts-expect-error
+			data: {
+				authentication: {
+					[authenticationMethod]: {
+						...(elementsToSave || {}),
+					},
+				},
+			},
 		})
 	}
 

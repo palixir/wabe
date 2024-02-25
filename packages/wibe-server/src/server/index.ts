@@ -66,11 +66,13 @@ export class WibeApp {
 	}
 
 	loadAuthenticationMethods() {
-		WibeApp.config.authentication.customAuthenticationMethods = [
-			...defaultAuthenticationMethods,
-			...(WibeApp.config.authentication.customAuthenticationMethods ||
-				[]),
-		]
+		WibeApp.config.authentication = {
+			customAuthenticationMethods: [
+				...defaultAuthenticationMethods,
+				...(WibeApp.config.authentication
+					?.customAuthenticationMethods || []),
+			],
+		}
 	}
 
 	loadHooks() {

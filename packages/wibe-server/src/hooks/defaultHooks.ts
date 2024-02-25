@@ -39,30 +39,3 @@ export const defaultBeforeInsertForDefaultValue = async (
 			})
 	})
 }
-
-export const defaultAfterInsertToCallSignUpEvent = async (
-	object: HookObject<'_User'>,
-	context: Context,
-) => {
-	// TODO : Redondant code with signInWithResolver need refactoring
-	const authenticationObject = object.get('authentication')
-
-	if (!authenticationObject) return
-
-	const authenticationMethods = Object.keys(authenticationObject)
-
-	if (authenticationMethods.length > 1 || authenticationMethods.length === 0)
-		throw new Error('Only one authentication method at the time is allowed')
-
-	const authenticationMethod = authenticationMethods[0]
-
-	const {
-		events: { onSignUp },
-	} = validAuthenticationMethod
-
-	await onSignUp({
-		context,
-		input: authenticationObject,
-		userId: object.get('id'),
-	})
-}

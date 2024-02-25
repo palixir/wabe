@@ -30,8 +30,6 @@ type _User {
   authentication: _UserAuthentication
   provider: AuthenticationProvider
   verifiedEmail: Boolean
-  refreshToken: String
-  accessToken: String
   createdAt: Date
   updatedAt: Date
 }
@@ -65,6 +63,8 @@ type _UserAuthentication {
 type _UserAuthenticationEmailPassword {
   identifier: Email!
   password: String!
+  accessToken: String
+  refreshToken: String
 }
 
 type Query {
@@ -124,8 +124,6 @@ input _UserWhereInput {
   authentication: _UserAuthenticationWhereInput
   provider: AnyWhereInput
   verifiedEmail: BooleanWhereInput
-  refreshToken: StringWhereInput
-  accessToken: StringWhereInput
   createdAt: DateWhereInput
   updatedAt: DateWhereInput
   OR: [_UserWhereInput]
@@ -209,6 +207,8 @@ input _UserAuthenticationWhereInput {
 input _UserAuthenticationEmailPasswordWhereInput {
   identifier: EmailWhereInput
   password: StringWhereInput
+  accessToken: StringWhereInput
+  refreshToken: StringWhereInput
   OR: [_UserAuthenticationEmailPasswordWhereInput]
   AND: [_UserAuthenticationEmailPasswordWhereInput]
 }
@@ -301,8 +301,6 @@ input _UserInput {
   authentication: _UserAuthenticationInput
   provider: AuthenticationProvider
   verifiedEmail: Boolean
-  refreshToken: String
-  accessToken: String
   createdAt: Date
   updatedAt: Date
 }
@@ -330,6 +328,8 @@ input _UserAuthenticationInput {
 input _UserAuthenticationEmailPasswordInput {
   identifier: Email!
   password: String!
+  accessToken: String
+  refreshToken: String
 }
 
 input _UsersCreateInput {
@@ -357,8 +357,6 @@ input _UserUpdateFieldsInput {
   authentication: _UserAuthenticationUpdateFieldsInput
   provider: AuthenticationProvider
   verifiedEmail: Boolean
-  refreshToken: String
-  accessToken: String
   createdAt: Date
   updatedAt: Date
 }
@@ -386,6 +384,8 @@ input _UserAuthenticationUpdateFieldsInput {
 input _UserAuthenticationEmailPasswordUpdateFieldsInput {
   identifier: Email
   password: String
+  accessToken: String
+  refreshToken: String
 }
 
 input _UsersUpdateInput {
@@ -432,6 +432,8 @@ input SignInWithAuthenticationInput {
 input SignInWithAuthenticationEmailPasswordInput {
   identifier: Email!
   password: String!
+  accessToken: String
+  refreshToken: String
 }
 
 input SignOutInput {
