@@ -121,7 +121,7 @@ describe('Email password', () => {
 		spyBunPasswordVerify.mockRestore()
 	})
 
-	it('should not signIn with email password if password are different', async () => {
+	it('should not signIn with email password if password is undefined', async () => {
 		const mockAddCookie = mock(() => {})
 		const mockSign = mock(() => 'token')
 		const spyBunPasswordVerify = spyOn(
@@ -138,7 +138,7 @@ describe('Email password', () => {
 					},
 					jwt: { sign: mockSign },
 				},
-				input: { identifier: 'email@test.fr', password: 'password' },
+				input: { identifier: 'email@test.fr' },
 				user: {
 					id: 'userId',
 					authentication: {
@@ -156,7 +156,7 @@ describe('Email password', () => {
 
 	it('should not signIn with email password if identifier are different', async () => {
 		const mockAddCookie = mock(() => {})
-		const mockSign = mock(() => 'token')
+		const mockSign = mock(() => Promise.resolve('token'))
 		const spyBunPasswordVerify = spyOn(
 			Bun.password,
 			'verify',
@@ -170,7 +170,7 @@ describe('Email password', () => {
 						refresh_token: { add: mockAddCookie },
 					},
 					jwt: { sign: mockSign },
-				},
+				} as any,
 				input: {
 					identifier: 'invalidEmail@test.fr',
 					password: 'password',
@@ -186,5 +186,7 @@ describe('Email password', () => {
 				},
 			}),
 		).rejects.toThrow('Invalid authentication credentials')
+
+		expect(spyBunPasswordVerify).toHaveBeenCalledTimes(1)
 	})
 })

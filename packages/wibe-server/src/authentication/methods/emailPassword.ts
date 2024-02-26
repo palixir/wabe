@@ -35,9 +35,13 @@ export const emailPasswordOnLogin = async ({
 	user,
 	context,
 }: AuthenticationEventsOptions) => {
+	const userDatabasePassword = user.authentication?.emailPassword?.password
+	if (!userDatabasePassword)
+		throw new Error('Invalid authentication credentials')
+
 	const isPasswordEquals = await Bun.password.verify(
 		input.password,
-		user.authentication?.emailPassword?.password,
+		userDatabasePassword,
 		'argon2id',
 	)
 
@@ -84,7 +88,7 @@ export const emailPasswordOnLogin = async ({
 	return {
 		accessToken,
 		refreshToken,
-		password: user.authentication?.emailPassword?.password,
+		password: userDatabasePassword,
 		identifier: input.identifier,
 	}
 }
