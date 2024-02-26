@@ -5,9 +5,11 @@ import { WibeApp } from '../server'
 const getOrCreateObjectIfNotExist = async ({
 	authenticationMethod,
 	inputOfTheGoodAuthenticationMethod,
+	context,
 }: {
 	authenticationMethod: string
 	inputOfTheGoodAuthenticationMethod: any
+	context: Context
 }) => {
 	const userWithIdentifier = await WibeApp.databaseController.getObjects({
 		className: '_User',
@@ -30,7 +32,6 @@ const getOrCreateObjectIfNotExist = async ({
 
 	const user = await WibeApp.databaseController.createObject({
 		className: '_User',
-		// @ts-expect-error
 		data: {
 			authentication: {
 				[authenticationMethod]: {
@@ -38,6 +39,7 @@ const getOrCreateObjectIfNotExist = async ({
 				},
 			},
 		},
+		context,
 	})
 
 	return { user, isSignUp: true }
@@ -87,6 +89,7 @@ export const signInWithResolver = async (
 	const { user, isSignUp } = await getOrCreateObjectIfNotExist({
 		authenticationMethod,
 		inputOfTheGoodAuthenticationMethod,
+		context,
 	})
 
 	const elementsToSave = isSignUp
@@ -94,17 +97,16 @@ export const signInWithResolver = async (
 				input: inputOfTheGoodAuthenticationMethod,
 				context,
 				user,
-		  })
+			})
 		: await events.onLogin({
 				input: inputOfTheGoodAuthenticationMethod,
 				context,
 				user,
-		  })
+			})
 
 	await WibeApp.databaseController.updateObject({
 		className: '_User',
 		id: user.id,
-		// @ts-expect-error
 		data: {
 			authentication: {
 				[authenticationMethod]: {
@@ -112,6 +114,7 @@ export const signInWithResolver = async (
 				},
 			},
 		},
+		context,
 	})
 
 	return true

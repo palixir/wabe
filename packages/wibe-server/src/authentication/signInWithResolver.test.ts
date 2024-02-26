@@ -216,6 +216,7 @@ describe('SignInWith', () => {
 					},
 				},
 			},
+			context: expect.any(Object),
 		})
 
 		expect(mockOnSignUp).toHaveBeenCalledTimes(0)
@@ -285,6 +286,7 @@ describe('SignInWith', () => {
 					},
 				},
 			},
+			context: expect.any(Object),
 		})
 
 		expect(mockUpdateObject).toHaveBeenCalledTimes(1)
@@ -299,6 +301,7 @@ describe('SignInWith', () => {
 					},
 				},
 			},
+			context: expect.any(Object),
 		})
 
 		expect(mockOnLogin).toHaveBeenCalledTimes(0)

@@ -58,6 +58,7 @@ type _UserObjectObjectOfObject {
 
 type _UserAuthentication {
   emailPassword: _UserAuthenticationEmailPassword
+  google: _UserAuthenticationGoogle
 }
 
 type _UserAuthenticationEmailPassword {
@@ -65,6 +66,14 @@ type _UserAuthenticationEmailPassword {
   password: String!
   accessToken: String
   refreshToken: String
+}
+
+type _UserAuthenticationGoogle {
+  identifier: String!
+  email: Email!
+  accessToken: String
+  refreshToken: String
+  authorizationCode: String
 }
 
 type Query {
@@ -200,6 +209,7 @@ input _UserObjectObjectOfObjectWhereInput {
 
 input _UserAuthenticationWhereInput {
   emailPassword: _UserAuthenticationEmailPasswordWhereInput
+  google: _UserAuthenticationGoogleWhereInput
   OR: [_UserAuthenticationWhereInput]
   AND: [_UserAuthenticationWhereInput]
 }
@@ -211,6 +221,16 @@ input _UserAuthenticationEmailPasswordWhereInput {
   refreshToken: StringWhereInput
   OR: [_UserAuthenticationEmailPasswordWhereInput]
   AND: [_UserAuthenticationEmailPasswordWhereInput]
+}
+
+input _UserAuthenticationGoogleWhereInput {
+  identifier: StringWhereInput
+  email: EmailWhereInput
+  accessToken: StringWhereInput
+  refreshToken: StringWhereInput
+  authorizationCode: StringWhereInput
+  OR: [_UserAuthenticationGoogleWhereInput]
+  AND: [_UserAuthenticationGoogleWhereInput]
 }
 
 type Mutation {
@@ -323,6 +343,7 @@ input _UserObjectObjectOfObjectInput {
 
 input _UserAuthenticationInput {
   emailPassword: _UserAuthenticationEmailPasswordInput
+  google: _UserAuthenticationGoogleInput
 }
 
 input _UserAuthenticationEmailPasswordInput {
@@ -330,6 +351,14 @@ input _UserAuthenticationEmailPasswordInput {
   password: String!
   accessToken: String
   refreshToken: String
+}
+
+input _UserAuthenticationGoogleInput {
+  identifier: String!
+  email: Email!
+  accessToken: String
+  refreshToken: String
+  authorizationCode: String
 }
 
 input _UsersCreateInput {
@@ -379,6 +408,7 @@ input _UserObjectObjectOfObjectUpdateFieldsInput {
 
 input _UserAuthenticationUpdateFieldsInput {
   emailPassword: _UserAuthenticationEmailPasswordUpdateFieldsInput
+  google: _UserAuthenticationGoogleUpdateFieldsInput
 }
 
 input _UserAuthenticationEmailPasswordUpdateFieldsInput {
@@ -386,6 +416,14 @@ input _UserAuthenticationEmailPasswordUpdateFieldsInput {
   password: String
   accessToken: String
   refreshToken: String
+}
+
+input _UserAuthenticationGoogleUpdateFieldsInput {
+  identifier: String
+  email: Email
+  accessToken: String
+  refreshToken: String
+  authorizationCode: String
 }
 
 input _UsersUpdateInput {
@@ -427,6 +465,7 @@ input SignInWithInput {
 
 input SignInWithAuthenticationInput {
   emailPassword: SignInWithAuthenticationEmailPasswordInput
+  google: SignInWithAuthenticationGoogleInput
 }
 
 input SignInWithAuthenticationEmailPasswordInput {
@@ -434,6 +473,14 @@ input SignInWithAuthenticationEmailPasswordInput {
   password: String!
   accessToken: String
   refreshToken: String
+}
+
+input SignInWithAuthenticationGoogleInput {
+  identifier: String!
+  email: Email!
+  accessToken: String
+  refreshToken: String
+  authorizationCode: String
 }
 
 input SignOutInput {
