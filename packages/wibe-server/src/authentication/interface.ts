@@ -55,5 +55,5 @@ export interface ValidateTokenOptions {
 export interface Provider {
 	validateTokenFromAuthorizationCode(
 		options: ValidateTokenOptions,
-	): Promise<{ accessToken: string; refreshToken: string }>
+	): Promise<void>
 }

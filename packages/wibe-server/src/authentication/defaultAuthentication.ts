@@ -3,6 +3,7 @@ import {
 	emailPasswordOnLogin,
 	emailPasswordOnSignUp,
 } from './methods/emailPassword'
+import { googleOnSignInOrSignUp } from './methods/google'
 
 export const defaultAuthenticationMethods: CustomAuthenticationMethods[] = [
 	{
@@ -50,14 +51,10 @@ export const defaultAuthenticationMethods: CustomAuthenticationMethods[] = [
 			refreshToken: {
 				type: 'String',
 			},
-			// Don't store the authorization code just use it in input to pass to the graphql mutation
-			authorizationCode: {
-				type: 'String',
-			},
 		},
 		events: {
-			onLogin: async () => {},
-			onSignUp: async () => {},
+			onLogin: googleOnSignInOrSignUp,
+			onSignUp: googleOnSignInOrSignUp,
 		},
 	},
 ]

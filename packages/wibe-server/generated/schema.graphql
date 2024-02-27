@@ -71,9 +71,9 @@ type _UserAuthenticationEmailPassword {
 type _UserAuthenticationGoogle {
   identifier: String!
   email: Email!
+  verifiedEmail: Boolean!
   accessToken: String
   refreshToken: String
-  authorizationCode: String
 }
 
 type Query {
@@ -226,9 +226,9 @@ input _UserAuthenticationEmailPasswordWhereInput {
 input _UserAuthenticationGoogleWhereInput {
   identifier: StringWhereInput
   email: EmailWhereInput
+  verifiedEmail: BooleanWhereInput
   accessToken: StringWhereInput
   refreshToken: StringWhereInput
-  authorizationCode: StringWhereInput
   OR: [_UserAuthenticationGoogleWhereInput]
   AND: [_UserAuthenticationGoogleWhereInput]
 }
@@ -356,9 +356,9 @@ input _UserAuthenticationEmailPasswordInput {
 input _UserAuthenticationGoogleInput {
   identifier: String!
   email: Email!
+  verifiedEmail: Boolean!
   accessToken: String
   refreshToken: String
-  authorizationCode: String
 }
 
 input _UsersCreateInput {
@@ -421,9 +421,9 @@ input _UserAuthenticationEmailPasswordUpdateFieldsInput {
 input _UserAuthenticationGoogleUpdateFieldsInput {
   identifier: String
   email: Email
+  verifiedEmail: Boolean
   accessToken: String
   refreshToken: String
-  authorizationCode: String
 }
 
 input _UsersUpdateInput {
@@ -478,9 +478,9 @@ input SignInWithAuthenticationEmailPasswordInput {
 input SignInWithAuthenticationGoogleInput {
   identifier: String!
   email: Email!
+  verifiedEmail: Boolean!
   accessToken: String
   refreshToken: String
-  authorizationCode: String
 }
 
 input SignOutInput {

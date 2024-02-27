@@ -72,8 +72,8 @@ describe('Auth handler', () => {
 			authentication: {
 				successRedirectPath: 'successRedirectPath',
 				failureRedirectPath: 'failureRedirectPath',
+				// @ts-expect-error
 				providers: {
-					// @ts-expect-error
 					GOOGLE: {
 						clientSecret: 'clientSecret',
 					},
@@ -86,15 +86,15 @@ describe('Auth handler', () => {
 				{ query: { code: 'code' } } as any,
 				ProviderEnum.GOOGLE,
 			),
-		).rejects.toThrow('Authentication : Client id or secret not found')
+		).rejects.toThrow('Client id or secret not found')
 
 		WibeApp.config = {
 			port: 3000,
 			authentication: {
 				successRedirectPath: 'successRedirectPath',
 				failureRedirectPath: 'failureRedirectPath',
+				// @ts-expect-error
 				providers: {
-					// @ts-expect-error
 					GOOGLE: {
 						clientId: 'clientId',
 					},
@@ -107,26 +107,18 @@ describe('Auth handler', () => {
 				{ query: { code: 'code' } } as any,
 				ProviderEnum.GOOGLE,
 			),
-		).rejects.toThrow('Authentication : Client id or secret not found')
+		).rejects.toThrow('Client id or secret not found')
 	})
 
 	it('should call google provider to check the code and generate access and refresh token', async () => {
 		const spyGoogleProvider = spyOn(
 			GoogleProvider.prototype,
 			'validateTokenFromAuthorizationCode',
-		).mockResolvedValue({
-			refreshToken: 'refreshToken',
-			accessToken: 'accessToken',
-		})
-
-		const spyAddCookie = mock(() => {})
+		).mockResolvedValue()
 
 		const context = {
 			query: { code: 'code' },
-			cookie: {
-				accessToken: { add: spyAddCookie },
-				refreshToken: { add: spyAddCookie },
-			},
+			cookie: {},
 			set: { redirect: '' },
 		} as any
 
@@ -135,21 +127,6 @@ describe('Auth handler', () => {
 		expect(spyGoogleProvider).toHaveBeenCalledTimes(1)
 		expect(spyGoogleProvider).toHaveBeenCalledWith({
 			code: 'code',
-		})
-
-		expect(spyAddCookie).toHaveBeenCalledTimes(2)
-		expect(spyAddCookie).toHaveBeenCalledWith({
-			value: 'accessToken',
-			httpOnly: true,
-			path: '/',
-			expires: expect.any(Date),
-		})
-
-		expect(spyAddCookie).toHaveBeenCalledWith({
-			value: 'refreshToken',
-			httpOnly: true,
-			path: '/',
-			expires: expect.any(Date),
 		})
 
 		expect(context.set.redirect).toBe('successRedirectPath')

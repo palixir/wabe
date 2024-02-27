@@ -4,11 +4,15 @@ import { GoogleProvider } from '../../authentication/providers/google'
 import { ProviderEnum } from '../../authentication/interface'
 import { XProvider } from '../../authentication/providers/x'
 
-const getProviderAdapter = ({
+const _getProviderAdapter = ({
 	provider,
 	clientId,
 	clientSecret,
-}: { provider: ProviderEnum; clientId: string; clientSecret: string }) => {
+}: {
+	provider: ProviderEnum
+	clientId: string
+	clientSecret: string
+}) => {
 	switch (provider) {
 		case ProviderEnum.GOOGLE:
 			return new GoogleProvider(clientId, clientSecret)
@@ -24,49 +28,32 @@ export const authHandler = async (context: Context, provider: ProviderEnum) => {
 
 	const code = context.query.code
 
-	const { authentication: authenticationConfig } = WibeApp.config
-
-	if (!authenticationConfig)
-		throw new Error('Authentication config not found')
-
-	const clientId = authenticationConfig.providers[provider]?.clientId
-	const clientSecret = authenticationConfig.providers[provider]?.clientSecret
-
 	if (!code) throw new Error('Authentication : Authorization code not found')
 
+	const { authentication } = WibeApp.config
+
+	if (!authentication) throw new Error('Authentication config not found')
+
+	const clientId = authentication.providers?.[provider]?.clientId
+	const clientSecret = authentication.providers?.[provider]?.clientSecret
+
 	if (!clientId || !clientSecret)
-		throw new Error('Authentication : Client id or secret not found')
+		throw new Error('Client id or secret not found')
 
 	try {
-		const providerAdapter = getProviderAdapter({
+		const providerAdapter = _getProviderAdapter({
 			provider,
 			clientId,
 			clientSecret,
 		})
 
-		const { accessToken, refreshToken } =
-			await providerAdapter.validateTokenFromAuthorizationCode({
-				code,
-			})
-
-		// Create cookie for access and refresh token
-		context.cookie.accessToken.add({
-			value: accessToken,
-			httpOnly: true,
-			path: '/',
-			expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+		await providerAdapter.validateTokenFromAuthorizationCode({
+			code,
 		})
 
-		context.cookie.refreshToken.add({
-			value: refreshToken,
-			httpOnly: true,
-			path: '/',
-			expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
-		})
-
-		context.set.redirect = authenticationConfig.successRedirectPath
+		context.set.redirect = authentication.successRedirectPath
 	} catch (e) {
 		console.error(e)
-		context.set.redirect = authenticationConfig?.failureRedirectPath
+		context.set.redirect = authentication.failureRedirectPath
 	}
 }
