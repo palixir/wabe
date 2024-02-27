@@ -45,7 +45,7 @@
 // 			}),
 // 		}))
 
-// 		const res = await googleProvider.validateTokenFromAuthorizationCode({
+// 		const res = await googleProvider.createTokenFromAuthorizationCode({
 // 			code: 'authorizationCode',
 // 		})
 
@@ -90,7 +90,7 @@
 // 		}))
 
 // 		expect(
-// 			googleProvider.validateTokenFromAuthorizationCode({
+// 			googleProvider.createTokenFromAuthorizationCode({
 // 				code: 'authorizationCode',
 // 			}),
 // 		).rejects.toThrow(
@@ -106,7 +106,7 @@
 // 		}))
 
 // 		expect(
-// 			googleProvider.validateTokenFromAuthorizationCode({
+// 			googleProvider.createTokenFromAuthorizationCode({
 // 				code: 'authorizationCode',
 // 			}),
 // 		).rejects.toThrow('Invalid token')
@@ -120,7 +120,7 @@
 // 		}))
 
 // 		expect(
-// 			googleProvider.validateTokenFromAuthorizationCode({
+// 			googleProvider.createTokenFromAuthorizationCode({
 // 				code: 'authorizationCode',
 // 			}),
 // 		).rejects.toThrow('Invalid token')

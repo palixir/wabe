@@ -10,7 +10,7 @@ export class XProvider implements Provider {
 		this.clientSecret = clientSecret
 	}
 
-	async validateTokenFromAuthorizationCode({ code }: ValidateTokenOptions) {
+	async createTokenFromAuthorizationCode({ code }: ValidateTokenOptions) {
 		const wibeConfig = WibeApp.config
 
 		const res = await fetch('https://api.twitter.com/2/oauth2/token', {

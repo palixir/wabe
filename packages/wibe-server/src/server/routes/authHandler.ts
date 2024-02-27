@@ -1,8 +1,8 @@
 import { Context } from 'elysia'
 import { WibeApp } from '..'
-import { GoogleProvider } from '../../authentication/providers/google'
+import { GoogleProvider } from '../../authentication/oauthProviders/google'
 import { ProviderEnum } from '../../authentication/interface'
-import { XProvider } from '../../authentication/providers/x'
+import { XProvider } from '../../authentication/oauthProviders/x'
 
 const _getProviderAdapter = ({
 	provider,
@@ -47,7 +47,7 @@ export const authHandler = async (context: Context, provider: ProviderEnum) => {
 			clientSecret,
 		})
 
-		await providerAdapter.validateTokenFromAuthorizationCode({
+		await providerAdapter.createTokenFromAuthorizationCode({
 			code,
 		})
 

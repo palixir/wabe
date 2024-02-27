@@ -1,9 +1,9 @@
 {
-    "name": "wibe-pluralize",
+    "name": "wibe-authentication",
     "version": "0.0.1",
     "license": "MIT",
     "main": "src/index.ts",
-    "description": "Package to pluralize a word in english",
+    "description": "Package to help for all authentication related tasks",
     "scripts": {
         "build": "tsc --project tsconfig.json",
         "linter": "biome lint ./src/**/**/*.ts --config-path=../../ --no-errors-on-unmatched",

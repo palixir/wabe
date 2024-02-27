@@ -97,12 +97,12 @@ export const signInWithResolver = async (
 				input: inputOfTheGoodAuthenticationMethod,
 				context,
 				user,
-			})
+		  })
 		: await events.onLogin({
 				input: inputOfTheGoodAuthenticationMethod,
 				context,
 				user,
-			})
+		  })
 
 	await WibeApp.databaseController.updateObject({
 		className: '_User',

@@ -12,12 +12,12 @@ import {
 import { authHandler } from './authHandler'
 import { WibeApp } from '../..'
 import { ProviderEnum } from '../../authentication/interface'
-import { GoogleProvider } from '../../authentication/providers/google'
+import { GoogleProvider } from '../../authentication/oauthProviders/google'
 
 describe('Auth handler', () => {
 	const spyGoogleProvider = spyOn(
 		GoogleProvider.prototype,
-		'validateTokenFromAuthorizationCode',
+		'createTokenFromAuthorizationCode',
 	)
 
 	beforeAll(() => {
@@ -113,7 +113,7 @@ describe('Auth handler', () => {
 	it('should call google provider to check the code and generate access and refresh token', async () => {
 		const spyGoogleProvider = spyOn(
 			GoogleProvider.prototype,
-			'validateTokenFromAuthorizationCode',
+			'createTokenFromAuthorizationCode',
 		).mockResolvedValue()
 
 		const context = {

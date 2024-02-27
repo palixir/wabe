@@ -1,5 +1,9 @@
 import { WibeApp } from '../../server'
-import { Provider, ValidateTokenOptions } from '../interface'
+import {
+	Provider,
+	CreateTokenFromAuthorizationCodeOptions,
+	refreshTokenOptions,
+} from '../interface'
 import { getClient } from '../../utils'
 
 export class GoogleProvider implements Provider {
@@ -11,7 +15,9 @@ export class GoogleProvider implements Provider {
 		this.clientSecret = clientSecret
 	}
 
-	async validateTokenFromAuthorizationCode({ code }: ValidateTokenOptions) {
+	async createTokenFromAuthorizationCode({
+		code,
+	}: CreateTokenFromAuthorizationCodeOptions) {
 		const wibeConfig = WibeApp.config
 
 		const res = await fetch('https://oauth2.googleapis.com/token', {
@@ -56,6 +62,7 @@ export class GoogleProvider implements Provider {
 			input: {
 				authentication: {
 					google: {
+						identifier: id_token,
 						email,
 						verifiedEmail: verified_email,
 						refreshToken: refresh_token,
@@ -65,4 +72,6 @@ export class GoogleProvider implements Provider {
 			},
 		})
 	}
+
+	async refreshToken(options: refreshTokenOptions) {}
 }
