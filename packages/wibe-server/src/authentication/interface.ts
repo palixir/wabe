@@ -23,6 +23,15 @@ export interface AuthenticationEventsOptions {
 	context: Context
 }
 
+export interface AuthenticationInterface {
+	onSignIn?: (
+		options: AuthenticationEventsOptions,
+	) => Promise<AuthenticationCallbackOutput>
+	onSignUp?: (
+		options: AuthenticationEventsOptions,
+	) => Promise<AuthenticationCallbackOutput>
+}
+
 export interface CustomAuthenticationEvents {
 	// TODO : Add onOTP
 	onSignUp: (
