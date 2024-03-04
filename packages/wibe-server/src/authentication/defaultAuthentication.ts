@@ -9,6 +9,16 @@ export const defaultAuthenticationMethods: CustomAuthenticationMethods[] = [
 	{
 		name: 'emailPassword',
 		input: {
+			email: {
+				type: 'Email',
+				required: true,
+			},
+			password: {
+				type: 'Email',
+				required: true,
+			},
+		},
+		dataToStore: {
 			identifier: {
 				type: 'Email',
 				required: true,
@@ -32,8 +42,17 @@ export const defaultAuthenticationMethods: CustomAuthenticationMethods[] = [
 	{
 		name: 'google',
 		input: {
-			// For google identifier is the id_token
-			identifier: {
+			authorizationCode: {
+				type: 'String',
+				required: true,
+			},
+			codeVerifier: {
+				type: 'String',
+				required: true,
+			},
+		},
+		dataToStore: {
+			idToken: {
 				type: 'String',
 				required: true,
 			},

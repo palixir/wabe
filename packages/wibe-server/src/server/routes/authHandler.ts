@@ -1,8 +1,7 @@
 import { Context } from 'elysia'
 import { WibeApp } from '..'
-import { GoogleProvider } from '../../authentication/oauthProviders/google'
 import { ProviderEnum } from '../../authentication/interface'
-import { XProvider } from '../../authentication/oauthProviders/x'
+import { Google } from '../../authentication/oauth/Google'
 
 const _getProviderAdapter = ({
 	provider,
@@ -15,9 +14,11 @@ const _getProviderAdapter = ({
 }) => {
 	switch (provider) {
 		case ProviderEnum.GOOGLE:
-			return new GoogleProvider(clientId, clientSecret)
-		case ProviderEnum.X:
-			return new XProvider(clientId, clientSecret)
+			return new Google(
+				clientId,
+				clientSecret,
+				`http://127.0.0.1:${WibeApp.config.port}/auth/provider/google`,
+			)
 		default:
 			throw new Error('Provider not found')
 	}
@@ -27,8 +28,11 @@ export const authHandler = async (context: Context, provider: ProviderEnum) => {
 	if (!WibeApp.config) throw new Error('Wibe config not found')
 
 	const code = context.query.code
+	// TODO : Check maybe it's better to store it in http cookie.
+	// https://www.rfc-editor.org/rfc/rfc7636#section-4.4 not precise the storage of codeVerifier
+	const codeVerifier = context.query.codeVerifier
 
-	if (!code) throw new Error('Authentication : Authorization code not found')
+	if (!code || !codeVerifier) throw new Error('Authentication failed')
 
 	const { authentication } = WibeApp.config
 
@@ -47,9 +51,8 @@ export const authHandler = async (context: Context, provider: ProviderEnum) => {
 			clientSecret,
 		})
 
-		await providerAdapter.createTokenFromAuthorizationCode({
-			code,
-		})
+		const { accessToken, refreshToken } =
+			await providerAdapter.validateAuthorizationCode(code, codeVerifier)
 
 		context.set.redirect = authentication.successRedirectPath
 	} catch (e) {

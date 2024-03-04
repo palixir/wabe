@@ -69,7 +69,7 @@ type _UserAuthenticationEmailPassword {
 }
 
 type _UserAuthenticationGoogle {
-  identifier: String!
+  idToken: String!
   email: Email!
   verifiedEmail: Boolean!
   accessToken: String
@@ -224,7 +224,7 @@ input _UserAuthenticationEmailPasswordWhereInput {
 }
 
 input _UserAuthenticationGoogleWhereInput {
-  identifier: StringWhereInput
+  idToken: StringWhereInput
   email: EmailWhereInput
   verifiedEmail: BooleanWhereInput
   accessToken: StringWhereInput
@@ -262,6 +262,7 @@ type Mutation {
   customMutation(input: CustomMutationInput): Int
   secondCustomMutation(input: SecondCustomMutationInput): Int
   signInWith(input: SignInWithInput): Boolean
+  signUpWith(input: SignUpWithInput): Boolean
   signOut(input: SignOutInput): Boolean
 }
 
@@ -354,7 +355,7 @@ input _UserAuthenticationEmailPasswordInput {
 }
 
 input _UserAuthenticationGoogleInput {
-  identifier: String!
+  idToken: String!
   email: Email!
   verifiedEmail: Boolean!
   accessToken: String
@@ -419,7 +420,7 @@ input _UserAuthenticationEmailPasswordUpdateFieldsInput {
 }
 
 input _UserAuthenticationGoogleUpdateFieldsInput {
-  identifier: String
+  idToken: String
   email: Email
   verifiedEmail: Boolean
   accessToken: String
@@ -469,18 +470,32 @@ input SignInWithAuthenticationInput {
 }
 
 input SignInWithAuthenticationEmailPasswordInput {
-  identifier: Email!
-  password: String!
-  accessToken: String
-  refreshToken: String
+  email: Email!
+  password: Email!
 }
 
 input SignInWithAuthenticationGoogleInput {
-  identifier: String!
+  authorizationCode: String!
+  codeVerifier: String!
+}
+
+input SignUpWithInput {
+  authentication: SignUpWithAuthenticationInput
+}
+
+input SignUpWithAuthenticationInput {
+  emailPassword: SignUpWithAuthenticationEmailPasswordInput
+  google: SignUpWithAuthenticationGoogleInput
+}
+
+input SignUpWithAuthenticationEmailPasswordInput {
   email: Email!
-  verifiedEmail: Boolean!
-  accessToken: String
-  refreshToken: String
+  password: Email!
+}
+
+input SignUpWithAuthenticationGoogleInput {
+  authorizationCode: String!
+  codeVerifier: String!
 }
 
 input SignOutInput {

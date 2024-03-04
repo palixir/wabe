@@ -22,17 +22,14 @@ describe('Schema', () => {
 			customAuthenticationMethods: [
 				{
 					name: 'EmailPassword',
-					input: {
+					input: {},
+					dataToStore: {
 						notAnIdentifier: { type: 'Email', required: true },
 						password: { type: 'String', required: true },
 					},
 					events: {
-						onSignUp: async (input, context) => {
-							return true
-						},
-						onLogin: async (input, context) => {
-							return true
-						},
+						onSignUp: () => Promise.resolve({}),
+						onLogin: () => Promise.resolve({}),
 					},
 				},
 			],
@@ -52,17 +49,14 @@ describe('Schema', () => {
 			customAuthenticationMethods: [
 				{
 					name: 'EmailPassword',
-					input: {
+					input: {},
+					dataToStore: {
 						identifier: { type: 'Email', required: true },
 						password: { type: 'String', required: true },
 					},
 					events: {
-						onSignUp: async (input, context) => {
-							return true
-						},
-						onLogin: async (input, context) => {
-							return true
-						},
+						onSignUp: () => Promise.resolve({}),
+						onLogin: () => Promise.resolve({}),
 					},
 				},
 			],

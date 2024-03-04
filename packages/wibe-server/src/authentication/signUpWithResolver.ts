@@ -2,7 +2,7 @@ import { SignInWithInput } from '../../generated/wibe'
 import { Context } from '../graphql/interface'
 import { WibeApp } from '../server'
 
-export const signInWithResolver = async (
+export const signUpWithResolver = async (
 	_: any,
 	{
 		input,
@@ -40,7 +40,7 @@ export const signInWithResolver = async (
 		// @ts-expect-error
 		input.authentication[authenticationMethod]
 
-	const { dataToStore, user } = await events.onLogin({
+	const { dataToStore, user } = await events.onSignUp({
 		input: inputOfTheGoodAuthenticationMethod,
 		context,
 	})

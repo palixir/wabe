@@ -63,7 +63,7 @@ describe('Auth handler', () => {
 	it('should throw an error if no google code provided', async () => {
 		expect(
 			authHandler({ query: {} } as any, ProviderEnum.GOOGLE),
-		).rejects.toThrow('Authentication : Authorization code not found')
+		).rejects.toThrow('Authentication failed')
 	})
 
 	it('should throw an error if the google client id or client secret is not provided ', async () => {

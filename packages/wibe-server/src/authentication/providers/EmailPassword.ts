@@ -1,3 +1,4 @@
+import { WibeApp } from '../../server'
 import {
 	AuthenticationEventsOptions,
 	AuthenticationInterface,
@@ -6,9 +7,27 @@ import {
 export class EmailPassword implements AuthenticationInterface {
 	constructor() {}
 
-	async onSignIn({ context, input, user }: AuthenticationEventsOptions) {
+	async onSignIn({ context, input }: AuthenticationEventsOptions) {
+		// TODO : Use first here but need to refactor in graphql and mongoadapter to have first and not limit
+		const users = await WibeApp.databaseController.getObjects({
+			className: '_User',
+			where: {
+				authentication: {
+					emailPassword: {
+						email: { equalTo: input.email },
+					},
+				},
+			},
+		})
+
+		if (users.length === 0)
+			throw new Error('Invalid authentication credentials')
+
+		const user = users[0]
+
 		const userDatabasePassword =
 			user.authentication?.emailPassword?.password
+
 		if (!userDatabasePassword)
 			throw new Error('Invalid authentication credentials')
 
@@ -59,14 +78,29 @@ export class EmailPassword implements AuthenticationInterface {
 		})
 
 		return {
-			accessToken,
-			refreshToken,
-			password: userDatabasePassword,
-			identifier: input.identifier,
+			user,
+			dataToStore: {
+				accessToken,
+				refreshToken,
+				password: userDatabasePassword,
+				identifier: input.identifier,
+			},
 		}
 	}
 
-	async onSignUp({ input, user, context }: AuthenticationEventsOptions) {
+	async onSignUp({ input, context }: AuthenticationEventsOptions) {
+		const user = await WibeApp.databaseController.createObject({
+			className: '_User',
+			data: {
+				authentication: {
+					emailPassword: {
+						...input,
+					},
+				},
+			},
+			context,
+		})
+
 		const fifteenMinutes = new Date(Date.now() + 15 * 60 * 1000)
 		const thirtyDays = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
 
@@ -88,10 +122,13 @@ export class EmailPassword implements AuthenticationInterface {
 		)
 
 		return {
-			accessToken,
-			refreshToken,
-			password: hashedPassword,
-			identifier: input.identifier,
+			user,
+			dataToStore: {
+				accessToken,
+				refreshToken,
+				password: hashedPassword,
+				identifier: input.identifier,
+			},
 		}
 	}
 }

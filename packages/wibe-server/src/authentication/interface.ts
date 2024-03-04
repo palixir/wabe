@@ -13,12 +13,11 @@ export interface ProviderConfig {
 }
 
 export interface AuthenticationCallbackOutput {
-	refreshToken?: string
-	accessToken?: string
+	dataToStore: { refreshToken?: string; accessToken?: string }
+	user: _User
 }
 
 export interface AuthenticationEventsOptions {
-	user: _User
 	input: Record<string, any>
 	context: Context
 }
@@ -45,6 +44,7 @@ export interface CustomAuthenticationEvents {
 export interface CustomAuthenticationMethods<T = Record<string, TypeField>> {
 	name: string
 	input: T
+	dataToStore: T
 	events: CustomAuthenticationEvents
 }
 

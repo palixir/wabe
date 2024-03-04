@@ -1,5 +1,6 @@
 import { WibeSchemaScalars, WibeSchemaEnums } from '../../generated/wibe'
 import { signInWithResolver } from '../authentication/signInWithResolver'
+import { signUpWithResolver } from '../authentication/signUpWithResolver'
 import { signOutResolver } from '../graphql/resolvers/signOut'
 import { WibeApp } from '../server'
 
@@ -132,21 +133,12 @@ export class Schema {
 
 		const allAuthenticationMethods = customAuthenticationConfig.reduce(
 			(acc, authenticationMethod) => {
-				if (
-					!Object.keys(authenticationMethod.input).includes(
-						'identifier',
-					)
-				)
-					throw new Error(
-						`${authenticationMethod.name} authentication method must have an 'identifier' field.`,
-					)
-
 				acc[authenticationMethod.name] = {
 					type: 'Object',
 					object: {
 						name: authenticationMethod.name,
 						fields: {
-							...authenticationMethod.input,
+							...authenticationMethod.dataToStore,
 						},
 					},
 				}
@@ -188,6 +180,33 @@ export class Schema {
 			},
 		}
 
+		// MUTATIONS
+		// TODO : Refactor this duplicate with above
+		const allAuthenticationMethodsForInput =
+			customAuthenticationConfig.reduce((acc, authenticationMethod) => {
+				acc[authenticationMethod.name] = {
+					type: 'Object',
+					object: {
+						name: authenticationMethod.name,
+						fields: {
+							...authenticationMethod.input,
+						},
+					},
+				}
+
+				return acc
+			}, {} as SchemaFields)
+
+		const authenticationInput = {
+			type: 'Object',
+			object: {
+				name: 'Authentication',
+				fields: {
+					...allAuthenticationMethodsForInput,
+				},
+			},
+		} as TypeField
+
 		const defaultResolvers: TypeResolver = {
 			mutations: {
 				...(customAuthenticationConfig.length > 0
@@ -196,12 +215,21 @@ export class Schema {
 								type: 'Boolean',
 								args: {
 									input: {
-										authentication: authenticationObject,
+										authentication: authenticationInput,
 									},
 								},
 								resolve: signInWithResolver,
 							},
-					  }
+							signUpWith: {
+								type: 'Boolean',
+								args: {
+									input: {
+										authentication: authenticationInput,
+									},
+								},
+								resolve: signUpWithResolver,
+							},
+						}
 					: {}),
 				signOut: {
 					type: 'Boolean',

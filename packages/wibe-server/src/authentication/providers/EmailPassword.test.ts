@@ -1,5 +1,5 @@
 import { describe, expect, it, mock, spyOn } from 'bun:test'
-import { EmailPassword } from './emailPassword'
+import { EmailPassword } from './EmailPassword'
 
 describe('Email password', () => {
 	const emailPassword = new EmailPassword()
@@ -190,5 +190,6 @@ describe('Email password', () => {
 		).rejects.toThrow('Invalid authentication credentials')
 
 		expect(spyBunPasswordVerify).toHaveBeenCalledTimes(1)
+		spyBunPasswordVerify.mockRestore()
 	})
 })
