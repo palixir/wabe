@@ -1,17 +1,40 @@
+import { WibeApp } from '../../server'
 import {
 	AuthenticationEventsOptions,
 	AuthenticationInterface,
 } from '../interface'
+import { Google as GoogleOauth } from '../oauth/Google'
 
 export class Google implements AuthenticationInterface {
 	constructor() {}
 
-	_googleAuthentication({ context, input }: AuthenticationEventsOptions) {
-		const { accessToken, refreshToken, email, verifiedEmail, identifier } =
-			input
+	async _googleAuthentication({
+		context,
+		input,
+	}: AuthenticationEventsOptions) {
+		const { authorizationCode, codeVerifier } = input
 
-		const fifteenMinutes = new Date(Date.now() + 1000 * 60 * 15)
-		const thirtyDays = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
+		const googleConfig = WibeApp.config.authentication?.providers?.google
+
+		if (!googleConfig) throw new Error('Google config not found')
+
+		const { clientId, clientSecret } = googleConfig
+
+		const googleOauth = new GoogleOauth(
+			clientId,
+			clientSecret,
+			`http://127.0.0.1:${WibeApp.config.port}/auth/provider/google`,
+		)
+
+		const {
+			accessToken,
+			refreshToken,
+			accessTokenExpiresAt,
+			refreshTokenExpiresAt,
+		} = await googleOauth.validateAuthorizationCode(
+			authorizationCode,
+			codeVerifier,
+		)
 
 		// Create cookie for access and refresh token
 		context.cookie.accessToken.add({
@@ -20,7 +43,7 @@ export class Google implements AuthenticationInterface {
 			path: '/',
 			// TODO : Check for implements csrf token for sub-domain protection
 			sameSite: 'strict',
-			expires: fifteenMinutes,
+			expires: accessTokenExpiresAt,
 			secure: Bun.env.NODE_ENV === 'production',
 		})
 
@@ -30,12 +53,11 @@ export class Google implements AuthenticationInterface {
 			path: '/',
 			// TODO : Check for implements csrf token for sub-domain protection
 			sameSite: 'strict',
-			expires: thirtyDays,
+			expires: refreshTokenExpiresAt,
 			secure: Bun.env.NODE_ENV === 'production',
 		})
 
 		return {
-			identifier,
 			accessToken,
 			refreshToken,
 			email,

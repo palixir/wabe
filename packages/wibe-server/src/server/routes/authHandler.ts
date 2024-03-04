@@ -1,28 +1,8 @@
 import { Context } from 'elysia'
 import { WibeApp } from '..'
 import { ProviderEnum } from '../../authentication/interface'
-import { Google } from '../../authentication/oauth/Google'
-
-const _getProviderAdapter = ({
-	provider,
-	clientId,
-	clientSecret,
-}: {
-	provider: ProviderEnum
-	clientId: string
-	clientSecret: string
-}) => {
-	switch (provider) {
-		case ProviderEnum.GOOGLE:
-			return new Google(
-				clientId,
-				clientSecret,
-				`http://127.0.0.1:${WibeApp.config.port}/auth/provider/google`,
-			)
-		default:
-			throw new Error('Provider not found')
-	}
-}
+import { getGraphqlClient } from '../../utils/helper'
+import { gql } from 'graphql-request'
 
 export const authHandler = async (context: Context, provider: ProviderEnum) => {
 	if (!WibeApp.config) throw new Error('Wibe config not found')
@@ -38,21 +18,25 @@ export const authHandler = async (context: Context, provider: ProviderEnum) => {
 
 	if (!authentication) throw new Error('Authentication config not found')
 
-	const clientId = authentication.providers?.[provider]?.clientId
-	const clientSecret = authentication.providers?.[provider]?.clientSecret
-
-	if (!clientId || !clientSecret)
-		throw new Error('Client id or secret not found')
-
 	try {
-		const providerAdapter = _getProviderAdapter({
-			provider,
-			clientId,
-			clientSecret,
-		})
-
-		const { accessToken, refreshToken } =
-			await providerAdapter.validateAuthorizationCode(code, codeVerifier)
+		// Here we can't use the classic graphql client because provider is dynamic
+		await getGraphqlClient(WibeApp.config.port).request<any>(gql`
+			mutation signInWith(
+				$authorizationCode: String!
+				$codeVerifier: String!
+			) {
+				signInWith(
+					input: {
+						authentication: {
+							${provider}: {
+								authorizationCode: $authorizationCode
+								codeVerifier: $codeVerifier
+							}
+						}
+					}
+				)
+			}
+		`)
 
 		context.set.redirect = authentication.successRedirectPath
 	} catch (e) {

@@ -3,8 +3,8 @@ import { Context } from '../graphql/interface'
 import { TypeField } from '../schema'
 
 export enum ProviderEnum {
-	GOOGLE = 'GOOGLE',
-	X = 'X',
+	google = 'google',
+	x = 'x',
 }
 
 export interface ProviderConfig {
