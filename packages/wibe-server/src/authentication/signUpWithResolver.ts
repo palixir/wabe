@@ -34,13 +34,13 @@ export const signUpWithResolver = async (
 	if (!validAuthenticationMethod)
 		throw new Error('No available custom authentication methods found')
 
-	const { events } = validAuthenticationMethod
+	const { provider } = validAuthenticationMethod
 
 	const inputOfTheGoodAuthenticationMethod =
 		// @ts-expect-error
 		input.authentication[authenticationMethod]
 
-	const { user, dataToStore } = await events.onSignUp({
+	const { user, dataToStore } = await provider.onSignUp({
 		input: inputOfTheGoodAuthenticationMethod,
 		context,
 	})

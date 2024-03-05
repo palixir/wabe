@@ -62,7 +62,7 @@ type _UserAuthentication {
 }
 
 type _UserAuthenticationEmailPassword {
-  identifier: Email!
+  email: Email!
   password: String!
   accessToken: String
   refreshToken: String
@@ -215,7 +215,7 @@ input _UserAuthenticationWhereInput {
 }
 
 input _UserAuthenticationEmailPasswordWhereInput {
-  identifier: EmailWhereInput
+  email: EmailWhereInput
   password: StringWhereInput
   accessToken: StringWhereInput
   refreshToken: StringWhereInput
@@ -263,7 +263,6 @@ type Mutation {
   secondCustomMutation(input: SecondCustomMutationInput): Int
   signInWith(input: SignInWithInput): Boolean
   signUpWith(input: SignUpWithInput): Boolean
-  signOut(input: SignOutInput): Boolean
 }
 
 input PostCreateInput {
@@ -348,7 +347,7 @@ input _UserAuthenticationInput {
 }
 
 input _UserAuthenticationEmailPasswordInput {
-  identifier: Email!
+  email: Email!
   password: String!
   accessToken: String
   refreshToken: String
@@ -413,7 +412,7 @@ input _UserAuthenticationUpdateFieldsInput {
 }
 
 input _UserAuthenticationEmailPasswordUpdateFieldsInput {
-  identifier: Email
+  email: Email
   password: String
   accessToken: String
   refreshToken: String
@@ -471,7 +470,7 @@ input SignInWithAuthenticationInput {
 
 input SignInWithAuthenticationEmailPasswordInput {
   email: Email!
-  password: Email!
+  password: String!
 }
 
 input SignInWithAuthenticationGoogleInput {
@@ -490,14 +489,10 @@ input SignUpWithAuthenticationInput {
 
 input SignUpWithAuthenticationEmailPasswordInput {
   email: Email!
-  password: Email!
+  password: String!
 }
 
 input SignUpWithAuthenticationGoogleInput {
   authorizationCode: String!
   codeVerifier: String!
-}
-
-input SignOutInput {
-  email: Email!
 }

@@ -1,7 +1,20 @@
-import { describe, expect, it, mock, spyOn } from 'bun:test'
+import { describe, expect, it, mock, spyOn, beforeAll } from 'bun:test'
 import { EmailPassword } from './EmailPassword'
+import { WibeApp } from '../../server'
 
 describe('Email password', () => {
+	const mockGetObjects = mock(() => Promise.resolve([]))
+	const mockCreateObject = mock(() =>
+		Promise.resolve({ id: 'userId' }),
+	) as any
+
+	beforeAll(() => {
+		WibeApp.databaseController = {
+			getObjects: mockGetObjects,
+			createObject: mockCreateObject,
+		} as any
+	})
+
 	const emailPassword = new EmailPassword()
 
 	it('should signUp with email password', async () => {
@@ -16,20 +29,19 @@ describe('Email password', () => {
 				cookie: {},
 				jwt: { sign: mockSign },
 			} as any,
-			input: { identifier: 'email@test.fr', password: 'password' },
-			user: { id: 'userId' },
+			input: { email: 'email@test.fr', password: 'password' },
 		})
 
-		expect(res).toEqual({
+		expect(res.dataToStore).toEqual({
 			accessToken: 'token',
 			refreshToken: 'token',
 			password: expect.any(String),
-			identifier: 'email@test.fr',
+			email: 'email@test.fr',
 		})
 
 		expect(spyBunPasswordHash).toHaveBeenCalledTimes(1)
 		expect(spyBunPasswordHash).toHaveBeenCalledWith('password', 'argon2id')
-		expect(res.password).toContain('$argon2id$')
+		expect(res.dataToStore.password).toContain('$argon2id$')
 
 		expect(mockSign).toHaveBeenCalledTimes(2)
 		expect(mockSign).toHaveBeenNthCalledWith(1, {
@@ -47,6 +59,18 @@ describe('Email password', () => {
 	})
 
 	it('should signIn with email password', async () => {
+		mockGetObjects.mockResolvedValue([
+			{
+				id: 'userId',
+				authentication: {
+					emailPassword: {
+						email: 'email@test.fr',
+						password: 'hashedPassword',
+					},
+				},
+			} as never,
+		])
+
 		const mockAddCookie = mock(() => {})
 		const mockSign = mock(() => Promise.resolve('token'))
 		const spyBunPasswordVerify = spyOn(
@@ -62,23 +86,14 @@ describe('Email password', () => {
 				},
 				jwt: { sign: mockSign },
 			} as any,
-			input: { identifier: 'email@test.fr', password: 'password' },
-			user: {
-				id: 'userId',
-				authentication: {
-					emailPassword: {
-						identifier: 'email@test.fr',
-						password: 'hashedPassword',
-					},
-				},
-			},
+			input: { email: 'email@test.fr', password: 'password' },
 		})
 
-		expect(res).toEqual({
+		expect(res.dataToStore).toEqual({
 			accessToken: 'token',
 			refreshToken: 'token',
 			password: 'hashedPassword',
-			identifier: 'email@test.fr',
+			email: 'email@test.fr',
 		})
 
 		expect(spyBunPasswordVerify).toHaveBeenCalledTimes(1)
@@ -140,16 +155,7 @@ describe('Email password', () => {
 					},
 					jwt: { sign: mockSign },
 				} as any,
-				input: { identifier: 'email@test.fr' },
-				user: {
-					id: 'userId',
-					authentication: {
-						emailPassword: {
-							identifier: 'email@test.fr',
-							password: 'invalidHashedPassword',
-						},
-					},
-				},
+				input: { email: 'email@test.fr' },
 			}),
 		).rejects.toThrow('Invalid authentication credentials')
 
@@ -174,17 +180,8 @@ describe('Email password', () => {
 					jwt: { sign: mockSign },
 				} as any,
 				input: {
-					identifier: 'invalidEmail@test.fr',
+					email: 'invalidEmail@test.fr',
 					password: 'password',
-				},
-				user: {
-					id: 'userId',
-					authentication: {
-						emailPassword: {
-							identifier: 'email@test.fr',
-							password: 'invalidHashedPassword',
-						},
-					},
 				},
 			}),
 		).rejects.toThrow('Invalid authentication credentials')

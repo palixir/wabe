@@ -6,26 +6,15 @@ import {
 	spyOn,
 	mock,
 	beforeAll,
-	afterAll,
-	afterEach,
 } from 'bun:test'
 import { authHandler } from './authHandler'
 import { WibeApp } from '../..'
 import { ProviderEnum } from '../../authentication/interface'
-import { GoogleProvider } from '../../authentication/oauthProviders/google'
+import { GraphQLClient } from 'graphql-request'
 
 describe('Auth handler', () => {
-	const spyGoogleProvider = spyOn(
-		GoogleProvider.prototype,
-		'createTokenFromAuthorizationCode',
-	)
-
 	beforeAll(() => {
 		spyOn(console, 'error').mockImplementation(() => {})
-	})
-
-	afterAll(() => {
-		spyGoogleProvider.mockRestore()
 	})
 
 	beforeEach(() => {
@@ -36,17 +25,13 @@ describe('Auth handler', () => {
 				successRedirectPath: 'successRedirectPath',
 				failureRedirectPath: 'failureRedirectPath',
 				providers: {
-					GOOGLE: {
+					google: {
 						clientId: 'clientId',
 						clientSecret: 'clientSecret',
 					},
 				},
 			},
 		}
-	})
-
-	afterEach(() => {
-		spyGoogleProvider.mockReset()
 	})
 
 	it('should throw an error if the authentication config is not provided', async () => {
@@ -54,91 +39,83 @@ describe('Auth handler', () => {
 		WibeApp.config = { port: 3000 }
 		expect(
 			authHandler(
-				{ query: { code: 'code' } } as any,
-				ProviderEnum.GOOGLE,
+				{
+					query: { code: 'code', codeVerifier: 'codeVerifier' },
+				} as any,
+				ProviderEnum.google,
 			),
 		).rejects.toThrow('Authentication config not found')
 	})
 
 	it('should throw an error if no google code provided', async () => {
 		expect(
-			authHandler({ query: {} } as any, ProviderEnum.GOOGLE),
+			authHandler({ query: {} } as any, ProviderEnum.google),
+		).rejects.toThrow('Authentication failed')
+
+		expect(
+			authHandler(
+				{ query: { code: 'code' } } as any,
+				ProviderEnum.google,
+			),
+		).rejects.toThrow('Authentication failed')
+
+		expect(
+			authHandler(
+				{ query: { codeVerifier: 'codeVerifier' } } as any,
+				ProviderEnum.google,
+			),
 		).rejects.toThrow('Authentication failed')
 	})
 
-	it('should throw an error if the google client id or client secret is not provided ', async () => {
-		WibeApp.config = {
-			port: 3000,
-			authentication: {
-				successRedirectPath: 'successRedirectPath',
-				failureRedirectPath: 'failureRedirectPath',
-				// @ts-expect-error
-				providers: {
-					GOOGLE: {
-						clientSecret: 'clientSecret',
-					},
-				},
-			},
-		}
-
-		expect(
-			authHandler(
-				{ query: { code: 'code' } } as any,
-				ProviderEnum.GOOGLE,
-			),
-		).rejects.toThrow('Client id or secret not found')
-
-		WibeApp.config = {
-			port: 3000,
-			authentication: {
-				successRedirectPath: 'successRedirectPath',
-				failureRedirectPath: 'failureRedirectPath',
-				// @ts-expect-error
-				providers: {
-					GOOGLE: {
-						clientId: 'clientId',
-					},
-				},
-			},
-		}
-
-		expect(
-			authHandler(
-				{ query: { code: 'code' } } as any,
-				ProviderEnum.GOOGLE,
-			),
-		).rejects.toThrow('Client id or secret not found')
-	})
-
-	it('should call google provider to check the code and generate access and refresh token', async () => {
-		const spyGoogleProvider = spyOn(
-			GoogleProvider.prototype,
-			'createTokenFromAuthorizationCode',
-		).mockResolvedValue()
+	it('should call signInWith mutation', async () => {
+		const mockGraphqlClientRequest = spyOn(
+			GraphQLClient.prototype,
+			'request',
+		).mockResolvedValue({})
 
 		const context = {
-			query: { code: 'code' },
+			query: { code: 'code', codeVerifier: 'codeVerifier' },
 			cookie: {},
 			set: { redirect: '' },
 		} as any
 
-		await authHandler(context, ProviderEnum.GOOGLE)
+		await authHandler(context, ProviderEnum.google)
 
-		expect(spyGoogleProvider).toHaveBeenCalledTimes(1)
-		expect(spyGoogleProvider).toHaveBeenCalledWith({
-			code: 'code',
-		})
-
+		expect(mockGraphqlClientRequest).toHaveBeenCalledTimes(1)
+		expect(mockGraphqlClientRequest.mock.calls[0][0]).toEqual(
+			`
+			mutation signInWith(
+				$authorizationCode: String!
+				$codeVerifier: String!
+			) {
+				signInWith(
+					input: {
+						authentication: {
+							google: {
+								authorizationCode: $authorizationCode
+								codeVerifier: $codeVerifier
+							}
+						}
+					}
+				)
+			}
+		` as any,
+		)
 		expect(context.set.redirect).toBe('successRedirectPath')
+
+		mockGraphqlClientRequest.mockRestore()
 	})
 
 	it('should redirect to the failure redirect path if something wrong', async () => {
-		spyGoogleProvider.mockRejectedValue(new Error('Something wrong'))
+		const mockGraphqlClientRequest = spyOn(
+			GraphQLClient.prototype,
+			'request',
+		).mockRejectedValue({})
 
 		const spyAddCookie = mock(() => {})
 
 		const context = {
-			query: { code: 'code' },
+			query: { code: 'code', codeVerifier: 'codeVerifier' },
 			cookie: {
 				accessToken: { add: spyAddCookie },
 				refreshToken: { add: spyAddCookie },
@@ -146,12 +123,11 @@ describe('Auth handler', () => {
 			set: { redirect: '' },
 		} as any
 
-		await authHandler(context, ProviderEnum.GOOGLE)
+		await authHandler(context, ProviderEnum.google)
 
-		expect(spyGoogleProvider).toHaveBeenCalledTimes(1)
-		expect(spyGoogleProvider).toHaveBeenCalledWith({
-			code: 'code',
-		})
+		expect(mockGraphqlClientRequest).toHaveBeenCalledTimes(1)
 		expect(context.set.redirect).toBe('failureRedirectPath')
+
+		mockGraphqlClientRequest.mockRestore()
 	})
 })

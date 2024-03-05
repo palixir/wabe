@@ -54,9 +54,9 @@ describe('SignUpWith', () => {
 							email: { type: 'Email', required: true },
 							password: { type: 'String', required: true },
 						},
-						events: {
+						provider: {
 							onSignUp: mockOnSignUp,
-							onLogin: mockOnLogin,
+							onSignIn: mockOnLogin,
 						},
 					},
 				],
@@ -98,9 +98,9 @@ describe('SignUpWith', () => {
 						email: { type: 'Email', required: true },
 						password: { type: 'String', required: true },
 					},
-					events: {
+					provider: {
 						onSignUp: mockOnSignUp,
-						onLogin: mockOnLogin,
+						onSignIn: mockOnLogin,
 					},
 				},
 			],

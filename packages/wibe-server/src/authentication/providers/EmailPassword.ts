@@ -2,8 +2,6 @@ import { WibeApp } from '../../server'
 import { AuthenticationEventsOptions, ProviderInterface } from '../interface'
 
 export class EmailPassword implements ProviderInterface {
-	constructor() {}
-
 	async onSignIn({ context, input }: AuthenticationEventsOptions) {
 		// TODO : Use first here but need to refactor in graphql and mongoadapter to have first and not limit
 		const users = await WibeApp.databaseController.getObjects({
@@ -37,7 +35,7 @@ export class EmailPassword implements ProviderInterface {
 
 		if (
 			!isPasswordEquals ||
-			input.identifier !== user.authentication?.emailPassword?.identifier
+			input.email !== user.authentication?.emailPassword?.email
 		)
 			throw new Error('Invalid authentication credentials')
 
@@ -81,7 +79,7 @@ export class EmailPassword implements ProviderInterface {
 				accessToken,
 				refreshToken,
 				password: userDatabasePassword,
-				identifier: input.identifier,
+				email: input.email,
 			},
 		}
 	}
@@ -125,7 +123,7 @@ export class EmailPassword implements ProviderInterface {
 				accessToken,
 				refreshToken,
 				password: hashedPassword,
-				identifier: input.identifier,
+				email: input.email,
 			},
 		}
 	}

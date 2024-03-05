@@ -5,62 +5,14 @@ import { Schema } from './Schema'
 
 describe('Schema', () => {
 	let wibe: WibeApp
-	let port: number
 
 	beforeAll(async () => {
 		const setup = await setupTests()
 		wibe = setup.wibe
-		port = setup.port
 	})
 
 	afterAll(async () => {
 		await wibe.close()
-	})
-
-	it('should display a message if no identifier is provided in custom authentication schema', () => {
-		WibeApp.config.authentication = {
-			customAuthenticationMethods: [
-				{
-					name: 'EmailPassword',
-					input: {},
-					dataToStore: {
-						notAnIdentifier: { type: 'Email', required: true },
-						password: { type: 'String', required: true },
-					},
-					events: {
-						onSignUp: () => Promise.resolve({}),
-						onLogin: () => Promise.resolve({}),
-					},
-				},
-			],
-		}
-
-		expect(
-			() =>
-				new Schema({
-					class: [],
-					enums: [],
-				}),
-		).toThrow(
-			"EmailPassword authentication method must have an 'identifier' field.",
-		)
-
-		WibeApp.config.authentication = {
-			customAuthenticationMethods: [
-				{
-					name: 'EmailPassword',
-					input: {},
-					dataToStore: {
-						identifier: { type: 'Email', required: true },
-						password: { type: 'String', required: true },
-					},
-					events: {
-						onSignUp: () => Promise.resolve({}),
-						onLogin: () => Promise.resolve({}),
-					},
-				},
-			],
-		}
 	})
 
 	it('should add default enums', () => {

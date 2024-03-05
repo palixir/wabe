@@ -36,7 +36,7 @@ export interface CustomAuthenticationMethods<T = Record<string, TypeField>> {
 	name: string
 	input: T
 	dataToStore: T
-	events: ProviderInterface
+	provider: ProviderInterface
 }
 
 export interface AuthenticationConfig {

@@ -3,8 +3,6 @@ import { AuthenticationEventsOptions, ProviderInterface } from '../interface'
 import { Google as GoogleOauth } from '../oauth/Google'
 
 export class Google implements ProviderInterface {
-	constructor() {}
-
 	async _googleAuthentication({
 		context,
 		input,

@@ -26,6 +26,7 @@ describe('SignInWith', () => {
 			},
 		}),
 	)
+
 	const mockUpdateObject = mock(() => Promise.resolve({}))
 
 	const mockDatabaseController = {
@@ -53,9 +54,9 @@ describe('SignInWith', () => {
 							email: { type: 'Email', required: true },
 							password: { type: 'String', required: true },
 						},
-						events: {
+						provider: {
 							onSignUp: mockOnSignUp,
-							onLogin: mockOnLogin,
+							onSignIn: mockOnLogin,
 						},
 					},
 				],
@@ -97,9 +98,9 @@ describe('SignInWith', () => {
 						email: { type: 'Email', required: true },
 						password: { type: 'String', required: true },
 					},
-					events: {
+					provider: {
 						onSignUp: mockOnSignUp,
-						onLogin: mockOnLogin,
+						onSignIn: mockOnLogin,
 					},
 				},
 			],

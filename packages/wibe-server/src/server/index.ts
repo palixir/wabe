@@ -9,9 +9,9 @@ import { GraphQLObjectType, GraphQLSchema, printSchema } from 'graphql'
 import { WibeGraphQLSchema } from '../schema/WibeGraphQLSchema'
 import { AuthenticationConfig } from '../authentication/interface'
 import { WibeRoute, defaultRoutes } from './routes'
-import { defaultAuthenticationMethods } from '../authentication'
 import { Hook, defaultHooks } from '../hooks'
 import { generateWibeFile } from './generateWibeFile'
+import { defaultAuthenticationMethods } from '../authentication/defaultAuthentication'
 
 interface WibeConfig {
 	port: number
@@ -68,7 +68,7 @@ export class WibeApp {
 	loadAuthenticationMethods() {
 		WibeApp.config.authentication = {
 			customAuthenticationMethods: [
-				...defaultAuthenticationMethods,
+				...defaultAuthenticationMethods(),
 				...(WibeApp.config.authentication
 					?.customAuthenticationMethods || []),
 			],

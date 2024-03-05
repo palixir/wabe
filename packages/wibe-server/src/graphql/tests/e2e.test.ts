@@ -96,7 +96,7 @@ describe('GraphQL : E2E', () => {
 					fields: {
 						authentication: {
 							emailPassword: {
-								identifier: 'email@test.fr',
+								email: 'email@test.fr',
 								password: 'password',
 							},
 						},
@@ -108,7 +108,7 @@ describe('GraphQL : E2E', () => {
 				where: {
 					authentication: {
 						emailPassword: {
-							identifier: { equalTo: 'email@test.fr' },
+							email: { equalTo: 'email@test.fr' },
 						},
 					},
 				},
@@ -674,13 +674,13 @@ describe('GraphQL : E2E', () => {
 
 	describe('Authentication mutations', () => {
 		it('should signIn with emailPassword if the password is correct', async () => {
-			const { signInWith } = await client.request<any>(
-				graphql.signInWith,
+			const { signUpWith } = await client.request<any>(
+				graphql.signUpWith,
 				{
 					input: {
 						authentication: {
 							emailPassword: {
-								identifier: 'email@test.fr',
+								email: 'email@test.fr',
 								password: 'password',
 							},
 						},
@@ -688,7 +688,7 @@ describe('GraphQL : E2E', () => {
 				},
 			)
 
-			expect(signInWith).toEqual(true)
+			expect(signUpWith).toEqual(true)
 
 			const { signInWith: signInWith2 } = await client.request<any>(
 				graphql.signInWith,
@@ -696,7 +696,7 @@ describe('GraphQL : E2E', () => {
 					input: {
 						authentication: {
 							emailPassword: {
-								identifier: 'email@test.fr',
+								email: 'email@test.fr',
 								password: 'password',
 							},
 						},
@@ -709,25 +709,36 @@ describe('GraphQL : E2E', () => {
 	})
 
 	it('should not signIn with emailPassword if the password is incorrect', async () => {
-		const { signInWith } = await client.request<any>(graphql.signInWith, {
+		expect(
+			client.request<any>(graphql.signInWith, {
+				input: {
+					authentication: {
+						emailPassword: {
+							email: 'email@test.fr',
+							password: 'password',
+						},
+					},
+				},
+			}),
+		).rejects.toThrow('Invalid authentication credentials')
+
+		await client.request<any>(graphql.signUpWith, {
 			input: {
 				authentication: {
 					emailPassword: {
-						identifier: 'email@test.fr',
+						email: 'email@test.fr',
 						password: 'password',
 					},
 				},
 			},
 		})
 
-		expect(signInWith).toEqual(true)
-
 		expect(
 			client.request<any>(graphql.signInWith, {
 				input: {
 					authentication: {
 						emailPassword: {
-							identifier: 'email@test.fr',
+							email: 'email@test.fr',
 							password: 'invalidpassword',
 						},
 					},
@@ -738,6 +749,11 @@ describe('GraphQL : E2E', () => {
 })
 
 const graphql = {
+	signUpWith: gql`
+		mutation signUpWith($input: SignUpWithInput!) {
+			signUpWith(input: $input)
+		}
+	`,
 	signInWith: gql`
 		mutation signInWith($input: SignInWithInput!) {
 			signInWith(input: $input)
