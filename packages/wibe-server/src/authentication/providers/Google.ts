@@ -1,11 +1,8 @@
 import { WibeApp } from '../../server'
-import {
-	AuthenticationEventsOptions,
-	AuthenticationInterface,
-} from '../interface'
+import { AuthenticationEventsOptions, ProviderInterface } from '../interface'
 import { Google as GoogleOauth } from '../oauth/Google'
 
-export class Google implements AuthenticationInterface {
+export class Google implements ProviderInterface {
 	constructor() {}
 
 	async _googleAuthentication({
@@ -31,9 +28,20 @@ export class Google implements AuthenticationInterface {
 			refreshToken,
 			accessTokenExpiresAt,
 			refreshTokenExpiresAt,
+			idToken,
 		} = await googleOauth.validateAuthorizationCode(
 			authorizationCode,
 			codeVerifier,
+		)
+
+		if (!refreshToken || !refreshTokenExpiresAt)
+			throw new Error('Access_type must be offline')
+
+		if (!idToken) throw new Error('Authentication failed')
+
+		const { email, verifiedEmail } = await googleOauth.getUserInfo(
+			accessToken,
+			idToken,
 		)
 
 		// Create cookie for access and refresh token
@@ -66,10 +74,45 @@ export class Google implements AuthenticationInterface {
 	}
 
 	async onSignIn(options: AuthenticationEventsOptions) {
-		return this._googleAuthentication(options)
+		const dataToStore = await this._googleAuthentication(options)
+
+		// TODO : Use first 1 here
+		const user = await WibeApp.databaseController.getObjects({
+			className: '_User',
+			where: {
+				authentication: {
+					// @ts-expect-error
+					google: {
+						email: { equalTo: options.input.email },
+					},
+				},
+			},
+		})
+
+		return {
+			user: user[0],
+			dataToStore,
+		}
 	}
 
 	async onSignUp(options: AuthenticationEventsOptions) {
-		return this._googleAuthentication(options)
+		const dataToStore = await this._googleAuthentication(options)
+
+		const user = await WibeApp.databaseController.createObject({
+			className: '_User',
+			data: {
+				authentication: {
+					google: {
+						...options.input,
+					},
+				},
+			},
+			context: options.context,
+		})
+
+		return {
+			user,
+			dataToStore,
+		}
 	}
 }

@@ -1,9 +1,6 @@
 import { CustomAuthenticationMethods } from './interface'
-import {
-	emailPasswordOnLogin,
-	emailPasswordOnSignUp,
-} from './methods/emailPassword'
-import { googleOnSignInOrSignUp } from './methods/google'
+import { EmailPassword } from './providers/EmailPassword'
+import { Google } from './providers/Google'
 
 export const defaultAuthenticationMethods: CustomAuthenticationMethods[] = [
 	{
@@ -34,10 +31,7 @@ export const defaultAuthenticationMethods: CustomAuthenticationMethods[] = [
 				type: 'String',
 			},
 		},
-		events: {
-			onLogin: emailPasswordOnLogin,
-			onSignUp: emailPasswordOnSignUp,
-		},
+		events: new EmailPassword(),
 	},
 	{
 		name: 'google',
@@ -71,9 +65,6 @@ export const defaultAuthenticationMethods: CustomAuthenticationMethods[] = [
 				type: 'String',
 			},
 		},
-		events: {
-			onLogin: googleOnSignInOrSignUp,
-			onSignUp: googleOnSignInOrSignUp,
-		},
+		events: new Google(),
 	},
 ]

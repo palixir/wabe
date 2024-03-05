@@ -1,7 +1,6 @@
 import { WibeSchemaScalars, WibeSchemaEnums } from '../../generated/wibe'
 import { signInWithResolver } from '../authentication/signInWithResolver'
 import { signUpWithResolver } from '../authentication/signUpWithResolver'
-import { signOutResolver } from '../graphql/resolvers/signOut'
 import { WibeApp } from '../server'
 
 export type WibeDefaultTypes =
@@ -231,18 +230,18 @@ export class Schema {
 							},
 						}
 					: {}),
-				signOut: {
-					type: 'Boolean',
-					resolve: signOutResolver,
-					args: {
-						input: {
-							email: {
-								type: 'Email',
-								required: true,
-							},
-						},
-					},
-				},
+				// signOut: {
+				// 	type: 'Boolean',
+				// 	resolve: signOutResolver,
+				// 	args: {
+				// 		input: {
+				// 			email: {
+				// 				type: 'Email',
+				// 				required: true,
+				// 			},
+				// 		},
+				// 	},
+				// },
 			},
 		}
 

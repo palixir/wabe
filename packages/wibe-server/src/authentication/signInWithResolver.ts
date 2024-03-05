@@ -40,10 +40,12 @@ export const signInWithResolver = async (
 		// @ts-expect-error
 		input.authentication[authenticationMethod]
 
-	const { dataToStore, user } = await events.onLogin({
+	const { dataToStore, user } = await events.onSignIn({
 		input: inputOfTheGoodAuthenticationMethod,
 		context,
 	})
+
+	if (!user.id) throw new Error('Authentication failed')
 
 	await WibeApp.databaseController.updateObject({
 		className: '_User',

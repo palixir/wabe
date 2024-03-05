@@ -1,10 +1,7 @@
 import { WibeApp } from '../../server'
-import {
-	AuthenticationEventsOptions,
-	AuthenticationInterface,
-} from '../interface'
+import { AuthenticationEventsOptions, ProviderInterface } from '../interface'
 
-export class EmailPassword implements AuthenticationInterface {
+export class EmailPassword implements ProviderInterface {
 	constructor() {}
 
 	async onSignIn({ context, input }: AuthenticationEventsOptions) {
@@ -13,6 +10,7 @@ export class EmailPassword implements AuthenticationInterface {
 			className: '_User',
 			where: {
 				authentication: {
+					// @ts-expect-error
 					emailPassword: {
 						email: { equalTo: input.email },
 					},

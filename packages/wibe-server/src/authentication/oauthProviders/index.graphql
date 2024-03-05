@@ -1,3 +1,0 @@
-mutation signInWith($input: SignInWithInput!) {
-	signInWith(input: $input)
-}
