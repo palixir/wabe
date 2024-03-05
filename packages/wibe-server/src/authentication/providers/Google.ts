@@ -9,17 +9,7 @@ export class Google implements ProviderInterface {
 	}: AuthenticationEventsOptions) {
 		const { authorizationCode, codeVerifier } = input
 
-		const googleConfig = WibeApp.config.authentication?.providers?.google
-
-		if (!googleConfig) throw new Error('Google config not found')
-
-		const { clientId, clientSecret } = googleConfig
-
-		const googleOauth = new GoogleOauth(
-			clientId,
-			clientSecret,
-			`http://127.0.0.1:${WibeApp.config.port}/auth/provider/google`,
-		)
+		const googleOauth = new GoogleOauth()
 
 		const {
 			accessToken,

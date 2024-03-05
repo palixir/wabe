@@ -16,7 +16,23 @@ describe('Oauth2Client', () => {
 		'https://redirectURI',
 	)
 
+	const oauthbidon = new OAuth2Client(
+		'296431040556-4jh84e5s264rmrgnh8bmegb0kl550teg.apps.googleusercontent.com',
+		'https://accounts.google.com/o/oauth2/v2/auth',
+		'https://oauth2.googleapis.com/token',
+		`http://127.0.0.1:${3000}/auth/provider/google`,
+	)
+
 	it('should create authorization URl', async () => {
+		console.log(
+			(
+				await oauthbidon.createAuthorizationURL({
+					codeVerifier: 'codeVerifier',
+					scopes: ['email'],
+					state: 'state',
+				})
+			).toString(),
+		)
 		const authorizationURL = await oauthClient.createAuthorizationURL()
 
 		expect(authorizationURL.toString()).toEqual(

@@ -67,6 +67,7 @@ export class WibeApp {
 
 	loadAuthenticationMethods() {
 		WibeApp.config.authentication = {
+			...WibeApp.config.authentication,
 			customAuthenticationMethods: [
 				...defaultAuthenticationMethods(),
 				...(WibeApp.config.authentication

@@ -1,9 +1,23 @@
 import { describe, expect, it, spyOn } from 'bun:test'
 import { Google } from './Google'
 import { OAuth2Client } from './Oauth2Client'
+import { WibeApp } from '../../server'
 
 describe('Google oauth', () => {
-	const googleOauth = new Google('clientId', 'clientSecret', 'redirectURI')
+	// @ts-expect-error
+	WibeApp.config = {
+		port: 3000,
+		authentication: {
+			providers: {
+				google: {
+					clientId: 'clientId',
+					clientSecret: 'clientSecret',
+				},
+			},
+		},
+	}
+
+	const googleOauth = new Google()
 
 	it('should create authorization url', async () => {
 		const spyOauth2ClientCreateAuthorizationUrl = spyOn(

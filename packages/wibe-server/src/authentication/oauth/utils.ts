@@ -1,3 +1,5 @@
+import crypto from 'crypto'
+
 export interface Tokens {
 	accessToken: string
 	refreshToken?: string | null
@@ -23,3 +25,6 @@ export const base64URLencode = (content: string) => {
 
 	return result.split('=')[0].replace('+', '-').replace('/', '_')
 }
+
+export const generateRandomValues = () =>
+	crypto.randomBytes(60).toString('base64url')
