@@ -1,9 +1,9 @@
 import { describe, expect, it, beforeEach, mock } from 'bun:test'
-import { WibeApp } from '../server'
-import { signInWithResolver } from './signInWithResolver'
-import { Context } from '../graphql/interface'
+import { WibeApp } from '../../server'
+import { signUpWithResolver } from './signUpWithResolver'
+import { Context } from '../../graphql/interface'
 
-describe('SignInWith', () => {
+describe('SignUpWith', () => {
 	const mockOnLogin = mock(() =>
 		Promise.resolve({
 			dataToStore: {
@@ -68,7 +68,7 @@ describe('SignInWith', () => {
 		WibeApp.config.authentication = undefined
 
 		expect(
-			signInWithResolver(
+			signUpWithResolver(
 				{},
 				{
 					input: {
@@ -107,7 +107,7 @@ describe('SignInWith', () => {
 		}
 
 		expect(
-			signInWithResolver(
+			signUpWithResolver(
 				{},
 				{
 					input: {
@@ -124,10 +124,10 @@ describe('SignInWith', () => {
 		).rejects.toThrow('No available custom authentication methods found')
 	})
 
-	it('should signInWith email and password when the user already exist', async () => {
+	it('should signUpWith email and password when the user not exist', async () => {
 		const mockAddCookie = mock(() => {})
 
-		const res = await signInWithResolver(
+		const res = await signUpWithResolver(
 			{},
 			{
 				input: {
@@ -152,8 +152,8 @@ describe('SignInWith', () => {
 		)
 
 		expect(res).toBe(true)
-		expect(mockOnLogin).toHaveBeenCalledTimes(1)
-		expect(mockOnLogin).toHaveBeenCalledWith({
+		expect(mockOnSignUp).toHaveBeenCalledTimes(1)
+		expect(mockOnSignUp).toHaveBeenCalledWith({
 			input: {
 				email: 'email@test.fr',
 				password: 'password',
@@ -176,6 +176,6 @@ describe('SignInWith', () => {
 			context: expect.any(Object),
 		})
 
-		expect(mockOnSignUp).toHaveBeenCalledTimes(0)
+		expect(mockOnLogin).toHaveBeenCalledTimes(0)
 	})
 })

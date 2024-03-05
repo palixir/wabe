@@ -1,6 +1,5 @@
 import { WibeSchemaScalars, WibeSchemaEnums } from '../../generated/wibe'
-import { signInWithResolver } from '../authentication/signInWithResolver'
-import { signUpWithResolver } from '../authentication/signUpWithResolver'
+import { signInWithResolver, signUpWithResolver } from '../authentication'
 import { WibeApp } from '../server'
 
 export type WibeDefaultTypes =
@@ -228,7 +227,7 @@ export class Schema {
 								},
 								resolve: signUpWithResolver,
 							},
-						}
+					  }
 					: {}),
 				// signOut: {
 				// 	type: 'Boolean',

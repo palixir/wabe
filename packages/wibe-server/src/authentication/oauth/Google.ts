@@ -1,5 +1,5 @@
 import { OAuth2Client } from '.'
-import type { OAuth2ProviderWithPKCE, Tokens } from '.'
+import type { OAuth2ProviderWithPKCE, Tokens } from './utils'
 
 const authorizeEndpoint = 'https://accounts.google.com/o/oauth2/v2/auth'
 const tokenEndpoint = 'https://oauth2.googleapis.com/token'
