@@ -77,6 +77,8 @@ export class Google implements ProviderInterface {
 			},
 		})
 
+		console.log(user)
+
 		return {
 			user: user[0],
 			dataToStore,

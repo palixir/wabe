@@ -21,35 +21,42 @@ export const oauthHandlerCallback = async (context: Context) => {
 	try {
 		const state = context.query.state
 		const code = context.query.code
-		const provider = context.query.provider
 
 		const stateInCookie = context.cookie.state.value
 
 		if (state !== stateInCookie) throw new Error('Authentication failed')
 
 		const codeVerifier = context.cookie.code_verifier.value
+		const provider = context.cookie.provider.value
 
-		await getGraphqlClient(WibeApp.config.port).request<any>(gql`
-		mutation signInWith(
-			$authorizationCode: String!
-			$codeVerifier: String!
-		) {
-			signInWith(
-				input: {
-					authentication: {
-						${provider}: {
-							authorizationCode: ${code}
-							codeVerifier: ${codeVerifier}
+		await getGraphqlClient(WibeApp.config.port).request<any>(
+			gql`
+				mutation signInWith(
+					$authorizationCode: String!
+					$codeVerifier: String!
+				) {
+					signInWith(
+						input: {
+							authentication: {
+								${provider}: {
+									authorizationCode: $authorizationCode
+									codeVerifier: $codeVerifier
+								}
+							}
 						}
-					}
+					)
 				}
-			)
-		}
-	`)
+			`,
+			{
+				authorizationCode: code,
+				codeVerifier,
+			},
+		)
 
 		context.set.redirect =
 			WibeApp.config.authentication?.successRedirectPath
 	} catch (error) {
+		console.error(error)
 		context.set.redirect =
 			WibeApp.config.authentication?.failureRedirectPath
 	}
@@ -58,6 +65,14 @@ export const oauthHandlerCallback = async (context: Context) => {
 export const authHandler = async (context: Context, provider: ProviderEnum) => {
 	if (!WibeApp.config) throw new Error('Wibe config not found')
 
+	context.cookie.provider.add({
+		value: provider,
+		httpOnly: true,
+		path: '/',
+		maxAge: 60 * 10, // 10 minutes
+		secure: Bun.env.NODE_ENV === 'production',
+	})
+
 	switch (provider) {
 		case ProviderEnum.google: {
 			const googleOauth = new Google()
@@ -65,11 +80,15 @@ export const authHandler = async (context: Context, provider: ProviderEnum) => {
 			const state = generateRandomValues()
 			const codeVerifier = generateRandomValues()
 
+			context.cookie.code_verifier.remove()
+			context.cookie.state.remove()
+			delete context.cookie.code_verifier
+			delete context.cookie.state
+
 			context.cookie.code_verifier.add({
 				value: codeVerifier,
 				httpOnly: true,
 				path: '/',
-				sameSite: 'strict',
 				maxAge: 60 * 10, // 10 minutes
 				secure: Bun.env.NODE_ENV === 'production',
 			})
@@ -78,7 +97,6 @@ export const authHandler = async (context: Context, provider: ProviderEnum) => {
 				value: state,
 				httpOnly: true,
 				path: '/',
-				sameSite: 'strict',
 				maxAge: 60 * 10, // 10 minutes
 				secure: Bun.env.NODE_ENV === 'production',
 			})
@@ -91,7 +109,10 @@ export const authHandler = async (context: Context, provider: ProviderEnum) => {
 				},
 			)
 
+			console.log(authorizationURL.toString())
+
 			context.set.redirect = authorizationURL.toString()
+			break
 		}
 		default:
 			break

@@ -24,11 +24,9 @@ export class Google implements OAuth2ProviderWithPKCE {
 	constructor() {
 		const googleConfig = WibeApp.config.authentication?.providers?.google
 
-		console.log(WibeApp.config.authentication)
-
 		if (!googleConfig) throw new Error('Google config not found')
 
-		const redirectURI = `http://127.0.0.1:${WibeApp?.config?.port || 3000}/auth/oauth/callback?provider=google`
+		const redirectURI = `http://127.0.0.1:${WibeApp?.config?.port || 3000}/auth/oauth/callback`
 
 		this.client = new OAuth2Client(
 			googleConfig.clientId,
@@ -53,7 +51,7 @@ export class Google implements OAuth2ProviderWithPKCE {
 			codeVerifier,
 			scopes: [...scopes, 'openid'],
 		})
-		url.searchParams.set('nonce', '_')
+		url.searchParams.set('access_type', 'offline')
 
 		return url
 	}

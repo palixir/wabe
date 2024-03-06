@@ -24,15 +24,6 @@ describe('Oauth2Client', () => {
 	)
 
 	it('should create authorization URl', async () => {
-		console.log(
-			(
-				await oauthbidon.createAuthorizationURL({
-					codeVerifier: 'codeVerifier',
-					scopes: ['email'],
-					state: 'state',
-				})
-			).toString(),
-		)
 		const authorizationURL = await oauthClient.createAuthorizationURL()
 
 		expect(authorizationURL.toString()).toEqual(

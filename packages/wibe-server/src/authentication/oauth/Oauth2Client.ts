@@ -54,6 +54,7 @@ export class OAuth2Client {
 			authorizationUrl.searchParams.set('code_challenge_method', 'S256')
 			authorizationUrl.searchParams.set('code_challenge', codeChallenge)
 		}
+
 		return authorizationUrl
 	}
 

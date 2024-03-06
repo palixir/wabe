@@ -23,7 +23,7 @@ export const base64URLencode = (content: string) => {
 	hasher.update(new TextEncoder().encode(content))
 	const result = hasher.digest('base64')
 
-	return result.split('=')[0].replace('+', '-').replace('/', '_')
+	return result.split('=')[0].replaceAll('+', '-').replaceAll('/', '_')
 }
 
 export const generateRandomValues = () =>
