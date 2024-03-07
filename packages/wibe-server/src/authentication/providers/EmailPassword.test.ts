@@ -71,7 +71,7 @@ describe('Email password', () => {
 			} as never,
 		])
 
-		const mockAddCookie = mock(() => {})
+		const mockSetCookie = mock(() => {})
 		const mockSign = mock(() => Promise.resolve('token'))
 		const spyBunPasswordVerify = spyOn(
 			Bun.password,
@@ -81,8 +81,8 @@ describe('Email password', () => {
 		const res = await emailPassword.onSignIn({
 			context: {
 				cookie: {
-					access_token: { add: mockAddCookie },
-					refresh_token: { add: mockAddCookie },
+					access_token: { set: mockSetCookie },
+					refresh_token: { set: mockSetCookie },
 				},
 				jwt: { sign: mockSign },
 			} as any,
@@ -103,8 +103,8 @@ describe('Email password', () => {
 			'argon2id',
 		)
 
-		expect(mockAddCookie).toHaveBeenCalledTimes(2)
-		expect(mockAddCookie).toHaveBeenNthCalledWith(1, {
+		expect(mockSetCookie).toHaveBeenCalledTimes(2)
+		expect(mockSetCookie).toHaveBeenNthCalledWith(1, {
 			value: 'token',
 			httpOnly: true,
 			path: '/',
@@ -113,7 +113,7 @@ describe('Email password', () => {
 			sameSite: 'strict',
 			secure: false,
 		})
-		expect(mockAddCookie).toHaveBeenNthCalledWith(2, {
+		expect(mockSetCookie).toHaveBeenNthCalledWith(2, {
 			value: 'token',
 			httpOnly: true,
 			path: '/',
@@ -139,7 +139,7 @@ describe('Email password', () => {
 	})
 
 	it('should not signIn with email password if password is undefined', async () => {
-		const mockAddCookie = mock(() => {})
+		const mockSetCookie = mock(() => {})
 		const mockSign = mock(() => Promise.resolve('token'))
 		const spyBunPasswordVerify = spyOn(
 			Bun.password,
@@ -150,8 +150,8 @@ describe('Email password', () => {
 			emailPassword.onSignIn({
 				context: {
 					cookie: {
-						access_token: { add: mockAddCookie },
-						refresh_token: { add: mockAddCookie },
+						access_token: { set: mockSetCookie },
+						refresh_token: { set: mockSetCookie },
 					},
 					jwt: { sign: mockSign },
 				} as any,
@@ -163,7 +163,7 @@ describe('Email password', () => {
 	})
 
 	it('should not signIn with email password if identifier are different', async () => {
-		const mockAddCookie = mock(() => {})
+		const mockSetCookie = mock(() => {})
 		const mockSign = mock(() => Promise.resolve('token'))
 		const spyBunPasswordVerify = spyOn(
 			Bun.password,
@@ -174,8 +174,8 @@ describe('Email password', () => {
 			emailPassword.onSignIn({
 				context: {
 					cookie: {
-						access_token: { add: mockAddCookie },
-						refresh_token: { add: mockAddCookie },
+						access_token: { set: mockSetCookie },
+						refresh_token: { set: mockSetCookie },
 					},
 					jwt: { sign: mockSign },
 				} as any,

@@ -11,6 +11,13 @@ export interface WibeRoute {
 export const defaultRoutes = (): WibeRoute[] => [
 	{
 		method: 'GET',
+		path: '/toto',
+		handler: async (context: Context) => {
+			console.log(context.cookie)
+		},
+	},
+	{
+		method: 'GET',
 		path: '/auth/oauth',
 		handler: async (context: Context) => {
 			const provider = context.query.provider

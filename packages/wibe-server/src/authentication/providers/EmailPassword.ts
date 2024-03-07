@@ -54,7 +54,7 @@ export class EmailPassword implements ProviderInterface {
 			exp: thirtyDays.getTime(),
 		})
 
-		context.cookie.access_token.add({
+		context.cookie.access_token.set({
 			value: accessToken,
 			httpOnly: true,
 			path: '/',
@@ -64,7 +64,7 @@ export class EmailPassword implements ProviderInterface {
 			secure: Bun.env.NODE_ENV === 'production',
 		})
 
-		context.cookie.refresh_token.add({
+		context.cookie.refresh_token.set({
 			value: refreshToken,
 			httpOnly: true,
 			path: '/',

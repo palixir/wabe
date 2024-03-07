@@ -64,8 +64,7 @@ export const oauthHandlerCallback = async (context: Context) => {
 
 export const authHandler = async (context: Context, provider: ProviderEnum) => {
 	if (!WibeApp.config) throw new Error('Wibe config not found')
-
-	context.cookie.provider.add({
+	context.cookie.provider.set({
 		value: provider,
 		httpOnly: true,
 		path: '/',
@@ -85,7 +84,7 @@ export const authHandler = async (context: Context, provider: ProviderEnum) => {
 			delete context.cookie.code_verifier
 			delete context.cookie.state
 
-			context.cookie.code_verifier.add({
+			context.cookie.code_verifier.set({
 				value: codeVerifier,
 				httpOnly: true,
 				path: '/',
@@ -93,7 +92,7 @@ export const authHandler = async (context: Context, provider: ProviderEnum) => {
 				secure: Bun.env.NODE_ENV === 'production',
 			})
 
-			context.cookie.state.add({
+			context.cookie.state.set({
 				value: state,
 				httpOnly: true,
 				path: '/',
@@ -108,8 +107,6 @@ export const authHandler = async (context: Context, provider: ProviderEnum) => {
 					scopes: ['email'],
 				},
 			)
-
-			console.log(authorizationURL.toString())
 
 			context.set.redirect = authorizationURL.toString()
 			break
