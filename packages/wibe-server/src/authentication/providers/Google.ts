@@ -27,7 +27,7 @@ export class Google implements ProviderInterface {
 		)
 
 		// Create cookie for access and refresh token
-		context.cookie.accessToken.set({
+		context.cookie.access_token.set({
 			value: accessToken,
 			httpOnly: true,
 			path: '/',
@@ -37,7 +37,7 @@ export class Google implements ProviderInterface {
 			secure: Bun.env.NODE_ENV === 'production',
 		})
 
-		context.cookie.refreshToken.set({
+		context.cookie.refresh_token.set({
 			value: refreshToken,
 			httpOnly: true,
 			path: '/',
@@ -46,6 +46,8 @@ export class Google implements ProviderInterface {
 			maxAge: Date.now() + 3600 * 24 * 60 * 1000, // 60 days
 			secure: Bun.env.NODE_ENV === 'production',
 		})
+
+		console.log(context.cookie)
 
 		const user = await WibeApp.databaseController.getObjects({
 			className: '_User',

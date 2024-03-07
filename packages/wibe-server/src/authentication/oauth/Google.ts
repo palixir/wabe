@@ -52,6 +52,7 @@ export class Google implements OAuth2ProviderWithPKCE {
 			scopes: [...scopes, 'openid'],
 		})
 		url.searchParams.set('access_type', 'offline')
+		url.searchParams.set('prompt', 'select_account')
 
 		return url
 	}
@@ -72,7 +73,7 @@ export class Google implements OAuth2ProviderWithPKCE {
 
 		return {
 			accessToken: access_token,
-			refreshToken: refresh_token ?? null,
+			refreshToken: refresh_token,
 			accessTokenExpiresAt: new Date(Date.now() + expires_in * 1000),
 			idToken: id_token,
 		}

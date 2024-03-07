@@ -139,8 +139,9 @@ export class WibeApp {
 		this.server.use(
 			await apollo({
 				schema,
-				context: (context) =>
-					Promise.resolve({
+				context: (context) => {
+					console.log('context', context)
+					return Promise.resolve({
 						...context,
 						// TODO : For the moment we are using fake user
 						// Need to request the user in database and get information
@@ -149,7 +150,8 @@ export class WibeApp {
 							id: 'fakeId',
 							email: 'fakeEmail',
 						},
-					}),
+					})
+				},
 			}),
 		)
 

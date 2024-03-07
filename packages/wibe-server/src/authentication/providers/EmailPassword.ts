@@ -1,3 +1,4 @@
+import { Context, Cookie } from 'elysia'
 import { WibeApp } from '../../server'
 import { AuthenticationEventsOptions, ProviderInterface } from '../interface'
 
@@ -85,6 +86,17 @@ export class EmailPassword implements ProviderInterface {
 	}
 
 	async onSignUp({ input, context }: AuthenticationEventsOptions) {
+		console.log(context)
+		// try {
+		// 	context.cookie.tata.set({
+		// 		value: 'tata',
+		// 		httpOnly: true,
+		// 		path: '/',
+		// 	})
+		// } catch (e) {
+		// 	console.error(e)
+		// }
+
 		const user = await WibeApp.databaseController.createObject({
 			className: '_User',
 			data: {
@@ -116,6 +128,27 @@ export class EmailPassword implements ProviderInterface {
 			input.password,
 			'argon2id',
 		)
+
+		context.cookie.access_token.set({
+			value: accessToken,
+			httpOnly: true,
+			path: '/',
+			expires: fifteenMinutes,
+			// TODO : Check for implements csrf token for sub-domain protection
+			sameSite: 'strict',
+			secure: Bun.env.NODE_ENV === 'production',
+		})
+
+		context.cookie.refresh_token.set({
+			value: refreshToken,
+			httpOnly: true,
+			path: '/',
+			expires: thirtyDays,
+			sameSite: 'strict',
+			secure: Bun.env.NODE_ENV === 'production',
+		})
+
+		console.log(context.cookie)
 
 		return {
 			user,

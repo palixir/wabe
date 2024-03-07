@@ -53,6 +53,14 @@ export const oauthHandlerCallback = async (context: Context) => {
 			},
 		)
 
+		context.cookie.tata.set({
+			value: 'tata',
+			httpOnly: true,
+			path: '/',
+			maxAge: 60 * 10, // 10 minutes
+			secure: Bun.env.NODE_ENV === 'production',
+		})
+
 		context.set.redirect =
 			WibeApp.config.authentication?.successRedirectPath
 	} catch (error) {
@@ -64,6 +72,7 @@ export const oauthHandlerCallback = async (context: Context) => {
 
 export const authHandler = async (context: Context, provider: ProviderEnum) => {
 	if (!WibeApp.config) throw new Error('Wibe config not found')
+
 	context.cookie.provider.set({
 		value: provider,
 		httpOnly: true,
@@ -78,11 +87,6 @@ export const authHandler = async (context: Context, provider: ProviderEnum) => {
 
 			const state = generateRandomValues()
 			const codeVerifier = generateRandomValues()
-
-			context.cookie.code_verifier.remove()
-			context.cookie.state.remove()
-			delete context.cookie.code_verifier
-			delete context.cookie.state
 
 			context.cookie.code_verifier.set({
 				value: codeVerifier,
