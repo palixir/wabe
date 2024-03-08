@@ -1,4 +1,3 @@
-import { Context, Cookie } from 'elysia'
 import { WibeApp } from '../../server'
 import { AuthenticationEventsOptions, ProviderInterface } from '../interface'
 
@@ -86,13 +85,12 @@ export class EmailPassword implements ProviderInterface {
 	}
 
 	async onSignUp({ input, context }: AuthenticationEventsOptions) {
-		console.log(context)
 		// try {
-		// 	context.cookie.tata.set({
-		// 		value: 'tata',
-		// 		httpOnly: true,
-		// 		path: '/',
-		// 	})
+		// context.cookie.tata.set({
+		// 	value: 'tata',
+		// 	httpOnly: true,
+		// 	path: '/',
+		// })
 		// } catch (e) {
 		// 	console.error(e)
 		// }

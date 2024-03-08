@@ -11,6 +11,14 @@ export const signUpWithResolver = async (
 	},
 	context: Context,
 ) => {
+	context.cookie.titi.set({
+		value: 'tata',
+		httpOnly: true,
+		path: '/',
+	})
+
+	console.log(context.cookie, context.set.cookie)
+
 	const customAuthenticationConfig =
 		WibeApp.config.authentication?.customAuthenticationMethods
 

@@ -50,6 +50,11 @@ export class WibeApp {
 		}
 
 		this.server = new Elysia().get('/health', (context) => {
+			context.cookie.tutu.set({
+				value: 'tutu',
+				httpOnly: true,
+				path: '/',
+			})
 			context.set.status = 200
 		})
 
@@ -140,7 +145,6 @@ export class WibeApp {
 			await apollo({
 				schema,
 				context: (context) => {
-					console.log('context', context)
 					return Promise.resolve({
 						...context,
 						// TODO : For the moment we are using fake user
