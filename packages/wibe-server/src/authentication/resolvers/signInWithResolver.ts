@@ -52,9 +52,23 @@ export const signInWithResolver = async (
 
 	const session = new Session()
 
-	await session.create(userId, context)
+	const { refreshToken, accessToken } = await session.create(userId, context)
 
-	// TODO : Need pointer on schema/resolver
+	context.response.setCookie('refreshToken', refreshToken, {
+		httpOnly: true,
+		path: '/',
+		secure: process.env.NODE_ENV === 'production',
+		expires: new Date(Date.now() + session.getRefreshTokenExpireIn()),
+	})
+
+	context.response.setCookie('accessToken', accessToken, {
+		httpOnly: true,
+		path: '/',
+		secure: process.env.NODE_ENV === 'production',
+		expires: new Date(Date.now() + session.getAccessTokenExpireIn()),
+	})
+
+	// TODO : Need object in return of graphql mutation
 	// return { accessToken, refreshToken }
 	return true
 }

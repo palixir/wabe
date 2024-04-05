@@ -49,7 +49,6 @@ describe('SignInWith', () => {
 						provider: {
 							onSignUp: mockOnSignUp,
 							onSignIn: mockOnLogin,
-							name: 'emailPassword',
 						},
 					},
 					{
@@ -63,7 +62,6 @@ describe('SignInWith', () => {
 						provider: {
 							onSendChallenge: mockOnSendChallenge,
 							onVerifyChallenge: mockOnVerifyChallenge,
-							name: 'otp',
 						},
 					},
 				],

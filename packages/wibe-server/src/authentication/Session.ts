@@ -26,7 +26,7 @@ export class Session {
 	}
 
 	async meFromAccessToken(
-		accessToken: string
+		accessToken: string,
 	): Promise<{ sessionId: string; user: _User | null }> {
 		const sessions = await WibeApp.databaseController.getObjects({
 			className: '_Session',
@@ -59,7 +59,7 @@ export class Session {
 				iat: Date.now(),
 				exp: Date.now() + this.getAccessTokenExpireIn(),
 			},
-			import.meta.env.JWT_SECRET || 'dev'
+			import.meta.env.JWT_SECRET || 'dev',
 		)
 
 		this.refreshToken = jwt.sign(
@@ -68,7 +68,7 @@ export class Session {
 				iat: Date.now(),
 				exp: Date.now() + this.getRefreshTokenExpireIn(),
 			},
-			import.meta.env.JWT_SECRET || 'dev'
+			import.meta.env.JWT_SECRET || 'dev',
 		)
 
 		const { id } = await WibeApp.databaseController.createObject({
@@ -77,11 +77,11 @@ export class Session {
 			data: {
 				accessToken: this.accessToken,
 				accessTokenExpiresAt: new Date(
-					Date.now() + this.getAccessTokenExpireIn()
+					Date.now() + this.getAccessTokenExpireIn(),
 				),
 				refreshToken: this.refreshToken,
 				refreshTokenExpiresAt: new Date(
-					Date.now() + this.getRefreshTokenExpireIn()
+					Date.now() + this.getRefreshTokenExpireIn(),
 				),
 				user: userId,
 			},
@@ -144,7 +144,7 @@ export class Session {
 				iat: Date.now(),
 				exp: this.getAccessTokenExpireIn(),
 			},
-			import.meta.env.JWT_SECRET || 'dev'
+			import.meta.env.JWT_SECRET || 'dev',
 		)
 
 		const newRefreshToken = jwt.sign(
@@ -153,7 +153,7 @@ export class Session {
 				iat: Date.now(),
 				exp: this.getRefreshTokenExpireIn(),
 			},
-			import.meta.env.JWT_SECRET || 'dev'
+			import.meta.env.JWT_SECRET || 'dev',
 		)
 
 		await WibeApp.databaseController.updateObject({
@@ -163,11 +163,11 @@ export class Session {
 			data: {
 				accessToken: newAccessToken,
 				accessTokenExpiresAt: new Date(
-					Date.now() + this.getAccessTokenExpireIn()
+					Date.now() + this.getAccessTokenExpireIn(),
 				),
 				refreshToken: newRefreshToken,
 				refreshTokenExpiresAt: new Date(
-					Date.now() + this.getRefreshTokenExpireIn()
+					Date.now() + this.getRefreshTokenExpireIn(),
 				),
 			},
 		})

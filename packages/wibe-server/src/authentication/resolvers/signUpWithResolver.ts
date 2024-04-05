@@ -45,7 +45,21 @@ export const signUpWithResolver = async (
 
 	const session = new Session()
 
-	await session.create(userId, context)
+	const { accessToken, refreshToken } = await session.create(userId, context)
+
+	context.response.setCookie('refreshToken', refreshToken, {
+		httpOnly: true,
+		path: '/',
+		secure: process.env.NODE_ENV === 'production',
+		expires: new Date(Date.now() + session.getRefreshTokenExpireIn()),
+	})
+
+	context.response.setCookie('accessToken', accessToken, {
+		httpOnly: true,
+		path: '/',
+		secure: process.env.NODE_ENV === 'production',
+		expires: new Date(Date.now() + session.getAccessTokenExpireIn()),
+	})
 
 	// TODO : Need pointer on schema/resolver
 	// return { accessToken, refreshToken }

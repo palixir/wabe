@@ -13,6 +13,7 @@ import { Wobe } from 'wobe'
 import { WobeGraphqlYogaPlugin } from 'wobe-graphql-yoga'
 import { Session } from '../authentication/Session'
 import { getCookieInRequestHeaders } from '../utils'
+import type { Context } from '../graphql/interface'
 
 interface WibeConfig {
 	port: number
@@ -137,7 +138,10 @@ export class WibeApp {
 			WobeGraphqlYogaPlugin({
 				schema,
 				maskedErrors: false,
-				context: async ({ request }) => {
+				context: async ({
+					request,
+					response,
+				}): Promise<Partial<Context>> => {
 					const headers = request.headers
 
 					const accessToken = headers.get('Wibe-Access-Token')
@@ -146,11 +150,12 @@ export class WibeApp {
 
 					const session = new Session()
 
-					const { user, sessionId } = await session.meFromAccessToken(
-						accessToken
-					)
+					const { user, sessionId } =
+						await session.meFromAccessToken(accessToken)
 
 					return {
+						response,
+						isRoot: false,
 						sessionId,
 						user,
 					}
@@ -161,12 +166,12 @@ export class WibeApp {
 					// TODO : Add tests for this
 					const accessToken = getCookieInRequestHeaders(
 						'accessToken',
-						res.request.headers
+						res.request.headers,
 					)
 
 					const refreshToken = getCookieInRequestHeaders(
 						'refreshToken',
-						res.request.headers
+						res.request.headers,
 					)
 
 					if (accessToken && refreshToken) {
@@ -178,7 +183,7 @@ export class WibeApp {
 						} = await session.refresh(
 							accessToken,
 							refreshToken,
-							{} as any
+							{} as any,
 						)
 
 						if (accessToken !== newAccessToken)
@@ -187,7 +192,7 @@ export class WibeApp {
 								path: '/',
 								expires: new Date(
 									Date.now() +
-										session.getAccessTokenExpireIn()
+										session.getAccessTokenExpireIn(),
 								),
 								secure: process.env.NODE_ENV === 'production',
 							})
@@ -198,7 +203,7 @@ export class WibeApp {
 								path: '/',
 								expires: new Date(
 									Date.now() +
-										session.getRefreshTokenExpireIn()
+										session.getRefreshTokenExpireIn(),
 								),
 								secure: process.env.NODE_ENV === 'production',
 							})
@@ -206,7 +211,7 @@ export class WibeApp {
 
 					return response
 				},
-			})
+			}),
 		)
 
 		if (
@@ -214,9 +219,8 @@ export class WibeApp {
 			process.env.NODE_ENV !== 'test' &&
 			WibeApp.config.codegen
 		) {
-			const contentOfCodegenFile = await Bun.file(
-				'generated/wibe.ts'
-			).text()
+			const contentOfCodegenFile =
+				await Bun.file('generated/wibe.ts').text()
 
 			if (!contentOfCodegenFile.includes('WibeSchemaTypes'))
 				Bun.write(
@@ -225,7 +229,7 @@ export class WibeApp {
 						scalars: wibeSchema.schema.scalars,
 						enums: wibeSchema.schema.enums,
 						schemas: wibeSchema.schema.class,
-					})}`
+					})}`,
 				)
 			Bun.write('generated/schema.graphql', printSchema(schema))
 		}

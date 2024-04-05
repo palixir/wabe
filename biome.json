@@ -37,7 +37,8 @@
 	"formatter": {
 		"enabled": true,
 		"indentWidth": 4,
-		"indentStyle": "tab"
+		"indentStyle": "tab",
+		"formatWithErrors": false
 	},
 	"javascript": {
 		"formatter": {
