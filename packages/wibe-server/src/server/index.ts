@@ -144,7 +144,21 @@ export class WibeApp {
 				}): Promise<Partial<Context>> => {
 					const headers = request.headers
 
-					const accessToken = headers.get('Wibe-Access-Token')
+					const getAccessToken = () => {
+						const isCookieSession =
+							!!WibeApp.config.authentication?.session
+								?.cookieSession
+
+						if (isCookieSession)
+							return getCookieInRequestHeaders(
+								'accessToken',
+								request.headers,
+							)
+
+						return headers.get('Wibe-Access-Token')
+					}
+
+					const accessToken = getAccessToken()
 
 					if (!accessToken) return {}
 
@@ -163,50 +177,54 @@ export class WibeApp {
 				graphqlMiddleware: async (resolve, res) => {
 					const response = await resolve()
 
-					// TODO : Add tests for this
-					const accessToken = getCookieInRequestHeaders(
-						'accessToken',
-						res.request.headers,
-					)
-
-					const refreshToken = getCookieInRequestHeaders(
-						'refreshToken',
-						res.request.headers,
-					)
-
-					if (accessToken && refreshToken) {
-						const session = new Session()
-
-						const {
-							accessToken: newAccessToken,
-							refreshToken: newRefreshToken,
-						} = await session.refresh(
-							accessToken,
-							refreshToken,
-							{} as any,
+					if (WibeApp.config.authentication?.session?.cookieSession) {
+						// TODO : Add tests for this
+						const accessToken = getCookieInRequestHeaders(
+							'accessToken',
+							res.request.headers,
 						)
 
-						if (accessToken !== newAccessToken)
-							res.setCookie('accessToken', newAccessToken, {
-								httpOnly: true,
-								path: '/',
-								expires: new Date(
-									Date.now() +
-										session.getAccessTokenExpireIn(),
-								),
-								secure: process.env.NODE_ENV === 'production',
-							})
+						const refreshToken = getCookieInRequestHeaders(
+							'refreshToken',
+							res.request.headers,
+						)
 
-						if (refreshToken !== newRefreshToken)
-							res.setCookie('refreshToken', newRefreshToken, {
-								httpOnly: true,
-								path: '/',
-								expires: new Date(
-									Date.now() +
-										session.getRefreshTokenExpireIn(),
-								),
-								secure: process.env.NODE_ENV === 'production',
-							})
+						if (accessToken && refreshToken) {
+							const session = new Session()
+
+							const {
+								accessToken: newAccessToken,
+								refreshToken: newRefreshToken,
+							} = await session.refresh(
+								accessToken,
+								refreshToken,
+								{} as any,
+							)
+
+							if (accessToken !== newAccessToken)
+								res.setCookie('accessToken', newAccessToken, {
+									httpOnly: true,
+									path: '/',
+									expires: new Date(
+										Date.now() +
+											session.getAccessTokenExpireIn(),
+									),
+									secure:
+										process.env.NODE_ENV === 'production',
+								})
+
+							if (refreshToken !== newRefreshToken)
+								res.setCookie('refreshToken', newRefreshToken, {
+									httpOnly: true,
+									path: '/',
+									expires: new Date(
+										Date.now() +
+											session.getRefreshTokenExpireIn(),
+									),
+									secure:
+										process.env.NODE_ENV === 'production',
+								})
+						}
 					}
 
 					return response

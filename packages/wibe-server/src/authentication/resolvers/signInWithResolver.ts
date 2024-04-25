@@ -1,3 +1,4 @@
+import { WibeApp } from '../..'
 import type { SignInWithInput } from '../../../generated/wibe'
 import type { Context } from '../../graphql/interface'
 import { Session } from '../Session'
@@ -54,19 +55,21 @@ export const signInWithResolver = async (
 
 	const { refreshToken, accessToken } = await session.create(userId, context)
 
-	context.response.setCookie('refreshToken', refreshToken, {
-		httpOnly: true,
-		path: '/',
-		secure: process.env.NODE_ENV === 'production',
-		expires: new Date(Date.now() + session.getRefreshTokenExpireIn()),
-	})
+	if (WibeApp.config.authentication?.session?.cookieSession) {
+		context.response.setCookie('refreshToken', refreshToken, {
+			httpOnly: true,
+			path: '/',
+			secure: process.env.NODE_ENV === 'production',
+			expires: new Date(Date.now() + session.getRefreshTokenExpireIn()),
+		})
 
-	context.response.setCookie('accessToken', accessToken, {
-		httpOnly: true,
-		path: '/',
-		secure: process.env.NODE_ENV === 'production',
-		expires: new Date(Date.now() + session.getAccessTokenExpireIn()),
-	})
+		context.response.setCookie('accessToken', accessToken, {
+			httpOnly: true,
+			path: '/',
+			secure: process.env.NODE_ENV === 'production',
+			expires: new Date(Date.now() + session.getAccessTokenExpireIn()),
+		})
+	}
 
 	// TODO : Need object in return of graphql mutation
 	// return { accessToken, refreshToken }

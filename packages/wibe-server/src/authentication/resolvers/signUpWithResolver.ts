@@ -47,19 +47,21 @@ export const signUpWithResolver = async (
 
 	const { accessToken, refreshToken } = await session.create(userId, context)
 
-	context.response.setCookie('refreshToken', refreshToken, {
-		httpOnly: true,
-		path: '/',
-		secure: process.env.NODE_ENV === 'production',
-		expires: new Date(Date.now() + session.getRefreshTokenExpireIn()),
-	})
+	if (WibeApp.config.authentication?.session?.cookieSession) {
+		context.response.setCookie('refreshToken', refreshToken, {
+			httpOnly: true,
+			path: '/',
+			secure: process.env.NODE_ENV === 'production',
+			expires: new Date(Date.now() + session.getRefreshTokenExpireIn()),
+		})
 
-	context.response.setCookie('accessToken', accessToken, {
-		httpOnly: true,
-		path: '/',
-		secure: process.env.NODE_ENV === 'production',
-		expires: new Date(Date.now() + session.getAccessTokenExpireIn()),
-	})
+		context.response.setCookie('accessToken', accessToken, {
+			httpOnly: true,
+			path: '/',
+			secure: process.env.NODE_ENV === 'production',
+			expires: new Date(Date.now() + session.getAccessTokenExpireIn()),
+		})
+	}
 
 	// TODO : Need pointer on schema/resolver
 	// return { accessToken, refreshToken }

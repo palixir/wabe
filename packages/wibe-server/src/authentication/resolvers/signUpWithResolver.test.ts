@@ -37,6 +37,9 @@ describe('SignUpWith', () => {
 		// @ts-expect-error
 		WibeApp.config = {
 			authentication: {
+				session: {
+					cookieSession: true,
+				},
 				customAuthenticationMethods: [
 					{
 						name: 'emailPassword',
@@ -113,10 +116,20 @@ describe('SignUpWith', () => {
 	})
 
 	it('should signUpWith email and password when the user not exist', async () => {
-		const spyCreateSession = spyOn(
+		const mockCreateSession = spyOn(
 			Session.prototype,
 			'create',
-		).mockResolvedValue({ id: 'sessionId' } as any)
+		).mockResolvedValue({
+			id: 'sessionId',
+			refreshToken: 'refreshToken',
+			accessToken: 'accessToken',
+		} as any)
+
+		const mockSetCookie = mock(() => {})
+
+		const mockResponse = {
+			setCookie: mockSetCookie,
+		}
 
 		const res = await signUpWithResolver(
 			{},
@@ -130,7 +143,9 @@ describe('SignUpWith', () => {
 					},
 				},
 			},
-			{} as any,
+			{
+				response: mockResponse,
+			} as any,
 		)
 
 		expect(res).toBe(true)
@@ -157,14 +172,49 @@ describe('SignUpWith', () => {
 			context: expect.any(Object),
 		})
 
-		expect(spyCreateSession).toHaveBeenCalledTimes(1)
-		expect(spyCreateSession).toHaveBeenCalledWith(
+		expect(mockCreateSession).toHaveBeenCalledTimes(1)
+		expect(mockCreateSession).toHaveBeenCalledWith(
 			'userId',
 			expect.any(Object),
 		)
 
+		expect(mockSetCookie).toHaveBeenCalledTimes(2)
+		expect(mockSetCookie).toHaveBeenNthCalledWith(
+			1,
+			'refreshToken',
+			'refreshToken',
+			{
+				httpOnly: true,
+				path: '/',
+				secure: false,
+				expires: expect.any(Date),
+			},
+		)
+		expect(mockSetCookie).toHaveBeenNthCalledWith(
+			2,
+			'accessToken',
+			'accessToken',
+			{
+				httpOnly: true,
+				path: '/',
+				secure: false,
+				expires: expect.any(Date),
+			},
+		)
+
+		const refreshTokenExpiresIn = mockSetCookie.mock.calls[0][2].expires
+		const accessTokenExpiresIn = mockSetCookie.mock.calls[1][2].expires
+
+		// - 1000 to avoid flaky
+		expect(
+			new Date(refreshTokenExpiresIn).getTime(),
+		).toBeGreaterThanOrEqual(Date.now() + 1000 * 30 * 24 * 60 * 60 - 1000)
+		expect(new Date(accessTokenExpiresIn).getTime()).toBeGreaterThanOrEqual(
+			Date.now() + 1000 * 15 * 60 - 1000,
+		)
+
 		expect(mockOnLogin).toHaveBeenCalledTimes(0)
 
-		spyCreateSession.mockRestore()
+		mockCreateSession.mockRestore()
 	})
 })

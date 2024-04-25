@@ -39,6 +39,9 @@ describe('SignInWith', () => {
 		// @ts-expect-error
 		WibeApp.config = {
 			authentication: {
+				session: {
+					cookieSession: true,
+				},
 				customAuthenticationMethods: [
 					{
 						name: 'emailPassword',
@@ -158,11 +161,20 @@ describe('SignInWith', () => {
 		).rejects.toThrow('No available custom authentication methods found')
 	})
 
-	it('should signInWith email and password when the user already exist', async () => {
-		const spyCreateSession = spyOn(
+	it('should signInWith email and password when the user already exist (on cookieSession)', async () => {
+		const mockCreateSession = spyOn(
 			Session.prototype,
 			'create',
-		).mockResolvedValue({} as any)
+		).mockResolvedValue({
+			refreshToken: 'refreshToken',
+			accessToken: 'accessToken',
+		} as any)
+
+		const mockSetCookie = mock(() => {})
+
+		const mockResponse = {
+			setCookie: mockSetCookie,
+		}
 
 		const res = await signInWithResolver(
 			{},
@@ -176,7 +188,9 @@ describe('SignInWith', () => {
 					},
 				},
 			},
-			{} as any,
+			{
+				response: mockResponse,
+			} as any,
 		)
 
 		expect(res).toBe(true)
@@ -189,11 +203,47 @@ describe('SignInWith', () => {
 			context: expect.anything(),
 		})
 
-		expect(spyCreateSession).toHaveBeenCalledTimes(1)
-		expect(spyCreateSession).toHaveBeenCalledWith('id', expect.anything())
+		expect(mockSetCookie).toHaveBeenCalledTimes(2)
+		expect(mockSetCookie).toHaveBeenNthCalledWith(
+			1,
+			'refreshToken',
+			'refreshToken',
+			{
+				httpOnly: true,
+				path: '/',
+				secure: false,
+				expires: expect.any(Date),
+			},
+		)
+
+		expect(mockSetCookie).toHaveBeenNthCalledWith(
+			2,
+			'accessToken',
+			'accessToken',
+			{
+				httpOnly: true,
+				path: '/',
+				secure: false,
+				expires: expect.any(Date),
+			},
+		)
+
+		const refreshTokenExpiresIn = mockSetCookie.mock.calls[0][2].expires
+		const accessTokenExpiresIn = mockSetCookie.mock.calls[1][2].expires
+
+		// - 1000 to avoid flaky
+		expect(
+			new Date(refreshTokenExpiresIn).getTime(),
+		).toBeGreaterThanOrEqual(Date.now() + 1000 * 30 * 24 * 60 * 60 - 1000)
+		expect(new Date(accessTokenExpiresIn).getTime()).toBeGreaterThanOrEqual(
+			Date.now() + 1000 * 15 * 60 - 1000,
+		)
+
+		expect(mockCreateSession).toHaveBeenCalledTimes(1)
+		expect(mockCreateSession).toHaveBeenCalledWith('id', expect.anything())
 
 		expect(mockOnSignUp).toHaveBeenCalledTimes(0)
 
-		spyCreateSession.mockRestore()
+		mockCreateSession.mockRestore()
 	})
 })
