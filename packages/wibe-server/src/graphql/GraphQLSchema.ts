@@ -491,9 +491,34 @@ export class GraphQLSchema {
 					allObjects: this.allObjects,
 				})
 
-				const graphqlType = graphqlParserWithInput.getGraphqlType({
-					field: currentMutation as TypeField,
-				}) as GraphQLOutputType
+				const getGraphqlOutputType = () => {
+					if (
+						currentMutation.type !== 'Object' &&
+						currentMutation.type !== 'Array'
+					)
+						return graphqlParserWithInput.getGraphqlType({
+							field: currentMutation,
+						})
+
+					if (currentMutation.type === 'Object') {
+						const objectGraphqlParser = graphqlParser({
+							schemaFields: currentMutation.outputObject.fields,
+							graphqlObjectType: 'Object',
+							allObjects: this.allObjects,
+						})
+
+						return new GraphQLObjectType({
+							name: currentMutation.outputObject.name,
+							fields: () => ({
+								...objectGraphqlParser.getGraphqlFields(
+									currentMutation.outputObject.name,
+								),
+							}),
+						})
+					}
+				}
+
+				const outputType = getGraphqlOutputType()
 
 				const graphqlInput = new GraphQLInputObjectType({
 					name: `${currentKeyWithFirstLetterUpperCase}Input`,
@@ -504,8 +529,8 @@ export class GraphQLSchema {
 
 				acc[currentKey] = {
 					type: required
-						? new GraphQLNonNull(graphqlType)
-						: graphqlType,
+						? new GraphQLNonNull(outputType)
+						: outputType,
 					args:
 						numberOfFieldsInInput > 0
 							? { input: { type: graphqlInput } }

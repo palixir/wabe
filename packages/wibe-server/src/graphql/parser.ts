@@ -10,13 +10,12 @@ import {
 	GraphQLObjectType,
 	type GraphQLScalarType,
 	GraphQLString,
-	GraphQLID,
 } from 'graphql'
 import type {
 	ClassInterface,
 	SchemaFields,
 	TypeField,
-	WibeDefaultTypes,
+	WibePrimaryTypes,
 } from '../schema'
 import {
 	AnyWhereInput,
@@ -27,7 +26,6 @@ import {
 	EmailScalarType,
 	EmailWhereInput,
 	FloatWhereInput,
-	IdWhereInput,
 	IntWhereInput,
 	StringWhereInput,
 	type AllObjects,
@@ -41,7 +39,7 @@ type GraphqlObjectType =
 	| 'WhereInputObject'
 
 type WibeDefaultTypesWithoutObjectAndPointerAndRelation = Exclude<
-	WibeDefaultTypes,
+	WibePrimaryTypes,
 	'Object' | 'Pointer' | 'Relation'
 >
 

@@ -8,19 +8,24 @@ import { signOutResolver } from '../authentication/resolvers/signOutResolver'
 import { verifyChallengeResolver } from '../authentication/resolvers/verifyChallenge'
 import { WibeApp } from '../server'
 
-export type WibeDefaultTypes =
+export type WibePrimaryTypes =
 	| 'String'
 	| 'Int'
 	| 'Float'
 	| 'Boolean'
-	| 'Date'
 	| 'Email'
-	| 'Array'
-	| 'Object'
-	| 'Pointer'
-	| 'Relation'
+	| 'Date'
 
-export type WibeTypes = WibeSchemaScalars | WibeSchemaEnums | WibeDefaultTypes
+export type WibeCustomTypes = 'Array' | 'Object'
+
+export type WibeRelationTypes = 'Pointer' | 'Relation'
+
+export type WibeTypes =
+	| WibeSchemaScalars
+	| WibeSchemaEnums
+	| WibeCustomTypes
+	| WibePrimaryTypes
+	| WibeRelationTypes
 
 type TypeFieldBase<T, K extends WibeTypes> = {
 	type: K | WibeSchemaScalars | WibeSchemaEnums
@@ -73,8 +78,18 @@ export type TypeField =
 
 export type SchemaFields = Record<string, TypeField>
 
+export type ResolverCustomOutput =
+	| {
+			type: WibeCustomTypes
+			outputObject: ClassInterface
+	  }
+	| {
+			type: WibeCustomTypes
+			typeValue: WibeTypes
+	  }
+
 export type QueryResolver = {
-	type: WibeTypes
+	type: WibePrimaryTypes
 	required?: boolean
 	description?: string
 	args?: {
@@ -84,7 +99,6 @@ export type QueryResolver = {
 }
 
 export type MutationResolver = {
-	type: WibeTypes
 	required?: boolean
 	description?: string
 	args?: {
@@ -93,7 +107,7 @@ export type MutationResolver = {
 		}
 	}
 	resolve: (...args: any) => any
-}
+} & ({ type: WibePrimaryTypes } | ResolverCustomOutput)
 
 export type TypeResolver = {
 	queries?: {
