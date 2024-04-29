@@ -26,7 +26,9 @@ export class Google implements OAuth2ProviderWithPKCE {
 
 		if (!googleConfig) throw new Error('Google config not found')
 
-		const redirectURI = `http://127.0.0.1:${WibeApp?.config?.port || 3000}/auth/oauth/callback`
+		const redirectURI = `http://127.0.0.1:${
+			WibeApp?.config?.port || 3000
+		}/auth/oauth/callback`
 
 		this.client = new OAuth2Client(
 			googleConfig.clientId,
