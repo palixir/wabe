@@ -54,24 +54,24 @@ export class EmailPassword implements ProviderInterface {
 			exp: thirtyDays.getTime(),
 		})
 
-		context.cookie.access_token.set({
-			value: accessToken,
-			httpOnly: true,
-			path: '/',
-			expires: fifteenMinutes,
-			// TODO : Check for implements csrf token for sub-domain protection
-			sameSite: 'strict',
-			secure: Bun.env.NODE_ENV === 'production',
-		})
+		// context.cookie.access_token.set({
+		// 	value: accessToken,
+		// 	httpOnly: true,
+		// 	path: '/',
+		// 	expires: fifteenMinutes,
+		// 	// TODO : Check for implements csrf token for sub-domain protection
+		// 	sameSite: 'strict',
+		// 	secure: Bun.env.NODE_ENV === 'production',
+		// })
 
-		context.cookie.refresh_token.set({
-			value: refreshToken,
-			httpOnly: true,
-			path: '/',
-			expires: thirtyDays,
-			sameSite: 'strict',
-			secure: Bun.env.NODE_ENV === 'production',
-		})
+		// context.cookie.refresh_token.set({
+		// 	value: refreshToken,
+		// 	httpOnly: true,
+		// 	path: '/',
+		// 	expires: thirtyDays,
+		// 	sameSite: 'strict',
+		// 	secure: Bun.env.NODE_ENV === 'production',
+		// })
 
 		return {
 			user,
@@ -127,26 +127,24 @@ export class EmailPassword implements ProviderInterface {
 			'argon2id',
 		)
 
-		context.cookie.access_token.set({
-			value: accessToken,
-			httpOnly: true,
-			path: '/',
-			expires: fifteenMinutes,
-			// TODO : Check for implements csrf token for sub-domain protection
-			sameSite: 'strict',
-			secure: Bun.env.NODE_ENV === 'production',
-		})
+		// context.cookie.access_token.set({
+		// 	value: accessToken,
+		// 	httpOnly: true,
+		// 	path: '/',
+		// 	expires: fifteenMinutes,
+		// 	// TODO : Check for implements csrf token for sub-domain protection
+		// 	sameSite: 'strict',
+		// 	secure: Bun.env.NODE_ENV === 'production',
+		// })
 
-		context.cookie.refresh_token.set({
-			value: refreshToken,
-			httpOnly: true,
-			path: '/',
-			expires: thirtyDays,
-			sameSite: 'strict',
-			secure: Bun.env.NODE_ENV === 'production',
-		})
-
-		console.log(context.cookie)
+		// context.cookie.refresh_token.set({
+		// 	value: refreshToken,
+		// 	httpOnly: true,
+		// 	path: '/',
+		// 	expires: thirtyDays,
+		// 	sameSite: 'strict',
+		// 	secure: Bun.env.NODE_ENV === 'production',
+		// })
 
 		return {
 			user,

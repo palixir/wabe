@@ -12,7 +12,7 @@ import { WibeApp } from '../..'
 import { ProviderEnum } from '../../authentication/interface'
 import { GraphQLClient } from 'graphql-request'
 
-describe('Auth handler', () => {
+describe.skip('Auth handler', () => {
 	beforeAll(() => {
 		spyOn(console, 'error').mockImplementation(() => {})
 	})

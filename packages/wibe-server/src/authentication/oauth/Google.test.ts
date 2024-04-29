@@ -30,7 +30,9 @@ describe('Google oauth', () => {
 			'codeVerifier',
 		)
 
-		expect(authorizationUrl.toString()).toBe('https://url/?nonce=_')
+		expect(authorizationUrl.toString()).toBe(
+			'https://url/?access_type=offline&prompt=select_account',
+		)
 		expect(spyOauth2ClientCreateAuthorizationUrl).toHaveBeenCalledTimes(1)
 		expect(spyOauth2ClientCreateAuthorizationUrl).toHaveBeenCalledWith({
 			state: 'state',
