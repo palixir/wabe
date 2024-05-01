@@ -1,8 +1,7 @@
-import { JWTPayloadSpec } from '@elysiajs/jwt'
-import { Cookie, Context as ElysiaContext } from 'elysia'
+import { Context as WobeContext } from 'wobe'
 import { _User } from '../../generated/wibe'
 
-export type Context = ElysiaContext & { user: _User }
+export type Context = WobeContext & { user: _User }
 
 // export interface Context {
 // 	cookie: Record<string, Cookie<any>>

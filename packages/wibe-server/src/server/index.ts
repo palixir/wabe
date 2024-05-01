@@ -1,6 +1,3 @@
-import { Elysia } from 'elysia'
-import { jwt } from '@elysiajs/jwt'
-import { apollo } from '@elysiajs/apollo'
 import { DatabaseConfig } from '../database'
 import { DatabaseController } from '../database/controllers/DatabaseController'
 import { MongoAdapter } from '../database/adapters/MongoAdapter'
@@ -12,6 +9,8 @@ import { WibeRoute, defaultRoutes } from './routes'
 import { Hook, defaultHooks } from '../hooks'
 import { generateWibeFile } from './generateWibeFile'
 import { defaultAuthenticationMethods } from '../authentication/defaultAuthentication'
+import { Wobe } from 'wobe'
+import { WobeGraphqlYogaPlugin } from 'wobe-graphql-yoga'
 
 interface WibeConfig {
 	port: number
@@ -25,7 +24,7 @@ interface WibeConfig {
 }
 
 export class WibeApp {
-	private server: Elysia
+	private server: Wobe
 
 	static config: WibeConfig
 	static databaseController: DatabaseController
@@ -49,13 +48,9 @@ export class WibeApp {
 			hooks,
 		}
 
-		this.server = new Elysia().get('/health', (context) => {
-			context.cookie.tutu.set({
-				value: 'tutu',
-				httpOnly: true,
-				path: '/',
-			})
-			context.set.status = 200
+		this.server = new Wobe().get('/health', (context) => {
+			context.res.status = 200
+			context.res.send('OK')
 		})
 
 		const databaseAdapter = new MongoAdapter({
@@ -134,30 +129,29 @@ export class WibeApp {
 			types: [...types.scalars, ...types.enums, ...types.objects],
 		})
 
-		this.server.use(
-			jwt({
-				name: 'jwt',
-				secret: WibeApp.config.wibeKey,
+		this.server.usePlugin(
+			WobeGraphqlYogaPlugin({
+				schema,
 			}),
 		)
 
-		this.server.use(
-			await apollo({
-				schema,
-				context: (context) => {
-					return Promise.resolve({
-						...context,
-						// TODO : For the moment we are using fake user
-						// Need to request the user in database and get information
-						// from the token. Here we need to use a cache to avoid a lot of request
-						user: {
-							id: 'fakeId',
-							email: 'fakeEmail',
-						},
-					})
-				},
-			}),
-		)
+		// this.server.use(
+		// 	await apollo({
+		// 		schema,
+		// 		context: (context) => {
+		// 			return Promise.resolve({
+		// 				...context,
+		// 				// TODO : For the moment we are using fake user
+		// 				// Need to request the user in database and get information
+		// 				// from the token. Here we need to use a cache to avoid a lot of request
+		// 				user: {
+		// 					id: 'fakeId',
+		// 					email: 'fakeEmail',
+		// 				},
+		// 			})
+		// 		},
+		// 	}),
+		// )
 
 		if (
 			process.env.NODE_ENV !== 'production' &&

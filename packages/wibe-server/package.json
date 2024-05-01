@@ -12,12 +12,12 @@
 		"codegen": "graphql-codegen --config codegen.ts"
 	},
 	"dependencies": {
-		"@apollo/server": "4.10.0",
-		"@elysiajs/apollo": "0.8.0",
-		"@elysiajs/jwt": "0.8.0",
-		"elysia": "0.8.17",
-		"graphql": "16.8.1",
-		"mongodb": "6.3.0"
+		"mongodb": "6.3.0",
+		"wobe": "1.0.0",
+		"wobe-graphql-yoga": "1.1.0"
+	},
+	"resolutions": {
+		"graphql": "16.8.1"
 	},
 	"devDependencies": {
 		"@graphql-codegen/cli": "5.0.0",

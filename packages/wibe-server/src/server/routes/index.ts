@@ -1,6 +1,6 @@
-import { Context } from 'elysia'
 import { authHandler, oauthHandlerCallback } from './authHandler'
 import { ProviderEnum } from '../../authentication/interface'
+import { Context } from 'wobe'
 
 export interface WibeRoute {
 	method: 'GET' | 'POST' | 'PUT' | 'DELETE'
