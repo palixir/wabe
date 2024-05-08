@@ -125,8 +125,6 @@ describe('SignInWith', () => {
 	})
 
 	it('should signInWith email and password when the user already exist', async () => {
-		const mockAddCookie = mock(() => {})
-
 		const res = await signInWithResolver(
 			{},
 			{
@@ -139,16 +137,7 @@ describe('SignInWith', () => {
 					},
 				},
 			},
-			{
-				cookie: {
-					access_token: {
-						add: mockAddCookie,
-					},
-					refresh_token: {
-						add: mockAddCookie,
-					},
-				},
-			} as any,
+			{} as any,
 		)
 
 		expect(res).toBe(true)

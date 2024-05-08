@@ -27,20 +27,22 @@ export type AuthenticationEventsOptions<T> = {
 }
 
 export type ProviderInterface<T> = {
-	// TODO: Add onOTP
 	onSignIn: (
 		options: AuthenticationEventsOptions<T>,
 	) => Promise<AuthenticationCallbackOutput<T>>
 	onSignUp: (
 		options: AuthenticationEventsOptions<T>,
 	) => Promise<AuthenticationCallbackOutput<T>>
+	// onSecondaryFactorAuthentication?: (
+	// 	options: AuthenticationEventsOptions<T>,
+	// ) => Promise<AuthenticationCallbackOutput<T>>
 }
 
 export interface CustomAuthenticationMethods<T = Record<string, TypeField>> {
 	name: string
 	input: T
 	dataToStore: T
-	provider: ProviderInterface
+	provider: ProviderInterface<T>
 }
 
 export interface AuthenticationConfig {

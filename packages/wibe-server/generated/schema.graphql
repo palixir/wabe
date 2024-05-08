@@ -59,6 +59,7 @@ type _UserObjectObjectOfObject {
 type _UserAuthentication {
   emailPassword: _UserAuthenticationEmailPassword
   google: _UserAuthenticationGoogle
+  OTP: _UserAuthenticationOTP
 }
 
 type _UserAuthenticationEmailPassword {
@@ -75,6 +76,8 @@ type _UserAuthenticationGoogle {
   accessToken: String
   refreshToken: String
 }
+
+type _UserAuthenticationOTP
 
 type Query {
   post(id: ID): Post
@@ -210,6 +213,7 @@ input _UserObjectObjectOfObjectWhereInput {
 input _UserAuthenticationWhereInput {
   emailPassword: _UserAuthenticationEmailPasswordWhereInput
   google: _UserAuthenticationGoogleWhereInput
+  OTP: _UserAuthenticationOTPWhereInput
   OR: [_UserAuthenticationWhereInput]
   AND: [_UserAuthenticationWhereInput]
 }
@@ -231,6 +235,11 @@ input _UserAuthenticationGoogleWhereInput {
   refreshToken: StringWhereInput
   OR: [_UserAuthenticationGoogleWhereInput]
   AND: [_UserAuthenticationGoogleWhereInput]
+}
+
+input _UserAuthenticationOTPWhereInput {
+  OR: [_UserAuthenticationOTPWhereInput]
+  AND: [_UserAuthenticationOTPWhereInput]
 }
 
 type Mutation {
@@ -344,6 +353,7 @@ input _UserObjectObjectOfObjectInput {
 input _UserAuthenticationInput {
   emailPassword: _UserAuthenticationEmailPasswordInput
   google: _UserAuthenticationGoogleInput
+  OTP: _UserAuthenticationOTPInput
 }
 
 input _UserAuthenticationEmailPasswordInput {
@@ -360,6 +370,8 @@ input _UserAuthenticationGoogleInput {
   accessToken: String
   refreshToken: String
 }
+
+input _UserAuthenticationOTPInput
 
 input _UsersCreateInput {
   fields: [_UserInput]!
@@ -409,6 +421,7 @@ input _UserObjectObjectOfObjectUpdateFieldsInput {
 input _UserAuthenticationUpdateFieldsInput {
   emailPassword: _UserAuthenticationEmailPasswordUpdateFieldsInput
   google: _UserAuthenticationGoogleUpdateFieldsInput
+  OTP: _UserAuthenticationOTPUpdateFieldsInput
 }
 
 input _UserAuthenticationEmailPasswordUpdateFieldsInput {
@@ -425,6 +438,8 @@ input _UserAuthenticationGoogleUpdateFieldsInput {
   accessToken: String
   refreshToken: String
 }
+
+input _UserAuthenticationOTPUpdateFieldsInput
 
 input _UsersUpdateInput {
   fields: _UserUpdateFieldsInput
@@ -466,6 +481,7 @@ input SignInWithInput {
 input SignInWithAuthenticationInput {
   emailPassword: SignInWithAuthenticationEmailPasswordInput
   google: SignInWithAuthenticationGoogleInput
+  OTP: SignInWithAuthenticationOTPInput
 }
 
 input SignInWithAuthenticationEmailPasswordInput {
@@ -478,6 +494,11 @@ input SignInWithAuthenticationGoogleInput {
   codeVerifier: String!
 }
 
+input SignInWithAuthenticationOTPInput {
+  email: Email
+  password: String
+}
+
 input SignUpWithInput {
   authentication: SignUpWithAuthenticationInput
 }
@@ -485,6 +506,7 @@ input SignUpWithInput {
 input SignUpWithAuthenticationInput {
   emailPassword: SignUpWithAuthenticationEmailPasswordInput
   google: SignUpWithAuthenticationGoogleInput
+  OTP: SignUpWithAuthenticationOTPInput
 }
 
 input SignUpWithAuthenticationEmailPasswordInput {
@@ -495,4 +517,9 @@ input SignUpWithAuthenticationEmailPasswordInput {
 input SignUpWithAuthenticationGoogleInput {
   authorizationCode: String!
   codeVerifier: String!
+}
+
+input SignUpWithAuthenticationOTPInput {
+  email: Email
+  password: String
 }

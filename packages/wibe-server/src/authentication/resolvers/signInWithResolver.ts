@@ -2,6 +2,19 @@ import { SignInWithInput } from '../../../generated/wibe'
 import { Context } from '../../graphql/interface'
 import { WibeApp } from '../../server'
 
+/*
+signInWithResolver(input: {
+    authentication : {
+        emailPassword: {
+            email: "email@test.fr",
+            password: "password"
+        }
+        secondaryFactor: otp
+    }
+}
+
+*/
+
 export const signInWithResolver = async (
 	_: any,
 	{
