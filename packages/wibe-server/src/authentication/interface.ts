@@ -12,24 +12,28 @@ export interface ProviderConfig {
 	clientSecret: string
 }
 
-export interface AuthenticationCallbackOutput {
-	dataToStore: { refreshToken?: string; accessToken?: string }
+export type AuthenticationCallbackOutput<T> = {
+	dataToStore: {
+		refreshToken?: string
+		accessToken?: string
+		expireAt?: Date
+	} & T
 	user: Partial<_User>
 }
 
-export interface AuthenticationEventsOptions {
-	input: Record<string, any>
+export type AuthenticationEventsOptions<T> = {
+	input: T
 	context: Context
 }
 
-export interface ProviderInterface {
+export type ProviderInterface<T> = {
 	// TODO: Add onOTP
 	onSignIn: (
-		options: AuthenticationEventsOptions,
-	) => Promise<AuthenticationCallbackOutput>
+		options: AuthenticationEventsOptions<T>,
+	) => Promise<AuthenticationCallbackOutput<T>>
 	onSignUp: (
-		options: AuthenticationEventsOptions,
-	) => Promise<AuthenticationCallbackOutput>
+		options: AuthenticationEventsOptions<T>,
+	) => Promise<AuthenticationCallbackOutput<T>>
 }
 
 export interface CustomAuthenticationMethods<T = Record<string, TypeField>> {

@@ -8,9 +8,8 @@ import {
 	it,
 } from 'bun:test'
 import { WibeApp } from '../../server'
-import { gql } from '@elysiajs/apollo'
 import { closeTests, getGraphqlClient, setupTests } from '../../utils/helper'
-import { GraphQLClient } from 'graphql-request'
+import { GraphQLClient, gql } from 'graphql-request'
 
 const cleanUsers = async (client: GraphQLClient) => {
 	const { _users } = await client.request<any>(graphql._users, {})

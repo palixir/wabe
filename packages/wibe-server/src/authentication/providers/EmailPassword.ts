@@ -1,8 +1,18 @@
+import jwt from 'jsonwebtoken'
 import { WibeApp } from '../../server'
 import { AuthenticationEventsOptions, ProviderInterface } from '../interface'
 
-export class EmailPassword implements ProviderInterface {
-	async onSignIn({ context, input }: AuthenticationEventsOptions) {
+type EmailPasswordInterface = {
+	password: string
+	email: string
+}
+
+export class EmailPassword
+	implements ProviderInterface<EmailPasswordInterface>
+{
+	async onSignIn({
+		input,
+	}: AuthenticationEventsOptions<EmailPasswordInterface>) {
 		// TODO : Use first here but need to refactor in graphql and mongoadapter to have first and not limit
 		const users = await WibeApp.databaseController.getObjects({
 			className: '_User',
@@ -42,59 +52,40 @@ export class EmailPassword implements ProviderInterface {
 		const fifteenMinutes = new Date(Date.now() + 1000 * 60 * 15)
 		const thirtyDays = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
 
-		const accessToken = await context.jwt.sign({
-			userId: user.id,
-			iat: Date.now(),
-			exp: fifteenMinutes.getTime(),
-		})
+		const accessToken = jwt.sign(
+			{
+				userId: user.id,
+				iat: Date.now(),
+				exp: fifteenMinutes.getTime(),
+			},
+			import.meta.env.JWT_SECRET as string,
+		)
 
-		const refreshToken = await context.jwt.sign({
-			userId: user.id,
-			iat: Date.now(),
-			exp: thirtyDays.getTime(),
-		})
-
-		// context.cookie.access_token.set({
-		// 	value: accessToken,
-		// 	httpOnly: true,
-		// 	path: '/',
-		// 	expires: fifteenMinutes,
-		// 	// TODO : Check for implements csrf token for sub-domain protection
-		// 	sameSite: 'strict',
-		// 	secure: Bun.env.NODE_ENV === 'production',
-		// })
-
-		// context.cookie.refresh_token.set({
-		// 	value: refreshToken,
-		// 	httpOnly: true,
-		// 	path: '/',
-		// 	expires: thirtyDays,
-		// 	sameSite: 'strict',
-		// 	secure: Bun.env.NODE_ENV === 'production',
-		// })
+		const refreshToken = jwt.sign(
+			{
+				userId: user.id,
+				iat: Date.now(),
+				exp: thirtyDays.getTime(),
+			},
+			import.meta.env.JWT_SECRET as string,
+		)
 
 		return {
 			user,
 			dataToStore: {
 				accessToken,
 				refreshToken,
+				expireAt: fifteenMinutes,
 				password: userDatabasePassword,
 				email: input.email,
 			},
 		}
 	}
 
-	async onSignUp({ input, context }: AuthenticationEventsOptions) {
-		// try {
-		// context.cookie.tata.set({
-		// 	value: 'tata',
-		// 	httpOnly: true,
-		// 	path: '/',
-		// })
-		// } catch (e) {
-		// 	console.error(e)
-		// }
-
+	async onSignUp({
+		input,
+		context,
+	}: AuthenticationEventsOptions<EmailPasswordInterface>) {
 		const user = await WibeApp.databaseController.createObject({
 			className: '_User',
 			data: {
@@ -110,47 +101,35 @@ export class EmailPassword implements ProviderInterface {
 		const fifteenMinutes = new Date(Date.now() + 15 * 60 * 1000)
 		const thirtyDays = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
 
-		const accessToken = await context.jwt.sign({
-			userId: user.id,
-			iat: Date.now(),
-			exp: fifteenMinutes.getTime(),
-		})
+		const accessToken = jwt.sign(
+			{
+				userId: user.id,
+				iat: Date.now(),
+				exp: fifteenMinutes.getTime(),
+			},
+			import.meta.env.JWT_SECRET as string,
+		)
 
-		const refreshToken = await context.jwt.sign({
-			userId: user.id,
-			iat: Date.now(),
-			exp: thirtyDays.getTime(),
-		})
+		const refreshToken = jwt.sign(
+			{
+				userId: user.id,
+				iat: Date.now(),
+				exp: thirtyDays.getTime(),
+			},
+			import.meta.env.JWT_SECRET as string,
+		)
 
 		const hashedPassword = await Bun.password.hash(
 			input.password,
 			'argon2id',
 		)
 
-		// context.cookie.access_token.set({
-		// 	value: accessToken,
-		// 	httpOnly: true,
-		// 	path: '/',
-		// 	expires: fifteenMinutes,
-		// 	// TODO : Check for implements csrf token for sub-domain protection
-		// 	sameSite: 'strict',
-		// 	secure: Bun.env.NODE_ENV === 'production',
-		// })
-
-		// context.cookie.refresh_token.set({
-		// 	value: refreshToken,
-		// 	httpOnly: true,
-		// 	path: '/',
-		// 	expires: thirtyDays,
-		// 	sameSite: 'strict',
-		// 	secure: Bun.env.NODE_ENV === 'production',
-		// })
-
 		return {
 			user,
 			dataToStore: {
 				accessToken,
 				refreshToken,
+				expireAt: fifteenMinutes,
 				password: hashedPassword,
 				email: input.email,
 			},

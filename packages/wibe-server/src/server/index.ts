@@ -132,26 +132,17 @@ export class WibeApp {
 		this.server.usePlugin(
 			WobeGraphqlYogaPlugin({
 				schema,
+				maskedErrors: false,
+				context: () => {
+					return {
+						user: {
+							id: 'fakeId',
+							email: 'fakeEmail',
+						},
+					}
+				},
 			}),
 		)
-
-		// this.server.use(
-		// 	await apollo({
-		// 		schema,
-		// 		context: (context) => {
-		// 			return Promise.resolve({
-		// 				...context,
-		// 				// TODO : For the moment we are using fake user
-		// 				// Need to request the user in database and get information
-		// 				// from the token. Here we need to use a cache to avoid a lot of request
-		// 				user: {
-		// 					id: 'fakeId',
-		// 					email: 'fakeEmail',
-		// 				},
-		// 			})
-		// 		},
-		// 	}),
-		// )
 
 		if (
 			process.env.NODE_ENV !== 'production' &&
@@ -173,13 +164,11 @@ export class WibeApp {
 			Bun.write('generated/schema.graphql', printSchema(schema))
 		}
 
-		this.server.listen(WibeApp.config.port, () => {
-			console.log(`Server running on port ${WibeApp.config.port}`)
-		})
+		this.server.listen(WibeApp.config.port)
 	}
 
 	async close() {
 		await WibeApp.databaseController.close()
-		await this.server.stop()
+		this.server.stop()
 	}
 }

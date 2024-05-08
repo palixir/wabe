@@ -26,29 +26,6 @@ export class Google implements ProviderInterface {
 			idToken,
 		)
 
-		// Create cookie for access and refresh token
-		context.cookie.access_token.set({
-			value: accessToken,
-			httpOnly: true,
-			path: '/',
-			// TODO : Check for implements csrf token for sub-domain protection
-			sameSite: 'strict',
-			maxAge: accessTokenExpiresAt?.getTime(),
-			secure: Bun.env.NODE_ENV === 'production',
-		})
-
-		context.cookie.refresh_token.set({
-			value: refreshToken,
-			httpOnly: true,
-			path: '/',
-			// TODO : Check for implements csrf token for sub-domain protection
-			sameSite: 'strict',
-			maxAge: Date.now() + 3600 * 24 * 60 * 1000, // 60 days
-			secure: Bun.env.NODE_ENV === 'production',
-		})
-
-		console.log(context.cookie)
-
 		const user = await WibeApp.databaseController.getObjects({
 			className: '_User',
 			where: {
@@ -64,6 +41,7 @@ export class Google implements ProviderInterface {
 		const dataToStore = {
 			accessToken,
 			refreshToken,
+			expireAt: accessTokenExpiresAt,
 			email,
 			verifiedEmail,
 			idToken,
