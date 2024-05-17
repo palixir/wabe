@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test'
-import { WibeGraphQLParser } from './wibeGraphqlParser'
+import { GraphqlParser } from './graphqlParser'
 import {
 	GraphQLNonNull,
 	GraphQLNullableType,
@@ -66,11 +66,11 @@ const deepCompareGraphQLObjects = (
 
 describe('WibeGraphqlParser', () => {
 	it('should parse a wibe object', () => {
-		const wibeGraphqlParser = WibeGraphQLParser({
+		const graphqlParser = GraphqlParser({
 			enums: [],
 			scalars: [],
 		})
-		const simpleObject = wibeGraphqlParser({
+		const simpleObject = graphqlParser({
 			graphqlObjectType: {} as any,
 			schemaFields: {} as any,
 		})._parseWibeObject({
@@ -103,12 +103,12 @@ describe('WibeGraphqlParser', () => {
 	})
 
 	it('should parse a recursive wibe object', () => {
-		const wibeGraphqlParser = WibeGraphQLParser({
+		const graphqlParser = GraphqlParser({
 			enums: [],
 			scalars: [],
 		})
 
-		const recursiveObject = wibeGraphqlParser({
+		const recursiveObject = graphqlParser({
 			graphqlObjectType: {} as any,
 			schemaFields: {} as any,
 		})._parseWibeObject({
@@ -156,12 +156,12 @@ describe('WibeGraphqlParser', () => {
 	})
 
 	it('should create an graphql object from simple object', () => {
-		const wibeGraphqlParser = WibeGraphQLParser({
+		const graphqlParser = GraphqlParser({
 			scalars: [],
 			enums: [],
 		})
 
-		const simpleObject = wibeGraphqlParser({
+		const simpleObject = graphqlParser({
 			schemaFields: {
 				name: { type: 'String', required: true },
 			},
@@ -176,12 +176,12 @@ describe('WibeGraphqlParser', () => {
 	})
 
 	it('should create an graphql object from recursive object', () => {
-		const wibeGraphqlParser = WibeGraphQLParser({
+		const graphqlParser = GraphqlParser({
 			scalars: [],
 			enums: [],
 		})
 
-		const recursiveObject = wibeGraphqlParser({
+		const recursiveObject = graphqlParser({
 			schemaFields: {
 				subObject: {
 					type: 'Object',
