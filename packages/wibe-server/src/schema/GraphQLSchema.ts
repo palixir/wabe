@@ -35,7 +35,7 @@ import {
 import { WibeSchemaTypes } from '../../generated/wibe'
 
 // This class is tested in the graphql.test.ts file
-export class WibeGraphQLSchema {
+export class GraphQLSchema {
 	private schemas: Schema
 
 	constructor(schemas: Schema) {

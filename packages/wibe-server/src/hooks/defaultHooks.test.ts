@@ -1,15 +1,6 @@
-import {
-	describe,
-	expect,
-	it,
-	beforeAll,
-	mock,
-	afterEach,
-	spyOn,
-} from 'bun:test'
+import { describe, expect, it, beforeAll, spyOn } from 'bun:test'
 import { WibeApp } from '..'
 import {
-	defaultAfterInsertToCallSignUpEvent,
 	defaultBeforeInsertForCreatedAt,
 	defaultBeforeInsertForDefaultValue,
 	defaultBeforeUpdateForUpdatedAt,
