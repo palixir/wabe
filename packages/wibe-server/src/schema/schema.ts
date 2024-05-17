@@ -295,26 +295,10 @@ export class Schema {
 							signOut: {
 								type: 'Boolean',
 								resolve: signOutResolver,
-								// TODO : Remove args (https://github.com/coratgerl/wibe/issues/10)
-								args: {
-									input: {
-										uselessField: {
-											type: 'String',
-										},
-									},
-								},
 							},
 							refresh: {
 								type: 'Boolean',
 								resolve: signOutResolver,
-								// TODO : Remove args (https://github.com/coratgerl/wibe/issues/10)
-								args: {
-									input: {
-										uselessField: {
-											type: 'String',
-										},
-									},
-								},
 							},
 							...(Object.keys(challengeInputObject.object.fields)
 								.length > 0

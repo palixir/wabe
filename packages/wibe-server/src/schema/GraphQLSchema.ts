@@ -31,7 +31,6 @@ import {
 import { GraphqlParser, GraphqlParserFactory } from './graphqlParser'
 import { WibeSchemaTypes } from '../../generated/wibe'
 
-// This class is tested in the graphql.test.ts file
 export class GraphQLSchema {
 	private schemas: Schema
 
@@ -350,6 +349,7 @@ export class GraphQLSchema {
 				const currentMutation = resolvers[currentKey]
 				const required = !!currentMutation.required
 				const input = currentMutation.args?.input || {}
+				const numberOfFieldsInInput = Object.keys(input).length
 
 				const currentKeyWithFirstLetterUpperCase = `${currentKey[0].toUpperCase()}${currentKey.slice(
 					1,
@@ -375,7 +375,10 @@ export class GraphQLSchema {
 					type: required
 						? new GraphQLNonNull(graphqlType)
 						: graphqlType,
-					args: { input: { type: graphqlInput } },
+					args:
+						numberOfFieldsInInput > 0
+							? { input: { type: graphqlInput } }
+							: undefined,
 					description: currentMutation.description,
 					resolve: currentMutation.resolve,
 				}
