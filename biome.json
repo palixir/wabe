@@ -1,7 +1,13 @@
 {
-	"$schema": "https://biomejs.dev/schemas/1.4.1/schema.json",
+	"$schema": "https://biomejs.dev/schemas/1.7.1/schema.json",
 	"files": {
-		"ignore": ["**/lib/**/*.ts", "**/lib/**/*.js", "**/node_modules/**"],
+		"include": ["**/*.ts", "**/*.js"],
+		"ignore": [
+			"**/dist/**",
+			"**/node_modules/**",
+			".vitepress/**",
+			"build/**"
+		],
 		"ignoreUnknown": true
 	},
 	"organizeImports": {
@@ -14,8 +20,8 @@
 			"suspicious": {
 				"noExplicitAny": "off"
 			},
-			"nursery": {
-				"noUnusedImports": "error"
+			"style": {
+				"useTemplate": "off"
 			}
 		}
 	},

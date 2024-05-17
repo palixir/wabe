@@ -1,22 +1,11 @@
 {
-  "name": "main",
-  "version": "1.0.0",
-  "devDependencies": {
-    "@biomejs/biome": "1.5.3",
-    "husky": "9.0.10",
-    "lint-staged": "15.2.2"
-  },
-  "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
-  "scripts": {
-    "prepare": "husky"
-  },
-  "lint-staged": {
-    "*": [
-      "biome lint ./packages/**/*.ts --no-errors-on-unmatched",
-      "biome format --write ."
-    ]
-  }
+	"name": "main",
+	"version": "1.0.0",
+	"devDependencies": {
+		"@biomejs/biome": "1.7.1",
+		"lefthook": "1.6.10",
+		"typescript": "5.4.2"
+	},
+	"private": true,
+	"workspaces": ["packages/*"]
 }
