@@ -1,5 +1,7 @@
 import { WibeSchemaScalars, WibeSchemaEnums } from '../../generated/wibe'
 import { signInWithResolver, signUpWithResolver } from '../authentication'
+import { signOutResolver } from '../authentication/resolvers/signOutResolver'
+import { verifyChallengeResolver } from '../authentication/resolvers/verifyChallenge'
 import { WibeApp } from '../server'
 
 export type WibeDefaultTypes =
@@ -21,6 +23,22 @@ type TypeFieldBase<T, K extends WibeTypes> = {
 	defaultValue?: T
 }
 
+type TypeFieldArray = {
+	type: 'Array'
+	required?: boolean
+	description?: string
+	defaultValue?: any[]
+	typeValue: WibeTypes
+}
+
+type TypeFieldObject = {
+	type: 'Object'
+	required?: boolean
+	description?: string
+	object: ClassInterface
+	defaultValue?: any
+}
+
 export type TypeField =
 	| TypeFieldBase<string, 'String'>
 	| TypeFieldBase<number, 'Int'>
@@ -28,19 +46,8 @@ export type TypeField =
 	| TypeFieldBase<boolean, 'Boolean'>
 	| TypeFieldBase<Date, 'Date'>
 	| TypeFieldBase<string, 'Email'>
-	| {
-			type: 'Array'
-			required?: boolean
-			description?: string
-			defaultValue?: any[]
-			typeValue: WibeTypes
-	  }
-	| {
-			type: 'Object'
-			required?: boolean
-			description?: string
-			object: ClassInterface
-	  }
+	| TypeFieldArray
+	| TypeFieldObject
 
 export type SchemaFields = Record<string, TypeField>
 
@@ -122,12 +129,54 @@ export class Schema {
 					Google: 'Google',
 				},
 			},
+			{
+				name: 'SecondaryFactor',
+				values: {
+					EmailOTP: 'emailOTP',
+				},
+			},
 		]
 	}
 
-	defaultClass(schema: SchemaInterface): ClassInterface[] {
+	_sessionClass(): ClassInterface {
+		return {
+			name: '_Session',
+			fields: {
+				// TODO : Add pointer to user
+				userId: {
+					type: 'String',
+					required: true,
+				},
+				accessToken: {
+					type: 'String',
+					required: true,
+				},
+				accessTokenExpiresAt: {
+					type: 'Date',
+					required: true,
+				},
+				refreshToken: {
+					type: 'String',
+				},
+				refreshTokenExpiresAt: {
+					type: 'Date',
+					required: true,
+				},
+				createdAt: {
+					type: 'Date',
+					required: true,
+				},
+				updatedAt: {
+					type: 'Date',
+					required: true,
+				},
+			},
+		}
+	}
+
+	_userClass(): ClassInterface {
 		const customAuthenticationConfig =
-			WibeApp.config.authentication?.customAuthenticationMethods || []
+			WibeApp.config?.authentication?.customAuthenticationMethods || []
 
 		const allAuthenticationMethods = customAuthenticationConfig.reduce(
 			(acc, authenticationMethod) => {
@@ -136,7 +185,7 @@ export class Schema {
 					object: {
 						name: authenticationMethod.name,
 						fields: {
-							...authenticationMethod.dataToStore,
+							...authenticationMethod.input,
 						},
 					},
 				}
@@ -146,7 +195,24 @@ export class Schema {
 			{} as SchemaFields,
 		)
 
-		const authenticationObject = {
+		const allSecondaryFactorAuthenticationMethods =
+			customAuthenticationConfig.reduce((acc, authenticationMethod) => {
+				if (!authenticationMethod.isSecondaryFactor) return acc
+
+				acc[authenticationMethod.name] = {
+					type: 'Object',
+					object: {
+						name: authenticationMethod.name,
+						fields: {
+							...authenticationMethod.input,
+						},
+					},
+				}
+
+				return acc
+			}, {} as SchemaFields)
+
+		const authenticationObject: TypeFieldObject = {
 			type: 'Object',
 			object: {
 				name: 'Authentication',
@@ -154,9 +220,9 @@ export class Schema {
 					...allAuthenticationMethods,
 				},
 			},
-		} as TypeField
+		}
 
-		const defaultUserFields: SchemaFields = {
+		const fields: SchemaFields = {
 			...(customAuthenticationConfig.length > 0
 				? { authentication: authenticationObject }
 				: {}),
@@ -178,34 +244,33 @@ export class Schema {
 			},
 		}
 
-		// MUTATIONS
-		// TODO : Refactor this duplicate with above
-		const allAuthenticationMethodsForInput =
-			customAuthenticationConfig.reduce((acc, authenticationMethod) => {
-				acc[authenticationMethod.name] = {
-					type: 'Object',
-					object: {
-						name: authenticationMethod.name,
-						fields: {
-							...authenticationMethod.input,
-						},
-					},
-				}
-
-				return acc
-			}, {} as SchemaFields)
-
-		const authenticationInput = {
+		const authenticationInput: TypeFieldObject = {
 			type: 'Object',
 			object: {
 				name: 'Authentication',
 				fields: {
-					...allAuthenticationMethodsForInput,
+					// All authentication providers
+					...authenticationObject.object.fields,
+					// Secondary factor
+					secondaryFactor: {
+						type: 'SecondaryFactor',
+						required: false,
+					},
 				},
 			},
-		} as TypeField
+		}
 
-		const defaultResolvers: TypeResolver = {
+		const challengeInputObject: TypeFieldObject = {
+			type: 'Object',
+			object: {
+				name: 'ChallengeInput',
+				fields: {
+					...allSecondaryFactorAuthenticationMethods,
+				},
+			},
+		}
+
+		const resolvers: TypeResolver = {
 			mutations: {
 				...(customAuthenticationConfig.length > 0
 					? {
@@ -227,68 +292,114 @@ export class Schema {
 								},
 								resolve: signUpWithResolver,
 							},
+							signOut: {
+								type: 'Boolean',
+								resolve: signOutResolver,
+								// TODO : Remove args (https://github.com/coratgerl/wibe/issues/10)
+								args: {
+									input: {
+										uselessField: {
+											type: 'String',
+										},
+									},
+								},
+							},
+							refresh: {
+								type: 'Boolean',
+								resolve: signOutResolver,
+								// TODO : Remove args (https://github.com/coratgerl/wibe/issues/10)
+								args: {
+									input: {
+										uselessField: {
+											type: 'String',
+										},
+									},
+								},
+							},
+							...(Object.keys(challengeInputObject.object.fields)
+								.length > 0
+								? {
+										verifyChallenge: {
+											type: 'Boolean',
+											args: {
+												input: {
+													factor: challengeInputObject,
+												},
+											},
+											resolve: verifyChallengeResolver,
+										},
+								  }
+								: {}),
 					  }
 					: {}),
-				// signOut: {
-				// 	type: 'Boolean',
-				// 	resolve: signOutResolver,
-				// 	args: {
-				// 		input: {
-				// 			email: {
-				// 				type: 'Email',
-				// 				required: true,
-				// 			},
-				// 		},
-				// 	},
-				// },
 			},
 		}
 
-		const _userIndex = schema.class.findIndex(
-			(wibeClass) => wibeClass.name === '_User',
-		)
-
-		if (_userIndex !== -1) {
-			const _user = schema.class[_userIndex]
-
-			const newUserObject = {
-				name: _user.name,
-				description: _user.description,
-				fields: {
-					..._user.fields,
-					...defaultUserFields,
-				},
-				resolvers: {
-					queries: {
-						..._user.resolvers?.queries,
-						...defaultResolvers.queries,
-					},
-					mutations: {
-						..._user.resolvers?.mutations,
-						...defaultResolvers.mutations,
-					},
-				},
-			}
-
-			const newArrayOfClassWithoutThe_User = [
-				...schema.class.slice(0, _userIndex),
-				...schema.class.slice(_userIndex + 1),
-			]
-
-			return [...newArrayOfClassWithoutThe_User, newUserObject]
+		return {
+			name: '_User',
+			fields,
+			resolvers,
 		}
+	}
 
-		return [
-			...schema.class,
-			{
-				name: '_User',
-				fields: {
-					...defaultUserFields,
-				},
-				resolvers: {
-					...defaultResolvers,
-				},
-			},
+	mergeClass(newClass: ClassInterface[]): ClassInterface[] {
+		const allUniqueClassName = [
+			...new Set(newClass.map((classItem) => classItem.name)),
 		]
+
+		return allUniqueClassName.map((uniqueClass) => {
+			const allClassWithSameName = newClass.filter(
+				(localClass) => localClass.name === uniqueClass,
+			)
+
+			return allClassWithSameName.reduce((acc, classItem) => {
+				const resolvers: TypeResolver = {
+					mutations: {
+						...acc.resolvers?.mutations,
+						...classItem.resolvers?.mutations,
+					},
+					queries: {
+						...acc.resolvers?.queries,
+						...classItem.resolvers?.queries,
+					},
+				}
+
+				const isMutationsEmpty =
+					Object.keys(resolvers.mutations || {}).length > 0
+				const isQueriesEmpty =
+					Object.keys(resolvers.queries || {}).length > 0
+
+				return {
+					// biome-ignore lint/performance/noAccumulatingSpread: Simplicity is important here
+					...acc,
+					...classItem,
+					fields: {
+						// We merge fields that have the same name and then we add the new fields
+						...acc.fields,
+						...classItem.fields,
+						// ...mergeField(classItem.fields, acc.fields),
+					},
+					resolvers:
+						isQueriesEmpty || isMutationsEmpty
+							? {
+									mutations: isMutationsEmpty
+										? resolvers.mutations
+										: undefined,
+									queries: isQueriesEmpty
+										? resolvers.queries
+										: undefined,
+							  }
+							: undefined,
+				}
+			}, allClassWithSameName[0] as ClassInterface)
+		})
+	}
+
+	defaultClass(schema: SchemaInterface): ClassInterface[] {
+		return this.mergeClass([
+			...schema.class,
+			this._userClass(),
+			this._sessionClass(),
+		])
 	}
 }

@@ -7,7 +7,6 @@ import {
 	beforeAll,
 	beforeEach,
 } from 'bun:test'
-import jwt from 'jsonwebtoken'
 import { EmailPassword } from './EmailPassword'
 import { WibeApp } from '../../server'
 
@@ -18,7 +17,6 @@ describe('Email password', () => {
 	) as any
 
 	const spyBunPasswordVerify = spyOn(Bun.password, 'verify')
-	const mockSign = spyOn(jwt, 'sign')
 
 	beforeAll(() => {
 		WibeApp.databaseController = {
@@ -31,54 +29,28 @@ describe('Email password', () => {
 		mockGetObjects.mockClear()
 		mockCreateObject.mockClear()
 		spyBunPasswordVerify.mockClear()
-		mockSign.mockClear()
 	})
 
 	const emailPassword = new EmailPassword()
 
 	it('should signUp with email password', async () => {
-		mockSign.mockReturnValue('token' as any)
 		const spyBunPasswordHash = spyOn(
 			Bun.password,
 			'hash',
 		).mockResolvedValue('$argon2id$hashedPassword')
 
-		const res = await emailPassword.onSignUp({
+		const {
+			authenticationDataToSave: { email, password },
+		} = await emailPassword.onSignUp({
 			context: {} as any,
 			input: { email: 'email@test.fr', password: 'password' },
 		})
 
-		expect(res.dataToStore).toEqual({
-			accessToken: 'token',
-			refreshToken: 'token',
-			password: expect.any(String),
-			email: 'email@test.fr',
-			expireAt: expect.any(Date),
-		})
+		expect(email).toBe('email@test.fr')
+		expect(password).toBe('$argon2id$hashedPassword')
 
 		expect(spyBunPasswordHash).toHaveBeenCalledTimes(1)
 		expect(spyBunPasswordHash).toHaveBeenCalledWith('password', 'argon2id')
-		expect(res.dataToStore.password).toContain('$argon2id$')
-
-		expect(mockSign).toHaveBeenCalledTimes(2)
-		expect(mockSign).toHaveBeenNthCalledWith(
-			1,
-			{
-				userId: 'userId',
-				iat: expect.any(Number),
-				exp: expect.any(Number),
-			},
-			'dev',
-		)
-		expect(mockSign).toHaveBeenNthCalledWith(
-			2,
-			{
-				userId: 'userId',
-				iat: expect.any(Number),
-				exp: expect.any(Number),
-			},
-			'dev',
-		)
 
 		spyBunPasswordHash.mockRestore()
 	})
@@ -96,20 +68,21 @@ describe('Email password', () => {
 			} as never,
 		])
 
-		mockSign.mockReturnValue('token' as any)
 		spyBunPasswordVerify.mockResolvedValue(true)
 
-		const res = await emailPassword.onSignIn({
+		const { user } = await emailPassword.onSignIn({
 			context: {} as any,
 			input: { email: 'email@test.fr', password: 'password' },
 		})
 
-		expect(res.dataToStore).toEqual({
-			accessToken: 'token',
-			refreshToken: 'token',
-			password: 'hashedPassword',
-			email: 'email@test.fr',
-			expireAt: expect.any(Date),
+		expect(user).toEqual({
+			id: 'userId',
+			authentication: {
+				emailPassword: {
+					email: 'email@test.fr',
+					password: 'hashedPassword',
+				},
+			},
 		})
 
 		expect(spyBunPasswordVerify).toHaveBeenCalledTimes(1)
@@ -117,26 +90,6 @@ describe('Email password', () => {
 			'password',
 			'hashedPassword',
 			'argon2id',
-		)
-
-		expect(mockSign).toHaveBeenCalledTimes(2)
-		expect(mockSign).toHaveBeenNthCalledWith(
-			1,
-			{
-				userId: 'userId',
-				iat: expect.any(Number),
-				exp: expect.any(Number),
-			},
-			'dev',
-		)
-		expect(mockSign).toHaveBeenNthCalledWith(
-			2,
-			{
-				userId: 'userId',
-				iat: expect.any(Number),
-				exp: expect.any(Number),
-			},
-			'dev',
 		)
 	})
 
@@ -146,6 +99,7 @@ describe('Email password', () => {
 		expect(
 			emailPassword.onSignIn({
 				context: {} as any,
+				// @ts-expect-error
 				input: { email: 'email@test.fr' },
 			}),
 		).rejects.toThrow('Invalid authentication credentials')

@@ -1,7 +1,6 @@
 import { runDatabase } from 'wibe-mongodb-launcher'
 import { WibeApp } from '../src'
 import { DatabaseEnum } from '../src/database'
-import { EmailPassword } from '../src/authentication/providers/EmailPassword'
 
 const run = async () => {
 	await runDatabase()
@@ -26,17 +25,14 @@ const run = async () => {
 			},
 			customAuthenticationMethods: [
 				{
-					name: 'OTP',
-					dataToStore: {},
+					name: 'otp',
 					input: {
-						email: {
-							type: 'Email',
-						},
-						password: {
+						code: {
 							type: 'String',
 						},
 					},
-					provider: new EmailPassword(),
+					provider: {} as any,
+					isSecondaryFactor: true,
 				},
 			],
 		},

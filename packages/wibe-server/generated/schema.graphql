@@ -10,9 +10,8 @@ enum AuthenticationProvider {
   Google
 }
 
-type Post {
-  id: ID!
-  name: String!
+enum SecondaryFactor {
+  EmailOTP
 }
 
 """User class"""
@@ -59,30 +58,40 @@ type _UserObjectObjectOfObject {
 type _UserAuthentication {
   emailPassword: _UserAuthenticationEmailPassword
   google: _UserAuthenticationGoogle
-  OTP: _UserAuthenticationOTP
+  otp: _UserAuthenticationOtp
 }
 
 type _UserAuthenticationEmailPassword {
   email: Email!
   password: String!
-  accessToken: String
-  refreshToken: String
 }
 
 type _UserAuthenticationGoogle {
-  idToken: String!
-  email: Email!
-  verifiedEmail: Boolean!
-  accessToken: String
-  refreshToken: String
+  authorizationCode: String!
+  codeVerifier: String!
 }
 
-type _UserAuthenticationOTP
+type _UserAuthenticationOtp {
+  code: String
+}
+
+type Post {
+  id: ID!
+  name: String!
+}
+
+type _Session {
+  id: ID!
+  userId: String!
+  accessToken: String!
+  accessTokenExpiresAt: Date!
+  refreshToken: String
+  refreshTokenExpiresAt: Date!
+  createdAt: Date!
+  updatedAt: Date!
+}
 
 type Query {
-  post(id: ID): Post
-  posts(where: PostWhereInput, offset: Int, limit: Int): PostConnection!
-
   """User class"""
   _user(id: ID): _User
 
@@ -91,27 +100,10 @@ type Query {
 
   """Hello world description"""
   helloWorld(name: String!): String
-}
-
-type PostConnection {
-  edges: [PostEdge]
-}
-
-type PostEdge {
-  node: Post!
-}
-
-input PostWhereInput {
-  name: StringWhereInput
-  OR: [PostWhereInput]
-  AND: [PostWhereInput]
-}
-
-input StringWhereInput {
-  equalTo: String
-  notEqualTo: String
-  in: [String]
-  notIn: [String]
+  post(id: ID): Post
+  posts(where: PostWhereInput, offset: Int, limit: Int): PostConnection!
+  _session(id: ID): _Session
+  _sessions(where: _SessionWhereInput, offset: Int, limit: Int): _SessionConnection!
 }
 
 type _UserConnection {
@@ -140,6 +132,13 @@ input _UserWhereInput {
   updatedAt: DateWhereInput
   OR: [_UserWhereInput]
   AND: [_UserWhereInput]
+}
+
+input StringWhereInput {
+  equalTo: String
+  notEqualTo: String
+  in: [String]
+  notIn: [String]
 }
 
 input IntWhereInput {
@@ -213,7 +212,7 @@ input _UserObjectObjectOfObjectWhereInput {
 input _UserAuthenticationWhereInput {
   emailPassword: _UserAuthenticationEmailPasswordWhereInput
   google: _UserAuthenticationGoogleWhereInput
-  OTP: _UserAuthenticationOTPWhereInput
+  otp: _UserAuthenticationOtpWhereInput
   OR: [_UserAuthenticationWhereInput]
   AND: [_UserAuthenticationWhereInput]
 }
@@ -221,35 +220,58 @@ input _UserAuthenticationWhereInput {
 input _UserAuthenticationEmailPasswordWhereInput {
   email: EmailWhereInput
   password: StringWhereInput
-  accessToken: StringWhereInput
-  refreshToken: StringWhereInput
   OR: [_UserAuthenticationEmailPasswordWhereInput]
   AND: [_UserAuthenticationEmailPasswordWhereInput]
 }
 
 input _UserAuthenticationGoogleWhereInput {
-  idToken: StringWhereInput
-  email: EmailWhereInput
-  verifiedEmail: BooleanWhereInput
-  accessToken: StringWhereInput
-  refreshToken: StringWhereInput
+  authorizationCode: StringWhereInput
+  codeVerifier: StringWhereInput
   OR: [_UserAuthenticationGoogleWhereInput]
   AND: [_UserAuthenticationGoogleWhereInput]
 }
 
-input _UserAuthenticationOTPWhereInput {
-  OR: [_UserAuthenticationOTPWhereInput]
-  AND: [_UserAuthenticationOTPWhereInput]
+input _UserAuthenticationOtpWhereInput {
+  code: StringWhereInput
+  OR: [_UserAuthenticationOtpWhereInput]
+  AND: [_UserAuthenticationOtpWhereInput]
+}
+
+type PostConnection {
+  edges: [PostEdge]
+}
+
+type PostEdge {
+  node: Post!
+}
+
+input PostWhereInput {
+  name: StringWhereInput
+  OR: [PostWhereInput]
+  AND: [PostWhereInput]
+}
+
+type _SessionConnection {
+  edges: [_SessionEdge]
+}
+
+type _SessionEdge {
+  node: _Session!
+}
+
+input _SessionWhereInput {
+  userId: StringWhereInput
+  accessToken: StringWhereInput
+  accessTokenExpiresAt: DateWhereInput
+  refreshToken: StringWhereInput
+  refreshTokenExpiresAt: DateWhereInput
+  createdAt: DateWhereInput
+  updatedAt: DateWhereInput
+  OR: [_SessionWhereInput]
+  AND: [_SessionWhereInput]
 }
 
 type Mutation {
-  createPost(input: PostCreateInput): Post!
-  createPosts(input: PostsCreateInput): PostConnection!
-  updatePost(input: PostUpdateInput): Post!
-  updatePosts(input: PostsUpdateInput): PostConnection!
-  deletePost(input: PostDeleteInput): Post!
-  deletePosts(input: PostsDeleteInput): PostConnection!
-
   """User class"""
   create_User(input: _UserCreateInput): _User!
 
@@ -272,44 +294,21 @@ type Mutation {
   secondCustomMutation(input: SecondCustomMutationInput): Int
   signInWith(input: SignInWithInput): Boolean
   signUpWith(input: SignUpWithInput): Boolean
-}
-
-input PostCreateInput {
-  fields: PostInput
-}
-
-input PostInput {
-  name: String!
-}
-
-input PostsCreateInput {
-  fields: [PostInput]!
-  offset: Int
-  limit: Int
-}
-
-input PostUpdateInput {
-  id: ID
-  fields: PostUpdateFieldsInput
-}
-
-input PostUpdateFieldsInput {
-  name: String
-}
-
-input PostsUpdateInput {
-  fields: PostUpdateFieldsInput
-  where: PostWhereInput
-  offset: Int
-  limit: Int
-}
-
-input PostDeleteInput {
-  id: ID
-}
-
-input PostsDeleteInput {
-  where: PostWhereInput
+  signOut(input: SignOutInput): Boolean
+  refresh(input: RefreshInput): Boolean
+  verifyChallenge(input: VerifyChallengeInput): Boolean
+  createPost(input: PostCreateInput): Post!
+  createPosts(input: PostsCreateInput): PostConnection!
+  updatePost(input: PostUpdateInput): Post!
+  updatePosts(input: PostsUpdateInput): PostConnection!
+  deletePost(input: PostDeleteInput): Post!
+  deletePosts(input: PostsDeleteInput): PostConnection!
+  create_Session(input: _SessionCreateInput): _Session!
+  create_Sessions(input: _SessionsCreateInput): _SessionConnection!
+  update_Session(input: _SessionUpdateInput): _Session!
+  update_Sessions(input: _SessionsUpdateInput): _SessionConnection!
+  delete_Session(input: _SessionDeleteInput): _Session!
+  delete_Sessions(input: _SessionsDeleteInput): _SessionConnection!
 }
 
 input _UserCreateInput {
@@ -353,25 +352,22 @@ input _UserObjectObjectOfObjectInput {
 input _UserAuthenticationInput {
   emailPassword: _UserAuthenticationEmailPasswordInput
   google: _UserAuthenticationGoogleInput
-  OTP: _UserAuthenticationOTPInput
+  otp: _UserAuthenticationOtpInput
 }
 
 input _UserAuthenticationEmailPasswordInput {
   email: Email!
   password: String!
-  accessToken: String
-  refreshToken: String
 }
 
 input _UserAuthenticationGoogleInput {
-  idToken: String!
-  email: Email!
-  verifiedEmail: Boolean!
-  accessToken: String
-  refreshToken: String
+  authorizationCode: String!
+  codeVerifier: String!
 }
 
-input _UserAuthenticationOTPInput
+input _UserAuthenticationOtpInput {
+  code: String
+}
 
 input _UsersCreateInput {
   fields: [_UserInput]!
@@ -421,25 +417,22 @@ input _UserObjectObjectOfObjectUpdateFieldsInput {
 input _UserAuthenticationUpdateFieldsInput {
   emailPassword: _UserAuthenticationEmailPasswordUpdateFieldsInput
   google: _UserAuthenticationGoogleUpdateFieldsInput
-  OTP: _UserAuthenticationOTPUpdateFieldsInput
+  otp: _UserAuthenticationOtpUpdateFieldsInput
 }
 
 input _UserAuthenticationEmailPasswordUpdateFieldsInput {
   email: Email
   password: String
-  accessToken: String
-  refreshToken: String
 }
 
 input _UserAuthenticationGoogleUpdateFieldsInput {
-  idToken: String
-  email: Email
-  verifiedEmail: Boolean
-  accessToken: String
-  refreshToken: String
+  authorizationCode: String
+  codeVerifier: String
 }
 
-input _UserAuthenticationOTPUpdateFieldsInput
+input _UserAuthenticationOtpUpdateFieldsInput {
+  code: String
+}
 
 input _UsersUpdateInput {
   fields: _UserUpdateFieldsInput
@@ -481,7 +474,8 @@ input SignInWithInput {
 input SignInWithAuthenticationInput {
   emailPassword: SignInWithAuthenticationEmailPasswordInput
   google: SignInWithAuthenticationGoogleInput
-  OTP: SignInWithAuthenticationOTPInput
+  otp: SignInWithAuthenticationOtpInput
+  secondaryFactor: SecondaryFactor
 }
 
 input SignInWithAuthenticationEmailPasswordInput {
@@ -494,9 +488,8 @@ input SignInWithAuthenticationGoogleInput {
   codeVerifier: String!
 }
 
-input SignInWithAuthenticationOTPInput {
-  email: Email
-  password: String
+input SignInWithAuthenticationOtpInput {
+  code: String
 }
 
 input SignUpWithInput {
@@ -506,7 +499,8 @@ input SignUpWithInput {
 input SignUpWithAuthenticationInput {
   emailPassword: SignUpWithAuthenticationEmailPasswordInput
   google: SignUpWithAuthenticationGoogleInput
-  OTP: SignUpWithAuthenticationOTPInput
+  otp: SignUpWithAuthenticationOtpInput
+  secondaryFactor: SecondaryFactor
 }
 
 input SignUpWithAuthenticationEmailPasswordInput {
@@ -519,7 +513,114 @@ input SignUpWithAuthenticationGoogleInput {
   codeVerifier: String!
 }
 
-input SignUpWithAuthenticationOTPInput {
-  email: Email
-  password: String
+input SignUpWithAuthenticationOtpInput {
+  code: String
+}
+
+input SignOutInput {
+  uselessField: String
+}
+
+input RefreshInput {
+  uselessField: String
+}
+
+input VerifyChallengeInput {
+  factor: VerifyChallengeFactorInput
+}
+
+input VerifyChallengeFactorInput {
+  otp: VerifyChallengeFactorOtpInput
+}
+
+input VerifyChallengeFactorOtpInput {
+  code: String
+}
+
+input PostCreateInput {
+  fields: PostInput
+}
+
+input PostInput {
+  name: String!
+}
+
+input PostsCreateInput {
+  fields: [PostInput]!
+  offset: Int
+  limit: Int
+}
+
+input PostUpdateInput {
+  id: ID
+  fields: PostUpdateFieldsInput
+}
+
+input PostUpdateFieldsInput {
+  name: String
+}
+
+input PostsUpdateInput {
+  fields: PostUpdateFieldsInput
+  where: PostWhereInput
+  offset: Int
+  limit: Int
+}
+
+input PostDeleteInput {
+  id: ID
+}
+
+input PostsDeleteInput {
+  where: PostWhereInput
+}
+
+input _SessionCreateInput {
+  fields: _SessionInput
+}
+
+input _SessionInput {
+  userId: String!
+  accessToken: String!
+  accessTokenExpiresAt: Date!
+  refreshToken: String
+  refreshTokenExpiresAt: Date!
+  createdAt: Date!
+  updatedAt: Date!
+}
+
+input _SessionsCreateInput {
+  fields: [_SessionInput]!
+  offset: Int
+  limit: Int
+}
+
+input _SessionUpdateInput {
+  id: ID
+  fields: _SessionUpdateFieldsInput
+}
+
+input _SessionUpdateFieldsInput {
+  userId: String
+  accessToken: String
+  accessTokenExpiresAt: Date
+  refreshToken: String
+  refreshTokenExpiresAt: Date
+  createdAt: Date
+  updatedAt: Date
+}
+
+input _SessionsUpdateInput {
+  fields: _SessionUpdateFieldsInput
+  where: _SessionWhereInput
+  offset: Int
+  limit: Int
+}
+
+input _SessionDeleteInput {
+  id: ID
+}
+
+input _SessionsDeleteInput {
+  where: _SessionWhereInput
 }

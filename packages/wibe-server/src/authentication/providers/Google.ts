@@ -2,11 +2,17 @@ import { WibeApp } from '../../server'
 import { AuthenticationEventsOptions, ProviderInterface } from '../interface'
 import { Google as GoogleOauth } from '../oauth/Google'
 
-export class Google implements ProviderInterface {
+type GoogleInterface = {
+	authorizationCode: string
+	codeVerifier: string
+}
+
+export class Google implements ProviderInterface<GoogleInterface> {
+	name = 'google'
 	async _googleAuthentication({
 		context,
 		input,
-	}: AuthenticationEventsOptions) {
+	}: AuthenticationEventsOptions<GoogleInterface>) {
 		const { authorizationCode, codeVerifier } = input
 
 		const googleOauth = new GoogleOauth()
@@ -72,11 +78,11 @@ export class Google implements ProviderInterface {
 		}
 	}
 
-	async onSignIn(options: AuthenticationEventsOptions) {
+	async onSignIn(options: AuthenticationEventsOptions<GoogleInterface>) {
 		return this._googleAuthentication(options)
 	}
 
-	async onSignUp(options: AuthenticationEventsOptions) {
+	async onSignUp(options: AuthenticationEventsOptions<GoogleInterface>) {
 		return this._googleAuthentication(options)
 	}
 }

@@ -16,22 +16,6 @@ export const defaultAuthenticationMethods =
 					required: true,
 				},
 			},
-			dataToStore: {
-				email: {
-					type: 'Email',
-					required: true,
-				},
-				password: {
-					type: 'String',
-					required: true,
-				},
-				accessToken: {
-					type: 'String',
-				},
-				refreshToken: {
-					type: 'String',
-				},
-			},
 			provider: new EmailPassword(),
 		},
 		{
@@ -44,26 +28,6 @@ export const defaultAuthenticationMethods =
 				codeVerifier: {
 					type: 'String',
 					required: true,
-				},
-			},
-			dataToStore: {
-				idToken: {
-					type: 'String',
-					required: true,
-				},
-				email: {
-					type: 'Email',
-					required: true,
-				},
-				verifiedEmail: {
-					type: 'Boolean',
-					required: true,
-				},
-				accessToken: {
-					type: 'String',
-				},
-				refreshToken: {
-					type: 'String',
 				},
 			},
 			provider: new Google(),

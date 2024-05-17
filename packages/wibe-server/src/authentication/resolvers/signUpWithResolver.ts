@@ -1,64 +1,53 @@
-import { SignInWithInput } from '../../../generated/wibe'
+import { SignUpWithInput } from '../../../generated/wibe'
 import { Context } from '../../graphql/interface'
 import { WibeApp } from '../../server'
+import { Session } from '../Session'
+import { ProviderInterface } from '../interface'
+import { getAuthenticationMethod } from '../utils'
 
+// 0 - Get the authentication method
+// 1 - We check if the signUp is possible (call onSign)
+// 2 - We create the user
+// 3 - We create session
 export const signUpWithResolver = async (
 	_: any,
 	{
 		input,
 	}: {
-		input: SignInWithInput
+		input: SignUpWithInput
 	},
 	context: Context,
 ) => {
-	const customAuthenticationConfig =
-		WibeApp.config.authentication?.customAuthenticationMethods
-
-	if (!customAuthenticationConfig)
-		throw new Error('No custom authentication methods found')
-
-	const authenticationMethods = Object.keys(input.authentication || {})
-
-	// We check if the client don't use multiple authentication methods at the same time
-	if (authenticationMethods.length > 1 || authenticationMethods.length === 0)
-		throw new Error('Only one authentication method at the time is allowed')
-
-	const authenticationMethod = authenticationMethods[0]
-
-	// We check if the authentication method is valid
-	const validAuthenticationMethod = customAuthenticationConfig.find(
-		(method) =>
-			method.name.toLowerCase() === authenticationMethod.toLowerCase(),
+	const { provider, name } = getAuthenticationMethod<ProviderInterface>(
+		Object.keys(input.authentication || {}),
 	)
-
-	if (!validAuthenticationMethod)
-		throw new Error('No available custom authentication methods found')
-
-	const { provider } = validAuthenticationMethod
 
 	const inputOfTheGoodAuthenticationMethod =
 		// @ts-expect-error
-		input.authentication[authenticationMethod]
+		input.authentication[name]
 
-	const { user, dataToStore } = await provider.onSignUp({
+	const { authenticationDataToSave } = await provider.onSignUp({
 		input: inputOfTheGoodAuthenticationMethod,
 		context,
 	})
 
-	if (!user.id) throw new Error('Authentication failed')
-
-	await WibeApp.databaseController.updateObject({
+	const { id: userId } = await WibeApp.databaseController.createObject({
 		className: '_User',
-		id: user.id,
 		data: {
 			authentication: {
-				[authenticationMethod]: {
-					...(dataToStore || {}),
+				[name]: {
+					...authenticationDataToSave,
 				},
 			},
 		},
 		context,
 	})
 
+	const session = new Session()
+
+	await session.create(userId, context)
+
+	// TODO : Need pointer on schema/resolver
+	// return { accessToken, refreshToken }
 	return true
 }

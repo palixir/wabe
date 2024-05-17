@@ -1,18 +1,297 @@
-import { describe, expect, it, beforeAll, afterAll } from 'bun:test'
-import { setupTests } from '../utils/helper'
-import { WibeApp } from '../server'
+import { describe, expect, it } from 'bun:test'
 import { Schema } from './Schema'
 
 describe('Schema', () => {
-	let wibe: WibeApp
+	it('should merge default class with custom class', () => {
+		const schema = new Schema({
+			class: [
+				{
+					name: 'Class1',
+					fields: {
+						field1: {
+							type: 'String',
+						},
+						field2: {
+							type: 'Int',
+						},
+					},
+				},
+				{
+					name: 'Class2',
+					fields: {
+						field3: {
+							type: 'String',
+						},
+						field4: {
+							type: 'Int',
+						},
+					},
+				},
+				{
+					name: 'Class1',
+					fields: {
+						fields3: {
+							type: 'String',
+						},
+					},
+				},
+			],
+		})
 
-	beforeAll(async () => {
-		const setup = await setupTests()
-		wibe = setup.wibe
+		expect(schema.schema.class[0]).toEqual({
+			name: 'Class1',
+			fields: {
+				field1: {
+					type: 'String',
+				},
+				field2: {
+					type: 'Int',
+				},
+				fields3: {
+					type: 'String',
+				},
+			},
+		})
+
+		expect(schema.schema.class[1]).toEqual({
+			name: 'Class2',
+			fields: {
+				field3: {
+					type: 'String',
+				},
+				field4: {
+					type: 'Int',
+				},
+			},
+		})
 	})
 
-	afterAll(async () => {
-		await wibe.close()
+	it('should merge default class with custom class with resolvers', () => {
+		const schema = new Schema({
+			class: [
+				{
+					name: 'Class1',
+					fields: {
+						field1: {
+							type: 'String',
+						},
+						field2: {
+							type: 'Int',
+						},
+					},
+					resolvers: {
+						queries: {
+							getClass1: {
+								type: 'String',
+								resolve: () => 'Class1',
+							},
+						},
+					},
+				},
+				{
+					name: 'Class2',
+					fields: {
+						field3: {
+							type: 'String',
+						},
+						field4: {
+							type: 'Int',
+						},
+					},
+				},
+				{
+					name: 'Class1',
+					fields: {
+						field1: {
+							type: 'Int',
+							defaultValue: 1,
+						},
+					},
+					resolvers: {
+						queries: {
+							getClass2: {
+								type: 'String',
+								resolve: () => 'Class1',
+							},
+						},
+					},
+				},
+			],
+		})
+
+		expect(schema.schema.class[0]).toEqual({
+			name: 'Class1',
+			fields: {
+				field1: {
+					type: 'Int',
+					defaultValue: 1,
+				},
+				field2: {
+					type: 'Int',
+				},
+			},
+			resolvers: {
+				queries: {
+					getClass1: {
+						type: 'String',
+						resolve: expect.any(Function),
+					},
+					getClass2: {
+						type: 'String',
+						resolve: expect.any(Function),
+					},
+				},
+			},
+		})
+
+		expect(schema.schema.class[1]).toEqual({
+			name: 'Class2',
+			fields: {
+				field3: {
+					type: 'String',
+				},
+				field4: {
+					type: 'Int',
+				},
+			},
+		})
+	})
+
+	it('should merge default class with custom class with field with same name', () => {
+		const schema = new Schema({
+			class: [
+				{
+					name: 'Class1',
+					fields: {
+						field1: {
+							type: 'String',
+						},
+						field2: {
+							type: 'Int',
+						},
+					},
+				},
+				{
+					name: 'Class2',
+					fields: {
+						field3: {
+							type: 'String',
+						},
+						field4: {
+							type: 'Int',
+						},
+					},
+				},
+				{
+					name: 'Class1',
+					fields: {
+						field1: {
+							type: 'Int',
+							defaultValue: 1,
+						},
+					},
+				},
+			],
+		})
+
+		expect(schema.schema.class[0]).toEqual({
+			name: 'Class1',
+			fields: {
+				field1: {
+					type: 'Int',
+					defaultValue: 1,
+				},
+				field2: {
+					type: 'Int',
+				},
+			},
+		})
+
+		expect(schema.schema.class[1]).toEqual({
+			name: 'Class2',
+			fields: {
+				field3: {
+					type: 'String',
+				},
+				field4: {
+					type: 'Int',
+				},
+			},
+		})
+	})
+
+	it('should merge default class with custom class with same different description', () => {
+		const schema = new Schema({
+			class: [
+				{
+					name: 'Class1',
+					description: 'Class1 description',
+					fields: {
+						field1: {
+							type: 'String',
+						},
+						field2: {
+							type: 'Int',
+						},
+					},
+				},
+				{
+					name: 'Class2',
+					fields: {
+						field3: {
+							type: 'String',
+						},
+						field4: {
+							type: 'Int',
+						},
+					},
+				},
+				{
+					name: 'Class1',
+					description: 'new Class1 description',
+					fields: {
+						field1: {
+							type: 'Int',
+							defaultValue: 1,
+						},
+					},
+				},
+			],
+		})
+
+		expect(schema.schema.class[0]).toEqual({
+			name: 'Class1',
+			description: 'new Class1 description',
+			fields: {
+				field1: {
+					type: 'Int',
+					defaultValue: 1,
+				},
+				field2: {
+					type: 'Int',
+				},
+			},
+		})
+
+		expect(schema.schema.class[1]).toEqual({
+			name: 'Class2',
+			fields: {
+				field3: {
+					type: 'String',
+				},
+				field4: {
+					type: 'Int',
+				},
+			},
+		})
+	})
+
+	it('should add default class', () => {
+		const schema = new Schema({ class: [] })
+
+		expect(schema.schema.class.length).toBe(2)
+		expect(schema.schema.class[0].name).toEqual('_User')
+		expect(schema.schema.class[1].name).toEqual('_Session')
 	})
 
 	it('should add default enums', () => {
@@ -39,6 +318,10 @@ describe('Schema', () => {
 			},
 			{
 				name: 'AuthenticationProvider',
+				values: expect.any(Object),
+			},
+			{
+				name: 'SecondaryFactor',
 				values: expect.any(Object),
 			},
 		])

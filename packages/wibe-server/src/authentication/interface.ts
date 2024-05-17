@@ -12,37 +12,34 @@ export interface ProviderConfig {
 	clientSecret: string
 }
 
-export type AuthenticationCallbackOutput<T> = {
-	dataToStore: {
-		refreshToken?: string
-		accessToken?: string
-		expireAt?: Date
-	} & T
-	user: Partial<_User>
-}
-
 export type AuthenticationEventsOptions<T> = {
 	input: T
 	context: Context
 }
 
-export type ProviderInterface<T> = {
+export type ProviderInterface<T = any> = {
+	name: string
 	onSignIn: (
 		options: AuthenticationEventsOptions<T>,
-	) => Promise<AuthenticationCallbackOutput<T>>
+	) => Promise<{ user: Partial<_User> }>
 	onSignUp: (
 		options: AuthenticationEventsOptions<T>,
-	) => Promise<AuthenticationCallbackOutput<T>>
-	// onSecondaryFactorAuthentication?: (
-	// 	options: AuthenticationEventsOptions<T>,
-	// ) => Promise<AuthenticationCallbackOutput<T>>
+	) => Promise<{ authenticationDataToSave: T }>
 }
 
-export interface CustomAuthenticationMethods<T = Record<string, TypeField>> {
+export type SecondaryProviderInterface<T = any> = {
+	onSendChallenge: () => Promise<void>
+	onVerifyChallenge: (options: T) => Promise<boolean>
+}
+
+export type CustomAuthenticationMethods<
+	K = ProviderInterface | SecondaryProviderInterface,
+	T = Record<string, TypeField>,
+> = {
 	name: string
 	input: T
-	dataToStore: T
-	provider: ProviderInterface<T>
+	provider: K
+	isSecondaryFactor?: boolean
 }
 
 export interface AuthenticationConfig {

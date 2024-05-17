@@ -1,4 +1,3 @@
-import jwt from 'jsonwebtoken'
 import { WibeApp } from '../../server'
 import { AuthenticationEventsOptions, ProviderInterface } from '../interface'
 
@@ -10,6 +9,7 @@ type EmailPasswordInterface = {
 export class EmailPassword
 	implements ProviderInterface<EmailPasswordInterface>
 {
+	name = 'emailPassword'
 	async onSignIn({
 		input,
 	}: AuthenticationEventsOptions<EmailPasswordInterface>) {
@@ -49,89 +49,32 @@ export class EmailPassword
 		)
 			throw new Error('Invalid authentication credentials')
 
-		const fifteenMinutes = new Date(Date.now() + 1000 * 60 * 15)
-		const thirtyDays = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
-
-		const accessToken = jwt.sign(
-			{
-				userId: user.id,
-				iat: Date.now(),
-				exp: fifteenMinutes.getTime(),
-			},
-			import.meta.env.JWT_SECRET as string,
-		)
-
-		const refreshToken = jwt.sign(
-			{
-				userId: user.id,
-				iat: Date.now(),
-				exp: thirtyDays.getTime(),
-			},
-			import.meta.env.JWT_SECRET as string,
-		)
-
 		return {
 			user,
-			dataToStore: {
-				accessToken,
-				refreshToken,
-				expireAt: fifteenMinutes,
-				password: userDatabasePassword,
-				email: input.email,
-			},
 		}
 	}
 
 	async onSignUp({
 		input,
-		context,
 	}: AuthenticationEventsOptions<EmailPasswordInterface>) {
-		const user = await WibeApp.databaseController.createObject({
+		const users = await WibeApp.databaseController.getObjects({
 			className: '_User',
-			data: {
+			where: {
 				authentication: {
+					// @ts-expect-error
 					emailPassword: {
-						...input,
+						email: { equalTo: input.email },
 					},
 				},
 			},
-			context,
 		})
 
-		const fifteenMinutes = new Date(Date.now() + 15 * 60 * 1000)
-		const thirtyDays = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-
-		const accessToken = jwt.sign(
-			{
-				userId: user.id,
-				iat: Date.now(),
-				exp: fifteenMinutes.getTime(),
-			},
-			import.meta.env.JWT_SECRET as string,
-		)
-
-		const refreshToken = jwt.sign(
-			{
-				userId: user.id,
-				iat: Date.now(),
-				exp: thirtyDays.getTime(),
-			},
-			import.meta.env.JWT_SECRET as string,
-		)
-
-		const hashedPassword = await Bun.password.hash(
-			input.password,
-			'argon2id',
-		)
+		if (users.length > 0) throw new Error('User already exists')
 
 		return {
-			user,
-			dataToStore: {
-				accessToken,
-				refreshToken,
-				expireAt: fifteenMinutes,
-				password: hashedPassword,
+			authenticationDataToSave: {
 				email: input.email,
+				password: await Bun.password.hash(input.password, 'argon2id'),
 			},
 		}
 	}

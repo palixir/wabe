@@ -1,20 +1,13 @@
 import { SignInWithInput } from '../../../generated/wibe'
 import { Context } from '../../graphql/interface'
-import { WibeApp } from '../../server'
+import { Session } from '../Session'
+import { ProviderInterface, SecondaryProviderInterface } from '../interface'
+import { getAuthenticationMethod } from '../utils'
 
-/*
-signInWithResolver(input: {
-    authentication : {
-        emailPassword: {
-            email: "email@test.fr",
-            password: "password"
-        }
-        secondaryFactor: otp
-    }
-}
-
-*/
-
+// 0 - Get the authentication method
+// 1 - We check if the signIn is possible (call onSign)
+// 2 - If secondaryFactor is present, we call the onSendChallenge method of the provider
+// 3 - We create session
 export const signInWithResolver = async (
 	_: any,
 	{
@@ -24,54 +17,41 @@ export const signInWithResolver = async (
 	},
 	context: Context,
 ) => {
-	const customAuthenticationConfig =
-		WibeApp.config.authentication?.customAuthenticationMethods
-
-	if (!customAuthenticationConfig)
-		throw new Error('No custom authentication methods found')
-
-	const authenticationMethods = Object.keys(input.authentication || {})
-
-	// We check if the client don't use multiple authentication methods at the same time
-	if (authenticationMethods.length > 1 || authenticationMethods.length === 0)
-		throw new Error('Only one authentication method at the time is allowed')
-
-	const authenticationMethod = authenticationMethods[0]
-
-	// We check if the authentication method is valid
-	const validAuthenticationMethod = customAuthenticationConfig.find(
-		(method) =>
-			method.name.toLowerCase() === authenticationMethod.toLowerCase(),
+	const { provider, name } = getAuthenticationMethod<ProviderInterface>(
+		Object.keys(input.authentication || {}),
 	)
-
-	if (!validAuthenticationMethod)
-		throw new Error('No available custom authentication methods found')
-
-	const { provider } = validAuthenticationMethod
 
 	const inputOfTheGoodAuthenticationMethod =
 		// @ts-expect-error
-		input.authentication[authenticationMethod]
+		input.authentication[name]
 
-	const { dataToStore, user } = await provider.onSignIn({
+	// 1 - We call the onSignIn method of the provider
+	const { user } = await provider.onSignIn({
 		input: inputOfTheGoodAuthenticationMethod,
 		context,
 	})
 
-	if (!user.id) throw new Error('Authentication failed')
+	// 2 - We call the onSendChallenge method of the provider
+	if (input.authentication?.secondaryFactor) {
+		const secondaryProvider =
+			getAuthenticationMethod<SecondaryProviderInterface>([
+				input.authentication.secondaryFactor,
+			])
 
-	await WibeApp.databaseController.updateObject({
-		className: '_User',
-		id: user.id,
-		data: {
-			authentication: {
-				[authenticationMethod]: {
-					...(dataToStore || {}),
-				},
-			},
-		},
-		context,
-	})
+		await secondaryProvider.provider.onSendChallenge()
 
+		return true
+	}
+
+	const userId = user.id
+
+	if (!userId) throw new Error('Authentication failed')
+
+	const session = new Session()
+
+	await session.create(userId, context)
+
+	// TODO : Need pointer on schema/resolver
+	// return { accessToken, refreshToken }
 	return true
 }

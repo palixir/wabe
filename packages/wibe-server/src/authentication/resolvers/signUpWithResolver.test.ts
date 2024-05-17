@@ -1,15 +1,12 @@
-import { describe, expect, it, beforeEach, mock } from 'bun:test'
+import { describe, expect, it, beforeEach, mock, spyOn } from 'bun:test'
 import { WibeApp } from '../../server'
 import { signUpWithResolver } from './signUpWithResolver'
 import { Context } from '../../graphql/interface'
+import { Session } from '../Session'
 
 describe('SignUpWith', () => {
 	const mockOnLogin = mock(() =>
 		Promise.resolve({
-			dataToStore: {
-				accessToken: 'accessToken',
-				refreshToken: 'refreshToken',
-			},
 			user: {
 				id: 'id',
 			},
@@ -17,24 +14,21 @@ describe('SignUpWith', () => {
 	)
 	const mockOnSignUp = mock(() =>
 		Promise.resolve({
-			dataToStore: {
-				accessToken: 'accessToken',
-				refreshToken: 'refreshToken',
-			},
-			user: {
-				id: 'id',
+			authenticationDataToSave: {
+				email: 'email@com.fr',
+				password: 'password',
 			},
 		}),
 	)
 
-	const mockUpdateObject = mock(() => Promise.resolve({}))
+	const mockCreateObject = mock(() => Promise.resolve({ id: 'userId' }))
 
 	const mockDatabaseController = {
-		updateObject: mockUpdateObject,
+		createObject: mockCreateObject,
 	}
 
 	beforeEach(() => {
-		mockUpdateObject.mockClear()
+		mockCreateObject.mockClear()
 		mockOnLogin.mockClear()
 		mockOnSignUp.mockClear()
 
@@ -50,13 +44,10 @@ describe('SignUpWith', () => {
 							email: { type: 'Email', required: true },
 							password: { type: 'String', required: true },
 						},
-						dataToStore: {
-							email: { type: 'Email', required: true },
-							password: { type: 'String', required: true },
-						},
 						provider: {
 							onSignUp: mockOnSignUp,
 							onSignIn: mockOnLogin,
+							name: 'emailPassword',
 						},
 					},
 				],
@@ -94,13 +85,10 @@ describe('SignUpWith', () => {
 						email: { type: 'Email', required: true },
 						password: { type: 'String', required: true },
 					},
-					dataToStore: {
-						email: { type: 'Email', required: true },
-						password: { type: 'String', required: true },
-					},
 					provider: {
 						onSignUp: mockOnSignUp,
 						onSignIn: mockOnLogin,
+						name: 'phonePassword',
 					},
 				},
 			],
@@ -125,7 +113,10 @@ describe('SignUpWith', () => {
 	})
 
 	it('should signUpWith email and password when the user not exist', async () => {
-		const mockAddCookie = mock(() => {})
+		const spyCreateSession = spyOn(
+			Session.prototype,
+			'create',
+		).mockResolvedValue({ id: 'sessionId' } as any)
 
 		const res = await signUpWithResolver(
 			{},
@@ -139,16 +130,7 @@ describe('SignUpWith', () => {
 					},
 				},
 			},
-			{
-				cookie: {
-					access_token: {
-						add: mockAddCookie,
-					},
-					refresh_token: {
-						add: mockAddCookie,
-					},
-				},
-			} as any,
+			{} as any,
 		)
 
 		expect(res).toBe(true)
@@ -161,21 +143,28 @@ describe('SignUpWith', () => {
 			context: expect.anything(),
 		})
 
-		expect(mockUpdateObject).toHaveBeenCalledTimes(1)
-		expect(mockUpdateObject).toHaveBeenCalledWith({
+		expect(mockCreateObject).toHaveBeenCalledTimes(1)
+		expect(mockCreateObject).toHaveBeenCalledWith({
 			className: '_User',
-			id: 'id',
 			data: {
 				authentication: {
 					emailPassword: {
-						accessToken: 'accessToken',
-						refreshToken: 'refreshToken',
+						email: 'email@com.fr',
+						password: 'password',
 					},
 				},
 			},
 			context: expect.any(Object),
 		})
 
+		expect(spyCreateSession).toHaveBeenCalledTimes(1)
+		expect(spyCreateSession).toHaveBeenCalledWith(
+			'userId',
+			expect.any(Object),
+		)
+
 		expect(mockOnLogin).toHaveBeenCalledTimes(0)
+
+		spyCreateSession.mockRestore()
 	})
 })

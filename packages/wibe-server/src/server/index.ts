@@ -113,6 +113,8 @@ export class WibeApp {
 
 		const wibeSchema = new Schema(WibeApp.config.schema)
 
+		WibeApp.config.schema = wibeSchema.schema
+
 		const graphqlSchema = new WibeGraphQLSchema(wibeSchema)
 
 		const types = graphqlSchema.createSchema()
@@ -135,6 +137,7 @@ export class WibeApp {
 				maskedErrors: false,
 				context: () => {
 					return {
+						sessionId: 'fakeSessionId',
 						user: {
 							id: 'fakeId',
 							email: 'fakeEmail',
@@ -164,7 +167,9 @@ export class WibeApp {
 			Bun.write('generated/schema.graphql', printSchema(schema))
 		}
 
-		this.server.listen(WibeApp.config.port)
+		this.server.listen(WibeApp.config.port, ({ port }) => {
+			console.log(`Server is running on port ${port}`)
+		})
 	}
 
 	async close() {
