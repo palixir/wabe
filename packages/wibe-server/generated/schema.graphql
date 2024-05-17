@@ -93,16 +93,16 @@ type _Session {
 
 type Query {
   """User class"""
-  _user(id: ID): _User
+  _user(id: ID): _User!
 
   """User class"""
   _users(where: _UserWhereInput, offset: Int, limit: Int): _UserConnection!
 
   """Hello world description"""
   helloWorld(name: String!): String
-  post(id: ID): Post
+  post(id: ID): Post!
   posts(where: PostWhereInput, offset: Int, limit: Int): PostConnection!
-  _session(id: ID): _Session
+  _session(id: ID): _Session!
   _sessions(where: _SessionWhereInput, offset: Int, limit: Int): _SessionConnection!
 }
 
@@ -294,8 +294,8 @@ type Mutation {
   secondCustomMutation(input: SecondCustomMutationInput): Int
   signInWith(input: SignInWithInput): Boolean
   signUpWith(input: SignUpWithInput): Boolean
-  signOut(input: SignOutInput): Boolean
-  refresh(input: RefreshInput): Boolean
+  signOut: Boolean
+  refresh: Boolean
   verifyChallenge(input: VerifyChallengeInput): Boolean
   createPost(input: PostCreateInput): Post!
   createPosts(input: PostsCreateInput): PostConnection!
@@ -515,14 +515,6 @@ input SignUpWithAuthenticationGoogleInput {
 
 input SignUpWithAuthenticationOtpInput {
   code: String
-}
-
-input SignOutInput {
-  uselessField: String
-}
-
-input RefreshInput {
-  uselessField: String
 }
 
 input VerifyChallengeInput {

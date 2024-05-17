@@ -438,9 +438,10 @@ export class GraphQLSchema {
 		connectionObject: GraphQLObjectType
 	}) {
 		const classNameInLowerCase = className.toLowerCase()
+
 		return {
 			[classNameInLowerCase]: {
-				type: object,
+				type: new GraphQLNonNull(object),
 				description: object.description,
 				args: { id: { type: GraphQLID } },
 				resolve: (root, args, ctx, info) =>
