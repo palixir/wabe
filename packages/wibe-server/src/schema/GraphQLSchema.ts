@@ -441,7 +441,7 @@ export class GraphQLSchema {
 
 		return {
 			[classNameInLowerCase]: {
-				type: new GraphQLNonNull(object),
+				type: object,
 				description: object.description,
 				args: { id: { type: GraphQLID } },
 				resolve: (root, args, ctx, info) =>
