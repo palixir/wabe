@@ -1,5 +1,5 @@
 import { describe, expect, it, spyOn, mock } from 'bun:test'
-import { fail } from 'assert'
+import { fail } from 'node:assert'
 import { OAuth2Client } from './Oauth2Client'
 import { base64URLencode } from './utils'
 

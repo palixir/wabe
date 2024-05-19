@@ -1,6 +1,6 @@
 import { describe, expect, it, spyOn } from 'bun:test'
 import { signOutResolver } from './signOutResolver'
-import { Context } from '../../graphql/interface'
+import type { Context } from '../../graphql/interface'
 import { Session } from '../Session'
 
 describe('signOut', () => {

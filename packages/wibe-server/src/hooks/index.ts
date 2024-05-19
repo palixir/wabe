@@ -1,5 +1,5 @@
-import { WibeSchemaTypes } from '../../generated/wibe'
-import { Context } from '../graphql/interface'
+import type { WibeSchemaTypes } from '../../generated/wibe'
+import type { Context } from '../graphql/interface'
 import { WibeApp } from '../server'
 import { notEmpty } from '../utils/helper'
 import { HookObject } from './HookObject'

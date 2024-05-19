@@ -1,39 +1,39 @@
 import { beforeAll, afterAll, describe, it, expect } from 'bun:test'
-import { GraphQLClient, gql } from 'graphql-request'
-import { WibeApp } from '../../server'
+import { type GraphQLClient, gql } from 'graphql-request'
+import type { WibeApp } from '../../server'
 import { closeTests, getGraphqlClient, setupTests } from '../../utils/helper'
 
 const graphql = {
 	_users: gql`
-        query _users($where: _UserWhereInput) {
-            _users(where: $where) {
-                edges {
-                    node {
-                        id
-                        name
-                        age
-                        isAdmin
-                        floatValue
-                    }
-                }
-            }
-        }
-    `,
+		query _users($where: _UserWhereInput) {
+			_users(where: $where) {
+				edges {
+					node {
+						id
+						name
+						age
+						isAdmin
+						floatValue
+					}
+				}
+			}
+		}
+	`,
 	create_Users: gql`
-        mutation create_Users($input: _UsersCreateInput!) {
-            create_Users(input: $input) {
-                edges {
-                    node {
-                        id
-                        name
-                        age
-                        isAdmin
-                        floatValue
-                    }
-                }
-            }
-        }
-    `,
+		mutation create_Users($input: Create_UsersInput!) {
+			create_Users(input: $input) {
+				edges {
+					node {
+						id
+						name
+						age
+						isAdmin
+						floatValue
+					}
+				}
+			}
+		}
+	`,
 }
 
 describe('GraphQL : aggregation', () => {

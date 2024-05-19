@@ -1,22 +1,22 @@
 import {
 	GraphQLBoolean,
-	GraphQLEnumType,
-	GraphQLFieldConfig,
+	type GraphQLEnumType,
+	type GraphQLFieldConfig,
 	GraphQLFloat,
 	GraphQLInputObjectType,
 	GraphQLInt,
 	GraphQLList,
 	GraphQLNonNull,
 	GraphQLObjectType,
-	GraphQLScalarType,
+	type GraphQLScalarType,
 	GraphQLString,
 } from 'graphql'
-import {
+import type {
 	ClassInterface,
 	SchemaFields,
 	TypeField,
 	WibeDefaultTypes,
-} from './Schema'
+} from '../schema'
 import {
 	AnyWhereInput,
 	ArrayWhereInput,
@@ -110,10 +110,7 @@ interface GraphqlParserConstructorOptions {
 	enums: GraphQLEnumType[]
 }
 
-export interface GraphqlParserFactory {
-	(
-		options: GraphqlParserFactoryOptions,
-	): {
+export type GraphqlParserFactory = (options: GraphqlParserFactoryOptions) => {
 		_parseWibeObject(options: ParseObjectOptions): any
 		_parseWibeWhereInputObject(options: ParseObjectOptions): any
 		_parseWibeInputObject(options: ParseObjectOptions): any
@@ -124,11 +121,8 @@ export interface GraphqlParserFactory {
 		}): any
 		getGraphqlFields(nameOfTheObject: string): any
 	}
-}
 
-export interface GraphqlParserConstructor {
-	(options: GraphqlParserConstructorOptions): GraphqlParserFactory
-}
+export type GraphqlParserConstructor = (options: GraphqlParserConstructorOptions) => GraphqlParserFactory
 
 export const GraphqlParser: GraphqlParserConstructor =
 	({ scalars, enums }: GraphqlParserConstructorOptions) =>
@@ -368,16 +362,12 @@ export const GraphqlParser: GraphqlParserConstructor =
 				(acc, key) => {
 					const currentField = schemaFields[key]
 
-					const keyWithFirstLetterUpperCase = `${key
-						.charAt(0)
-						.toUpperCase()}${key.slice(1)}`
-
 					if (currentField.type === 'Object') {
 						acc[key] = {
 							type: callback({
 								...currentField,
 								objectToParse: currentField.object,
-								nameOfTheObject: `${nameOfTheObject}${keyWithFirstLetterUpperCase}`,
+								nameOfTheObject: `${nameOfTheObject}${currentField.object.name}`,
 							}),
 						}
 

@@ -1,5 +1,5 @@
 import { WibeApp } from '../../server'
-import { AuthenticationEventsOptions, ProviderInterface } from '../interface'
+import type { AuthenticationEventsOptions, ProviderInterface } from '../interface'
 import { Google as GoogleOauth } from '../oauth/Google'
 
 type GoogleInterface = {

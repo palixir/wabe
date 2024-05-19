@@ -1,4 +1,4 @@
-import { CustomAuthenticationMethods } from './interface'
+import type { CustomAuthenticationMethods } from './interface'
 import { EmailPassword } from './providers/EmailPassword'
 import { Google } from './providers/Google'
 

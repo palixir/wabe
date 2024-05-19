@@ -93,16 +93,16 @@ type _Session {
 
 type Query {
   """User class"""
-  _user(id: ID): _User!
+  _user(id: ID): _User
 
   """User class"""
   _users(where: _UserWhereInput, offset: Int, limit: Int): _UserConnection!
 
   """Hello world description"""
   helloWorld(name: String!): String
-  post(id: ID): Post!
+  post(id: ID): Post
   posts(where: PostWhereInput, offset: Int, limit: Int): PostConnection!
-  _session(id: ID): _Session!
+  _session(id: ID): _Session
   _sessions(where: _SessionWhereInput, offset: Int, limit: Int): _SessionConnection!
 }
 
@@ -273,22 +273,22 @@ input _SessionWhereInput {
 
 type Mutation {
   """User class"""
-  create_User(input: _UserCreateInput): _User!
+  create_User(input: Create_UserInput): Create_UserPayload
 
   """User class"""
-  create_Users(input: _UsersCreateInput): _UserConnection!
+  create_Users(input: Create_UsersInput): _UserConnection!
 
   """User class"""
-  update_User(input: _UserUpdateInput): _User!
+  update_User(input: Update_UserInput): Update_UserPayload
 
   """User class"""
-  update_Users(input: _UsersUpdateInput): _UserConnection!
+  update_Users(input: Update_UsersInput): _UserConnection!
 
   """User class"""
-  delete_User(input: _UserDeleteInput): _User!
+  delete_User(input: Delete_UserInput): Delete_UserPayload
 
   """User class"""
-  delete_Users(input: _UsersDeleteInput): _UserConnection!
+  delete_Users(input: Delete_UsersInput): _UserConnection!
   createMutation(input: CreateMutationInput): Boolean!
   customMutation(input: CustomMutationInput): Int
   secondCustomMutation(input: SecondCustomMutationInput): Int
@@ -297,21 +297,26 @@ type Mutation {
   signOut: Boolean
   refresh: Boolean
   verifyChallenge(input: VerifyChallengeInput): Boolean
-  createPost(input: PostCreateInput): Post!
-  createPosts(input: PostsCreateInput): PostConnection!
-  updatePost(input: PostUpdateInput): Post!
-  updatePosts(input: PostsUpdateInput): PostConnection!
-  deletePost(input: PostDeleteInput): Post!
-  deletePosts(input: PostsDeleteInput): PostConnection!
-  create_Session(input: _SessionCreateInput): _Session!
-  create_Sessions(input: _SessionsCreateInput): _SessionConnection!
-  update_Session(input: _SessionUpdateInput): _Session!
-  update_Sessions(input: _SessionsUpdateInput): _SessionConnection!
-  delete_Session(input: _SessionDeleteInput): _Session!
-  delete_Sessions(input: _SessionsDeleteInput): _SessionConnection!
+  createPost(input: CreatePostInput): CreatePostPayload
+  createPosts(input: CreatePostsInput): PostConnection!
+  updatePost(input: UpdatePostInput): UpdatePostPayload
+  updatePosts(input: UpdatePostsInput): PostConnection!
+  deletePost(input: DeletePostInput): DeletePostPayload
+  deletePosts(input: DeletePostsInput): PostConnection!
+  create_Session(input: Create_SessionInput): Create_SessionPayload
+  create_Sessions(input: Create_SessionsInput): _SessionConnection!
+  update_Session(input: Update_SessionInput): Update_SessionPayload
+  update_Sessions(input: Update_SessionsInput): _SessionConnection!
+  delete_Session(input: Delete_SessionInput): Delete_SessionPayload
+  delete_Sessions(input: Delete_SessionsInput): _SessionConnection!
 }
 
-input _UserCreateInput {
+type Create_UserPayload {
+  _user: _User
+  clientMutationId: String
+}
+
+input Create_UserInput {
   fields: _UserInput
 }
 
@@ -369,13 +374,18 @@ input _UserAuthenticationOtpInput {
   code: String
 }
 
-input _UsersCreateInput {
+input Create_UsersInput {
   fields: [_UserInput]!
   offset: Int
   limit: Int
 }
 
-input _UserUpdateInput {
+type Update_UserPayload {
+  _user: _User
+  clientMutationId: String
+}
+
+input Update_UserInput {
   id: ID
   fields: _UserUpdateFieldsInput
 }
@@ -434,18 +444,23 @@ input _UserAuthenticationOtpUpdateFieldsInput {
   code: String
 }
 
-input _UsersUpdateInput {
+input Update_UsersInput {
   fields: _UserUpdateFieldsInput
   where: _UserWhereInput
   offset: Int
   limit: Int
 }
 
-input _UserDeleteInput {
+type Delete_UserPayload {
+  _user: _User
+  clientMutationId: String
+}
+
+input Delete_UserInput {
   id: ID
 }
 
-input _UsersDeleteInput {
+input Delete_UsersInput {
   where: _UserWhereInput
 }
 
@@ -529,7 +544,12 @@ input VerifyChallengeFactorOtpInput {
   code: String
 }
 
-input PostCreateInput {
+type CreatePostPayload {
+  post: Post
+  clientMutationId: String
+}
+
+input CreatePostInput {
   fields: PostInput
 }
 
@@ -537,13 +557,18 @@ input PostInput {
   name: String!
 }
 
-input PostsCreateInput {
+input CreatePostsInput {
   fields: [PostInput]!
   offset: Int
   limit: Int
 }
 
-input PostUpdateInput {
+type UpdatePostPayload {
+  post: Post
+  clientMutationId: String
+}
+
+input UpdatePostInput {
   id: ID
   fields: PostUpdateFieldsInput
 }
@@ -552,22 +577,32 @@ input PostUpdateFieldsInput {
   name: String
 }
 
-input PostsUpdateInput {
+input UpdatePostsInput {
   fields: PostUpdateFieldsInput
   where: PostWhereInput
   offset: Int
   limit: Int
 }
 
-input PostDeleteInput {
+type DeletePostPayload {
+  post: Post
+  clientMutationId: String
+}
+
+input DeletePostInput {
   id: ID
 }
 
-input PostsDeleteInput {
+input DeletePostsInput {
   where: PostWhereInput
 }
 
-input _SessionCreateInput {
+type Create_SessionPayload {
+  _session: _Session
+  clientMutationId: String
+}
+
+input Create_SessionInput {
   fields: _SessionInput
 }
 
@@ -581,13 +616,18 @@ input _SessionInput {
   updatedAt: Date!
 }
 
-input _SessionsCreateInput {
+input Create_SessionsInput {
   fields: [_SessionInput]!
   offset: Int
   limit: Int
 }
 
-input _SessionUpdateInput {
+type Update_SessionPayload {
+  _session: _Session
+  clientMutationId: String
+}
+
+input Update_SessionInput {
   id: ID
   fields: _SessionUpdateFieldsInput
 }
@@ -602,17 +642,22 @@ input _SessionUpdateFieldsInput {
   updatedAt: Date
 }
 
-input _SessionsUpdateInput {
+input Update_SessionsInput {
   fields: _SessionUpdateFieldsInput
   where: _SessionWhereInput
   offset: Int
   limit: Int
 }
 
-input _SessionDeleteInput {
+type Delete_SessionPayload {
+  _session: _Session
+  clientMutationId: String
+}
+
+input Delete_SessionInput {
   id: ID
 }
 
-input _SessionsDeleteInput {
+input Delete_SessionsInput {
   where: _SessionWhereInput
 }

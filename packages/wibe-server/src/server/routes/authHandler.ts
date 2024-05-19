@@ -1,4 +1,4 @@
-import { Context } from 'wobe'
+import type { Context } from 'wobe'
 import { WibeApp } from '..'
 import { ProviderEnum } from '../../authentication/interface'
 import { getGraphqlClient } from '../../utils/helper'

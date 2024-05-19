@@ -1,8 +1,8 @@
-import { SignUpWithInput } from '../../../generated/wibe'
-import { Context } from '../../graphql/interface'
+import type { SignUpWithInput } from '../../../generated/wibe'
+import type { Context } from '../../graphql/interface'
 import { WibeApp } from '../../server'
 import { Session } from '../Session'
-import { ProviderInterface } from '../interface'
+import type { ProviderInterface } from '../interface'
 import { getAuthenticationMethod } from '../utils'
 
 // 0 - Get the authentication method

@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken'
 import { WibeApp } from '../server'
-import { Context } from '../graphql/interface'
+import type { Context } from '../graphql/interface'
 
 export class Session {
 	private accessToken: string | undefined = undefined

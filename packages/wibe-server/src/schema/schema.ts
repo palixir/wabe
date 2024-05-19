@@ -1,4 +1,4 @@
-import { WibeSchemaScalars, WibeSchemaEnums } from '../../generated/wibe'
+import type { WibeSchemaScalars, WibeSchemaEnums } from '../../generated/wibe'
 import { signInWithResolver, signUpWithResolver } from '../authentication'
 import { signOutResolver } from '../authentication/resolvers/signOutResolver'
 import { verifyChallengeResolver } from '../authentication/resolvers/verifyChallenge'
@@ -263,7 +263,7 @@ export class Schema {
 		const challengeInputObject: TypeFieldObject = {
 			type: 'Object',
 			object: {
-				name: 'ChallengeInput',
+				name: 'Factor',
 				fields: {
 					...allSecondaryFactorAuthenticationMethods,
 				},
@@ -312,9 +312,9 @@ export class Schema {
 											},
 											resolve: verifyChallengeResolver,
 										},
-								  }
+									}
 								: {}),
-					  }
+						}
 					: {}),
 			},
 		}
@@ -372,7 +372,7 @@ export class Schema {
 									queries: isQueriesEmpty
 										? resolvers.queries
 										: undefined,
-							  }
+								}
 							: undefined,
 				}
 			}, allClassWithSameName[0] as ClassInterface)

@@ -1,5 +1,5 @@
 import { WibeApp } from '../server'
-import {
+import type {
 	CustomAuthenticationMethods,
 	ProviderInterface,
 	SecondaryProviderInterface,

@@ -13,6 +13,7 @@ const config: CodegenConfig = {
 			documents: './src/**/*.graphql',
 		},
 	},
+	ignoreNoDocuments: true,
 }
 
 export default config

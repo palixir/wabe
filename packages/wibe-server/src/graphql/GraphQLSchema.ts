@@ -1,14 +1,15 @@
 import {
 	GraphQLEnumType,
-	GraphQLFieldConfig,
+	type GraphQLFieldConfig,
 	GraphQLID,
 	GraphQLInputObjectType,
 	GraphQLInt,
 	GraphQLList,
 	GraphQLNonNull,
 	GraphQLObjectType,
-	GraphQLOutputType,
+	type GraphQLOutputType,
 	GraphQLScalarType,
+	GraphQLString,
 } from 'graphql'
 import { pluralize } from 'wibe-pluralize'
 import {
@@ -20,16 +21,17 @@ import {
 	mutationToUpdateObject,
 	queryForMultipleObject,
 	queryForOneObject,
-} from '../graphql'
-import {
+} from './resolvers'
+import type {
 	ClassInterface,
 	MutationResolver,
 	QueryResolver,
 	Schema,
 	TypeField,
-} from './Schema'
-import { GraphqlParser, GraphqlParserFactory } from './graphqlParser'
-import { WibeSchemaTypes } from '../../generated/wibe'
+} from '../schema'
+import { GraphqlParser, type GraphqlParserFactory } from './parser'
+import type { WibeSchemaTypes } from '../../generated/wibe'
+import { firstLetterInLowerCase } from '../utils'
 
 export class GraphQLSchema {
 	private schemas: Schema
@@ -68,7 +70,7 @@ export class GraphQLSchema {
 				} = currentObject
 
 				// Queries
-				const defaultQueries = this.createDefaultQueriesSchema({
+				const defaultQueries = this.createDefaultQueries({
 					className,
 					whereInputType,
 					object,
@@ -84,7 +86,7 @@ export class GraphQLSchema {
 					resolvers: current.resolvers?.mutations || {},
 					graphqlParser,
 				})
-				const defaultMutations = this.createDefaultMutationsSchema({
+				const defaultMutations = this.createDefaultMutations({
 					className,
 					defaultInputType,
 					whereInputType,
@@ -319,6 +321,7 @@ export class GraphQLSchema {
 				graphqlParser,
 				wibeClass,
 			})
+
 			const whereInputObject = this.createWhereInputObject({
 				graphqlParser,
 				wibeClass,
@@ -426,7 +429,7 @@ export class GraphQLSchema {
 		)
 	}
 
-	createDefaultQueriesSchema({
+	createDefaultQueries({
 		className,
 		whereInputType,
 		object,
@@ -437,10 +440,11 @@ export class GraphQLSchema {
 		object: GraphQLObjectType
 		connectionObject: GraphQLObjectType
 	}) {
-		const classNameInLowerCase = className.toLowerCase()
+		const classNameWithFirstLetterLowerCase =
+			firstLetterInLowerCase(className)
 
 		return {
-			[classNameInLowerCase]: {
+			[classNameWithFirstLetterLowerCase]: {
 				type: object,
 				description: object.description,
 				args: { id: { type: GraphQLID } },
@@ -453,7 +457,7 @@ export class GraphQLSchema {
 						className as keyof WibeSchemaTypes,
 					),
 			},
-			[pluralize(classNameInLowerCase)]: {
+			[pluralize(classNameWithFirstLetterLowerCase)]: {
 				type: new GraphQLNonNull(connectionObject),
 				description: object.description,
 				args: {
@@ -473,7 +477,7 @@ export class GraphQLSchema {
 		} as Record<string, GraphQLFieldConfig<any, any, any>>
 	}
 
-	createDefaultMutationsSchema({
+	createDefaultMutations({
 		className,
 		object,
 		defaultInputType,
@@ -488,15 +492,28 @@ export class GraphQLSchema {
 		object: GraphQLObjectType
 		connectionObject: GraphQLObjectType
 	}) {
+		const classNameWithFirstLetterLowerCase =
+			firstLetterInLowerCase(className)
+
+		const pluralClassName = pluralize(className)
+
+		const createPayloadType = new GraphQLObjectType({
+			name: `Create${className}Payload`,
+			fields: () => ({
+				[classNameWithFirstLetterLowerCase]: { type: object },
+				clientMutationId: { type: GraphQLString },
+			}),
+		})
+
 		const createInputType = new GraphQLInputObjectType({
-			name: `${className}CreateInput`,
+			name: `Create${className}Input`,
 			fields: () => ({
 				fields: { type: defaultInputType },
 			}),
 		})
 
 		const createsInputType = new GraphQLInputObjectType({
-			name: `${className}sCreateInput`,
+			name: `Create${pluralClassName}Input`,
 			fields: () => ({
 				fields: {
 					type: new GraphQLNonNull(new GraphQLList(defaultInputType)),
@@ -506,8 +523,16 @@ export class GraphQLSchema {
 			}),
 		})
 
+		const updatePayloadType = new GraphQLObjectType({
+			name: `Update${className}Payload`,
+			fields: () => ({
+				[classNameWithFirstLetterLowerCase]: { type: object },
+				clientMutationId: { type: GraphQLString },
+			}),
+		})
+
 		const updateInputType = new GraphQLInputObjectType({
-			name: `${className}UpdateInput`,
+			name: `Update${className}Input`,
 			fields: () => ({
 				id: { type: GraphQLID },
 				fields: { type: defaultUpdateInputType },
@@ -515,7 +540,7 @@ export class GraphQLSchema {
 		})
 
 		const updatesInputType = new GraphQLInputObjectType({
-			name: `${className}sUpdateInput`,
+			name: `Update${pluralClassName}Input`,
 			fields: () => ({
 				fields: { type: defaultUpdateInputType },
 				where: { type: whereInputType },
@@ -524,15 +549,23 @@ export class GraphQLSchema {
 			}),
 		})
 
+		const deletePayloadType = new GraphQLObjectType({
+			name: `Delete${className}Payload`,
+			fields: () => ({
+				[classNameWithFirstLetterLowerCase]: { type: object },
+				clientMutationId: { type: GraphQLString },
+			}),
+		})
+
 		const deleteInputType = new GraphQLInputObjectType({
-			name: `${className}DeleteInput`,
+			name: `Delete${className}Input`,
 			fields: () => ({
 				id: { type: GraphQLID },
 			}),
 		})
 
 		const deletesInputType = new GraphQLInputObjectType({
-			name: `${className}sDeleteInput`,
+			name: `Delete${pluralClassName}Input`,
 			fields: () => ({
 				where: { type: whereInputType },
 			}),
@@ -540,7 +573,7 @@ export class GraphQLSchema {
 
 		return {
 			[`create${className}`]: {
-				type: new GraphQLNonNull(object),
+				type: createPayloadType,
 				description: object.description,
 				args: { input: { type: createInputType } },
 				resolve: (root, args, ctx, info) =>
@@ -566,7 +599,7 @@ export class GraphQLSchema {
 					),
 			},
 			[`update${className}`]: {
-				type: new GraphQLNonNull(object),
+				type: updatePayloadType,
 				description: object.description,
 				args: { input: { type: updateInputType } },
 				resolve: (root, args, ctx, info) =>
@@ -592,7 +625,7 @@ export class GraphQLSchema {
 					),
 			},
 			[`delete${className}`]: {
-				type: new GraphQLNonNull(object),
+				type: deletePayloadType,
 				description: object.description,
 				args: {
 					input: {

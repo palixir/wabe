@@ -10,3 +10,13 @@ export const getClient = () => {
 
 	return getSdk(client)
 }
+
+export const firstLetterInLowerCase = (str: string) => {
+	const indexOfFirstLetter = str.search(/[a-z]/i)
+
+	return (
+		str.slice(0, indexOfFirstLetter) +
+		str[indexOfFirstLetter].toLowerCase() +
+		str.slice(indexOfFirstLetter + 1)
+	)
+}

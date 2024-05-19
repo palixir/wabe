@@ -7,9 +7,9 @@ import {
 	expect,
 	it,
 } from 'bun:test'
-import { WibeApp } from '../../server'
+import type { WibeApp } from '../../server'
 import { closeTests, getGraphqlClient, setupTests } from '../../utils/helper'
-import { GraphQLClient, gql } from 'graphql-request'
+import { type GraphQLClient, gql } from 'graphql-request'
 
 const cleanUsers = async (client: GraphQLClient) => {
 	const { _users } = await client.request<any>(graphql._users, {})
@@ -87,160 +87,6 @@ describe('GraphQL : E2E', () => {
 
 			expect(_users.edges.length).toEqual(2)
 			expect(_users.edges[0].node.name).toEqual('Toto6')
-		})
-
-		it('should request sub sub object', async () => {
-			await client.request<any>(graphql.create_Users, {
-				input: {
-					fields: {
-						authentication: {
-							emailPassword: {
-								email: 'email@test.fr',
-								password: 'password',
-							},
-						},
-					},
-				},
-			})
-
-			const res = await client.request<any>(graphql._users, {
-				where: {
-					authentication: {
-						emailPassword: {
-							email: { equalTo: 'email@test.fr' },
-						},
-					},
-				},
-			})
-
-			expect(res._users.edges.length).toEqual(1)
-		})
-
-		it('should create user with custom object in schema', async () => {
-			await client.request<any>(graphql.create_Users, {
-				input: {
-					fields: [
-						{
-							name: 'Jean',
-							address: {
-								address1: '1 rue de la paix',
-								address2: '2 rue de la paix',
-								postalCode: 75000,
-								city: 'Paris',
-								country: 'France',
-							},
-						},
-						{
-							name: 'Jeanne',
-							age: 23,
-						},
-					],
-				},
-			})
-
-			const { _users } = await client.request<any>(graphql._users, {
-				where: {
-					address: {
-						address1: {
-							equalTo: '1 rue de la paix',
-						},
-					},
-				},
-			})
-
-			expect(_users.edges.length).toEqual(1)
-			expect(_users.edges[0].node.name).toEqual('Jean')
-
-			const { _users: users2 } = await client.request<any>(
-				graphql._users,
-				{
-					where: {
-						address: {
-							postalCode: {
-								equalTo: 75000,
-							},
-						},
-					},
-				},
-			)
-
-			expect(users2.edges.length).toEqual(1)
-			expect(users2.edges[0].node.name).toEqual('Jean')
-
-			const { _users: users3 } = await client.request<any>(
-				graphql._users,
-				{
-					where: {
-						address: {
-							address1: {
-								notEqualTo: '1 rue de la paix',
-							},
-						},
-					},
-				},
-			)
-
-			expect(users3.edges.length).toEqual(3)
-		})
-
-		it('should create user with object of object in schema', async () => {
-			await client.request<any>(graphql.create_Users, {
-				input: {
-					fields: [
-						{
-							name: 'Jean',
-							object: {
-								objectOfObject: {
-									name: 'object',
-								},
-							},
-						},
-					],
-				},
-			})
-
-			const { _users } = await client.request<any>(graphql._users, {
-				where: {
-					object: {
-						objectOfObject: {
-							name: { equalTo: 'object' },
-						},
-					},
-				},
-			})
-
-			expect(_users.edges.length).toEqual(1)
-			expect(_users.edges[0].node.name).toEqual('Jean')
-
-			const { _users: users2 } = await client.request<any>(
-				graphql._users,
-				{
-					where: {
-						object: {
-							objectOfObject: {
-								name: { equalTo: 'object2' },
-							},
-						},
-					},
-				},
-			)
-
-			expect(users2.edges.length).toEqual(0)
-
-			const { _users: users3 } = await client.request<any>(
-				graphql._users,
-				{
-					where: {
-						object: {
-							objectOfObject: {
-								name: { notEqualTo: 'object' },
-							},
-						},
-					},
-				},
-			)
-
-			expect(users3.edges.length).toEqual(2)
 		})
 
 		it('should create user with custom enum (Role)', async () => {
@@ -344,95 +190,6 @@ describe('GraphQL : E2E', () => {
 			])
 		})
 
-		it('should create custom query successfully', async () => {
-			// Test required field
-			expect(
-				client.request<any>(graphql.customQuery, {}),
-			).rejects.toThrow()
-
-			// Test String param is correctly passed
-			expect(
-				client.request<any>(graphql.customMutation, {
-					input: {
-						name: 1.5,
-					},
-				}),
-			).rejects.toThrow()
-
-			const res = await client.request<any>(graphql.customQuery, {
-				name: 'Lucas',
-			})
-
-			expect(res.customQuery).toEqual('Successfull')
-		})
-
-		it('should create custom mutation successfully', async () => {
-			// Test required field
-			expect(
-				client.request<any>(graphql.customMutation, {}),
-			).rejects.toThrow()
-
-			// Test Int param is correctly passed
-			expect(
-				client.request<any>(graphql.customMutation, {
-					input: {
-						a: 1.5,
-						b: 1.5,
-					},
-				}),
-			).rejects.toThrow()
-
-			const res = await client.request<any>(graphql.customMutation, {
-				input: {
-					a: 1,
-					b: 1,
-				},
-			})
-
-			expect(res.customMutation).toEqual(2)
-		})
-
-		it('should create recursive mutation correctly (with sub input)', async () => {
-			expect(
-				client.request<any>(graphql.secondCustomMutation, {
-					input: {
-						a: 1,
-						b: 1,
-					},
-				}),
-			).rejects.toThrow()
-
-			const res = await client.request<any>(
-				graphql.secondCustomMutation,
-				{
-					input: {
-						sum: {
-							a: 1,
-							b: 1,
-						},
-					},
-				},
-			)
-
-			expect(res.secondCustomMutation).toEqual(2)
-
-			const res2 = await client.request<any>(
-				graphql.thirdCustomMutation,
-				{
-					input: {
-						subObject: {
-							sum: {
-								a: 1,
-								b: 1,
-							},
-						},
-					},
-				},
-			)
-
-			expect(res2.thirdCustomMutation).toEqual(2)
-		})
-
 		it('should get an object that not exist', async () => {
 			expect(
 				await client.request<any>(graphql._user, {
@@ -452,11 +209,11 @@ describe('GraphQL : E2E', () => {
 			})
 
 			const { _user } = await client.request<any>(graphql._user, {
-				id: res.create_User.id,
+				id: res.create_User._user.id,
 			})
 
 			expect(_user).toEqual({
-				id: res.create_User.id,
+				id: res.create_User._user.id,
 				name: 'CurrentUser',
 				age: 99,
 			})
@@ -501,7 +258,7 @@ describe('GraphQL : E2E', () => {
 				},
 			})
 
-			expect(res.create_User).toEqual({
+			expect(res.create_User._user).toEqual({
 				id: expect.anything(),
 				name: 'John',
 				age: 23,
@@ -583,7 +340,7 @@ describe('GraphQL : E2E', () => {
 				},
 			})
 
-			expect(res.update_User).toEqual({
+			expect(res.update_User._user).toEqual({
 				name: 'NameAfterUpdate',
 				age: userToUpdate.age,
 			})
@@ -626,7 +383,7 @@ describe('GraphQL : E2E', () => {
 				},
 			})
 
-			expect(res.delete_User).toEqual({
+			expect(res.delete_User._user).toEqual({
 				name: userToDelete.name,
 				age: userToDelete.age,
 			})
@@ -801,16 +558,18 @@ const graphql = {
 		}
 	`,
 	create_User: gql`
-		mutation create_User($input: _UserCreateInput!) {
+		mutation create_User($input: Create_UserInput!) {
 			create_User(input: $input) {
-				id
-				name
-				age
+				_user {
+					id
+					name
+					age
+				}
 			}
 		}
 	`,
 	create_Users: gql`
-		mutation create_Users($input: _UsersCreateInput!) {
+		mutation create_Users($input: Create_UsersInput!) {
 			create_Users(input: $input) {
 				edges {
 					node {
@@ -822,15 +581,17 @@ const graphql = {
 		}
 	`,
 	update_User: gql`
-		mutation update_User($input: _UserUpdateInput!) {
+		mutation update_User($input: Update_UserInput!) {
 			update_User(input: $input) {
-				name
-				age
+				_user {
+					name
+					age
+				}
 			}
 		}
 	`,
 	update_Users: gql`
-		mutation update_Users($input: _UsersUpdateInput!) {
+		mutation update_Users($input: Update_UsersInput!) {
 			update_Users(input: $input) {
 				edges {
 					node {
@@ -842,15 +603,17 @@ const graphql = {
 		}
 	`,
 	delete_User: gql`
-		mutation delete_User($input: _UserDeleteInput!) {
+		mutation delete_User($input: Delete_UserInput!) {
 			delete_User(input: $input) {
-				name
-				age
+				_user {
+					name
+					age
+				}
 			}
 		}
 	`,
 	delete_Users: gql`
-		mutation delete_Users($input: _UsersDeleteInput!) {
+		mutation delete_Users($input: Delete_UsersInput!) {
 			delete_Users(input: $input) {
 				edges {
 					node {

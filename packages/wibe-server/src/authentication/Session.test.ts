@@ -7,8 +7,8 @@ import {
 	spyOn,
 	beforeEach,
 } from 'bun:test'
-import { fail } from 'assert'
-import jwt, { JwtPayload } from 'jsonwebtoken'
+import { fail } from 'node:assert'
+import jwt, { type JwtPayload } from 'jsonwebtoken'
 import { Session } from './Session'
 import { WibeApp } from '../server'
 

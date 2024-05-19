@@ -1,7 +1,7 @@
 import { describe, expect, it, beforeEach, mock, spyOn } from 'bun:test'
 import { WibeApp } from '../../server'
 import { signUpWithResolver } from './signUpWithResolver'
-import { Context } from '../../graphql/interface'
+import type { Context } from '../../graphql/interface'
 import { Session } from '../Session'
 
 describe('SignUpWith', () => {

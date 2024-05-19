@@ -8,10 +8,10 @@ import {
 	spyOn,
 	afterEach,
 } from 'bun:test'
-import { fail } from 'assert'
+import { fail } from 'node:assert'
 import { ObjectId } from 'mongodb'
 import { closeTests, setupTests } from '../../utils/helper'
-import { MongoAdapter, buildMongoWhereQuery } from './MongoAdapter'
+import { type MongoAdapter, buildMongoWhereQuery } from './MongoAdapter'
 import { WibeApp } from '../../server'
 import * as hooks from '../../hooks'
 

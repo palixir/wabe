@@ -1,5 +1,5 @@
-import { WibeSchemaTypes } from '../../../generated/wibe'
-import {
+import type { WibeSchemaTypes } from '../../../generated/wibe'
+import type {
 	CreateObjectOptions,
 	CreateObjectsOptions,
 	DatabaseAdapter,

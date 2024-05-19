@@ -1,6 +1,5 @@
-import { Context } from '../graphql/interface'
 import { WibeApp } from '../server'
-import { HookObject } from './HookObject'
+import type { HookObject } from './HookObject'
 
 export const defaultBeforeInsertForCreatedAt = async (
 	object: HookObject<any>,

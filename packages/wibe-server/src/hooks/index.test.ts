@@ -2,7 +2,7 @@ import { describe, expect, it, spyOn, mock } from 'bun:test'
 import * as index from './index'
 import { WibeApp } from '../server'
 import { OperationType } from './index'
-import { Context } from '../graphql/interface'
+import type { Context } from '../graphql/interface'
 
 describe('Hooks', () => {
 	it('should find and execute all the hooks and respect the priorities', async () => {

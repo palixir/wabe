@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'bun:test'
-import { GraphqlParser } from './graphqlParser'
+import { GraphqlParser } from './parser'
 import {
 	GraphQLNonNull,
-	GraphQLNullableType,
+	type GraphQLNullableType,
 	GraphQLObjectType,
 	GraphQLString,
 } from 'graphql'

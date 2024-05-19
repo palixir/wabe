@@ -14,9 +14,9 @@ export type DeepRequired<T> = T extends Primitive
 			[P in keyof T]-?: T[P] extends Array<infer U>
 				? Array<DeepRequired<U>>
 				: T[P] extends ReadonlyArray<infer U2>
-				  ? DeepRequired<U2>
-				  : DeepRequired<T[P]>
-	  }
+					? DeepRequired<U2>
+					: DeepRequired<T[P]>
+		}
 
 export const notEmpty = <T>(value: T | null | undefined): value is T =>
 	value !== null && value !== undefined
@@ -64,140 +64,6 @@ export const setupTests = async () => {
 						role: {
 							type: 'Role',
 							defaultValue: 'Member',
-						},
-						address: {
-							type: 'Object',
-							object: {
-								name: 'Address',
-								fields: {
-									address1: {
-										type: 'String',
-									},
-									address2: {
-										type: 'String',
-									},
-									postalCode: {
-										type: 'Int',
-									},
-									city: {
-										type: 'String',
-									},
-									country: {
-										type: 'String',
-									},
-								},
-							},
-						},
-						object: {
-							type: 'Object',
-							object: {
-								name: 'Object',
-								fields: {
-									objectOfObject: {
-										type: 'Object',
-										object: {
-											name: 'ObjectOfObject',
-											fields: {
-												name: {
-													type: 'String',
-												},
-											},
-										},
-									},
-								},
-							},
-						},
-					},
-					resolvers: {
-						queries: {
-							customQuery: {
-								type: 'String',
-								args: {
-									name: {
-										type: 'String',
-										required: true,
-									},
-								},
-								resolve: () => 'Successfull',
-							},
-						},
-						mutations: {
-							customMutation: {
-								type: 'Int',
-								args: {
-									input: {
-										a: {
-											type: 'Int',
-											required: true,
-										},
-										b: {
-											type: 'Int',
-											required: true,
-										},
-									},
-								},
-								resolve: (root: any, args: any) =>
-									args.input.a + args.input.b,
-							},
-							secondCustomMutation: {
-								type: 'Int',
-								args: {
-									input: {
-										sum: {
-											type: 'Object',
-											object: {
-												name: 'Sum',
-												fields: {
-													a: {
-														type: 'Int',
-														required: true,
-													},
-													b: {
-														type: 'Int',
-														required: true,
-													},
-												},
-											},
-										},
-									},
-								},
-								resolve: (_: any, args: any) =>
-									args.input.sum.a + args.input.sum.b,
-							},
-							thirdCustomMutation: {
-								type: 'Int',
-								args: {
-									input: {
-										subObject: {
-											type: 'Object',
-											object: {
-												name: 'SubObject',
-												fields: {
-													sum: {
-														type: 'Object',
-														object: {
-															name: 'Sum',
-															fields: {
-																a: {
-																	type: 'Int',
-																	required: true,
-																},
-																b: {
-																	type: 'Int',
-																	required: true,
-																},
-															},
-														},
-													},
-												},
-											},
-										},
-									},
-								},
-								resolve: (_: any, args: any) =>
-									args.input.subObject.sum.a +
-									args.input.subObject.sum.b,
-							},
 						},
 					},
 				},

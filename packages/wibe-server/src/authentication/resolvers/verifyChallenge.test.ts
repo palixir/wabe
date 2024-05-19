@@ -8,7 +8,7 @@ import {
 	spyOn,
 } from 'bun:test'
 import { verifyChallengeResolver } from './verifyChallenge'
-import { Context } from '../../graphql/interface'
+import type { Context } from '../../graphql/interface'
 import { WibeApp } from '../../server'
 import { Session } from '../Session'
 

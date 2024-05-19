@@ -1,5 +1,5 @@
-import { OperationType } from '.'
-import { WibeSchemaTypes, _User } from '../../generated/wibe'
+import type { OperationType } from '.'
+import { type WibeSchemaTypes, _User } from '../../generated/wibe'
 
 export class HookObject<T extends keyof WibeSchemaTypes> {
 	public className: T

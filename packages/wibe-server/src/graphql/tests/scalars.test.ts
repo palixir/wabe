@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test'
-import { WibeApp } from '../../server'
-import { GraphQLClient, gql } from 'graphql-request'
+import type { WibeApp } from '../../server'
+import { type GraphQLClient, gql } from 'graphql-request'
 import { closeTests, getGraphqlClient, setupTests } from '../../utils/helper'
 
 describe('GraphQL : Scalars', () => {
@@ -243,30 +243,30 @@ describe('GraphQL : Scalars', () => {
 
 const graphql = {
 	_users: gql`
-        query _users($where: _UserWhereInput) {
-            _users(where: $where) {
-                edges {
-                    node {
-                        id
-                        name
-                        birthDate
-                        email
-                    }
-                }
-            }
-        }
-    `,
+		query _users($where: _UserWhereInput) {
+			_users(where: $where) {
+				edges {
+					node {
+						id
+						name
+						birthDate
+						email
+					}
+				}
+			}
+		}
+	`,
 	create_Users: gql`
-        mutation create_Users($input: _UsersCreateInput!) {
-            create_Users(input: $input) {
-                edges {
-                    node {
-                        name
-                        birthDate
-                        email
-                    }
-                }
-            }
-        }
-    `,
+		mutation create_Users($input: Create_UsersInput!) {
+			create_Users(input: $input) {
+				edges {
+					node {
+						name
+						birthDate
+						email
+					}
+				}
+			}
+		}
+	`,
 }

@@ -1,13 +1,13 @@
 import {
-	ChangeStream,
-	ChangeStreamDocument,
-	Document,
-	Db,
-	Filter,
+	type ChangeStream,
+	type ChangeStreamDocument,
+	type Document,
+	type Db,
+	type Filter,
 	MongoClient,
 	ObjectId,
 } from 'mongodb'
-import {
+import type {
 	AdapterOptions,
 	DatabaseAdapter,
 	GetObjectOptions,
@@ -20,7 +20,7 @@ import {
 	WhereType,
 	DeleteObjectOptions,
 } from './adaptersInterface'
-import { WibeSchemaTypes } from '../../../generated/wibe'
+import type { WibeSchemaTypes } from '../../../generated/wibe'
 import { OperationType, findHooksAndExecute } from '../../hooks'
 
 export const buildMongoWhereQuery = <T extends keyof WibeSchemaTypes>(
@@ -188,7 +188,7 @@ export class MongoAdapter implements DatabaseAdapter {
 				projection: fields
 					? {
 							...objectOfFieldsToGet,
-					  }
+						}
 					: {},
 			})
 			.limit(limit || 0)

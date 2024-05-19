@@ -1,4 +1,4 @@
-import { ClassInterface, EnumInterface, ScalarInterface } from '../schema'
+import type { ClassInterface, EnumInterface, ScalarInterface } from '../schema'
 
 export const generateWibeFile = ({
 	scalars,

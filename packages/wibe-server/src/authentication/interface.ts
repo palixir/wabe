@@ -1,6 +1,6 @@
-import { _User } from '../../generated/wibe'
-import { Context } from '../graphql/interface'
-import { TypeField } from '../schema'
+import type { _User } from '../../generated/wibe'
+import type { Context } from '../graphql/interface'
+import type { TypeField } from '../schema'
 
 export enum ProviderEnum {
 	google = 'google',

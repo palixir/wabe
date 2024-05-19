@@ -1,7 +1,7 @@
-import { VerifyChallengeInput } from '../../../generated/wibe'
-import { Context } from '../../graphql/interface'
+import type { VerifyChallengeInput } from '../../../generated/wibe'
+import type { Context } from '../../graphql/interface'
 import { Session } from '../Session'
-import { SecondaryProviderInterface } from '../interface'
+import type { SecondaryProviderInterface } from '../interface'
 import { getAuthenticationMethod } from '../utils'
 
 export const verifyChallengeResolver = async (

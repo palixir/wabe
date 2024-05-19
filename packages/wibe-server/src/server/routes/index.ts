@@ -1,6 +1,6 @@
 import { authHandler, oauthHandlerCallback } from './authHandler'
-import { ProviderEnum } from '../../authentication/interface'
-import { Context } from 'wobe'
+import type { ProviderEnum } from '../../authentication/interface'
+import type { Context } from 'wobe'
 
 export interface WibeRoute {
 	method: 'GET' | 'POST' | 'PUT' | 'DELETE'
