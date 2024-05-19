@@ -1,5 +1,8 @@
 import { WibeApp } from '../../server'
-import type { AuthenticationEventsOptions, ProviderInterface } from '../interface'
+import type {
+	AuthenticationEventsOptions,
+	ProviderInterface,
+} from '../interface'
 
 type EmailPasswordInterface = {
 	password: string
@@ -9,7 +12,6 @@ type EmailPasswordInterface = {
 export class EmailPassword
 	implements ProviderInterface<EmailPasswordInterface>
 {
-	name = 'emailPassword'
 	async onSignIn({
 		input,
 	}: AuthenticationEventsOptions<EmailPasswordInterface>) {

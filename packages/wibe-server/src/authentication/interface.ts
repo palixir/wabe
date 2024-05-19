@@ -18,7 +18,6 @@ export type AuthenticationEventsOptions<T> = {
 }
 
 export type ProviderInterface<T = any> = {
-	name: string
 	onSignIn: (
 		options: AuthenticationEventsOptions<T>,
 	) => Promise<{ user: Partial<_User> }>
