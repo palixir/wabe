@@ -12,7 +12,7 @@
 		"codegen": "graphql-codegen --config codegen.ts"
 	},
 	"dependencies": {
-		"jsonwebtoken": "^9.0.2",
+		"jsonwebtoken": "9.0.2",
 		"mongodb": "6.3.0",
 		"wobe": "1.1.1",
 		"wobe-graphql-yoga": "1.2.0"

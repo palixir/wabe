@@ -28,12 +28,10 @@ export const defaultBeforeInsertForDefaultValue = async (
 	allFields.map((field) => {
 		if (
 			!object.get(field) &&
-			// @ts-expect-error
 			schemaClass?.fields[field].defaultValue !== undefined
 		)
 			object.set({
 				field,
-				// @ts-expect-error
 				value: schemaClass?.fields[field].defaultValue,
 			})
 	})

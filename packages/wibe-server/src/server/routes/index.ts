@@ -13,9 +13,7 @@ export const defaultRoutes = (): WibeRoute[] => [
 		method: 'GET',
 		path: '/toto',
 		handler: async (context: Context) => {
-			console.log(context)
-
-			context.set.redirect = 'http://localhost:5173'
+			context.redirect('http://localhost:5173')
 		},
 	},
 	{

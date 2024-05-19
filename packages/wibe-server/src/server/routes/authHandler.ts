@@ -22,12 +22,12 @@ export const oauthHandlerCallback = async (context: Context) => {
 		const state = context.query.state
 		const code = context.query.code
 
-		const stateInCookie = context.cookie.state.value
+		const stateInCookie = context.res.getCookie('state')
 
 		if (state !== stateInCookie) throw new Error('Authentication failed')
 
-		const codeVerifier = context.cookie.code_verifier.value
-		const provider = context.cookie.provider.value
+		const codeVerifier = context.res.getCookie('code_verifier')
+		const provider = context.res.getCookie('provider')
 
 		await getGraphqlClient(WibeApp.config.port).request<any>(
 			gql`
@@ -53,28 +53,21 @@ export const oauthHandlerCallback = async (context: Context) => {
 			},
 		)
 
-		context.cookie.tata.set({
-			value: 'tata',
-			httpOnly: true,
-			path: '/',
-			maxAge: 60 * 10, // 10 minutes
-			secure: Bun.env.NODE_ENV === 'production',
-		})
-
-		context.set.redirect =
-			WibeApp.config.authentication?.successRedirectPath
+		context.redirect(
+			WibeApp.config.authentication?.successRedirectPath || '/',
+		)
 	} catch (error) {
 		console.error(error)
-		context.set.redirect =
-			WibeApp.config.authentication?.failureRedirectPath
+		context.redirect(
+			WibeApp.config.authentication?.failureRedirectPath || '/',
+		)
 	}
 }
 
 export const authHandler = async (context: Context, provider: ProviderEnum) => {
 	if (!WibeApp.config) throw new Error('Wibe config not found')
 
-	context.cookie.provider.set({
-		value: provider,
+	context.res.setCookie('provider', provider, {
 		httpOnly: true,
 		path: '/',
 		maxAge: 60 * 10, // 10 minutes
@@ -88,16 +81,14 @@ export const authHandler = async (context: Context, provider: ProviderEnum) => {
 			const state = generateRandomValues()
 			const codeVerifier = generateRandomValues()
 
-			context.cookie.code_verifier.set({
-				value: codeVerifier,
+			context.res.setCookie('code_verifier', codeVerifier, {
 				httpOnly: true,
 				path: '/',
 				maxAge: 60 * 10, // 10 minutes
 				secure: Bun.env.NODE_ENV === 'production',
 			})
 
-			context.cookie.state.set({
-				value: state,
+			context.res.setCookie('state', state, {
 				httpOnly: true,
 				path: '/',
 				maxAge: 60 * 10, // 10 minutes
@@ -112,7 +103,8 @@ export const authHandler = async (context: Context, provider: ProviderEnum) => {
 				},
 			)
 
-			context.set.redirect = authorizationURL.toString()
+			context.redirect(authorizationURL.toString())
+
 			break
 		}
 		default:

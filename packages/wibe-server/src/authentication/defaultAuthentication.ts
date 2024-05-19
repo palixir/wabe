@@ -1,6 +1,5 @@
 import type { CustomAuthenticationMethods } from './interface'
 import { EmailPassword } from './providers/EmailPassword'
-import { Google } from './providers/Google'
 
 export const defaultAuthenticationMethods =
 	(): CustomAuthenticationMethods[] => [
@@ -18,18 +17,18 @@ export const defaultAuthenticationMethods =
 			},
 			provider: new EmailPassword(),
 		},
-		{
-			name: 'google',
-			input: {
-				authorizationCode: {
-					type: 'String',
-					required: true,
-				},
-				codeVerifier: {
-					type: 'String',
-					required: true,
-				},
-			},
-			provider: new Google(),
-		},
+		// {
+		// 	name: 'google',
+		// 	input: {
+		// 		authorizationCode: {
+		// 			type: 'String',
+		// 			required: true,
+		// 		},
+		// 		codeVerifier: {
+		// 			type: 'String',
+		// 			required: true,
+		// 		},
+		// 	},
+		// 	provider: new Google(),
+		// },
 	]
