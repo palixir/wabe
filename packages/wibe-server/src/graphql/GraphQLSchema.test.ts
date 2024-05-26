@@ -85,6 +85,22 @@ describe('GraphqlSchema', () => {
 						},
 					},
 				},
+				{
+					name: 'FifthClass',
+					fields: {
+						relation: {
+							type: 'Relation',
+							// @ts-expect-error
+							class: 'SixthClass',
+						},
+					},
+				},
+				{
+					name: 'SixthClass',
+					fields: {
+						field6: { type: 'String' },
+					},
+				},
 			],
 		})
 
@@ -102,6 +118,32 @@ describe('GraphqlSchema', () => {
 				fields: types.mutations,
 			}),
 			types: [...types.scalars, ...types.enums, ...types.objects],
+		})
+	})
+
+	it('should have a TestClassRelationInput', () => {
+		expect(
+			getTypeFromGraphQLSchema({
+				schema,
+				type: 'Type',
+				name: 'TestClassRelationInput',
+			}).input,
+		).toEqual({
+			add: '[ID!]',
+			remove: '[ID!]',
+			createAndAdd: '[TestClassCreateFieldsInput!]',
+		})
+	})
+
+	it('should have a RelationInput on SixthClass on field relation of FifthClass', () => {
+		expect(
+			getTypeFromGraphQLSchema({
+				schema,
+				type: 'Type',
+				name: 'FifthClassInput',
+			}).input,
+		).toEqual({
+			relation: 'SixthClassRelationInput',
 		})
 	})
 

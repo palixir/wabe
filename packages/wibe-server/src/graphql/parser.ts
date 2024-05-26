@@ -38,14 +38,14 @@ type GraphqlObjectType =
 	| 'UpdateFieldsInput'
 	| 'WhereInputObject'
 
-type WibeDefaultTypesWithoutObjectAndPointer = Exclude<
+type WibeDefaultTypesWithoutObjectAndPointerAndRelation = Exclude<
 	WibeDefaultTypes,
-	'Object' | 'Pointer'
+	'Object' | 'Pointer' | 'Relation'
 >
 
-type WibeDefaultTypesWithoutArrayAndObjectAndPointer = Exclude<
-	WibeDefaultTypesWithoutObjectAndPointer,
-	'Array' | 'Pointer'
+type WibeDefaultTypesWithoutArrayAndObjectAndPointerAndRelation = Exclude<
+	WibeDefaultTypesWithoutObjectAndPointerAndRelation,
+	'Array' | 'Pointer' | 'Relation'
 >
 
 type ParseObjectOptions = {
@@ -58,7 +58,7 @@ type ParseObjectOptions = {
 type ParseObjectCallback = (options: ParseObjectOptions) => any
 
 export const templateScalarType: Record<
-	WibeDefaultTypesWithoutArrayAndObjectAndPointer,
+	WibeDefaultTypesWithoutArrayAndObjectAndPointerAndRelation,
 	GraphQLScalarType
 > = {
 	String: GraphQLString,
@@ -70,7 +70,7 @@ export const templateScalarType: Record<
 }
 
 export const templateWhereInput: Record<
-	Exclude<WibeDefaultTypes, 'Object' | 'Pointer'>,
+	WibeDefaultTypesWithoutObjectAndPointerAndRelation,
 	GraphQLInputObjectType
 > = {
 	String: StringWhereInput,
@@ -94,14 +94,14 @@ const _getGraphqlTypeFromTemplate = ({ field }: { field: TypeField }) => {
 		// We can cast because we exclude scalars and enums before in previous getGraphqlType
 		return new GraphQLList(
 			templateScalarType[
-				field.typeValue as WibeDefaultTypesWithoutArrayAndObjectAndPointer
+				field.typeValue as WibeDefaultTypesWithoutArrayAndObjectAndPointerAndRelation
 			],
 		)
 	}
 
 	// We can cast because we exclude scalars and enums before in previous call getGraphqlType
 	return templateScalarType[
-		field.type as WibeDefaultTypesWithoutArrayAndObjectAndPointer
+		field.type as WibeDefaultTypesWithoutArrayAndObjectAndPointerAndRelation
 	]
 }
 
@@ -374,7 +374,7 @@ export const GraphqlParser: GraphqlParserConstructor =
 					return AnyWhereInput
 
 				return templateWhereInput[
-					field.type as WibeDefaultTypesWithoutObjectAndPointer
+					field.type as WibeDefaultTypesWithoutObjectAndPointerAndRelation
 				]
 			}
 
@@ -400,6 +400,39 @@ export const GraphqlParser: GraphqlParserConstructor =
 				(acc, key) => {
 					const currentField = schemaFields[key]
 
+					// TODO : Refactor with pointer (same code except for input object)
+					if (currentField.type === 'Relation') {
+						switch (graphqlObjectType) {
+							case 'Object': {
+								acc[key] = {
+									type: allObjects[currentField.class].object,
+								}
+
+								break
+							}
+							case 'UpdateFieldsInput':
+							case 'CreateFieldsInput':
+							case 'InputObject': {
+								acc[key] = {
+									type: allObjects[currentField.class]
+										.relationInputObject,
+								}
+
+								break
+							}
+							case 'WhereInputObject': {
+								acc[key] = {
+									type: allObjects[currentField.class]
+										.whereInputObject,
+								}
+
+								break
+							}
+						}
+
+						return acc
+					}
+
 					if (currentField.type === 'Pointer') {
 						switch (graphqlObjectType) {
 							case 'Object': {
@@ -414,7 +447,7 @@ export const GraphqlParser: GraphqlParserConstructor =
 							case 'InputObject': {
 								acc[key] = {
 									type: allObjects[currentField.class]
-										.createPointerInput,
+										.pointerInputObject,
 								}
 
 								break

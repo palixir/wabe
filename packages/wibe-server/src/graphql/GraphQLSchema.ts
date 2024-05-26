@@ -38,7 +38,8 @@ type AllPossibleObject =
 	| 'inputObject'
 	| 'whereInputObject'
 	| 'connectionObject'
-	| 'createPointerInput'
+	| 'pointerInputObject'
+	| 'relationInputObject'
 	| 'updateInputObject'
 	| 'createInputObject'
 
@@ -99,7 +100,8 @@ export class GraphQLSchema {
 				const {
 					object,
 					inputObject,
-					createPointerInput,
+					pointerInputObject,
+					relationInputObject,
 					createInputObject,
 					updateInputObject,
 					whereInputObject,
@@ -160,7 +162,8 @@ export class GraphQLSchema {
 
 				acc.objects.push(object)
 				acc.objects.push(inputObject)
-				acc.objects.push(createPointerInput)
+				acc.objects.push(pointerInputObject)
+				acc.objects.push(relationInputObject)
 
 				return acc
 			},
@@ -258,6 +261,34 @@ export class GraphQLSchema {
 			fields: () => ({
 				link: { type: GraphQLID },
 				createAndLink: { type: inputCreateFields },
+			}),
+		})
+	}
+
+	createRelationInputObject({
+		wibeClass,
+		inputCreateFields,
+	}: {
+		wibeClass: ClassInterface
+		inputCreateFields: GraphQLInputObjectType
+	}) {
+		const { name } = wibeClass
+
+		const nameWithoutSpace = name.replace(' ', '')
+
+		return new GraphQLInputObjectType({
+			name: `${nameWithoutSpace}RelationInput`,
+			description: `Input to add a relation to the class ${nameWithoutSpace}`,
+			fields: () => ({
+				add: { type: new GraphQLList(new GraphQLNonNull(GraphQLID)) },
+				remove: {
+					type: new GraphQLList(new GraphQLNonNull(GraphQLID)),
+				},
+				createAndAdd: {
+					type: new GraphQLList(
+						new GraphQLNonNull(inputCreateFields),
+					),
+				},
 			}),
 		})
 	}
@@ -422,7 +453,12 @@ export class GraphQLSchema {
 			wibeClass,
 		})
 
-		const createPointerInput = this.createPointerInputObject({
+		const pointerInputObject = this.createPointerInputObject({
+			inputCreateFields: createInputObject,
+			wibeClass,
+		})
+
+		const relationInputObject = this.createRelationInputObject({
 			inputCreateFields: createInputObject,
 			wibeClass,
 		})
@@ -442,7 +478,8 @@ export class GraphQLSchema {
 			createInputObject,
 			updateInputObject,
 			whereInputObject,
-			createPointerInput,
+			pointerInputObject,
+			relationInputObject,
 			inputObject,
 			object,
 		}

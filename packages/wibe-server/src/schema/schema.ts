@@ -18,6 +18,7 @@ export type WibeDefaultTypes =
 	| 'Array'
 	| 'Object'
 	| 'Pointer'
+	| 'Relation'
 
 export type WibeTypes = WibeSchemaScalars | WibeSchemaEnums | WibeDefaultTypes
 
@@ -51,6 +52,13 @@ type TypeFieldPointer = {
 	class: keyof WibeSchemaTypes
 }
 
+type TypeFieldRelation = {
+	type: 'Relation'
+	required?: boolean
+	description?: string
+	class: keyof WibeSchemaTypes
+}
+
 export type TypeField =
 	| TypeFieldBase<string, 'String'>
 	| TypeFieldBase<number, 'Int'>
@@ -61,6 +69,7 @@ export type TypeField =
 	| TypeFieldArray
 	| TypeFieldObject
 	| TypeFieldPointer
+	| TypeFieldRelation
 
 export type SchemaFields = Record<string, TypeField>
 
