@@ -1,4 +1,8 @@
-import type { WibeSchemaScalars, WibeSchemaEnums } from '../../generated/wibe'
+import type {
+	WibeSchemaScalars,
+	WibeSchemaEnums,
+	WibeSchemaTypes,
+} from '../../generated/wibe'
 import { signInWithResolver, signUpWithResolver } from '../authentication'
 import { signOutResolver } from '../authentication/resolvers/signOutResolver'
 import { verifyChallengeResolver } from '../authentication/resolvers/verifyChallenge'
@@ -13,6 +17,7 @@ export type WibeDefaultTypes =
 	| 'Email'
 	| 'Array'
 	| 'Object'
+	| 'Pointer'
 
 export type WibeTypes = WibeSchemaScalars | WibeSchemaEnums | WibeDefaultTypes
 
@@ -39,6 +44,13 @@ type TypeFieldObject = {
 	defaultValue?: any
 }
 
+type TypeFieldPointer = {
+	type: 'Pointer'
+	required?: boolean
+	description?: string
+	class: keyof WibeSchemaTypes
+}
+
 export type TypeField =
 	| TypeFieldBase<string, 'String'>
 	| TypeFieldBase<number, 'Int'>
@@ -48,6 +60,7 @@ export type TypeField =
 	| TypeFieldBase<string, 'Email'>
 	| TypeFieldArray
 	| TypeFieldObject
+	| TypeFieldPointer
 
 export type SchemaFields = Record<string, TypeField>
 
@@ -354,7 +367,6 @@ export class Schema {
 					Object.keys(resolvers.queries || {}).length > 0
 
 				return {
-					// biome-ignore lint/performance/noAccumulatingSpread: Simplicity is important here
 					...acc,
 					...classItem,
 					fields: {

@@ -52,6 +52,10 @@ const run = async () => {
 						age: { type: 'Int' },
 						isCool: { type: 'Boolean' },
 						email: { type: 'Email', required: true },
+						post: {
+							type: 'Pointer',
+							class: 'Post',
+						},
 						birthDate: {
 							type: 'Date',
 						},

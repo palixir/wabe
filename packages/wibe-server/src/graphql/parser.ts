@@ -28,19 +28,24 @@ import {
 	FloatWhereInput,
 	IntWhereInput,
 	StringWhereInput,
+	type AllObjects,
 } from '../graphql'
 
 type GraphqlObjectType =
 	| 'Object'
 	| 'InputObject'
+	| 'CreateFieldsInput'
 	| 'UpdateFieldsInput'
 	| 'WhereInputObject'
 
-type WibeDefaultTypesWithoutObject = Exclude<WibeDefaultTypes, 'Object'>
+type WibeDefaultTypesWithoutObjectAndPointer = Exclude<
+	WibeDefaultTypes,
+	'Object' | 'Pointer'
+>
 
-type WibeDefaultTypesWithoutArrayAndObject = Exclude<
-	WibeDefaultTypesWithoutObject,
-	'Array'
+type WibeDefaultTypesWithoutArrayAndObjectAndPointer = Exclude<
+	WibeDefaultTypesWithoutObjectAndPointer,
+	'Array' | 'Pointer'
 >
 
 type ParseObjectOptions = {
@@ -53,7 +58,7 @@ type ParseObjectOptions = {
 type ParseObjectCallback = (options: ParseObjectOptions) => any
 
 export const templateScalarType: Record<
-	WibeDefaultTypesWithoutArrayAndObject,
+	WibeDefaultTypesWithoutArrayAndObjectAndPointer,
 	GraphQLScalarType
 > = {
 	String: GraphQLString,
@@ -65,7 +70,7 @@ export const templateScalarType: Record<
 }
 
 export const templateWhereInput: Record<
-	Exclude<WibeDefaultTypes, 'Object'>,
+	Exclude<WibeDefaultTypes, 'Object' | 'Pointer'>,
 	GraphQLInputObjectType
 > = {
 	String: StringWhereInput,
@@ -89,19 +94,20 @@ const _getGraphqlTypeFromTemplate = ({ field }: { field: TypeField }) => {
 		// We can cast because we exclude scalars and enums before in previous getGraphqlType
 		return new GraphQLList(
 			templateScalarType[
-				field.typeValue as WibeDefaultTypesWithoutArrayAndObject
+				field.typeValue as WibeDefaultTypesWithoutArrayAndObjectAndPointer
 			],
 		)
 	}
 
 	// We can cast because we exclude scalars and enums before in previous call getGraphqlType
 	return templateScalarType[
-		field.type as WibeDefaultTypesWithoutArrayAndObject
+		field.type as WibeDefaultTypesWithoutArrayAndObjectAndPointer
 	]
 }
 
 interface GraphqlParserFactoryOptions {
 	graphqlObjectType: GraphqlObjectType
+	allObjects: AllObjects
 	schemaFields: SchemaFields
 }
 
@@ -111,22 +117,25 @@ interface GraphqlParserConstructorOptions {
 }
 
 export type GraphqlParserFactory = (options: GraphqlParserFactoryOptions) => {
-		_parseWibeObject(options: ParseObjectOptions): any
-		_parseWibeWhereInputObject(options: ParseObjectOptions): any
-		_parseWibeInputObject(options: ParseObjectOptions): any
-		_parseWibeUpdateInputObject(options: ParseObjectOptions): any
-		getGraphqlType(options: {
-			field: TypeField
-			isWhereType?: boolean
-		}): any
-		getGraphqlFields(nameOfTheObject: string): any
-	}
+	_parseWibeObject(options: ParseObjectOptions): any
+	_parseWibeWhereInputObject(options: ParseObjectOptions): any
+	_parseWibeInputObject(options: ParseObjectOptions): any
+	_parseWibeUpdateInputObject(options: ParseObjectOptions): any
+	getGraphqlType(options: { field: TypeField; isWhereType?: boolean }): any
+	getGraphqlFields(nameOfTheObject: string): any
+}
 
-export type GraphqlParserConstructor = (options: GraphqlParserConstructorOptions) => GraphqlParserFactory
+export type GraphqlParserConstructor = (
+	options: GraphqlParserConstructorOptions,
+) => GraphqlParserFactory
 
 export const GraphqlParser: GraphqlParserConstructor =
 	({ scalars, enums }: GraphqlParserConstructorOptions) =>
-	({ graphqlObjectType, schemaFields }: GraphqlParserFactoryOptions) => {
+	({
+		graphqlObjectType,
+		schemaFields,
+		allObjects,
+	}: GraphqlParserFactoryOptions) => {
 		// Get graphql fields from a wibe object
 		const _getGraphqlFieldsFromAnObject = ({
 			objectToParse,
@@ -230,6 +239,29 @@ export const GraphqlParser: GraphqlParserConstructor =
 			return required ? new GraphQLNonNull(graphqlObject) : graphqlObject
 		}
 
+		// Parse create input object
+		const _parseWibeCreateInputObject = ({
+			required,
+			description,
+			objectToParse,
+			nameOfTheObject,
+		}: ParseObjectOptions) => {
+			const graphqlFields = _getGraphqlFieldsFromAnObject({
+				objectToParse,
+				callBackForObjectType: _parseWibeCreateInputObject,
+				forceRequiredToFalse: true,
+				nameOfTheObject,
+			})
+
+			const graphqlObject = new GraphQLInputObjectType({
+				name: `${nameOfTheObject}CreateFieldsInput`,
+				description: description,
+				fields: graphqlFields,
+			})
+
+			return required ? new GraphQLNonNull(graphqlObject) : graphqlObject
+		}
+
 		// Parse update input object
 		const _parseWibeUpdateInputObject = ({
 			required,
@@ -306,6 +338,11 @@ export const GraphqlParser: GraphqlParserConstructor =
 				isWhereType: false,
 				forceRequiredToFalse: false,
 			},
+			CreateFieldsInput: {
+				callback: _parseWibeCreateInputObject,
+				isWhereType: false,
+				forceRequiredToFalse: true,
+			},
 			UpdateFieldsInput: {
 				callback: _parseWibeUpdateInputObject,
 				isWhereType: false,
@@ -329,6 +366,7 @@ export const GraphqlParser: GraphqlParserConstructor =
 			const scalarExist = scalars.find(
 				(scalar) => scalar.name === field.type,
 			)
+
 			const enumExist = enums.find((e) => e.name === field.type)
 
 			if (isWhereType) {
@@ -336,7 +374,7 @@ export const GraphqlParser: GraphqlParserConstructor =
 					return AnyWhereInput
 
 				return templateWhereInput[
-					field.type as WibeDefaultTypesWithoutObject
+					field.type as WibeDefaultTypesWithoutObjectAndPointer
 				]
 			}
 
@@ -361,6 +399,38 @@ export const GraphqlParser: GraphqlParserConstructor =
 			const rawFields = keysOfObject.reduce(
 				(acc, key) => {
 					const currentField = schemaFields[key]
+
+					if (currentField.type === 'Pointer') {
+						switch (graphqlObjectType) {
+							case 'Object': {
+								acc[key] = {
+									type: allObjects[currentField.class].object,
+								}
+
+								break
+							}
+							case 'UpdateFieldsInput':
+							case 'CreateFieldsInput':
+							case 'InputObject': {
+								acc[key] = {
+									type: allObjects[currentField.class]
+										.createPointerInput,
+								}
+
+								break
+							}
+							case 'WhereInputObject': {
+								acc[key] = {
+									type: allObjects[currentField.class]
+										.whereInputObject,
+								}
+
+								break
+							}
+						}
+
+						return acc
+					}
 
 					if (currentField.type === 'Object') {
 						acc[key] = {
@@ -391,9 +461,7 @@ export const GraphqlParser: GraphqlParserConstructor =
 				{} as Record<string, any>,
 			)
 
-			const fieldsKey = Object.keys(rawFields)
-
-			const graphqlFieldsOfTheObject = fieldsKey.reduce(
+			return Object.keys(rawFields).reduce(
 				(acc, key) => {
 					const field = rawFields[key]
 
@@ -403,8 +471,6 @@ export const GraphqlParser: GraphqlParserConstructor =
 				},
 				{} as Record<string, GraphQLFieldConfig<any, any, any>>,
 			)
-
-			return graphqlFieldsOfTheObject
 		}
 
 		return {

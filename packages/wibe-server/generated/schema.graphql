@@ -21,6 +21,7 @@ type _User {
   age: Int
   isCool: Boolean
   email: Email
+  post: Post
   birthDate: Date
   phone: Phone
   role: Role
@@ -57,7 +58,6 @@ type _UserObjectObjectOfObject {
 
 type _UserAuthentication {
   emailPassword: _UserAuthenticationEmailPassword
-  google: _UserAuthenticationGoogle
   otp: _UserAuthenticationOtp
 }
 
@@ -66,18 +66,131 @@ type _UserAuthenticationEmailPassword {
   password: String!
 }
 
-type _UserAuthenticationGoogle {
-  authorizationCode: String!
-  codeVerifier: String!
+type _UserAuthenticationOtp {
+  code: String
 }
 
-type _UserAuthenticationOtp {
+"""User class"""
+input _UserInput {
+  name: String
+  age: Int
+  isCool: Boolean
+  email: Email
+  post: PostPointerInput
+  birthDate: Date
+  phone: Phone
+  role: Role
+  address: _UserAddressInput
+  object: _UserObjectInput
+  authentication: _UserAuthenticationInput
+  provider: AuthenticationProvider
+  verifiedEmail: Boolean
+  createdAt: Date
+  updatedAt: Date
+}
+
+input _UserAddressInput {
+  address1: String
+  address2: String
+  postalCode: Int
+  city: String
+  country: String
+}
+
+input _UserObjectInput {
+  objectOfObject: _UserObjectObjectOfObjectInput
+}
+
+input _UserObjectObjectOfObjectInput {
+  name: String
+}
+
+input _UserAuthenticationInput {
+  emailPassword: _UserAuthenticationEmailPasswordInput
+  otp: _UserAuthenticationOtpInput
+}
+
+input _UserAuthenticationEmailPasswordInput {
+  email: Email!
+  password: String!
+}
+
+input _UserAuthenticationOtpInput {
+  code: String
+}
+
+"""Input to link an object to a pointer _User"""
+input _UserPointerInput {
+  link: ID
+  createAndLink: _UserCreateFieldsInput
+}
+
+"""User class"""
+input _UserCreateFieldsInput {
+  name: String
+  age: Int
+  isCool: Boolean
+  email: Email
+  post: PostPointerInput
+  birthDate: Date
+  phone: Phone
+  role: Role
+  address: _UserAddressCreateFieldsInput
+  object: _UserObjectCreateFieldsInput
+  authentication: _UserAuthenticationCreateFieldsInput
+  provider: AuthenticationProvider
+  verifiedEmail: Boolean
+  createdAt: Date
+  updatedAt: Date
+}
+
+input _UserAddressCreateFieldsInput {
+  address1: String
+  address2: String
+  postalCode: Int
+  city: String
+  country: String
+}
+
+input _UserObjectCreateFieldsInput {
+  objectOfObject: _UserObjectObjectOfObjectCreateFieldsInput
+}
+
+input _UserObjectObjectOfObjectCreateFieldsInput {
+  name: String
+}
+
+input _UserAuthenticationCreateFieldsInput {
+  emailPassword: _UserAuthenticationEmailPasswordCreateFieldsInput
+  otp: _UserAuthenticationOtpCreateFieldsInput
+}
+
+input _UserAuthenticationEmailPasswordCreateFieldsInput {
+  email: Email
+  password: String
+}
+
+input _UserAuthenticationOtpCreateFieldsInput {
   code: String
 }
 
 type Post {
   id: ID!
   name: String!
+}
+
+input PostInput {
+  name: String!
+}
+
+"""Input to link an object to a pointer Post"""
+input PostPointerInput {
+  link: ID
+  createAndLink: PostCreateFieldsInput
+}
+
+input PostCreateFieldsInput {
+  name: String
 }
 
 type _Session {
@@ -89,6 +202,32 @@ type _Session {
   refreshTokenExpiresAt: Date!
   createdAt: Date!
   updatedAt: Date!
+}
+
+input _SessionInput {
+  userId: String!
+  accessToken: String!
+  accessTokenExpiresAt: Date!
+  refreshToken: String
+  refreshTokenExpiresAt: Date!
+  createdAt: Date!
+  updatedAt: Date!
+}
+
+"""Input to link an object to a pointer _Session"""
+input _SessionPointerInput {
+  link: ID
+  createAndLink: _SessionCreateFieldsInput
+}
+
+input _SessionCreateFieldsInput {
+  userId: String
+  accessToken: String
+  accessTokenExpiresAt: Date
+  refreshToken: String
+  refreshTokenExpiresAt: Date
+  createdAt: Date
+  updatedAt: Date
 }
 
 type Query {
@@ -120,6 +259,7 @@ input _UserWhereInput {
   age: IntWhereInput
   isCool: BooleanWhereInput
   email: EmailWhereInput
+  post: PostWhereInput
   birthDate: DateWhereInput
   phone: AnyWhereInput
   role: AnyWhereInput
@@ -164,6 +304,12 @@ input EmailWhereInput {
   notEqualTo: Email
   in: [Email]
   notIn: [Email]
+}
+
+input PostWhereInput {
+  name: StringWhereInput
+  OR: [PostWhereInput]
+  AND: [PostWhereInput]
 }
 
 input DateWhereInput {
@@ -211,7 +357,6 @@ input _UserObjectObjectOfObjectWhereInput {
 
 input _UserAuthenticationWhereInput {
   emailPassword: _UserAuthenticationEmailPasswordWhereInput
-  google: _UserAuthenticationGoogleWhereInput
   otp: _UserAuthenticationOtpWhereInput
   OR: [_UserAuthenticationWhereInput]
   AND: [_UserAuthenticationWhereInput]
@@ -222,13 +367,6 @@ input _UserAuthenticationEmailPasswordWhereInput {
   password: StringWhereInput
   OR: [_UserAuthenticationEmailPasswordWhereInput]
   AND: [_UserAuthenticationEmailPasswordWhereInput]
-}
-
-input _UserAuthenticationGoogleWhereInput {
-  authorizationCode: StringWhereInput
-  codeVerifier: StringWhereInput
-  OR: [_UserAuthenticationGoogleWhereInput]
-  AND: [_UserAuthenticationGoogleWhereInput]
 }
 
 input _UserAuthenticationOtpWhereInput {
@@ -243,12 +381,6 @@ type PostConnection {
 
 type PostEdge {
   node: Post!
-}
-
-input PostWhereInput {
-  name: StringWhereInput
-  OR: [PostWhereInput]
-  AND: [PostWhereInput]
 }
 
 type _SessionConnection {
@@ -317,65 +449,11 @@ type Create_UserPayload {
 }
 
 input Create_UserInput {
-  fields: _UserInput
-}
-
-"""User class"""
-input _UserInput {
-  name: String
-  age: Int
-  isCool: Boolean
-  email: Email
-  birthDate: Date
-  phone: Phone
-  role: Role
-  address: _UserAddressInput
-  object: _UserObjectInput
-  authentication: _UserAuthenticationInput
-  provider: AuthenticationProvider
-  verifiedEmail: Boolean
-  createdAt: Date
-  updatedAt: Date
-}
-
-input _UserAddressInput {
-  address1: String
-  address2: String
-  postalCode: Int
-  city: String
-  country: String
-}
-
-input _UserObjectInput {
-  objectOfObject: _UserObjectObjectOfObjectInput
-}
-
-input _UserObjectObjectOfObjectInput {
-  name: String
-}
-
-input _UserAuthenticationInput {
-  emailPassword: _UserAuthenticationEmailPasswordInput
-  google: _UserAuthenticationGoogleInput
-  otp: _UserAuthenticationOtpInput
-}
-
-input _UserAuthenticationEmailPasswordInput {
-  email: Email!
-  password: String!
-}
-
-input _UserAuthenticationGoogleInput {
-  authorizationCode: String!
-  codeVerifier: String!
-}
-
-input _UserAuthenticationOtpInput {
-  code: String
+  fields: _UserCreateFieldsInput
 }
 
 input Create_UsersInput {
-  fields: [_UserInput]!
+  fields: [_UserCreateFieldsInput]!
   offset: Int
   limit: Int
 }
@@ -396,6 +474,7 @@ input _UserUpdateFieldsInput {
   age: Int
   isCool: Boolean
   email: Email
+  post: PostPointerInput
   birthDate: Date
   phone: Phone
   role: Role
@@ -426,18 +505,12 @@ input _UserObjectObjectOfObjectUpdateFieldsInput {
 
 input _UserAuthenticationUpdateFieldsInput {
   emailPassword: _UserAuthenticationEmailPasswordUpdateFieldsInput
-  google: _UserAuthenticationGoogleUpdateFieldsInput
   otp: _UserAuthenticationOtpUpdateFieldsInput
 }
 
 input _UserAuthenticationEmailPasswordUpdateFieldsInput {
   email: Email
   password: String
-}
-
-input _UserAuthenticationGoogleUpdateFieldsInput {
-  authorizationCode: String
-  codeVerifier: String
 }
 
 input _UserAuthenticationOtpUpdateFieldsInput {
@@ -488,7 +561,6 @@ input SignInWithInput {
 
 input SignInWithAuthenticationInput {
   emailPassword: SignInWithAuthenticationEmailPasswordInput
-  google: SignInWithAuthenticationGoogleInput
   otp: SignInWithAuthenticationOtpInput
   secondaryFactor: SecondaryFactor
 }
@@ -496,11 +568,6 @@ input SignInWithAuthenticationInput {
 input SignInWithAuthenticationEmailPasswordInput {
   email: Email!
   password: String!
-}
-
-input SignInWithAuthenticationGoogleInput {
-  authorizationCode: String!
-  codeVerifier: String!
 }
 
 input SignInWithAuthenticationOtpInput {
@@ -513,7 +580,6 @@ input SignUpWithInput {
 
 input SignUpWithAuthenticationInput {
   emailPassword: SignUpWithAuthenticationEmailPasswordInput
-  google: SignUpWithAuthenticationGoogleInput
   otp: SignUpWithAuthenticationOtpInput
   secondaryFactor: SecondaryFactor
 }
@@ -521,11 +587,6 @@ input SignUpWithAuthenticationInput {
 input SignUpWithAuthenticationEmailPasswordInput {
   email: Email!
   password: String!
-}
-
-input SignUpWithAuthenticationGoogleInput {
-  authorizationCode: String!
-  codeVerifier: String!
 }
 
 input SignUpWithAuthenticationOtpInput {
@@ -550,15 +611,11 @@ type CreatePostPayload {
 }
 
 input CreatePostInput {
-  fields: PostInput
-}
-
-input PostInput {
-  name: String!
+  fields: PostCreateFieldsInput
 }
 
 input CreatePostsInput {
-  fields: [PostInput]!
+  fields: [PostCreateFieldsInput]!
   offset: Int
   limit: Int
 }
@@ -603,21 +660,11 @@ type Create_SessionPayload {
 }
 
 input Create_SessionInput {
-  fields: _SessionInput
-}
-
-input _SessionInput {
-  userId: String!
-  accessToken: String!
-  accessTokenExpiresAt: Date!
-  refreshToken: String
-  refreshTokenExpiresAt: Date!
-  createdAt: Date!
-  updatedAt: Date!
+  fields: _SessionCreateFieldsInput
 }
 
 input Create_SessionsInput {
-  fields: [_SessionInput]!
+  fields: [_SessionCreateFieldsInput]!
   offset: Int
   limit: Int
 }

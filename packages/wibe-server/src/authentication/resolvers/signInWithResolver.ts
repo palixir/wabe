@@ -1,7 +1,10 @@
 import type { SignInWithInput } from '../../../generated/wibe'
 import type { Context } from '../../graphql/interface'
 import { Session } from '../Session'
-import type { ProviderInterface, SecondaryProviderInterface } from '../interface'
+import type {
+	ProviderInterface,
+	SecondaryProviderInterface,
+} from '../interface'
 import { getAuthenticationMethod } from '../utils'
 
 // 0 - Get the authentication method

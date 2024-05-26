@@ -10,7 +10,7 @@
 
 		// Bundler mode
 		"moduleResolution": "bundler",
-		"verbatimModuleSyntax": true,
+		"verbatimModuleSyntax": false,
 		"outDir": "dist",
 		"declaration": true,
 		"emitDeclarationOnly": true,

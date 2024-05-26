@@ -26,13 +26,16 @@ export const defaultBeforeInsertForDefaultValue = async (
 	const allFields = Object.keys(schemaClass.fields)
 
 	allFields.map((field) => {
+		const currentSchemaField = schemaClass.fields[field]
+
 		if (
 			!object.get(field) &&
-			schemaClass?.fields[field].defaultValue !== undefined
+			currentSchemaField.type !== 'Pointer' &&
+			currentSchemaField.defaultValue !== undefined
 		)
 			object.set({
 				field,
-				value: schemaClass?.fields[field].defaultValue,
+				value: currentSchemaField.defaultValue,
 			})
 	})
 }

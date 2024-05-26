@@ -33,11 +33,43 @@ import { GraphqlParser, type GraphqlParserFactory } from './parser'
 import type { WibeSchemaTypes } from '../../generated/wibe'
 import { firstLetterInLowerCase } from '../utils'
 
+type AllPossibleObject =
+	| 'object'
+	| 'inputObject'
+	| 'whereInputObject'
+	| 'connectionObject'
+	| 'createPointerInput'
+	| 'updateInputObject'
+	| 'createInputObject'
+
+export type AllObjects = Record<string, Record<AllPossibleObject, any>>
+
 export class GraphQLSchema {
 	private schemas: Schema
 
+	private allObjects: AllObjects
+
 	constructor(schemas: Schema) {
 		this.schemas = schemas
+		this.allObjects = {}
+	}
+
+	initializeObject(classes: Array<ClassInterface>) {
+		for (const wibeClass of classes) {
+			const classNameWithoutSpace = wibeClass.name.replace(' ', '')
+
+			// We initialize to empty to have a lazy loading of the fields for the pointer circular dependency
+			// We use an object with a mutate state because we need to have reference to the object
+			this.allObjects[classNameWithoutSpace] = {
+				connectionObject: {},
+				createInputObject: {},
+				createPointerInput: {},
+				inputObject: {},
+				object: {},
+				updateInputObject: {},
+				whereInputObject: {},
+			}
+		}
 	}
 
 	createSchema() {
@@ -46,33 +78,38 @@ export class GraphQLSchema {
 		const scalars = this.createScalars()
 		const enums = this.createEnums()
 
+		const classes = this.schemas.schema.class
+
+		this.initializeObject(classes)
+
 		const graphqlParser = GraphqlParser({ scalars, enums })
 
-		const allObjects = this.createAllObjects(graphqlParser)
+		classes.map((wibeClass) =>
+			this.createCompleteObject(graphqlParser, wibeClass),
+		)
 
-		const queriesMutationAndObjects = this.schemas.schema.class.reduce(
+		const queriesMutationAndObjects = classes.reduce(
 			(acc, current) => {
 				const className = current.name.replace(' ', '')
 
-				const currentObject = allObjects.find(
-					(object) => object[className] !== undefined,
-				)
+				const currentObject = this.allObjects[className]
+
 				if (!currentObject) throw new Error('Object not found')
 
 				const {
-					[className]: {
-						object,
-						inputObject: defaultInputType,
-						updateInputObject: defaultUpdateInputType,
-						whereInputObject: whereInputType,
-						connectionObject,
-					},
+					object,
+					inputObject,
+					createPointerInput,
+					createInputObject,
+					updateInputObject,
+					whereInputObject,
+					connectionObject,
 				} = currentObject
 
 				// Queries
 				const defaultQueries = this.createDefaultQueries({
 					className,
-					whereInputType,
+					whereInputType: whereInputObject,
 					object,
 					connectionObject,
 				})
@@ -88,11 +125,11 @@ export class GraphQLSchema {
 				})
 				const defaultMutations = this.createDefaultMutations({
 					className,
-					defaultInputType,
-					whereInputType,
+					whereInputType: whereInputObject,
 					object,
 					connectionObject,
-					defaultUpdateInputType,
+					defaultUpdateInputType: updateInputObject,
+					defaultCreateInputType: createInputObject,
 				})
 
 				const defaultQueriesKeys = Object.keys(defaultQueries)
@@ -122,13 +159,15 @@ export class GraphQLSchema {
 				}
 
 				acc.objects.push(object)
+				acc.objects.push(inputObject)
+				acc.objects.push(createPointerInput)
 
 				return acc
 			},
 			{ queries: {}, mutations: {}, objects: [] } as {
 				queries: Record<string, GraphQLFieldConfig<any, any, any>>
 				mutations: Record<string, GraphQLFieldConfig<any, any, any>>
-				objects: Array<GraphQLObjectType>
+				objects: Array<GraphQLObjectType | GraphQLInputObjectType>
 			},
 		)
 
@@ -188,14 +227,37 @@ export class GraphQLSchema {
 		const graphqlParserWithInput = graphqlParser({
 			schemaFields: fields,
 			graphqlObjectType: 'Object',
+			allObjects: this.allObjects,
 		})
 
 		return new GraphQLObjectType({
 			name: nameWithoutSpace,
 			description,
+			// We need to use function here to have lazy loading of fields
 			fields: () => ({
 				id: { type: new GraphQLNonNull(GraphQLID) },
 				...graphqlParserWithInput.getGraphqlFields(nameWithoutSpace),
+			}),
+		})
+	}
+
+	createPointerInputObject({
+		wibeClass,
+		inputCreateFields,
+	}: {
+		wibeClass: ClassInterface
+		inputCreateFields: GraphQLInputObjectType
+	}) {
+		const { name } = wibeClass
+
+		const nameWithoutSpace = name.replace(' ', '')
+
+		return new GraphQLInputObjectType({
+			name: `${nameWithoutSpace}PointerInput`,
+			description: `Input to link an object to a pointer ${nameWithoutSpace}`,
+			fields: () => ({
+				link: { type: GraphQLID },
+				createAndLink: { type: inputCreateFields },
 			}),
 		})
 	}
@@ -214,12 +276,41 @@ export class GraphQLSchema {
 		const graphqlParserWithInput = graphqlParser({
 			schemaFields: fields,
 			graphqlObjectType: 'InputObject',
+			allObjects: this.allObjects,
 		})
 
 		return new GraphQLInputObjectType({
 			name: `${nameWithoutSpace}Input`,
 			description,
-			fields: graphqlParserWithInput.getGraphqlFields(nameWithoutSpace),
+			fields: () => ({
+				...graphqlParserWithInput.getGraphqlFields(nameWithoutSpace),
+			}),
+		})
+	}
+
+	createCreateInputObject({
+		wibeClass,
+		graphqlParser,
+	}: {
+		wibeClass: ClassInterface
+		graphqlParser: GraphqlParserFactory
+	}) {
+		const { name, fields, description } = wibeClass
+
+		const nameWithoutSpace = name.replace(' ', '')
+
+		const graphqlParserWithInput = graphqlParser({
+			schemaFields: fields,
+			graphqlObjectType: 'CreateFieldsInput',
+			allObjects: this.allObjects,
+		})
+
+		return new GraphQLInputObjectType({
+			name: `${nameWithoutSpace}CreateFieldsInput`,
+			description,
+			fields: () => ({
+				...graphqlParserWithInput.getGraphqlFields(nameWithoutSpace),
+			}),
 		})
 	}
 
@@ -237,12 +328,15 @@ export class GraphQLSchema {
 		const graphqlParserWithInput = graphqlParser({
 			schemaFields: fields,
 			graphqlObjectType: 'UpdateFieldsInput',
+			allObjects: this.allObjects,
 		})
 
 		return new GraphQLInputObjectType({
 			name: `${nameWithoutSpace}UpdateFieldsInput`,
 			description,
-			fields: graphqlParserWithInput.getGraphqlFields(nameWithoutSpace),
+			fields: () => ({
+				...graphqlParserWithInput.getGraphqlFields(nameWithoutSpace),
+			}),
 		})
 	}
 
@@ -260,6 +354,7 @@ export class GraphQLSchema {
 		const graphqlParserWithInput = graphqlParser({
 			schemaFields: fields,
 			graphqlObjectType: 'WhereInputObject',
+			allObjects: this.allObjects,
 		})
 
 		// @ts-expect-error
@@ -282,7 +377,7 @@ export class GraphQLSchema {
 		return inputObject
 	}
 
-	createOutputObject({
+	createConnectionObject({
 		object,
 		wibeClass,
 	}: {
@@ -303,41 +398,54 @@ export class GraphQLSchema {
 			}),
 		})
 
-		return { edgeObject, connectionObject }
+		return connectionObject
 	}
 
-	createAllObjects(graphqlParser: GraphqlParserFactory) {
-		return this.schemas.schema.class.map((wibeClass) => {
-			const object = this.createObject({ graphqlParser, wibeClass })
-			const { edgeObject, connectionObject } = this.createOutputObject({
-				object,
-				wibeClass,
-			})
-			const inputObject = this.createInputObject({
-				graphqlParser,
-				wibeClass,
-			})
-			const updateInputObject = this.createUpdateInputObject({
-				graphqlParser,
-				wibeClass,
-			})
+	createCompleteObject(
+		graphqlParser: GraphqlParserFactory,
+		wibeClass: ClassInterface,
+	) {
+		const object = this.createObject({ graphqlParser, wibeClass })
 
-			const whereInputObject = this.createWhereInputObject({
-				graphqlParser,
-				wibeClass,
-			})
-
-			return {
-				[wibeClass.name]: {
-					object,
-					edgeObject,
-					connectionObject,
-					inputObject,
-					updateInputObject,
-					whereInputObject,
-				},
-			}
+		const connectionObject = this.createConnectionObject({
+			object,
+			wibeClass,
 		})
+
+		const inputObject = this.createInputObject({
+			graphqlParser,
+			wibeClass,
+		})
+
+		const createInputObject = this.createCreateInputObject({
+			graphqlParser,
+			wibeClass,
+		})
+
+		const createPointerInput = this.createPointerInputObject({
+			inputCreateFields: createInputObject,
+			wibeClass,
+		})
+
+		const updateInputObject = this.createUpdateInputObject({
+			graphqlParser,
+			wibeClass,
+		})
+
+		const whereInputObject = this.createWhereInputObject({
+			graphqlParser,
+			wibeClass,
+		})
+
+		this.allObjects[wibeClass.name] = {
+			connectionObject,
+			createInputObject,
+			updateInputObject,
+			whereInputObject,
+			createPointerInput,
+			inputObject,
+			object,
+		}
 	}
 
 	createCustomMutations({
@@ -361,6 +469,7 @@ export class GraphQLSchema {
 				const graphqlParserWithInput = graphqlParser({
 					schemaFields: input,
 					graphqlObjectType: 'InputObject',
+					allObjects: this.allObjects,
 				})
 
 				const graphqlType = graphqlParserWithInput.getGraphqlType({
@@ -408,6 +517,7 @@ export class GraphQLSchema {
 				const graphqlParserWithInput = graphqlParser({
 					schemaFields: currentArgs,
 					graphqlObjectType: 'Object',
+					allObjects: this.allObjects,
 				})
 
 				const graphqlType = graphqlParserWithInput.getGraphqlType({
@@ -480,14 +590,14 @@ export class GraphQLSchema {
 	createDefaultMutations({
 		className,
 		object,
-		defaultInputType,
 		defaultUpdateInputType,
+		defaultCreateInputType,
 		whereInputType,
 		connectionObject,
 	}: {
 		className: string
-		defaultInputType: GraphQLInputObjectType
 		defaultUpdateInputType: GraphQLInputObjectType
+		defaultCreateInputType: GraphQLInputObjectType
 		whereInputType: GraphQLInputObjectType
 		object: GraphQLObjectType
 		connectionObject: GraphQLObjectType
@@ -508,7 +618,7 @@ export class GraphQLSchema {
 		const createInputType = new GraphQLInputObjectType({
 			name: `Create${className}Input`,
 			fields: () => ({
-				fields: { type: defaultInputType },
+				fields: { type: defaultCreateInputType },
 			}),
 		})
 
@@ -516,7 +626,9 @@ export class GraphQLSchema {
 			name: `Create${pluralClassName}Input`,
 			fields: () => ({
 				fields: {
-					type: new GraphQLNonNull(new GraphQLList(defaultInputType)),
+					type: new GraphQLNonNull(
+						new GraphQLList(defaultCreateInputType),
+					),
 				},
 				offset: { type: GraphQLInt },
 				limit: { type: GraphQLInt },

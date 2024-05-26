@@ -1,54 +1,81 @@
-import type { GraphQLResolveInfo } from 'graphql'
+import type { GraphQLResolveInfo, SelectionSetNode } from 'graphql'
 import { WibeApp } from '../..'
 import type { WibeSchemaTypes } from '../../generated/wibe'
 import type { Context } from '../graphql/interface'
 import { firstLetterInLowerCase } from '../utils'
 
-const getFieldsFromInfo = (
-	info: GraphQLResolveInfo,
+const ignoredFields = ['edges', 'node']
+
+export const getFieldsFromInfo = (
+	selectionSet: SelectionSetNode,
 	className?: keyof WibeSchemaTypes,
+): Array<any> => {
+	if (className) ignoredFields.push(firstLetterInLowerCase(className))
+
+	return selectionSet.selections
+		?.flatMap((selection) => {
+			//@ts-expect-error
+			const currentValue = selection.name.value
+
+			if (
+				//@ts-expect-error
+				selection.selectionSet?.selections &&
+				//@ts-expect-error
+				selection.selectionSet?.selections?.length > 0
+			) {
+				//@ts-expect-error
+				const res = getFieldsFromInfo(selection.selectionSet, className)
+
+				if (ignoredFields.indexOf(currentValue) === -1)
+					return res.map((field) => `${currentValue}.${field}`)
+
+				return res
+			}
+
+			return currentValue
+		})
+		.filter((value) => ignoredFields.indexOf(value) === -1)
+}
+
+export const executeRelationOnFields = async (
+	fields: Record<string, any>,
+	context: Context,
 ) => {
-	const firstNode = info.fieldNodes[0]
+	const entries = Object.entries(fields)
 
-	const edgesNode = firstNode.selectionSet?.selections.find(
-		// @ts-expect-error
-		(selection) => selection.name.value === 'edges',
-	)
+	return entries.reduce(
+		async (acc, [fieldName, value]) => {
+			const newAcc = await acc
 
-	// For multiple results
-	if (edgesNode) {
-		// @ts-expect-error
-		return firstNode.selectionSet?.selections[0].selectionSet?.selections[0].selectionSet.selections.map(
-			// @ts-expect-error
-			(selection) => selection.name.value,
-		)
-	}
+			if (typeof value === 'object' && value?.createAndLink) {
+				const { createAndLink } = value
 
-	// For mutation
-	if (className) {
-		const classNameWithFirstLetterLowerCase =
-			firstLetterInLowerCase(className)
+				const classInSchema = WibeApp.config.schema.class.find(
+					(schemaClass) => schemaClass.fields[fieldName],
+				)
 
-		const selectionOfOutputClassName =
-			firstNode.selectionSet?.selections.find(
-				(selection) =>
+				if (!classInSchema) throw new Error('Class not found in schema')
+
+				const fieldInClass = classInSchema?.fields[fieldName]
+
+				const { id } = await WibeApp.databaseController.createObject({
 					// @ts-expect-error
-					selection.name.value === classNameWithFirstLetterLowerCase,
-			)
+					className: fieldInClass.class,
+					data: createAndLink,
+					fields: ['id'],
+					context,
+				})
 
-		if (!selectionOfOutputClassName) throw new Error('No fields provided')
+				newAcc[fieldName] = id
+			} else if (typeof value === 'object' && value?.link) {
+				newAcc[fieldName] = value.link
+			} else {
+				newAcc[fieldName] = value
+			}
 
-		// @ts-expect-error
-		return selectionOfOutputClassName.selectionSet?.selections.map(
-			// @ts-expect-error
-			(selection) => selection.name.value,
-		)
-	}
-
-	// For one result
-	return firstNode.selectionSet?.selections.map(
-		// @ts-expect-error
-		(selection) => selection.name.value,
+			return newAcc
+		},
+		Promise.resolve({}) as Promise<Record<string, any>>,
 	)
 }
 
@@ -59,7 +86,11 @@ export const queryForOneObject = (
 	info: GraphQLResolveInfo,
 	className: keyof WibeSchemaTypes,
 ) => {
-	const fields = getFieldsFromInfo(info)
+	const selectionSet = info.fieldNodes[0].selectionSet
+
+	if (!selectionSet) throw new Error('No output fields provided')
+
+	const fields = getFieldsFromInfo(selectionSet, className)
 
 	if (!fields) throw new Error('No fields provided')
 
@@ -77,7 +108,11 @@ export const queryForMultipleObject = async (
 	info: GraphQLResolveInfo,
 	className: keyof WibeSchemaTypes,
 ) => {
-	const fields = getFieldsFromInfo(info)
+	const selectionSet = info.fieldNodes[0].selectionSet
+
+	if (!selectionSet) throw new Error('No output fields provided')
+
+	const fields = getFieldsFromInfo(selectionSet, className)
 
 	if (!fields) throw new Error('No fields provided')
 
@@ -103,17 +138,26 @@ export const mutationToCreateObject = async (
 	info: GraphQLResolveInfo,
 	className: keyof WibeSchemaTypes,
 ) => {
-	const fields = getFieldsFromInfo(info, className)
+	const selectionSet = info.fieldNodes[0].selectionSet
+
+	if (!selectionSet) throw new Error('No output fields provided')
+
+	const fields = getFieldsFromInfo(selectionSet, className)
 
 	if (!fields) throw new Error('No fields provided')
 
 	const classNameWithFirstLetterLowercase = firstLetterInLowerCase(className)
 
+	const updatedFieldsToCreate = await executeRelationOnFields(
+		args.input?.fields,
+		context,
+	)
+
 	return {
 		[classNameWithFirstLetterLowercase]:
 			await WibeApp.databaseController.createObject({
 				className,
-				data: args.input?.fields,
+				data: updatedFieldsToCreate,
 				fields,
 				context,
 			}),
@@ -127,7 +171,11 @@ export const mutationToCreateMultipleObjects = async (
 	info: GraphQLResolveInfo,
 	className: keyof WibeSchemaTypes,
 ) => {
-	const fields = getFieldsFromInfo(info, className)
+	const selectionSet = info.fieldNodes[0].selectionSet
+
+	if (!selectionSet) throw new Error('No output fields provided')
+
+	const fields = getFieldsFromInfo(selectionSet, className)
 
 	if (!fields) throw new Error('No fields provided')
 
@@ -152,18 +200,27 @@ export const mutationToUpdateObject = async (
 	info: GraphQLResolveInfo,
 	className: keyof WibeSchemaTypes,
 ) => {
-	const fields = getFieldsFromInfo(info, className)
+	const selectionSet = info.fieldNodes[0].selectionSet
+
+	if (!selectionSet) throw new Error('No output fields provided')
+
+	const fields = getFieldsFromInfo(selectionSet, className)
 
 	if (!fields) throw new Error('No fields provided')
 
 	const classNameWithFirstLetterLowercase = firstLetterInLowerCase(className)
+
+	const updatedFields = await executeRelationOnFields(
+		args.input?.fields,
+		context,
+	)
 
 	return {
 		[classNameWithFirstLetterLowercase]:
 			await WibeApp.databaseController.updateObject({
 				className,
 				id: args.input?.id,
-				data: args.input?.fields,
+				data: updatedFields,
 				fields,
 				context,
 			}),
@@ -177,7 +234,11 @@ export const mutationToUpdateMultipleObjects = async (
 	info: GraphQLResolveInfo,
 	className: keyof WibeSchemaTypes,
 ) => {
-	const fields = getFieldsFromInfo(info, className)
+	const selectionSet = info.fieldNodes[0].selectionSet
+
+	if (!selectionSet) throw new Error('No output fields provided')
+
+	const fields = getFieldsFromInfo(selectionSet, className)
 
 	if (!fields) throw new Error('No fields provided')
 
@@ -203,7 +264,11 @@ export const mutationToDeleteObject = async (
 	info: GraphQLResolveInfo,
 	className: keyof WibeSchemaTypes,
 ) => {
-	const fields = getFieldsFromInfo(info, className)
+	const selectionSet = info.fieldNodes[0].selectionSet
+
+	if (!selectionSet) throw new Error('No output fields provided')
+
+	const fields = getFieldsFromInfo(selectionSet, className)
 
 	if (!fields) throw new Error('No fields provided')
 
@@ -227,7 +292,11 @@ export const mutationToDeleteMultipleObjects = async (
 	info: GraphQLResolveInfo,
 	className: keyof WibeSchemaTypes,
 ) => {
-	const fields = getFieldsFromInfo(info, className)
+	const selectionSet = info.fieldNodes[0].selectionSet
+
+	if (!selectionSet) throw new Error('No output fields provided')
+
+	const fields = getFieldsFromInfo(selectionSet, className)
 
 	if (!fields) throw new Error('No fields provided')
 

@@ -73,6 +73,42 @@ describe('Mongo adapter', () => {
 		).rejects.toThrow('Connection to database is not established')
 	})
 
+	it('should return id if an empty fields is specified', async () => {
+		const insertedObjects = await mongoAdapter.createObjects({
+			className: '_User',
+			data: [
+				{
+					name: 'Lucas',
+					age: 20,
+				},
+			],
+			fields: [],
+			context: { user: {} } as any,
+		})
+
+		if (!insertedObjects) fail()
+
+		// @ts-expect-error
+		expect(insertedObjects[0].id).toBeDefined()
+	})
+
+	it('should return id if no fields is specified', async () => {
+		const insertedObjects = await mongoAdapter.createObjects({
+			className: '_User',
+			data: [
+				{
+					name: 'Lucas',
+					age: 20,
+				},
+			],
+			context: { user: {} } as any,
+		})
+
+		if (!insertedObjects) fail()
+
+		expect(insertedObjects[0].id).toBeDefined()
+	})
+
 	it('should getObjects using id and not _id', async () => {
 		const insertedObjects = await mongoAdapter.createObjects({
 			className: '_User',

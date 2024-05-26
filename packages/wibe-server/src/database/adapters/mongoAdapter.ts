@@ -22,6 +22,7 @@ import type {
 } from './adaptersInterface'
 import type { WibeSchemaTypes } from '../../../generated/wibe'
 import { OperationType, findHooksAndExecute } from '../../hooks'
+import { WibeApp } from '../../..'
 
 export const buildMongoWhereQuery = <T extends keyof WibeSchemaTypes>(
 	where?: WhereType<T>,
@@ -134,17 +135,19 @@ export class MongoAdapter implements DatabaseAdapter {
 			{} as Record<any, number>,
 		)
 
-		// @ts-expect-error
-		const isIdInProjection = fields?.includes('id') || !fields
+		const isIdInProjection =
+			// @ts-expect-error
+			fields?.includes('id') || !fields || fields.length === 0
 
 		const collection = await this.createClassIfNotExist(className)
 
 		const res = await collection.findOne(
 			{ _id: new ObjectId(id) } as Filter<any>,
 			{
-				projection: fields
-					? { ...objectOfFieldsToGet, _id: isIdInProjection }
-					: {},
+				projection:
+					fields && fields.length > 0
+						? { ...objectOfFieldsToGet, _id: isIdInProjection }
+						: {},
 			},
 		)
 
@@ -178,18 +181,20 @@ export class MongoAdapter implements DatabaseAdapter {
 			{} as Record<any, number>,
 		)
 
-		// @ts-expect-error
-		const isIdInProjection = fields?.includes('id') || !fields
+		const isIdInProjection =
+			// @ts-expect-error
+			fields?.includes('id') || !fields || fields.length === 0
 
 		const collection = await this.createClassIfNotExist(className)
 
 		const res = await collection
 			.find(whereBuilded, {
-				projection: fields
-					? {
-							...objectOfFieldsToGet,
-						}
-					: {},
+				projection:
+					fields && fields.length > 0
+						? {
+								...objectOfFieldsToGet,
+							}
+						: {},
 			})
 			.limit(limit || 0)
 			.skip(offset || 0)
@@ -256,7 +261,7 @@ export class MongoAdapter implements DatabaseAdapter {
 			}),
 		)
 
-		const allObjects = await this.getObjects({
+		const allObjects = await WibeApp.databaseController.getObjects({
 			className,
 			where: { OR: orStatement } as WhereType<T>,
 			fields,
@@ -271,7 +276,7 @@ export class MongoAdapter implements DatabaseAdapter {
 			context,
 		})
 
-		return allObjects
+		return allObjects as Pick<WibeSchemaTypes[T], K>[]
 	}
 
 	async updateObject<

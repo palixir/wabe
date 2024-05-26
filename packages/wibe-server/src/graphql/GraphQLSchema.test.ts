@@ -1,11 +1,14 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it, beforeAll } from 'bun:test'
 import { v4 as uuid } from 'uuid'
 import { WibeApp } from '../server'
 import getPort from 'get-port'
 import { DatabaseEnum } from '../database'
 import { gql } from 'graphql-request'
 import { getGraphqlClient } from '../utils/helper'
-import type { SchemaInterface } from '../schema'
+import { Schema, type SchemaInterface } from '../schema'
+import { GraphQLSchema, GraphQLObjectType } from 'graphql'
+import { GraphQLSchema as WibeGraphQLSchema } from './GraphQLSchema'
+import { getTypeFromGraphQLSchema } from './parseGraphqlSchema'
 
 const createWibeApp = async (schema: SchemaInterface) => {
 	const databaseId = uuid()
@@ -32,215 +35,10 @@ const createWibeApp = async (schema: SchemaInterface) => {
 }
 
 describe('GraphqlSchema', () => {
-	it('should return graphql relay standard output for default get query', async () => {
-		const { client, wibeApp } = await createWibeApp({
-			class: [
-				{
-					name: 'TestClass',
-					fields: { field1: { type: 'String' } },
-				},
-			],
-		})
+	let schema: GraphQLSchema
 
-		const createdObject = await client.request<any>(
-			graphql.createTestClass,
-			{
-				input: {
-					fields: { field1: 'test' },
-				},
-			},
-		)
-
-		const request = await client.request<any>(graphql.testClass, {
-			id: createdObject.createTestClass.testClass.id,
-		})
-
-		expect(request.testClass.field1).toBe('test')
-
-		await wibeApp.close()
-	})
-
-	it('should return graphql relay standard output for default get query (multiple)', async () => {
-		const { client, wibeApp } = await createWibeApp({
-			class: [
-				{
-					name: 'TestClass',
-					fields: { field1: { type: 'String' } },
-				},
-			],
-		})
-
-		await client.request<any>(graphql.createTestClass, {
-			input: {
-				fields: { field1: 'test' },
-			},
-		})
-
-		const request = await client.request<any>(graphql.testClasses, {
-			where: { field1: { equalTo: 'test' } },
-		})
-
-		expect(request.testClasses.edges[0].node.field1).toBe('test')
-
-		await wibeApp.close()
-	})
-
-	it('should return graphql relay standard output for default create mutation (clientMutationId, type)', async () => {
-		const { client, wibeApp } = await createWibeApp({
-			class: [
-				{
-					name: 'TestClass',
-					fields: { field1: { type: 'String' } },
-				},
-			],
-		})
-
-		const request = await client.request<any>(graphql.createTestClass, {
-			input: { fields: { field1: 'test' } },
-		})
-
-		expect(request.createTestClass.testClass.field1).toBe('test')
-
-		await wibeApp.close()
-	})
-
-	it('should return graphql relay standard output for default creates (multiple) mutation', async () => {
-		const { client, wibeApp } = await createWibeApp({
-			class: [
-				{
-					name: 'TestClass',
-					fields: { field1: { type: 'String' } },
-				},
-			],
-		})
-
-		const request = await client.request<any>(graphql.createTestClasses, {
-			input: { fields: [{ field1: 'test' }] },
-		})
-
-		expect(request.createTestClasses.edges[0].node.field1).toBe('test')
-
-		await wibeApp.close()
-	})
-
-	it('should return graphql relay standard output for default update mutation (clientMutationId, type)', async () => {
-		const { client, wibeApp } = await createWibeApp({
-			class: [
-				{
-					name: 'TestClass',
-					fields: { field1: { type: 'String' } },
-				},
-			],
-		})
-
-		const createdObject = await client.request<any>(
-			graphql.createTestClass,
-			{
-				input: {
-					fields: { field1: 'test' },
-				},
-			},
-		)
-
-		const request = await client.request<any>(graphql.updateTestClass, {
-			input: {
-				fields: { field1: 'test2' },
-				id: createdObject.createTestClass.testClass.id,
-			},
-		})
-
-		expect(request.updateTestClass.testClass.field1).toBe('test2')
-
-		await wibeApp.close()
-	})
-
-	it('should return graphql relay standard output for default updates (multiple) mutation', async () => {
-		const { client, wibeApp } = await createWibeApp({
-			class: [
-				{
-					name: 'TestClass',
-					fields: { field1: { type: 'String' } },
-				},
-			],
-		})
-
-		await client.request<any>(graphql.createTestClass, {
-			input: {
-				fields: { field1: 'test' },
-			},
-		})
-
-		const request = await client.request<any>(graphql.updateTestClasses, {
-			input: {
-				fields: { field1: 'test2' },
-				where: { field1: { equalTo: 'test' } },
-			},
-		})
-
-		expect(request.updateTestClasses.edges[0].node.field1).toBe('test2')
-
-		await wibeApp.close()
-	})
-
-	it('should return graphql relay standard output for default delete mutation (clientMutationId, type)', async () => {
-		const { client, wibeApp } = await createWibeApp({
-			class: [
-				{
-					name: 'TestClass',
-					fields: { field1: { type: 'String' } },
-				},
-			],
-		})
-
-		const createdObject = await client.request<any>(
-			graphql.createTestClass,
-			{
-				input: {
-					fields: { field1: 'test' },
-				},
-			},
-		)
-
-		const request = await client.request<any>(graphql.deleteTestClass, {
-			input: {
-				id: createdObject.createTestClass.testClass.id,
-			},
-		})
-
-		expect(request.deleteTestClass.testClass.field1).toBe('test')
-
-		await wibeApp.close()
-	})
-
-	it('should return graphql relay standard output for default deletes (multiple) mutation', async () => {
-		const { client, wibeApp } = await createWibeApp({
-			class: [
-				{
-					name: 'TestClass',
-					fields: { field1: { type: 'String' } },
-				},
-			],
-		})
-
-		await client.request<any>(graphql.createTestClass, {
-			input: {
-				fields: { field1: 'test' },
-			},
-		})
-
-		const request = await client.request<any>(graphql.deleteTestClasses, {
-			input: {
-				where: { field1: { equalTo: 'test' } },
-			},
-		})
-
-		expect(request.deleteTestClasses.edges[0].node.field1).toBe('test')
-
-		await wibeApp.close()
-	})
-
-	it('should not create input for mutation when there is no field', async () => {
-		const { client, wibeApp } = await createWibeApp({
+	beforeAll(() => {
+		const wibeSchema = new Schema({
 			class: [
 				{
 					name: 'TestClass',
@@ -252,25 +50,6 @@ describe('GraphqlSchema', () => {
 								resolve: () => true,
 							},
 						},
-					},
-				},
-			],
-		})
-
-		const request = await client.request<any>(graphql.customMutation, {})
-
-		expect(request.customMutation).toBe(true)
-
-		await wibeApp.close()
-	})
-
-	it('should create custom query', async () => {
-		const { client, wibeApp } = await createWibeApp({
-			class: [
-				{
-					name: 'TestClass',
-					fields: { field1: { type: 'String' } },
-					resolvers: {
 						queries: {
 							customQuery: {
 								type: 'Boolean',
@@ -279,53 +58,346 @@ describe('GraphqlSchema', () => {
 						},
 					},
 				},
-			],
-		})
-
-		const request = await client.request<any>(
-			gql`
-				query customQuery {
-					customQuery
-				}
-			`,
-			{},
-		)
-
-		expect(request.customQuery).toBe(true)
-
-		await wibeApp.close()
-	})
-
-	it('should create custom mutation', async () => {
-		const { client, wibeApp } = await createWibeApp({
-			class: [
 				{
-					name: 'TestClass',
-					fields: { field1: { type: 'String' } },
-					resolvers: {
-						mutations: {
-							customMutation: {
-								type: 'Boolean',
-								resolve: () => true,
-							},
+					name: 'SecondClass',
+					fields: {
+						// @ts-expect-error
+						pointer: { type: 'Pointer', class: 'TestClass' },
+					},
+				},
+				{
+					name: 'ThirdClass',
+					fields: {
+						pointer: {
+							type: 'Pointer',
+							// @ts-expect-error
+							class: 'FourthClass',
+						},
+					},
+				},
+				{
+					name: 'FourthClass',
+					fields: {
+						pointer: {
+							type: 'Pointer',
+							// @ts-expect-error
+							class: 'ThirdClass',
 						},
 					},
 				},
 			],
 		})
 
-		const request = await client.request<any>(
-			gql`
-				mutation customMutation {
-					customMutation
-				}
-			`,
-			{},
-		)
+		const graphqlSchema = new WibeGraphQLSchema(wibeSchema)
 
-		expect(request.customMutation).toBe(true)
+		const types = graphqlSchema.createSchema()
 
-		await wibeApp.close()
+		schema = new GraphQLSchema({
+			query: new GraphQLObjectType({
+				name: 'Query',
+				fields: types.queries,
+			}),
+			mutation: new GraphQLObjectType({
+				name: 'Mutation',
+				fields: types.mutations,
+			}),
+			types: [...types.scalars, ...types.enums, ...types.objects],
+		})
+	})
+
+	it('should have the pointer in the object when there is a circular dependency in pointer', () => {
+		expect(
+			getTypeFromGraphQLSchema({
+				schema,
+				type: 'Type',
+				name: 'ThirdClass',
+			}).input,
+		).toEqual({
+			id: 'ID!',
+			pointer: 'FourthClass',
+		})
+
+		expect(
+			getTypeFromGraphQLSchema({
+				schema,
+				type: 'Type',
+				name: 'FourthClass',
+			}).input,
+		).toEqual({
+			id: 'ID!',
+			pointer: 'ThirdClass',
+		})
+
+		expect(
+			getTypeFromGraphQLSchema({
+				schema,
+				type: 'Type',
+				name: 'ThirdClassInput',
+			}).input,
+		).toEqual({
+			pointer: 'FourthClassPointerInput',
+		})
+
+		expect(
+			getTypeFromGraphQLSchema({
+				schema,
+				type: 'Type',
+				name: 'FourthClassInput',
+			}).input,
+		).toEqual({
+			pointer: 'ThirdClassPointerInput',
+		})
+
+		expect(
+			getTypeFromGraphQLSchema({
+				schema,
+				type: 'Type',
+				name: 'ThirdClassPointerInput',
+			}).input,
+		).toEqual({
+			link: 'ID',
+			createAndLink: 'ThirdClassCreateFieldsInput',
+		})
+
+		expect(
+			getTypeFromGraphQLSchema({
+				schema,
+				type: 'Type',
+				name: 'FourthClassPointerInput',
+			}).input,
+		).toEqual({
+			link: 'ID',
+			createAndLink: 'FourthClassCreateFieldsInput',
+		})
+	})
+
+	it('should have TestClassPointerInput', () => {
+		expect(
+			getTypeFromGraphQLSchema({
+				schema,
+				type: 'Type',
+				name: 'TestClassPointerInput',
+			}).input,
+		).toEqual({
+			link: 'ID',
+			createAndLink: 'TestClassCreateFieldsInput',
+		})
+	})
+
+	it('should have a type with a pointer to TestClass', () => {
+		expect(
+			getTypeFromGraphQLSchema({
+				schema,
+				type: 'Type',
+				name: 'SecondClass',
+			}),
+		).toEqual({
+			input: {
+				id: 'ID!',
+				pointer: 'TestClass',
+			},
+		})
+	})
+
+	it('should have pointer input on SecondClassCreateFieldsInput', () => {
+		expect(
+			getTypeFromGraphQLSchema({
+				schema,
+				type: 'Type',
+				name: 'SecondClassCreateFieldsInput',
+			}),
+		).toEqual({
+			input: {
+				pointer: 'TestClassPointerInput',
+			},
+		})
+	})
+
+	it('should have pointer input on SecondClassUpdateFieldsInput', () => {
+		expect(
+			getTypeFromGraphQLSchema({
+				schema,
+				type: 'Type',
+				name: 'SecondClassUpdateFieldsInput',
+			}),
+		).toEqual({
+			input: {
+				pointer: 'TestClassPointerInput',
+			},
+		})
+	})
+
+	it('should have ClassCreateInputFieldsInput', () => {
+		expect(
+			getTypeFromGraphQLSchema({
+				schema,
+				type: 'Type',
+				name: 'TestClassCreateFieldsInput',
+			}).input,
+		).toEqual({
+			field1: 'String',
+		})
+	})
+
+	it('should have ClassUpdateInputFieldsInput', () => {
+		expect(
+			getTypeFromGraphQLSchema({
+				schema,
+				type: 'Type',
+				name: 'TestClassUpdateFieldsInput',
+			}).input,
+		).toEqual({
+			field1: 'String',
+		})
+	})
+
+	it('should get correct CreateTestClassPaylod type', () => {
+		expect(
+			getTypeFromGraphQLSchema({
+				schema,
+				type: 'Type',
+				name: 'CreateTestClassPayload',
+			}).input,
+		).toEqual({
+			clientMutationId: 'String',
+			testClass: 'TestClass',
+		})
+	})
+
+	it('should return graphql relay standard output for default get query', () => {
+		expect(
+			getTypeFromGraphQLSchema({
+				schema,
+				type: 'Query',
+				name: 'testClass',
+			}),
+		).toEqual({
+			input: {
+				id: 'ID',
+			},
+			output: 'TestClass',
+		})
+	})
+
+	it('should return graphql relay standard output for default get query (multiple)', () => {
+		expect(
+			getTypeFromGraphQLSchema({
+				schema,
+				type: 'Query',
+				name: 'testClasses',
+			}),
+		).toEqual({
+			input: {
+				limit: 'Int',
+				offset: 'Int',
+				where: 'TestClassWhereInput',
+			},
+			output: 'TestClassConnection!',
+		})
+	})
+
+	it('should return graphql relay standard output for default create mutation', () => {
+		expect(
+			getTypeFromGraphQLSchema({
+				schema,
+				type: 'Mutation',
+				name: 'createTestClass',
+			}),
+		).toEqual({
+			input: { input: 'CreateTestClassInput' },
+			output: 'CreateTestClassPayload',
+		})
+	})
+
+	it('should return graphql relay standard output for default creates mutation (multiple)', () => {
+		expect(
+			getTypeFromGraphQLSchema({
+				schema,
+				type: 'Mutation',
+				name: 'createTestClasses',
+			}),
+		).toEqual({
+			input: { input: 'CreateTestClassesInput' },
+			output: 'TestClassConnection!',
+		})
+	})
+
+	it('should return graphql relay standard output for default update mutation (clientMutationId, type)', () => {
+		expect(
+			getTypeFromGraphQLSchema({
+				schema,
+				type: 'Mutation',
+				name: 'updateTestClass',
+			}),
+		).toEqual({
+			input: { input: 'UpdateTestClassInput' },
+			output: 'UpdateTestClassPayload',
+		})
+	})
+
+	it('should return graphql relay standard output for default updates (multiple) mutation', () => {
+		expect(
+			getTypeFromGraphQLSchema({
+				schema,
+				type: 'Mutation',
+				name: 'updateTestClasses',
+			}),
+		).toEqual({
+			input: { input: 'UpdateTestClassesInput' },
+			output: 'TestClassConnection!',
+		})
+	})
+
+	it('should return graphql relay standard output for default delete mutation (clientMutationId, type)', () => {
+		expect(
+			getTypeFromGraphQLSchema({
+				schema,
+				type: 'Mutation',
+				name: 'deleteTestClass',
+			}),
+		).toEqual({
+			input: { input: 'DeleteTestClassInput' },
+			output: 'DeleteTestClassPayload',
+		})
+	})
+
+	it('should return graphql relay standard output for default deletes (multiple) mutation', () => {
+		expect(
+			getTypeFromGraphQLSchema({
+				schema,
+				type: 'Mutation',
+				name: 'deleteTestClasses',
+			}),
+		).toEqual({
+			input: { input: 'DeleteTestClassesInput' },
+			output: 'TestClassConnection!',
+		})
+	})
+
+	it('should not create input for mutation when there is no field', () => {
+		expect(
+			getTypeFromGraphQLSchema({
+				schema,
+				type: 'Mutation',
+				name: 'customMutation',
+			}),
+		).toEqual({
+			input: {},
+			output: 'Boolean',
+		})
+	})
+
+	it('should create custom query with no args', () => {
+		expect(
+			getTypeFromGraphQLSchema({
+				schema,
+				type: 'Query',
+				name: 'customQuery',
+			}),
+		).toEqual({
+			input: {},
+			output: 'Boolean',
+		})
 	})
 
 	it('should create mutation with sub input', async () => {
@@ -523,59 +595,6 @@ describe('GraphqlSchema', () => {
 		await wibeApp.close()
 	})
 
-	it('should create mutation with empty input', async () => {
-		const { client, wibeApp } = await createWibeApp({
-			class: [
-				{
-					name: 'TestClass',
-					fields: { field1: { type: 'String' } },
-					resolvers: {
-						mutations: {
-							customMutation: {
-								type: 'Boolean',
-								resolve: () => true,
-								args: {
-									input: {},
-								},
-							},
-						},
-					},
-				},
-			],
-		})
-
-		const request = await client.request<any>(graphql.customMutation, {})
-
-		expect(request.customMutation).toBe(true)
-
-		await wibeApp.close()
-	})
-
-	it('should execute when there is no fields', async () => {
-		const { client, wibeApp } = await createWibeApp({
-			class: [
-				{
-					name: 'TestClass',
-					fields: { field1: { type: 'String' } },
-					resolvers: {
-						queries: {
-							customQueries: {
-								type: 'Boolean',
-								resolve: () => true,
-							},
-						},
-					},
-				},
-			],
-		})
-
-		const request = await client.request<any>(graphql.customQueries, {})
-
-		expect(request.customQueries).toBe(true)
-
-		await wibeApp.close()
-	})
-
 	it('should create a sub object with the good type', async () => {
 		const { client, wibeApp } = await createWibeApp({
 			class: [
@@ -646,38 +665,48 @@ describe('GraphqlSchema', () => {
 		await wibeApp.close()
 	})
 
-	it('should request a sub sub object', async () => {
+	it('should create an object with a pointer (createAndLink)', async () => {
 		const { client, wibeApp } = await createWibeApp({
 			class: [
 				{
 					name: 'TestClass',
 					fields: {
 						field1: {
-							type: 'Object',
-							object: {
-								name: 'SubOject',
-								fields: {
-									field2: { type: 'String' },
-									field3: { type: 'Int' },
-								},
-							},
+							type: 'String',
+						},
+					},
+				},
+				{
+					name: 'TestClass2',
+					fields: {
+						name: {
+							type: 'String',
+						},
+						field2: {
+							type: 'Pointer',
+							// @ts-expect-error
+							class: 'TestClass',
 						},
 					},
 				},
 			],
 		})
 
-		await client.request<any>(
+		const res = await client.request<any>(
 			gql`
 				mutation createTestClass {
-					createTestClass(
+					createTestClass2(
 						input: {
-							fields: { field1: { field2: "test2", field3: 1 } }
+							fields: {
+								name: "name"
+								field2: { createAndLink: { field1: "field1" } }
+							}
 						}
 					) {
-						testClass {
-							field1 {
-								field2
+						testClass2 {
+							name
+							field2 {
+								field1
 							}
 						}
 					}
@@ -686,119 +715,84 @@ describe('GraphqlSchema', () => {
 			{},
 		)
 
-		const request = await client.request<any>(
+		expect(res.createTestClass2.testClass2.name).toBe('name')
+		expect(res.createTestClass2.testClass2.field2.field1).toBe('field1')
+
+		await wibeApp.close()
+	})
+
+	it('should link an object to a pointer', async () => {
+		const { client, wibeApp } = await createWibeApp({
+			class: [
+				{
+					name: 'TestClass',
+					fields: {
+						field1: {
+							type: 'String',
+						},
+					},
+				},
+				{
+					name: 'TestClass2',
+					fields: {
+						name: {
+							type: 'String',
+						},
+						field2: {
+							type: 'Pointer',
+							// @ts-expect-error
+							class: 'TestClass',
+						},
+					},
+				},
+			],
+		})
+
+		const {
+			createTestClass: {
+				testClass: { id: idOfTestClass },
+			},
+		} = await client.request<any>(
 			gql`
-				query testClasses {
-					testClasses(
-						where: { field1: { field2: { equalTo: "test2" } } }
-					) {
-						edges {
-							node {
-								field1 {
-									field2
+				mutation createTestClass {
+					createTestClass(input: { fields: { field1: "field1" } }) {
+						testClass {
+							id
+						}
+					}
+				}
+			`,
+			{},
+		)
+
+		const res = await client.request<any>(
+			gql`
+					mutation createTestClass {
+						createTestClass2(
+							input: {
+								fields: {
+									name: "name"
+									field2: {
+										link: "${idOfTestClass}"
+									}
+								}
+							}
+						) {
+							testClass2 {
+								name
+								field2 {
+									field1
 								}
 							}
 						}
 					}
-				}
-			`,
+				`,
 			{},
 		)
 
-		expect(request.testClasses.edges[0].node.field1.field2).toBe('test2')
+		expect(res.createTestClass2.testClass2.name).toBe('name')
+		expect(res.createTestClass2.testClass2.field2.field1).toBe('field1')
 
 		await wibeApp.close()
 	})
 })
-
-const graphql = {
-	testClass: gql`
-		query testClass($id: ID!) {
-			testClass(id: $id) {
-				field1
-			}
-		}
-	`,
-	testClasses: gql`
-		query testClasses($where: TestClassWhereInput!) {
-			testClasses(where: $where) {
-				edges {
-					node {
-						field1
-					}
-				}
-			}
-		}
-	`,
-	deleteTestClass: gql`
-		mutation deleteTestClass($input: DeleteTestClassInput!) {
-			deleteTestClass(input: $input) {
-				testClass {
-					field1
-				}
-			}
-		}
-	`,
-	deleteTestClasses: gql`
-		mutation deleteTestClasses($input: DeleteTestClassesInput!) {
-			deleteTestClasses(input: $input) {
-				edges {
-					node {
-						field1
-					}
-				}
-			}
-		}
-	`,
-	updateTestClass: gql`
-		mutation updateTestClass($input: UpdateTestClassInput!) {
-			updateTestClass(input: $input) {
-				testClass {
-					field1
-				}
-			}
-		}
-	`,
-	updateTestClasses: gql`
-		mutation updateTestClasses($input: UpdateTestClassesInput!) {
-			updateTestClasses(input: $input) {
-				edges {
-					node {
-						field1
-					}
-				}
-			}
-		}
-	`,
-	createTestClass: gql`
-		mutation createTestClass($input: CreateTestClassInput!) {
-			createTestClass(input: $input) {
-				testClass {
-					id
-					field1
-				}
-			}
-		}
-	`,
-	createTestClasses: gql`
-		mutation createTestClasses($input: CreateTestClassesInput!) {
-			createTestClasses(input: $input) {
-				edges {
-					node {
-						field1
-					}
-				}
-			}
-		}
-	`,
-	customMutation: gql`
-		mutation customMutation {
-			customMutation
-		}
-	`,
-	customQueries: gql`
-		query customQueries {
-			customQueries
-		}
-	`,
-}

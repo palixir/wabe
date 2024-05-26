@@ -1,30 +1,542 @@
-import { describe, it, expect, spyOn, beforeAll, afterAll } from 'bun:test'
-import { MongoAdapter } from '../adapters/MongoAdapter'
-import { closeTests, setupTests } from '../../utils/helper'
+import {
+	describe,
+	it,
+	expect,
+	mock,
+	beforeAll,
+	beforeEach,
+	spyOn,
+} from 'bun:test'
 import { WibeApp } from '../../server'
+import { DatabaseController } from '..'
 
 describe('DatabaseController', () => {
-	let wibe: WibeApp
+	const mockGetObject = mock(() => {})
+	const mockGetObjects = mock(() => {})
+	const mockCreateObject = mock(() => {})
+	const mockCreateObjects = mock(() => {})
+	const mockUpdateObject = mock(() => {})
+	const mockUpdateObjects = mock(() => {})
+	const mockDeleteObject = mock(() => {})
+	const mockDeleteObjects = mock(() => {})
 
-	beforeAll(async () => {
-		const setup = await setupTests()
-		wibe = setup.wibe
+	const mockAdapter = mock(() => ({
+		getObject: mockGetObject,
+		getObjects: mockGetObjects,
+		createObject: mockCreateObject,
+		createObjects: mockCreateObjects,
+		updateObject: mockUpdateObject,
+		updateObjects: mockUpdateObjects,
+		deleteObject: mockDeleteObject,
+		deleteObjects: mockDeleteObjects,
+	}))
+
+	beforeAll(() => {
+		WibeApp.config = {
+			schema: {
+				class: [
+					{
+						name: 'TestClass',
+						fields: {
+							pointerToAnotherClass: {
+								type: 'Pointer',
+								// @ts-expect-error
+								class: 'AnotherClass',
+							},
+							pointerToAnotherClass2: {
+								type: 'Pointer',
+								// @ts-expect-error
+								class: 'AnotherClass2',
+							},
+						},
+					},
+					{
+						name: 'AnotherClass',
+						fields: {
+							field1: {
+								type: 'String',
+							},
+						},
+					},
+					{
+						name: 'AnotherClass2',
+						fields: {
+							field3: {
+								type: 'String',
+							},
+						},
+					},
+				],
+			},
+		}
 	})
 
-	afterAll(async () => {
-		await closeTests(wibe)
+	beforeEach(() => {
+		mockGetObject.mockClear()
+		mockGetObjects.mockClear()
 	})
 
-	it('should call adapter for createClass', async () => {
-		const spyMongoAdapterCreateClass = spyOn(
-			MongoAdapter.prototype,
-			'createClassIfNotExist',
-		).mockResolvedValue({} as any)
+	it('should get the object with pointer data', async () => {
+		const databaseController = new DatabaseController(mockAdapter() as any)
 
-		await WibeApp.databaseController.createClassIfNotExist('Collection1')
+		spyOn(databaseController, '_isPointerField').mockReturnValueOnce(true)
 
-		expect(spyMongoAdapterCreateClass).toHaveBeenCalledTimes(1)
+		await databaseController._getFinalObjectWithPointer(
+			{
+				// @ts-expect-error
+				name: 'name',
+				pointerToAnotherClass: 'idOfAnotherClass',
+			},
+			{
+				pointerToAnotherClass: {
+					fieldsOfPointerClass: ['field1'],
+					pointerClass: 'AnotherClass',
+				},
+			},
+			'TestClass',
+		)
 
-		spyMongoAdapterCreateClass.mockRestore()
+		expect(mockGetObject).toHaveBeenCalledTimes(1)
+		expect(mockGetObject).toHaveBeenCalledWith({
+			className: 'AnotherClass',
+			fields: ['field1'],
+			id: 'idOfAnotherClass',
+		})
+	})
+
+	it('should return true if the field is a Pointer of the class', () => {
+		const databaseController = new DatabaseController(mockAdapter() as any)
+
+		expect(
+			databaseController._isPointerField(
+				'testClass' as any,
+				'anotherClass',
+			),
+		).toBe(true)
+	})
+
+	it('should return false if the field is not Pointer of the class', () => {
+		const databaseController = new DatabaseController(mockAdapter() as any)
+
+		expect(
+			databaseController._isPointerField(
+				'anotherClass' as any,
+				'anotherClass2',
+			),
+		).toBe(false)
+	})
+
+	it('should return false if the field is not Pointer of the class (class not exist)', () => {
+		const databaseController = new DatabaseController(mockAdapter() as any)
+
+		expect(
+			databaseController._isPointerField(
+				'invalidClass' as any,
+				'anotherClass2',
+			),
+		).toBe(false)
+	})
+
+	it("should get all pointer's classes to request", () => {
+		const databaseController = new DatabaseController(mockAdapter() as any)
+
+		const fields = [
+			'name',
+			'pointerToAnotherClass.field1',
+			'pointerToAnotherClass.field2',
+		]
+
+		expect(
+			databaseController._getPointerObject('TestClass', fields),
+		).toEqual({
+			pointers: {
+				pointerToAnotherClass: {
+					pointerClass: 'AnotherClass',
+					fieldsOfPointerClass: ['field1', 'field2'],
+				},
+			},
+			pointersFieldsId: ['pointerToAnotherClass'],
+		})
+	})
+
+	it("should get all pointer's classes to request with multiple pointer", () => {
+		const databaseController = new DatabaseController(mockAdapter() as any)
+
+		const fields = [
+			'name',
+			'pointerToAnotherClass.field1',
+			'pointerToAnotherClass.field2',
+			'pointerToAnotherClass2.field3',
+		]
+
+		expect(
+			databaseController._getPointerObject('TestClass', fields),
+		).toEqual({
+			pointers: {
+				pointerToAnotherClass: {
+					pointerClass: 'AnotherClass',
+					fieldsOfPointerClass: ['field1', 'field2'],
+				},
+				pointerToAnotherClass2: {
+					pointerClass: 'AnotherClass2',
+					fieldsOfPointerClass: ['field3'],
+				},
+			},
+			pointersFieldsId: [
+				'pointerToAnotherClass',
+				'pointerToAnotherClass2',
+			],
+		})
+	})
+
+	it('shoud getObject with no fields in output', async () => {
+		mockGetObject.mockResolvedValueOnce({
+			id: '123',
+			name: 'name',
+		} as never)
+
+		const databaseController = new DatabaseController(mockAdapter() as any)
+
+		await databaseController.getObject({
+			// @ts-expect-error
+			className: 'TestClass',
+			id: '123',
+		})
+
+		expect(mockGetObject).toHaveBeenCalledTimes(1)
+		expect(mockGetObject).toHaveBeenNthCalledWith(1, {
+			className: 'TestClass',
+			id: '123',
+			fields: [],
+		})
+	})
+
+	it('should getObject without pointer', async () => {
+		mockGetObject.mockResolvedValueOnce({
+			id: '123',
+			name: 'name',
+		} as never)
+
+		const databaseController = new DatabaseController(mockAdapter() as any)
+
+		const res = await databaseController.getObject({
+			// @ts-expect-error
+			className: 'TestClass',
+			id: '123',
+			// @ts-expect-error
+			fields: ['name'],
+		})
+
+		expect(res).toEqual({
+			id: '123',
+			// @ts-expect-error
+			name: 'name',
+		})
+
+		expect(mockGetObject).toHaveBeenCalledTimes(1)
+		expect(mockGetObject).toHaveBeenNthCalledWith(1, {
+			className: 'TestClass',
+			id: '123',
+			fields: ['name'],
+		})
+	})
+
+	it('should call the getObject on adapter with one pointer', async () => {
+		mockGetObject.mockResolvedValueOnce({
+			id: '123',
+			pointerToAnotherClass: 'anotherClassId',
+		} as never)
+
+		mockGetObject.mockResolvedValueOnce({
+			id: 'anotherClassId',
+			name: 'anotherClassName',
+		} as never)
+
+		const databaseController = new DatabaseController(mockAdapter() as any)
+
+		const res = await databaseController.getObject({
+			// @ts-expect-error
+			className: 'TestClass',
+			id: '123',
+			fields: [
+				// @ts-expect-error
+				'name',
+				// @ts-expect-error
+				'pointerToAnotherClass.id',
+				// @ts-expect-error
+				'pointerToAnotherClass.name',
+			],
+		})
+
+		expect(res).toEqual({
+			id: '123',
+			// @ts-expect-error
+			pointerToAnotherClass: {
+				id: 'anotherClassId',
+				name: 'anotherClassName',
+			},
+		})
+
+		expect(mockGetObject).toHaveBeenCalledTimes(2)
+		expect(mockGetObject).toHaveBeenNthCalledWith(1, {
+			className: 'TestClass',
+			id: '123',
+			fields: ['name', 'pointerToAnotherClass'],
+		})
+
+		expect(mockGetObject).toHaveBeenNthCalledWith(2, {
+			className: 'AnotherClass',
+			id: 'anotherClassId',
+			fields: ['id', 'name'],
+		})
+	})
+
+	it('should call getObject with multiple pointers', async () => {
+		mockGetObject.mockResolvedValueOnce({
+			id: '123',
+			pointerToAnotherClass: 'anotherClassId',
+			pointerToAnotherClass2: 'anotherClass2Id',
+		} as never)
+
+		mockGetObject.mockResolvedValueOnce({
+			id: 'anotherClassId',
+			name: 'anotherClassName',
+		} as never)
+
+		mockGetObject.mockResolvedValueOnce({
+			age: 'anotherClass2Age',
+		} as never)
+
+		const databaseController = new DatabaseController(mockAdapter() as any)
+
+		const res = await databaseController.getObject({
+			// @ts-expect-error
+			className: 'TestClass',
+			id: '123',
+			fields: [
+				// @ts-expect-error
+				'name',
+				// @ts-expect-error
+				'pointerToAnotherClass.id',
+				// @ts-expect-error
+				'pointerToAnotherClass.name',
+				// @ts-expect-error
+				'pointerToAnotherClass2.age',
+			],
+		})
+
+		expect(res).toEqual({
+			id: '123',
+			// @ts-expect-error
+			pointerToAnotherClass: {
+				id: 'anotherClassId',
+				name: 'anotherClassName',
+			},
+			pointerToAnotherClass2: {
+				age: 'anotherClass2Age',
+			},
+		})
+
+		expect(mockGetObject).toHaveBeenCalledTimes(3)
+		expect(mockGetObject).toHaveBeenNthCalledWith(1, {
+			className: 'TestClass',
+			id: '123',
+			fields: ['name', 'pointerToAnotherClass', 'pointerToAnotherClass2'],
+		})
+
+		expect(mockGetObject).toHaveBeenNthCalledWith(2, {
+			className: 'AnotherClass',
+			id: 'anotherClassId',
+			fields: ['id', 'name'],
+		})
+
+		expect(mockGetObject).toHaveBeenNthCalledWith(3, {
+			className: 'AnotherClass2',
+			id: 'anotherClass2Id',
+			fields: ['age'],
+		})
+	})
+
+	it('shoud getObjects with no fields in output', async () => {
+		mockGetObjects.mockResolvedValueOnce([
+			{
+				id: '123',
+			},
+		] as never)
+
+		const databaseController = new DatabaseController(mockAdapter() as any)
+
+		await databaseController.getObjects({
+			// @ts-expect-error
+			className: 'TestClass',
+			id: '123',
+		})
+
+		expect(mockGetObjects).toHaveBeenCalledTimes(1)
+		expect(mockGetObjects).toHaveBeenNthCalledWith(1, {
+			className: 'TestClass',
+			id: '123',
+			fields: [],
+		})
+	})
+
+	it('should call getObjects with no pointer', async () => {
+		mockGetObjects.mockResolvedValueOnce([
+			{
+				id: '123',
+				name: 'name',
+			},
+		] as never)
+
+		const databaseController = new DatabaseController(mockAdapter() as any)
+
+		const res = await databaseController.getObjects({
+			// @ts-expect-error
+			className: 'TestClass',
+			id: '123',
+			fields: [
+				// @ts-expect-error
+				'name',
+			],
+		})
+
+		expect(res).toEqual([
+			{
+				id: '123',
+				name: 'name',
+			},
+		])
+
+		expect(mockGetObject).toHaveBeenCalledTimes(0)
+
+		expect(mockGetObjects).toHaveBeenCalledTimes(1)
+		expect(mockGetObjects).toHaveBeenNthCalledWith(1, {
+			className: 'TestClass',
+			id: '123',
+			fields: ['name'],
+		})
+	})
+
+	it('should call getObjects with one pointer', async () => {
+		mockGetObjects.mockResolvedValueOnce([
+			{
+				id: '123',
+				pointerToAnotherClass: 'anotherClassId',
+			},
+		] as never)
+
+		mockGetObject.mockResolvedValueOnce({
+			id: 'anotherClassId',
+			name: 'anotherClassName',
+		} as never)
+
+		const databaseController = new DatabaseController(mockAdapter() as any)
+
+		const res = await databaseController.getObjects({
+			// @ts-expect-error
+			className: 'TestClass',
+			id: '123',
+			fields: [
+				// @ts-expect-error
+				'name',
+				// @ts-expect-error
+				'pointerToAnotherClass.id',
+				// @ts-expect-error
+				'pointerToAnotherClass.name',
+			],
+		})
+
+		expect(res).toEqual([
+			{
+				id: '123',
+				pointerToAnotherClass: {
+					id: 'anotherClassId',
+					name: 'anotherClassName',
+				},
+			},
+		])
+
+		expect(mockGetObject).toHaveBeenCalledTimes(1)
+		expect(mockGetObject).toHaveBeenNthCalledWith(1, {
+			className: 'AnotherClass',
+			id: 'anotherClassId',
+			fields: ['id', 'name'],
+		})
+
+		expect(mockGetObjects).toHaveBeenCalledTimes(1)
+		expect(mockGetObjects).toHaveBeenNthCalledWith(1, {
+			className: 'TestClass',
+			id: '123',
+			fields: ['name', 'pointerToAnotherClass'],
+		})
+	})
+
+	it('should call getObjects with multiple pointer', async () => {
+		mockGetObjects.mockResolvedValueOnce([
+			{
+				id: '123',
+				pointerToAnotherClass: 'anotherClassId',
+				pointerToAnotherClass2: 'anotherClass2Id',
+			},
+		] as never)
+
+		mockGetObject.mockResolvedValueOnce({
+			id: 'anotherClassId',
+			name: 'anotherClassName',
+		} as never)
+
+		mockGetObject.mockResolvedValueOnce({
+			age: 'anotherClass2Age',
+		} as never)
+
+		const databaseController = new DatabaseController(mockAdapter() as any)
+
+		const res = await databaseController.getObjects({
+			// @ts-expect-error
+			className: 'TestClass',
+			id: '123',
+			fields: [
+				// @ts-expect-error
+				'name',
+				// @ts-expect-error
+				'pointerToAnotherClass.id',
+				// @ts-expect-error
+				'pointerToAnotherClass.name',
+				// @ts-expect-error
+				'pointerToAnotherClass2.age',
+			],
+		})
+
+		expect(res).toEqual([
+			{
+				id: '123',
+				pointerToAnotherClass: {
+					id: 'anotherClassId',
+					name: 'anotherClassName',
+				},
+				pointerToAnotherClass2: {
+					age: 'anotherClass2Age',
+				},
+			},
+		])
+
+		expect(mockGetObject).toHaveBeenCalledTimes(2)
+		expect(mockGetObject).toHaveBeenNthCalledWith(1, {
+			className: 'AnotherClass',
+			id: 'anotherClassId',
+			fields: ['id', 'name'],
+		})
+		expect(mockGetObject).toHaveBeenNthCalledWith(2, {
+			className: 'AnotherClass2',
+			id: 'anotherClass2Id',
+			fields: ['age'],
+		})
+
+		expect(mockGetObjects).toHaveBeenCalledTimes(1)
+		expect(mockGetObjects).toHaveBeenNthCalledWith(1, {
+			className: 'TestClass',
+			id: '123',
+			fields: ['name', 'pointerToAnotherClass', 'pointerToAnotherClass2'],
+		})
 	})
 })
