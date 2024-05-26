@@ -326,13 +326,15 @@ export class MongoAdapter implements DatabaseAdapter {
 			context,
 		})
 
-		const objectsBeforeUpdate = await this.getObjects({
-			className,
-			where,
-			fields: ['id'],
-			offset,
-			limit,
-		})
+		const objectsBeforeUpdate = await WibeApp.databaseController.getObjects(
+			{
+				className,
+				where,
+				fields: ['id'],
+				offset,
+				limit,
+			},
+		)
 
 		await collection.updateMany(whereBuilded, {
 			$set: arrayOfComputedData[0],
@@ -342,7 +344,7 @@ export class MongoAdapter implements DatabaseAdapter {
 			id: { equalTo: new ObjectId(object.id) },
 		}))
 
-		const objects = await this.getObjects({
+		const objects = await WibeApp.databaseController.getObjects({
 			className,
 			where: {
 				OR: orStatement,
@@ -398,13 +400,15 @@ export class MongoAdapter implements DatabaseAdapter {
 
 		const collection = await this.createClassIfNotExist(className)
 
-		const objectsBeforeDelete = await this.getObjects({
-			className,
-			where,
-			fields,
-			limit,
-			offset,
-		})
+		const objectsBeforeDelete = await WibeApp.databaseController.getObjects(
+			{
+				className,
+				where,
+				fields,
+				limit,
+				offset,
+			},
+		)
 
 		await findHooksAndExecute({
 			className,

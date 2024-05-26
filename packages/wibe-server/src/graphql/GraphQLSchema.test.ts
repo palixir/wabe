@@ -795,4 +795,396 @@ describe('GraphqlSchema', () => {
 
 		await wibeApp.close()
 	})
+
+	it('should link a pointer on create multiple object', async () => {
+		const { client, wibeApp } = await createWibeApp({
+			class: [
+				{
+					name: 'TestClass',
+					fields: {
+						field1: {
+							type: 'String',
+						},
+					},
+				},
+				{
+					name: 'TestClass2',
+					fields: {
+						name: {
+							type: 'String',
+						},
+						field2: {
+							type: 'Pointer',
+							// @ts-expect-error
+							class: 'TestClass',
+						},
+					},
+				},
+			],
+		})
+
+		const res = await client.request<any>(
+			gql`
+				mutation createTestClass2s {
+					createTestClass2s(
+						input: {
+							fields: [
+								{
+									name: "name"
+									field2: {
+										createAndLink: { field1: "field1" }
+									}
+								}
+							]
+						}
+					) {
+						edges {
+							node {
+								name
+								field2 {
+									field1
+								}
+							}
+						}
+					}
+				}
+			`,
+			{},
+		)
+
+		expect(res.createTestClass2s.edges[0].node.name).toBe('name')
+		expect(res.createTestClass2s.edges[0].node.field2.field1).toBe('field1')
+
+		await wibeApp.close()
+	})
+
+	it('should create and link a pointer on update', async () => {
+		const { client, wibeApp } = await createWibeApp({
+			class: [
+				{
+					name: 'TestClass',
+					fields: {
+						field1: {
+							type: 'String',
+						},
+					},
+				},
+				{
+					name: 'TestClass2',
+					fields: {
+						name: {
+							type: 'String',
+						},
+						field2: {
+							type: 'Pointer',
+							// @ts-expect-error
+							class: 'TestClass',
+						},
+					},
+				},
+			],
+		})
+
+		const res = await client.request<any>(
+			gql`
+				mutation createTestClass {
+					createTestClass2(
+						input: {
+							fields: {
+								name: "name"
+								field2: { createAndLink: { field1: "field1" } }
+							}
+						}
+					) {
+						testClass2 {
+							id
+							name
+							field2 {
+								field1
+							}
+						}
+					}
+				}
+			`,
+			{},
+		)
+
+		expect(res.createTestClass2.testClass2.name).toBe('name')
+		expect(res.createTestClass2.testClass2.field2.field1).toBe('field1')
+
+		const resAfterUpdate = await client.request<any>(gql`
+			mutation updateTestClass {
+				updateTestClass2(
+					input: {
+						fields: {
+							field2: {
+								createAndLink: { field1: "field1AfterUpdate" }
+							}
+						}
+						id: "${res.createTestClass2.testClass2.id}"
+					}
+				) {
+					testClass2 {
+						name
+						field2 {
+							field1
+						}
+					}
+				}
+			}
+		`)
+
+		expect(resAfterUpdate.updateTestClass2.testClass2.name).toBe('name')
+		expect(resAfterUpdate.updateTestClass2.testClass2.field2.field1).toBe(
+			'field1AfterUpdate',
+		)
+
+		await wibeApp.close()
+	})
+
+	it('should link a pointer on update', async () => {
+		const { client, wibeApp } = await createWibeApp({
+			class: [
+				{
+					name: 'TestClass',
+					fields: {
+						field1: {
+							type: 'String',
+						},
+					},
+				},
+				{
+					name: 'TestClass2',
+					fields: {
+						name: {
+							type: 'String',
+						},
+						field2: {
+							type: 'Pointer',
+							// @ts-expect-error
+							class: 'TestClass',
+						},
+					},
+				},
+			],
+		})
+
+		const {
+			createTestClass: {
+				testClass: { id: idOfTestClass },
+			},
+		} = await client.request<any>(
+			gql`
+				mutation createTestClass {
+					createTestClass(input: { fields: { field1: "field1" } }) {
+						testClass {
+							id
+						}
+					}
+				}
+			`,
+			{},
+		)
+
+		const res = await client.request<any>(
+			gql`
+				mutation createTestClass {
+					createTestClass2(input: { fields: { name: "name" } }) {
+						testClass2 {
+							id
+							name
+						}
+					}
+				}
+			`,
+			{},
+		)
+
+		const resAfterUpdate = await client.request<any>(
+			gql`
+				mutation updateTestClass {
+					updateTestClass2(input: {
+  					id: "${res.createTestClass2.testClass2.id}"
+  					fields: {
+   				     field2: { link: "${idOfTestClass}" }
+  					}
+					}){
+					  testClass2 {
+							name
+							field2{
+							 field1
+							}
+						}
+					}
+				}
+			`,
+			{},
+		)
+
+		expect(resAfterUpdate.updateTestClass2.testClass2.name).toBe('name')
+		expect(resAfterUpdate.updateTestClass2.testClass2.field2.field1).toBe(
+			'field1',
+		)
+
+		await wibeApp.close()
+	})
+
+	it('should link a pointer on update multiple object', async () => {
+		const { client, wibeApp } = await createWibeApp({
+			class: [
+				{
+					name: 'TestClass',
+					fields: {
+						field1: {
+							type: 'String',
+						},
+					},
+				},
+				{
+					name: 'TestClass2',
+					fields: {
+						name: {
+							type: 'String',
+						},
+						field2: {
+							type: 'Pointer',
+							// @ts-expect-error
+							class: 'TestClass',
+						},
+					},
+				},
+			],
+		})
+
+		await client.request<any>(
+			gql`
+				mutation createTestClass2s {
+					createTestClass2s(
+						input: { fields: [{ name: "name" }, { name: "name2" }] }
+					) {
+						edges {
+							node {
+								name
+								field2 {
+									field1
+								}
+							}
+						}
+					}
+				}
+			`,
+			{},
+		)
+
+		const resAfterUpdate = await client.request<any>(
+			gql`
+				mutation updateTestClass2s {
+					updateTestClass2s(
+						input: {
+							where: { name: { equalTo: "name" } }
+							fields: {
+								field2: {
+									createAndLink: {
+										field1: "field1UpdateMultiple"
+									}
+								}
+							}
+						}
+					) {
+						edges {
+							node {
+								name
+								field2 {
+									field1
+								}
+							}
+						}
+					}
+				}
+			`,
+			{},
+		)
+
+		expect(resAfterUpdate.updateTestClass2s.edges[0].node.name).toBe('name')
+		expect(
+			resAfterUpdate.updateTestClass2s.edges[0].node.field2.field1,
+		).toBe('field1UpdateMultiple')
+
+		await wibeApp.close()
+	})
+
+	it('should return pointer data on delete an element', async () => {
+		const { client, wibeApp } = await createWibeApp({
+			class: [
+				{
+					name: 'TestClass',
+					fields: {
+						field1: {
+							type: 'String',
+						},
+					},
+				},
+				{
+					name: 'TestClass2',
+					fields: {
+						name: {
+							type: 'String',
+						},
+						field2: {
+							type: 'Pointer',
+							// @ts-expect-error
+							class: 'TestClass',
+						},
+					},
+				},
+			],
+		})
+
+		const res = await client.request<any>(
+			gql`
+				mutation createTestClass {
+					createTestClass2(
+						input: {
+							fields: {
+								name: "name"
+								field2: { createAndLink: { field1: "field1" } }
+							}
+						}
+					) {
+						testClass2 {
+							id
+							name
+							field2 {
+								field1
+							}
+						}
+					}
+				}
+			`,
+			{},
+		)
+
+		expect(res.createTestClass2.testClass2.name).toBe('name')
+		expect(res.createTestClass2.testClass2.field2.field1).toBe('field1')
+
+		const resAfterDelete = await client.request<any>(gql`
+			mutation deleteTestClass2 {
+				deleteTestClass2(input: {id: "${res.createTestClass2.testClass2.id}"}) {
+					testClass2 {
+					  name
+						field2 {
+							field1
+						}
+					}
+				}
+			}
+		`)
+
+		expect(resAfterDelete.deleteTestClass2.testClass2.name).toBe('name')
+		expect(resAfterDelete.deleteTestClass2.testClass2.field2.field1).toBe(
+			'field1',
+		)
+
+		await wibeApp.close()
+	})
 })

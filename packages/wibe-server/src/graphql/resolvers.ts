@@ -179,9 +179,17 @@ export const mutationToCreateMultipleObjects = async (
 
 	if (!fields) throw new Error('No fields provided')
 
+	const inputFields = args.input?.fields as Array<any>
+
+	const updatedFieldsToCreate = await Promise.all(
+		inputFields.map((inputField) =>
+			executeRelationOnFields(inputField, context),
+		),
+	)
+
 	const objects = await WibeApp.databaseController.createObjects({
 		className,
-		data: args.input?.fields,
+		data: updatedFieldsToCreate,
 		fields,
 		offset: args.input?.offset,
 		limit: args.input?.limit,
@@ -242,10 +250,15 @@ export const mutationToUpdateMultipleObjects = async (
 
 	if (!fields) throw new Error('No fields provided')
 
+	const updatedFields = await executeRelationOnFields(
+		args.input?.fields,
+		context,
+	)
+
 	const objects = await WibeApp.databaseController.updateObjects({
 		className,
 		where: args.input?.where,
-		data: args.input?.fields,
+		data: updatedFields,
 		fields,
 		offset: args.input?.offset,
 		limit: args.input?.limit,
