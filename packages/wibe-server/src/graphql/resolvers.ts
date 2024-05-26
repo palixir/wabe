@@ -3,7 +3,6 @@ import { WibeApp } from '../..'
 import type { WibeSchemaTypes } from '../../generated/wibe'
 import type { Context } from '../graphql/interface'
 import { firstLetterInLowerCase } from '../utils'
-import { allocUnsafe } from 'bun'
 
 const ignoredFields = ['edges', 'node']
 
@@ -199,21 +198,12 @@ export const executeRelationOnFields = async ({
 				}
 
 				if (typeOfExecution === 'updateMany' && where) {
-					const classInSchema = WibeApp.config.schema.class.find(
-						(classItem) => classItem.name === className,
-					)
-
-					if (!classInSchema)
-						throw new Error('Class not found in schema')
-
-					const fieldInClass = classInSchema?.fields[fieldName]
-
 					const allObjectsMatchedWithWhere =
 						await WibeApp.databaseController.getObjects({
 							// @ts-expect-error
-							className: fieldInClass.class,
+							className,
 							where,
-							fields: [fieldName],
+							fields: ['id'],
 						})
 
 					await Promise.all(
@@ -224,8 +214,9 @@ export const executeRelationOnFields = async ({
 
 							await WibeApp.databaseController.updateObject({
 								// @ts-expect-error
-								className: fieldInClass.class,
+								className,
 								id: object.id,
+								// @ts-expect-error
 								data: {
 									[fieldName]: olderValue.filter(
 										(olderVal: any) =>
@@ -395,6 +386,8 @@ export const mutationToUpdateObject = async (
 		className,
 		fields: args.input?.fields,
 		context,
+		id: args.input?.id,
+		typeOfExecution: 'update',
 	})
 
 	return {
@@ -428,6 +421,8 @@ export const mutationToUpdateMultipleObjects = async (
 		className,
 		fields: args.input?.fields,
 		context,
+		typeOfExecution: 'updateMany',
+		where: args.input?.where,
 	})
 
 	const objects = await WibeApp.databaseController.updateObjects({

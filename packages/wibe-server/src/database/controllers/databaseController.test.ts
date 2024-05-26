@@ -167,7 +167,6 @@ describe('DatabaseController', () => {
 		})
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
-		console.log(mockGetObjects.mock.calls[0][0])
 		expect(mockGetObjects).toHaveBeenCalledWith({
 			className: 'AnotherClass3',
 			where: { id: { in: ['anotherClass3Id'] } },

@@ -1258,7 +1258,7 @@ describe('GraphqlSchema', () => {
 		await wibeApp.close()
 	})
 
-	it('should createAndAdd an object on a relation field', async () => {
+	it('should createAndAdd an object on a relation field (on create)', async () => {
 		const { client, wibeApp } = await createWibeApp({
 			class: [
 				{
@@ -1313,6 +1313,698 @@ describe('GraphqlSchema', () => {
 		expect(
 			res.createTestClass2.testClass2.field2.edges[0].node.field1,
 		).toBe('field1')
+
+		await wibeApp.close()
+	})
+
+	it('should add an object on a relation field (on create)', async () => {
+		const { client, wibeApp } = await createWibeApp({
+			class: [
+				{
+					name: 'TestClass',
+					fields: {
+						field1: {
+							type: 'String',
+						},
+					},
+				},
+				{
+					name: 'TestClass2',
+					fields: {
+						name: {
+							type: 'String',
+						},
+						field2: {
+							type: 'Relation',
+							// @ts-expect-error
+							class: 'TestClass',
+						},
+					},
+				},
+			],
+		})
+
+		const res = await client.request<any>(gql`
+			mutation createTestClass {
+				createTestClass(input: { fields: { field1: "field1" } }) {
+					testClass {
+						id
+					}
+				}
+			}
+		`)
+
+		const resAfterAdd = await client.request<any>(gql`
+			mutation createTestClass2 {
+				createTestClass2(
+					input: {
+						fields: {
+							name: "name"
+							field2: { add: ["${res.createTestClass.testClass.id}"] }
+						}
+					}
+				) {
+					testClass2 {
+						name
+						field2 {
+							edges {
+								node {
+									field1
+								}
+							}
+						}
+					}
+				}
+			}
+		`)
+
+		expect(resAfterAdd.createTestClass2.testClass2.name).toBe('name')
+		expect(
+			resAfterAdd.createTestClass2.testClass2.field2.edges[0].node.field1,
+		).toBe('field1')
+
+		await wibeApp.close()
+	})
+
+	it('should createAndAdd an object on a relation field (on createMany)', async () => {
+		const { client, wibeApp } = await createWibeApp({
+			class: [
+				{
+					name: 'TestClass',
+					fields: {
+						field1: {
+							type: 'String',
+						},
+					},
+				},
+				{
+					name: 'TestClass2',
+					fields: {
+						name: {
+							type: 'String',
+						},
+						field2: {
+							type: 'Relation',
+							// @ts-expect-error
+							class: 'TestClass',
+						},
+					},
+				},
+			],
+		})
+
+		const res = await client.request<any>(gql`
+			mutation createTestClass2s {
+				createTestClass2s(
+					input: {
+						fields: [
+							{
+								name: "name"
+								field2: { createAndAdd: [{ field1: "field1" }] }
+							}
+						]
+					}
+				) {
+					edges {
+						node {
+							name
+							field2 {
+								edges {
+									node {
+										field1
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		`)
+
+		expect(res.createTestClass2s.edges[0].node.name).toBe('name')
+		expect(
+			res.createTestClass2s.edges[0].node.field2.edges[0].node.field1,
+		).toBe('field1')
+
+		await wibeApp.close()
+	})
+
+	it('should add an object on a relation field (on createMany)', async () => {
+		const { client, wibeApp } = await createWibeApp({
+			class: [
+				{
+					name: 'TestClass',
+					fields: {
+						field1: {
+							type: 'String',
+						},
+					},
+				},
+				{
+					name: 'TestClass2',
+					fields: {
+						name: {
+							type: 'String',
+						},
+						field2: {
+							type: 'Relation',
+							// @ts-expect-error
+							class: 'TestClass',
+						},
+					},
+				},
+			],
+		})
+
+		const res = await client.request<any>(gql`
+			mutation createTestClass {
+				createTestClass(input: { fields: { field1: "field1" } }) {
+					testClass {
+						id
+					}
+				}
+			}
+		`)
+
+		const resAfterAdd = await client.request<any>(gql`
+			mutation createTestClass2s {
+				createTestClass2s(
+					input: {
+						fields: [
+							{
+								name: "name"
+								field2: { add: ["${res.createTestClass.testClass.id}"] }
+							}
+						]
+					}
+				) {
+					edges {
+						node {
+							name
+							field2 {
+								edges {
+									node {
+										field1
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		`)
+
+		expect(resAfterAdd.createTestClass2s.edges[0].node.name).toBe('name')
+		expect(
+			resAfterAdd.createTestClass2s.edges[0].node.field2.edges[0].node
+				.field1,
+		).toBe('field1')
+
+		await wibeApp.close()
+	})
+
+	it('should createAndAdd an object on a relation field (on update)', async () => {
+		const { client, wibeApp } = await createWibeApp({
+			class: [
+				{
+					name: 'TestClass',
+					fields: {
+						field1: {
+							type: 'String',
+						},
+					},
+				},
+				{
+					name: 'TestClass2',
+					fields: {
+						name: {
+							type: 'String',
+						},
+						field2: {
+							type: 'Relation',
+							// @ts-expect-error
+							class: 'TestClass',
+						},
+					},
+				},
+			],
+		})
+
+		const resAfterAdd = await client.request<any>(gql`
+			mutation createTestClass2 {
+				createTestClass2(input: { fields: { name: "name" } }) {
+					testClass2 {
+						id
+						name
+					}
+				}
+			}
+		`)
+
+		const resAfterUpdate = await client.request<any>(gql`
+			mutation updateTestClass2 {
+				updateTestClass2(
+					input: {
+						id: "${resAfterAdd.createTestClass2.testClass2.id}"
+						fields: {
+							field2: { createAndAdd: [{ field1: "field1" }] }
+						}
+					}
+				) {
+					testClass2 {
+						id
+						name
+						field2 {
+							edges {
+  							node {
+  							   field1
+  							}
+							}
+						}
+					}
+				}
+			}
+		`)
+
+		expect(resAfterUpdate.updateTestClass2.testClass2.name).toBe('name')
+		expect(
+			resAfterUpdate.updateTestClass2.testClass2.field2.edges[0].node
+				.field1,
+		).toBe('field1')
+
+		await wibeApp.close()
+	})
+
+	it('should add an object on a relation field (on update)', async () => {
+		const { client, wibeApp } = await createWibeApp({
+			class: [
+				{
+					name: 'TestClass',
+					fields: {
+						field1: {
+							type: 'String',
+						},
+					},
+				},
+				{
+					name: 'TestClass2',
+					fields: {
+						name: {
+							type: 'String',
+						},
+						field2: {
+							type: 'Relation',
+							// @ts-expect-error
+							class: 'TestClass',
+						},
+					},
+				},
+			],
+		})
+
+		const res = await client.request<any>(gql`
+			mutation createTestClass {
+				createTestClass(input: { fields: { field1: "field1" } }) {
+					testClass {
+						id
+					}
+				}
+			}
+		`)
+
+		const resAfterAdd = await client.request<any>(gql`
+			mutation createTestClass2 {
+				createTestClass2(input: { fields: { name: "name" } }) {
+					testClass2 {
+						id
+						name
+					}
+				}
+			}
+		`)
+
+		const resAfterUpdate = await client.request<any>(gql`
+			mutation updateTestClass2 {
+				updateTestClass2(
+					input: {
+						id: "${resAfterAdd.createTestClass2.testClass2.id}"
+						fields: {
+							field2: { add: ["${res.createTestClass.testClass.id}"] }
+						}
+					}
+				) {
+					testClass2 {
+						id
+						name
+						field2 {
+							edges {
+  							node {
+  							   field1
+  							}
+							}
+						}
+					}
+				}
+			}
+		`)
+
+		expect(resAfterUpdate.updateTestClass2.testClass2.name).toBe('name')
+		expect(
+			resAfterUpdate.updateTestClass2.testClass2.field2.edges[0].node
+				.field1,
+		).toBe('field1')
+
+		await wibeApp.close()
+	})
+
+	it('should remove an object on a relation field (on update)', async () => {
+		const { client, wibeApp } = await createWibeApp({
+			class: [
+				{
+					name: 'TestClass',
+					fields: {
+						field1: {
+							type: 'String',
+						},
+					},
+				},
+				{
+					name: 'TestClass2',
+					fields: {
+						name: {
+							type: 'String',
+						},
+						field2: {
+							type: 'Relation',
+							// @ts-expect-error
+							class: 'TestClass',
+						},
+					},
+				},
+			],
+		})
+
+		const resAfterAdd = await client.request<any>(gql`
+			mutation createTestClass2 {
+				createTestClass2(
+					input: {
+						fields: {
+							name: "name"
+							field2: { createAndAdd: [{ field1: "field1" }] }
+						}
+					}
+				) {
+					testClass2 {
+						id
+						name
+						field2 {
+							edges {
+								node {
+									id
+									field1
+								}
+							}
+						}
+					}
+				}
+			}
+		`)
+
+		const resAfterUpdate = await client.request<any>(gql`
+			mutation updateTestClass2 {
+				updateTestClass2(
+					input: {
+						id: "${resAfterAdd.createTestClass2.testClass2.id}"
+						fields: {
+							field2: { remove: ["${resAfterAdd.createTestClass2.testClass2.field2.edges[0].node.id}"] }
+						}
+					}
+				) {
+					testClass2 {
+						id
+						name
+						field2 {
+							edges {
+  							node {
+  							   field1
+  							}
+							}
+						}
+					}
+				}
+			}
+		`)
+
+		expect(resAfterUpdate.updateTestClass2.testClass2.name).toBe('name')
+		expect(
+			resAfterUpdate.updateTestClass2.testClass2.field2.edges.length,
+		).toEqual(0)
+
+		await wibeApp.close()
+	})
+
+	it('should createAndAdd an object on a relation field (on updateMany)', async () => {
+		const { client, wibeApp } = await createWibeApp({
+			class: [
+				{
+					name: 'TestClass',
+					fields: {
+						field1: {
+							type: 'String',
+						},
+					},
+				},
+				{
+					name: 'TestClass2',
+					fields: {
+						name: {
+							type: 'String',
+						},
+						field2: {
+							type: 'Relation',
+							// @ts-expect-error
+							class: 'TestClass',
+						},
+					},
+				},
+			],
+		})
+
+		const resAfterAdd = await client.request<any>(gql`
+			mutation createTestClass2 {
+				createTestClass2(input: { fields: { name: "name" } }) {
+					testClass2 {
+						id
+						name
+					}
+				}
+			}
+		`)
+
+		const resAfterUpdate = await client.request<any>(gql`
+			mutation updateTestClass2s {
+				updateTestClass2s(
+					input: {
+						where: {id: {equalTo: "${resAfterAdd.createTestClass2.testClass2.id}"}}
+						fields: {
+							field2: { createAndAdd: [{ field1: "field1" }] }
+						}
+					}
+				) {
+					edges {
+						node {
+							id
+							name
+							field2 {
+								edges {
+									node {
+										field1
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		`)
+
+		expect(resAfterUpdate.updateTestClass2s.edges[0].node.name).toBe('name')
+		expect(
+			resAfterUpdate.updateTestClass2s.edges[0].node.field2.edges[0].node
+				.field1,
+		).toBe('field1')
+
+		await wibeApp.close()
+	})
+
+	it('should add an object on a relation field (on updateMany)', async () => {
+		const { client, wibeApp } = await createWibeApp({
+			class: [
+				{
+					name: 'TestClass',
+					fields: {
+						field1: {
+							type: 'String',
+						},
+					},
+				},
+				{
+					name: 'TestClass2',
+					fields: {
+						name: {
+							type: 'String',
+						},
+						field2: {
+							type: 'Relation',
+							// @ts-expect-error
+							class: 'TestClass',
+						},
+					},
+				},
+			],
+		})
+
+		const res = await client.request<any>(gql`
+			mutation createTestClass {
+				createTestClass(input: { fields: { field1: "field1" } }) {
+					testClass {
+						id
+					}
+				}
+			}
+		`)
+
+		const resAfterAdd = await client.request<any>(gql`
+			mutation createTestClass2 {
+				createTestClass2(input: { fields: { name: "name" } }) {
+					testClass2 {
+						id
+						name
+					}
+				}
+			}
+		`)
+
+		const resAfterUpdate = await client.request<any>(gql`
+			mutation updateTestClass2s {
+				updateTestClass2s(
+					input: {
+						where: {id: {equalTo: "${resAfterAdd.createTestClass2.testClass2.id}"}}
+						fields: {
+							field2: { add: ["${res.createTestClass.testClass.id}"] }
+						}
+					}
+				) {
+					edges {
+						node {
+							id
+							name
+							field2 {
+								edges {
+									node {
+										field1
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		`)
+
+		expect(resAfterUpdate.updateTestClass2s.edges[0].node.name).toBe('name')
+		expect(
+			resAfterUpdate.updateTestClass2s.edges[0].node.field2.edges[0].node
+				.field1,
+		).toBe('field1')
+
+		await wibeApp.close()
+	})
+
+	it('should remove an object on a relation field (on updateMany)', async () => {
+		const { client, wibeApp } = await createWibeApp({
+			class: [
+				{
+					name: 'TestClass',
+					fields: {
+						field1: {
+							type: 'String',
+						},
+					},
+				},
+				{
+					name: 'TestClass2',
+					fields: {
+						name: {
+							type: 'String',
+						},
+						field2: {
+							type: 'Relation',
+							// @ts-expect-error
+							class: 'TestClass',
+						},
+					},
+				},
+			],
+		})
+
+		const resAfterAdd = await client.request<any>(gql`
+			mutation createTestClass2 {
+				createTestClass2(
+					input: {
+						fields: {
+							name: "name"
+							field2: { createAndAdd: [{ field1: "field1" }] }
+						}
+					}
+				) {
+					testClass2 {
+						id
+						name
+						field2 {
+							edges {
+								node {
+									id
+									field1
+								}
+							}
+						}
+					}
+				}
+			}
+		`)
+
+		const resAfterUpdate = await client.request<any>(gql`
+			mutation updateTestClass2s {
+				updateTestClass2s(
+					input: {
+						where: {id: {equalTo: "${resAfterAdd.createTestClass2.testClass2.id}"}}
+						fields: {
+							field2: { remove: ["${resAfterAdd.createTestClass2.testClass2.field2.edges[0].node.id}"] }
+						}
+					}
+				) {
+					edges {
+						node {
+							id
+							name
+							field2 {
+								edges {
+									node {
+										field1
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		`)
+
+		expect(resAfterUpdate.updateTestClass2s.edges[0].node.name).toBe('name')
+		expect(
+			resAfterUpdate.updateTestClass2s.edges[0].node.field2.edges.length,
+		).toBe(0)
 
 		await wibeApp.close()
 	})

@@ -485,8 +485,8 @@ describe('Resolver', () => {
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
 		expect(mockGetObjects).toHaveBeenCalledWith({
-			className: 'TestClass',
-			fields: ['field2'],
+			className: 'TestClass2',
+			fields: ['id'],
 			where: {
 				id: { equalTo: 'id' },
 			},
@@ -494,7 +494,7 @@ describe('Resolver', () => {
 
 		expect(mockUpdateObject).toHaveBeenCalledTimes(1)
 		expect(mockUpdateObject).toHaveBeenCalledWith({
-			className: 'TestClass',
+			className: 'TestClass2',
 			data: { field2: [] },
 			id: 'objectId',
 			context,
