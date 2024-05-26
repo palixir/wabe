@@ -45,6 +45,118 @@ describe('Mongo adapter', () => {
 		spyFindHooksAndExecute.mockClear()
 	})
 
+	it('should support notEqualTo on _id', async () => {
+		const insertedObjects = await mongoAdapter.createObjects({
+			className: '_User',
+			data: [
+				{
+					name: 'Lucas',
+					age: 20,
+				},
+				{
+					name: 'LucasBis',
+					age: 18,
+				},
+			],
+			fields: [],
+			context: { user: {} } as any,
+		})
+
+		const res = await mongoAdapter.getObjects({
+			className: '_User',
+			where: {
+				// @ts-expect-error
+				id: { notEqualTo: insertedObjects[0].id },
+			},
+		})
+
+		expect(res.length).toEqual(1)
+	})
+
+	it('should support equalTo on _id', async () => {
+		const insertedObjects = await mongoAdapter.createObjects({
+			className: '_User',
+			data: [
+				{
+					name: 'Lucas',
+					age: 20,
+				},
+				{
+					name: 'LucasBis',
+					age: 18,
+				},
+			],
+			fields: [],
+			context: { user: {} } as any,
+		})
+
+		const res = await mongoAdapter.getObjects({
+			className: '_User',
+			where: {
+				// @ts-expect-error
+				id: { equalTo: insertedObjects[0].id },
+			},
+		})
+
+		expect(res.length).toEqual(1)
+	})
+
+	it('should support $in aggregation on _id', async () => {
+		const insertedObjects = await mongoAdapter.createObjects({
+			className: '_User',
+			data: [
+				{
+					name: 'Lucas',
+					age: 20,
+				},
+				{
+					name: 'LucasBis',
+					age: 18,
+				},
+			],
+			fields: [],
+			context: { user: {} } as any,
+		})
+
+		const res = await mongoAdapter.getObjects({
+			className: '_User',
+			where: {
+				// @ts-expect-error
+				id: { in: insertedObjects.map((obj) => obj.id) },
+			},
+		})
+
+		expect(res.length).toEqual(2)
+	})
+
+	it('should support $nin aggregation on _id', async () => {
+		const insertedObjects = await mongoAdapter.createObjects({
+			className: '_User',
+			data: [
+				{
+					name: 'Lucas',
+					age: 20,
+				},
+				{
+					name: 'LucasBis',
+					age: 18,
+				},
+			],
+			fields: [],
+			context: { user: {} } as any,
+		})
+
+		const res = await mongoAdapter.getObjects({
+			className: '_User',
+			where: {
+				// @ts-expect-error
+				id: { notIn: insertedObjects.map((obj) => obj.id) },
+			},
+		})
+
+		expect(res.length).toEqual(0)
+	})
+
 	it('should create class', async () => {
 		if (!mongoAdapter.database) fail()
 

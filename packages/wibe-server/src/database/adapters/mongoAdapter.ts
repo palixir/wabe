@@ -39,8 +39,19 @@ export const buildMongoWhereQuery = <T extends keyof WibeSchemaTypes>(
 
 			if (value?.contains) acc[keyToWrite] = value.contains
 			if (value?.notContains) acc[keyToWrite] = { $ne: value.notContains }
-			if (value?.equalTo) acc[keyToWrite] = value.equalTo
-			if (value?.notEqualTo) acc[keyToWrite] = { $ne: value.notEqualTo }
+			if (value?.equalTo)
+				acc[keyToWrite] =
+					keyToWrite === '_id' && typeof value.equalTo === 'string'
+						? ObjectId.createFromHexString(value.equalTo)
+						: value.equalTo
+			if (value?.notEqualTo)
+				acc[keyToWrite] = {
+					$ne:
+						keyToWrite === '_id' &&
+						typeof value.notEqualTo === 'string'
+							? ObjectId.createFromHexString(value.notEqualTo)
+							: value.notEqualTo,
+				}
 
 			if (value?.greaterThan) acc[keyToWrite] = { $gt: value.greaterThan }
 			if (value?.greaterThanOrEqualTo)
@@ -50,8 +61,36 @@ export const buildMongoWhereQuery = <T extends keyof WibeSchemaTypes>(
 			if (value?.lessThanOrEqualTo)
 				acc[keyToWrite] = { $lte: value.lessThanOrEqualTo }
 
-			if (value?.in) acc[keyToWrite] = { $in: value.in }
-			if (value?.notIn) acc[keyToWrite] = { $nin: value.notIn }
+			if (value?.in)
+				acc[keyToWrite] = {
+					$in:
+						keyToWrite === '_id'
+							? value.in
+									.filter(
+										(inValue) =>
+											typeof inValue === 'string',
+									)
+									.map((inValue) =>
+										ObjectId.createFromHexString(inValue),
+									)
+							: value.in,
+				}
+			if (value?.notIn)
+				acc[keyToWrite] = {
+					$nin:
+						keyToWrite === '_id'
+							? value.notIn
+									.filter(
+										(notInValue) =>
+											typeof notInValue === 'string',
+									)
+									.map((notInValue) =>
+										ObjectId.createFromHexString(
+											notInValue,
+										),
+									)
+							: value.notIn,
+				}
 
 			if (value && keyToWrite === 'OR') {
 				acc.$or = where.OR?.map((or) => buildMongoWhereQuery(or))
@@ -199,8 +238,6 @@ export class MongoAdapter implements DatabaseAdapter {
 			.limit(limit || 0)
 			.skip(offset || 0)
 			.toArray()
-
-		console.log(res)
 
 		return res.map((object) => {
 			const { _id, ...resultWithout_Id } = object

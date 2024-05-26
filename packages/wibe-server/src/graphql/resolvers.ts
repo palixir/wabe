@@ -100,8 +100,6 @@ export const executeRelationOnFields = async ({
 					context,
 				})
 
-				console.log(result)
-
 				newAcc[fieldName] = result.map((object: any) => object.id)
 			} else if (value?.add) {
 				if (typeOfExecution === 'create') {

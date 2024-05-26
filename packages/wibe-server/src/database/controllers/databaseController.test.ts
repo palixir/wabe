@@ -120,7 +120,7 @@ describe('DatabaseController', () => {
 	it('should getObject with one relation field', async () => {
 		mockGetObject.mockResolvedValueOnce({
 			id: '123',
-			relationToAnotherClass3: 'anotherClass3Id',
+			relationToAnotherClass3: ['anotherClass3Id'],
 		} as never)
 
 		mockGetObjects.mockResolvedValueOnce([
@@ -167,9 +167,10 @@ describe('DatabaseController', () => {
 		})
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
+		console.log(mockGetObjects.mock.calls[0][0])
 		expect(mockGetObjects).toHaveBeenCalledWith({
 			className: 'AnotherClass3',
-			where: { id: { equalTo: 'anotherClass3Id' } },
+			where: { id: { in: ['anotherClass3Id'] } },
 			fields: ['id', 'field4'],
 		})
 	})
@@ -178,7 +179,7 @@ describe('DatabaseController', () => {
 		mockGetObjects.mockResolvedValueOnce([
 			{
 				id: '123',
-				relationToAnotherClass3: 'anotherClass3Id',
+				relationToAnotherClass3: ['anotherClass3Id'],
 			},
 		] as never)
 
@@ -228,7 +229,7 @@ describe('DatabaseController', () => {
 		})
 		expect(mockGetObjects).toHaveBeenNthCalledWith(2, {
 			className: 'AnotherClass3',
-			where: { id: { equalTo: 'anotherClass3Id' } },
+			where: { id: { in: ['anotherClass3Id'] } },
 			fields: ['id', 'field4'],
 		})
 	})
