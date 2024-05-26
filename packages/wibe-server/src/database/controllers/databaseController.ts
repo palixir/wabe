@@ -87,6 +87,22 @@ export class DatabaseController {
 		)
 	}
 
+	_isRelationField<T extends keyof WibeSchemaTypes>(
+		originClassName: T,
+		pointerClassName: string,
+	) {
+		return WibeApp.config.schema.class.some(
+			(c) =>
+				c.name.toLowerCase() === originClassName.toLowerCase() &&
+				Object.values(c.fields).find(
+					(field) =>
+						field.type === 'Relation' &&
+						field.class.toLowerCase() ===
+							pointerClassName.toLowerCase(),
+				),
+		)
+	}
+
 	_isPointerField<T extends keyof WibeSchemaTypes>(
 		originClassName: T,
 		pointerClassName: string,
@@ -136,6 +152,31 @@ export class DatabaseController {
 					return {
 						...acc,
 						[pointerField]: pointerObject,
+					}
+				}
+
+				const isRelation = this._isRelationField(
+					originClassName,
+					pointerClass,
+				)
+
+				if (isRelation) {
+					const relationObjects = await this.getObjects({
+						// @ts-expect-error
+						className: pointerClass,
+						// @ts-expect-error
+						fields: fieldsOfPointerClass,
+						// @ts-expect-error
+						where: { id: { in: objectData[pointerField] } },
+					})
+
+					return {
+						...acc,
+						[pointerField]: {
+							edges: relationObjects.map((object: any) => ({
+								node: object,
+							})),
+						},
 					}
 				}
 

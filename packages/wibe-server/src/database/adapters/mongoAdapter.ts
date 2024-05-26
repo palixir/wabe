@@ -200,6 +200,8 @@ export class MongoAdapter implements DatabaseAdapter {
 			.skip(offset || 0)
 			.toArray()
 
+		console.log(res)
+
 		return res.map((object) => {
 			const { _id, ...resultWithout_Id } = object
 

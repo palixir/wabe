@@ -56,6 +56,7 @@ const run = async () => {
 							type: 'Pointer',
 							class: 'Post',
 						},
+						postRelation: { type: 'Relation', class: 'Post' },
 						birthDate: {
 							type: 'Date',
 						},

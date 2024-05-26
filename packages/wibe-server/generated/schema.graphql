@@ -22,6 +22,7 @@ type _User {
   isCool: Boolean
   email: Email
   post: Post
+  postRelation: Post
   birthDate: Date
   phone: Phone
   role: Role
@@ -77,6 +78,7 @@ input _UserInput {
   isCool: Boolean
   email: Email
   post: PostPointerInput
+  postRelation: PostRelationInput
   birthDate: Date
   phone: Phone
   role: Role
@@ -132,6 +134,7 @@ input _UserCreateFieldsInput {
   isCool: Boolean
   email: Email
   post: PostPointerInput
+  postRelation: PostRelationInput
   birthDate: Date
   phone: Phone
   role: Role
@@ -174,6 +177,13 @@ input _UserAuthenticationOtpCreateFieldsInput {
   code: String
 }
 
+"""Input to add a relation to the class _User"""
+input _UserRelationInput {
+  add: [ID!]
+  remove: [ID!]
+  createAndAdd: [_UserCreateFieldsInput!]
+}
+
 type Post {
   id: ID!
   name: String!
@@ -191,6 +201,13 @@ input PostPointerInput {
 
 input PostCreateFieldsInput {
   name: String
+}
+
+"""Input to add a relation to the class Post"""
+input PostRelationInput {
+  add: [ID!]
+  remove: [ID!]
+  createAndAdd: [PostCreateFieldsInput!]
 }
 
 type _Session {
@@ -230,6 +247,13 @@ input _SessionCreateFieldsInput {
   updatedAt: Date
 }
 
+"""Input to add a relation to the class _Session"""
+input _SessionRelationInput {
+  add: [ID!]
+  remove: [ID!]
+  createAndAdd: [_SessionCreateFieldsInput!]
+}
+
 type Query {
   """User class"""
   _user(id: ID): _User
@@ -260,6 +284,7 @@ input _UserWhereInput {
   isCool: BooleanWhereInput
   email: EmailWhereInput
   post: PostWhereInput
+  postRelation: PostWhereInput
   birthDate: DateWhereInput
   phone: AnyWhereInput
   role: AnyWhereInput
@@ -475,6 +500,7 @@ input _UserUpdateFieldsInput {
   isCool: Boolean
   email: Email
   post: PostPointerInput
+  postRelation: PostRelationInput
   birthDate: Date
   phone: Phone
   role: Role

@@ -86,6 +86,16 @@ export const EmailWhereInput = new GraphQLInputObjectType({
 	},
 })
 
+export const IdWhereInput = new GraphQLInputObjectType({
+	name: 'IdWhereInput',
+	fields: {
+		equalTo: { type: GraphQLString },
+		notEqualTo: { type: GraphQLString },
+		in: { type: new GraphQLList(GraphQLString) },
+		notIn: { type: new GraphQLList(GraphQLString) },
+	},
+})
+
 export const StringWhereInput = new GraphQLInputObjectType({
 	name: 'StringWhereInput',
 	fields: {

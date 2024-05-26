@@ -3,6 +3,7 @@ import { WibeApp } from '../..'
 import type { WibeSchemaTypes } from '../../generated/wibe'
 import type { Context } from '../graphql/interface'
 import { firstLetterInLowerCase } from '../utils'
+import { allocUnsafe } from 'bun'
 
 const ignoredFields = ['edges', 'node']
 
@@ -37,10 +38,21 @@ export const getFieldsFromInfo = (
 		.filter((value) => ignoredFields.indexOf(value) === -1)
 }
 
-export const executeRelationOnFields = async (
-	fields: Record<string, any>,
-	context: Context,
-) => {
+export const executeRelationOnFields = async ({
+	className,
+	fields,
+	context,
+	id,
+	typeOfExecution,
+	where,
+}: {
+	className: string
+	fields: Record<string, any>
+	context: Context
+	id?: string
+	where?: any
+	typeOfExecution?: 'create' | 'update' | 'updateMany'
+}) => {
 	const entries = Object.entries(fields)
 
 	return entries.reduce(
@@ -69,6 +81,164 @@ export const executeRelationOnFields = async (
 				newAcc[fieldName] = id
 			} else if (typeof value === 'object' && value?.link) {
 				newAcc[fieldName] = value.link
+			} else if (typeof value === 'object' && value?.createAndAdd) {
+				const { createAndAdd } = value
+
+				const classInSchema = WibeApp.config.schema.class.find(
+					(schemaClass) => schemaClass.fields[fieldName],
+				)
+
+				if (!classInSchema) throw new Error('Class not found in schema')
+
+				const fieldInClass = classInSchema?.fields[fieldName]
+
+				const result = await WibeApp.databaseController.createObjects({
+					// @ts-expect-error
+					className: fieldInClass.class,
+					data: createAndAdd,
+					fields: ['id'],
+					context,
+				})
+
+				console.log(result)
+
+				newAcc[fieldName] = result.map((object: any) => object.id)
+			} else if (value?.add) {
+				if (typeOfExecution === 'create') {
+					newAcc[fieldName] = value.add
+				}
+
+				// If update we get the current value and add the new value (we need to concat)
+				if (typeOfExecution === 'update' && id) {
+					const classInSchema = WibeApp.config.schema.class.find(
+						(classItem) => classItem.name === className,
+					)
+
+					if (!classInSchema)
+						throw new Error('Class not found in schema')
+
+					const fieldInClass = classInSchema?.fields[fieldName]
+
+					const currentValue =
+						await WibeApp.databaseController.getObject({
+							// @ts-expect-error
+							className: fieldInClass.class,
+							id,
+							fields: [fieldName],
+						})
+
+					newAcc[fieldName] = [
+						...(currentValue?.[fieldName] || []),
+						...value.add,
+					]
+				}
+
+				// For update many we need to get all objects that match the where and add the new value
+				// So we doesn't update the field for updateMany
+				if (typeOfExecution === 'updateMany' && where) {
+					const classInSchema = WibeApp.config.schema.class.find(
+						(classItem) => classItem.name === className,
+					)
+
+					if (!classInSchema)
+						throw new Error('Class not found in schema')
+
+					const fieldInClass = classInSchema?.fields[fieldName]
+
+					const allObjectsMatchedWithWhere =
+						await WibeApp.databaseController.getObjects({
+							// @ts-expect-error
+							className: fieldInClass.class,
+							where,
+							fields: [fieldName],
+						})
+
+					await Promise.all(
+						allObjectsMatchedWithWhere.map(async (object: any) => {
+							const currentValue = object[fieldName]
+
+							await WibeApp.databaseController.updateObject({
+								// @ts-expect-error
+								className: fieldInClass.class,
+								id: object.id,
+								data: {
+									[fieldName]: [
+										...(currentValue || []),
+										...value.add,
+									],
+								},
+								context,
+							})
+						}),
+					)
+				}
+			} else if (value?.remove) {
+				if (typeOfExecution === 'create') newAcc[fieldName] = []
+
+				if (typeOfExecution === 'update' && id) {
+					const classInSchema = WibeApp.config.schema.class.find(
+						(classItem) => classItem.name === className,
+					)
+
+					if (!classInSchema)
+						throw new Error('Class not found in schema')
+
+					const fieldInClass = classInSchema?.fields[fieldName]
+
+					const currentValue =
+						await WibeApp.databaseController.getObject({
+							// @ts-expect-error
+							className: fieldInClass.class,
+							id,
+							fields: [fieldName],
+						})
+
+					const olderValue = currentValue?.[fieldName] || []
+
+					newAcc[fieldName] = olderValue.filter(
+						(olderVal: any) => !value.remove.includes(olderVal),
+					)
+				}
+
+				if (typeOfExecution === 'updateMany' && where) {
+					const classInSchema = WibeApp.config.schema.class.find(
+						(classItem) => classItem.name === className,
+					)
+
+					if (!classInSchema)
+						throw new Error('Class not found in schema')
+
+					const fieldInClass = classInSchema?.fields[fieldName]
+
+					const allObjectsMatchedWithWhere =
+						await WibeApp.databaseController.getObjects({
+							// @ts-expect-error
+							className: fieldInClass.class,
+							where,
+							fields: [fieldName],
+						})
+
+					await Promise.all(
+						allObjectsMatchedWithWhere.map(async (object: any) => {
+							const currentValue = object[fieldName]
+
+							const olderValue = currentValue?.[fieldName] || []
+
+							await WibeApp.databaseController.updateObject({
+								// @ts-expect-error
+								className: fieldInClass.class,
+								id: object.id,
+								data: {
+									[fieldName]: olderValue.filter(
+										(olderVal: any) =>
+											!value.remove.includes(olderVal),
+									),
+								},
+								context,
+							})
+						}),
+					)
+				}
 			} else {
 				newAcc[fieldName] = value
 			}
@@ -148,10 +318,11 @@ export const mutationToCreateObject = async (
 
 	const classNameWithFirstLetterLowercase = firstLetterInLowerCase(className)
 
-	const updatedFieldsToCreate = await executeRelationOnFields(
-		args.input?.fields,
+	const updatedFieldsToCreate = await executeRelationOnFields({
+		className,
+		fields: args.input?.fields,
 		context,
-	)
+	})
 
 	return {
 		[classNameWithFirstLetterLowercase]:
@@ -183,7 +354,11 @@ export const mutationToCreateMultipleObjects = async (
 
 	const updatedFieldsToCreate = await Promise.all(
 		inputFields.map((inputField) =>
-			executeRelationOnFields(inputField, context),
+			executeRelationOnFields({
+				className,
+				fields: inputField,
+				context,
+			}),
 		),
 	)
 
@@ -218,10 +393,11 @@ export const mutationToUpdateObject = async (
 
 	const classNameWithFirstLetterLowercase = firstLetterInLowerCase(className)
 
-	const updatedFields = await executeRelationOnFields(
-		args.input?.fields,
+	const updatedFields = await executeRelationOnFields({
+		className,
+		fields: args.input?.fields,
 		context,
-	)
+	})
 
 	return {
 		[classNameWithFirstLetterLowercase]:
@@ -250,10 +426,11 @@ export const mutationToUpdateMultipleObjects = async (
 
 	if (!fields) throw new Error('No fields provided')
 
-	const updatedFields = await executeRelationOnFields(
-		args.input?.fields,
+	const updatedFields = await executeRelationOnFields({
+		className,
+		fields: args.input?.fields,
 		context,
-	)
+	})
 
 	const objects = await WibeApp.databaseController.updateObjects({
 		className,

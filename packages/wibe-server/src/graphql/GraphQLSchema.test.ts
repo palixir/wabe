@@ -121,6 +121,83 @@ describe('GraphqlSchema', () => {
 		})
 	})
 
+	it.only('should support in statement in where input on id', async () => {
+		const { client, wibeApp } = await createWibeApp({
+			class: [
+				{
+					name: 'TestClass',
+					fields: {
+						field1: {
+							type: 'String',
+						},
+					},
+				},
+			],
+		})
+
+		const res = await client.request<any>(gql`
+			mutation createTestClass {
+				createTestClass(input: { fields: { field1: "field1" } }) {
+					testClass {
+						id
+						field1
+					}
+				}
+			}
+		`)
+
+		const resOfQuery = await client.request<any>(
+			gql`
+				query testClasses($where: TestClassWhereInput!) {
+					testClasses(where: $where) {
+						edges {
+							node {
+								field1
+							}
+						}
+					}
+				}
+			`,
+			{
+				where: { id: { in: [res.createTestClass.testClass.id] } },
+			},
+		)
+
+		console.log(resOfQuery)
+
+		// expect(resOfQuery.testClasses.edges[0].node.field1).toBe('field1')
+
+		await wibeApp.close()
+	})
+
+	it('should have id in WhereInput object', () => {
+		expect(
+			getTypeFromGraphQLSchema({
+				schema,
+				type: 'Type',
+				name: 'TestClassWhereInput',
+			}).input,
+		).toEqual({
+			id: 'IdWhereInput',
+			AND: '[TestClassWhereInput]',
+			OR: '[TestClassWhereInput]',
+			field1: 'StringWhereInput',
+		})
+	})
+
+	it('should have ConnectionObject on field of relation in ObjectType', () => {
+		expect(
+			getTypeFromGraphQLSchema({
+				schema,
+				type: 'Type',
+				name: 'FifthClass',
+			}).input,
+		).toEqual({
+			id: 'ID!',
+			relation: 'SixthClassConnection',
+		})
+	})
+
 	it('should have a TestClassRelationInput', () => {
 		expect(
 			getTypeFromGraphQLSchema({
@@ -1226,6 +1303,65 @@ describe('GraphqlSchema', () => {
 		expect(resAfterDelete.deleteTestClass2.testClass2.field2.field1).toBe(
 			'field1',
 		)
+
+		await wibeApp.close()
+	})
+
+	it('should createAndAdd an object on a relation field', async () => {
+		const { client, wibeApp } = await createWibeApp({
+			class: [
+				{
+					name: 'TestClass',
+					fields: {
+						field1: {
+							type: 'String',
+						},
+					},
+				},
+				{
+					name: 'TestClass2',
+					fields: {
+						name: {
+							type: 'String',
+						},
+						field2: {
+							type: 'Relation',
+							// @ts-expect-error
+							class: 'TestClass',
+						},
+					},
+				},
+			],
+		})
+
+		const res = await client.request<any>(gql`
+			mutation createTestClass2 {
+				createTestClass2(
+					input: {
+						fields: {
+							name: "name"
+							field2: { createAndAdd: [{ field1: "field1" }] }
+						}
+					}
+				) {
+					testClass2 {
+						name
+						field2 {
+							edges {
+								node {
+									field1
+								}
+							}
+						}
+					}
+				}
+			}
+		`)
+
+		expect(res.createTestClass2.testClass2.name).toBe('name')
+		expect(
+			res.createTestClass2.testClass2.field2.edges[0].node.field1,
+		).toBe('field1')
 
 		await wibeApp.close()
 	})

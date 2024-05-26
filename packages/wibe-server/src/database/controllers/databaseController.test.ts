@@ -66,6 +66,24 @@ describe('DatabaseController', () => {
 							},
 						},
 					},
+					{
+						name: 'AnotherClass3',
+						fields: {
+							field4: {
+								type: 'String',
+							},
+						},
+					},
+					{
+						name: 'AnotherClass4',
+						fields: {
+							relationToAnotherClass3: {
+								type: 'Relation',
+								// @ts-expect-error
+								class: 'AnotherClass3',
+							},
+						},
+					},
 				],
 			},
 		}
@@ -74,6 +92,145 @@ describe('DatabaseController', () => {
 	beforeEach(() => {
 		mockGetObject.mockClear()
 		mockGetObjects.mockClear()
+	})
+
+	it('should return true if there is at least one relation field (_isRelationField)', () => {
+		const databaseController = new DatabaseController(mockAdapter() as any)
+
+		expect(
+			databaseController._isRelationField(
+				// @ts-expect-error
+				'AnotherClass4',
+				'AnotherClass3',
+			),
+		).toBe(true)
+	})
+
+	it('should return false if the field is not Pointer of the class', () => {
+		const databaseController = new DatabaseController(mockAdapter() as any)
+
+		expect(
+			databaseController._isRelationField(
+				'AnotherClass3' as any,
+				'AnotherClass4',
+			),
+		).toBe(false)
+	})
+
+	it('should getObject with one relation field', async () => {
+		mockGetObject.mockResolvedValueOnce({
+			id: '123',
+			relationToAnotherClass3: 'anotherClass3Id',
+		} as never)
+
+		mockGetObjects.mockResolvedValueOnce([
+			{
+				id: 'anotherClass3Id',
+				name: 'anotherClass3Name',
+			},
+		] as never)
+
+		const databaseController = new DatabaseController(mockAdapter() as any)
+
+		const res = await databaseController.getObject({
+			// @ts-expect-error
+			className: 'AnotherClass4',
+			id: '123',
+			fields: [
+				// @ts-expect-error
+				'relationToAnotherClass3.id',
+				// @ts-expect-error
+				'relationToAnotherClass3.field4',
+			],
+		})
+
+		expect(res).toEqual({
+			id: '123',
+			// @ts-expect-error
+			relationToAnotherClass3: {
+				edges: [
+					{
+						node: {
+							id: 'anotherClass3Id',
+							name: 'anotherClass3Name',
+						},
+					},
+				],
+			},
+		})
+
+		expect(mockGetObject).toHaveBeenCalledTimes(1)
+		expect(mockGetObject).toHaveBeenCalledWith({
+			className: 'AnotherClass4',
+			id: '123',
+			fields: ['relationToAnotherClass3'],
+		})
+
+		expect(mockGetObjects).toHaveBeenCalledTimes(1)
+		expect(mockGetObjects).toHaveBeenCalledWith({
+			className: 'AnotherClass3',
+			where: { id: { equalTo: 'anotherClass3Id' } },
+			fields: ['id', 'field4'],
+		})
+	})
+
+	it('should getObjects with one relation field', async () => {
+		mockGetObjects.mockResolvedValueOnce([
+			{
+				id: '123',
+				relationToAnotherClass3: 'anotherClass3Id',
+			},
+		] as never)
+
+		mockGetObjects.mockResolvedValueOnce([
+			{
+				id: 'anotherClass3Id',
+				name: 'anotherClass3Name',
+			},
+		] as never)
+
+		const databaseController = new DatabaseController(mockAdapter() as any)
+
+		const res = await databaseController.getObjects({
+			// @ts-expect-error
+			className: 'AnotherClass4',
+			where: { id: { equalTo: '123' } },
+			fields: [
+				// @ts-expect-error
+				'relationToAnotherClass3.id',
+				// @ts-expect-error
+				'relationToAnotherClass3.field4',
+			],
+		})
+
+		expect(res).toEqual([
+			{
+				id: '123',
+				// @ts-expect-error
+				relationToAnotherClass3: {
+					edges: [
+						{
+							node: {
+								id: 'anotherClass3Id',
+								name: 'anotherClass3Name',
+							},
+						},
+					],
+				},
+			},
+		])
+
+		expect(mockGetObjects).toHaveBeenCalledTimes(2)
+		expect(mockGetObjects).toHaveBeenNthCalledWith(1, {
+			className: 'AnotherClass4',
+			where: { id: { equalTo: '123' } },
+			fields: ['relationToAnotherClass3'],
+		})
+		expect(mockGetObjects).toHaveBeenNthCalledWith(2, {
+			className: 'AnotherClass3',
+			where: { id: { equalTo: 'anotherClass3Id' } },
+			fields: ['id', 'field4'],
+		})
 	})
 
 	it('should get the object with pointer data', async () => {

@@ -6,21 +6,27 @@ import { WibeApp } from '../server'
 describe('Resolver', () => {
 	const mockUpdateObject = mock(() => {})
 	const mockGetObject = mock(() => {})
+	const mockGetObjects = mock(() => {})
 	const mockCreateObject = mock(() => {})
+	const mockCreateObjects = mock(() => {})
 
 	const context = {}
 
 	beforeEach(() => {
 		mockUpdateObject.mockClear()
+		mockGetObjects.mockClear()
 		mockGetObject.mockClear()
 		mockCreateObject.mockClear()
+		mockCreateObjects.mockClear()
 	})
 
 	beforeAll(() => {
 		WibeApp.databaseController = {
 			updateObject: mockUpdateObject,
 			getObject: mockGetObject,
+			getObjects: mockGetObjects,
 			createObject: mockCreateObject,
+			createObjects: mockCreateObjects,
 		} as any
 
 		WibeApp.config = {
@@ -233,7 +239,273 @@ describe('Resolver', () => {
 		})
 	})
 
-	it('should create an object when a pointer if passed in input with createAndLink', async () => {
+	it('should create a list of objects if a relation is passed in input with createAndAdd (on create)', async () => {
+		mockCreateObjects.mockReturnValue([{ id: 'createFieldId' }] as any)
+
+		const fields = {
+			name: 'name',
+			field2: { createAndAdd: [{ field1: 'test' }] },
+		}
+
+		const updatedFields = await executeRelationOnFields({
+			className: 'TestClass',
+			fields,
+			context: context as any,
+		})
+
+		expect(mockCreateObjects).toHaveBeenCalledTimes(1)
+		expect(mockCreateObjects).toHaveBeenCalledWith({
+			className: 'TestClass',
+			data: [{ field1: 'test' }],
+			fields: ['id'],
+			context,
+		})
+
+		expect(updatedFields).toEqual({
+			name: 'name',
+			field2: ['createFieldId'],
+		} as any)
+	})
+
+	it('should add an element to the list of element when a field is passed with add (on create)', async () => {
+		const fields = {
+			name: 'name',
+			field2: { add: ['idToAdd'] },
+		}
+
+		const updatedFields = await executeRelationOnFields({
+			className: 'TestClass',
+			fields,
+			context: context as any,
+			typeOfExecution: 'create',
+		})
+
+		expect(updatedFields).toEqual({
+			name: 'name',
+			field2: ['idToAdd'],
+		} as any)
+	})
+
+	it('should remove an element to the list of element when a field is passed with remove (on create)', async () => {
+		const fields = {
+			name: 'name',
+			field2: { remove: ['idToRemove'] },
+		}
+
+		const updatedFields = await executeRelationOnFields({
+			className: 'TestClass',
+			fields,
+			context: context as any,
+			typeOfExecution: 'create',
+		})
+
+		expect(updatedFields).toEqual({
+			name: 'name',
+			field2: [],
+		} as any)
+	})
+
+	it('should create a list of objects if a relation is passed in input with createAndAdd (on update)', async () => {
+		mockCreateObjects.mockReturnValue([{ id: 'createFieldId' }] as any)
+
+		const fields = {
+			name: 'name',
+			field2: { createAndAdd: [{ field1: 'test' }] },
+		}
+
+		const updatedFields = await executeRelationOnFields({
+			className: 'TestClass',
+			fields,
+			context: context as any,
+			typeOfExecution: 'update',
+		})
+
+		expect(mockCreateObjects).toHaveBeenCalledTimes(1)
+		expect(mockCreateObjects).toHaveBeenCalledWith({
+			className: 'TestClass',
+			data: [{ field1: 'test' }],
+			fields: ['id'],
+			context,
+		})
+
+		expect(updatedFields).toEqual({
+			name: 'name',
+			field2: ['createFieldId'],
+		} as any)
+	})
+
+	it('should add an element to the list of element when a field is passed with add (on update)', async () => {
+		mockGetObject.mockReturnValue({ field2: ['olderId'] } as any)
+
+		const fields = {
+			name: 'name',
+			field2: { add: ['idToAdd'] },
+		}
+
+		const updatedFields = await executeRelationOnFields({
+			className: 'TestClass2',
+			fields,
+			id: 'id',
+			context: context as any,
+			typeOfExecution: 'update',
+		})
+
+		expect(mockGetObject).toHaveBeenCalledTimes(1)
+		expect(mockGetObject).toHaveBeenCalledWith({
+			className: 'TestClass',
+			fields: ['field2'],
+			id: 'id',
+		})
+
+		expect(updatedFields).toEqual({
+			name: 'name',
+			field2: ['olderId', 'idToAdd'],
+		} as any)
+	})
+
+	it('should remove an element from the list of element when a field is passed with remove (on update)', async () => {
+		mockGetObject.mockReturnValue({ field2: ['olderId'] } as any)
+
+		const fields = {
+			name: 'name',
+			field2: { remove: ['olderId'] },
+		}
+
+		const updatedFields = await executeRelationOnFields({
+			className: 'TestClass2',
+			fields,
+			id: 'id',
+			context: context as any,
+			typeOfExecution: 'update',
+		})
+
+		expect(mockGetObject).toHaveBeenCalledTimes(1)
+		expect(mockGetObject).toHaveBeenCalledWith({
+			className: 'TestClass',
+			fields: ['field2'],
+			id: 'id',
+		})
+
+		expect(updatedFields).toEqual({
+			name: 'name',
+			field2: [],
+		} as any)
+	})
+
+	it('should create a list of objects if a relation is passed in input with createAndAdd (on updateMany)', async () => {
+		mockCreateObjects.mockReturnValue([{ id: 'createFieldId' }] as any)
+
+		const fields = {
+			name: 'name',
+			field2: { createAndAdd: [{ field1: 'test' }] },
+		}
+
+		const updatedFields = await executeRelationOnFields({
+			className: 'TestClass2',
+			fields,
+			context: context as any,
+			typeOfExecution: 'updateMany',
+		})
+
+		expect(mockCreateObjects).toHaveBeenCalledTimes(1)
+		expect(mockCreateObjects).toHaveBeenCalledWith({
+			className: 'TestClass',
+			data: [{ field1: 'test' }],
+			fields: ['id'],
+			context,
+		})
+
+		expect(updatedFields).toEqual({
+			name: 'name',
+			field2: ['createFieldId'],
+		} as any)
+	})
+
+	it('should add an element to the list of element when a field is passed with add (on updateMany)', async () => {
+		mockGetObjects.mockReturnValue([
+			{ id: 'objectId', field2: ['olderId'] },
+		] as any)
+
+		const fields = {
+			name: 'name',
+			field2: { add: ['idToAdd'] },
+		}
+
+		const updatedFields = await executeRelationOnFields({
+			className: 'TestClass2',
+			fields,
+			context: context as any,
+			typeOfExecution: 'updateMany',
+			where: {
+				id: { equalTo: 'id' },
+			},
+		})
+
+		expect(mockGetObjects).toHaveBeenCalledTimes(1)
+		expect(mockGetObjects).toHaveBeenCalledWith({
+			className: 'TestClass',
+			fields: ['field2'],
+			where: {
+				id: { equalTo: 'id' },
+			},
+		})
+
+		expect(mockUpdateObject).toHaveBeenCalledTimes(1)
+		expect(mockUpdateObject).toHaveBeenCalledWith({
+			className: 'TestClass',
+			data: { field2: ['olderId', 'idToAdd'] },
+			id: 'objectId',
+			context,
+		})
+
+		expect(updatedFields).toEqual({
+			name: 'name',
+		} as any)
+	})
+
+	it('should remove an element from the list of element when a field is passed with remove (on updateMany)', async () => {
+		mockGetObjects.mockReturnValue([
+			{ id: 'objectId', field2: ['olderId'] },
+		] as any)
+
+		const fields = {
+			name: 'name',
+			field2: { remove: ['olderId'] },
+		}
+
+		const updatedFields = await executeRelationOnFields({
+			className: 'TestClass2',
+			fields,
+			context: context as any,
+			typeOfExecution: 'updateMany',
+			where: {
+				id: { equalTo: 'id' },
+			},
+		})
+
+		expect(mockGetObjects).toHaveBeenCalledTimes(1)
+		expect(mockGetObjects).toHaveBeenCalledWith({
+			className: 'TestClass',
+			fields: ['field2'],
+			where: {
+				id: { equalTo: 'id' },
+			},
+		})
+
+		expect(mockUpdateObject).toHaveBeenCalledTimes(1)
+		expect(mockUpdateObject).toHaveBeenCalledWith({
+			className: 'TestClass',
+			data: { field2: [] },
+			id: 'objectId',
+			context,
+		})
+
+		expect(updatedFields).toEqual({
+			name: 'name',
+		} as any)
+	})
+
+	it('should create an object when if a pointer is passed in input with createAndLink', async () => {
 		mockCreateObject.mockReturnValue({ id: 'createFieldId' } as any)
 
 		const fields = {
@@ -241,10 +513,11 @@ describe('Resolver', () => {
 			field2: { createAndLink: { field1: 'test' } },
 		}
 
-		const updatedFields = await executeRelationOnFields(
+		const updatedFields = await executeRelationOnFields({
+			className: 'TestClass',
 			fields,
-			context as any,
-		)
+			context: context as any,
+		})
 
 		expect(mockCreateObject).toHaveBeenCalledTimes(1)
 		expect(mockCreateObject).toHaveBeenCalledWith({
@@ -266,10 +539,11 @@ describe('Resolver', () => {
 			field2: { link: 'alreadyExistingObjectId' },
 		}
 
-		const updatedFields = await executeRelationOnFields(
+		const updatedFields = await executeRelationOnFields({
+			className: 'TestClass',
 			fields,
-			context as any,
-		)
+			context: context as any,
+		})
 
 		expect(mockCreateObject).toHaveBeenCalledTimes(0)
 
@@ -285,10 +559,11 @@ describe('Resolver', () => {
 			age: 20,
 		}
 
-		const updatedFields = await executeRelationOnFields(
+		const updatedFields = await executeRelationOnFields({
+			className: 'TestClass',
 			fields,
-			context as any,
-		)
+			context: context as any,
+		})
 
 		expect(mockCreateObject).toHaveBeenCalledTimes(0)
 

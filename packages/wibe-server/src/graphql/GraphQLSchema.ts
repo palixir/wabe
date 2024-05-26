@@ -32,6 +32,7 @@ import type {
 import { GraphqlParser, type GraphqlParserFactory } from './parser'
 import type { WibeSchemaTypes } from '../../generated/wibe'
 import { firstLetterInLowerCase } from '../utils'
+import { IdWhereInput } from './types'
 
 type AllPossibleObject =
 	| 'object'
@@ -55,24 +56,6 @@ export class GraphQLSchema {
 		this.allObjects = {}
 	}
 
-	initializeObject(classes: Array<ClassInterface>) {
-		for (const wibeClass of classes) {
-			const classNameWithoutSpace = wibeClass.name.replace(' ', '')
-
-			// We initialize to empty to have a lazy loading of the fields for the pointer circular dependency
-			// We use an object with a mutate state because we need to have reference to the object
-			this.allObjects[classNameWithoutSpace] = {
-				connectionObject: {},
-				createInputObject: {},
-				createPointerInput: {},
-				inputObject: {},
-				object: {},
-				updateInputObject: {},
-				whereInputObject: {},
-			}
-		}
-	}
-
 	createSchema() {
 		if (!this.schemas) throw new Error('Schema not found')
 
@@ -80,8 +63,6 @@ export class GraphQLSchema {
 		const enums = this.createEnums()
 
 		const classes = this.schemas.schema.class
-
-		this.initializeObject(classes)
 
 		const graphqlParser = GraphqlParser({ scalars, enums })
 
@@ -393,6 +374,7 @@ export class GraphQLSchema {
 			name: `${nameWithoutSpace}WhereInput`,
 			description,
 			fields: () => ({
+				id: { type: IdWhereInput },
 				...graphqlParserWithInput.getGraphqlFields(nameWithoutSpace),
 				...{
 					OR: {

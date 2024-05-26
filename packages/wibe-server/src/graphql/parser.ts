@@ -10,6 +10,7 @@ import {
 	GraphQLObjectType,
 	type GraphQLScalarType,
 	GraphQLString,
+	GraphQLID,
 } from 'graphql'
 import type {
 	ClassInterface,
@@ -26,6 +27,7 @@ import {
 	EmailScalarType,
 	EmailWhereInput,
 	FloatWhereInput,
+	IdWhereInput,
 	IntWhereInput,
 	StringWhereInput,
 	type AllObjects,
@@ -405,7 +407,8 @@ export const GraphqlParser: GraphqlParserConstructor =
 						switch (graphqlObjectType) {
 							case 'Object': {
 								acc[key] = {
-									type: allObjects[currentField.class].object,
+									type: allObjects[currentField.class]
+										.connectionObject,
 								}
 
 								break
