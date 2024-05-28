@@ -41,7 +41,10 @@ export type CustomAuthenticationMethods<
 	isSecondaryFactor?: boolean
 }
 
+export type RoleConfig = Array<string>
+
 export interface AuthenticationConfig {
+	roles?: RoleConfig
 	successRedirectPath?: string
 	failureRedirectPath?: string
 	providers?: Partial<Record<ProviderEnum, ProviderConfig>>

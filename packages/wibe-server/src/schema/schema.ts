@@ -104,11 +104,19 @@ export type TypeResolver = {
 	}
 }
 
+export interface Permissions {
+	create: Record<string, boolean> // TODO : Use RoleEnum
+	read: Record<string, boolean> // TODO : Use RoleEnum
+	update: Record<string, boolean> // TODO : Use RoleEnum
+	delete: Record<string, boolean> // TODO : Use RoleEnum
+}
+
 export interface ClassInterface {
 	name: string
 	fields: SchemaFields
 	description?: string
 	resolvers?: TypeResolver
+	permissions?: Permissions
 }
 
 export interface ScalarInterface {

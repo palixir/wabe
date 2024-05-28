@@ -9,6 +9,7 @@ const run = async () => {
 		wibeKey:
 			'0uwFvUxM$ceFuF1aEtTtZMa7DUN2NZudqgY5ve5W*QCyb58cwMj9JeoaV@d#%29v&aJzswuudVU1%nAT+rxS0Bh&OkgBYc0PH18*',
 		authentication: {
+			roles: ['Admin', 'Client'],
 			successRedirectPath: 'http://localhost:5173',
 			failureRedirectPath: 'http://localhost:5173',
 			providers: {
