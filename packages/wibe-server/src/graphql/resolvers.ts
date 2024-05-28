@@ -3,6 +3,13 @@ import { WibeApp } from '../..'
 import type { WibeSchemaTypes } from '../../generated/wibe'
 import type { Context } from '../graphql/interface'
 import { firstLetterInLowerCase } from '../utils'
+import {
+	InputFields,
+	add,
+	createAndAdd,
+	createAndLink,
+	remove,
+} from './pointerAndRelationFunction'
 
 const ignoredFields = ['edges', 'node']
 
@@ -46,7 +53,7 @@ export const executeRelationOnFields = async ({
 	where,
 }: {
 	className: string
-	fields: Record<string, any>
+	fields: InputFields
 	context: Context
 	id?: string
 	where?: any
@@ -59,175 +66,45 @@ export const executeRelationOnFields = async ({
 			const newAcc = await acc
 
 			if (typeof value === 'object' && value?.createAndLink) {
-				const { createAndLink } = value
-
-				const classInSchema = WibeApp.config.schema.class.find(
-					(schemaClass) => schemaClass.fields[fieldName],
-				)
-
-				if (!classInSchema) throw new Error('Class not found in schema')
-
-				const fieldInClass = classInSchema?.fields[fieldName]
-
-				const { id } = await WibeApp.databaseController.createObject({
-					// @ts-expect-error
-					className: fieldInClass.class,
-					data: createAndLink,
-					fields: ['id'],
+				newAcc[fieldName] = await createAndLink({
+					createAndLink: value.createAndLink,
+					fieldName,
 					context,
+					className,
 				})
-
-				newAcc[fieldName] = id
 			} else if (typeof value === 'object' && value?.link) {
 				newAcc[fieldName] = value.link
 			} else if (typeof value === 'object' && value?.createAndAdd) {
-				const { createAndAdd } = value
-
-				const classInSchema = WibeApp.config.schema.class.find(
-					(schemaClass) => schemaClass.fields[fieldName],
-				)
-
-				if (!classInSchema) throw new Error('Class not found in schema')
-
-				const fieldInClass = classInSchema?.fields[fieldName]
-
-				const result = await WibeApp.databaseController.createObjects({
-					// @ts-expect-error
-					className: fieldInClass.class,
-					data: createAndAdd,
-					fields: ['id'],
+				newAcc[fieldName] = await createAndAdd({
+					createAndAdd: value.createAndAdd,
+					fieldName,
 					context,
+					className,
+				})
+			} else if (typeof value === 'object' && value?.add) {
+				const addValue = await add({
+					add: value.add,
+					context,
+					fieldName,
+					typeOfExecution: typeOfExecution || 'create',
+					id,
+					className,
+					where,
 				})
 
-				newAcc[fieldName] = result.map((object: any) => object.id)
-			} else if (value?.add) {
-				if (typeOfExecution === 'create') {
-					newAcc[fieldName] = value.add
-				}
+				if (addValue) newAcc[fieldName] = addValue
+			} else if (typeof value === 'object' && value?.remove) {
+				const removeValue = await remove({
+					remove: value.remove,
+					context,
+					fieldName,
+					typeOfExecution: typeOfExecution || 'create',
+					id,
+					className,
+					where,
+				})
 
-				// If update we get the current value and add the new value (we need to concat)
-				if (typeOfExecution === 'update' && id) {
-					const classInSchema = WibeApp.config.schema.class.find(
-						(classItem) => classItem.name === className,
-					)
-
-					if (!classInSchema)
-						throw new Error('Class not found in schema')
-
-					const fieldInClass = classInSchema?.fields[fieldName]
-
-					const currentValue =
-						await WibeApp.databaseController.getObject({
-							// @ts-expect-error
-							className: fieldInClass.class,
-							id,
-							fields: [fieldName],
-						})
-
-					newAcc[fieldName] = [
-						...(currentValue?.[fieldName] || []),
-						...value.add,
-					]
-				}
-
-				// For update many we need to get all objects that match the where and add the new value
-				// So we doesn't update the field for updateMany
-				if (typeOfExecution === 'updateMany' && where) {
-					const classInSchema = WibeApp.config.schema.class.find(
-						(classItem) => classItem.name === className,
-					)
-
-					if (!classInSchema)
-						throw new Error('Class not found in schema')
-
-					const fieldInClass = classInSchema?.fields[fieldName]
-
-					const allObjectsMatchedWithWhere =
-						await WibeApp.databaseController.getObjects({
-							// @ts-expect-error
-							className: fieldInClass.class,
-							where,
-							fields: [fieldName],
-						})
-
-					await Promise.all(
-						allObjectsMatchedWithWhere.map(async (object: any) => {
-							const currentValue = object[fieldName]
-
-							await WibeApp.databaseController.updateObject({
-								// @ts-expect-error
-								className: fieldInClass.class,
-								id: object.id,
-								data: {
-									[fieldName]: [
-										...(currentValue || []),
-										...value.add,
-									],
-								},
-								context,
-							})
-						}),
-					)
-				}
-			} else if (value?.remove) {
-				if (typeOfExecution === 'create') newAcc[fieldName] = []
-
-				if (typeOfExecution === 'update' && id) {
-					const classInSchema = WibeApp.config.schema.class.find(
-						(classItem) => classItem.name === className,
-					)
-
-					if (!classInSchema)
-						throw new Error('Class not found in schema')
-
-					const fieldInClass = classInSchema?.fields[fieldName]
-
-					const currentValue =
-						await WibeApp.databaseController.getObject({
-							// @ts-expect-error
-							className: fieldInClass.class,
-							id,
-							fields: [fieldName],
-						})
-
-					const olderValue = currentValue?.[fieldName] || []
-
-					newAcc[fieldName] = olderValue.filter(
-						(olderVal: any) => !value.remove.includes(olderVal),
-					)
-				}
-
-				if (typeOfExecution === 'updateMany' && where) {
-					const allObjectsMatchedWithWhere =
-						await WibeApp.databaseController.getObjects({
-							// @ts-expect-error
-							className,
-							where,
-							fields: ['id'],
-						})
-
-					await Promise.all(
-						allObjectsMatchedWithWhere.map(async (object: any) => {
-							const currentValue = object[fieldName]
-
-							const olderValue = currentValue?.[fieldName] || []
-
-							await WibeApp.databaseController.updateObject({
-								// @ts-expect-error
-								className,
-								id: object.id,
-								// @ts-expect-error
-								data: {
-									[fieldName]: olderValue.filter(
-										(olderVal: any) =>
-											!value.remove.includes(olderVal),
-									),
-								},
-								context,
-							})
-						}),
-					)
-				}
+				if (removeValue) newAcc[fieldName] = removeValue
 			} else {
 				newAcc[fieldName] = value
 			}

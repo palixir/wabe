@@ -35,6 +35,9 @@ describe('Resolver', () => {
 					{
 						name: 'TestClass',
 						fields: {
+							name: {
+								type: 'String',
+							},
 							field1: {
 								type: 'String',
 							},
@@ -248,7 +251,7 @@ describe('Resolver', () => {
 		}
 
 		const updatedFields = await executeRelationOnFields({
-			className: 'TestClass',
+			className: 'TestClass2',
 			fields,
 			context: context as any,
 		})
@@ -293,7 +296,7 @@ describe('Resolver', () => {
 		}
 
 		const updatedFields = await executeRelationOnFields({
-			className: 'TestClass',
+			className: 'TestClass2',
 			fields,
 			context: context as any,
 			typeOfExecution: 'create',
@@ -314,7 +317,7 @@ describe('Resolver', () => {
 		}
 
 		const updatedFields = await executeRelationOnFields({
-			className: 'TestClass',
+			className: 'TestClass2',
 			fields,
 			context: context as any,
 			typeOfExecution: 'update',
@@ -514,7 +517,7 @@ describe('Resolver', () => {
 		}
 
 		const updatedFields = await executeRelationOnFields({
-			className: 'TestClass',
+			className: 'TestClass2',
 			fields,
 			context: context as any,
 		})
