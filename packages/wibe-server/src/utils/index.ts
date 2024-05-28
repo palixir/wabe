@@ -1,4 +1,5 @@
 import { getSdk } from '../../generated/wibe'
+import type { ClassInterface } from '../schema'
 import { WibeApp } from '../server'
 import { getGraphqlClient } from './helper'
 
@@ -19,4 +20,14 @@ export const firstLetterInLowerCase = (str: string) => {
 		str[indexOfFirstLetter].toLowerCase() +
 		str.slice(indexOfFirstLetter + 1)
 	)
+}
+
+export const getClassFromClassName = (className: string): ClassInterface => {
+	const classInSchema = WibeApp.config.schema.class.find(
+		(schemaClass) => schemaClass.name === className,
+	)
+
+	if (!classInSchema) throw new Error('Class not found in schema')
+
+	return classInSchema
 }

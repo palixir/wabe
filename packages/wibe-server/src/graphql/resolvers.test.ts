@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeAll, mock, beforeEach } from 'bun:test'
 import type { GraphQLResolveInfo } from 'graphql'
-import { executeRelationOnFields, getFieldsFromInfo } from './resolvers'
+import { executeRelationOnFields, extractFieldsFromSetNode } from './resolvers'
 import { WibeApp } from '../server'
 
 describe('Resolver', () => {
@@ -109,8 +109,10 @@ describe('Resolver', () => {
 				],
 			}
 
-			// @ts-expect-error
-			const fields = getFieldsFromInfo(info.fieldNodes[0].selectionSet)
+			const fields = extractFieldsFromSetNode(
+				// @ts-expect-error
+				info.fieldNodes[0].selectionSet,
+			)
 			expect(fields).toEqual(['name', 'age'])
 		})
 
@@ -144,7 +146,7 @@ describe('Resolver', () => {
 				],
 			}
 
-			const fields = getFieldsFromInfo(
+			const fields = extractFieldsFromSetNode(
 				// @ts-expect-error
 				info.fieldNodes[0].selectionSet,
 			)
@@ -192,8 +194,10 @@ describe('Resolver', () => {
 				],
 			}
 
-			// @ts-expect-error
-			const fields = getFieldsFromInfo(info.fieldNodes[0].selectionSet)
+			const fields = extractFieldsFromSetNode(
+				// @ts-expect-error
+				info.fieldNodes[0].selectionSet,
+			)
 
 			expect(fields).toEqual(['name', 'age', 'field1.field2'])
 		})
@@ -232,7 +236,7 @@ describe('Resolver', () => {
 				],
 			}
 
-			const fields = getFieldsFromInfo(
+			const fields = extractFieldsFromSetNode(
 				// @ts-expect-error
 				info.fieldNodes[0].selectionSet,
 				'className',

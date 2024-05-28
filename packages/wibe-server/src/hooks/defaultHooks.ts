@@ -1,4 +1,4 @@
-import { WibeApp } from '../server'
+import { getClassFromClassName } from '../utils'
 import type { HookObject } from './HookObject'
 
 export const defaultBeforeInsertForCreatedAt = async (
@@ -17,11 +17,7 @@ export const defaultBeforeUpdateForUpdatedAt = async (
 export const defaultBeforeInsertForDefaultValue = async (
 	object: HookObject<any>,
 ) => {
-	const schemaClass = WibeApp.config.schema.class.find(
-		(schema) => schema.name === object.className,
-	)
-
-	if (!schemaClass) throw new Error('Class not found in schema')
+	const schemaClass = getClassFromClassName(object.className)
 
 	const allFields = Object.keys(schemaClass.fields)
 
@@ -31,6 +27,7 @@ export const defaultBeforeInsertForDefaultValue = async (
 		if (
 			!object.get(field) &&
 			currentSchemaField.type !== 'Pointer' &&
+			currentSchemaField.type !== 'Relation' &&
 			currentSchemaField.defaultValue !== undefined
 		)
 			object.set({

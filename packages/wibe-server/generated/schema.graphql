@@ -22,7 +22,7 @@ type _User {
   isCool: Boolean
   email: Email
   post: Post
-  postRelation: Post
+  postRelation: PostConnection
   birthDate: Date
   phone: Phone
   role: Role
@@ -37,6 +37,14 @@ type _User {
 
 """Email scalar type"""
 scalar Email
+
+type PostConnection {
+  edges: [PostEdge]
+}
+
+type PostEdge {
+  node: Post!
+}
 
 """Date scalar type"""
 scalar Date
@@ -279,6 +287,7 @@ type _UserEdge {
 
 """User class"""
 input _UserWhereInput {
+  id: IdWhereInput
   name: StringWhereInput
   age: IntWhereInput
   isCool: BooleanWhereInput
@@ -297,6 +306,13 @@ input _UserWhereInput {
   updatedAt: DateWhereInput
   OR: [_UserWhereInput]
   AND: [_UserWhereInput]
+}
+
+input IdWhereInput {
+  equalTo: String
+  notEqualTo: String
+  in: [String]
+  notIn: [String]
 }
 
 input StringWhereInput {
@@ -332,6 +348,7 @@ input EmailWhereInput {
 }
 
 input PostWhereInput {
+  id: IdWhereInput
   name: StringWhereInput
   OR: [PostWhereInput]
   AND: [PostWhereInput]
@@ -400,14 +417,6 @@ input _UserAuthenticationOtpWhereInput {
   AND: [_UserAuthenticationOtpWhereInput]
 }
 
-type PostConnection {
-  edges: [PostEdge]
-}
-
-type PostEdge {
-  node: Post!
-}
-
 type _SessionConnection {
   edges: [_SessionEdge]
 }
@@ -417,6 +426,7 @@ type _SessionEdge {
 }
 
 input _SessionWhereInput {
+  id: IdWhereInput
   userId: StringWhereInput
   accessToken: StringWhereInput
   accessTokenExpiresAt: DateWhereInput

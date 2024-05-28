@@ -1,11 +1,14 @@
 import { WibeApp } from '../..'
-import { Context } from './interface'
+import { getClassFromClassName } from '../utils'
+import type { Context } from './interface'
 
 type CreateAndLink = any
 type Link = string
 type Add = Array<string>
 type Remove = Array<string>
 type CreateAndAdd = Array<any>
+
+export type TypeOfExecution = 'create' | 'update' | 'updateMany'
 
 export type InputFields = Record<
 	string,
@@ -30,17 +33,11 @@ export const createAndLink = async ({
 	context: Context
 	className: string
 }) => {
-	const classInSchema = WibeApp.config.schema.class.find(
-		(schemaClass) => schemaClass.name === className,
-	)
-
-	if (!classInSchema) throw new Error('Class not found in schema')
-
-	const fieldInClass = classInSchema?.fields[fieldName]
+	const classInSchema = getClassFromClassName(className)
 
 	const { id } = await WibeApp.databaseController.createObject({
 		// @ts-expect-error
-		className: fieldInClass.class,
+		className: classInSchema.fields[fieldName].class,
 		data: createAndLink,
 		fields: ['id'],
 		context,
@@ -60,17 +57,11 @@ export const createAndAdd = async ({
 	context: Context
 	className: string
 }) => {
-	const classInSchema = WibeApp.config.schema.class.find(
-		(schemaClass) => schemaClass.name === className,
-	)
-
-	if (!classInSchema) throw new Error('Class not found in schema')
-
-	const fieldInClass = classInSchema?.fields[fieldName]
+	const classInSchema = getClassFromClassName(className)
 
 	const result = await WibeApp.databaseController.createObjects({
 		// @ts-expect-error
-		className: fieldInClass.class,
+		className: classInSchema.fields[fieldName].class,
 		data: createAndAdd,
 		fields: ['id'],
 		context,
@@ -91,23 +82,18 @@ export const add = async ({
 	add: Add
 	fieldName: string
 	context: Context
-	typeOfExecution: 'create' | 'update' | 'updateMany'
+	typeOfExecution: TypeOfExecution
 	id?: string
 	className: string
 	where: any
 }) => {
 	if (typeOfExecution === 'create') return add
 
-	// If update we get the current value and add the new value (we need to concat)
+	const classInSchema = getClassFromClassName(className)
+
+	const fieldInClass = classInSchema.fields[fieldName]
+
 	if (typeOfExecution === 'update' && id) {
-		const classInSchema = WibeApp.config.schema.class.find(
-			(classItem) => classItem.name === className,
-		)
-
-		if (!classInSchema) throw new Error('Class not found in schema')
-
-		const fieldInClass = classInSchema?.fields[fieldName]
-
 		const currentValue = await WibeApp.databaseController.getObject({
 			// @ts-expect-error
 			className: fieldInClass.class,
@@ -115,20 +101,14 @@ export const add = async ({
 			fields: [fieldName],
 		})
 
-		return [...(currentValue?.[fieldName] || []), ...add]
+		if (!currentValue) return [...add]
+
+		return [...currentValue[fieldName], ...add]
 	}
 
 	// For update many we need to get all objects that match the where and add the new value
 	// So we doesn't update the field for updateMany
 	if (typeOfExecution === 'updateMany' && where) {
-		const classInSchema = WibeApp.config.schema.class.find(
-			(classItem) => classItem.name === className,
-		)
-
-		if (!classInSchema) throw new Error('Class not found in schema')
-
-		const fieldInClass = classInSchema?.fields[fieldName]
-
 		const allObjectsMatchedWithWhere =
 			await WibeApp.databaseController.getObjects({
 				// @ts-expect-error
@@ -141,9 +121,9 @@ export const add = async ({
 			allObjectsMatchedWithWhere.map(async (object: any) => {
 				const currentValue = object[fieldName]
 
-				await WibeApp.databaseController.updateObject({
+				return WibeApp.databaseController.updateObject({
 					// @ts-expect-error
-					className: fieldInClass.class,
+					className: classInSchema.fields[fieldName].class,
 					id: object.id,
 					data: {
 						[fieldName]: [...(currentValue || []), ...add],
@@ -167,7 +147,7 @@ export const remove = async ({
 	remove: Remove
 	fieldName: string
 	context: Context
-	typeOfExecution: 'create' | 'update' | 'updateMany'
+	typeOfExecution: TypeOfExecution
 	id?: string
 	className: string
 	where: any
@@ -175,13 +155,9 @@ export const remove = async ({
 	if (typeOfExecution === 'create') return []
 
 	if (typeOfExecution === 'update' && id) {
-		const classInSchema = WibeApp.config.schema.class.find(
-			(classItem) => classItem.name === className,
-		)
+		const classInSchema = getClassFromClassName(className)
 
-		if (!classInSchema) throw new Error('Class not found in schema')
-
-		const fieldInClass = classInSchema?.fields[fieldName]
+		const fieldInClass = classInSchema.fields[fieldName]
 
 		const currentValue = await WibeApp.databaseController.getObject({
 			// @ts-expect-error
@@ -190,9 +166,11 @@ export const remove = async ({
 			fields: [fieldName],
 		})
 
-		const olderValue = currentValue?.[fieldName] || []
+		const olderValues = currentValue?.[fieldName] || []
 
-		return olderValue.filter((olderVal: any) => !remove.includes(olderVal))
+		return olderValues.filter(
+			(olderValue: any) => !remove.includes(olderValue),
+		)
 	}
 
 	if (typeOfExecution === 'updateMany' && where) {
@@ -206,18 +184,16 @@ export const remove = async ({
 
 		await Promise.all(
 			allObjectsMatchedWithWhere.map(async (object: any) => {
-				const currentValue = object[fieldName]
+				const olderValues = object[fieldName]?.[fieldName] || []
 
-				const olderValue = currentValue?.[fieldName] || []
-
-				await WibeApp.databaseController.updateObject({
+				return WibeApp.databaseController.updateObject({
 					// @ts-expect-error
 					className,
 					id: object.id,
 					// @ts-expect-error
 					data: {
-						[fieldName]: olderValue.filter(
-							(olderVal: any) => !remove.includes(olderVal),
+						[fieldName]: olderValues.filter(
+							(olderValue: any) => !remove.includes(olderValue),
 						),
 					},
 					context,
