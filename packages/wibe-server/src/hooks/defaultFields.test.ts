@@ -4,11 +4,11 @@ import {
 	defaultBeforeInsertForCreatedAt,
 	defaultBeforeInsertForDefaultValue,
 	defaultBeforeUpdateForUpdatedAt,
-} from './defaultHooks'
+} from './defaultFields'
 import { HookObject } from './HookObject'
 import { OperationType } from '.'
 
-describe('Default hooks', () => {
+describe('Default fields', () => {
 	const now = new Date()
 
 	describe('CreatedAt and UpdatedAt', () => {

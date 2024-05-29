@@ -1,5 +1,5 @@
 import { getClassFromClassName } from '../utils'
-import type { HookObject } from './HookObject'
+import { HookObject } from './HookObject'
 
 export const defaultBeforeInsertForCreatedAt = async (
 	object: HookObject<any>,

@@ -7,7 +7,7 @@ import {
 	defaultBeforeInsertForCreatedAt,
 	defaultBeforeInsertForDefaultValue,
 	defaultBeforeUpdateForUpdatedAt,
-} from './defaultHooks'
+} from './defaultFields'
 
 export enum OperationType {
 	AfterInsert = 'afterInsert',
@@ -31,24 +31,6 @@ export type Hook<T extends keyof WibeSchemaTypes> = {
 		context: Context,
 	) => Promise<void> | void
 }
-
-export const defaultHooks: Hook<any>[] = [
-	{
-		operationType: OperationType.BeforeInsert,
-		priority: 1,
-		callback: defaultBeforeInsertForCreatedAt,
-	},
-	{
-		operationType: OperationType.BeforeInsert,
-		priority: 1,
-		callback: defaultBeforeInsertForDefaultValue,
-	},
-	{
-		operationType: OperationType.BeforeUpdate,
-		priority: 1,
-		callback: defaultBeforeUpdateForUpdatedAt,
-	},
-]
 
 export const _findHooksByPriority = async <T extends keyof WibeSchemaTypes>({
 	className,
@@ -131,3 +113,21 @@ after:
 - Résultat de la requête
 - User qui a fait la request
 */
+
+export const defaultHooks: Hook<any>[] = [
+	{
+		operationType: OperationType.BeforeInsert,
+		priority: 1,
+		callback: defaultBeforeInsertForCreatedAt,
+	},
+	{
+		operationType: OperationType.BeforeInsert,
+		priority: 1,
+		callback: defaultBeforeInsertForDefaultValue,
+	},
+	{
+		operationType: OperationType.BeforeUpdate,
+		priority: 1,
+		callback: defaultBeforeUpdateForUpdatedAt,
+	},
+]
