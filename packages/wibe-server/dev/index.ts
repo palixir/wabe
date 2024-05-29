@@ -48,68 +48,7 @@ const run = async () => {
         {
           name: '_User',
           description: 'User class',
-          fields: {
-            name: { type: 'String' },
-            age: { type: 'Int' },
-            isCool: { type: 'Boolean' },
-            email: { type: 'Email', required: true },
-            post: {
-              type: 'Pointer',
-              class: 'Post',
-            },
-            postRelation: { type: 'Relation', class: 'Post' },
-            birthDate: {
-              type: 'Date',
-            },
-            phone: {
-              type: 'Phone',
-            },
-            role: {
-              type: 'Role',
-            },
-            address: {
-              type: 'Object',
-              object: {
-                name: 'Address',
-                fields: {
-                  address1: {
-                    type: 'String',
-                  },
-                  address2: {
-                    type: 'String',
-                  },
-                  postalCode: {
-                    type: 'Int',
-                  },
-                  city: {
-                    type: 'String',
-                  },
-                  country: {
-                    type: 'String',
-                  },
-                },
-              },
-            },
-            object: {
-              type: 'Object',
-              object: {
-                name: 'Object',
-                fields: {
-                  objectOfObject: {
-                    type: 'Object',
-                    object: {
-                      name: 'ObjectOfObject',
-                      fields: {
-                        name: {
-                          type: 'String',
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
+          fields: {},
           resolvers: {
             queries: {
               helloWorld: {

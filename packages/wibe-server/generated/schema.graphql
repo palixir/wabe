@@ -17,52 +17,12 @@ enum SecondaryFactor {
 """User class"""
 type _User {
   id: ID!
-  name: String
-  age: Int
-  isCool: Boolean
-  email: Email
-  post: Post
-  postRelation: PostConnection
-  birthDate: Date
-  phone: Phone
-  role: Role
-  address: _UserAddress
-  object: _UserObject
   authentication: _UserAuthentication
   provider: AuthenticationProvider
+  email: Email
   verifiedEmail: Boolean
   createdAt: Date
   updatedAt: Date
-}
-
-"""Email scalar type"""
-scalar Email
-
-type PostConnection {
-  edges: [PostEdge]
-}
-
-type PostEdge {
-  node: Post!
-}
-
-"""Date scalar type"""
-scalar Date
-
-type _UserAddress {
-  address1: String
-  address2: String
-  postalCode: Int
-  city: String
-  country: String
-}
-
-type _UserObject {
-  objectOfObject: _UserObjectObjectOfObject
-}
-
-type _UserObjectObjectOfObject {
-  name: String
 }
 
 type _UserAuthentication {
@@ -75,44 +35,24 @@ type _UserAuthenticationEmailPassword {
   password: String!
 }
 
+"""Email scalar type"""
+scalar Email
+
 type _UserAuthenticationOtp {
   code: String
 }
 
+"""Date scalar type"""
+scalar Date
+
 """User class"""
 input _UserInput {
-  name: String
-  age: Int
-  isCool: Boolean
-  email: Email
-  post: PostPointerInput
-  postRelation: PostRelationInput
-  birthDate: Date
-  phone: Phone
-  role: Role
-  address: _UserAddressInput
-  object: _UserObjectInput
   authentication: _UserAuthenticationInput
   provider: AuthenticationProvider
+  email: Email
   verifiedEmail: Boolean
   createdAt: Date
   updatedAt: Date
-}
-
-input _UserAddressInput {
-  address1: String
-  address2: String
-  postalCode: Int
-  city: String
-  country: String
-}
-
-input _UserObjectInput {
-  objectOfObject: _UserObjectObjectOfObjectInput
-}
-
-input _UserObjectObjectOfObjectInput {
-  name: String
 }
 
 input _UserAuthenticationInput {
@@ -137,38 +77,12 @@ input _UserPointerInput {
 
 """User class"""
 input _UserCreateFieldsInput {
-  name: String
-  age: Int
-  isCool: Boolean
-  email: Email
-  post: PostPointerInput
-  postRelation: PostRelationInput
-  birthDate: Date
-  phone: Phone
-  role: Role
-  address: _UserAddressCreateFieldsInput
-  object: _UserObjectCreateFieldsInput
   authentication: _UserAuthenticationCreateFieldsInput
   provider: AuthenticationProvider
+  email: Email
   verifiedEmail: Boolean
   createdAt: Date
   updatedAt: Date
-}
-
-input _UserAddressCreateFieldsInput {
-  address1: String
-  address2: String
-  postalCode: Int
-  city: String
-  country: String
-}
-
-input _UserObjectCreateFieldsInput {
-  objectOfObject: _UserObjectObjectOfObjectCreateFieldsInput
-}
-
-input _UserObjectObjectOfObjectCreateFieldsInput {
-  name: String
 }
 
 input _UserAuthenticationCreateFieldsInput {
@@ -288,19 +202,9 @@ type _UserEdge {
 """User class"""
 input _UserWhereInput {
   id: IdWhereInput
-  name: StringWhereInput
-  age: IntWhereInput
-  isCool: BooleanWhereInput
-  email: EmailWhereInput
-  post: PostWhereInput
-  postRelation: PostWhereInput
-  birthDate: DateWhereInput
-  phone: AnyWhereInput
-  role: AnyWhereInput
-  address: _UserAddressWhereInput
-  object: _UserObjectWhereInput
   authentication: _UserAuthenticationWhereInput
   provider: AnyWhereInput
+  email: EmailWhereInput
   verifiedEmail: BooleanWhereInput
   createdAt: DateWhereInput
   updatedAt: DateWhereInput
@@ -313,88 +217,6 @@ input IdWhereInput {
   notEqualTo: String
   in: [String]
   notIn: [String]
-}
-
-input StringWhereInput {
-  equalTo: String
-  notEqualTo: String
-  in: [String]
-  notIn: [String]
-}
-
-input IntWhereInput {
-  equalTo: Int
-  notEqualTo: Int
-  lessThan: Int
-  lessThanOrEqualTo: Int
-  greaterThan: Int
-  greaterThanOrEqualTo: Int
-  in: [Int]
-  notIn: [Int]
-}
-
-input BooleanWhereInput {
-  equalTo: Boolean
-  notEqualTo: Boolean
-  in: [Boolean]
-  notIn: [Boolean]
-}
-
-input EmailWhereInput {
-  equalTo: Email
-  notEqualTo: Email
-  in: [Email]
-  notIn: [Email]
-}
-
-input PostWhereInput {
-  id: IdWhereInput
-  name: StringWhereInput
-  OR: [PostWhereInput]
-  AND: [PostWhereInput]
-}
-
-input DateWhereInput {
-  equalTo: Date
-  notEqualTo: Date
-  in: [Date]
-  notIn: [Date]
-  lessThan: Date
-  lessThanOrEqualTo: Date
-  greaterThan: Date
-  greaterThanOrEqualTo: Date
-}
-
-input AnyWhereInput {
-  equalTo: Any
-  notEqualTo: Any
-}
-
-"""
-The Any scalar type is used in operations and types that involve any type of value.
-"""
-scalar Any
-
-input _UserAddressWhereInput {
-  address1: StringWhereInput
-  address2: StringWhereInput
-  postalCode: IntWhereInput
-  city: StringWhereInput
-  country: StringWhereInput
-  OR: [_UserAddressWhereInput]
-  AND: [_UserAddressWhereInput]
-}
-
-input _UserObjectWhereInput {
-  objectOfObject: _UserObjectObjectOfObjectWhereInput
-  OR: [_UserObjectWhereInput]
-  AND: [_UserObjectWhereInput]
-}
-
-input _UserObjectObjectOfObjectWhereInput {
-  name: StringWhereInput
-  OR: [_UserObjectObjectOfObjectWhereInput]
-  AND: [_UserObjectObjectOfObjectWhereInput]
 }
 
 input _UserAuthenticationWhereInput {
@@ -411,10 +233,67 @@ input _UserAuthenticationEmailPasswordWhereInput {
   AND: [_UserAuthenticationEmailPasswordWhereInput]
 }
 
+input EmailWhereInput {
+  equalTo: Email
+  notEqualTo: Email
+  in: [Email]
+  notIn: [Email]
+}
+
+input StringWhereInput {
+  equalTo: String
+  notEqualTo: String
+  in: [String]
+  notIn: [String]
+}
+
 input _UserAuthenticationOtpWhereInput {
   code: StringWhereInput
   OR: [_UserAuthenticationOtpWhereInput]
   AND: [_UserAuthenticationOtpWhereInput]
+}
+
+input AnyWhereInput {
+  equalTo: Any
+  notEqualTo: Any
+}
+
+"""
+The Any scalar type is used in operations and types that involve any type of value.
+"""
+scalar Any
+
+input BooleanWhereInput {
+  equalTo: Boolean
+  notEqualTo: Boolean
+  in: [Boolean]
+  notIn: [Boolean]
+}
+
+input DateWhereInput {
+  equalTo: Date
+  notEqualTo: Date
+  in: [Date]
+  notIn: [Date]
+  lessThan: Date
+  lessThanOrEqualTo: Date
+  greaterThan: Date
+  greaterThanOrEqualTo: Date
+}
+
+type PostConnection {
+  edges: [PostEdge]
+}
+
+type PostEdge {
+  node: Post!
+}
+
+input PostWhereInput {
+  id: IdWhereInput
+  name: StringWhereInput
+  OR: [PostWhereInput]
+  AND: [PostWhereInput]
 }
 
 type _SessionConnection {
@@ -505,38 +384,12 @@ input Update_UserInput {
 
 """User class"""
 input _UserUpdateFieldsInput {
-  name: String
-  age: Int
-  isCool: Boolean
-  email: Email
-  post: PostPointerInput
-  postRelation: PostRelationInput
-  birthDate: Date
-  phone: Phone
-  role: Role
-  address: _UserAddressUpdateFieldsInput
-  object: _UserObjectUpdateFieldsInput
   authentication: _UserAuthenticationUpdateFieldsInput
   provider: AuthenticationProvider
+  email: Email
   verifiedEmail: Boolean
   createdAt: Date
   updatedAt: Date
-}
-
-input _UserAddressUpdateFieldsInput {
-  address1: String
-  address2: String
-  postalCode: Int
-  city: String
-  country: String
-}
-
-input _UserObjectUpdateFieldsInput {
-  objectOfObject: _UserObjectObjectOfObjectUpdateFieldsInput
-}
-
-input _UserObjectObjectOfObjectUpdateFieldsInput {
-  name: String
 }
 
 input _UserAuthenticationUpdateFieldsInput {
