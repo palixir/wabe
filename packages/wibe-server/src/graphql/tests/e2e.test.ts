@@ -89,54 +89,6 @@ describe('GraphQL : E2E', () => {
 			expect(_users.edges[0].node.name).toEqual('Toto6')
 		})
 
-		it('should create user with custom enum (Role)', async () => {
-			await client.request<any>(graphql.create_Users, {
-				input: {
-					fields: [{ name: 'Jack', role: 'Admin' }],
-				},
-			})
-
-			const { _users } = await client.request<any>(graphql._users, {
-				where: {
-					role: {
-						equalTo: 'Admin',
-					},
-				},
-			})
-
-			expect(_users.edges.length).toEqual(1)
-			expect(_users.edges[0].node.name).toEqual('Jack')
-
-			const { _users: users2 } = await client.request<any>(
-				graphql._users,
-				{
-					where: {
-						role: {
-							notEqualTo: 'Admin',
-						},
-					},
-				},
-			)
-
-			expect(users2.edges.length).toEqual(2)
-			expect(users2.edges).toEqual([
-				{
-					node: {
-						id: expect.anything(),
-						name: 'Lucas',
-						age: 23,
-					},
-				},
-				{
-					node: {
-						id: expect.anything(),
-						name: 'Jeanne',
-						age: 23,
-					},
-				},
-			])
-		})
-
 		it('should create user with a custom scalar (phone)', async () => {
 			await client.request<any>(graphql.create_Users, {
 				input: {

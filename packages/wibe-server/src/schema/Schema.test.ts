@@ -289,9 +289,10 @@ describe('Schema', () => {
 	it('should add default class', () => {
 		const schema = new Schema({ class: [] })
 
-		expect(schema.schema.class.length).toBe(2)
+		expect(schema.schema.class.length).toBe(3)
 		expect(schema.schema.class[0].name).toEqual('_User')
 		expect(schema.schema.class[1].name).toEqual('_Session')
+		expect(schema.schema.class[2].name).toEqual('_Role')
 	})
 
 	it('should add default enums', () => {

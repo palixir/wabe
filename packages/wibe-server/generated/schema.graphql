@@ -21,6 +21,7 @@ type _User {
   provider: AuthenticationProvider
   email: Email
   verifiedEmail: Boolean
+  role: _Role
   createdAt: Date
   updatedAt: Date
 }
@@ -51,6 +52,7 @@ input _UserInput {
   provider: AuthenticationProvider
   email: Email
   verifiedEmail: Boolean
+  role: _RolePointerInput
   createdAt: Date
   updatedAt: Date
 }
@@ -81,6 +83,7 @@ input _UserCreateFieldsInput {
   provider: AuthenticationProvider
   email: Email
   verifiedEmail: Boolean
+  role: _RolePointerInput
   createdAt: Date
   updatedAt: Date
 }
@@ -176,6 +179,43 @@ input _SessionRelationInput {
   createAndAdd: [_SessionCreateFieldsInput!]
 }
 
+type _Role {
+  id: ID!
+  name: String!
+  users: _UserConnection
+}
+
+type _UserConnection {
+  edges: [_UserEdge]
+}
+
+type _UserEdge {
+  node: _User!
+}
+
+input _RoleInput {
+  name: String!
+  users: _UserRelationInput
+}
+
+"""Input to link an object to a pointer _Role"""
+input _RolePointerInput {
+  link: ID
+  createAndLink: _RoleCreateFieldsInput
+}
+
+input _RoleCreateFieldsInput {
+  name: String
+  users: _UserRelationInput
+}
+
+"""Input to add a relation to the class _Role"""
+input _RoleRelationInput {
+  add: [ID!]
+  remove: [ID!]
+  createAndAdd: [_RoleCreateFieldsInput!]
+}
+
 type Query {
   """User class"""
   _user(id: ID): _User
@@ -189,14 +229,8 @@ type Query {
   posts(where: PostWhereInput, offset: Int, limit: Int): PostConnection!
   _session(id: ID): _Session
   _sessions(where: _SessionWhereInput, offset: Int, limit: Int): _SessionConnection!
-}
-
-type _UserConnection {
-  edges: [_UserEdge]
-}
-
-type _UserEdge {
-  node: _User!
+  _role(id: ID): _Role
+  _roles(where: _RoleWhereInput, offset: Int, limit: Int): _RoleConnection!
 }
 
 """User class"""
@@ -206,6 +240,7 @@ input _UserWhereInput {
   provider: AnyWhereInput
   email: EmailWhereInput
   verifiedEmail: BooleanWhereInput
+  role: _RoleWhereInput
   createdAt: DateWhereInput
   updatedAt: DateWhereInput
   OR: [_UserWhereInput]
@@ -270,6 +305,14 @@ input BooleanWhereInput {
   notIn: [Boolean]
 }
 
+input _RoleWhereInput {
+  id: IdWhereInput
+  name: StringWhereInput
+  users: _UserWhereInput
+  OR: [_RoleWhereInput]
+  AND: [_RoleWhereInput]
+}
+
 input DateWhereInput {
   equalTo: Date
   notEqualTo: Date
@@ -317,6 +360,14 @@ input _SessionWhereInput {
   AND: [_SessionWhereInput]
 }
 
+type _RoleConnection {
+  edges: [_RoleEdge]
+}
+
+type _RoleEdge {
+  node: _Role!
+}
+
 type Mutation {
   """User class"""
   create_User(input: Create_UserInput): Create_UserPayload
@@ -355,6 +406,12 @@ type Mutation {
   update_Sessions(input: Update_SessionsInput): _SessionConnection!
   delete_Session(input: Delete_SessionInput): Delete_SessionPayload
   delete_Sessions(input: Delete_SessionsInput): _SessionConnection!
+  create_Role(input: Create_RoleInput): Create_RolePayload
+  create_Roles(input: Create_RolesInput): _RoleConnection!
+  update_Role(input: Update_RoleInput): Update_RolePayload
+  update_Roles(input: Update_RolesInput): _RoleConnection!
+  delete_Role(input: Delete_RoleInput): Delete_RolePayload
+  delete_Roles(input: Delete_RolesInput): _RoleConnection!
 }
 
 type Create_UserPayload {
@@ -388,6 +445,7 @@ input _UserUpdateFieldsInput {
   provider: AuthenticationProvider
   email: Email
   verifiedEmail: Boolean
+  role: _RolePointerInput
   createdAt: Date
   updatedAt: Date
 }
@@ -596,4 +654,54 @@ input Delete_SessionInput {
 
 input Delete_SessionsInput {
   where: _SessionWhereInput
+}
+
+type Create_RolePayload {
+  _role: _Role
+  clientMutationId: String
+}
+
+input Create_RoleInput {
+  fields: _RoleCreateFieldsInput
+}
+
+input Create_RolesInput {
+  fields: [_RoleCreateFieldsInput]!
+  offset: Int
+  limit: Int
+}
+
+type Update_RolePayload {
+  _role: _Role
+  clientMutationId: String
+}
+
+input Update_RoleInput {
+  id: ID
+  fields: _RoleUpdateFieldsInput
+}
+
+input _RoleUpdateFieldsInput {
+  name: String
+  users: _UserRelationInput
+}
+
+input Update_RolesInput {
+  fields: _RoleUpdateFieldsInput
+  where: _RoleWhereInput
+  offset: Int
+  limit: Int
+}
+
+type Delete_RolePayload {
+  _role: _Role
+  clientMutationId: String
+}
+
+input Delete_RoleInput {
+  id: ID
+}
+
+input Delete_RolesInput {
+  where: _RoleWhereInput
 }

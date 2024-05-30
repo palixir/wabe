@@ -58,13 +58,6 @@ export const setupTests = async () => {
 						phone: {
 							type: 'Phone',
 						},
-						email: {
-							type: 'Email',
-						},
-						role: {
-							type: 'Role',
-							defaultValue: 'Member',
-						},
 					},
 				},
 			],
@@ -72,15 +65,6 @@ export const setupTests = async () => {
 				{
 					name: 'Phone',
 					description: 'Phone scalar',
-				},
-			],
-			enums: [
-				{
-					name: 'Role',
-					values: {
-						Admin: 'Admin',
-						Member: 'Member',
-					},
 				},
 			],
 		},

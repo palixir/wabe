@@ -121,6 +121,74 @@ describe('GraphqlSchema', () => {
 		})
 	})
 
+	it('should have a custom enum as value in type', async () => {
+		const { client, wibeApp } = await createWibeApp({
+			class: [
+				{
+					name: 'TestClass',
+					fields: {
+						field1: {
+							// @ts-expect-error
+							type: 'CustomEnum',
+						},
+					},
+				},
+			],
+			enums: [
+				{
+					name: 'CustomEnum',
+					values: {
+						Value1: 'Value1',
+						Value2: 'Value2',
+					},
+				},
+			],
+		})
+
+		await client.request<any>(gql`
+			mutation createTestClass {
+				createTestClass(input: { fields: { field1: Value1 } }) {
+					testClass {
+						field1
+					}
+				}
+			}
+		`)
+
+		const res = await client.request<any>(gql`
+			query testClasses {
+				testClasses(where: { field1: { equalTo: "Value1" } }) {
+					edges {
+						node {
+							id
+							field1
+						}
+					}
+				}
+			}
+		`)
+
+		expect(res.testClasses.edges.length).toBe(1)
+		expect(res.testClasses.edges[0].node.field1).toBe('Value1')
+
+		const resNotEqual = await client.request<any>(gql`
+			query testClasses {
+				testClasses(where: { field1: { notEqualTo: "Value1" } }) {
+					edges {
+						node {
+							id
+							field1
+						}
+					}
+				}
+			}
+		`)
+
+		expect(resNotEqual.testClasses.edges.length).toBe(0)
+
+		await wibeApp.close()
+	})
+
 	it('should have id in WhereInput object', () => {
 		expect(
 			getTypeFromGraphQLSchema({
