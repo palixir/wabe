@@ -109,7 +109,7 @@ export type PermissionsOperations = 'create' | 'read' | 'update' | 'delete'
 export interface PermissionProperties {
 	requireAuthentication?: boolean
 	// TODO : Use RoleEnum instead of string
-	rolesAuthorization: Record<string, boolean>
+	rolesAuthorization?: Record<string, boolean>
 }
 
 export type Permissions = Partial<
@@ -177,10 +177,10 @@ export class Schema {
 		return {
 			name: '_Session',
 			fields: {
-				// TODO : Add pointer to user
-				userId: {
-					type: 'String',
+				user: {
+					type: 'Pointer',
 					required: true,
+					class: '_User',
 				},
 				accessToken: {
 					type: 'String',

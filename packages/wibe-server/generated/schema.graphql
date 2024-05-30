@@ -137,7 +137,7 @@ input PostRelationInput {
 
 type _Session {
   id: ID!
-  userId: String!
+  user: _User
   accessToken: String!
   accessTokenExpiresAt: Date!
   refreshToken: String
@@ -147,7 +147,7 @@ type _Session {
 }
 
 input _SessionInput {
-  userId: String!
+  user: _UserPointerInput
   accessToken: String!
   accessTokenExpiresAt: Date!
   refreshToken: String
@@ -163,7 +163,7 @@ input _SessionPointerInput {
 }
 
 input _SessionCreateFieldsInput {
-  userId: String
+  user: _UserPointerInput
   accessToken: String
   accessTokenExpiresAt: Date
   refreshToken: String
@@ -349,7 +349,7 @@ type _SessionEdge {
 
 input _SessionWhereInput {
   id: IdWhereInput
-  userId: StringWhereInput
+  user: _UserWhereInput
   accessToken: StringWhereInput
   accessTokenExpiresAt: DateWhereInput
   refreshToken: StringWhereInput
@@ -627,7 +627,7 @@ input Update_SessionInput {
 }
 
 input _SessionUpdateFieldsInput {
-  userId: String
+  user: _UserPointerInput
   accessToken: String
   accessTokenExpiresAt: Date
   refreshToken: String

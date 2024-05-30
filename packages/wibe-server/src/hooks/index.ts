@@ -13,9 +13,11 @@ export enum OperationType {
 	AfterInsert = 'afterInsert',
 	AfterUpdate = 'afterUpdate',
 	AfterDelete = 'afterDelete',
+	AfterRead = 'afterRead',
 	BeforeInsert = 'beforeInsert',
 	BeforeUpdate = 'beforeUpdate',
 	BeforeDelete = 'beforeDelete',
+	BeforeRead = 'beforeRead',
 }
 
 export type Hook<T extends keyof WibeSchemaTypes> = {
