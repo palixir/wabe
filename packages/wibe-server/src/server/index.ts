@@ -135,7 +135,9 @@ export class WibeApp {
 			WobeGraphqlYogaPlugin({
 				schema,
 				maskedErrors: false,
-				context: () => {
+				context: (obj) => {
+					console.log('tata')
+					console.log(obj)
 					return {
 						sessionId: 'fakeSessionId',
 						user: {
@@ -144,7 +146,7 @@ export class WibeApp {
 						},
 					}
 				},
-			}),
+			})
 		)
 
 		if (
@@ -152,8 +154,9 @@ export class WibeApp {
 			process.env.NODE_ENV !== 'test' &&
 			WibeApp.config.codegen
 		) {
-			const contentOfCodegenFile =
-				await Bun.file('generated/wibe.ts').text()
+			const contentOfCodegenFile = await Bun.file(
+				'generated/wibe.ts'
+			).text()
 
 			if (!contentOfCodegenFile.includes('WibeSchemaTypes'))
 				Bun.write(
@@ -162,7 +165,7 @@ export class WibeApp {
 						scalars: wibeSchema.schema.scalars,
 						enums: wibeSchema.schema.enums,
 						schemas: wibeSchema.schema.class,
-					})}`,
+					})}`
 				)
 			Bun.write('generated/schema.graphql', printSchema(schema))
 		}

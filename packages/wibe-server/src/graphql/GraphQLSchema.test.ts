@@ -615,13 +615,11 @@ describe('GraphqlSchema', () => {
 															fields: {
 																a: {
 																	type: 'Int',
-																	required:
-																		true,
+																	required: true,
 																},
 																b: {
 																	type: 'Int',
-																	required:
-																		true,
+																	required: true,
 																},
 															},
 														},

@@ -109,7 +109,10 @@ export type PermissionsOperations = 'create' | 'read' | 'update' | 'delete'
 export interface PermissionProperties {
 	requireAuthentication?: boolean
 	// TODO : Use RoleEnum instead of string
-	rolesAuthorization?: Record<string, boolean>
+	/**
+	 * An empty array means that none role is authorized (except root client)
+	 */
+	authorizedRoles: Array<string>
 }
 
 export type Permissions = Partial<
