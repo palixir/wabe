@@ -135,9 +135,23 @@ export class WibeApp {
 			WobeGraphqlYogaPlugin({
 				schema,
 				maskedErrors: false,
-				context: (obj) => {
-					console.log('tata')
-					console.log(obj)
+				context: async (request: Request) => {
+					// const headers = request.headers
+
+					// const accessToken = headers.get('Wibe-Access-Token')
+
+					// const users = await WibeApp.databaseController.getObjects({
+					// 	className: '_Session',
+					// 	where: {
+					// 		accessToken: { equalTo: accessToken },
+					// 	},
+					// 	limit: 1,
+					// 	// @ts-expect-error
+					// 	fields: ['id', 'user.id', 'user.email'],
+					// })
+
+					// const user = users[0]
+
 					return {
 						sessionId: 'fakeSessionId',
 						user: {

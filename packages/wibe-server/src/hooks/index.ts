@@ -30,7 +30,7 @@ export type Hook<T extends keyof WibeSchemaTypes> = {
 	priority: number
 	callback: (
 		hookObject: HookObject<T>,
-		context: Context,
+		context: Context
 	) => Promise<void> | void
 }
 
@@ -47,9 +47,10 @@ export const _findHooksByPriority = async <T extends keyof WibeSchemaTypes>({
 		(hook) =>
 			hook.operationType === operationType &&
 			hook.priority === priority &&
-			(className === hook.className || !hook.className),
+			(className === hook.className || !hook.className)
 	) || []
 
+// TODO: If context is empty we need to early return
 export const findHooksAndExecute = async ({
 	className,
 	operationType,
@@ -90,13 +91,13 @@ export const findHooksAndExecute = async ({
 
 				await Promise.all(
 					hooksToCompute.map((hook) =>
-						hook.callback(hookObject, context),
-					),
+						hook.callback(hookObject, context)
+					)
 				)
 			}, Promise.resolve())
 
 			return { index, data: hookObject.getObject() }
-		}),
+		})
 	)
 
 	return computedResult

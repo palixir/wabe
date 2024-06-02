@@ -1,10 +1,61 @@
 import jwt from 'jsonwebtoken'
 import { WibeApp } from '../server'
 import type { Context } from '../graphql/interface'
+import { _Session, _User } from '../../generated/wibe'
 
 export class Session {
 	private accessToken: string | undefined = undefined
 	private refreshToken: string | undefined = undefined
+
+	async meFromAccessToken(
+		accessToken: string,
+		refreshToken?: string
+	): Promise<{
+		user: _User
+		accessToken: string
+		refreshToken?: string
+	} | null> {
+		const sessions = await WibeApp.databaseController.getObjects({
+			className: '_Session',
+			where: {
+				accessToken: { equalTo: accessToken },
+			},
+			limit: 1,
+			fields: [
+				'id',
+				// @ts-expect-error
+				'user.id',
+				// @ts-expect-error
+				'user.email',
+				'refreshToken',
+				'refreshTokenExpiresAt',
+			],
+		})
+
+		const session = sessions[0]
+
+		const user = session?.user
+
+		if (!user) return null
+
+		if (!refreshToken) return { user, accessToken }
+
+		if (session.refreshToken !== refreshToken)
+			throw new Error('Invalid refresh token')
+
+		const { refreshToken: newRefreshToken, accessToken: newAccessToken } =
+			await this.refreshWithSessionObject(session, {
+				user,
+				sessionId: session.id,
+				isRoot: false,
+			})
+
+		return {
+			user,
+			accessToken: newAccessToken,
+			refreshToken: newRefreshToken,
+		}
+	}
 
 	async create(userId: string, context: Context) {
 		const fifteenMinutes = new Date(Date.now() + 1000 * 60 * 15)
@@ -16,7 +67,7 @@ export class Session {
 				iat: Date.now(),
 				exp: fifteenMinutes.getTime(),
 			},
-			import.meta.env.JWT_SECRET || 'dev',
+			import.meta.env.JWT_SECRET || 'dev'
 		)
 
 		this.refreshToken = jwt.sign(
@@ -25,7 +76,7 @@ export class Session {
 				iat: Date.now(),
 				exp: thirtyDays.getTime(),
 			},
-			import.meta.env.JWT_SECRET || 'dev',
+			import.meta.env.JWT_SECRET || 'dev'
 		)
 
 		const { id } = await WibeApp.databaseController.createObject({
@@ -36,7 +87,7 @@ export class Session {
 				accessTokenExpiresAt: fifteenMinutes,
 				refreshToken: this.refreshToken,
 				refreshTokenExpiresAt: thirtyDays,
-				userId,
+				user: userId,
 			},
 		})
 
@@ -64,7 +115,7 @@ export class Session {
 				iat: Date.now(),
 				exp: thirtyDays.getTime(),
 			},
-			import.meta.env.JWT_SECRET || 'dev',
+			import.meta.env.JWT_SECRET || 'dev'
 		)
 
 		WibeApp.databaseController.updateObject({
@@ -78,19 +129,11 @@ export class Session {
 		})
 	}
 
-	async refresh(sessionId: string, context: Context) {
-		const session = await WibeApp.databaseController.getObject({
-			className: '_Session',
-			id: sessionId,
-			fields: ['userId', 'refreshTokenExpiresAt'],
-		})
-
-		if (!session) throw new Error('Session not found')
-
+	async refreshWithSessionObject(session: _Session, context: Context) {
 		if (session.refreshTokenExpiresAt < new Date())
 			throw new Error('Refresh token has expired')
 
-		const userId = session.userId
+		const userId = session.user
 
 		const fifteenMinutes = new Date(Date.now() + 1000 * 60 * 15)
 
@@ -100,7 +143,50 @@ export class Session {
 				iat: Date.now(),
 				exp: fifteenMinutes.getTime(),
 			},
-			import.meta.env.JWT_SECRET as string,
+			import.meta.env.JWT_SECRET as string
+		)
+
+		await WibeApp.databaseController.updateObject({
+			className: '_Session',
+			context,
+			id: session.id,
+			data: {
+				accessToken: this.accessToken,
+				accessTokenExpiresAt: fifteenMinutes,
+			},
+		})
+
+		await this._rotateRefreshToken(context)
+
+		return {
+			accessToken: this.accessToken,
+			refreshToken: this.refreshToken,
+		}
+	}
+
+	async refresh(sessionId: string, context: Context) {
+		const session = await WibeApp.databaseController.getObject({
+			className: '_Session',
+			id: sessionId,
+			fields: ['user', 'refreshTokenExpiresAt'],
+		})
+
+		if (!session) throw new Error('Session not found')
+
+		if (session.refreshTokenExpiresAt < new Date())
+			throw new Error('Refresh token has expired')
+
+		const userId = session.user
+
+		const fifteenMinutes = new Date(Date.now() + 1000 * 60 * 15)
+
+		this.accessToken = jwt.sign(
+			{
+				userId,
+				iat: Date.now(),
+				exp: fifteenMinutes.getTime(),
+			},
+			import.meta.env.JWT_SECRET as string
 		)
 
 		await WibeApp.databaseController.updateObject({
