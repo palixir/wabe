@@ -93,7 +93,7 @@ describe('Permissions', () => {
 		}
 
 		expect(_checkPermissions(obj, context)).rejects.toThrow(
-			'Permission denied to read class TestClass'
+			'Permission denied to read class TestClass',
 		)
 	})
 
@@ -124,7 +124,7 @@ describe('Permissions', () => {
 		}
 
 		expect(_checkPermissions(obj, context)).rejects.toThrow(
-			'Permission denied to read class TestClass'
+			'Permission denied to read class TestClass',
 		)
 	})
 
@@ -180,18 +180,18 @@ describe('Permissions', () => {
 	it('should call _checkPermission on beforeRead', async () => {
 		const spyBeforeRead = spyOn(
 			permissions,
-			'defaultCheckPermissionOnRead'
+			'defaultCheckPermissionOnRead',
 		).mockResolvedValue()
 
 		permissions.defaultCheckPermissionOnRead(
 			{} as never,
-			{ sessionId: 'sessionId', user: { id: 'userId' } } as never
+			{ sessionId: 'sessionId', user: { id: 'userId' } } as never,
 		)
 
 		expect(spyBeforeRead).toHaveBeenCalledTimes(1)
 		expect(spyBeforeRead).toHaveBeenCalledWith(
 			{},
-			{ sessionId: 'sessionId', user: { id: 'userId' } }
+			{ sessionId: 'sessionId', user: { id: 'userId' } },
 		)
 
 		spyBeforeRead.mockRestore()
@@ -200,18 +200,18 @@ describe('Permissions', () => {
 	it('should call _checkPermission on beforeCreate', async () => {
 		const spyBeforeCreate = spyOn(
 			permissions,
-			'defaultCheckPermissionOnCreate'
+			'defaultCheckPermissionOnCreate',
 		).mockResolvedValue()
 
 		permissions.defaultCheckPermissionOnCreate(
 			{} as never,
-			{ sessionId: 'sessionId', user: { id: 'userId' } } as never
+			{ sessionId: 'sessionId', user: { id: 'userId' } } as never,
 		)
 
 		expect(spyBeforeCreate).toHaveBeenCalledTimes(1)
 		expect(spyBeforeCreate).toHaveBeenCalledWith(
 			{},
-			{ sessionId: 'sessionId', user: { id: 'userId' } }
+			{ sessionId: 'sessionId', user: { id: 'userId' } },
 		)
 
 		spyBeforeCreate.mockRestore()
@@ -220,18 +220,18 @@ describe('Permissions', () => {
 	it('should call _checkPermission on beforeUpdate', async () => {
 		const spyBeforeUpdate = spyOn(
 			permissions,
-			'defaultCheckPermissionOnUpdate'
+			'defaultCheckPermissionOnUpdate',
 		).mockResolvedValue()
 
 		permissions.defaultCheckPermissionOnUpdate(
 			{} as never,
-			{ sessionId: 'sessionId', user: { id: 'userId' } } as never
+			{ sessionId: 'sessionId', user: { id: 'userId' } } as never,
 		)
 
 		expect(spyBeforeUpdate).toHaveBeenCalledTimes(1)
 		expect(spyBeforeUpdate).toHaveBeenCalledWith(
 			{},
-			{ sessionId: 'sessionId', user: { id: 'userId' } }
+			{ sessionId: 'sessionId', user: { id: 'userId' } },
 		)
 
 		spyBeforeUpdate.mockRestore()
@@ -240,18 +240,18 @@ describe('Permissions', () => {
 	it('should call _checkPermission on beforeDelete', async () => {
 		const spyBeforeDelete = spyOn(
 			permissions,
-			'defaultCheckPermissionOnDelete'
+			'defaultCheckPermissionOnDelete',
 		).mockResolvedValue()
 
 		permissions.defaultCheckPermissionOnDelete(
 			{} as never,
-			{ sessionId: 'sessionId', user: { id: 'userId' } } as never
+			{ sessionId: 'sessionId', user: { id: 'userId' } } as never,
 		)
 
 		expect(spyBeforeDelete).toHaveBeenCalledTimes(1)
 		expect(spyBeforeDelete).toHaveBeenCalledWith(
 			{},
-			{ sessionId: 'sessionId', user: { id: 'userId' } }
+			{ sessionId: 'sessionId', user: { id: 'userId' } },
 		)
 
 		spyBeforeDelete.mockRestore()

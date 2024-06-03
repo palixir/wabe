@@ -16,7 +16,7 @@ describe('Session', () => {
 	const mockGetObject = mock(() => Promise.resolve({}) as any)
 	const mockGetObjects = mock(() => Promise.resolve([]) as any)
 	const mockCreateObject = mock(() =>
-		Promise.resolve({ id: 'userId' })
+		Promise.resolve({ id: 'userId' }),
 	) as any
 	const mockDeleteObject = mock(() => Promise.resolve()) as any
 	const mockUpdateObject = mock(() => Promise.resolve()) as any
@@ -49,7 +49,7 @@ describe('Session', () => {
 					email: 'userEmail',
 				},
 				refreshTokenExpiresAt: new Date(
-					Date.now() + 1000 * 60 * 60 * 24 * 30
+					Date.now() + 1000 * 60 * 60 * 24 * 30,
 				),
 			},
 		])
@@ -57,7 +57,7 @@ describe('Session', () => {
 		const session = new Session()
 
 		expect(
-			session.meFromAccessToken('accessToken', 'refreshToken')
+			session.meFromAccessToken('accessToken', 'refreshToken'),
 		).rejects.toThrow('Invalid refresh token')
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
@@ -84,7 +84,7 @@ describe('Session', () => {
 
 		const res = await session.meFromAccessToken(
 			'accessToken',
-			'refreshToken'
+			'refreshToken',
 		)
 
 		expect(res).toBeNull()
@@ -116,21 +116,21 @@ describe('Session', () => {
 					email: 'userEmail',
 				},
 				refreshTokenExpiresAt: new Date(
-					Date.now() + 1000 * 60 * 60 * 24 * 30
+					Date.now() + 1000 * 60 * 60 * 24 * 30,
 				),
 			},
 		])
 
 		const mockRefreshWithSessionObject = spyOn(
 			Session.prototype,
-			'refreshWithSessionObject'
+			'refreshWithSessionObject',
 		).mockResolvedValue({} as never)
 
 		const session = new Session()
 
 		const res = await session.meFromAccessToken(
 			'accessToken',
-			'refreshToken'
+			'refreshToken',
 		)
 
 		const user = res?.user
@@ -166,7 +166,7 @@ describe('Session', () => {
 				sessionId: 'sessionId',
 				user: expect.any(Object),
 				isRoot: false,
-			}
+			},
 		)
 
 		mockRefreshWithSessionObject.mockRestore()
@@ -180,7 +180,7 @@ describe('Session', () => {
 
 		const { accessToken, refreshToken } = await session.create(
 			'userId',
-			{} as any
+			{} as any,
 		)
 
 		expect(accessToken).not.toBeUndefined()
@@ -194,14 +194,14 @@ describe('Session', () => {
 		expect(decodedAccessToken).not.toBeNull()
 		expect(decodedAccessToken.userId).toEqual('userId')
 		expect(decodedAccessToken.exp).toBeGreaterThanOrEqual(
-			fifteenMinutes.getTime()
+			fifteenMinutes.getTime(),
 		)
 		expect(decodedAccessToken.iat).toBeGreaterThanOrEqual(Date.now() - 500) // minus 500ms to avoid flaky
 
 		expect(decodedRefreshToken).not.toBeNull()
 		expect(decodedRefreshToken.userId).toEqual('userId')
 		expect(decodedRefreshToken.exp).toBeGreaterThanOrEqual(
-			thirtyDays.getTime()
+			thirtyDays.getTime(),
 		)
 		expect(decodedRefreshToken.iat).toBeGreaterThanOrEqual(Date.now() - 500) // minus 500ms to avoid flaky
 
@@ -241,7 +241,7 @@ describe('Session', () => {
 		const session = new Session()
 
 		expect(session.refresh('sessionId', {} as any)).rejects.toThrow(
-			'Refresh token has expired'
+			'Refresh token has expired',
 		)
 	})
 
@@ -281,7 +281,7 @@ describe('Session', () => {
 		const mockSign = spyOn(jwt, 'sign').mockReturnValue('token' as any)
 		const spyRotateRefreshToken = spyOn(
 			Session.prototype,
-			'_rotateRefreshToken'
+			'_rotateRefreshToken',
 		)
 
 		const session = new Session()

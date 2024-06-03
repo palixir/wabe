@@ -11,7 +11,7 @@ export const _getPermissionPropertiesOfAClass = async ({
 	operation: PermissionsOperations
 }) => {
 	const wibeClass = WibeApp.config.schema.class.find(
-		(c) => c.name === className
+		(c) => c.name === className,
 	)
 
 	if (!wibeClass) throw new Error(`Class ${className} not found in schema`)
@@ -23,7 +23,7 @@ export const _getPermissionPropertiesOfAClass = async ({
 
 export const _checkPermissions = async (
 	object: HookObject<any>,
-	context: Context
+	context: Context,
 ) => {
 	if (context.isRoot) return
 
@@ -63,20 +63,20 @@ export const _checkPermissions = async (
 
 export const defaultCheckPermissionOnRead = async (
 	object: HookObject<any>,
-	context: Context
+	context: Context,
 ) => _checkPermissions(object, context)
 
 export const defaultCheckPermissionOnCreate = async (
 	object: HookObject<any>,
-	context: Context
+	context: Context,
 ) => _checkPermissions(object, context)
 
 export const defaultCheckPermissionOnUpdate = async (
 	object: HookObject<any>,
-	context: Context
+	context: Context,
 ) => _checkPermissions(object, context)
 
 export const defaultCheckPermissionOnDelete = async (
 	object: HookObject<any>,
-	context: Context
+	context: Context,
 ) => _checkPermissions(object, context)

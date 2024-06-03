@@ -66,7 +66,7 @@ describe('Server', () => {
 
 		// _Session class is a default class so if it's present the schema is updated
 		const isSessionClassExist = WibeApp.config.schema.class.find(
-			(schemaClass) => schemaClass.name === '_Session'
+			(schemaClass) => schemaClass.name === '_Session',
 		)
 
 		expect(isSessionClassExist).not.toBeUndefined()

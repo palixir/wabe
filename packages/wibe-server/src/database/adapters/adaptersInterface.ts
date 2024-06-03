@@ -34,7 +34,7 @@ export interface AdapterOptions {
 // TODO: It could be cool if fields type supports something like user.id, user.email
 export interface GetObjectOptions<
 	T extends keyof WibeSchemaTypes,
-	K extends keyof WibeSchemaTypes[T]
+	K extends keyof WibeSchemaTypes[T],
 > {
 	className: T
 	id: string
@@ -43,7 +43,7 @@ export interface GetObjectOptions<
 
 export interface GetObjectsOptions<
 	T extends keyof WibeSchemaTypes,
-	K extends keyof WibeSchemaTypes[T]
+	K extends keyof WibeSchemaTypes[T],
 > {
 	className: T
 	where?: WhereType<T>
@@ -55,7 +55,7 @@ export interface GetObjectsOptions<
 export interface CreateObjectOptions<
 	T extends keyof WibeSchemaTypes,
 	K extends keyof WibeSchemaTypes[T],
-	W extends keyof WibeSchemaTypes[T]
+	W extends keyof WibeSchemaTypes[T],
 > {
 	className: T
 	data: Record<W, any>
@@ -65,7 +65,7 @@ export interface CreateObjectOptions<
 export interface CreateObjectsOptions<
 	T extends keyof WibeSchemaTypes,
 	K extends keyof WibeSchemaTypes[T],
-	W extends keyof WibeSchemaTypes[T]
+	W extends keyof WibeSchemaTypes[T],
 > {
 	className: T
 	data: Array<Record<W, any>>
@@ -78,7 +78,7 @@ export interface CreateObjectsOptions<
 export interface UpdateObjectOptions<
 	T extends keyof WibeSchemaTypes,
 	K extends keyof WibeSchemaTypes[T],
-	W extends keyof WibeSchemaTypes[T]
+	W extends keyof WibeSchemaTypes[T],
 > {
 	className: T
 	id: string
@@ -90,7 +90,7 @@ export interface UpdateObjectOptions<
 export interface UpdateObjectsOptions<
 	T extends keyof WibeSchemaTypes,
 	K extends keyof WibeSchemaTypes[T],
-	W extends keyof WibeSchemaTypes[T]
+	W extends keyof WibeSchemaTypes[T],
 > {
 	className: T
 	where: WhereType<T>
@@ -103,7 +103,7 @@ export interface UpdateObjectsOptions<
 
 export interface DeleteObjectOptions<
 	T extends keyof WibeSchemaTypes,
-	K extends keyof WibeSchemaTypes[T]
+	K extends keyof WibeSchemaTypes[T],
 > {
 	className: T
 	id: string
@@ -113,7 +113,7 @@ export interface DeleteObjectOptions<
 
 export interface DeleteObjectsOptions<
 	T extends keyof WibeSchemaTypes,
-	K extends keyof WibeSchemaTypes[T]
+	K extends keyof WibeSchemaTypes[T],
 > {
 	className: T
 	where: WhereType<T>
@@ -131,57 +131,55 @@ export interface DatabaseAdapter {
 
 	getObject<
 		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T]
+		K extends keyof WibeSchemaTypes[T],
 	>(
-		params: GetObjectOptions<T, K>
+		params: GetObjectOptions<T, K>,
 	): Promise<Pick<WibeSchemaTypes[T], K> | null>
 	getObjects<
 		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T]
-	>(
-		params: GetObjectsOptions<T, K>
-	): Promise<Pick<WibeSchemaTypes[T], K>[]>
+		K extends keyof WibeSchemaTypes[T],
+	>(params: GetObjectsOptions<T, K>): Promise<Pick<WibeSchemaTypes[T], K>[]>
 
 	createObject<
 		T extends keyof WibeSchemaTypes,
 		K extends keyof WibeSchemaTypes[T],
-		W extends keyof WibeSchemaTypes[T]
+		W extends keyof WibeSchemaTypes[T],
 	>(
-		params: CreateObjectOptions<T, K, W>
+		params: CreateObjectOptions<T, K, W>,
 	): Promise<Pick<WibeSchemaTypes[T], K>>
 	createObjects<
 		T extends keyof WibeSchemaTypes,
 		K extends keyof WibeSchemaTypes[T],
-		W extends keyof WibeSchemaTypes[T]
+		W extends keyof WibeSchemaTypes[T],
 	>(
-		params: CreateObjectsOptions<T, K, W>
+		params: CreateObjectsOptions<T, K, W>,
 	): Promise<Pick<WibeSchemaTypes[T], K>[]>
 
 	updateObject<
 		T extends keyof WibeSchemaTypes,
 		K extends keyof WibeSchemaTypes[T],
-		W extends keyof WibeSchemaTypes[T]
+		W extends keyof WibeSchemaTypes[T],
 	>(
-		params: UpdateObjectOptions<T, K, W>
+		params: UpdateObjectOptions<T, K, W>,
 	): Promise<Pick<WibeSchemaTypes[T], K>>
 	updateObjects<
 		T extends keyof WibeSchemaTypes,
 		K extends keyof WibeSchemaTypes[T],
-		W extends keyof WibeSchemaTypes[T]
+		W extends keyof WibeSchemaTypes[T],
 	>(
-		params: UpdateObjectsOptions<T, K, W>
+		params: UpdateObjectsOptions<T, K, W>,
 	): Promise<Pick<WibeSchemaTypes[T], K>[]>
 
 	deleteObject<
 		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T]
+		K extends keyof WibeSchemaTypes[T],
 	>(
-		params: DeleteObjectOptions<T, K>
+		params: DeleteObjectOptions<T, K>,
 	): Promise<Pick<WibeSchemaTypes[T], K> | null>
 	deleteObjects<
 		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T]
+		K extends keyof WibeSchemaTypes[T],
 	>(
-		params: DeleteObjectsOptions<T, K>
+		params: DeleteObjectsOptions<T, K>,
 	): Promise<Pick<WibeSchemaTypes[T], K>[]>
 }

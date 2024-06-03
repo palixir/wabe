@@ -9,7 +9,7 @@ export class Session {
 
 	async meFromAccessToken(
 		accessToken: string,
-		refreshToken?: string
+		refreshToken?: string,
 	): Promise<{
 		user: _User
 		accessToken: string
@@ -67,7 +67,7 @@ export class Session {
 				iat: Date.now(),
 				exp: fifteenMinutes.getTime(),
 			},
-			import.meta.env.JWT_SECRET || 'dev'
+			import.meta.env.JWT_SECRET || 'dev',
 		)
 
 		this.refreshToken = jwt.sign(
@@ -76,7 +76,7 @@ export class Session {
 				iat: Date.now(),
 				exp: thirtyDays.getTime(),
 			},
-			import.meta.env.JWT_SECRET || 'dev'
+			import.meta.env.JWT_SECRET || 'dev',
 		)
 
 		const { id } = await WibeApp.databaseController.createObject({
@@ -115,7 +115,7 @@ export class Session {
 				iat: Date.now(),
 				exp: thirtyDays.getTime(),
 			},
-			import.meta.env.JWT_SECRET || 'dev'
+			import.meta.env.JWT_SECRET || 'dev',
 		)
 
 		WibeApp.databaseController.updateObject({
@@ -143,7 +143,7 @@ export class Session {
 				iat: Date.now(),
 				exp: fifteenMinutes.getTime(),
 			},
-			import.meta.env.JWT_SECRET as string
+			import.meta.env.JWT_SECRET as string,
 		)
 
 		await WibeApp.databaseController.updateObject({
@@ -186,7 +186,7 @@ export class Session {
 				iat: Date.now(),
 				exp: fifteenMinutes.getTime(),
 			},
-			import.meta.env.JWT_SECRET as string
+			import.meta.env.JWT_SECRET as string,
 		)
 
 		await WibeApp.databaseController.updateObject({
