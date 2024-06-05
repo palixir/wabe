@@ -39,55 +39,15 @@ describe('Session', () => {
 		mockUpdateObject.mockClear()
 	})
 
-	it('should throw an error if the refreshToken is not equal to database refreshToken', async () => {
-		mockGetObjects.mockResolvedValue([
-			{
-				id: 'sessionId',
-				refreshToken: 'anotherRefreshToken',
-				user: {
-					id: 'userId',
-					email: 'userEmail',
-				},
-				refreshTokenExpiresAt: new Date(
-					Date.now() + 1000 * 60 * 60 * 24 * 30,
-				),
-			},
-		])
-
-		const session = new Session()
-
-		expect(
-			session.meFromAccessToken('accessToken', 'refreshToken'),
-		).rejects.toThrow('Invalid refresh token')
-
-		expect(mockGetObjects).toHaveBeenCalledTimes(1)
-		expect(mockGetObjects).toHaveBeenCalledWith({
-			className: '_Session',
-			where: {
-				accessToken: { equalTo: 'accessToken' },
-			},
-			limit: 1,
-			fields: [
-				'id',
-				'user.id',
-				'user.email',
-				'refreshToken',
-				'refreshTokenExpiresAt',
-			],
-		})
-	})
-
 	it('should returns null if no user found', async () => {
 		mockGetObjects.mockResolvedValue([])
 
 		const session = new Session()
 
-		const res = await session.meFromAccessToken(
-			'accessToken',
-			'refreshToken',
-		)
+		const res = await session.meFromAccessToken('accessToken')
 
-		expect(res).toBeNull()
+		expect(res.user).toBeNull()
+		expect(res.sessionId).toBeNull()
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
 		expect(mockGetObjects).toHaveBeenCalledWith({
@@ -121,19 +81,10 @@ describe('Session', () => {
 			},
 		])
 
-		const mockRefreshWithSessionObject = spyOn(
-			Session.prototype,
-			'refreshWithSessionObject',
-		).mockResolvedValue({} as never)
-
 		const session = new Session()
 
-		const res = await session.meFromAccessToken(
-			'accessToken',
-			'refreshToken',
-		)
-
-		const user = res?.user
+		const { sessionId, user } =
+			await session.meFromAccessToken('accessToken')
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
 		expect(mockGetObjects).toHaveBeenCalledWith({
@@ -151,25 +102,9 @@ describe('Session', () => {
 			],
 		})
 
+		expect(sessionId).toEqual('sessionId')
 		expect(user?.id).toEqual('userId')
 		expect(user?.email).toEqual('userEmail')
-
-		expect(mockRefreshWithSessionObject).toHaveBeenCalledTimes(1)
-		expect(mockRefreshWithSessionObject).toHaveBeenCalledWith(
-			{
-				id: 'sessionId',
-				refreshToken: 'refreshToken',
-				user: expect.any(Object),
-				refreshTokenExpiresAt: expect.any(Date),
-			},
-			{
-				sessionId: 'sessionId',
-				user: expect.any(Object),
-				isRoot: false,
-			},
-		)
-
-		mockRefreshWithSessionObject.mockRestore()
 	})
 
 	it('should create a new session', async () => {

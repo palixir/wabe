@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken'
 import { WibeApp } from '../server'
 import type { Context } from '../graphql/interface'
-import { _Session, _User } from '../../generated/wibe'
+import type { _Session, _User } from '../../generated/wibe'
 
 export class Session {
 	private accessToken: string | undefined = undefined
@@ -9,12 +9,7 @@ export class Session {
 
 	async meFromAccessToken(
 		accessToken: string,
-		refreshToken?: string,
-	): Promise<{
-		user: _User
-		accessToken: string
-		refreshToken?: string
-	} | null> {
+	): Promise<{ sessionId: string; user: _User | null }> {
 		const sessions = await WibeApp.databaseController.getObjects({
 			className: '_Session',
 			where: {
@@ -36,25 +31,7 @@ export class Session {
 
 		const user = session?.user
 
-		if (!user) return null
-
-		if (!refreshToken) return { user, accessToken }
-
-		if (session.refreshToken !== refreshToken)
-			throw new Error('Invalid refresh token')
-
-		const { refreshToken: newRefreshToken, accessToken: newAccessToken } =
-			await this.refreshWithSessionObject(session, {
-				user,
-				sessionId: session.id,
-				isRoot: false,
-			})
-
-		return {
-			user,
-			accessToken: newAccessToken,
-			refreshToken: newRefreshToken,
-		}
+		return { sessionId: session?.id ?? null, user: user ?? null }
 	}
 
 	async create(userId: string, context: Context) {

@@ -11,6 +11,7 @@ import { generateWibeFile } from './generateWibeFile'
 import { defaultAuthenticationMethods } from '../authentication/defaultAuthentication'
 import { Wobe } from 'wobe'
 import { WobeGraphqlYogaPlugin } from 'wobe-graphql-yoga'
+import { Session } from '../authentication/Session'
 
 interface WibeConfig {
 	port: number
@@ -135,29 +136,20 @@ export class WibeApp {
 			WobeGraphqlYogaPlugin({
 				schema,
 				maskedErrors: false,
-				context: async (request: Request) => {
-					// const headers = request.headers
+				context: async ({ request }) => {
+					const headers = request.headers
 
-					// const accessToken = headers.get('Wibe-Access-Token')
+					const accessToken = headers.get('Wibe-Access-Token')
 
-					// const users = await WibeApp.databaseController.getObjects({
-					// 	className: '_Session',
-					// 	where: {
-					// 		accessToken: { equalTo: accessToken },
-					// 	},
-					// 	limit: 1,
-					// 	// @ts-expect-error
-					// 	fields: ['id', 'user.id', 'user.email'],
-					// })
+					const session = new Session()
 
-					// const user = users[0]
+					const user = accessToken
+						? session.meFromAccessToken(accessToken)
+						: null
 
 					return {
 						sessionId: 'fakeSessionId',
-						user: {
-							id: 'fakeId',
-							email: 'fakeEmail',
-						},
+						user,
 					}
 				},
 			}),
