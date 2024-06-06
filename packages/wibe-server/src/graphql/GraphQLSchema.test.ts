@@ -195,7 +195,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'TestClassWhereInput',
-			}).input,
+			}).input
 		).toEqual({
 			id: 'IdWhereInput',
 			AND: '[TestClassWhereInput]',
@@ -210,7 +210,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'FifthClass',
-			}).input,
+			}).input
 		).toEqual({
 			id: 'ID!',
 			relation: 'SixthClassConnection',
@@ -223,7 +223,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'TestClassRelationInput',
-			}).input,
+			}).input
 		).toEqual({
 			add: '[ID!]',
 			remove: '[ID!]',
@@ -237,7 +237,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'FifthClassInput',
-			}).input,
+			}).input
 		).toEqual({
 			relation: 'SixthClassRelationInput',
 		})
@@ -249,7 +249,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'ThirdClass',
-			}).input,
+			}).input
 		).toEqual({
 			id: 'ID!',
 			pointer: 'FourthClass',
@@ -260,7 +260,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'FourthClass',
-			}).input,
+			}).input
 		).toEqual({
 			id: 'ID!',
 			pointer: 'ThirdClass',
@@ -271,7 +271,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'ThirdClassInput',
-			}).input,
+			}).input
 		).toEqual({
 			pointer: 'FourthClassPointerInput',
 		})
@@ -281,7 +281,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'FourthClassInput',
-			}).input,
+			}).input
 		).toEqual({
 			pointer: 'ThirdClassPointerInput',
 		})
@@ -291,7 +291,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'ThirdClassPointerInput',
-			}).input,
+			}).input
 		).toEqual({
 			link: 'ID',
 			createAndLink: 'ThirdClassCreateFieldsInput',
@@ -302,7 +302,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'FourthClassPointerInput',
-			}).input,
+			}).input
 		).toEqual({
 			link: 'ID',
 			createAndLink: 'FourthClassCreateFieldsInput',
@@ -315,7 +315,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'TestClassPointerInput',
-			}).input,
+			}).input
 		).toEqual({
 			link: 'ID',
 			createAndLink: 'TestClassCreateFieldsInput',
@@ -328,7 +328,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'SecondClass',
-			}),
+			})
 		).toEqual({
 			input: {
 				id: 'ID!',
@@ -343,7 +343,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'SecondClassCreateFieldsInput',
-			}),
+			})
 		).toEqual({
 			input: {
 				pointer: 'TestClassPointerInput',
@@ -357,7 +357,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'SecondClassUpdateFieldsInput',
-			}),
+			})
 		).toEqual({
 			input: {
 				pointer: 'TestClassPointerInput',
@@ -371,7 +371,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'TestClassCreateFieldsInput',
-			}).input,
+			}).input
 		).toEqual({
 			field1: 'String',
 		})
@@ -383,7 +383,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'TestClassUpdateFieldsInput',
-			}).input,
+			}).input
 		).toEqual({
 			field1: 'String',
 		})
@@ -395,7 +395,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'CreateTestClassPayload',
-			}).input,
+			}).input
 		).toEqual({
 			clientMutationId: 'String',
 			testClass: 'TestClass',
@@ -408,7 +408,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Query',
 				name: 'testClass',
-			}),
+			})
 		).toEqual({
 			input: {
 				id: 'ID',
@@ -423,7 +423,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Query',
 				name: 'testClasses',
-			}),
+			})
 		).toEqual({
 			input: {
 				limit: 'Int',
@@ -440,7 +440,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Mutation',
 				name: 'createTestClass',
-			}),
+			})
 		).toEqual({
 			input: { input: 'CreateTestClassInput' },
 			output: 'CreateTestClassPayload',
@@ -453,7 +453,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Mutation',
 				name: 'createTestClasses',
-			}),
+			})
 		).toEqual({
 			input: { input: 'CreateTestClassesInput' },
 			output: 'TestClassConnection!',
@@ -466,7 +466,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Mutation',
 				name: 'updateTestClass',
-			}),
+			})
 		).toEqual({
 			input: { input: 'UpdateTestClassInput' },
 			output: 'UpdateTestClassPayload',
@@ -479,7 +479,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Mutation',
 				name: 'updateTestClasses',
-			}),
+			})
 		).toEqual({
 			input: { input: 'UpdateTestClassesInput' },
 			output: 'TestClassConnection!',
@@ -492,7 +492,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Mutation',
 				name: 'deleteTestClass',
-			}),
+			})
 		).toEqual({
 			input: { input: 'DeleteTestClassInput' },
 			output: 'DeleteTestClassPayload',
@@ -505,7 +505,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Mutation',
 				name: 'deleteTestClasses',
-			}),
+			})
 		).toEqual({
 			input: { input: 'DeleteTestClassesInput' },
 			output: 'TestClassConnection!',
@@ -518,7 +518,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Mutation',
 				name: 'customMutation',
-			}),
+			})
 		).toEqual({
 			input: {},
 			output: 'Boolean',
@@ -531,7 +531,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Query',
 				name: 'customQuery',
-			}),
+			})
 		).toEqual({
 			input: {},
 			output: 'Boolean',
@@ -583,7 +583,7 @@ describe('GraphqlSchema', () => {
 					customMutation(input: { sum: { a: 1, b: 2 } })
 				}
 			`,
-			{},
+			{}
 		)
 
 		expect(request.customMutation).toBe(3)
@@ -615,11 +615,13 @@ describe('GraphqlSchema', () => {
 															fields: {
 																a: {
 																	type: 'Int',
-																	required: true,
+																	required:
+																		true,
 																},
 																b: {
 																	type: 'Int',
-																	required: true,
+																	required:
+																		true,
 																},
 															},
 														},
@@ -647,7 +649,7 @@ describe('GraphqlSchema', () => {
 					)
 				}
 			`,
-			{},
+			{}
 		)
 
 		expect(request.customMutation).toBe(3)
@@ -705,7 +707,7 @@ describe('GraphqlSchema', () => {
 					a: 1,
 					b: 2,
 				},
-			},
+			}
 		)
 
 		expect(request.customMutation).toBe(3)
@@ -723,7 +725,7 @@ describe('GraphqlSchema', () => {
 						b: 2,
 					},
 				},
-			},
+			}
 		)
 
 		expect(request2.customMutation).toBe(3)
@@ -768,7 +770,7 @@ describe('GraphqlSchema', () => {
 					}
 				}
 			`,
-			{},
+			{}
 		)
 
 		const request = await client.request<any>(
@@ -792,7 +794,7 @@ describe('GraphqlSchema', () => {
 				field1WhereInput: {
 					field2: { equalTo: 'test' },
 				},
-			},
+			}
 		)
 
 		expect(request.testClasses.edges[0].node.field1.field2).toBe('test')
@@ -848,7 +850,7 @@ describe('GraphqlSchema', () => {
 					}
 				}
 			`,
-			{},
+			{}
 		)
 
 		expect(res.createTestClass2.testClass2.name).toBe('name')
@@ -898,7 +900,7 @@ describe('GraphqlSchema', () => {
 					}
 				}
 			`,
-			{},
+			{}
 		)
 
 		const res = await client.request<any>(
@@ -923,7 +925,7 @@ describe('GraphqlSchema', () => {
 						}
 					}
 				`,
-			{},
+			{}
 		)
 
 		expect(res.createTestClass2.testClass2.name).toBe('name')
@@ -985,11 +987,235 @@ describe('GraphqlSchema', () => {
 					}
 				}
 			`,
-			{},
+			{}
 		)
 
 		expect(res.createTestClass2s.edges[0].node.name).toBe('name')
 		expect(res.createTestClass2s.edges[0].node.field2.field1).toBe('field1')
+
+		await wibeApp.close()
+	})
+
+	it('should filter an object (on query) with pointer field', async () => {
+		const { client, wibeApp } = await createWibeApp({
+			class: [
+				{
+					name: 'TestClass',
+					fields: {
+						field1: {
+							type: 'String',
+						},
+					},
+				},
+				{
+					name: 'TestClass2',
+					fields: {
+						name: {
+							type: 'String',
+						},
+						field2: {
+							type: 'Pointer',
+							// @ts-expect-error
+							class: 'TestClass',
+						},
+					},
+				},
+			],
+		})
+
+		const res = await client.request<any>(
+			gql`
+				mutation createTestClass {
+					createTestClass2(
+						input: {
+							fields: {
+								name: "name"
+								field2: { createAndLink: { field1: "field1" } }
+							}
+						}
+					) {
+						testClass2 {
+							name
+							field2 {
+								field1
+							}
+						}
+					}
+				}
+			`,
+			{}
+		)
+
+		expect(res.createTestClass2.testClass2.name).toBe('name')
+		expect(res.createTestClass2.testClass2.field2.field1).toBe('field1')
+
+		const queryRes = await client.request<any>(gql`
+			query testClass2s {
+				testClass2s(
+					where: { field2: { field1: { equalTo: "field1" } } }
+				) {
+					edges {
+						node {
+							name
+						}
+					}
+				}
+			}
+		`)
+
+		expect(queryRes.testClass2s.edges.length).toBe(1)
+		expect(queryRes.testClass2s.edges[0].node.name).toBe('name')
+
+		await wibeApp.close()
+	})
+
+	it('should filter an object (on updates) with pointer field', async () => {
+		const { client, wibeApp } = await createWibeApp({
+			class: [
+				{
+					name: 'TestClass',
+					fields: {
+						field1: {
+							type: 'String',
+						},
+					},
+				},
+				{
+					name: 'TestClass2',
+					fields: {
+						name: {
+							type: 'String',
+						},
+						field2: {
+							type: 'Pointer',
+							// @ts-expect-error
+							class: 'TestClass',
+						},
+					},
+				},
+			],
+		})
+
+		const res = await client.request<any>(
+			gql`
+				mutation createTestClass {
+					createTestClass2(
+						input: {
+							fields: {
+								name: "name"
+								field2: { createAndLink: { field1: "field1" } }
+							}
+						}
+					) {
+						testClass2 {
+							name
+							field2 {
+								field1
+							}
+						}
+					}
+				}
+			`,
+			{}
+		)
+
+		expect(res.createTestClass2.testClass2.name).toBe('name')
+		expect(res.createTestClass2.testClass2.field2.field1).toBe('field1')
+
+		const updateRes = await client.request<any>(gql`
+			mutation updateTestClass2s {
+				updateTestClass2s(
+					input: {
+						fields: { name: "name2" }
+						where: { field2: { field1: { equalTo: "field1" } } }
+					}
+				) {
+					edges {
+						node {
+							name
+						}
+					}
+				}
+			}
+		`)
+
+		expect(updateRes.updateTestClass2s.edges.length).toBe(1)
+		expect(updateRes.updateTestClass2s.edges[0].node.name).toBe('name2')
+
+		await wibeApp.close()
+	})
+
+	it('should filter an object (on deletes) with pointer field', async () => {
+		const { client, wibeApp } = await createWibeApp({
+			class: [
+				{
+					name: 'TestClass',
+					fields: {
+						field1: {
+							type: 'String',
+						},
+					},
+				},
+				{
+					name: 'TestClass2',
+					fields: {
+						name: {
+							type: 'String',
+						},
+						field2: {
+							type: 'Pointer',
+							// @ts-expect-error
+							class: 'TestClass',
+						},
+					},
+				},
+			],
+		})
+
+		const res = await client.request<any>(
+			gql`
+				mutation createTestClass {
+					createTestClass2(
+						input: {
+							fields: {
+								name: "name"
+								field2: { createAndLink: { field1: "field1" } }
+							}
+						}
+					) {
+						testClass2 {
+							name
+							field2 {
+								field1
+							}
+						}
+					}
+				}
+			`,
+			{}
+		)
+
+		expect(res.createTestClass2.testClass2.name).toBe('name')
+		expect(res.createTestClass2.testClass2.field2.field1).toBe('field1')
+
+		const deleteRes = await client.request<any>(gql`
+			mutation deleteTestClass2s {
+				deleteTestClass2s(
+					input: {
+						where: { field2: { field1: { equalTo: "field1" } } }
+					}
+				) {
+					edges {
+						node {
+							name
+						}
+					}
+				}
+			}
+		`)
+
+		expect(deleteRes.deleteTestClass2s.edges.length).toBe(1)
+		expect(deleteRes.deleteTestClass2s.edges[0].node.name).toBe('name')
 
 		await wibeApp.close()
 	})
@@ -1042,7 +1268,7 @@ describe('GraphqlSchema', () => {
 					}
 				}
 			`,
-			{},
+			{}
 		)
 
 		expect(res.createTestClass2.testClass2.name).toBe('name')
@@ -1072,7 +1298,7 @@ describe('GraphqlSchema', () => {
 
 		expect(resAfterUpdate.updateTestClass2.testClass2.name).toBe('name')
 		expect(resAfterUpdate.updateTestClass2.testClass2.field2.field1).toBe(
-			'field1AfterUpdate',
+			'field1AfterUpdate'
 		)
 
 		await wibeApp.close()
@@ -1119,7 +1345,7 @@ describe('GraphqlSchema', () => {
 					}
 				}
 			`,
-			{},
+			{}
 		)
 
 		const res = await client.request<any>(
@@ -1133,7 +1359,7 @@ describe('GraphqlSchema', () => {
 					}
 				}
 			`,
-			{},
+			{}
 		)
 
 		const resAfterUpdate = await client.request<any>(
@@ -1154,12 +1380,12 @@ describe('GraphqlSchema', () => {
 					}
 				}
 			`,
-			{},
+			{}
 		)
 
 		expect(resAfterUpdate.updateTestClass2.testClass2.name).toBe('name')
 		expect(resAfterUpdate.updateTestClass2.testClass2.field2.field1).toBe(
-			'field1',
+			'field1'
 		)
 
 		await wibeApp.close()
@@ -1209,7 +1435,7 @@ describe('GraphqlSchema', () => {
 					}
 				}
 			`,
-			{},
+			{}
 		)
 
 		const resAfterUpdate = await client.request<any>(
@@ -1238,12 +1464,12 @@ describe('GraphqlSchema', () => {
 					}
 				}
 			`,
-			{},
+			{}
 		)
 
 		expect(resAfterUpdate.updateTestClass2s.edges[0].node.name).toBe('name')
 		expect(
-			resAfterUpdate.updateTestClass2s.edges[0].node.field2.field1,
+			resAfterUpdate.updateTestClass2s.edges[0].node.field2.field1
 		).toBe('field1UpdateMultiple')
 
 		await wibeApp.close()
@@ -1297,7 +1523,7 @@ describe('GraphqlSchema', () => {
 					}
 				}
 			`,
-			{},
+			{}
 		)
 
 		expect(res.createTestClass2.testClass2.name).toBe('name')
@@ -1318,7 +1544,7 @@ describe('GraphqlSchema', () => {
 
 		expect(resAfterDelete.deleteTestClass2.testClass2.name).toBe('name')
 		expect(resAfterDelete.deleteTestClass2.testClass2.field2.field1).toBe(
-			'field1',
+			'field1'
 		)
 
 		await wibeApp.close()
@@ -1377,7 +1603,7 @@ describe('GraphqlSchema', () => {
 
 		expect(res.createTestClass2.testClass2.name).toBe('name')
 		expect(
-			res.createTestClass2.testClass2.field2.edges[0].node.field1,
+			res.createTestClass2.testClass2.field2.edges[0].node.field1
 		).toBe('field1')
 
 		await wibeApp.close()
@@ -1446,7 +1672,7 @@ describe('GraphqlSchema', () => {
 
 		expect(resAfterAdd.createTestClass2.testClass2.name).toBe('name')
 		expect(
-			resAfterAdd.createTestClass2.testClass2.field2.edges[0].node.field1,
+			resAfterAdd.createTestClass2.testClass2.field2.edges[0].node.field1
 		).toBe('field1')
 
 		await wibeApp.close()
@@ -1509,7 +1735,7 @@ describe('GraphqlSchema', () => {
 
 		expect(res.createTestClass2s.edges[0].node.name).toBe('name')
 		expect(
-			res.createTestClass2s.edges[0].node.field2.edges[0].node.field1,
+			res.createTestClass2s.edges[0].node.field2.edges[0].node.field1
 		).toBe('field1')
 
 		await wibeApp.close()
@@ -1583,7 +1809,7 @@ describe('GraphqlSchema', () => {
 		expect(resAfterAdd.createTestClass2s.edges[0].node.name).toBe('name')
 		expect(
 			resAfterAdd.createTestClass2s.edges[0].node.field2.edges[0].node
-				.field1,
+				.field1
 		).toBe('field1')
 
 		await wibeApp.close()
@@ -1655,7 +1881,7 @@ describe('GraphqlSchema', () => {
 		expect(resAfterUpdate.updateTestClass2.testClass2.name).toBe('name')
 		expect(
 			resAfterUpdate.updateTestClass2.testClass2.field2.edges[0].node
-				.field1,
+				.field1
 		).toBe('field1')
 
 		await wibeApp.close()
@@ -1737,7 +1963,7 @@ describe('GraphqlSchema', () => {
 		expect(resAfterUpdate.updateTestClass2.testClass2.name).toBe('name')
 		expect(
 			resAfterUpdate.updateTestClass2.testClass2.field2.edges[0].node
-				.field1,
+				.field1
 		).toBe('field1')
 
 		await wibeApp.close()
@@ -1823,7 +2049,7 @@ describe('GraphqlSchema', () => {
 
 		expect(resAfterUpdate.updateTestClass2.testClass2.name).toBe('name')
 		expect(
-			resAfterUpdate.updateTestClass2.testClass2.field2.edges.length,
+			resAfterUpdate.updateTestClass2.testClass2.field2.edges.length
 		).toEqual(0)
 
 		await wibeApp.close()
@@ -1897,7 +2123,7 @@ describe('GraphqlSchema', () => {
 		expect(resAfterUpdate.updateTestClass2s.edges[0].node.name).toBe('name')
 		expect(
 			resAfterUpdate.updateTestClass2s.edges[0].node.field2.edges[0].node
-				.field1,
+				.field1
 		).toBe('field1')
 
 		await wibeApp.close()
@@ -1981,7 +2207,7 @@ describe('GraphqlSchema', () => {
 		expect(resAfterUpdate.updateTestClass2s.edges[0].node.name).toBe('name')
 		expect(
 			resAfterUpdate.updateTestClass2s.edges[0].node.field2.edges[0].node
-				.field1,
+				.field1
 		).toBe('field1')
 
 		await wibeApp.close()
@@ -2069,7 +2295,95 @@ describe('GraphqlSchema', () => {
 
 		expect(resAfterUpdate.updateTestClass2s.edges[0].node.name).toBe('name')
 		expect(
-			resAfterUpdate.updateTestClass2s.edges[0].node.field2.edges.length,
+			resAfterUpdate.updateTestClass2s.edges[0].node.field2.edges.length
+		).toBe(0)
+
+		await wibeApp.close()
+	})
+
+	it('should remove an object on a relation field (on updateMany)', async () => {
+		const { client, wibeApp } = await createWibeApp({
+			class: [
+				{
+					name: 'TestClass',
+					fields: {
+						field1: {
+							type: 'String',
+						},
+					},
+				},
+				{
+					name: 'TestClass2',
+					fields: {
+						name: {
+							type: 'String',
+						},
+						field2: {
+							type: 'Relation',
+							// @ts-expect-error
+							class: 'TestClass',
+						},
+					},
+				},
+			],
+		})
+
+		const resAfterAdd = await client.request<any>(gql`
+			mutation createTestClass2 {
+				createTestClass2(
+					input: {
+						fields: {
+							name: "name"
+							field2: { createAndAdd: [{ field1: "field1" }] }
+						}
+					}
+				) {
+					testClass2 {
+						id
+						name
+						field2 {
+							edges {
+								node {
+									id
+									field1
+								}
+							}
+						}
+					}
+				}
+			}
+		`)
+
+		const resAfterUpdate = await client.request<any>(gql`
+			mutation updateTestClass2s {
+				updateTestClass2s(
+					input: {
+						where: {id: {equalTo: "${resAfterAdd.createTestClass2.testClass2.id}"}}
+						fields: {
+							field2: { remove: ["${resAfterAdd.createTestClass2.testClass2.field2.edges[0].node.id}"] }
+						}
+					}
+				) {
+					edges {
+						node {
+							id
+							name
+							field2 {
+								edges {
+									node {
+										field1
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		`)
+
+		expect(resAfterUpdate.updateTestClass2s.edges[0].node.name).toBe('name')
+		expect(
+			resAfterUpdate.updateTestClass2s.edges[0].node.field2.edges.length
 		).toBe(0)
 
 		await wibeApp.close()

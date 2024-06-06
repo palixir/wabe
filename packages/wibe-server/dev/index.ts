@@ -48,7 +48,12 @@ const run = async () => {
 				{
 					name: '_User',
 					description: 'User class',
-					fields: {},
+					fields: {
+						post: {
+							type: 'Pointer',
+							class: 'Post',
+						},
+					},
 					resolvers: {
 						queries: {
 							helloWorld: {

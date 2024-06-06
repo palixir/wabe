@@ -38,6 +38,9 @@ describe('DatabaseController', () => {
 					{
 						name: 'TestClass',
 						fields: {
+							fieldX: {
+								type: 'String',
+							},
 							pointerToAnotherClass: {
 								type: 'Pointer',
 								// @ts-expect-error
@@ -94,6 +97,105 @@ describe('DatabaseController', () => {
 		mockGetObjects.mockClear()
 	})
 
+	it("should get where object on complex structure (AND or OR) when try to get object from pointer's class", async () => {
+		mockGetObjects.mockResolvedValueOnce([
+			{ id: 'anotherClassId' },
+			{ id: 'anotherClassId2' },
+		] as never)
+
+		const databaseController = new DatabaseController(mockAdapter() as any)
+
+		const res =
+			await databaseController._getWhereObjectWithPointerOrRelation(
+				// @ts-expect-error
+				'TestClass',
+				{
+					AND: [
+						{
+							pointerToAnotherClass: {
+								field1: { equalTo: 'value' },
+							},
+						},
+						{
+							fieldX: { equalTo: 'value' },
+						},
+					],
+				}
+			)
+
+		expect(res).toEqual({
+			AND: [
+				{
+					// @ts-expect-error
+					pointerToAnotherClass: {
+						in: ['anotherClassId', 'anotherClassId2'],
+					},
+				},
+				{
+					// @ts-expect-error
+					fieldX: { equalTo: 'value' },
+				},
+			],
+		})
+	})
+
+	it("should get where object when try to get object from pointer's class", async () => {
+		mockGetObjects.mockResolvedValueOnce([
+			{ id: 'anotherClassId' },
+			{ id: 'anotherClassId2' },
+		] as never)
+
+		const databaseController = new DatabaseController(mockAdapter() as any)
+
+		const res =
+			await databaseController._getWhereObjectWithPointerOrRelation(
+				// @ts-expect-error
+				'TestClass',
+				{
+					pointerToAnotherClass: { field1: { equalTo: 'value' } },
+				}
+			)
+
+		expect(res).toEqual({
+			// @ts-expect-error
+			pointerToAnotherClass: {
+				in: ['anotherClassId', 'anotherClassId2'],
+			},
+		})
+	})
+
+	it('should get the object with pointer data', async () => {
+		mockGetObjects.mockResolvedValueOnce([
+			{ id: 'anotherClassId' },
+			{ id: 'anotherClassId2' },
+		] as never)
+
+		mockGetObjects.mockResolvedValueOnce([
+			{ id: 'anotherClassId' },
+			{ id: 'anotherClassId2' },
+		] as never)
+
+		const databaseController = new DatabaseController(mockAdapter() as any)
+
+		await databaseController.getObjects({
+			// @ts-expect-error
+			className: 'TestClass',
+			where: {
+				// @ts-expect-error
+				pointerToAnotherClass: { field1: { equalTo: 'value' } },
+			},
+			fields: ['id'],
+		})
+
+		// One time for the call above and one to get all objects of the pointer class
+		expect(mockGetObjects).toHaveBeenCalledTimes(2)
+		expect(mockGetObjects).toHaveBeenNthCalledWith(1, {
+			className: 'AnotherClass',
+			where: { field1: { equalTo: 'value' } },
+			fields: ['id'],
+		})
+	})
+
 	it('should return id on pointer type if no sub field specified', async () => {
 		mockGetObject.mockResolvedValueOnce({
 			id: '123',
@@ -126,8 +228,8 @@ describe('DatabaseController', () => {
 			databaseController._isRelationField(
 				// @ts-expect-error
 				'AnotherClass4',
-				'AnotherClass3',
-			),
+				'AnotherClass3'
+			)
 		).toBe(true)
 	})
 
@@ -137,8 +239,8 @@ describe('DatabaseController', () => {
 		expect(
 			databaseController._isRelationField(
 				'AnotherClass3' as any,
-				'AnotherClass4',
-			),
+				'AnotherClass4'
+			)
 		).toBe(false)
 	})
 
@@ -275,7 +377,7 @@ describe('DatabaseController', () => {
 					pointerClass: 'AnotherClass',
 				},
 			},
-			'TestClass',
+			'TestClass'
 		)
 
 		expect(mockGetObject).toHaveBeenCalledTimes(1)
@@ -292,8 +394,8 @@ describe('DatabaseController', () => {
 		expect(
 			databaseController._isPointerField(
 				'testClass' as any,
-				'anotherClass',
-			),
+				'anotherClass'
+			)
 		).toBe(true)
 	})
 
@@ -303,8 +405,8 @@ describe('DatabaseController', () => {
 		expect(
 			databaseController._isPointerField(
 				'anotherClass' as any,
-				'anotherClass2',
-			),
+				'anotherClass2'
+			)
 		).toBe(false)
 	})
 
@@ -314,8 +416,8 @@ describe('DatabaseController', () => {
 		expect(
 			databaseController._isPointerField(
 				'invalidClass' as any,
-				'anotherClass2',
-			),
+				'anotherClass2'
+			)
 		).toBe(false)
 	})
 
@@ -329,7 +431,7 @@ describe('DatabaseController', () => {
 		]
 
 		expect(
-			databaseController._getPointerObject('TestClass', fields),
+			databaseController._getPointerObject('TestClass', fields)
 		).toEqual({
 			pointers: {
 				pointerToAnotherClass: {
@@ -352,7 +454,7 @@ describe('DatabaseController', () => {
 		]
 
 		expect(
-			databaseController._getPointerObject('TestClass', fields),
+			databaseController._getPointerObject('TestClass', fields)
 		).toEqual({
 			pointers: {
 				pointerToAnotherClass: {

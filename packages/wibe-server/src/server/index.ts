@@ -152,7 +152,15 @@ export class WibeApp {
 						user,
 					}
 				},
-			}),
+				graphqlMiddleware: async (resolve, res) => {
+					const response = await resolve()
+
+					const accessToken =
+						res.request.headers.get('Wibe-Access-Token')
+
+					return response
+				},
+			})
 		)
 
 		if (
@@ -160,8 +168,9 @@ export class WibeApp {
 			process.env.NODE_ENV !== 'test' &&
 			WibeApp.config.codegen
 		) {
-			const contentOfCodegenFile =
-				await Bun.file('generated/wibe.ts').text()
+			const contentOfCodegenFile = await Bun.file(
+				'generated/wibe.ts'
+			).text()
 
 			if (!contentOfCodegenFile.includes('WibeSchemaTypes'))
 				Bun.write(
@@ -170,7 +179,7 @@ export class WibeApp {
 						scalars: wibeSchema.schema.scalars,
 						enums: wibeSchema.schema.enums,
 						schemas: wibeSchema.schema.class,
-					})}`,
+					})}`
 				)
 			Bun.write('generated/schema.graphql', printSchema(schema))
 		}

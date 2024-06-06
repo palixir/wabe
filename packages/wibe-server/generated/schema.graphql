@@ -17,6 +17,7 @@ enum SecondaryFactor {
 """User class"""
 type _User {
   id: ID!
+  post: Post
   authentication: _UserAuthentication
   provider: AuthenticationProvider
   email: Email
@@ -48,6 +49,7 @@ scalar Date
 
 """User class"""
 input _UserInput {
+  post: PostPointerInput
   authentication: _UserAuthenticationInput
   provider: AuthenticationProvider
   email: Email
@@ -79,6 +81,7 @@ input _UserPointerInput {
 
 """User class"""
 input _UserCreateFieldsInput {
+  post: PostPointerInput
   authentication: _UserAuthenticationCreateFieldsInput
   provider: AuthenticationProvider
   email: Email
@@ -236,6 +239,7 @@ type Query {
 """User class"""
 input _UserWhereInput {
   id: IdWhereInput
+  post: PostWhereInput
   authentication: _UserAuthenticationWhereInput
   provider: AnyWhereInput
   email: EmailWhereInput
@@ -248,6 +252,20 @@ input _UserWhereInput {
 }
 
 input IdWhereInput {
+  equalTo: String
+  notEqualTo: String
+  in: [String]
+  notIn: [String]
+}
+
+input PostWhereInput {
+  id: IdWhereInput
+  name: StringWhereInput
+  OR: [PostWhereInput]
+  AND: [PostWhereInput]
+}
+
+input StringWhereInput {
   equalTo: String
   notEqualTo: String
   in: [String]
@@ -273,13 +291,6 @@ input EmailWhereInput {
   notEqualTo: Email
   in: [Email]
   notIn: [Email]
-}
-
-input StringWhereInput {
-  equalTo: String
-  notEqualTo: String
-  in: [String]
-  notIn: [String]
 }
 
 input _UserAuthenticationOtpWhereInput {
@@ -330,13 +341,6 @@ type PostConnection {
 
 type PostEdge {
   node: Post!
-}
-
-input PostWhereInput {
-  id: IdWhereInput
-  name: StringWhereInput
-  OR: [PostWhereInput]
-  AND: [PostWhereInput]
 }
 
 type _SessionConnection {
@@ -441,6 +445,7 @@ input Update_UserInput {
 
 """User class"""
 input _UserUpdateFieldsInput {
+  post: PostPointerInput
   authentication: _UserAuthenticationUpdateFieldsInput
   provider: AuthenticationProvider
   email: Email

@@ -25,98 +25,91 @@ import { OperationType, findHooksAndExecute } from '../../hooks'
 import { WibeApp } from '../../..'
 
 export const buildMongoWhereQuery = <T extends keyof WibeSchemaTypes>(
-	where?: WhereType<T>,
+	where?: WhereType<T>
 ): Record<string, any> => {
 	if (!where) return {}
 
 	const objectKeys = Object.keys(where) as Array<keyof WhereType<T>>
 
-	return objectKeys.reduce(
-		(acc, key) => {
-			const value = where[key]
+	return objectKeys.reduce((acc, key) => {
+		const value = where[key]
 
-			const keyToWrite = key === 'id' ? '_id' : key
+		const keyToWrite = key === 'id' ? '_id' : key
 
-			if (value?.contains) acc[keyToWrite] = value.contains
-			if (value?.notContains) acc[keyToWrite] = { $ne: value.notContains }
-			if (value?.equalTo)
-				acc[keyToWrite] =
-					keyToWrite === '_id' && typeof value.equalTo === 'string'
-						? ObjectId.createFromHexString(value.equalTo)
-						: value.equalTo
-			if (value?.notEqualTo)
-				acc[keyToWrite] = {
-					$ne:
-						keyToWrite === '_id' &&
-						typeof value.notEqualTo === 'string'
-							? ObjectId.createFromHexString(value.notEqualTo)
-							: value.notEqualTo,
-				}
-
-			if (value?.greaterThan) acc[keyToWrite] = { $gt: value.greaterThan }
-			if (value?.greaterThanOrEqualTo)
-				acc[keyToWrite] = { $gte: value.greaterThanOrEqualTo }
-
-			if (value?.lessThan) acc[keyToWrite] = { $lt: value.lessThan }
-			if (value?.lessThanOrEqualTo)
-				acc[keyToWrite] = { $lte: value.lessThanOrEqualTo }
-
-			if (value?.in)
-				acc[keyToWrite] = {
-					$in:
-						keyToWrite === '_id'
-							? value.in
-									.filter(
-										(inValue) =>
-											typeof inValue === 'string',
-									)
-									.map((inValue) =>
-										ObjectId.createFromHexString(inValue),
-									)
-							: value.in,
-				}
-			if (value?.notIn)
-				acc[keyToWrite] = {
-					$nin:
-						keyToWrite === '_id'
-							? value.notIn
-									.filter(
-										(notInValue) =>
-											typeof notInValue === 'string',
-									)
-									.map((notInValue) =>
-										ObjectId.createFromHexString(
-											notInValue,
-										),
-									)
-							: value.notIn,
-				}
-
-			if (value && keyToWrite === 'OR') {
-				acc.$or = where.OR?.map((or) => buildMongoWhereQuery(or))
-				return acc
+		if (value?.contains) acc[keyToWrite] = value.contains
+		if (value?.notContains) acc[keyToWrite] = { $ne: value.notContains }
+		if (value?.equalTo)
+			acc[keyToWrite] =
+				keyToWrite === '_id' && typeof value.equalTo === 'string'
+					? ObjectId.createFromHexString(value.equalTo)
+					: value.equalTo
+		if (value?.notEqualTo)
+			acc[keyToWrite] = {
+				$ne:
+					keyToWrite === '_id' && typeof value.notEqualTo === 'string'
+						? ObjectId.createFromHexString(value.notEqualTo)
+						: value.notEqualTo,
 			}
 
-			if (value && keyToWrite === 'AND') {
-				acc.$and = where.AND?.map((and) => buildMongoWhereQuery(and))
-				return acc
+		if (value?.greaterThan) acc[keyToWrite] = { $gt: value.greaterThan }
+		if (value?.greaterThanOrEqualTo)
+			acc[keyToWrite] = { $gte: value.greaterThanOrEqualTo }
+
+		if (value?.lessThan) acc[keyToWrite] = { $lt: value.lessThan }
+		if (value?.lessThanOrEqualTo)
+			acc[keyToWrite] = { $lte: value.lessThanOrEqualTo }
+
+		if (value?.in)
+			acc[keyToWrite] = {
+				$in:
+					keyToWrite === '_id'
+						? value.in
+								.filter(
+									(inValue) => typeof inValue === 'string'
+								)
+								.map((inValue) =>
+									ObjectId.createFromHexString(inValue)
+								)
+						: value.in,
+			}
+		if (value?.notIn)
+			acc[keyToWrite] = {
+				$nin:
+					keyToWrite === '_id'
+						? value.notIn
+								.filter(
+									(notInValue) =>
+										typeof notInValue === 'string'
+								)
+								.map((notInValue) =>
+									ObjectId.createFromHexString(notInValue)
+								)
+						: value.notIn,
 			}
 
-			if (typeof value === 'object') {
-				const where = buildMongoWhereQuery(value as WhereType<T>)
-				const entries = Object.entries(where)
-
-				if (entries.length > 0)
-					return {
-						[`${keyToWrite.toString()}.${entries[0][0]}`]:
-							entries[0][1],
-					}
-			}
-
+		if (value && keyToWrite === 'OR') {
+			acc.$or = where.OR?.map((or) => buildMongoWhereQuery(or))
 			return acc
-		},
-		{} as Record<any, any>,
-	)
+		}
+
+		if (value && keyToWrite === 'AND') {
+			acc.$and = where.AND?.map((and) => buildMongoWhereQuery(and))
+			return acc
+		}
+
+		if (typeof value === 'object') {
+			const where = buildMongoWhereQuery(value as WhereType<T>)
+			const entries = Object.entries(where)
+
+			if (entries.length > 0)
+				return {
+					[`${keyToWrite.toString()}.${entries[0][0]}`]:
+						entries[0][1],
+				}
+		}
+
+		return acc
+	}, {} as Record<any, any>)
 }
 
 export class MongoAdapter implements DatabaseAdapter {
@@ -157,22 +150,19 @@ export class MongoAdapter implements DatabaseAdapter {
 
 	async getObject<
 		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T],
+		K extends keyof WibeSchemaTypes[T]
 	>(
-		params: GetObjectOptions<T, K>,
+		params: GetObjectOptions<T, K>
 	): Promise<Pick<WibeSchemaTypes[T], K> | null> {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 
 		const { className, id, fields } = params
 
-		const objectOfFieldsToGet = fields?.reduce(
-			(acc, prev) => {
-				acc[prev] = 1
-				return acc
-			},
-			{} as Record<any, number>,
-		)
+		const objectOfFieldsToGet = fields?.reduce((acc, prev) => {
+			acc[prev] = 1
+			return acc
+		}, {} as Record<any, number>)
 
 		const isIdInProjection =
 			// @ts-expect-error
@@ -187,7 +177,7 @@ export class MongoAdapter implements DatabaseAdapter {
 					fields && fields.length > 0
 						? { ...objectOfFieldsToGet, _id: isIdInProjection }
 						: {},
-			},
+			}
 		)
 
 		if (!res) return null
@@ -202,7 +192,7 @@ export class MongoAdapter implements DatabaseAdapter {
 
 	async getObjects<
 		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T],
+		K extends keyof WibeSchemaTypes[T]
 	>(params: GetObjectsOptions<T, K>): Promise<Pick<WibeSchemaTypes[T], K>[]> {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
@@ -211,14 +201,11 @@ export class MongoAdapter implements DatabaseAdapter {
 
 		const whereBuilded = buildMongoWhereQuery<T>(where)
 
-		const objectOfFieldsToGet = fields?.reduce(
-			(acc, prev) => {
-				acc[prev] = 1
+		const objectOfFieldsToGet = fields?.reduce((acc, prev) => {
+			acc[prev] = 1
 
-				return acc
-			},
-			{} as Record<any, number>,
-		)
+			return acc
+		}, {} as Record<any, number>)
 
 		const isIdInProjection =
 			// @ts-expect-error
@@ -232,7 +219,7 @@ export class MongoAdapter implements DatabaseAdapter {
 					fields && fields.length > 0
 						? {
 								...objectOfFieldsToGet,
-							}
+						  }
 						: {},
 			})
 			.limit(limit || 0)
@@ -252,9 +239,9 @@ export class MongoAdapter implements DatabaseAdapter {
 	async createObject<
 		T extends keyof WibeSchemaTypes,
 		K extends keyof WibeSchemaTypes[T],
-		W extends keyof WibeSchemaTypes[T],
+		W extends keyof WibeSchemaTypes[T]
 	>(
-		params: CreateObjectOptions<T, K, W>,
+		params: CreateObjectOptions<T, K, W>
 	): Promise<Pick<WibeSchemaTypes[T], K>> {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
@@ -274,9 +261,9 @@ export class MongoAdapter implements DatabaseAdapter {
 	async createObjects<
 		T extends keyof WibeSchemaTypes,
 		K extends keyof WibeSchemaTypes[T],
-		W extends keyof WibeSchemaTypes[T],
+		W extends keyof WibeSchemaTypes[T]
 	>(
-		params: CreateObjectsOptions<T, K, W>,
+		params: CreateObjectsOptions<T, K, W>
 	): Promise<Pick<WibeSchemaTypes[T], K>[]> {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
@@ -297,7 +284,7 @@ export class MongoAdapter implements DatabaseAdapter {
 		const orStatement = Object.entries(res.insertedIds).map(
 			([, value]) => ({
 				id: { equalTo: value },
-			}),
+			})
 		)
 
 		const allObjects = await WibeApp.databaseController.getObjects({
@@ -321,9 +308,9 @@ export class MongoAdapter implements DatabaseAdapter {
 	async updateObject<
 		T extends keyof WibeSchemaTypes,
 		K extends keyof WibeSchemaTypes[T],
-		W extends keyof WibeSchemaTypes[T],
+		W extends keyof WibeSchemaTypes[T]
 	>(
-		params: UpdateObjectOptions<T, K, W>,
+		params: UpdateObjectOptions<T, K, W>
 	): Promise<Pick<WibeSchemaTypes[T], K>> {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
@@ -344,9 +331,9 @@ export class MongoAdapter implements DatabaseAdapter {
 	async updateObjects<
 		T extends keyof WibeSchemaTypes,
 		K extends keyof WibeSchemaTypes[T],
-		W extends keyof WibeSchemaTypes[T],
+		W extends keyof WibeSchemaTypes[T]
 	>(
-		params: UpdateObjectsOptions<T, K, W>,
+		params: UpdateObjectsOptions<T, K, W>
 	): Promise<Pick<WibeSchemaTypes[T], K>[]> {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
@@ -372,7 +359,7 @@ export class MongoAdapter implements DatabaseAdapter {
 				fields: ['id'],
 				offset,
 				limit,
-			},
+			}
 		)
 
 		await collection.updateMany(whereBuilded, {
@@ -405,9 +392,9 @@ export class MongoAdapter implements DatabaseAdapter {
 
 	async deleteObject<
 		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T],
+		K extends keyof WibeSchemaTypes[T]
 	>(
-		params: DeleteObjectOptions<T, K>,
+		params: DeleteObjectOptions<T, K>
 	): Promise<Pick<WibeSchemaTypes[T], K> | null> {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
@@ -426,9 +413,9 @@ export class MongoAdapter implements DatabaseAdapter {
 
 	async deleteObjects<
 		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T],
+		K extends keyof WibeSchemaTypes[T]
 	>(
-		params: DeleteObjectsOptions<T, K>,
+		params: DeleteObjectsOptions<T, K>
 	): Promise<Pick<WibeSchemaTypes[T], K>[]> {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
@@ -446,7 +433,7 @@ export class MongoAdapter implements DatabaseAdapter {
 				fields,
 				limit,
 				offset,
-			},
+			}
 		)
 
 		await findHooksAndExecute({

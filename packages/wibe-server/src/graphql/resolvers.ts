@@ -16,7 +16,7 @@ const ignoredFields = ['edges', 'node']
 
 export const extractFieldsFromSetNode = (
 	selectionSet: SelectionSetNode,
-	className: string,
+	className: string
 ): Array<any> => {
 	if (className) ignoredFields.push(firstLetterInLowerCase(className))
 
@@ -34,7 +34,7 @@ export const extractFieldsFromSetNode = (
 				const res = extractFieldsFromSetNode(
 					//@ts-expect-error
 					selection.selectionSet,
-					className,
+					className
 				)
 
 				if (ignoredFields.indexOf(currentValue) === -1)
@@ -77,58 +77,55 @@ export const executeRelationOnFields = async ({
 }) => {
 	const entries = Object.entries(fields)
 
-	return entries.reduce(
-		async (acc, [fieldName, value]) => {
-			const newAcc = await acc
+	return entries.reduce(async (acc, [fieldName, value]) => {
+		const newAcc = await acc
 
-			if (typeof value === 'object' && value?.createAndLink) {
-				newAcc[fieldName] = await createAndLink({
-					createAndLink: value.createAndLink,
-					fieldName,
-					context,
-					className,
-				})
-			} else if (typeof value === 'object' && value?.link) {
-				newAcc[fieldName] = value.link
-			} else if (typeof value === 'object' && value?.createAndAdd) {
-				newAcc[fieldName] = await createAndAdd({
-					createAndAdd: value.createAndAdd,
-					fieldName,
-					context,
-					className,
-				})
-			} else if (typeof value === 'object' && value?.add) {
-				const addValue = await add({
-					add: value.add,
-					context,
-					fieldName,
-					typeOfExecution: typeOfExecution || 'create',
-					id,
-					className,
-					where,
-				})
+		if (typeof value === 'object' && value?.createAndLink) {
+			newAcc[fieldName] = await createAndLink({
+				createAndLink: value.createAndLink,
+				fieldName,
+				context,
+				className,
+			})
+		} else if (typeof value === 'object' && value?.link) {
+			newAcc[fieldName] = value.link
+		} else if (typeof value === 'object' && value?.createAndAdd) {
+			newAcc[fieldName] = await createAndAdd({
+				createAndAdd: value.createAndAdd,
+				fieldName,
+				context,
+				className,
+			})
+		} else if (typeof value === 'object' && value?.add) {
+			const addValue = await add({
+				add: value.add,
+				context,
+				fieldName,
+				typeOfExecution: typeOfExecution || 'create',
+				id,
+				className,
+				where,
+			})
 
-				if (addValue) newAcc[fieldName] = addValue
-			} else if (typeof value === 'object' && value?.remove) {
-				const removeValue = await remove({
-					remove: value.remove,
-					context,
-					fieldName,
-					typeOfExecution: typeOfExecution || 'create',
-					id,
-					className,
-					where,
-				})
+			if (addValue) newAcc[fieldName] = addValue
+		} else if (typeof value === 'object' && value?.remove) {
+			const removeValue = await remove({
+				remove: value.remove,
+				context,
+				fieldName,
+				typeOfExecution: typeOfExecution || 'create',
+				id,
+				className,
+				where,
+			})
 
-				if (removeValue) newAcc[fieldName] = removeValue
-			} else {
-				newAcc[fieldName] = value
-			}
+			if (removeValue) newAcc[fieldName] = removeValue
+		} else {
+			newAcc[fieldName] = value
+		}
 
-			return newAcc
-		},
-		Promise.resolve({}) as Promise<Record<string, any>>,
-	)
+		return newAcc
+	}, Promise.resolve({}) as Promise<Record<string, any>>)
 }
 
 export const queryForOneObject = (
@@ -136,7 +133,7 @@ export const queryForOneObject = (
 	{ id }: any,
 	__: any,
 	info: GraphQLResolveInfo,
-	className: keyof WibeSchemaTypes,
+	className: keyof WibeSchemaTypes
 ) => {
 	const fields = getFieldsFromInfo(info, className)
 
@@ -152,7 +149,7 @@ export const queryForMultipleObject = async (
 	{ where, offset, limit }: any,
 	__: any,
 	info: GraphQLResolveInfo,
-	className: keyof WibeSchemaTypes,
+	className: keyof WibeSchemaTypes
 ) => {
 	const fields = getFieldsFromInfo(info, className)
 
@@ -176,7 +173,7 @@ export const mutationToCreateObject = async (
 	args: any,
 	context: Context,
 	info: GraphQLResolveInfo,
-	className: keyof WibeSchemaTypes,
+	className: keyof WibeSchemaTypes
 ) => {
 	const fields = getFieldsFromInfo(info, className)
 
@@ -202,7 +199,7 @@ export const mutationToCreateMultipleObjects = async (
 	args: any,
 	context: Context,
 	info: GraphQLResolveInfo,
-	className: keyof WibeSchemaTypes,
+	className: keyof WibeSchemaTypes
 ) => {
 	const fields = getFieldsFromInfo(info, className)
 
@@ -214,8 +211,8 @@ export const mutationToCreateMultipleObjects = async (
 				className,
 				fields: inputField,
 				context,
-			}),
-		),
+			})
+		)
 	)
 
 	const objects = await WibeApp.databaseController.createObjects({
@@ -237,7 +234,7 @@ export const mutationToUpdateObject = async (
 	args: any,
 	context: Context,
 	info: GraphQLResolveInfo,
-	className: keyof WibeSchemaTypes,
+	className: keyof WibeSchemaTypes
 ) => {
 	const fields = getFieldsFromInfo(info, className)
 
@@ -266,7 +263,7 @@ export const mutationToUpdateMultipleObjects = async (
 	args: any,
 	context: Context,
 	info: GraphQLResolveInfo,
-	className: keyof WibeSchemaTypes,
+	className: keyof WibeSchemaTypes
 ) => {
 	const fields = getFieldsFromInfo(info, className)
 
@@ -298,7 +295,7 @@ export const mutationToDeleteObject = async (
 	args: any,
 	context: Context,
 	info: GraphQLResolveInfo,
-	className: keyof WibeSchemaTypes,
+	className: keyof WibeSchemaTypes
 ) => {
 	const fields = getFieldsFromInfo(info, className)
 
@@ -318,7 +315,7 @@ export const mutationToDeleteMultipleObjects = async (
 	args: any,
 	context: Context,
 	info: GraphQLResolveInfo,
-	className: keyof WibeSchemaTypes,
+	className: keyof WibeSchemaTypes
 ) => {
 	const fields = getFieldsFromInfo(info, className)
 
