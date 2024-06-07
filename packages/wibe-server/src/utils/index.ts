@@ -24,10 +24,26 @@ export const firstLetterInLowerCase = (str: string) => {
 
 export const getClassFromClassName = (className: string): ClassInterface => {
 	const classInSchema = WibeApp.config.schema.class.find(
-		(schemaClass) => schemaClass.name === className,
+		(schemaClass) => schemaClass.name === className
 	)
 
 	if (!classInSchema) throw new Error('Class not found in schema')
 
 	return classInSchema
+}
+
+// TODO: Put this in wobe
+export const getCookieInRequestHeaders = (
+	cookieName: string,
+	headers: Headers
+) => {
+	const cookies = headers.get('Cookie')
+
+	if (!cookies) return
+
+	const cookie = cookies.split(';').find((c) => c.includes(cookieName))
+
+	if (!cookie) return
+
+	return cookie.split('=')[1]
 }

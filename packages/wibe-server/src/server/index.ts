@@ -12,6 +12,7 @@ import { defaultAuthenticationMethods } from '../authentication/defaultAuthentic
 import { Wobe } from 'wobe'
 import { WobeGraphqlYogaPlugin } from 'wobe-graphql-yoga'
 import { Session } from '../authentication/Session'
+import { getCookieInRequestHeaders } from '../utils'
 
 interface WibeConfig {
 	port: number
@@ -141,22 +142,67 @@ export class WibeApp {
 
 					const accessToken = headers.get('Wibe-Access-Token')
 
+					if (!accessToken) return {}
+
 					const session = new Session()
 
-					const user = accessToken
-						? session.meFromAccessToken(accessToken)
-						: null
+					const { user, sessionId } = await session.meFromAccessToken(
+						accessToken
+					)
 
 					return {
-						sessionId: 'fakeSessionId',
+						sessionId,
 						user,
 					}
 				},
 				graphqlMiddleware: async (resolve, res) => {
 					const response = await resolve()
 
-					const accessToken =
-						res.request.headers.get('Wibe-Access-Token')
+					// TODO : Add tests for this
+					const accessToken = getCookieInRequestHeaders(
+						'accessToken',
+						res.request.headers
+					)
+
+					const refreshToken = getCookieInRequestHeaders(
+						'refreshToken',
+						res.request.headers
+					)
+
+					if (accessToken && refreshToken) {
+						const session = new Session()
+
+						const {
+							accessToken: newAccessToken,
+							refreshToken: newRefreshToken,
+						} = await session.refresh(
+							accessToken,
+							refreshToken,
+							{} as any
+						)
+
+						if (accessToken !== newAccessToken)
+							res.setCookie('accessToken', newAccessToken, {
+								httpOnly: true,
+								path: '/',
+								expires: new Date(
+									Date.now() +
+										session.getAccessTokenExpireIn()
+								),
+								secure: process.env.NODE_ENV === 'production',
+							})
+
+						if (refreshToken !== newRefreshToken)
+							res.setCookie('refreshToken', newRefreshToken, {
+								httpOnly: true,
+								path: '/',
+								expires: new Date(
+									Date.now() +
+										session.getRefreshTokenExpireIn()
+								),
+								secure: process.env.NODE_ENV === 'production',
+							})
+					}
 
 					return response
 				},

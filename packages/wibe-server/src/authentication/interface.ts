@@ -19,10 +19,10 @@ export type AuthenticationEventsOptions<T> = {
 
 export type ProviderInterface<T = any> = {
 	onSignIn: (
-		options: AuthenticationEventsOptions<T>,
+		options: AuthenticationEventsOptions<T>
 	) => Promise<{ user: Partial<_User> }>
 	onSignUp: (
-		options: AuthenticationEventsOptions<T>,
+		options: AuthenticationEventsOptions<T>
 	) => Promise<{ authenticationDataToSave: T }>
 }
 
@@ -33,7 +33,7 @@ export type SecondaryProviderInterface<T = any> = {
 
 export type CustomAuthenticationMethods<
 	K = ProviderInterface | SecondaryProviderInterface,
-	T = Record<string, TypeField>,
+	T = Record<string, TypeField>
 > = {
 	name: string
 	input: T
@@ -43,7 +43,19 @@ export type CustomAuthenticationMethods<
 
 export type RoleConfig = Array<string>
 
+export interface SessionConfig {
+	/**
+	 * The time in milliseconds that the access token will expire
+	 */
+	accessTokenExpiresIn?: number
+	/**
+	 * The time in milliseconds that the refresh token will expire
+	 */
+	refreshTokenExpiresIn?: number
+}
+
 export interface AuthenticationConfig {
+	session?: SessionConfig
 	roles?: RoleConfig
 	successRedirectPath?: string
 	failureRedirectPath?: string
@@ -63,7 +75,7 @@ export interface refreshTokenOptions {
 
 export interface Provider {
 	createTokenFromAuthorizationCode(
-		options: CreateTokenFromAuthorizationCodeOptions,
+		options: CreateTokenFromAuthorizationCodeOptions
 	): Promise<void>
 	refreshToken(options: refreshTokenOptions): Promise<void>
 }

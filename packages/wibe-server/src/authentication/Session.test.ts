@@ -16,7 +16,7 @@ describe('Session', () => {
 	const mockGetObject = mock(() => Promise.resolve({}) as any)
 	const mockGetObjects = mock(() => Promise.resolve([]) as any)
 	const mockCreateObject = mock(() =>
-		Promise.resolve({ id: 'userId' }),
+		Promise.resolve({ id: 'userId' })
 	) as any
 	const mockDeleteObject = mock(() => Promise.resolve()) as any
 	const mockUpdateObject = mock(() => Promise.resolve()) as any
@@ -76,15 +76,16 @@ describe('Session', () => {
 					email: 'userEmail',
 				},
 				refreshTokenExpiresAt: new Date(
-					Date.now() + 1000 * 60 * 60 * 24 * 30,
+					Date.now() + 1000 * 60 * 60 * 24 * 30
 				),
 			},
 		])
 
 		const session = new Session()
 
-		const { sessionId, user } =
-			await session.meFromAccessToken('accessToken')
+		const { sessionId, user } = await session.meFromAccessToken(
+			'accessToken'
+		)
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
 		expect(mockGetObjects).toHaveBeenCalledWith({
@@ -115,7 +116,7 @@ describe('Session', () => {
 
 		const { accessToken, refreshToken } = await session.create(
 			'userId',
-			{} as any,
+			{} as any
 		)
 
 		expect(accessToken).not.toBeUndefined()
@@ -129,14 +130,14 @@ describe('Session', () => {
 		expect(decodedAccessToken).not.toBeNull()
 		expect(decodedAccessToken.userId).toEqual('userId')
 		expect(decodedAccessToken.exp).toBeGreaterThanOrEqual(
-			fifteenMinutes.getTime(),
+			fifteenMinutes.getTime()
 		)
 		expect(decodedAccessToken.iat).toBeGreaterThanOrEqual(Date.now() - 500) // minus 500ms to avoid flaky
 
 		expect(decodedRefreshToken).not.toBeNull()
 		expect(decodedRefreshToken.userId).toEqual('userId')
 		expect(decodedRefreshToken.exp).toBeGreaterThanOrEqual(
-			thirtyDays.getTime(),
+			thirtyDays.getTime()
 		)
 		expect(decodedRefreshToken.iat).toBeGreaterThanOrEqual(Date.now() - 500) // minus 500ms to avoid flaky
 
@@ -167,106 +168,167 @@ describe('Session', () => {
 		})
 	})
 
-	it('should not refresh a session if the refresh token has expired', async () => {
-		mockGetObject.mockResolvedValue({
-			userId: 'userId',
-			refreshTokenExpiresAt: new Date(Date.now() - 1000),
-		})
-
-		const session = new Session()
-
-		expect(session.refresh('sessionId', {} as any)).rejects.toThrow(
-			'Refresh token has expired',
-		)
-	})
-
-	it('should rotate the refresh token', async () => {
-		const session = new Session()
-
-		const context = {
-			sessionId: 'sessionId',
-			user: {
-				id: 'userId',
+	it('should refresh a session', async () => {
+		mockGetObjects.mockResolvedValue([
+			{
+				id: 'sessionId',
+				refreshToken: 'refreshToken',
+				refreshTokenExpiresAt: new Date(
+					Date.now() + 1000 * 60 * 60 * 24 * 30
+				),
+				user: {
+					id: 'userId',
+					email: 'userEmail',
+				},
 			},
-			isRoot: false,
-		}
+		])
 
-		const mockSign = spyOn(jwt, 'sign').mockReturnValue('token' as any)
+		const session = new Session()
 
-		await session._rotateRefreshToken(context)
+		const { accessToken, refreshToken } = await session.refresh(
+			'accessToken',
+			'refreshToken',
+			{} as any
+		)
+
+		expect(accessToken).not.toBeUndefined()
+		expect(refreshToken).not.toBeUndefined()
+
+		expect(mockGetObjects).toHaveBeenCalledTimes(1)
+		expect(mockGetObjects).toHaveBeenCalledWith({
+			className: '_Session',
+			where: {
+				accessToken: { equalTo: 'accessToken' },
+			},
+			fields: ['id', 'user', 'refreshToken', 'refreshTokenExpiresAt'],
+		})
 
 		expect(mockUpdateObject).toHaveBeenCalledTimes(1)
 		expect(mockUpdateObject).toHaveBeenCalledWith({
 			className: '_Session',
-			context,
-			id: context.sessionId,
+			context: {},
+			id: 'sessionId',
 			data: {
-				refreshToken: 'token',
+				accessToken: expect.any(String),
+				accessTokenExpiresAt: expect.any(Date),
+				refreshToken: expect.any(String),
 				refreshTokenExpiresAt: expect.any(Date),
 			},
 		})
 
-		mockSign.mockRestore()
-	})
+		const accessTokenExpiresAt = mockUpdateObject.mock.calls[0][0].data
+			.accessTokenExpiresAt as Date
 
-	it('should rotate the refresh token after the session was refreshed', async () => {
-		mockGetObject.mockResolvedValue({
-			userId: 'userId',
-		})
-		const mockSign = spyOn(jwt, 'sign').mockReturnValue('token' as any)
-		const spyRotateRefreshToken = spyOn(
-			Session.prototype,
-			'_rotateRefreshToken',
+		const refreshTokenExpiresAt = mockUpdateObject.mock.calls[0][0].data
+			.refreshTokenExpiresAt as Date
+
+		// -1000 to avoid flaky
+		expect(accessTokenExpiresAt.getTime()).toBeGreaterThan(
+			Date.now() + 1000 * 60 * 15 - 1000
 		)
 
-		const session = new Session()
-
-		const { sessionId } = await session.create('userId', {
-			sessionId: 'sessionId',
-			user: { id: 'userId' },
-		} as any)
-
-		await session.refresh(sessionId, {
-			sessionId: 'sessionId',
-			user: { id: 'userId' },
-		} as any)
-
-		expect(spyRotateRefreshToken).toHaveBeenCalledTimes(1)
-
-		mockSign.mockRestore()
+		// -1000 to avoid flaky
+		expect(refreshTokenExpiresAt.getTime()).toBeGreaterThan(
+			Date.now() + 1000 * 60 * 60 * 24 * 30 - 1000
+		)
 	})
 
-	it('should refresh a session', async () => {
-		mockGetObject.mockResolvedValue({
-			userId: 'userId',
-		})
-		const mockSign = spyOn(jwt, 'sign').mockReturnValue('token' as any)
+	it('should should not refresh session if the access token does not already take 75% of time', async () => {
+		mockGetObjects.mockResolvedValue([
+			{
+				id: 'sessionId',
+				refreshToken: 'refreshToken',
+				refreshTokenExpiresAt: new Date(
+					Date.now() + 1000 * 60 * 60 * 24 * 1
+				),
+				user: {
+					id: 'userId',
+					email: 'userEmail',
+				},
+			},
+		])
 
 		const session = new Session()
 
-		const { sessionId } = await session.create('userId', {} as any)
+		const { accessToken, refreshToken } = await session.refresh(
+			'accessToken',
+			'refreshToken',
+			{} as any
+		)
 
-		await session.refresh(sessionId, {
-			sessionId: 'sessionId',
-			user: { id: 'userId' },
-		} as any)
+		expect(accessToken).toBe('accessToken')
+		expect(refreshToken).toBe('refreshToken')
 
-		expect(mockUpdateObject).toHaveBeenCalledTimes(2)
-		expect(mockUpdateObject).toHaveBeenNthCalledWith(1, {
+		expect(mockGetObjects).toHaveBeenCalledTimes(1)
+		expect(mockGetObjects).toHaveBeenCalledWith({
 			className: '_Session',
-			context: {
-				sessionId: 'sessionId',
-				user: {
-					id: 'userId',
-				},
+			where: {
+				accessToken: { equalTo: 'accessToken' },
 			},
-			id: sessionId,
-			data: {
-				accessToken: 'token',
-				accessTokenExpiresAt: expect.any(Date),
-			},
+			fields: ['id', 'user', 'refreshToken', 'refreshTokenExpiresAt'],
 		})
 
-		mockSign.mockRestore()
+		expect(mockUpdateObject).toHaveBeenCalledTimes(0)
+	})
+
+	it('should throw an error on refresh session if session not found', async () => {
+		mockGetObjects.mockResolvedValue([])
+
+		const session = new Session()
+
+		expect(
+			session.refresh('accessToken', 'refreshToken', {} as any)
+		).rejects.toThrow('Session not found')
+
+		expect(mockGetObjects).toHaveBeenCalledTimes(1)
+		expect(mockGetObjects).toHaveBeenCalledWith({
+			className: '_Session',
+			where: {
+				accessToken: { equalTo: 'accessToken' },
+			},
+			fields: ['id', 'user', 'refreshToken', 'refreshTokenExpiresAt'],
+		})
+	})
+
+	it("should throw an error on refresh session if session's refresh token is expired", async () => {
+		mockGetObjects.mockResolvedValue([
+			{
+				id: 'sessionId',
+				refreshToken: 'refreshToken',
+				refreshTokenExpiresAt: new Date(Date.now() - 1000),
+				user: {
+					id: 'userId',
+					email: 'userEmail',
+				},
+			},
+		])
+
+		const session = new Session()
+
+		expect(
+			session.refresh('accessToken', 'refreshToken', {} as any)
+		).rejects.toThrow('Refresh token expired')
+	})
+
+	it("should throw an error on refresh session if session's refresh token is not the same as the one in the database", async () => {
+		mockGetObjects.mockResolvedValue([
+			{
+				id: 'sessionId',
+				refreshToken: 'refreshToken',
+				refreshTokenExpiresAt: new Date(
+					Date.now() + 1000 * 60 * 60 * 24 * 30
+				),
+				user: {
+					id: 'userId',
+					email: 'userEmail',
+				},
+			},
+		])
+
+		const session = new Session()
+
+		expect(
+			session.refresh('accessToken', 'wrongRefreshToken', {} as any)
+		).rejects.toThrow('Invalid refresh token')
 	})
 })
