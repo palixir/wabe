@@ -11,12 +11,7 @@ import {
 	type GraphQLScalarType,
 	GraphQLString,
 } from 'graphql'
-import type {
-	ClassInterface,
-	SchemaFields,
-	WibeCustomTypes,
-	WibePrimaryTypes,
-} from '../schema'
+import type { ClassInterface, SchemaFields, WibePrimaryTypes } from '../schema'
 import {
 	AnyWhereInput,
 	ArrayWhereInput,
@@ -30,6 +25,7 @@ import {
 	StringWhereInput,
 	type AllObjects,
 } from '../graphql'
+import type { WibeSchemaEnums, WibeSchemaScalars } from '../../generated/wibe'
 
 type GraphqlObjectType =
 	| 'Object'
@@ -37,16 +33,6 @@ type GraphqlObjectType =
 	| 'CreateFieldsInput'
 	| 'UpdateFieldsInput'
 	| 'WhereInputObject'
-
-type WibeDefaultTypesWithoutObjectAndPointerAndRelation = Exclude<
-	WibePrimaryTypes,
-	'Object' | 'Pointer' | 'Relation'
->
-
-type WibeDefaultTypesWithoutArrayAndObjectAndPointerAndRelation = Exclude<
-	WibeDefaultTypesWithoutObjectAndPointerAndRelation,
-	'Array' | 'Pointer' | 'Relation'
->
 
 type ParseObjectOptions = {
 	required?: boolean
@@ -57,10 +43,7 @@ type ParseObjectOptions = {
 
 type ParseObjectCallback = (options: ParseObjectOptions) => any
 
-export const templateScalarType: Record<
-	WibeDefaultTypesWithoutArrayAndObjectAndPointerAndRelation,
-	GraphQLScalarType
-> = {
+export const templateScalarType: Record<WibePrimaryTypes, GraphQLScalarType> = {
 	String: GraphQLString,
 	Int: GraphQLInt,
 	Float: GraphQLFloat,
@@ -70,7 +53,7 @@ export const templateScalarType: Record<
 }
 
 export const templateWhereInput: Record<
-	WibeDefaultTypesWithoutObjectAndPointerAndRelation,
+	WibePrimaryTypes | 'Array',
 	GraphQLInputObjectType
 > = {
 	String: StringWhereInput,
@@ -86,29 +69,19 @@ export const templateWhereInput: Record<
 // Don't export this function
 // This function is only call by getGraphqlType
 const _getGraphqlTypeFromTemplate = ({
-	fieldValue,
-	arrayTypeValue,
+	type,
+	typeValue,
 }: {
-	fieldValue: WibePrimaryTypes | WibeCustomTypes
-	arrayTypeValue?: WibePrimaryTypes | WibeCustomTypes
+	type: WibePrimaryTypes | 'Array'
+	typeValue?: WibePrimaryTypes
 }) => {
-	if (fieldValue === 'Array') {
-		if (!arrayTypeValue) throw new Error('Type value not found')
-		if (arrayTypeValue === 'Array')
-			throw new Error('Array of array are not supported')
+	if (type === 'Array') {
+		if (!typeValue) throw new Error('Type value not found')
 
-		// We can cast because we exclude scalars and enums before in previous getGraphqlType
-		return new GraphQLList(
-			templateScalarType[
-				arrayTypeValue as WibeDefaultTypesWithoutArrayAndObjectAndPointerAndRelation
-			],
-		)
+		return new GraphQLList(templateScalarType[typeValue])
 	}
 
-	// We can cast because we exclude scalars and enums before in previous call getGraphqlType
-	return templateScalarType[
-		fieldValue as WibeDefaultTypesWithoutArrayAndObjectAndPointerAndRelation
-	]
+	return templateScalarType[type]
 }
 
 interface GraphqlParserFactoryOptions {
@@ -128,8 +101,8 @@ export type GraphqlParserFactory = (options: GraphqlParserFactoryOptions) => {
 	_parseWibeInputObject(options: ParseObjectOptions): any
 	_parseWibeUpdateInputObject(options: ParseObjectOptions): any
 	getGraphqlType(options: {
-		fieldValue: WibeCustomTypes | WibePrimaryTypes
-		arrayTypeValue?: WibeCustomTypes | WibePrimaryTypes
+		type: WibePrimaryTypes | 'Array'
+		typeValue?: WibePrimaryTypes
 		isWhereType?: boolean
 	}): any
 	getGraphqlFields(nameOfTheObject: string): any
@@ -183,21 +156,12 @@ export const GraphqlParser: GraphqlParserConstructor =
 						return acc
 					}
 
-					const computeGraphqlType = () => {
-						if (currentField.type === 'Array')
-							return getGraphqlType({
-								fieldvalue: currentField.type,
-								arrayTypeValue: currentField.typeValue,
-								isWhereType,
-							})
-
-						return getGraphqlType({
-							fieldValue: currentField.type,
-							isWhereType,
-						})
-					}
-
-					const graphqlType = computeGraphqlType()
+					const graphqlType = getGraphqlType({
+						...currentField,
+						// We never come here, complicated to good type this
+						type: currentField.type as WibePrimaryTypes,
+						isWhereType,
+					})
 
 					acc[key] = {
 						type:
@@ -378,39 +342,38 @@ export const GraphqlParser: GraphqlParserConstructor =
 
 		// Get the good graphql type for a field
 		const getGraphqlType = ({
-			fieldValue,
-			arrayTypeValue,
+			type,
+			typeValue,
 			isWhereType = false,
 		}: {
-			fieldValue: WibePrimaryTypes | WibeCustomTypes
-			arrayTypeValue?: WibePrimaryTypes | WibeCustomTypes
+			type:
+				| WibePrimaryTypes
+				| 'Array'
+				| WibeSchemaEnums
+				| WibeSchemaScalars
+			typeValue?: WibePrimaryTypes
 			isWhereType?: boolean
 		}) => {
-			const scalarExist = scalars.find(
-				(scalar) => scalar.name === fieldValue,
-			)
+			const scalarExist = scalars.find((scalar) => scalar.name === type)
 
-			const enumExist = enums.find((e) => e.name === fieldValue)
+			const enumExist = enums.find((e) => e.name === type)
 
 			if (isWhereType) {
-				if (!Object.keys(templateWhereInput).includes(fieldValue))
+				if (!Object.keys(templateWhereInput).includes(type))
 					return AnyWhereInput
 
-				return templateWhereInput[
-					fieldValue as WibeDefaultTypesWithoutObjectAndPointerAndRelation
-				]
+				return templateWhereInput[type as WibePrimaryTypes]
 			}
 
 			if (scalarExist) return scalarExist
 			if (enumExist) return enumExist
 
 			const graphqlType = _getGraphqlTypeFromTemplate({
-				fieldValue,
-				arrayTypeValue,
+				type: type as WibePrimaryTypes,
+				typeValue,
 			})
 
-			if (!graphqlType)
-				throw new Error(`${fieldValue} not exist in schema`)
+			if (!graphqlType) throw new Error(`${type} not exist in schema`)
 
 			return graphqlType
 		}
@@ -426,13 +389,18 @@ export const GraphqlParser: GraphqlParserConstructor =
 				(acc, key) => {
 					const currentField = schemaFields[key]
 
-					// TODO : Refactor with pointer (same code except for input object)
-					if (currentField.type === 'Relation') {
+					const isRelation = currentField.type === 'Relation'
+					const isPointer = currentField.type === 'Pointer'
+
+					if (isRelation || isPointer) {
+						const graphqlObject = allObjects[currentField.class]
+
 						switch (graphqlObjectType) {
 							case 'Object': {
 								acc[key] = {
-									type: allObjects[currentField.class]
-										.connectionObject,
+									type: isRelation
+										? graphqlObject.connectionObject
+										: graphqlObject.object,
 								}
 
 								break
@@ -441,40 +409,9 @@ export const GraphqlParser: GraphqlParserConstructor =
 							case 'CreateFieldsInput':
 							case 'InputObject': {
 								acc[key] = {
-									type: allObjects[currentField.class]
-										.relationInputObject,
-								}
-
-								break
-							}
-							case 'WhereInputObject': {
-								acc[key] = {
-									type: allObjects[currentField.class]
-										.whereInputObject,
-								}
-
-								break
-							}
-						}
-
-						return acc
-					}
-
-					if (currentField.type === 'Pointer') {
-						switch (graphqlObjectType) {
-							case 'Object': {
-								acc[key] = {
-									type: allObjects[currentField.class].object,
-								}
-
-								break
-							}
-							case 'UpdateFieldsInput':
-							case 'CreateFieldsInput':
-							case 'InputObject': {
-								acc[key] = {
-									type: allObjects[currentField.class]
-										.pointerInputObject,
+									type: isRelation
+										? graphqlObject.relationInputObject
+										: graphqlObject.pointerInputObject,
 								}
 
 								break
@@ -504,21 +441,10 @@ export const GraphqlParser: GraphqlParserConstructor =
 						return acc
 					}
 
-					const computeGraphqlType = () => {
-						if (currentField.type === 'Array')
-							return getGraphqlType({
-								fieldValue: currentField.type,
-								arrayTypeValue: currentField.typeValue,
-								isWhereType,
-							})
-
-						return getGraphqlType({
-							fieldValue: currentField.type,
-							isWhereType,
-						})
-					}
-
-					const graphqlType = computeGraphqlType()
+					const graphqlType = getGraphqlType({
+						...currentField,
+						isWhereType,
+					})
 
 					acc[key] = {
 						type:

@@ -39,7 +39,7 @@ type TypeFieldArray = {
 	required?: boolean
 	description?: string
 	defaultValue?: any[]
-	typeValue: WibeTypes
+	typeValue: WibePrimaryTypes
 }
 
 type TypeFieldObject = {

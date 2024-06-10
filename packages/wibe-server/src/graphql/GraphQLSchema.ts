@@ -499,7 +499,7 @@ export class GraphQLSchema {
 						currentMutation.type !== 'Array'
 					)
 						return graphqlParserWithInput.getGraphqlType({
-							fieldValue: currentMutation.type,
+							type: currentMutation.type,
 						})
 
 					if (currentMutation.type === 'Object') {
@@ -522,8 +522,7 @@ export class GraphQLSchema {
 					if (currentMutation.type === 'Array') {
 						const arrayGraphqlType =
 							graphqlParserWithInput.getGraphqlType({
-								fieldValue: currentMutation.type,
-								arrayTypeValue: currentMutation.typeValue,
+								...currentMutation,
 							})
 
 						return arrayGraphqlType
@@ -579,7 +578,7 @@ export class GraphQLSchema {
 				})
 
 				const graphqlType = graphqlParserWithInput.getGraphqlType({
-					fieldValue: currentQuery.type,
+					type: currentQuery.type,
 				}) as GraphQLOutputType
 
 				acc[currentKey] = {
