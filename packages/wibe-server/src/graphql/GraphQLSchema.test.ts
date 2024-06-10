@@ -121,7 +121,89 @@ describe('GraphqlSchema', () => {
 		})
 	})
 
-	it('should return an array in a mutation or query', async () => {
+	it('should return an array in a query', async () => {
+		const { client, wibeApp } = await createWibeApp({
+			class: [
+				{
+					name: 'TestClass',
+					fields: {
+						field1: {
+							type: 'String',
+						},
+					},
+					resolvers: {
+						queries: {
+							testQuery: {
+								resolve: () => {
+									return ['test']
+								},
+								type: 'Array',
+								typeValue: 'String',
+							},
+						},
+					},
+				},
+			],
+		})
+
+		const res = await client.request<any>(gql`
+				query testQuery {
+					testQuery
+						
+				}
+			`)
+
+		expect(res.testQuery).toEqual(['test'])
+
+		await wibeApp.close()
+	})
+
+	it('should return an object in a query', async () => {
+		const { client, wibeApp } = await createWibeApp({
+			class: [
+				{
+					name: 'TestClass',
+					fields: {
+						field1: {
+							type: 'String',
+						},
+					},
+					resolvers: {
+						queries: {
+							testQuery: {
+								resolve: () => {
+									return { test: 'test' }
+								},
+								type: 'Object',
+								outputObject: {
+									name: 'TestQueryOutput',
+									fields: {
+										test: {
+											type: 'String',
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			],
+		})
+
+		const res = await client.request<any>(gql`
+				query testQuery {
+					testQuery {
+						test
+					}
+				}
+			`)
+
+		expect(res.testQuery.test).toEqual('test')
+
+		await wibeApp.close()
+	})
+
+	it('should return an array in a mutation', async () => {
 		const { client, wibeApp } = await createWibeApp({
 			class: [
 				{
@@ -158,7 +240,7 @@ describe('GraphqlSchema', () => {
 		await wibeApp.close()
 	})
 
-	it('should return an object in a mutation or query', async () => {
+	it('should return an object in a mutation', async () => {
 		const { client, wibeApp } = await createWibeApp({
 			class: [
 				{

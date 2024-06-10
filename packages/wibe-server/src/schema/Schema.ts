@@ -86,14 +86,17 @@ export type TypeField =
 export type SchemaFields = Record<string, TypeField>
 
 export type QueryResolver = {
-	type: WibePrimaryTypes
 	required?: boolean
 	description?: string
 	args?: {
 		[key: string]: TypeField
 	}
 	resolve: (...args: any) => any
-}
+} & (
+	| { type: WibePrimaryTypes }
+	| { type: 'Object'; outputObject: ClassInterface }
+	| { type: 'Array'; typeValue: WibePrimaryTypes }
+)
 
 export type MutationResolver = {
 	required?: boolean

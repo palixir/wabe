@@ -27,7 +27,6 @@ import type {
 	MutationResolver,
 	QueryResolver,
 	Schema,
-	TypeField,
 } from '../schema'
 import { GraphqlParser, type GraphqlParserFactory } from './parser'
 import type { WibeSchemaTypes } from '../../generated/wibe'
@@ -494,12 +493,9 @@ export class GraphQLSchema {
 				const getGraphqlOutputType = ():
 					| GraphQLOutputType
 					| undefined => {
-					if (
-						currentMutation.type !== 'Object' &&
-						currentMutation.type !== 'Array'
-					)
+					if (currentMutation.type !== 'Object')
 						return graphqlParserWithInput.getGraphqlType({
-							type: currentMutation.type,
+							...currentMutation,
 						})
 
 					if (currentMutation.type === 'Object') {
@@ -517,15 +513,6 @@ export class GraphQLSchema {
 								),
 							}),
 						})
-					}
-
-					if (currentMutation.type === 'Array') {
-						const arrayGraphqlType =
-							graphqlParserWithInput.getGraphqlType({
-								...currentMutation,
-							})
-
-						return arrayGraphqlType
 					}
 				}
 
@@ -577,14 +564,40 @@ export class GraphQLSchema {
 					allObjects: this.allObjects,
 				})
 
-				const graphqlType = graphqlParserWithInput.getGraphqlType({
-					type: currentQuery.type,
-				}) as GraphQLOutputType
+				const getGraphqlOutputType = ():
+					| GraphQLOutputType
+					| undefined => {
+					if (currentQuery.type !== 'Object')
+						return graphqlParserWithInput.getGraphqlType({
+							...currentQuery,
+						})
+
+					if (currentQuery.type === 'Object') {
+						const objectGraphqlParser = graphqlParser({
+							schemaFields: currentQuery.outputObject.fields,
+							graphqlObjectType: 'Object',
+							allObjects: this.allObjects,
+						})
+
+						return new GraphQLObjectType({
+							name: currentQuery.outputObject.name,
+							fields: () => ({
+								...objectGraphqlParser.getGraphqlFields(
+									currentQuery.outputObject.name,
+								),
+							}),
+						})
+					}
+				}
+
+				const outputType = getGraphqlOutputType()
+
+				if (!outputType) throw new Error('Invalid mutation output type')
 
 				acc[currentKey] = {
 					type: required
-						? new GraphQLNonNull(graphqlType)
-						: graphqlType,
+						? new GraphQLNonNull(outputType)
+						: outputType,
 					args: graphqlParserWithInput.getGraphqlFields(currentKey),
 					description: currentQuery.description,
 					resolve: currentQuery.resolve,
