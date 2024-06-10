@@ -100,7 +100,7 @@ describe('verifyChallenge', () => {
 		).rejects.toThrow('Invalid challenge')
 	})
 
-	it('should return true if the verifyChallenge is correc', async () => {
+	it('should return true if the verifyChallenge is correct', async () => {
 		const spyCreateSession = spyOn(
 			Session.prototype,
 			'create',

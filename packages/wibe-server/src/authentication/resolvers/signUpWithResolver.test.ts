@@ -50,7 +50,6 @@ describe('SignUpWith', () => {
 						provider: {
 							onSignUp: mockOnSignUp,
 							onSignIn: mockOnLogin,
-							name: 'emailPassword',
 						},
 					},
 				],
@@ -91,7 +90,6 @@ describe('SignUpWith', () => {
 					provider: {
 						onSignUp: mockOnSignUp,
 						onSignIn: mockOnLogin,
-						name: 'phonePassword',
 					},
 				},
 			],
@@ -148,7 +146,10 @@ describe('SignUpWith', () => {
 			} as any,
 		)
 
-		expect(res).toBe(true)
+		expect(res).toEqual({
+			refreshToken: 'refreshToken',
+			accessToken: 'accessToken',
+		})
 		expect(mockOnSignUp).toHaveBeenCalledTimes(1)
 		expect(mockOnSignUp).toHaveBeenCalledWith({
 			input: {

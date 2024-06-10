@@ -71,7 +71,5 @@ export const signInWithResolver = async (
 		})
 	}
 
-	// TODO : Need object in return of graphql mutation
-	// return { accessToken, refreshToken }
-	return true
+	return { accessToken, refreshToken }
 }

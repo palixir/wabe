@@ -38,12 +38,18 @@ describe('Authentication', () => {
 const graphql = {
 	signInWith: gql`
 		 mutation signInWith($input: SignInWithInput!) {
-  		signInWith(input: $input)
+  		signInWith(input: $input){
+  			accessToken
+  			refreshToken
+  		}
 		}
 	`,
 	signUpWith: gql`
 		 mutation signUpWith($input: SignUpWithInput!) {
-  		signUpWith(input:	$input)
+  		signUpWith(input:	$input){
+  			accessToken
+  			refreshToken
+  		}
   	}
 	 `,
 	signOut: gql`

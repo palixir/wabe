@@ -4,6 +4,7 @@ import type {
 	WibeSchemaTypes,
 } from '../../generated/wibe'
 import { signInWithResolver, signUpWithResolver } from '../authentication'
+import { refreshResolver } from '../authentication/resolvers/refreshResolver'
 import { signOutResolver } from '../authentication/resolvers/signOutResolver'
 import { verifyChallengeResolver } from '../authentication/resolvers/verifyChallenge'
 import { WibeApp } from '../server'
@@ -26,6 +27,12 @@ export type WibeTypes =
 	| WibeCustomTypes
 	| WibePrimaryTypes
 	| WibeRelationTypes
+
+export type WibeGraphQLType =
+	| WibePrimaryTypes
+	| WibeCustomTypes
+	| WibeSchemaEnums
+	| WibeSchemaScalars
 
 type TypeFieldBase<T, K extends WibeTypes> = {
 	type: K | WibeSchemaScalars | WibeSchemaEnums
@@ -341,7 +348,20 @@ export class Schema {
 				...(customAuthenticationConfig.length > 0
 					? {
 							signInWith: {
-								type: 'Boolean',
+								type: 'Object',
+								outputObject: {
+									name: 'SignInWithOutput',
+									fields: {
+										accessToken: {
+											type: 'String',
+											required: true,
+										},
+										refreshToken: {
+											type: 'String',
+											required: true,
+										},
+									},
+								},
 								args: {
 									input: {
 										authentication: authenticationInput,
@@ -350,7 +370,20 @@ export class Schema {
 								resolve: signInWithResolver,
 							},
 							signUpWith: {
-								type: 'Boolean',
+								type: 'Object',
+								outputObject: {
+									name: 'SignUpWithOutput',
+									fields: {
+										accessToken: {
+											type: 'String',
+											required: true,
+										},
+										refreshToken: {
+											type: 'String',
+											required: true,
+										},
+									},
+								},
 								args: {
 									input: {
 										authentication: authenticationInput,

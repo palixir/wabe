@@ -63,7 +63,5 @@ export const signUpWithResolver = async (
 		})
 	}
 
-	// TODO : Need pointer on schema/resolver
-	// return { accessToken, refreshToken }
-	return true
+	return { accessToken, refreshToken }
 }

@@ -396,7 +396,10 @@ describe('GraphQL : E2E', () => {
 				},
 			)
 
-			expect(signUpWith).toEqual(true)
+			expect(signUpWith).toEqual({
+				accessToken: expect.any(String),
+				refreshToken: expect.any(String),
+			})
 
 			const { signInWith: signInWith2 } = await client.request<any>(
 				graphql.signInWith,
@@ -412,7 +415,10 @@ describe('GraphQL : E2E', () => {
 				},
 			)
 
-			expect(signInWith2).toEqual(true)
+			expect(signInWith2).toEqual({
+				accessToken: expect.any(String),
+				refreshToken: expect.any(String),
+			})
 		})
 	})
 
@@ -459,12 +465,18 @@ describe('GraphQL : E2E', () => {
 const graphql = {
 	signUpWith: gql`
 		mutation signUpWith($input: SignUpWithInput!) {
-			signUpWith(input: $input)
+			signUpWith(input: $input){
+				accessToken
+				refreshToken
+			}
 		}
 	`,
 	signInWith: gql`
 		mutation signInWith($input: SignInWithInput!) {
-			signInWith(input: $input)
+			signInWith(input: $input){
+				accessToken
+				refreshToken
+			}
 		}
 	`,
 	customQuery: gql`
