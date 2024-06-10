@@ -14,7 +14,7 @@ import {
 import type {
 	ClassInterface,
 	SchemaFields,
-	TypeField,
+	WibeCustomTypes,
 	WibePrimaryTypes,
 } from '../schema'
 import {
@@ -85,23 +85,29 @@ export const templateWhereInput: Record<
 // For the moment we not support array of array (for sql database it's tricky)
 // Don't export this function
 // This function is only call by getGraphqlType
-const _getGraphqlTypeFromTemplate = ({ field }: { field: TypeField }) => {
-	if (field.type === 'Array') {
-		if (!field.typeValue) throw new Error('Type value not found')
-		if (field.typeValue === 'Array')
+const _getGraphqlTypeFromTemplate = ({
+	fieldValue,
+	arrayTypeValue,
+}: {
+	fieldValue: WibePrimaryTypes | WibeCustomTypes
+	arrayTypeValue?: WibePrimaryTypes | WibeCustomTypes
+}) => {
+	if (fieldValue === 'Array') {
+		if (!arrayTypeValue) throw new Error('Type value not found')
+		if (arrayTypeValue === 'Array')
 			throw new Error('Array of array are not supported')
 
 		// We can cast because we exclude scalars and enums before in previous getGraphqlType
 		return new GraphQLList(
 			templateScalarType[
-				field.typeValue as WibeDefaultTypesWithoutArrayAndObjectAndPointerAndRelation
+				arrayTypeValue as WibeDefaultTypesWithoutArrayAndObjectAndPointerAndRelation
 			],
 		)
 	}
 
 	// We can cast because we exclude scalars and enums before in previous call getGraphqlType
 	return templateScalarType[
-		field.type as WibeDefaultTypesWithoutArrayAndObjectAndPointerAndRelation
+		fieldValue as WibeDefaultTypesWithoutArrayAndObjectAndPointerAndRelation
 	]
 }
 
@@ -121,7 +127,11 @@ export type GraphqlParserFactory = (options: GraphqlParserFactoryOptions) => {
 	_parseWibeWhereInputObject(options: ParseObjectOptions): any
 	_parseWibeInputObject(options: ParseObjectOptions): any
 	_parseWibeUpdateInputObject(options: ParseObjectOptions): any
-	getGraphqlType(options: { field: TypeField; isWhereType?: boolean }): any
+	getGraphqlType(options: {
+		fieldValue: WibeCustomTypes | WibePrimaryTypes
+		arrayTypeValue?: WibeCustomTypes | WibePrimaryTypes
+		isWhereType?: boolean
+	}): any
 	getGraphqlFields(nameOfTheObject: string): any
 }
 
@@ -173,10 +183,21 @@ export const GraphqlParser: GraphqlParserConstructor =
 						return acc
 					}
 
-					const graphqlType = getGraphqlType({
-						field: currentField,
-						isWhereType,
-					})
+					const computeGraphqlType = () => {
+						if (currentField.type === 'Array')
+							return getGraphqlType({
+								fieldvalue: currentField.type,
+								arrayTypeValue: currentField.typeValue,
+								isWhereType,
+							})
+
+						return getGraphqlType({
+							fieldValue: currentField.type,
+							isWhereType,
+						})
+					}
+
+					const graphqlType = computeGraphqlType()
 
 					acc[key] = {
 						type:
@@ -357,34 +378,39 @@ export const GraphqlParser: GraphqlParserConstructor =
 
 		// Get the good graphql type for a field
 		const getGraphqlType = ({
-			field,
+			fieldValue,
+			arrayTypeValue,
 			isWhereType = false,
 		}: {
-			field: TypeField
+			fieldValue: WibePrimaryTypes | WibeCustomTypes
+			arrayTypeValue?: WibePrimaryTypes | WibeCustomTypes
 			isWhereType?: boolean
 		}) => {
 			const scalarExist = scalars.find(
-				(scalar) => scalar.name === field.type,
+				(scalar) => scalar.name === fieldValue,
 			)
 
-			const enumExist = enums.find((e) => e.name === field.type)
+			const enumExist = enums.find((e) => e.name === fieldValue)
 
 			if (isWhereType) {
-				if (!Object.keys(templateWhereInput).includes(field.type))
+				if (!Object.keys(templateWhereInput).includes(fieldValue))
 					return AnyWhereInput
 
 				return templateWhereInput[
-					field.type as WibeDefaultTypesWithoutObjectAndPointerAndRelation
+					fieldValue as WibeDefaultTypesWithoutObjectAndPointerAndRelation
 				]
 			}
 
 			if (scalarExist) return scalarExist
 			if (enumExist) return enumExist
 
-			const graphqlType = _getGraphqlTypeFromTemplate({ field })
+			const graphqlType = _getGraphqlTypeFromTemplate({
+				fieldValue,
+				arrayTypeValue,
+			})
 
 			if (!graphqlType)
-				throw new Error(`${field.type} not exist in schema`)
+				throw new Error(`${fieldValue} not exist in schema`)
 
 			return graphqlType
 		}
@@ -478,10 +504,21 @@ export const GraphqlParser: GraphqlParserConstructor =
 						return acc
 					}
 
-					const graphqlType = getGraphqlType({
-						field: currentField,
-						isWhereType,
-					})
+					const computeGraphqlType = () => {
+						if (currentField.type === 'Array')
+							return getGraphqlType({
+								fieldValue: currentField.type,
+								arrayTypeValue: currentField.typeValue,
+								isWhereType,
+							})
+
+						return getGraphqlType({
+							fieldValue: currentField.type,
+							isWhereType,
+						})
+					}
+
+					const graphqlType = computeGraphqlType()
 
 					acc[key] = {
 						type:
