@@ -2,7 +2,7 @@ import { WibeApp } from '../..'
 import type { Context } from '../graphql/interface'
 import type { PermissionsOperations } from '../schema'
 import type { HookObject } from './HookObject'
-import { BeforeOperationType, OperationType } from './index'
+import { BeforeOperationType } from './index'
 
 const convertOperationTypeToPermission = (
 	beforeOperationType: BeforeOperationType,
@@ -55,7 +55,9 @@ export const _checkPermissions = async (
 
 	const sessionId = context.sessionId
 
-	if (permissionProperties.requireAuthentication && !sessionId)
+	if (!permissionProperties.requireAuthentication) return
+
+	if (!sessionId)
 		throw new Error(
 			`Permission denied to ${permissionOperation} class ${object.className}`,
 		)
@@ -90,22 +92,22 @@ export const _checkPermissions = async (
 		)
 }
 
-export const defaultCheckPermissionOnRead = async (
+export const defaultCheckPermissionOnRead = (
 	object: HookObject<any>,
 	context: Context,
 ) => _checkPermissions(object, context, BeforeOperationType.BeforeRead)
 
-export const defaultCheckPermissionOnCreate = async (
+export const defaultCheckPermissionOnCreate = (
 	object: HookObject<any>,
 	context: Context,
 ) => _checkPermissions(object, context, BeforeOperationType.BeforeInsert)
 
-export const defaultCheckPermissionOnUpdate = async (
+export const defaultCheckPermissionOnUpdate = (
 	object: HookObject<any>,
 	context: Context,
 ) => _checkPermissions(object, context, BeforeOperationType.BeforeUpdate)
 
-export const defaultCheckPermissionOnDelete = async (
+export const defaultCheckPermissionOnDelete = (
 	object: HookObject<any>,
 	context: Context,
 ) => _checkPermissions(object, context, BeforeOperationType.BeforeDelete)

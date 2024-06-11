@@ -127,18 +127,7 @@ export const findHooksAndExecute = async ({
 		.filter(notEmpty)
 }
 
-/*
-before :
- - Get les valeurs modifiés ou insérés
- - Avoir le user qui a fait la request
- - Modifier ou ajouter des valeurs
-
-after:
-- Résultat de la requête
-- User qui a fait la request
-*/
-
-export const defaultHooks: Hook<any>[] = [
+export const getDefaultHooks = (): Hook<any>[] => [
 	{
 		operationType: OperationType.BeforeRead,
 		priority: 0,

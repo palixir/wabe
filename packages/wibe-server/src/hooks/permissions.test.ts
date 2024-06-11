@@ -13,9 +13,10 @@ import {
 } from './permissions'
 import { WibeApp } from '../..'
 import { HookObject } from './HookObject'
-import { OperationType } from '.'
-import { Context } from '../graphql/interface'
+import { BeforeOperationType, OperationType } from '.'
+import type { Context } from '../graphql/interface'
 import * as permissions from './permissions'
+import type { PermissionProperties } from '../schema'
 
 describe('Permissions', () => {
 	const mockGetObject = mock(() => {})
@@ -92,9 +93,9 @@ describe('Permissions', () => {
 			isRoot: false,
 		}
 
-		expect(_checkPermissions(obj, context)).rejects.toThrow(
-			'Permission denied to read class TestClass',
-		)
+		expect(
+			_checkPermissions(obj, context, BeforeOperationType.BeforeRead),
+		).rejects.toThrow('Permission denied to read class TestClass')
 	})
 
 	it('should throw permission denied if role is not an authorized role', async () => {
@@ -123,9 +124,9 @@ describe('Permissions', () => {
 			isRoot: false,
 		}
 
-		expect(_checkPermissions(obj, context)).rejects.toThrow(
-			'Permission denied to read class TestClass',
-		)
+		expect(
+			_checkPermissions(obj, context, BeforeOperationType.BeforeRead),
+		).rejects.toThrow('Permission denied to read class TestClass')
 	})
 
 	it('should not throw permission denied if valid session id is provided', async () => {
@@ -154,7 +155,8 @@ describe('Permissions', () => {
 			isRoot: false,
 		}
 
-		expect(_checkPermissions(obj, context)).resolves
+		expect(_checkPermissions(obj, context, BeforeOperationType.BeforeRead))
+			.resolves
 	})
 
 	it('should not throw permission denied if client is root', async () => {
@@ -174,7 +176,8 @@ describe('Permissions', () => {
 			isRoot: true,
 		}
 
-		expect(_checkPermissions(obj, context)).resolves
+		expect(_checkPermissions(obj, context, BeforeOperationType.BeforeRead))
+			.resolves
 	})
 
 	it('should call _checkPermission on beforeRead', async () => {

@@ -6,7 +6,7 @@ import { GraphQLObjectType, GraphQLSchema, printSchema } from 'graphql'
 import { GraphQLSchema as WibeGraphQLSchema } from '../graphql'
 import type { AuthenticationConfig } from '../authentication/interface'
 import { type WibeRoute, defaultRoutes } from './routes'
-import { type Hook, defaultHooks } from '../hooks'
+import { type Hook, getDefaultHooks } from '../hooks'
 import { generateWibeFile } from './generateWibeFile'
 import { defaultAuthenticationMethods } from '../authentication/defaultAuthentication'
 import { Wobe } from 'wobe'
@@ -81,7 +81,7 @@ export class WibeApp {
 
 	loadHooks() {
 		WibeApp.config.hooks = [
-			...defaultHooks,
+			...getDefaultHooks(),
 			...(WibeApp.config.hooks || []),
 		]
 	}
