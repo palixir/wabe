@@ -457,7 +457,7 @@ describe('Mongo adapter', () => {
 			fields: ['name', 'id'],
 			limit: 2,
 			offset: 2,
-			context: { user: {} } as any,
+			context: { user: {}, isRoot: true } as any,
 		})
 
 		expect(res.length).toEqual(2)
@@ -476,7 +476,7 @@ describe('Mongo adapter', () => {
 			fields: ['name'],
 			limit: 2,
 			offset: 1,
-			context: { user: {} } as any,
+			context: { user: {}, isRoot: true } as any,
 		})
 
 		expect(res2.length).toEqual(2)
@@ -982,7 +982,7 @@ describe('Mongo adapter', () => {
 				name: 'John',
 				age: 20,
 			},
-			context: { user: {} } as any,
+			context: { user: {}, isRoot: true } as any,
 		})
 
 		if (!insertedObject) fail()
@@ -996,7 +996,7 @@ describe('Mongo adapter', () => {
 			id: id.toString(),
 			data: { name: 'Doe' },
 			fields: ['name', 'id'],
-			context: { user: {} } as any,
+			context: { user: {}, isRoot: true } as any,
 		})
 
 		if (!updatedObject) fail()
@@ -1034,7 +1034,7 @@ describe('Mongo adapter', () => {
 			id: id.toString(),
 			data: { name: 'Doe' },
 			fields: ['name', 'id', 'age'],
-			context: { user: {} } as any,
+			context: { user: {}, isRoot: true } as any,
 		})
 
 		if (!updatedObject2) fail()
@@ -1059,7 +1059,7 @@ describe('Mongo adapter', () => {
 					age: 20,
 				},
 			],
-			context: { user: {} } as any,
+			context: { user: {}, isRoot: true } as any,
 		})
 
 		if (!insertedObjects) fail()
@@ -1073,7 +1073,7 @@ describe('Mongo adapter', () => {
 			},
 			data: { age: 21 },
 			fields: ['name', 'id', 'age'],
-			context: { user: {} } as any,
+			context: { user: {}, isRoot: true } as any,
 		})
 
 		expect(spyFindHooksAndExecute).toHaveBeenCalledTimes(2)
@@ -1115,7 +1115,7 @@ describe('Mongo adapter', () => {
 			},
 			data: { age: 23 },
 			fields: ['name', 'id', 'age'],
-			context: { user: {} } as any,
+			context: { user: {}, isRoot: true } as any,
 		})
 
 		expect(updatedObjects2).toEqual([
@@ -1139,7 +1139,7 @@ describe('Mongo adapter', () => {
 				name: 'John',
 				age: 20,
 			},
-			context: { user: {} } as any,
+			context: { user: {}, isRoot: true } as any,
 		})
 
 		if (!insertedObject) fail()
@@ -1153,7 +1153,7 @@ describe('Mongo adapter', () => {
 				},
 			},
 			fields: ['age', 'id'],
-			context: { user: {} } as any,
+			context: { user: {}, isRoot: true } as any,
 		})
 
 		expect(updatedObjects).toEqual([
@@ -1171,7 +1171,7 @@ describe('Mongo adapter', () => {
 				name: 'John',
 				age: 20,
 			},
-			context: { user: {} } as any,
+			context: { user: {}, isRoot: true } as any,
 		})
 
 		if (!insertedObject) fail()
@@ -1184,7 +1184,7 @@ describe('Mongo adapter', () => {
 			className: '_User',
 			id: id.toString(),
 			fields: ['name', 'id', 'age'],
-			context: { user: {} } as any,
+			context: { user: {}, isRoot: true } as any,
 		})
 
 		if (!deletedObject) fail()
@@ -1220,7 +1220,7 @@ describe('Mongo adapter', () => {
 		const res = await mongoAdapter.deleteObject({
 			className: '_User',
 			id: '5f9b3b3b3b3b3b3b3b3b3b3b',
-			context: { user: {} } as any,
+			context: { user: {}, isRoot: true } as any,
 		})
 
 		expect(res).toEqual(null)
@@ -1233,7 +1233,7 @@ describe('Mongo adapter', () => {
 				name: 'John',
 				age: 18,
 			},
-			context: { user: {} } as any,
+			context: { user: {}, isRoot: true } as any,
 		})
 
 		await mongoAdapter.createObject({
@@ -1242,7 +1242,7 @@ describe('Mongo adapter', () => {
 				name: 'Lucas',
 				age: 18,
 			},
-			context: { user: {} } as any,
+			context: { user: {}, isRoot: true } as any,
 		})
 
 		spyFindHooksAndExecute.mockClear()
@@ -1251,7 +1251,7 @@ describe('Mongo adapter', () => {
 			className: '_User',
 			where: { age: { equalTo: 18 } },
 			fields: ['name', 'id', 'age'],
-			context: { user: {} } as any,
+			context: { user: {}, isRoot: true } as any,
 		})
 
 		if (!deletedObjects) fail()

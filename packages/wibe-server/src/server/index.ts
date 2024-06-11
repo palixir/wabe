@@ -160,7 +160,10 @@ export class WibeApp {
 
 					const accessToken = getAccessToken()
 
-					if (!accessToken) return {}
+					if (!accessToken)
+						return {
+							isRoot: true, // TODO: Check headers to set isRoot
+						}
 
 					const session = new Session()
 
@@ -169,7 +172,7 @@ export class WibeApp {
 
 					return {
 						response,
-						isRoot: false,
+						isRoot: true, // TODO : Check headers to set isRoot
 						sessionId,
 						user,
 					}
