@@ -1,7 +1,21 @@
 import { WibeApp } from '../..'
-import { Context } from '../graphql/interface'
-import { type PermissionsOperations } from '../schema'
-import { HookObject } from './HookObject'
+import type { Context } from '../graphql/interface'
+import type { PermissionsOperations } from '../schema'
+import type { HookObject } from './HookObject'
+import { BeforeOperationType, OperationType } from './index'
+
+const convertOperationTypeToPermission = (
+	beforeOperationType: BeforeOperationType,
+) => {
+	const template: Record<BeforeOperationType, PermissionsOperations> = {
+		[BeforeOperationType.BeforeInsert]: 'create',
+		[BeforeOperationType.BeforeRead]: 'read',
+		[BeforeOperationType.BeforeDelete]: 'delete',
+		[BeforeOperationType.BeforeUpdate]: 'update',
+	}
+
+	return template[beforeOperationType]
+}
 
 export const _getPermissionPropertiesOfAClass = async ({
 	className,
@@ -24,12 +38,17 @@ export const _getPermissionPropertiesOfAClass = async ({
 export const _checkPermissions = async (
 	object: HookObject<any>,
 	context: Context,
+	operationType: BeforeOperationType,
 ) => {
 	if (context.isRoot) return
 
+	const permissionOperation = convertOperationTypeToPermission(operationType)
+
+	if (!permissionOperation) throw new Error('Bad operation type provided')
+
 	const permissionProperties = await _getPermissionPropertiesOfAClass({
 		className: object.className,
-		operation: 'read',
+		operation: permissionOperation,
 	})
 
 	if (!permissionProperties) return
@@ -37,7 +56,9 @@ export const _checkPermissions = async (
 	const sessionId = context.sessionId
 
 	if (permissionProperties.requireAuthentication && !sessionId)
-		throw new Error(`Permission denied to read class ${object.className}`)
+		throw new Error(
+			`Permission denied to ${permissionOperation} class ${object.className}`,
+		)
 
 	const res = await WibeApp.databaseController.getObject({
 		className: '_Session',
@@ -47,36 +68,44 @@ export const _checkPermissions = async (
 	})
 
 	if (!res)
-		throw new Error(`Permission denied to read class ${object.className}`)
+		throw new Error(
+			`Permission denied to ${permissionOperation} class ${object.className}`,
+		)
 
-	if (context.user.id !== res.user?.id)
-		throw new Error(`Permission denied to read class ${object.className}`)
+	if (context.user?.id !== res.user?.id)
+		throw new Error(
+			`Permission denied to ${permissionOperation} class ${object.className}`,
+		)
 
-	const roleName = context.user.role?.name
+	const roleName = context.user?.role?.name
 
 	if (!roleName)
-		throw new Error(`Permission denied to read class ${object.className}`)
+		throw new Error(
+			`Permission denied to ${permissionOperation} class ${object.className}`,
+		)
 
 	if (!permissionProperties.authorizedRoles.includes(roleName))
-		throw new Error(`Permission denied to read class ${object.className}`)
+		throw new Error(
+			`Permission denied to ${permissionOperation} class ${object.className}`,
+		)
 }
 
 export const defaultCheckPermissionOnRead = async (
 	object: HookObject<any>,
 	context: Context,
-) => _checkPermissions(object, context)
+) => _checkPermissions(object, context, BeforeOperationType.BeforeRead)
 
 export const defaultCheckPermissionOnCreate = async (
 	object: HookObject<any>,
 	context: Context,
-) => _checkPermissions(object, context)
+) => _checkPermissions(object, context, BeforeOperationType.BeforeInsert)
 
 export const defaultCheckPermissionOnUpdate = async (
 	object: HookObject<any>,
 	context: Context,
-) => _checkPermissions(object, context)
+) => _checkPermissions(object, context, BeforeOperationType.BeforeUpdate)
 
 export const defaultCheckPermissionOnDelete = async (
 	object: HookObject<any>,
 	context: Context,
-) => _checkPermissions(object, context)
+) => _checkPermissions(object, context, BeforeOperationType.BeforeDelete)

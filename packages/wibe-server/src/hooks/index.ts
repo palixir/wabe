@@ -8,6 +8,27 @@ import {
 	defaultBeforeInsertForDefaultValue,
 	defaultBeforeUpdateForUpdatedAt,
 } from './defaultFields'
+import {
+	defaultCheckPermissionOnCreate,
+	defaultCheckPermissionOnDelete,
+	defaultCheckPermissionOnRead,
+	defaultCheckPermissionOnUpdate,
+} from './permissions'
+
+// Here we have duplicated code but we need before and after type to simplify default hooks (permission)
+export enum BeforeOperationType {
+	BeforeInsert = 'beforeInsert',
+	BeforeUpdate = 'beforeUpdate',
+	BeforeDelete = 'beforeDelete',
+	BeforeRead = 'beforeRead',
+}
+
+export enum AfterOperationType {
+	AfterInsert = 'afterInsert',
+	AfterUpdate = 'afterUpdate',
+	AfterDelete = 'afterDelete',
+	AfterRead = 'afterRead',
+}
 
 export enum OperationType {
 	AfterInsert = 'afterInsert',
@@ -118,6 +139,26 @@ after:
 */
 
 export const defaultHooks: Hook<any>[] = [
+	{
+		operationType: OperationType.BeforeRead,
+		priority: 0,
+		callback: defaultCheckPermissionOnRead,
+	},
+	{
+		operationType: OperationType.BeforeUpdate,
+		priority: 0,
+		callback: defaultCheckPermissionOnUpdate,
+	},
+	{
+		operationType: OperationType.BeforeInsert,
+		priority: 0,
+		callback: defaultCheckPermissionOnCreate,
+	},
+	{
+		operationType: OperationType.BeforeDelete,
+		priority: 0,
+		callback: defaultCheckPermissionOnDelete,
+	},
 	{
 		operationType: OperationType.BeforeInsert,
 		priority: 1,

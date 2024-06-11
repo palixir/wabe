@@ -19,7 +19,7 @@ describe('Authentication', () => {
 		await closeTests(wibe)
 	})
 
-	it('should authenticate an user with EmailPassword', async () => {
+	it('should authorize a connected user to access to user schema (protected by default)', async () => {
 		const res = await client.request<any>(graphql.signUpWith, {
 			input: {
 				authentication: {
@@ -31,7 +31,19 @@ describe('Authentication', () => {
 			},
 		})
 
-		// console.log(res)
+		const resUsers = await client.request<any>(gql`
+				query _users {
+					_users {
+						edges {
+							node {
+								id
+							}
+						}
+					}
+				}
+			`)
+
+		console.log(resUsers._users.edges)
 	})
 })
 

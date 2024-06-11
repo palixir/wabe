@@ -425,6 +425,24 @@ export class Schema {
 			name: '_User',
 			fields,
 			resolvers,
+			permissions: {
+				delete: {
+					authorizedRoles: [],
+					requireAuthentication: true,
+				},
+				update: {
+					authorizedRoles: [],
+					requireAuthentication: true,
+				},
+				create: {
+					authorizedRoles: [],
+					requireAuthentication: false,
+				},
+				read: {
+					authorizedRoles: [],
+					requireAuthentication: true,
+				},
+			},
 		}
 	}
 
