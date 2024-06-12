@@ -19,8 +19,6 @@ describe('Mongo adapter', () => {
 	let mongoAdapter: MongoAdapter
 	let wibe: WibeApp
 
-	const spyFindHooksAndExecute = spyOn(hooks, 'findHooksAndExecute')
-
 	beforeAll(async () => {
 		const setup = await setupTests()
 		wibe = setup.wibe
@@ -39,10 +37,6 @@ describe('Mongo adapter', () => {
 			await Promise.all(
 				collections?.map((collection) => collection.drop()),
 			)
-	})
-
-	afterEach(() => {
-		spyFindHooksAndExecute.mockClear()
 	})
 
 	it('should support notEqualTo on _id', async () => {
@@ -464,7 +458,7 @@ describe('Mongo adapter', () => {
 		expect(res[0].name).toEqual('John2')
 		expect(res[1].name).toEqual('John3')
 
-		const res2 = await mongoAdapter.deleteObjects({
+		await mongoAdapter.deleteObjects({
 			className: '_User',
 			where: {
 				OR: [
@@ -479,9 +473,18 @@ describe('Mongo adapter', () => {
 			context: { user: {}, isRoot: true } as any,
 		})
 
-		expect(res2.length).toEqual(2)
-		expect(res2[0].name).toEqual('John3')
-		expect(res2[1].name).toEqual('John4')
+		const res2 = await mongoAdapter.getObjects({
+			className: '_User',
+			where: {
+				OR: [
+					{ name: { equalTo: 'John2' } },
+					{ name: { equalTo: 'John3' } },
+					{ name: { equalTo: 'John4' } },
+				],
+			},
+		})
+
+		expect(res2.length).toEqual(0)
 	})
 
 	it('should get the _id of an object', async () => {
@@ -838,31 +841,6 @@ describe('Mongo adapter', () => {
 			context: { user: {} } as any,
 		})
 
-		expect(spyFindHooksAndExecute).toHaveBeenCalledTimes(2)
-		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
-			operationType: hooks.OperationType.BeforeInsert,
-			className: '_User',
-			data: [
-				{
-					name: 'Lucas',
-					age: 23,
-				},
-			],
-			context: expect.any(Object),
-		})
-
-		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
-			operationType: hooks.OperationType.AfterInsert,
-			className: '_User',
-			data: [
-				{
-					age: 23,
-					id: expect.any(String),
-				},
-			],
-			context: expect.any(Object),
-		})
-
 		expect(insertedObject).toEqual({ age: 23, id: expect.any(String) })
 
 		const insertedObject2 = await mongoAdapter.createObject({
@@ -897,39 +875,6 @@ describe('Mongo adapter', () => {
 			],
 			fields: ['name', 'id'],
 			context: { user: {} } as any,
-		})
-
-		expect(spyFindHooksAndExecute).toHaveBeenCalledTimes(2)
-		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
-			operationType: hooks.OperationType.BeforeInsert,
-			className: '_User',
-			data: [
-				{
-					name: 'Lucas3',
-					age: 23,
-				},
-				{
-					name: 'Lucas4',
-					age: 24,
-				},
-			],
-			context: expect.any(Object),
-		})
-
-		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
-			operationType: hooks.OperationType.AfterInsert,
-			className: '_User',
-			data: [
-				{
-					name: 'Lucas3',
-					id: expect.any(String),
-				},
-				{
-					name: 'Lucas4',
-					id: expect.any(String),
-				},
-			],
-			context: expect.any(Object),
 		})
 
 		expect(insertedObjects).toEqual([
@@ -989,8 +934,6 @@ describe('Mongo adapter', () => {
 
 		const id = insertedObject.id
 
-		spyFindHooksAndExecute.mockClear()
-
 		const updatedObject = await mongoAdapter.updateObject({
 			className: '_User',
 			id: id.toString(),
@@ -1000,29 +943,6 @@ describe('Mongo adapter', () => {
 		})
 
 		if (!updatedObject) fail()
-
-		expect(spyFindHooksAndExecute).toHaveBeenCalledTimes(2)
-		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
-			operationType: hooks.OperationType.BeforeUpdate,
-			className: '_User',
-			data: [
-				{
-					name: 'Doe',
-				},
-			],
-			context: expect.any(Object),
-		})
-		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
-			operationType: hooks.OperationType.AfterUpdate,
-			className: '_User',
-			data: [
-				{
-					name: 'Doe',
-					id: expect.any(String),
-				},
-			],
-			context: expect.any(Object),
-		})
 
 		expect(updatedObject).toEqual({
 			name: 'Doe',
@@ -1064,8 +984,6 @@ describe('Mongo adapter', () => {
 
 		if (!insertedObjects) fail()
 
-		spyFindHooksAndExecute.mockClear()
-
 		const updatedObjects = await mongoAdapter.updateObjects({
 			className: '_User',
 			where: {
@@ -1074,30 +992,6 @@ describe('Mongo adapter', () => {
 			data: { age: 21 },
 			fields: ['name', 'id', 'age'],
 			context: { user: {}, isRoot: true } as any,
-		})
-
-		expect(spyFindHooksAndExecute).toHaveBeenCalledTimes(2)
-		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
-			operationType: hooks.OperationType.BeforeUpdate,
-			className: '_User',
-			data: [
-				{
-					age: 21,
-				},
-			],
-			context: expect.any(Object),
-		})
-		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
-			operationType: hooks.OperationType.AfterUpdate,
-			className: '_User',
-			data: [
-				{
-					age: 21,
-					name: 'Lucas',
-					id: expect.any(String),
-				},
-			],
-			context: expect.any(Object),
 		})
 
 		expect(updatedObjects).toEqual([
@@ -1178,52 +1072,19 @@ describe('Mongo adapter', () => {
 
 		const id = insertedObject.id
 
-		spyFindHooksAndExecute.mockClear()
-
-		const deletedObject = await mongoAdapter.deleteObject({
+		await mongoAdapter.deleteObject({
 			className: '_User',
 			id: id.toString(),
 			fields: ['name', 'id', 'age'],
 			context: { user: {}, isRoot: true } as any,
 		})
 
-		if (!deletedObject) fail()
-
-		expect(spyFindHooksAndExecute).toHaveBeenCalledTimes(2)
-		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
-			operationType: hooks.OperationType.BeforeDelete,
+		const resAfterDelete = await mongoAdapter.getObject({
 			className: '_User',
-			data: [
-				{
-					id: expect.any(String),
-					name: 'John',
-					age: 20,
-				},
-			],
-			context: expect.any(Object),
-		})
-		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
-			operationType: hooks.OperationType.AfterDelete,
-			className: '_User',
-			data: [{ id: expect.any(String), name: 'John', age: 20 }],
-			context: expect.any(Object),
+			id: id.toString(),
 		})
 
-		expect(deletedObject).toEqual({
-			id: expect.any(String),
-			name: 'John',
-			age: 20,
-		})
-	})
-
-	it("should not delete an user that doesn't exist", async () => {
-		const res = await mongoAdapter.deleteObject({
-			className: '_User',
-			id: '5f9b3b3b3b3b3b3b3b3b3b3b',
-			context: { user: {}, isRoot: true } as any,
-		})
-
-		expect(res).toEqual(null)
+		expect(resAfterDelete).toBeNull()
 	})
 
 	it('should delete multiple object', async () => {
@@ -1245,65 +1106,19 @@ describe('Mongo adapter', () => {
 			context: { user: {}, isRoot: true } as any,
 		})
 
-		spyFindHooksAndExecute.mockClear()
-
-		const deletedObjects = await mongoAdapter.deleteObjects({
+		await mongoAdapter.deleteObjects({
 			className: '_User',
 			where: { age: { equalTo: 18 } },
 			fields: ['name', 'id', 'age'],
 			context: { user: {}, isRoot: true } as any,
 		})
 
-		if (!deletedObjects) fail()
-
-		expect(spyFindHooksAndExecute).toHaveBeenCalledTimes(2)
-		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
-			operationType: hooks.OperationType.BeforeDelete,
+		const resAfterDelete = await mongoAdapter.getObjects({
 			className: '_User',
-			data: [
-				{
-					id: expect.any(String),
-					name: 'John',
-					age: 18,
-				},
-				{
-					id: expect.any(String),
-					name: 'Lucas',
-					age: 18,
-				},
-			],
-			context: expect.any(Object),
-		})
-		expect(spyFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
-			operationType: hooks.OperationType.AfterDelete,
-			className: '_User',
-			data: [
-				{
-					id: expect.any(String),
-					name: 'John',
-					age: 18,
-				},
-				{
-					id: expect.any(String),
-					name: 'Lucas',
-					age: 18,
-				},
-			],
-			context: expect.any(Object),
+			where: { age: { equalTo: 18 } },
 		})
 
-		expect(deletedObjects).toEqual([
-			{
-				id: expect.any(String),
-				name: 'John',
-				age: 18,
-			},
-			{
-				id: expect.any(String),
-				name: 'Lucas',
-				age: 18,
-			},
-		])
+		expect(resAfterDelete.length).toEqual(0)
 	})
 
 	it('should build where query for mongo adapter', () => {

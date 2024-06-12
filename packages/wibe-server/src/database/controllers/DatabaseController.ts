@@ -1,5 +1,6 @@
 import { WibeApp } from '../../..'
 import type { WibeSchemaTypes } from '../../../generated/wibe'
+import { OperationType, findHooksAndExecute } from '../../hooks'
 import type {
 	CreateObjectOptions,
 	CreateObjectsOptions,
@@ -47,7 +48,7 @@ export class DatabaseController {
 
 	_getPointerObject(className: string, fields: string[]): PointerFields {
 		const realClass = WibeApp.config.schema.class.find(
-			(c) => c.name.toLowerCase() === className.toLowerCase()
+			(c) => c.name.toLowerCase() === className.toLowerCase(),
 		)
 
 		if (!realClass) throw new Error('Class not found in schema')
@@ -78,19 +79,19 @@ export class DatabaseController {
 						},
 					},
 					pointersFieldsId: acc.pointersFieldsId?.includes(
-						pointerField
+						pointerField,
 					)
 						? acc.pointersFieldsId
 						: [...(acc.pointersFieldsId || []), pointerField],
 				}
 			},
-			{ pointers: {} } as PointerFields
+			{ pointers: {} } as PointerFields,
 		)
 	}
 
 	_isRelationField<T extends keyof WibeSchemaTypes>(
 		originClassName: T,
-		pointerClassName: string
+		pointerClassName: string,
 	) {
 		return WibeApp.config.schema.class.some(
 			(c) =>
@@ -99,14 +100,14 @@ export class DatabaseController {
 					(field) =>
 						field.type === 'Relation' &&
 						field.class.toLowerCase() ===
-							pointerClassName.toLowerCase()
-				)
+							pointerClassName.toLowerCase(),
+				),
 		)
 	}
 
 	_isPointerField<T extends keyof WibeSchemaTypes>(
 		originClassName: T,
-		pointerClassName: string
+		pointerClassName: string,
 	) {
 		return WibeApp.config.schema.class.some(
 			(c) =>
@@ -115,29 +116,29 @@ export class DatabaseController {
 					(field) =>
 						field.type === 'Pointer' &&
 						field.class.toLowerCase() ===
-							pointerClassName.toLowerCase()
-				)
+							pointerClassName.toLowerCase(),
+				),
 		)
 	}
 
 	async _getFinalObjectWithPointer<
 		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T]
+		K extends keyof WibeSchemaTypes[T],
 	>(
 		objectData: Pick<WibeSchemaTypes[T], K> | null,
 		pointersObject: PointerObject,
-		originClassName: T
+		originClassName: T,
 	) {
 		return Object.entries(pointersObject).reduce(
 			async (
 				accPromise,
-				[pointerField, { fieldsOfPointerClass, pointerClass }]
+				[pointerField, { fieldsOfPointerClass, pointerClass }],
 			) => {
 				const acc = await accPromise
 
 				const isPointer = this._isPointerField(
 					originClassName,
-					pointerClass
+					pointerClass,
 				)
 
 				if (isPointer) {
@@ -158,7 +159,7 @@ export class DatabaseController {
 
 				const isRelation = this._isRelationField(
 					originClassName,
-					pointerClass
+					pointerClass,
 				)
 
 				if (isRelation) {
@@ -185,18 +186,18 @@ export class DatabaseController {
 			},
 			Promise.resolve({
 				...objectData,
-			})
+			}),
 		)
 	}
 
 	async _getWhereObjectWithPointerOrRelation<T extends keyof WibeSchemaTypes>(
 		className: T,
-		where: WhereType<T>
+		where: WhereType<T>,
 	) {
 		const whereKeys = Object.keys(where) as Array<keyof WhereType<T>>
 
 		const realClass = WibeApp.config.schema.class.find(
-			(c) => c.name.toLowerCase() === className.toLowerCase()
+			(c) => c.name.toLowerCase() === className.toLowerCase(),
 		)
 
 		const newWhereObject = await whereKeys.reduce(async (acc, key) => {
@@ -211,9 +212,9 @@ export class DatabaseController {
 					(where[fieldName] as any).map((whereObject: any) =>
 						this._getWhereObjectWithPointerOrRelation(
 							className,
-							whereObject
-						)
-					)
+							whereObject,
+						),
+					),
 				)
 
 				return {
@@ -250,20 +251,27 @@ export class DatabaseController {
 
 	async getObject<
 		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T]
+		K extends keyof WibeSchemaTypes[T],
 	>(
-		params: GetObjectOptions<T, K>
+		params: GetObjectOptions<T, K>,
 	): Promise<Pick<WibeSchemaTypes[T], K> | null> {
 		const fields = (params.fields || []) as string[]
 
 		const { pointersFieldsId, pointers } = this._getPointerObject(
 			params.className,
-			fields
+			fields,
 		)
 
 		const fieldsWithoutPointers = fields.filter(
-			(field) => !field.includes('.')
+			(field) => !field.includes('.'),
 		)
+
+		await findHooksAndExecute({
+			className: params.className,
+			context: params.context,
+			data: [],
+			operationType: OperationType.BeforeRead,
+		})
 
 		const dataOfCurrentObject = await this.adapter.getObject({
 			...params,
@@ -271,34 +279,48 @@ export class DatabaseController {
 			fields: [...fieldsWithoutPointers, ...(pointersFieldsId || [])],
 		})
 
+		await findHooksAndExecute({
+			className: params.className,
+			context: params.context,
+			data: [dataOfCurrentObject || {}],
+			operationType: OperationType.AfterRead,
+		})
+
 		if (!dataOfCurrentObject) return null
 
 		return this._getFinalObjectWithPointer(
 			dataOfCurrentObject,
 			pointers,
-			params.className
+			params.className,
 		) as any
 	}
 
 	async getObjects<
 		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T]
+		K extends keyof WibeSchemaTypes[T],
 	>(params: GetObjectsOptions<T, K>): Promise<Pick<WibeSchemaTypes[T], K>[]> {
 		const fields = (params.fields || []) as string[]
 
 		const { pointersFieldsId, pointers } = this._getPointerObject(
 			params.className,
-			fields
+			fields,
 		)
 
 		const fieldsWithoutPointers = fields.filter(
-			(field) => !field.includes('.')
+			(field) => !field.includes('.'),
 		)
 
 		const where = await this._getWhereObjectWithPointerOrRelation(
 			params.className,
-			params.where || {}
+			params.where || {},
 		)
+
+		await findHooksAndExecute({
+			className: params.className,
+			context: params.context,
+			data: [],
+			operationType: OperationType.BeforeRead,
+		})
 
 		const dataOfCurrentObject = await this.adapter.getObjects({
 			...params,
@@ -307,76 +329,190 @@ export class DatabaseController {
 			fields: [...fieldsWithoutPointers, ...(pointersFieldsId || [])],
 		})
 
+		await findHooksAndExecute({
+			className: params.className,
+			context: params.context,
+			data: dataOfCurrentObject,
+			operationType: OperationType.AfterRead,
+		})
+
 		return Promise.all(
 			dataOfCurrentObject.map((data) =>
 				this._getFinalObjectWithPointer(
 					data,
 					pointers,
-					params.className
-				)
-			)
+					params.className,
+				),
+			),
 		) as Promise<Pick<WibeSchemaTypes[T], K>[]>
 	}
 
 	async createObject<
 		T extends keyof WibeSchemaTypes,
 		K extends keyof WibeSchemaTypes[T],
-		W extends keyof WibeSchemaTypes[T]
+		W extends keyof WibeSchemaTypes[T],
 	>(params: CreateObjectOptions<T, K, W>) {
-		return this.adapter.createObject(params)
+		const arrayOfComputedData = await findHooksAndExecute({
+			...params,
+			data: [params.data],
+			operationType: OperationType.BeforeInsert,
+		})
+
+		const res = await this.adapter.createObject({
+			...params,
+			data: arrayOfComputedData[0],
+		})
+
+		await findHooksAndExecute({
+			className: params.className,
+			data: [res],
+			operationType: OperationType.AfterInsert,
+			context: params.context,
+		})
+
+		return res
 	}
 
 	async createObjects<
 		T extends keyof WibeSchemaTypes,
 		K extends keyof WibeSchemaTypes[T],
-		W extends keyof WibeSchemaTypes[T]
+		W extends keyof WibeSchemaTypes[T],
 	>(params: CreateObjectsOptions<T, K, W>) {
-		return this.adapter.createObjects(params)
+		const arrayOfComputedData = await findHooksAndExecute({
+			...params,
+			data: params.data,
+			operationType: OperationType.BeforeInsert,
+		})
+
+		const res = await this.adapter.createObjects({
+			...params,
+			data: arrayOfComputedData,
+		})
+
+		await findHooksAndExecute({
+			...params,
+			data: res,
+			operationType: OperationType.AfterInsert,
+		})
+
+		return res
 	}
 
 	async updateObject<
 		T extends keyof WibeSchemaTypes,
 		K extends keyof WibeSchemaTypes[T],
-		W extends keyof WibeSchemaTypes[T]
+		W extends keyof WibeSchemaTypes[T],
 	>(params: UpdateObjectOptions<T, K, W>) {
-		return this.adapter.updateObject(params)
+		const arrayOfComputedData = await findHooksAndExecute({
+			...params,
+			data: [params.data],
+			operationType: OperationType.BeforeUpdate,
+		})
+
+		const res = await this.adapter.updateObject({
+			...params,
+			data: arrayOfComputedData[0],
+		})
+
+		await findHooksAndExecute({
+			className: params.className,
+			data: [res],
+			operationType: OperationType.AfterUpdate,
+			context: params.context,
+		})
+
+		return res
 	}
 
 	async updateObjects<
 		T extends keyof WibeSchemaTypes,
 		K extends keyof WibeSchemaTypes[T],
-		W extends keyof WibeSchemaTypes[T]
+		W extends keyof WibeSchemaTypes[T],
 	>(params: UpdateObjectsOptions<T, K, W>) {
 		const whereObject = await this._getWhereObjectWithPointerOrRelation(
 			params.className,
-			params.where || {}
+			params.where || {},
 		)
 
-		return this.adapter.updateObjects({
+		const arrayOfComputedData = await findHooksAndExecute({
 			...params,
+			data: [params.data],
+			operationType: OperationType.BeforeUpdate,
+		})
+
+		const res = await this.adapter.updateObjects({
+			...params,
+			data: arrayOfComputedData[0],
 			where: whereObject,
 		})
+
+		await findHooksAndExecute({
+			className: params.className,
+			data: [res],
+			operationType: OperationType.AfterUpdate,
+			context: params.context,
+		})
+
+		return res
 	}
 
 	async deleteObject<
 		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T]
+		K extends keyof WibeSchemaTypes[T],
 	>(params: DeleteObjectOptions<T, K>) {
-		return this.adapter.deleteObject(params)
+		const objectBeforeDelete = await this.getObject({
+			...params,
+		})
+
+		if (!objectBeforeDelete) return null
+
+		await findHooksAndExecute({
+			...params,
+			data: [objectBeforeDelete],
+			operationType: OperationType.BeforeDelete,
+		})
+
+		await this.adapter.deleteObject(params)
+
+		await findHooksAndExecute({
+			...params,
+			data: [objectBeforeDelete],
+			operationType: OperationType.AfterDelete,
+		})
+
+		return objectBeforeDelete
 	}
 
 	async deleteObjects<
 		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T]
+		K extends keyof WibeSchemaTypes[T],
 	>(params: DeleteObjectsOptions<T, K>) {
 		const whereObject = await this._getWhereObjectWithPointerOrRelation(
 			params.className,
-			params.where || {}
+			params.where || {},
 		)
 
-		return this.adapter.deleteObjects({
+		const objectsBeforeDelete = await this.getObjects({
+			...params,
+		})
+
+		await findHooksAndExecute({
+			...params,
+			data: objectsBeforeDelete,
+			operationType: OperationType.BeforeDelete,
+		})
+
+		await this.adapter.deleteObjects({
 			...params,
 			where: whereObject,
 		})
+
+		await findHooksAndExecute({
+			...params,
+			data: objectsBeforeDelete,
+			operationType: OperationType.AfterDelete,
+		})
+
+		return objectsBeforeDelete
 	}
 }

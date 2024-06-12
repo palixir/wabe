@@ -39,6 +39,7 @@ export interface GetObjectOptions<
 	className: T
 	id: string
 	fields?: Array<K>
+	context: Context
 }
 
 export interface GetObjectsOptions<
@@ -50,6 +51,7 @@ export interface GetObjectsOptions<
 	fields?: Array<K>
 	offset?: number
 	limit?: number
+	context: Context
 }
 
 export interface CreateObjectOptions<
@@ -173,13 +175,9 @@ export interface DatabaseAdapter {
 	deleteObject<
 		T extends keyof WibeSchemaTypes,
 		K extends keyof WibeSchemaTypes[T],
-	>(
-		params: DeleteObjectOptions<T, K>,
-	): Promise<Pick<WibeSchemaTypes[T], K> | null>
+	>(params: DeleteObjectOptions<T, K>): Promise<void>
 	deleteObjects<
 		T extends keyof WibeSchemaTypes,
 		K extends keyof WibeSchemaTypes[T],
-	>(
-		params: DeleteObjectsOptions<T, K>,
-	): Promise<Pick<WibeSchemaTypes[T], K>[]>
+	>(params: DeleteObjectsOptions<T, K>): Promise<void>
 }
