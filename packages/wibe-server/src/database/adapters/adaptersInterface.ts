@@ -173,13 +173,9 @@ export interface DatabaseAdapter {
 	deleteObject<
 		T extends keyof WibeSchemaTypes,
 		K extends keyof WibeSchemaTypes[T],
-	>(
-		params: DeleteObjectOptions<T, K>,
-	): Promise<Pick<WibeSchemaTypes[T], K> | null>
+	>(params: DeleteObjectOptions<T, K>): Promise<void>
 	deleteObjects<
 		T extends keyof WibeSchemaTypes,
 		K extends keyof WibeSchemaTypes[T],
-	>(
-		params: DeleteObjectsOptions<T, K>,
-	): Promise<Pick<WibeSchemaTypes[T], K>[]>
+	>(params: DeleteObjectsOptions<T, K>): Promise<void>
 }
