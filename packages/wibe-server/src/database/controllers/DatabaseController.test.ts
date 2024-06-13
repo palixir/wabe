@@ -4,7 +4,7 @@ import {
 	expect,
 	mock,
 	beforeAll,
-	beforeEach,
+	afterEach,
 	spyOn,
 } from 'bun:test'
 import { WibeApp } from '../../server'
@@ -21,10 +21,7 @@ describe('DatabaseController', () => {
 	const mockDeleteObject = mock(() => {})
 	const mockDeleteObjects = mock(() => {})
 
-	const mockFindHooksAndExecute = spyOn(
-		hooks,
-		'findHooksAndExecute',
-	).mockResolvedValue({})
+	const mockFindHooksAndExecute = spyOn(hooks, 'findHooksAndExecute')
 
 	const mockAdapter = mock(() => ({
 		getObject: mockGetObject,
@@ -98,7 +95,7 @@ describe('DatabaseController', () => {
 		}
 	})
 
-	beforeEach(() => {
+	afterEach(() => {
 		mockGetObject.mockClear()
 		mockGetObjects.mockClear()
 		mockFindHooksAndExecute.mockClear()
