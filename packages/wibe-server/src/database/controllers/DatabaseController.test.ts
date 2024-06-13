@@ -9,6 +9,7 @@ import {
 } from 'bun:test'
 import { WibeApp } from '../../server'
 import { DatabaseController } from '..'
+import * as hooks from '../../hooks/index'
 
 describe('DatabaseController', () => {
 	const mockGetObject = mock(() => {})
@@ -19,6 +20,11 @@ describe('DatabaseController', () => {
 	const mockUpdateObjects = mock(() => {})
 	const mockDeleteObject = mock(() => {})
 	const mockDeleteObjects = mock(() => {})
+
+	const mockFindHooksAndExecute = spyOn(
+		hooks,
+		'findHooksAndExecute',
+	).mockResolvedValue({})
 
 	const mockAdapter = mock(() => ({
 		getObject: mockGetObject,
@@ -95,17 +101,247 @@ describe('DatabaseController', () => {
 	beforeEach(() => {
 		mockGetObject.mockClear()
 		mockGetObjects.mockClear()
+		mockFindHooksAndExecute.mockClear()
 	})
 
-	it('should call findHooksAndExecute beforeRead', async () => {
+	it('should call findHooksAndExecute on getObject', async () => {
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
 		await databaseController.getObject({
 			// @ts-expect-error
 			className: 'TestClass',
-			context: {} as any,
+			context: { sessionId: 'sessionId' } as any,
 			id: 'id',
 			fields: ['id'],
+		})
+
+		expect(mockFindHooksAndExecute).toHaveBeenCalledTimes(2)
+		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
+			className: 'TestClass',
+			context: { sessionId: 'sessionId' },
+			data: [],
+			operationType: hooks.OperationType.BeforeRead,
+		})
+
+		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
+			className: 'TestClass',
+			context: { sessionId: 'sessionId' },
+			data: expect.any(Array),
+			operationType: hooks.OperationType.AfterRead,
+		})
+	})
+
+	it('should call findHooksAndExecute on getObjects', async () => {
+		mockGetObjects.mockResolvedValue([] as never)
+
+		const databaseController = new DatabaseController(mockAdapter() as any)
+
+		await databaseController.getObjects({
+			// @ts-expect-error
+			className: 'TestClass',
+			context: { sessionId: 'sessionId' } as any,
+			where: { id: { equalTo: 'id' } },
+			fields: ['id'],
+		})
+
+		expect(mockFindHooksAndExecute).toHaveBeenCalledTimes(2)
+		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
+			className: 'TestClass',
+			context: { sessionId: 'sessionId' },
+			data: [],
+			operationType: hooks.OperationType.BeforeRead,
+		})
+
+		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
+			className: 'TestClass',
+			context: { sessionId: 'sessionId' },
+			data: expect.any(Array),
+			operationType: hooks.OperationType.AfterRead,
+		})
+	})
+
+	it('should call findHooksAndExecute on updateObject', async () => {
+		const databaseController = new DatabaseController(mockAdapter() as any)
+
+		await databaseController.updateObject({
+			// @ts-expect-error
+			className: 'TestClass',
+			context: { sessionId: 'sessionId' } as any,
+			id: 'id',
+			data: { name: 'test' },
+			fields: ['id'],
+		})
+
+		expect(mockFindHooksAndExecute).toHaveBeenCalledTimes(2)
+		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
+			className: 'TestClass',
+			context: { sessionId: 'sessionId' },
+			data: [
+				{
+					name: 'test',
+				},
+			],
+			operationType: hooks.OperationType.BeforeUpdate,
+		})
+
+		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
+			className: 'TestClass',
+			context: { sessionId: 'sessionId' },
+			data: expect.any(Array),
+			operationType: hooks.OperationType.AfterUpdate,
+		})
+	})
+
+	it('should call findHooksAndExecute on updateObjects', async () => {
+		mockGetObjects.mockResolvedValue([] as never)
+
+		const databaseController = new DatabaseController(mockAdapter() as any)
+
+		await databaseController.updateObjects({
+			// @ts-expect-error
+			className: 'TestClass',
+			context: { sessionId: 'sessionId' } as any,
+			where: { id: { equalTo: 'id' } },
+			data: { name: 'test' },
+			fields: ['id'],
+		})
+
+		expect(mockFindHooksAndExecute).toHaveBeenCalledTimes(2)
+		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
+			className: 'TestClass',
+			context: { sessionId: 'sessionId' },
+			data: [{ name: 'test' }],
+			operationType: hooks.OperationType.BeforeUpdate,
+		})
+
+		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
+			className: 'TestClass',
+			context: { sessionId: 'sessionId' },
+			data: expect.any(Array),
+			operationType: hooks.OperationType.AfterUpdate,
+		})
+	})
+
+	it('should call findHooksAndExecute on createObject', async () => {
+		const databaseController = new DatabaseController(mockAdapter() as any)
+
+		await databaseController.createObject({
+			// @ts-expect-error
+			className: 'TestClass',
+			context: { sessionId: 'sessionId' } as any,
+			data: { name: 'test' },
+			fields: ['id'],
+		})
+
+		expect(mockFindHooksAndExecute).toHaveBeenCalledTimes(2)
+		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
+			className: 'TestClass',
+			context: { sessionId: 'sessionId' },
+			data: [
+				{
+					name: 'test',
+				},
+			],
+			operationType: hooks.OperationType.BeforeInsert,
+		})
+
+		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
+			className: 'TestClass',
+			context: { sessionId: 'sessionId' },
+			data: expect.any(Array),
+			operationType: hooks.OperationType.AfterInsert,
+		})
+	})
+
+	it('should call findHooksAndExecute on createObjects', async () => {
+		mockGetObjects.mockResolvedValue([] as never)
+
+		const databaseController = new DatabaseController(mockAdapter() as any)
+
+		await databaseController.createObjects({
+			// @ts-expect-error
+			className: 'TestClass',
+			context: { sessionId: 'sessionId' } as any,
+			data: [{ name: 'test' }],
+			fields: ['id'],
+		})
+
+		expect(mockFindHooksAndExecute).toHaveBeenCalledTimes(2)
+		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
+			className: 'TestClass',
+			context: { sessionId: 'sessionId' },
+			data: [{ name: 'test' }],
+			operationType: hooks.OperationType.BeforeInsert,
+		})
+
+		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
+			className: 'TestClass',
+			context: { sessionId: 'sessionId' },
+			data: expect.any(Array),
+			operationType: hooks.OperationType.AfterInsert,
+		})
+	})
+
+	it('should call findHooksAndExecute on deleteObject', async () => {
+		mockGetObject.mockResolvedValue({ name: 'test' } as never)
+
+		const databaseController = new DatabaseController(mockAdapter() as any)
+
+		await databaseController.deleteObject({
+			// @ts-expect-error
+			className: 'TestClass',
+			context: { sessionId: 'sessionId' } as any,
+			fields: ['id'],
+		})
+
+		// 4 before we get the object before
+		expect(mockFindHooksAndExecute).toHaveBeenCalledTimes(4)
+		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(3, {
+			className: 'TestClass',
+			context: { sessionId: 'sessionId' },
+			data: [
+				{
+					name: 'test',
+				},
+			],
+			operationType: hooks.OperationType.BeforeDelete,
+		})
+
+		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(4, {
+			className: 'TestClass',
+			context: { sessionId: 'sessionId' },
+			data: [{ name: 'test' }],
+			operationType: hooks.OperationType.AfterDelete,
+		})
+	})
+
+	it('should call findHooksAndExecute on deleteObjects', async () => {
+		mockGetObjects.mockResolvedValue([{ name: 'test' }] as never)
+
+		const databaseController = new DatabaseController(mockAdapter() as any)
+
+		await databaseController.deleteObjects({
+			// @ts-expect-error
+			className: 'TestClass',
+			context: { sessionId: 'sessionId' } as any,
+			where: { id: { equalTo: 'id' } },
+			fields: ['id'],
+		})
+
+		// 4 before we get objects before delete
+		expect(mockFindHooksAndExecute).toHaveBeenCalledTimes(4)
+		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(3, {
+			className: 'TestClass',
+			context: { sessionId: 'sessionId' },
+			data: [{ name: 'test' }],
+			operationType: hooks.OperationType.BeforeDelete,
+		})
+
+		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(4, {
+			className: 'TestClass',
+			context: { sessionId: 'sessionId' },
+			data: [{ name: 'test' }],
+			operationType: hooks.OperationType.AfterDelete,
 		})
 	})
 

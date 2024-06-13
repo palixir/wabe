@@ -332,7 +332,7 @@ export class DatabaseController {
 		await findHooksAndExecute({
 			className: params.className,
 			context: params.context,
-			data: dataOfCurrentObject,
+			data: dataOfCurrentObject || [],
 			operationType: OperationType.AfterRead,
 		})
 
@@ -353,7 +353,8 @@ export class DatabaseController {
 		W extends keyof WibeSchemaTypes[T],
 	>(params: CreateObjectOptions<T, K, W>) {
 		const arrayOfComputedData = await findHooksAndExecute({
-			...params,
+			className: params.className,
+			context: params.context,
 			data: [params.data],
 			operationType: OperationType.BeforeInsert,
 		})
@@ -379,7 +380,8 @@ export class DatabaseController {
 		W extends keyof WibeSchemaTypes[T],
 	>(params: CreateObjectsOptions<T, K, W>) {
 		const arrayOfComputedData = await findHooksAndExecute({
-			...params,
+			className: params.className,
+			context: params.context,
 			data: params.data,
 			operationType: OperationType.BeforeInsert,
 		})
@@ -390,8 +392,9 @@ export class DatabaseController {
 		})
 
 		await findHooksAndExecute({
-			...params,
-			data: res,
+			className: params.className,
+			context: params.context,
+			data: params.data,
 			operationType: OperationType.AfterInsert,
 		})
 
@@ -404,7 +407,8 @@ export class DatabaseController {
 		W extends keyof WibeSchemaTypes[T],
 	>(params: UpdateObjectOptions<T, K, W>) {
 		const arrayOfComputedData = await findHooksAndExecute({
-			...params,
+			className: params.className,
+			context: params.context,
 			data: [params.data],
 			operationType: OperationType.BeforeUpdate,
 		})
@@ -435,7 +439,8 @@ export class DatabaseController {
 		)
 
 		const arrayOfComputedData = await findHooksAndExecute({
-			...params,
+			className: params.className,
+			context: params.context,
 			data: [params.data],
 			operationType: OperationType.BeforeUpdate,
 		})
@@ -467,7 +472,8 @@ export class DatabaseController {
 		if (!objectBeforeDelete) return null
 
 		await findHooksAndExecute({
-			...params,
+			className: params.className,
+			context: params.context,
 			data: [objectBeforeDelete],
 			operationType: OperationType.BeforeDelete,
 		})
@@ -475,7 +481,8 @@ export class DatabaseController {
 		await this.adapter.deleteObject(params)
 
 		await findHooksAndExecute({
-			...params,
+			className: params.className,
+			context: params.context,
 			data: [objectBeforeDelete],
 			operationType: OperationType.AfterDelete,
 		})
@@ -497,7 +504,8 @@ export class DatabaseController {
 		})
 
 		await findHooksAndExecute({
-			...params,
+			className: params.className,
+			context: params.context,
 			data: objectsBeforeDelete,
 			operationType: OperationType.BeforeDelete,
 		})
@@ -508,7 +516,8 @@ export class DatabaseController {
 		})
 
 		await findHooksAndExecute({
-			...params,
+			className: params.className,
+			context: params.context,
 			data: objectsBeforeDelete,
 			operationType: OperationType.AfterDelete,
 		})
