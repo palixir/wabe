@@ -1,8 +1,8 @@
 import { describe, expect, it, beforeAll, spyOn } from 'bun:test'
 import { WibeApp } from '..'
 import {
-	defaultBeforeInsertForCreatedAt,
-	defaultBeforeInsertForDefaultValue,
+	defaultBeforeCreateForCreatedAt,
+	defaultBeforeCreateForDefaultValue,
 	defaultBeforeUpdateForUpdatedAt,
 } from './defaultFields'
 import { HookObject } from './HookObject'
@@ -15,7 +15,7 @@ describe('Default fields', () => {
 		it('should add createdAt and updatedAt value on insert operation type', async () => {
 			const hookObject = new HookObject<'_User'>({
 				className: '_User',
-				operationType: OperationType.BeforeInsert,
+				operationType: OperationType.BeforeCreate,
 				object: {
 					email: 'email@test.fr',
 				} as any,
@@ -23,7 +23,7 @@ describe('Default fields', () => {
 
 			const spyHookObjectSet = spyOn(hookObject, 'set')
 
-			await defaultBeforeInsertForCreatedAt(hookObject)
+			await defaultBeforeCreateForCreatedAt(hookObject)
 
 			expect(spyHookObjectSet).toHaveBeenCalledTimes(2)
 			expect(spyHookObjectSet).toHaveBeenNthCalledWith(1, {
@@ -98,7 +98,7 @@ describe('Default fields', () => {
 		it('should add the value if a default value is defined in schema but not specified', async () => {
 			const hookObject = new HookObject<'_User'>({
 				className: '_User',
-				operationType: OperationType.BeforeInsert,
+				operationType: OperationType.BeforeCreate,
 				object: {
 					id: 'id',
 					email: 'email@test.fr',
@@ -107,7 +107,7 @@ describe('Default fields', () => {
 
 			const spyHookObjectSet = spyOn(hookObject, 'set')
 
-			await defaultBeforeInsertForDefaultValue(hookObject)
+			await defaultBeforeCreateForDefaultValue(hookObject)
 
 			expect(spyHookObjectSet).toHaveBeenCalledTimes(1)
 		})
@@ -115,7 +115,7 @@ describe('Default fields', () => {
 		it('should not add a default value if a value is specified', async () => {
 			const hookObject = new HookObject<'_User'>({
 				className: '_User',
-				operationType: OperationType.BeforeInsert,
+				operationType: OperationType.BeforeCreate,
 				object: {
 					id: 'id',
 					email: 'email@test.fr',
@@ -125,7 +125,7 @@ describe('Default fields', () => {
 
 			const spyHookObjectSet = spyOn(hookObject, 'set')
 
-			await defaultBeforeInsertForDefaultValue(hookObject)
+			await defaultBeforeCreateForDefaultValue(hookObject)
 
 			expect(spyHookObjectSet).toHaveBeenCalledTimes(0)
 		})

@@ -239,7 +239,7 @@ describe('DatabaseController', () => {
 					name: 'test',
 				},
 			],
-			operationType: hooks.OperationType.BeforeInsert,
+			operationType: hooks.OperationType.BeforeCreate,
 		})
 
 		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
@@ -268,7 +268,7 @@ describe('DatabaseController', () => {
 			className: 'TestClass',
 			context: { sessionId: 'sessionId' },
 			data: [{ name: 'test' }],
-			operationType: hooks.OperationType.BeforeInsert,
+			operationType: hooks.OperationType.BeforeCreate,
 		})
 
 		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(2, {

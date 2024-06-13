@@ -356,7 +356,7 @@ export class DatabaseController {
 			className: params.className,
 			context: params.context,
 			data: [params.data],
-			operationType: OperationType.BeforeInsert,
+			operationType: OperationType.BeforeCreate,
 		})
 
 		const res = await this.adapter.createObject({
@@ -383,7 +383,7 @@ export class DatabaseController {
 			className: params.className,
 			context: params.context,
 			data: params.data,
-			operationType: OperationType.BeforeInsert,
+			operationType: OperationType.BeforeCreate,
 		})
 
 		const res = await this.adapter.createObjects({

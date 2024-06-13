@@ -9,7 +9,7 @@ describe('HookObject', () => {
 		const hookObject = new HookObject({
 			className: '_User',
 			object: userData as any,
-			operationType: OperationType.BeforeInsert,
+			operationType: OperationType.BeforeCreate,
 		})
 
 		expect(hookObject.className).toEqual('_User')
@@ -24,7 +24,7 @@ describe('HookObject', () => {
 		const hookObject = new HookObject({
 			className: '_User',
 			object: userData as any,
-			operationType: OperationType.BeforeInsert,
+			operationType: OperationType.BeforeCreate,
 		})
 
 		hookObject.set({ field: 'name', value: 'tata' })
@@ -39,7 +39,7 @@ describe('HookObject', () => {
 		const hookObject = new HookObject({
 			className: '_User',
 			object: userData as any,
-			operationType: OperationType.BeforeInsert,
+			operationType: OperationType.BeforeCreate,
 		})
 
 		hookObject.set({ field: 'name', value: 'tata' })

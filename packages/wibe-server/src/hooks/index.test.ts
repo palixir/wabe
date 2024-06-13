@@ -14,12 +14,12 @@ describe('Hooks', () => {
 		WibeApp.config = {
 			hooks: [
 				{
-					operationType: OperationType.BeforeInsert,
+					operationType: OperationType.BeforeCreate,
 					priority: 0,
 					callback: mockCallbackOne,
 				},
 				{
-					operationType: OperationType.BeforeInsert,
+					operationType: OperationType.BeforeCreate,
 					priority: 1,
 					callback: mockCallbackTwo,
 				},
@@ -33,7 +33,7 @@ describe('Hooks', () => {
 					name: 'tata',
 				},
 			],
-			operationType: OperationType.BeforeInsert,
+			operationType: OperationType.BeforeCreate,
 			context: {
 				user: {
 					id: 'fakeId',
@@ -57,7 +57,7 @@ describe('Hooks', () => {
 		WibeApp.config = {
 			hooks: [
 				{
-					operationType: OperationType.BeforeInsert,
+					operationType: OperationType.BeforeCreate,
 					priority: 0,
 					callback: mockCallbackOne,
 				},
@@ -76,7 +76,7 @@ describe('Hooks', () => {
 					name: 'tata',
 				},
 			],
-			operationType: OperationType.BeforeInsert,
+			operationType: OperationType.BeforeCreate,
 			context: {
 				user: {
 					id: 'fakeId',

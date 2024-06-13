@@ -8,7 +8,7 @@ const convertOperationTypeToPermission = (
 	beforeOperationType: BeforeOperationType,
 ) => {
 	const template: Record<BeforeOperationType, PermissionsOperations> = {
-		[BeforeOperationType.BeforeInsert]: 'create',
+		[BeforeOperationType.BeforeCreate]: 'create',
 		[BeforeOperationType.BeforeRead]: 'read',
 		[BeforeOperationType.BeforeDelete]: 'delete',
 		[BeforeOperationType.BeforeUpdate]: 'update',
@@ -100,7 +100,7 @@ export const defaultCheckPermissionOnRead = (
 export const defaultCheckPermissionOnCreate = (
 	object: HookObject<any>,
 	context: Context,
-) => _checkPermissions(object, context, BeforeOperationType.BeforeInsert)
+) => _checkPermissions(object, context, BeforeOperationType.BeforeCreate)
 
 export const defaultCheckPermissionOnUpdate = (
 	object: HookObject<any>,

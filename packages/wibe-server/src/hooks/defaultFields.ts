@@ -1,7 +1,7 @@
 import { getClassFromClassName } from '../utils'
 import type { HookObject } from './HookObject'
 
-export const defaultBeforeInsertForCreatedAt = async (
+export const defaultBeforeCreateForCreatedAt = async (
 	object: HookObject<any>,
 ) => {
 	object.set({ field: 'createdAt', value: new Date() })
@@ -14,7 +14,7 @@ export const defaultBeforeUpdateForUpdatedAt = async (
 	object.set({ field: 'updatedAt', value: new Date() })
 }
 
-export const defaultBeforeInsertForDefaultValue = async (
+export const defaultBeforeCreateForDefaultValue = async (
 	object: HookObject<any>,
 ) => {
 	const schemaClass = getClassFromClassName(object.className)

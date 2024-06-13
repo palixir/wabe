@@ -4,8 +4,8 @@ import { WibeApp } from '../server'
 import { notEmpty } from '../utils/helper'
 import { HookObject } from './HookObject'
 import {
-	defaultBeforeInsertForCreatedAt,
-	defaultBeforeInsertForDefaultValue,
+	defaultBeforeCreateForCreatedAt,
+	defaultBeforeCreateForDefaultValue,
 	defaultBeforeUpdateForUpdatedAt,
 } from './defaultFields'
 import {
@@ -17,7 +17,7 @@ import {
 
 // Here we have duplicated code but we need before and after type to simplify default hooks (permission)
 export enum BeforeOperationType {
-	BeforeInsert = 'beforeInsert',
+	BeforeCreate = 'beforeInsert',
 	BeforeUpdate = 'beforeUpdate',
 	BeforeDelete = 'beforeDelete',
 	BeforeRead = 'beforeRead',
@@ -35,7 +35,7 @@ export enum OperationType {
 	AfterUpdate = 'afterUpdate',
 	AfterDelete = 'afterDelete',
 	AfterRead = 'afterRead',
-	BeforeInsert = 'beforeInsert',
+	BeforeCreate = 'beforeInsert',
 	BeforeUpdate = 'beforeUpdate',
 	BeforeDelete = 'beforeDelete',
 	BeforeRead = 'beforeRead',
@@ -139,7 +139,7 @@ export const getDefaultHooks = (): Hook<any>[] => [
 		callback: defaultCheckPermissionOnUpdate,
 	},
 	{
-		operationType: OperationType.BeforeInsert,
+		operationType: OperationType.BeforeCreate,
 		priority: 0,
 		callback: defaultCheckPermissionOnCreate,
 	},
@@ -149,14 +149,14 @@ export const getDefaultHooks = (): Hook<any>[] => [
 		callback: defaultCheckPermissionOnDelete,
 	},
 	{
-		operationType: OperationType.BeforeInsert,
+		operationType: OperationType.BeforeCreate,
 		priority: 1,
-		callback: defaultBeforeInsertForCreatedAt,
+		callback: defaultBeforeCreateForCreatedAt,
 	},
 	{
-		operationType: OperationType.BeforeInsert,
+		operationType: OperationType.BeforeCreate,
 		priority: 1,
-		callback: defaultBeforeInsertForDefaultValue,
+		callback: defaultBeforeCreateForDefaultValue,
 	},
 	{
 		operationType: OperationType.BeforeUpdate,
