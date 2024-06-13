@@ -109,6 +109,7 @@ export class Session {
 				accessToken: { equalTo: accessToken },
 			},
 			fields: ['id', 'user', 'refreshToken', 'refreshTokenExpiresAt'],
+			context,
 		})
 
 		if (!session.length) throw new Error('Session not found')

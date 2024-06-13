@@ -1,5 +1,6 @@
 import { WibeApp } from '../../..'
 import type { WibeSchemaTypes } from '../../../generated/wibe'
+import { Context } from '../../graphql/interface'
 import { OperationType, findHooksAndExecute } from '../../hooks'
 import type {
 	CreateObjectOptions,
@@ -193,6 +194,7 @@ export class DatabaseController {
 	async _getWhereObjectWithPointerOrRelation<T extends keyof WibeSchemaTypes>(
 		className: T,
 		where: WhereType<T>,
+		context: Context,
 	) {
 		const whereKeys = Object.keys(where) as Array<keyof WhereType<T>>
 
@@ -213,6 +215,7 @@ export class DatabaseController {
 						this._getWhereObjectWithPointerOrRelation(
 							className,
 							whereObject,
+							context,
 						),
 					),
 				)
@@ -233,6 +236,7 @@ export class DatabaseController {
 				fields: ['id'],
 				// @ts-expect-error
 				where: { ...where[fieldName] },
+				context,
 			})
 
 			return {
@@ -313,6 +317,7 @@ export class DatabaseController {
 		const where = await this._getWhereObjectWithPointerOrRelation(
 			params.className,
 			params.where || {},
+			params.context,
 		)
 
 		await findHooksAndExecute({
@@ -436,6 +441,7 @@ export class DatabaseController {
 		const whereObject = await this._getWhereObjectWithPointerOrRelation(
 			params.className,
 			params.where || {},
+			params.context,
 		)
 
 		const arrayOfComputedData = await findHooksAndExecute({
@@ -497,6 +503,7 @@ export class DatabaseController {
 		const whereObject = await this._getWhereObjectWithPointerOrRelation(
 			params.className,
 			params.where || {},
+			params.context,
 		)
 
 		const objectsBeforeDelete = await this.getObjects({

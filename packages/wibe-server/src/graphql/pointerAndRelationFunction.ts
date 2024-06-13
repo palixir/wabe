@@ -99,6 +99,7 @@ export const add = async ({
 			className: fieldInClass.class,
 			id,
 			fields: [fieldName],
+			context,
 		})
 
 		if (!currentValue) return [...add]
@@ -115,6 +116,7 @@ export const add = async ({
 				className: fieldInClass.class,
 				where,
 				fields: [fieldName],
+				context,
 			})
 
 		await Promise.all(
@@ -164,6 +166,7 @@ export const remove = async ({
 			className: fieldInClass.class,
 			id,
 			fields: [fieldName],
+			context,
 		})
 
 		const olderValues = currentValue?.[fieldName] || []
