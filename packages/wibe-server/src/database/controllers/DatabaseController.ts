@@ -1,6 +1,6 @@
 import { WibeApp } from '../../..'
 import type { WibeSchemaTypes } from '../../../generated/wibe'
-import { Context } from '../../graphql/interface'
+import type { Context } from '../../graphql/interface'
 import { OperationType, findHooksAndExecute } from '../../hooks'
 import type {
 	CreateObjectOptions,
@@ -273,7 +273,7 @@ export class DatabaseController {
 		await findHooksAndExecute({
 			className: params.className,
 			context: params.context,
-			data: [],
+			newData: null,
 			operationType: OperationType.BeforeRead,
 		})
 
@@ -286,7 +286,7 @@ export class DatabaseController {
 		await findHooksAndExecute({
 			className: params.className,
 			context: params.context,
-			data: [dataOfCurrentObject || {}],
+			newData: null,
 			operationType: OperationType.AfterRead,
 		})
 
@@ -323,7 +323,7 @@ export class DatabaseController {
 		await findHooksAndExecute({
 			className: params.className,
 			context: params.context,
-			data: [],
+			newData: null,
 			operationType: OperationType.BeforeRead,
 		})
 
@@ -337,7 +337,7 @@ export class DatabaseController {
 		await findHooksAndExecute({
 			className: params.className,
 			context: params.context,
-			data: dataOfCurrentObject || [],
+			newData: null,
 			operationType: OperationType.AfterRead,
 		})
 
@@ -360,7 +360,7 @@ export class DatabaseController {
 		const arrayOfComputedData = await findHooksAndExecute({
 			className: params.className,
 			context: params.context,
-			data: [params.data],
+			newData: [params.data],
 			operationType: OperationType.BeforeCreate,
 		})
 
@@ -371,7 +371,7 @@ export class DatabaseController {
 
 		await findHooksAndExecute({
 			className: params.className,
-			data: [res],
+			newData: [params.data],
 			operationType: OperationType.AfterInsert,
 			context: params.context,
 		})
@@ -387,7 +387,7 @@ export class DatabaseController {
 		const arrayOfComputedData = await findHooksAndExecute({
 			className: params.className,
 			context: params.context,
-			data: params.data,
+			newData: params.data,
 			operationType: OperationType.BeforeCreate,
 		})
 
@@ -399,7 +399,7 @@ export class DatabaseController {
 		await findHooksAndExecute({
 			className: params.className,
 			context: params.context,
-			data: params.data,
+			newData: params.data,
 			operationType: OperationType.AfterInsert,
 		})
 
@@ -414,7 +414,7 @@ export class DatabaseController {
 		const arrayOfComputedData = await findHooksAndExecute({
 			className: params.className,
 			context: params.context,
-			data: [params.data],
+			newData: [params.data],
 			operationType: OperationType.BeforeUpdate,
 		})
 
@@ -425,7 +425,7 @@ export class DatabaseController {
 
 		await findHooksAndExecute({
 			className: params.className,
-			data: [res],
+			newData: [params.data],
 			operationType: OperationType.AfterUpdate,
 			context: params.context,
 		})
@@ -447,7 +447,7 @@ export class DatabaseController {
 		const arrayOfComputedData = await findHooksAndExecute({
 			className: params.className,
 			context: params.context,
-			data: [params.data],
+			newData: [params.data],
 			operationType: OperationType.BeforeUpdate,
 		})
 
@@ -459,7 +459,7 @@ export class DatabaseController {
 
 		await findHooksAndExecute({
 			className: params.className,
-			data: [res],
+			newData: [params.data],
 			operationType: OperationType.AfterUpdate,
 			context: params.context,
 		})
@@ -480,7 +480,7 @@ export class DatabaseController {
 		await findHooksAndExecute({
 			className: params.className,
 			context: params.context,
-			data: [objectBeforeDelete],
+			newData: null,
 			operationType: OperationType.BeforeDelete,
 		})
 
@@ -489,7 +489,7 @@ export class DatabaseController {
 		await findHooksAndExecute({
 			className: params.className,
 			context: params.context,
-			data: [objectBeforeDelete],
+			newData: null,
 			operationType: OperationType.AfterDelete,
 		})
 
@@ -513,7 +513,7 @@ export class DatabaseController {
 		await findHooksAndExecute({
 			className: params.className,
 			context: params.context,
-			data: objectsBeforeDelete,
+			newData: null,
 			operationType: OperationType.BeforeDelete,
 		})
 
@@ -525,7 +525,7 @@ export class DatabaseController {
 		await findHooksAndExecute({
 			className: params.className,
 			context: params.context,
-			data: objectsBeforeDelete,
+			newData: null,
 			operationType: OperationType.AfterDelete,
 		})
 

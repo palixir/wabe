@@ -1,39 +1,54 @@
 import type { OperationType } from '.'
 import type { WibeSchemaTypes } from '../../generated/wibe'
+import type { Context } from '../graphql/interface'
+import { notEmpty } from '../utils/helper'
+
+type TypedNewData<T extends keyof WibeSchemaTypes> = Array<
+	Record<keyof WibeSchemaTypes[T], any>
+>
 
 export class HookObject<T extends keyof WibeSchemaTypes> {
 	public className: T
-	private object: Record<keyof WibeSchemaTypes[T], any>
+	private newDatas: TypedNewData<T>
 	private operationType: OperationType
+	private context: Context
 
 	constructor({
-		object,
+		newDatas,
 		className,
 		operationType,
+		context,
 	}: {
 		className: T
-		object: Record<keyof WibeSchemaTypes[T], any>
+		newDatas: TypedNewData<T>
 		operationType: OperationType
+		context: Context
 	}) {
-		this.object = Object.assign({}, object)
+		this.newDatas = newDatas
 		this.className = className
 		this.operationType = operationType
+		this.context = context
+	}
+
+	getUser() {
+		return this.context.user
 	}
 
 	get(field: keyof WibeSchemaTypes[T]) {
-		return this.object?.[field]
+		return this.newDatas.map((newData) => newData[field]).filter(notEmpty)
 	}
 
-	set({ field, value }: { field: keyof WibeSchemaTypes[T]; value: any }) {
+	set(field: keyof WibeSchemaTypes[T], value: any) {
 		if (!this.operationType.includes('before'))
 			throw new Error(
 				'Cannot set data in a hook that is not a before hook',
 			)
 
-		this.object[field] = value
-	}
+		const newArrayOfData = this.newDatas.map((newData) => ({
+			...newData,
+			[field]: value,
+		}))
 
-	getObject() {
-		return this.object
+		this.newDatas = newArrayOfData
 	}
 }

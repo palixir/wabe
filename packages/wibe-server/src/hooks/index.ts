@@ -71,39 +71,42 @@ export const _findHooksByPriority = async <T extends keyof WibeSchemaTypes>({
 			(className === hook.className || !hook.className),
 	) || []
 
+const getHooksOrderByPriorities = () =>
+	WibeApp.config.hooks
+		?.reduce((acc, hook) => {
+			if (!acc.includes(hook.priority)) acc.push(hook.priority)
+
+			return acc
+		}, [] as number[])
+		.sort((a, b) => a - b) || []
+
 // TODO: If context is empty we need to early return
 export const findHooksAndExecute = async ({
 	className,
 	operationType,
-	data,
+	newData,
 	context,
 }: {
 	className: keyof WibeSchemaTypes
 	operationType: OperationType
-	data: Array<Record<string, any>>
+	newData: Array<Record<string, any>> | null
 	context: Context
 }) => {
-	const listOfPriorities =
-		WibeApp.config.hooks
-			?.reduce((acc, hook) => {
-				if (!acc.includes(hook.priority)) acc.push(hook.priority)
-
-				return acc
-			}, [] as number[])
-			.sort((a, b) => a - b) || []
+	const hooksOrderByPriorities = getHooksOrderByPriorities()
 
 	// We need to keep the order of the data but we need to execute the hooks in parallel
 	const computedResult = await Promise.all(
-		data.map(async (dataForOneObject, index) => {
+		newData.map(async (dataForOneObject, index) => {
 			const hookObject = new HookObject({
 				className,
 				object: dataForOneObject,
 				operationType,
+				context,
 			})
 
 			// We need reduce here to keep the order of the hooks
 			// Priority 0, then 1 etc...
-			await listOfPriorities.reduce(async (_, priority) => {
+			await hooksOrderByPriorities.reduce(async (_, priority) => {
 				const hooksToCompute = await _findHooksByPriority({
 					className,
 					operationType,
