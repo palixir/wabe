@@ -6,7 +6,7 @@ export class HookObject<T extends keyof WibeSchemaTypes> {
 	public className: T
 	private newData: TypedNewData<T>
 	private operationType: OperationType
-	private context: Context
+	public context: Context
 
 	constructor({
 		newData,

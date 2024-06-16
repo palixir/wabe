@@ -40,6 +40,7 @@ export const _checkPermissions = async (
 	context: Context,
 	operationType: BeforeOperationType,
 ) => {
+	console.log({ context })
 	if (context.isRoot) return
 
 	const permissionOperation = convertOperationTypeToPermission(operationType)
@@ -92,22 +93,14 @@ export const _checkPermissions = async (
 		)
 }
 
-export const defaultCheckPermissionOnRead = (
-	object: HookObject<any>,
-	context: Context,
-) => _checkPermissions(object, context, BeforeOperationType.BeforeRead)
+export const defaultCheckPermissionOnRead = (object: HookObject<any>) =>
+	_checkPermissions(object, object.context, BeforeOperationType.BeforeRead)
 
-export const defaultCheckPermissionOnCreate = (
-	object: HookObject<any>,
-	context: Context,
-) => _checkPermissions(object, context, BeforeOperationType.BeforeCreate)
+export const defaultCheckPermissionOnCreate = (object: HookObject<any>) =>
+	_checkPermissions(object, object.context, BeforeOperationType.BeforeCreate)
 
-export const defaultCheckPermissionOnUpdate = (
-	object: HookObject<any>,
-	context: Context,
-) => _checkPermissions(object, context, BeforeOperationType.BeforeUpdate)
+export const defaultCheckPermissionOnUpdate = (object: HookObject<any>) =>
+	_checkPermissions(object, object.context, BeforeOperationType.BeforeUpdate)
 
-export const defaultCheckPermissionOnDelete = (
-	object: HookObject<any>,
-	context: Context,
-) => _checkPermissions(object, context, BeforeOperationType.BeforeDelete)
+export const defaultCheckPermissionOnDelete = (object: HookObject<any>) =>
+	_checkPermissions(object, object.context, BeforeOperationType.BeforeDelete)
