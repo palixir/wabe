@@ -275,6 +275,7 @@ export class DatabaseController {
 			context: params.context,
 			newData: null,
 			operationType: OperationType.BeforeRead,
+			id: params.id,
 		})
 
 		const dataOfCurrentObject = await this.adapter.getObject({
@@ -288,6 +289,7 @@ export class DatabaseController {
 			context: params.context,
 			newData: null,
 			operationType: OperationType.AfterRead,
+			id: params.id,
 		})
 
 		if (!dataOfCurrentObject) return null
@@ -325,6 +327,7 @@ export class DatabaseController {
 			context: params.context,
 			newData: null,
 			operationType: OperationType.BeforeRead,
+			where: params.where,
 		})
 
 		const dataOfCurrentObject = await this.adapter.getObjects({
@@ -339,6 +342,7 @@ export class DatabaseController {
 			context: params.context,
 			newData: null,
 			operationType: OperationType.AfterRead,
+			where: params.where,
 		})
 
 		return Promise.all(
@@ -360,18 +364,18 @@ export class DatabaseController {
 		const arrayOfComputedData = await findHooksAndExecute({
 			className: params.className,
 			context: params.context,
-			newData: [params.data],
+			newData: params.data,
 			operationType: OperationType.BeforeCreate,
 		})
 
 		const res = await this.adapter.createObject({
 			...params,
-			data: arrayOfComputedData[0],
+			data: arrayOfComputedData,
 		})
 
 		await findHooksAndExecute({
 			className: params.className,
-			newData: [params.data],
+			newData: params.data,
 			operationType: OperationType.AfterInsert,
 			context: params.context,
 		})
@@ -384,24 +388,32 @@ export class DatabaseController {
 		K extends keyof WibeSchemaTypes[T],
 		W extends keyof WibeSchemaTypes[T],
 	>(params: CreateObjectsOptions<T, K, W>) {
-		const arrayOfComputedData = await findHooksAndExecute({
-			className: params.className,
-			context: params.context,
-			newData: params.data,
-			operationType: OperationType.BeforeCreate,
-		})
+		const arrayOfComputedData = await Promise.all(
+			params.data.map((newData) =>
+				findHooksAndExecute({
+					className: params.className,
+					context: params.context,
+					newData,
+					operationType: OperationType.BeforeCreate,
+				}),
+			),
+		)
 
 		const res = await this.adapter.createObjects({
 			...params,
 			data: arrayOfComputedData,
 		})
 
-		await findHooksAndExecute({
-			className: params.className,
-			context: params.context,
-			newData: params.data,
-			operationType: OperationType.AfterInsert,
-		})
+		await Promise.all(
+			params.data.map((newData) =>
+				findHooksAndExecute({
+					className: params.className,
+					context: params.context,
+					newData,
+					operationType: OperationType.AfterInsert,
+				}),
+			),
+		)
 
 		return res
 	}
@@ -414,20 +426,22 @@ export class DatabaseController {
 		const arrayOfComputedData = await findHooksAndExecute({
 			className: params.className,
 			context: params.context,
-			newData: [params.data],
+			newData: params.data,
 			operationType: OperationType.BeforeUpdate,
+			id: params.id,
 		})
 
 		const res = await this.adapter.updateObject({
 			...params,
-			data: arrayOfComputedData[0],
+			data: arrayOfComputedData,
 		})
 
 		await findHooksAndExecute({
 			className: params.className,
-			newData: [params.data],
+			newData: params.data,
 			operationType: OperationType.AfterUpdate,
 			context: params.context,
+			id: params.id,
 		})
 
 		return res
@@ -447,21 +461,23 @@ export class DatabaseController {
 		const arrayOfComputedData = await findHooksAndExecute({
 			className: params.className,
 			context: params.context,
-			newData: [params.data],
+			newData: params.data,
+			where: params.where,
 			operationType: OperationType.BeforeUpdate,
 		})
 
 		const res = await this.adapter.updateObjects({
 			...params,
-			data: arrayOfComputedData[0],
+			data: arrayOfComputedData,
 			where: whereObject,
 		})
 
 		await findHooksAndExecute({
 			className: params.className,
-			newData: [params.data],
+			newData: params.data,
 			operationType: OperationType.AfterUpdate,
 			context: params.context,
+			where: params.where,
 		})
 
 		return res
@@ -482,6 +498,7 @@ export class DatabaseController {
 			context: params.context,
 			newData: null,
 			operationType: OperationType.BeforeDelete,
+			id: params.id,
 		})
 
 		await this.adapter.deleteObject(params)
@@ -491,6 +508,7 @@ export class DatabaseController {
 			context: params.context,
 			newData: null,
 			operationType: OperationType.AfterDelete,
+			id: params.id,
 		})
 
 		return objectBeforeDelete
@@ -515,6 +533,7 @@ export class DatabaseController {
 			context: params.context,
 			newData: null,
 			operationType: OperationType.BeforeDelete,
+			where: params.where,
 		})
 
 		await this.adapter.deleteObjects({
@@ -527,6 +546,7 @@ export class DatabaseController {
 			context: params.context,
 			newData: null,
 			operationType: OperationType.AfterDelete,
+			where: params.where,
 		})
 
 		return objectsBeforeDelete

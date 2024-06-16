@@ -16,32 +16,38 @@ describe('Default fields', () => {
 			const hookObject = new HookObject<'_User'>({
 				className: '_User',
 				operationType: OperationType.BeforeCreate,
-				object: {
+				newData: {
 					email: 'email@test.fr',
 				} as any,
+				context: {} as any,
 			})
 
-			const spyHookObjectSet = spyOn(hookObject, 'set')
+			const spyHookObjectUpsertNewData = spyOn(
+				hookObject,
+				'upsertNewData',
+			)
 
 			await defaultBeforeCreateForCreatedAt(hookObject)
 
-			expect(spyHookObjectSet).toHaveBeenCalledTimes(2)
-			expect(spyHookObjectSet).toHaveBeenNthCalledWith(1, {
-				field: 'createdAt',
-				value: expect.any(Date),
-			})
-			expect(spyHookObjectSet).toHaveBeenNthCalledWith(2, {
-				field: 'updatedAt',
-				value: expect.any(Date),
-			})
+			expect(spyHookObjectUpsertNewData).toHaveBeenCalledTimes(2)
+			expect(spyHookObjectUpsertNewData).toHaveBeenNthCalledWith(
+				1,
+				'createdAt',
+				expect.any(Date),
+			)
+			expect(spyHookObjectUpsertNewData).toHaveBeenNthCalledWith(
+				2,
+				'updatedAt',
+				expect.any(Date),
+			)
 
-			const createdAt = spyHookObjectSet.mock.calls[0][0].value
+			const createdAt = spyHookObjectUpsertNewData.mock.calls[0][1]
 
 			expect(createdAt.getDay()).toEqual(now.getDay())
 			expect(createdAt.getMonth()).toEqual(now.getMonth())
 			expect(createdAt.getFullYear()).toEqual(now.getFullYear())
 
-			const updatedAt = spyHookObjectSet.mock.calls[1][0].value
+			const updatedAt = spyHookObjectUpsertNewData.mock.calls[1][1]
 			expect(updatedAt.getDay()).toEqual(now.getDay())
 			expect(updatedAt.getMonth()).toEqual(now.getMonth())
 			expect(updatedAt.getFullYear()).toEqual(now.getFullYear())
@@ -51,21 +57,25 @@ describe('Default fields', () => {
 			const hookObject = new HookObject<'_User'>({
 				className: '_User',
 				operationType: OperationType.BeforeUpdate,
-				object: {
+				newData: {
 					email: 'email@test.fr',
 				} as any,
+				context: {} as any,
 			})
 
-			const spyHookObjectSet = spyOn(hookObject, 'set')
+			const spyHookObjectUpsertNewData = spyOn(
+				hookObject,
+				'upsertNewData',
+			)
 
 			await defaultBeforeUpdateForUpdatedAt(hookObject)
-			expect(spyHookObjectSet).toHaveBeenCalledTimes(1)
-			expect(spyHookObjectSet).toHaveBeenCalledWith({
-				field: 'updatedAt',
-				value: expect.any(Date),
-			})
+			expect(spyHookObjectUpsertNewData).toHaveBeenCalledTimes(1)
+			expect(spyHookObjectUpsertNewData).toHaveBeenCalledWith(
+				'updatedAt',
+				expect.any(Date),
+			)
 
-			const updatedAt = spyHookObjectSet.mock.calls[0][0].value
+			const updatedAt = spyHookObjectUpsertNewData.mock.calls[0][1]
 
 			// Don't test hours to avoid flaky
 			expect(updatedAt.getDay()).toEqual(now.getDay())
@@ -99,35 +109,43 @@ describe('Default fields', () => {
 			const hookObject = new HookObject<'_User'>({
 				className: '_User',
 				operationType: OperationType.BeforeCreate,
-				object: {
+				newData: {
 					id: 'id',
 					email: 'email@test.fr',
 				} as any,
+				context: {} as any,
 			})
 
-			const spyHookObjectSet = spyOn(hookObject, 'set')
+			const spyHookObjectUpsertNewData = spyOn(
+				hookObject,
+				'upsertNewData',
+			)
 
 			await defaultBeforeCreateForDefaultValue(hookObject)
 
-			expect(spyHookObjectSet).toHaveBeenCalledTimes(1)
+			expect(spyHookObjectUpsertNewData).toHaveBeenCalledTimes(1)
 		})
 
 		it('should not add a default value if a value is specified', async () => {
 			const hookObject = new HookObject<'_User'>({
 				className: '_User',
 				operationType: OperationType.BeforeCreate,
-				object: {
+				newData: {
 					id: 'id',
 					email: 'email@test.fr',
 					isAdmin: true,
 				} as any,
+				context: {} as any,
 			})
 
-			const spyHookObjectSet = spyOn(hookObject, 'set')
+			const spyHookObjectUpsertNewData = spyOn(
+				hookObject,
+				'upsertNewData',
+			)
 
 			await defaultBeforeCreateForDefaultValue(hookObject)
 
-			expect(spyHookObjectSet).toHaveBeenCalledTimes(0)
+			expect(spyHookObjectUpsertNewData).toHaveBeenCalledTimes(0)
 		})
 	})
 })

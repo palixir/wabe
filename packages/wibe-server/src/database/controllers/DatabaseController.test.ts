@@ -116,15 +116,17 @@ describe('DatabaseController', () => {
 		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
 			className: 'TestClass',
 			context: { sessionId: 'sessionId' },
-			data: [],
+			newData: null,
 			operationType: hooks.OperationType.BeforeRead,
+			id: 'id',
 		})
 
 		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
 			className: 'TestClass',
 			context: { sessionId: 'sessionId' },
-			data: expect.any(Array),
+			newData: null,
 			operationType: hooks.OperationType.AfterRead,
+			id: 'id',
 		})
 	})
 
@@ -145,15 +147,17 @@ describe('DatabaseController', () => {
 		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
 			className: 'TestClass',
 			context: { sessionId: 'sessionId' },
-			data: [],
+			newData: null,
 			operationType: hooks.OperationType.BeforeRead,
+			where: { id: { equalTo: 'id' } },
 		})
 
 		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
 			className: 'TestClass',
 			context: { sessionId: 'sessionId' },
-			data: expect.any(Array),
+			newData: null,
 			operationType: hooks.OperationType.AfterRead,
+			where: { id: { equalTo: 'id' } },
 		})
 	})
 
@@ -165,6 +169,7 @@ describe('DatabaseController', () => {
 			className: 'TestClass',
 			context: { sessionId: 'sessionId' } as any,
 			id: 'id',
+			// @ts-expect-error
 			data: { name: 'test' },
 			fields: ['id'],
 		})
@@ -173,19 +178,19 @@ describe('DatabaseController', () => {
 		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
 			className: 'TestClass',
 			context: { sessionId: 'sessionId' },
-			data: [
-				{
-					name: 'test',
-				},
-			],
+			newData: {
+				name: 'test',
+			},
 			operationType: hooks.OperationType.BeforeUpdate,
+			id: 'id',
 		})
 
 		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
 			className: 'TestClass',
 			context: { sessionId: 'sessionId' },
-			data: expect.any(Array),
+			newData: { name: 'test' },
 			operationType: hooks.OperationType.AfterUpdate,
+			id: 'id',
 		})
 	})
 
@@ -199,6 +204,7 @@ describe('DatabaseController', () => {
 			className: 'TestClass',
 			context: { sessionId: 'sessionId' } as any,
 			where: { id: { equalTo: 'id' } },
+			// @ts-expect-error
 			data: { name: 'test' },
 			fields: ['id'],
 		})
@@ -207,15 +213,17 @@ describe('DatabaseController', () => {
 		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
 			className: 'TestClass',
 			context: { sessionId: 'sessionId' },
-			data: [{ name: 'test' }],
+			newData: { name: 'test' },
 			operationType: hooks.OperationType.BeforeUpdate,
+			where: { id: { equalTo: 'id' } },
 		})
 
 		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
 			className: 'TestClass',
 			context: { sessionId: 'sessionId' },
-			data: expect.any(Array),
+			newData: { name: 'test' },
 			operationType: hooks.OperationType.AfterUpdate,
+			where: { id: { equalTo: 'id' } },
 		})
 	})
 
@@ -226,6 +234,7 @@ describe('DatabaseController', () => {
 			// @ts-expect-error
 			className: 'TestClass',
 			context: { sessionId: 'sessionId' } as any,
+			// @ts-expect-error
 			data: { name: 'test' },
 			fields: ['id'],
 		})
@@ -234,18 +243,16 @@ describe('DatabaseController', () => {
 		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
 			className: 'TestClass',
 			context: { sessionId: 'sessionId' },
-			data: [
-				{
-					name: 'test',
-				},
-			],
+			newData: {
+				name: 'test',
+			},
 			operationType: hooks.OperationType.BeforeCreate,
 		})
 
 		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
 			className: 'TestClass',
 			context: { sessionId: 'sessionId' },
-			data: expect.any(Array),
+			newData: { name: 'test' },
 			operationType: hooks.OperationType.AfterInsert,
 		})
 	})
@@ -259,6 +266,7 @@ describe('DatabaseController', () => {
 			// @ts-expect-error
 			className: 'TestClass',
 			context: { sessionId: 'sessionId' } as any,
+			// @ts-expect-error
 			data: [{ name: 'test' }],
 			fields: ['id'],
 		})
@@ -267,14 +275,14 @@ describe('DatabaseController', () => {
 		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
 			className: 'TestClass',
 			context: { sessionId: 'sessionId' },
-			data: [{ name: 'test' }],
+			newData: { name: 'test' },
 			operationType: hooks.OperationType.BeforeCreate,
 		})
 
 		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
 			className: 'TestClass',
 			context: { sessionId: 'sessionId' },
-			data: expect.any(Array),
+			newData: { name: 'test' },
 			operationType: hooks.OperationType.AfterInsert,
 		})
 	})
@@ -289,6 +297,7 @@ describe('DatabaseController', () => {
 			className: 'TestClass',
 			context: { sessionId: 'sessionId' } as any,
 			fields: ['id'],
+			id: 'id',
 		})
 
 		// 4 before we get the object before
@@ -296,19 +305,17 @@ describe('DatabaseController', () => {
 		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(3, {
 			className: 'TestClass',
 			context: { sessionId: 'sessionId' },
-			data: [
-				{
-					name: 'test',
-				},
-			],
+			newData: null,
 			operationType: hooks.OperationType.BeforeDelete,
+			id: 'id',
 		})
 
 		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(4, {
 			className: 'TestClass',
 			context: { sessionId: 'sessionId' },
-			data: [{ name: 'test' }],
+			newData: null,
 			operationType: hooks.OperationType.AfterDelete,
+			id: 'id',
 		})
 	})
 
@@ -330,15 +337,17 @@ describe('DatabaseController', () => {
 		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(3, {
 			className: 'TestClass',
 			context: { sessionId: 'sessionId' },
-			data: [{ name: 'test' }],
+			newData: null,
 			operationType: hooks.OperationType.BeforeDelete,
+			where: { id: { equalTo: 'id' } },
 		})
 
 		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(4, {
 			className: 'TestClass',
 			context: { sessionId: 'sessionId' },
-			data: [{ name: 'test' }],
+			newData: null,
 			operationType: hooks.OperationType.AfterDelete,
+			where: { id: { equalTo: 'id' } },
 		})
 	})
 

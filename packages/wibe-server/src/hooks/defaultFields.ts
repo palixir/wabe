@@ -4,14 +4,14 @@ import type { HookObject } from './HookObject'
 export const defaultBeforeCreateForCreatedAt = async (
 	object: HookObject<any>,
 ) => {
-	object.set('createdAt', new Date())
-	object.set('updatedAt', new Date())
+	object.upsertNewData('createdAt', new Date())
+	object.upsertNewData('updatedAt', new Date())
 }
 
 export const defaultBeforeUpdateForUpdatedAt = async (
 	object: HookObject<any>,
 ) => {
-	object.set('updatedAt', new Date())
+	object.upsertNewData('updatedAt', new Date())
 }
 
 export const defaultBeforeCreateForDefaultValue = async (
@@ -25,11 +25,11 @@ export const defaultBeforeCreateForDefaultValue = async (
 		const currentSchemaField = schemaClass.fields[field]
 
 		if (
-			!object.get(field) &&
+			!object.isFieldUpdate(field) &&
 			currentSchemaField.type !== 'Pointer' &&
 			currentSchemaField.type !== 'Relation' &&
 			currentSchemaField.defaultValue !== undefined
 		)
-			object.set(field, currentSchemaField.defaultValue)
+			object.upsertNewData(field, currentSchemaField.defaultValue)
 	})
 }
