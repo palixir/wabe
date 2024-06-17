@@ -14,6 +14,7 @@ export class EmailPassword
 {
 	async onSignIn({
 		input,
+		context,
 	}: AuthenticationEventsOptions<EmailPasswordInterface>) {
 		// TODO : Use first here but need to refactor in graphql and mongoadapter to have first and not limit
 		const users = await WibeApp.databaseController.getObjects({
@@ -26,6 +27,7 @@ export class EmailPassword
 					},
 				},
 			},
+			context,
 		})
 
 		if (users.length === 0)
@@ -58,6 +60,7 @@ export class EmailPassword
 
 	async onSignUp({
 		input,
+		context,
 	}: AuthenticationEventsOptions<EmailPasswordInterface>) {
 		const users = await WibeApp.databaseController.getObjects({
 			className: '_User',
@@ -69,6 +72,7 @@ export class EmailPassword
 					},
 				},
 			},
+			context,
 		})
 
 		if (users.length > 0) throw new Error('User already exists')

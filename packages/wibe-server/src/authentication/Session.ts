@@ -27,6 +27,7 @@ export class Session {
 
 	async meFromAccessToken(
 		accessToken: string,
+		context: Context,
 	): Promise<{ sessionId: string; user: _User | null }> {
 		const sessions = await WibeApp.databaseController.getObjects({
 			className: '_Session',
@@ -43,6 +44,7 @@ export class Session {
 				'refreshToken',
 				'refreshTokenExpiresAt',
 			],
+			context,
 		})
 
 		const session = sessions[0]

@@ -40,7 +40,6 @@ export const _checkPermissions = async (
 	context: Context,
 	operationType: BeforeOperationType,
 ) => {
-	console.log({ context })
 	if (context.isRoot) return
 
 	const permissionOperation = convertOperationTypeToPermission(operationType)
@@ -68,6 +67,7 @@ export const _checkPermissions = async (
 		id: sessionId,
 		// @ts-expect-error
 		fields: ['id', 'user.id'],
+		context,
 	})
 
 	if (!res)

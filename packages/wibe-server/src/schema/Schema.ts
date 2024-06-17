@@ -4,7 +4,6 @@ import type {
 	WibeSchemaTypes,
 } from '../../generated/wibe'
 import { signInWithResolver, signUpWithResolver } from '../authentication'
-import { refreshResolver } from '../authentication/resolvers/refreshResolver'
 import { signOutResolver } from '../authentication/resolvers/signOutResolver'
 import { verifyChallengeResolver } from '../authentication/resolvers/verifyChallenge'
 import { WibeApp } from '../server'

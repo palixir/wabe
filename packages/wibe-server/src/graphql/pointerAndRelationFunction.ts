@@ -183,6 +183,7 @@ export const remove = async ({
 				className,
 				where,
 				fields: ['id'],
+				context,
 			})
 
 		await Promise.all(

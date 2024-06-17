@@ -207,7 +207,6 @@ export const mutationToCreateMultipleObjects = async (
 	className: keyof WibeSchemaTypes,
 ) => {
 	const fields = getFieldsFromInfo(info, className)
-
 	const inputFields = args.input?.fields as Array<any>
 
 	const updatedFieldsToCreate = await Promise.all(

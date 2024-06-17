@@ -111,7 +111,7 @@ describe('Resolver', () => {
 
 			// @ts-expect-error
 			const fields = extractFieldsFromSetNode(
-				info.fieldNodes[0].selectionSet
+				info.fieldNodes[0].selectionSet,
 			)
 			expect(fields).toEqual(['name', 'age'])
 		})
@@ -148,7 +148,7 @@ describe('Resolver', () => {
 
 			// @ts-expect-error
 			const fields = extractFieldsFromSetNode(
-				info.fieldNodes[0].selectionSet
+				info.fieldNodes[0].selectionSet,
 			)
 
 			expect(fields).toEqual(['name', 'age', 'field2'])
@@ -196,7 +196,7 @@ describe('Resolver', () => {
 
 			// @ts-expect-error
 			const fields = extractFieldsFromSetNode(
-				info.fieldNodes[0].selectionSet
+				info.fieldNodes[0].selectionSet,
 			)
 
 			expect(fields).toEqual(['name', 'age', 'field1.field2'])
@@ -239,7 +239,7 @@ describe('Resolver', () => {
 			const fields = extractFieldsFromSetNode(
 				// @ts-expect-error
 				info.fieldNodes[0].selectionSet,
-				'className'
+				'className',
 			)
 
 			expect(fields).toEqual(['field2', 'field3'])
@@ -362,6 +362,7 @@ describe('Resolver', () => {
 			className: 'TestClass',
 			fields: ['field2'],
 			id: 'id',
+			context,
 		})
 
 		expect(updatedFields).toEqual({
@@ -391,6 +392,7 @@ describe('Resolver', () => {
 			className: 'TestClass',
 			fields: ['field2'],
 			id: 'id',
+			context,
 		})
 
 		expect(updatedFields).toEqual({
@@ -455,6 +457,7 @@ describe('Resolver', () => {
 			where: {
 				id: { equalTo: 'id' },
 			},
+			context,
 		})
 
 		expect(mockUpdateObject).toHaveBeenCalledTimes(1)
@@ -497,6 +500,7 @@ describe('Resolver', () => {
 			where: {
 				id: { equalTo: 'id' },
 			},
+			context,
 		})
 
 		expect(mockUpdateObject).toHaveBeenCalledTimes(1)

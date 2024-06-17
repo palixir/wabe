@@ -21,7 +21,6 @@ import type {
 	DeleteObjectOptions,
 } from './adaptersInterface'
 import type { WibeSchemaTypes } from '../../../generated/wibe'
-import { OperationType, findHooksAndExecute } from '../../hooks'
 import { WibeApp } from '../../..'
 
 export const buildMongoWhereQuery = <T extends keyof WibeSchemaTypes>(

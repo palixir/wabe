@@ -42,8 +42,6 @@ describe('Authentication', () => {
 					}
 				}
 			`)
-
-		console.log(resUsers._users.edges)
 	})
 })
 

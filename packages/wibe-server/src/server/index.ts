@@ -138,10 +138,7 @@ export class WibeApp {
 			WobeGraphqlYogaPlugin({
 				schema,
 				maskedErrors: false,
-				context: async ({
-					request,
-					response,
-				}): Promise<Partial<Context>> => {
+				context: async ({ request }): Promise<Partial<Context>> => {
 					const headers = request.headers
 
 					const getAccessToken = () => {
@@ -167,11 +164,12 @@ export class WibeApp {
 
 					const session = new Session()
 
-					const { user, sessionId } =
-						await session.meFromAccessToken(accessToken)
+					const { user, sessionId } = await session.meFromAccessToken(
+						accessToken,
+						{ isRoot: true } as Context,
+					)
 
 					return {
-						response,
 						isRoot: true, // TODO : Check headers to set isRoot
 						sessionId,
 						user,

@@ -6,14 +6,12 @@ import {
 	afterAll,
 	beforeEach,
 	spyOn,
-	afterEach,
 } from 'bun:test'
 import { fail } from 'node:assert'
 import { ObjectId } from 'mongodb'
 import { closeTests, setupTests } from '../../utils/helper'
 import { type MongoAdapter, buildMongoWhereQuery } from './MongoAdapter'
 import { WibeApp } from '../../server'
-import * as hooks from '../../hooks'
 
 describe('Mongo adapter', () => {
 	let mongoAdapter: MongoAdapter
@@ -53,7 +51,7 @@ describe('Mongo adapter', () => {
 				},
 			],
 			fields: [],
-			context: { user: {} } as any,
+			context: { isRoot: true } as any,
 		})
 
 		const res = await mongoAdapter.getObjects({
@@ -62,6 +60,7 @@ describe('Mongo adapter', () => {
 				// @ts-expect-error
 				id: { notEqualTo: insertedObjects[0].id },
 			},
+			context: { isRoot: true } as any,
 		})
 
 		expect(res.length).toEqual(1)
@@ -81,7 +80,7 @@ describe('Mongo adapter', () => {
 				},
 			],
 			fields: [],
-			context: { user: {} } as any,
+			context: { isRoot: true } as any,
 		})
 
 		const res = await mongoAdapter.getObjects({
@@ -90,6 +89,7 @@ describe('Mongo adapter', () => {
 				// @ts-expect-error
 				id: { equalTo: insertedObjects[0].id },
 			},
+			context: { isRoot: true } as any,
 		})
 
 		expect(res.length).toEqual(1)
@@ -109,7 +109,7 @@ describe('Mongo adapter', () => {
 				},
 			],
 			fields: [],
-			context: { user: {} } as any,
+			context: { isRoot: true } as any,
 		})
 
 		const res = await mongoAdapter.getObjects({
@@ -118,6 +118,7 @@ describe('Mongo adapter', () => {
 				// @ts-expect-error
 				id: { in: insertedObjects.map((obj) => obj.id) },
 			},
+			context: { isRoot: true } as any,
 		})
 
 		expect(res.length).toEqual(2)
@@ -137,7 +138,7 @@ describe('Mongo adapter', () => {
 				},
 			],
 			fields: [],
-			context: { user: {} } as any,
+			context: { isRoot: true } as any,
 		})
 
 		const res = await mongoAdapter.getObjects({
@@ -146,6 +147,7 @@ describe('Mongo adapter', () => {
 				// @ts-expect-error
 				id: { notIn: insertedObjects.map((obj) => obj.id) },
 			},
+			context: { isRoot: true } as any,
 		})
 
 		expect(res.length).toEqual(0)
@@ -189,7 +191,7 @@ describe('Mongo adapter', () => {
 				},
 			],
 			fields: [],
-			context: { user: {} } as any,
+			context: { isRoot: true } as any,
 		})
 
 		if (!insertedObjects) fail()
@@ -207,7 +209,7 @@ describe('Mongo adapter', () => {
 					age: 20,
 				},
 			],
-			context: { user: {} } as any,
+			context: { isRoot: true } as any,
 		})
 
 		if (!insertedObjects) fail()
@@ -229,7 +231,7 @@ describe('Mongo adapter', () => {
 				},
 			],
 			fields: ['name', 'id'],
-			context: { user: {} } as any,
+			context: { isRoot: true } as any,
 		})
 
 		if (!insertedObjects) fail()
@@ -239,6 +241,7 @@ describe('Mongo adapter', () => {
 			where: {
 				id: { equalTo: new ObjectId(insertedObjects[0].id) },
 			},
+			context: { isRoot: true } as any,
 		})
 
 		expect(res.length).toEqual(1)
@@ -270,7 +273,7 @@ describe('Mongo adapter', () => {
 				},
 			],
 			fields: ['name', 'id'],
-			context: { user: {} } as any,
+			context: { isRoot: true } as any,
 		})
 
 		const res = await mongoAdapter.getObjects({
@@ -278,6 +281,7 @@ describe('Mongo adapter', () => {
 			fields: ['name'],
 			limit: 2,
 			offset: 2,
+			context: { isRoot: true } as any,
 		})
 
 		expect(res.length).toEqual(2)
@@ -312,7 +316,7 @@ describe('Mongo adapter', () => {
 			],
 			fields: ['name', 'id'],
 			limit: 2,
-			context: { user: {} } as any,
+			context: { isRoot: true } as any,
 		})
 
 		expect(res.length).toEqual(2)
@@ -347,7 +351,7 @@ describe('Mongo adapter', () => {
 			],
 			fields: ['name', 'id'],
 			limit: -2,
-			context: { user: {} } as any,
+			context: { isRoot: true } as any,
 		})
 
 		expect(res.length).toEqual(2)
@@ -379,7 +383,7 @@ describe('Mongo adapter', () => {
 				],
 				fields: ['name', 'id'],
 				offset: -2,
-				context: { user: {} } as any,
+				context: { isRoot: true } as any,
 			}),
 		).rejects.toThrow(
 			"BSON field 'skip' value must be >= 0, actual value '-2'",
@@ -412,12 +416,13 @@ describe('Mongo adapter', () => {
 				},
 			],
 			fields: ['name', 'id'],
-			context: { user: {} } as any,
+			context: { isRoot: true } as any,
 		})
 
 		const res = await mongoAdapter.getObjects({
 			className: '_User',
 			fields: ['name'],
+			context: { isRoot: true } as any,
 		})
 
 		expect(res.length).toEqual(5)
@@ -451,7 +456,7 @@ describe('Mongo adapter', () => {
 			fields: ['name', 'id'],
 			limit: 2,
 			offset: 2,
-			context: { user: {}, isRoot: true } as any,
+			context: { isRoot: true } as any,
 		})
 
 		expect(res.length).toEqual(2)
@@ -470,7 +475,7 @@ describe('Mongo adapter', () => {
 			fields: ['name'],
 			limit: 2,
 			offset: 1,
-			context: { user: {}, isRoot: true } as any,
+			context: { isRoot: true } as any,
 		})
 
 		const res2 = await mongoAdapter.getObjects({
@@ -482,6 +487,7 @@ describe('Mongo adapter', () => {
 					{ name: { equalTo: 'John4' } },
 				],
 			},
+			context: { isRoot: true } as any,
 		})
 
 		expect(res2.length).toEqual(0)
@@ -495,13 +501,14 @@ describe('Mongo adapter', () => {
 				age: 20,
 			},
 			fields: ['name', 'id'],
-			context: { user: {} } as any,
+			context: { isRoot: true } as any,
 		})
 
 		const res = await mongoAdapter.getObject({
 			id: insertedObject?.id.toString(),
 			className: '_User',
 			fields: ['id'],
+			context: { isRoot: true } as any,
 		})
 
 		expect(res?.id).toEqual(insertedObject?.id)
@@ -510,6 +517,7 @@ describe('Mongo adapter', () => {
 			id: insertedObject?.id.toString(),
 			className: '_User',
 			fields: ['name'],
+			context: { isRoot: true } as any,
 		})
 
 		// @ts-ignore
@@ -524,7 +532,7 @@ describe('Mongo adapter', () => {
 				age: 20,
 			},
 			fields: ['name', 'id'],
-			context: { user: {} } as any,
+			context: { isRoot: true } as any,
 		})
 
 		if (!insertedObject) fail()
@@ -537,6 +545,7 @@ describe('Mongo adapter', () => {
 			className: '_User',
 			id: id.toString(),
 			fields: ['name'],
+			context: { isRoot: true } as any,
 		})
 
 		expect(field).toEqual({
@@ -559,7 +568,7 @@ describe('Mongo adapter', () => {
 				age: 20,
 			},
 			fields: ['name'],
-			context: { user: {} } as any,
+			context: { isRoot: true } as any,
 		})
 
 		await mongoAdapter.createObject({
@@ -569,12 +578,13 @@ describe('Mongo adapter', () => {
 				age: 20,
 			},
 			fields: ['name'],
-			context: { user: {} } as any,
+			context: { isRoot: true } as any,
 		})
 
 		const objects2 = await mongoAdapter.getObjects({
 			className: '_User',
 			fields: ['name', 'id'],
+			context: { isRoot: true } as any,
 		})
 
 		expect(objects2.length).toEqual(2)
@@ -592,6 +602,7 @@ describe('Mongo adapter', () => {
 		const objects3 = await mongoAdapter.getObjects({
 			className: '_User',
 			fields: ['name', 'id', 'age'],
+			context: { isRoot: true } as any,
 		})
 
 		expect(objects3.length).toEqual(2)
@@ -617,7 +628,7 @@ describe('Mongo adapter', () => {
 				age: 20,
 			},
 			fields: ['name'],
-			context: { user: {} } as any,
+			context: { isRoot: true } as any,
 		})
 
 		await mongoAdapter.createObject({
@@ -627,7 +638,7 @@ describe('Mongo adapter', () => {
 				age: 20,
 			},
 			fields: ['name'],
-			context: { user: {} } as any,
+			context: { isRoot: true } as any,
 		})
 
 		// OR statement
@@ -645,6 +656,7 @@ describe('Mongo adapter', () => {
 					],
 				},
 				fields: ['name', 'id', 'age'],
+				context: { isRoot: true } as any,
 			}),
 		).toEqual([
 			{
@@ -673,6 +685,7 @@ describe('Mongo adapter', () => {
 					],
 				},
 				fields: ['name', 'id', 'age'],
+				context: { isRoot: true } as any,
 			}),
 		).toEqual([
 			{
@@ -697,6 +710,7 @@ describe('Mongo adapter', () => {
 					],
 				},
 				fields: ['name', 'id', 'age'],
+				context: { isRoot: true } as any,
 			}),
 		).toEqual([
 			{
@@ -719,6 +733,7 @@ describe('Mongo adapter', () => {
 						},
 					],
 				},
+				context: { isRoot: true } as any,
 			}),
 		).toEqual([])
 
@@ -730,6 +745,7 @@ describe('Mongo adapter', () => {
 					name: { equalTo: 'John1' },
 				},
 				fields: ['name', 'id', 'age'],
+				context: { isRoot: true } as any,
 			}),
 		).toEqual([
 			{
@@ -745,6 +761,7 @@ describe('Mongo adapter', () => {
 				where: {
 					age: { greaterThan: 21 },
 				},
+				context: { isRoot: true } as any,
 			}),
 		).toEqual([])
 
@@ -756,6 +773,7 @@ describe('Mongo adapter', () => {
 					name: { notEqualTo: 'John1' },
 				},
 				fields: ['name', 'id', 'age'],
+				context: { isRoot: true } as any,
 			}),
 		).toEqual([
 			{
@@ -772,6 +790,7 @@ describe('Mongo adapter', () => {
 				where: {
 					name: { lessThan: 'John1' },
 				},
+				context: { isRoot: true } as any,
 			}),
 		).toEqual([])
 
@@ -783,6 +802,7 @@ describe('Mongo adapter', () => {
 					age: { lessThan: 30 },
 				},
 				fields: ['name', 'id', 'age'],
+				context: { isRoot: true } as any,
 			}),
 		).toEqual([
 			{
@@ -805,6 +825,7 @@ describe('Mongo adapter', () => {
 					age: { equalTo: 20 },
 				},
 				fields: ['name', 'id', 'age'],
+				context: { isRoot: true } as any,
 			}),
 		).toEqual([
 			{
@@ -838,7 +859,7 @@ describe('Mongo adapter', () => {
 				age: 23,
 			},
 			fields: ['age', 'id'],
-			context: { user: {} } as any,
+			context: { isRoot: true } as any,
 		})
 
 		expect(insertedObject).toEqual({ age: 23, id: expect.any(String) })
@@ -850,7 +871,7 @@ describe('Mongo adapter', () => {
 				age: 24,
 			},
 			fields: ['name', 'id', 'age'],
-			context: { user: {} } as any,
+			context: { isRoot: true } as any,
 		})
 
 		expect(insertedObject2).toEqual({
@@ -874,7 +895,7 @@ describe('Mongo adapter', () => {
 				},
 			],
 			fields: ['name', 'id'],
-			context: { user: {} } as any,
+			context: { isRoot: true } as any,
 		})
 
 		expect(insertedObjects).toEqual([
@@ -903,7 +924,7 @@ describe('Mongo adapter', () => {
 				},
 			],
 			fields: ['name', 'id', 'age'],
-			context: { user: {} } as any,
+			context: { isRoot: true } as any,
 		})
 
 		expect(insertedObjects).toEqual([
@@ -927,7 +948,7 @@ describe('Mongo adapter', () => {
 				name: 'John',
 				age: 20,
 			},
-			context: { user: {}, isRoot: true } as any,
+			context: { isRoot: true } as any,
 		})
 
 		if (!insertedObject) fail()
@@ -939,7 +960,7 @@ describe('Mongo adapter', () => {
 			id: id.toString(),
 			data: { name: 'Doe' },
 			fields: ['name', 'id'],
-			context: { user: {}, isRoot: true } as any,
+			context: { isRoot: true } as any,
 		})
 
 		if (!updatedObject) fail()
@@ -979,7 +1000,7 @@ describe('Mongo adapter', () => {
 					age: 20,
 				},
 			],
-			context: { user: {}, isRoot: true } as any,
+			context: { isRoot: true } as any,
 		})
 
 		if (!insertedObjects) fail()
@@ -991,7 +1012,7 @@ describe('Mongo adapter', () => {
 			},
 			data: { age: 21 },
 			fields: ['name', 'id', 'age'],
-			context: { user: {}, isRoot: true } as any,
+			context: { isRoot: true } as any,
 		})
 
 		expect(updatedObjects).toEqual([
@@ -1009,7 +1030,7 @@ describe('Mongo adapter', () => {
 			},
 			data: { age: 23 },
 			fields: ['name', 'id', 'age'],
-			context: { user: {}, isRoot: true } as any,
+			context: { isRoot: true } as any,
 		})
 
 		expect(updatedObjects2).toEqual([
@@ -1033,7 +1054,7 @@ describe('Mongo adapter', () => {
 				name: 'John',
 				age: 20,
 			},
-			context: { user: {}, isRoot: true } as any,
+			context: { isRoot: true } as any,
 		})
 
 		if (!insertedObject) fail()
@@ -1047,7 +1068,7 @@ describe('Mongo adapter', () => {
 				},
 			},
 			fields: ['age', 'id'],
-			context: { user: {}, isRoot: true } as any,
+			context: { isRoot: true } as any,
 		})
 
 		expect(updatedObjects).toEqual([
@@ -1065,7 +1086,7 @@ describe('Mongo adapter', () => {
 				name: 'John',
 				age: 20,
 			},
-			context: { user: {}, isRoot: true } as any,
+			context: { isRoot: true } as any,
 		})
 
 		if (!insertedObject) fail()
@@ -1076,12 +1097,13 @@ describe('Mongo adapter', () => {
 			className: '_User',
 			id: id.toString(),
 			fields: ['name', 'id', 'age'],
-			context: { user: {}, isRoot: true } as any,
+			context: { isRoot: true } as any,
 		})
 
 		const resAfterDelete = await mongoAdapter.getObject({
 			className: '_User',
 			id: id.toString(),
+			context: { isRoot: true } as any,
 		})
 
 		expect(resAfterDelete).toBeNull()
@@ -1094,7 +1116,7 @@ describe('Mongo adapter', () => {
 				name: 'John',
 				age: 18,
 			},
-			context: { user: {}, isRoot: true } as any,
+			context: { isRoot: true } as any,
 		})
 
 		await mongoAdapter.createObject({
@@ -1103,19 +1125,20 @@ describe('Mongo adapter', () => {
 				name: 'Lucas',
 				age: 18,
 			},
-			context: { user: {}, isRoot: true } as any,
+			context: { isRoot: true } as any,
 		})
 
 		await mongoAdapter.deleteObjects({
 			className: '_User',
 			where: { age: { equalTo: 18 } },
 			fields: ['name', 'id', 'age'],
-			context: { user: {}, isRoot: true } as any,
+			context: { isRoot: true } as any,
 		})
 
 		const resAfterDelete = await mongoAdapter.getObjects({
 			className: '_User',
 			where: { age: { equalTo: 18 } },
+			context: { isRoot: true } as any,
 		})
 
 		expect(resAfterDelete.length).toEqual(0)
@@ -1194,7 +1217,7 @@ describe('Mongo adapter', () => {
 	it('should request sub object in object', async () => {
 		await mongoAdapter.createObject({
 			className: '_User',
-			context: {} as any,
+			context: { isRoot: true } as any,
 			data: {
 				authentication: {
 					emailPassword: {
@@ -1215,6 +1238,7 @@ describe('Mongo adapter', () => {
 					},
 				},
 			},
+			context: { isRoot: true } as any,
 		})
 
 		expect(res.length).toEqual(1)

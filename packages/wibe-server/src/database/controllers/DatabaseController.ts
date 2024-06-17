@@ -129,6 +129,7 @@ export class DatabaseController {
 		objectData: Pick<WibeSchemaTypes[T], K> | null,
 		pointersObject: PointerObject,
 		originClassName: T,
+		context: Context,
 	) {
 		return Object.entries(pointersObject).reduce(
 			async (
@@ -150,6 +151,7 @@ export class DatabaseController {
 						fields: fieldsOfPointerClass,
 						// @ts-expect-error
 						id: objectData[pointerField],
+						context,
 					})
 
 					return {
@@ -171,6 +173,7 @@ export class DatabaseController {
 						fields: fieldsOfPointerClass,
 						// @ts-expect-error
 						where: { id: { in: objectData[pointerField] } },
+						context,
 					})
 
 					return {
@@ -298,6 +301,7 @@ export class DatabaseController {
 			dataOfCurrentObject,
 			pointers,
 			params.className,
+			params.context,
 		) as any
 	}
 
@@ -351,6 +355,7 @@ export class DatabaseController {
 					data,
 					pointers,
 					params.className,
+					params.context,
 				),
 			),
 		) as Promise<Pick<WibeSchemaTypes[T], K>[]>
@@ -487,9 +492,7 @@ export class DatabaseController {
 		T extends keyof WibeSchemaTypes,
 		K extends keyof WibeSchemaTypes[T],
 	>(params: DeleteObjectOptions<T, K>) {
-		const objectBeforeDelete = await this.getObject({
-			...params,
-		})
+		const objectBeforeDelete = await this.getObject(params)
 
 		if (!objectBeforeDelete) return null
 
@@ -524,9 +527,7 @@ export class DatabaseController {
 			params.context,
 		)
 
-		const objectsBeforeDelete = await this.getObjects({
-			...params,
-		})
+		const objectsBeforeDelete = await this.getObjects(params)
 
 		await findHooksAndExecute({
 			className: params.className,

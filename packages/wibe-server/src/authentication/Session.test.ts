@@ -16,7 +16,7 @@ describe('Session', () => {
 	const mockGetObject = mock(() => Promise.resolve({}) as any)
 	const mockGetObjects = mock(() => Promise.resolve([]) as any)
 	const mockCreateObject = mock(() =>
-		Promise.resolve({ id: 'userId' })
+		Promise.resolve({ id: 'userId' }),
 	) as any
 	const mockDeleteObject = mock(() => Promise.resolve()) as any
 	const mockUpdateObject = mock(() => Promise.resolve()) as any
@@ -76,7 +76,7 @@ describe('Session', () => {
 					email: 'userEmail',
 				},
 				refreshTokenExpiresAt: new Date(
-					Date.now() + 1000 * 60 * 60 * 24 * 30
+					Date.now() + 1000 * 60 * 60 * 24 * 30,
 				),
 			},
 		])
@@ -84,7 +84,8 @@ describe('Session', () => {
 		const session = new Session()
 
 		const { sessionId, user } = await session.meFromAccessToken(
-			'accessToken'
+			'accessToken',
+			{ isRoot: true } as any,
 		)
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
@@ -101,6 +102,7 @@ describe('Session', () => {
 				'refreshToken',
 				'refreshTokenExpiresAt',
 			],
+			context: expect.any(Object),
 		})
 
 		expect(sessionId).toEqual('sessionId')
@@ -116,7 +118,7 @@ describe('Session', () => {
 
 		const { accessToken, refreshToken } = await session.create(
 			'userId',
-			{} as any
+			{} as any,
 		)
 
 		expect(accessToken).not.toBeUndefined()
@@ -130,21 +132,21 @@ describe('Session', () => {
 		expect(decodedAccessToken).not.toBeNull()
 		expect(decodedAccessToken.userId).toEqual('userId')
 		expect(decodedAccessToken.exp).toBeGreaterThanOrEqual(
-			fifteenMinutes.getTime()
+			fifteenMinutes.getTime(),
 		)
 		expect(decodedAccessToken.iat).toBeGreaterThanOrEqual(Date.now() - 500) // minus 500ms to avoid flaky
 
 		expect(decodedRefreshToken).not.toBeNull()
 		expect(decodedRefreshToken.userId).toEqual('userId')
 		expect(decodedRefreshToken.exp).toBeGreaterThanOrEqual(
-			thirtyDays.getTime()
+			thirtyDays.getTime(),
 		)
 		expect(decodedRefreshToken.iat).toBeGreaterThanOrEqual(Date.now() - 500) // minus 500ms to avoid flaky
 
 		expect(mockCreateObject).toHaveBeenCalledTimes(1)
 		expect(mockCreateObject).toHaveBeenCalledWith({
 			className: '_Session',
-			context: {},
+			context: expect.any(Object),
 			data: {
 				accessToken,
 				accessTokenExpiresAt: expect.any(Date),
@@ -174,7 +176,7 @@ describe('Session', () => {
 				id: 'sessionId',
 				refreshToken: 'refreshToken',
 				refreshTokenExpiresAt: new Date(
-					Date.now() + 1000 * 60 * 60 * 24 * 30
+					Date.now() + 1000 * 60 * 60 * 24 * 30,
 				),
 				user: {
 					id: 'userId',
@@ -188,7 +190,7 @@ describe('Session', () => {
 		const { accessToken, refreshToken } = await session.refresh(
 			'accessToken',
 			'refreshToken',
-			{} as any
+			{} as any,
 		)
 
 		expect(accessToken).not.toBeUndefined()
@@ -201,6 +203,7 @@ describe('Session', () => {
 				accessToken: { equalTo: 'accessToken' },
 			},
 			fields: ['id', 'user', 'refreshToken', 'refreshTokenExpiresAt'],
+			context: expect.any(Object),
 		})
 
 		expect(mockUpdateObject).toHaveBeenCalledTimes(1)
@@ -224,22 +227,22 @@ describe('Session', () => {
 
 		// -1000 to avoid flaky
 		expect(accessTokenExpiresAt.getTime()).toBeGreaterThan(
-			Date.now() + 1000 * 60 * 15 - 1000
+			Date.now() + 1000 * 60 * 15 - 1000,
 		)
 
 		// -1000 to avoid flaky
 		expect(refreshTokenExpiresAt.getTime()).toBeGreaterThan(
-			Date.now() + 1000 * 60 * 60 * 24 * 30 - 1000
+			Date.now() + 1000 * 60 * 60 * 24 * 30 - 1000,
 		)
 	})
 
-	it('should should not refresh session if the access token does not already take 75% of time', async () => {
+	it('should not refresh session if the access token does not already take 75% of time', async () => {
 		mockGetObjects.mockResolvedValue([
 			{
 				id: 'sessionId',
 				refreshToken: 'refreshToken',
 				refreshTokenExpiresAt: new Date(
-					Date.now() + 1000 * 60 * 60 * 24 * 1
+					Date.now() + 1000 * 60 * 60 * 24 * 1,
 				),
 				user: {
 					id: 'userId',
@@ -253,7 +256,7 @@ describe('Session', () => {
 		const { accessToken, refreshToken } = await session.refresh(
 			'accessToken',
 			'refreshToken',
-			{} as any
+			{} as any,
 		)
 
 		expect(accessToken).toBe('accessToken')
@@ -266,6 +269,7 @@ describe('Session', () => {
 				accessToken: { equalTo: 'accessToken' },
 			},
 			fields: ['id', 'user', 'refreshToken', 'refreshTokenExpiresAt'],
+			context: expect.any(Object),
 		})
 
 		expect(mockUpdateObject).toHaveBeenCalledTimes(0)
@@ -277,7 +281,7 @@ describe('Session', () => {
 		const session = new Session()
 
 		expect(
-			session.refresh('accessToken', 'refreshToken', {} as any)
+			session.refresh('accessToken', 'refreshToken', {} as any),
 		).rejects.toThrow('Session not found')
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
@@ -287,6 +291,7 @@ describe('Session', () => {
 				accessToken: { equalTo: 'accessToken' },
 			},
 			fields: ['id', 'user', 'refreshToken', 'refreshTokenExpiresAt'],
+			context: expect.any(Object),
 		})
 	})
 
@@ -306,7 +311,7 @@ describe('Session', () => {
 		const session = new Session()
 
 		expect(
-			session.refresh('accessToken', 'refreshToken', {} as any)
+			session.refresh('accessToken', 'refreshToken', {} as any),
 		).rejects.toThrow('Refresh token expired')
 	})
 
@@ -316,7 +321,7 @@ describe('Session', () => {
 				id: 'sessionId',
 				refreshToken: 'refreshToken',
 				refreshTokenExpiresAt: new Date(
-					Date.now() + 1000 * 60 * 60 * 24 * 30
+					Date.now() + 1000 * 60 * 60 * 24 * 30,
 				),
 				user: {
 					id: 'userId',
@@ -328,7 +333,7 @@ describe('Session', () => {
 		const session = new Session()
 
 		expect(
-			session.refresh('accessToken', 'wrongRefreshToken', {} as any)
+			session.refresh('accessToken', 'wrongRefreshToken', {} as any),
 		).rejects.toThrow('Invalid refresh token')
 	})
 })
