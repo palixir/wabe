@@ -67,7 +67,8 @@ export const _checkPermissions = async (
 		id: sessionId,
 		// @ts-expect-error
 		fields: ['id', 'user.id'],
-		context,
+		// We need to set isRoot to true to avoid infinite loop
+		context: { isRoot: true },
 	})
 
 	if (!res)

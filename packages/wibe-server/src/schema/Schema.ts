@@ -354,6 +354,7 @@ export class Schema {
 								outputObject: {
 									name: 'SignInWithOutput',
 									fields: {
+										id: { type: 'String' },
 										accessToken: {
 											type: 'String',
 											required: true,
@@ -376,6 +377,7 @@ export class Schema {
 								outputObject: {
 									name: 'SignUpWithOutput',
 									fields: {
+										id: { type: 'String' },
 										accessToken: {
 											type: 'String',
 											required: true,

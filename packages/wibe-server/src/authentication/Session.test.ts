@@ -1,12 +1,4 @@
-import {
-	describe,
-	expect,
-	it,
-	beforeAll,
-	mock,
-	spyOn,
-	beforeEach,
-} from 'bun:test'
+import { describe, expect, it, beforeAll, mock, beforeEach } from 'bun:test'
 import { fail } from 'node:assert'
 import jwt, { type JwtPayload } from 'jsonwebtoken'
 import { Session } from './Session'
@@ -44,7 +36,9 @@ describe('Session', () => {
 
 		const session = new Session()
 
-		const res = await session.meFromAccessToken('accessToken')
+		const res = await session.meFromAccessToken('accessToken', {
+			isRoot: true,
+		})
 
 		expect(res.user).toBeNull()
 		expect(res.sessionId).toBeNull()
@@ -60,9 +54,11 @@ describe('Session', () => {
 				'id',
 				'user.id',
 				'user.email',
+				'user.role.name',
 				'refreshToken',
 				'refreshTokenExpiresAt',
 			],
+			context: { isRoot: true },
 		})
 	})
 
@@ -99,6 +95,7 @@ describe('Session', () => {
 				'id',
 				'user.id',
 				'user.email',
+				'user.role.name',
 				'refreshToken',
 				'refreshTokenExpiresAt',
 			],

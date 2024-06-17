@@ -195,6 +195,7 @@ describe('SignInWith', () => {
 		expect(res).toEqual({
 			accessToken: 'accessToken',
 			refreshToken: 'refreshToken',
+			id: 'id',
 		})
 		expect(mockOnLogin).toHaveBeenCalledTimes(1)
 		expect(mockOnLogin).toHaveBeenCalledWith({

@@ -179,7 +179,7 @@ export class WibeApp {
 					)
 
 					return {
-						isRoot: true,
+						isRoot: false,
 						sessionId,
 						user,
 					}

@@ -38,6 +38,19 @@ export const getAnonymousClient = (port: number): GraphQLClient => {
 	return { ...client, request: client.request<any> } as GraphQLClient
 }
 
+export const getUserClient = (
+	port: number,
+	accessToken: string,
+): GraphQLClient => {
+	const client = new GraphQLClient(`http://127.0.0.1:${port}/graphql`, {
+		headers: {
+			'Wibe-Access-Token': accessToken,
+		},
+	})
+
+	return { ...client, request: client.request<any> } as GraphQLClient
+}
+
 export const setupTests = async () => {
 	const databaseId = uuid()
 

@@ -508,6 +508,7 @@ input SecondCustomMutationSumInput {
 }
 
 type SignInWithOutput {
+  id: String
   accessToken: String!
   refreshToken: String!
 }
@@ -532,6 +533,7 @@ input SignInWithAuthenticationOtpInput {
 }
 
 type SignUpWithOutput {
+  id: String
   accessToken: String!
   refreshToken: String!
 }

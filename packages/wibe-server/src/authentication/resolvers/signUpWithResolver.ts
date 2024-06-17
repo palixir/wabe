@@ -50,14 +50,14 @@ export const signUpWithResolver = async (
 	} as Context)
 
 	if (WibeApp.config.authentication?.session?.cookieSession) {
-		context.response.setCookie('refreshToken', refreshToken, {
+		context.response?.setCookie('refreshToken', refreshToken, {
 			httpOnly: true,
 			path: '/',
 			secure: process.env.NODE_ENV === 'production',
 			expires: new Date(Date.now() + session.getRefreshTokenExpireIn()),
 		})
 
-		context.response.setCookie('accessToken', accessToken, {
+		context.response?.setCookie('accessToken', accessToken, {
 			httpOnly: true,
 			path: '/',
 			secure: process.env.NODE_ENV === 'production',
@@ -65,5 +65,5 @@ export const signUpWithResolver = async (
 		})
 	}
 
-	return { accessToken, refreshToken }
+	return { accessToken, refreshToken, id: userId }
 }

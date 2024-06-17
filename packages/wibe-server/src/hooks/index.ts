@@ -109,7 +109,9 @@ export const findHooksAndExecute = async <T extends keyof WibeSchemaTypes>({
 	})
 
 	// We need to keep the order of the data but we need to execute the hooks in parallel
-	await hooksOrderByPriorities.reduce(async (_, priority) => {
+	await hooksOrderByPriorities.reduce(async (acc, priority) => {
+		await acc
+
 		const hooksToCompute = await _findHooksByPriority({
 			className,
 			operationType,
