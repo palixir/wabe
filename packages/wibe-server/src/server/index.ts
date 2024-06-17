@@ -22,7 +22,7 @@ interface WibeConfig {
 	codegen?: boolean
 	authentication?: AuthenticationConfig
 	routes?: WibeRoute[]
-	wibeKey: string
+	rootKey: string
 	hooks?: Hook<any>[]
 }
 
@@ -38,7 +38,7 @@ export class WibeApp {
 		database,
 		codegen = true,
 		authentication,
-		wibeKey,
+		rootKey,
 		hooks,
 	}: WibeConfig) {
 		WibeApp.config = {
@@ -47,7 +47,7 @@ export class WibeApp {
 			database,
 			codegen,
 			authentication,
-			wibeKey,
+			rootKey,
 			hooks,
 		}
 
@@ -112,6 +112,11 @@ export class WibeApp {
 	}
 
 	async start() {
+		if (WibeApp.config.rootKey.length < 64)
+			throw new Error(
+				'Root key need to be greater or equal than 64 characters',
+			)
+
 		await WibeApp.databaseController.connect()
 
 		const wibeSchema = new Schema(WibeApp.config.schema)
@@ -141,6 +146,9 @@ export class WibeApp {
 				context: async ({ request }): Promise<Partial<Context>> => {
 					const headers = request.headers
 
+					if (headers.get('Wibe-Root-Key') === WibeApp.config.rootKey)
+						return { isRoot: true }
+
 					const getAccessToken = () => {
 						const isCookieSession =
 							!!WibeApp.config.authentication?.session
@@ -159,7 +167,7 @@ export class WibeApp {
 
 					if (!accessToken)
 						return {
-							isRoot: true, // TODO: Check headers to set isRoot
+							isRoot: false,
 						}
 
 					const session = new Session()
@@ -170,7 +178,7 @@ export class WibeApp {
 					)
 
 					return {
-						isRoot: true, // TODO : Check headers to set isRoot
+						isRoot: true,
 						sessionId,
 						user,
 					}

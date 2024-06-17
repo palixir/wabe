@@ -18,7 +18,7 @@ const createWibeApp = async (schema: SchemaInterface) => {
 	const wibeApp = new WibeApp({
 		port,
 		schema,
-		wibeKey:
+		rootKey:
 			'0uwFvUxM$ceFuF1aEtTtZMa7DUN2NZudqgY5ve5W*QCyb58cwMj9JeoaV@d#%29v&aJzswuudVU1%nAT+rxS0Bh&OkgBYc0PH18*',
 		database: {
 			type: DatabaseEnum.Mongo,
