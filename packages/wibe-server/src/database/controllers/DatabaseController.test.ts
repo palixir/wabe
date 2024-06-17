@@ -101,6 +101,19 @@ describe('DatabaseController', () => {
 		mockFindHooksAndExecute.mockClear()
 	})
 
+	it('should not call createObjects adapter when the data array is empty', async () => {
+		const databaseController = new DatabaseController(mockAdapter() as any)
+
+		await databaseController.createObjects({
+			// @ts-expect-error
+			className: 'TestClass',
+			context: { isRoot: true },
+			data: [],
+		})
+
+		expect(mockCreateObjects).toHaveBeenCalledTimes(0)
+	})
+
 	it('should call findHooksAndExecute on getObject', async () => {
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
@@ -375,6 +388,7 @@ describe('DatabaseController', () => {
 						},
 					],
 				},
+				{ isRoot: true },
 			)
 
 		expect(res).toEqual({
@@ -408,6 +422,7 @@ describe('DatabaseController', () => {
 				{
 					pointerToAnotherClass: { field1: { equalTo: 'value' } },
 				},
+				{ isRoot: true },
 			)
 
 		expect(res).toEqual({
@@ -418,7 +433,7 @@ describe('DatabaseController', () => {
 		})
 	})
 
-	it('should get the object with pointer data', async () => {
+	it('should get multiple objects with pointer data', async () => {
 		mockGetObjects.mockResolvedValueOnce([
 			{ id: 'anotherClassId' },
 			{ id: 'anotherClassId2' },
@@ -632,6 +647,7 @@ describe('DatabaseController', () => {
 				},
 			},
 			'TestClass',
+			{ isRoot: true },
 		)
 
 		expect(mockGetObject).toHaveBeenCalledTimes(1)
@@ -639,6 +655,7 @@ describe('DatabaseController', () => {
 			className: 'AnotherClass',
 			fields: ['field1'],
 			id: 'idOfAnotherClass',
+			context: { isRoot: true },
 		})
 	})
 

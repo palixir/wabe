@@ -28,7 +28,7 @@ export const signUpWithResolver = async (
 
 	const { authenticationDataToSave } = await provider.onSignUp({
 		input: inputOfTheGoodAuthenticationMethod,
-		context,
+		context: { isRoot: true } as Context,
 	})
 
 	const { id: userId } = await WibeApp.databaseController.createObject({
@@ -40,12 +40,14 @@ export const signUpWithResolver = async (
 				},
 			},
 		},
-		context,
+		context: { isRoot: true } as Context,
 	})
 
 	const session = new Session()
 
-	const { accessToken, refreshToken } = await session.create(userId, context)
+	const { accessToken, refreshToken } = await session.create(userId, {
+		isRoot: true,
+	} as Context)
 
 	if (WibeApp.config.authentication?.session?.cookieSession) {
 		context.response.setCookie('refreshToken', refreshToken, {

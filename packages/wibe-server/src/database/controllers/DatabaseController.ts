@@ -393,6 +393,8 @@ export class DatabaseController {
 		K extends keyof WibeSchemaTypes[T],
 		W extends keyof WibeSchemaTypes[T],
 	>(params: CreateObjectsOptions<T, K, W>) {
+		if (params.data.length === 0) return []
+
 		const arrayOfComputedData = await Promise.all(
 			params.data.map((newData) =>
 				findHooksAndExecute({

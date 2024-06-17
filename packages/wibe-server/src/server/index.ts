@@ -14,6 +14,7 @@ import { WobeGraphqlYogaPlugin } from 'wobe-graphql-yoga'
 import { Session } from '../authentication/Session'
 import { getCookieInRequestHeaders } from '../utils'
 import type { Context } from '../graphql/interface'
+import { initializeRoles } from '../authentication/roles'
 
 interface WibeConfig {
 	port: number
@@ -260,6 +261,8 @@ export class WibeApp {
 				)
 			Bun.write('generated/schema.graphql', printSchema(schema))
 		}
+
+		await initializeRoles()
 
 		this.server.listen(WibeApp.config.port, ({ port }) => {
 			console.log(`Server is running on port ${port}`)

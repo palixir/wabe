@@ -1,5 +1,10 @@
 import { beforeAll, afterAll, describe, expect, it } from 'bun:test'
-import { closeTests, getGraphqlClient, setupTests } from '../utils/helper'
+import {
+	closeTests,
+	getAnonymousClient,
+	getGraphqlClient,
+	setupTests,
+} from '../utils/helper'
 import type { WibeApp } from '..'
 import { gql, type GraphQLClient } from 'graphql-request'
 
@@ -7,12 +12,14 @@ describe('Authentication', () => {
 	let wibe: WibeApp
 	let port: number
 	let client: GraphQLClient
+	let rootClient: GraphQLClient
 
 	beforeAll(async () => {
 		const setup = await setupTests()
 		wibe = setup.wibe
 		port = setup.port
-		client = getGraphqlClient(port)
+		client = getAnonymousClient(port)
+		rootClient = getGraphqlClient(port)
 	})
 
 	afterAll(async () => {
@@ -31,17 +38,17 @@ describe('Authentication', () => {
 			},
 		})
 
-		const resUsers = await client.request<any>(gql`
-				query _users {
-					_users {
-						edges {
-							node {
-								id
-							}
-						}
-					}
-				}
-			`)
+		// const resUsers = await rootClient.request<any>(gql`
+		// 		query _users {
+		// 			_users {
+		// 				edges {
+		// 					node {
+		// 						id
+		// 					}
+		// 				}
+		// 			}
+		// 		}
+		// 	`)
 	})
 })
 

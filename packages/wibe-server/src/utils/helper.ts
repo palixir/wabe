@@ -32,6 +32,12 @@ export const getGraphqlClient = (port: number): GraphQLClient => {
 	return { ...client, request: client.request<any> } as GraphQLClient
 }
 
+export const getAnonymousClient = (port: number): GraphQLClient => {
+	const client = new GraphQLClient(`http://127.0.0.1:${port}/graphql`)
+
+	return { ...client, request: client.request<any> } as GraphQLClient
+}
+
 export const setupTests = async () => {
 	const databaseId = uuid()
 
@@ -44,6 +50,9 @@ export const setupTests = async () => {
 			type: DatabaseEnum.Mongo,
 			url: 'mongodb://127.0.0.1:27045',
 			name: databaseId,
+		},
+		authentication: {
+			roles: ['Client'],
 		},
 		port,
 		schema: {
@@ -62,6 +71,18 @@ export const setupTests = async () => {
 						},
 						phone: {
 							type: 'Phone',
+						},
+					},
+				},
+				{
+					name: 'Test',
+					fields: {
+						name: { type: 'String' },
+					},
+					permissions: {
+						read: {
+							authorizedRoles: ['Client'],
+							requireAuthentication: true,
 						},
 					},
 				},

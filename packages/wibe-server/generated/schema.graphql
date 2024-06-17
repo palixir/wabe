@@ -393,8 +393,8 @@ type Mutation {
   createMutation(input: CreateMutationInput): Boolean!
   customMutation(input: CustomMutationInput): Int
   secondCustomMutation(input: SecondCustomMutationInput): Int
-  signInWith(input: SignInWithInput): Boolean
-  signUpWith(input: SignUpWithInput): Boolean
+  signInWith(input: SignInWithInput): SignInWithOutput
+  signUpWith(input: SignUpWithInput): SignUpWithOutput
   signOut: Boolean
   refresh: Boolean
   verifyChallenge(input: VerifyChallengeInput): Boolean
@@ -507,6 +507,11 @@ input SecondCustomMutationSumInput {
   b: Int!
 }
 
+type SignInWithOutput {
+  accessToken: String!
+  refreshToken: String!
+}
+
 input SignInWithInput {
   authentication: SignInWithAuthenticationInput
 }
@@ -524,6 +529,11 @@ input SignInWithAuthenticationEmailPasswordInput {
 
 input SignInWithAuthenticationOtpInput {
   code: String
+}
+
+type SignUpWithOutput {
+  accessToken: String!
+  refreshToken: String!
 }
 
 input SignUpWithInput {
