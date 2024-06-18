@@ -49,10 +49,7 @@ export type Hook<T extends keyof WibeSchemaTypes> = {
 	// The priority 0 is for the security hooks
 	// The default priority is 1
 	priority: number
-	callback: (
-		hookObject: HookObject<T>,
-		context: Context,
-	) => Promise<void> | void
+	callback: (hookObject: HookObject<T>) => Promise<void> | void
 }
 
 export type TypedNewData<T extends keyof WibeSchemaTypes> = Record<
@@ -85,45 +82,80 @@ const getHooksOrderByPriorities = () =>
 		}, [] as number[])
 		.sort((a, b) => a - b) || []
 
-// TODO: If context is empty we need to early return
-export const findHooksAndExecute = async <T extends keyof WibeSchemaTypes>({
+export const initializeHook = async <T extends keyof WibeSchemaTypes>({
 	className,
-	operationType,
 	newData,
 	context,
+	id,
+	where,
+	skipHooks,
 }: {
-	className: keyof WibeSchemaTypes
 	id?: string
 	where?: WhereType<any>
-	operationType: OperationType
+	className: keyof WibeSchemaTypes
 	newData: TypedNewData<any>
 	context: Context
-}): Promise<Record<keyof WibeSchemaTypes[T], any>> => {
-	const hooksOrderByPriorities = getHooksOrderByPriorities()
+	skipHooks?: boolean
+}) => {
+	if (skipHooks) return { run: () => {} }
 
-	const hookObject = new HookObject({
-		className,
-		newData,
-		operationType,
-		context,
-	})
+	const objects =
+		id || where
+			? await WibeApp.databaseController.getObjects({
+					className,
+					context: { isRoot: true },
+					fields: [],
+					where: where ? where : { id: { equalTo: id } },
+					skipHooks: true,
+				})
+			: [newData || {}]
 
-	// We need to keep the order of the data but we need to execute the hooks in parallel
-	await hooksOrderByPriorities.reduce(async (acc, priority) => {
-		await acc
+	return {
+		run: async (
+			operationType: OperationType,
+		): Promise<Record<keyof WibeSchemaTypes[T], any>> => {
+			const hooksOrderByPriorities = getHooksOrderByPriorities()
 
-		const hooksToCompute = await _findHooksByPriority({
-			className,
-			operationType,
-			priority,
-		})
+			const res = await Promise.all(
+				objects.map(async (object) => {
+					const hookObject = new HookObject({
+						className,
+						newData,
+						operationType,
+						context,
+						object,
+					})
 
-		await Promise.all(
-			hooksToCompute.map((hook) => hook.callback(hookObject, context)),
-		)
-	}, Promise.resolve())
+					// We need to keep the order of the data but we need to execute the hooks in parallel
+					await hooksOrderByPriorities.reduce(
+						async (acc, priority) => {
+							await acc
 
-	return hookObject.getNewData()
+							const hooksToCompute = await _findHooksByPriority({
+								className,
+								operationType,
+								priority,
+							})
+
+							await Promise.all(
+								hooksToCompute.map((hook) =>
+									hook.callback(hookObject),
+								),
+							)
+						},
+						Promise.resolve(),
+					)
+
+					return hookObject.getNewData()
+				}),
+			)
+
+			// Here we return the first element because we had a map on all the objects
+			// But the input of each object (params.data) is the same so the result of each output
+			// will be the same. Index 0 is arbitrary
+			return res[0]
+		},
+	}
 }
 
 export const getDefaultHooks = (): Hook<any>[] => [

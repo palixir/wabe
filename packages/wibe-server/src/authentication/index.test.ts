@@ -256,6 +256,16 @@ describe('Authentication', () => {
 			}
 		`)
 
+		await rootClient.request<any>(gql`
+				mutation createTest{
+					createTest(input: {fields: {name: "test"}}){
+						test{
+							id
+						}
+					}
+				}
+			`)
+
 		const userClient = getUserClient(port, res.signUpWith.accessToken)
 
 		expect(

@@ -6,6 +6,7 @@ import {
 	beforeAll,
 	afterEach,
 	spyOn,
+	afterAll,
 } from 'bun:test'
 import { WibeApp } from '../../server'
 import { DatabaseController } from '..'
@@ -21,7 +22,13 @@ describe('DatabaseController', () => {
 	const mockDeleteObject = mock(() => {})
 	const mockDeleteObjects = mock(() => {})
 
-	const mockFindHooksAndExecute = spyOn(hooks, 'findHooksAndExecute')
+	const mockHookRun = mock(() => {})
+
+	const mockInitializeHook = spyOn(hooks, 'initializeHook').mockResolvedValue(
+		{
+			run: mockHookRun,
+		} as any,
+	)
 
 	const mockAdapter = mock(() => ({
 		getObject: mockGetObject,
@@ -95,10 +102,16 @@ describe('DatabaseController', () => {
 		}
 	})
 
+	afterAll(() => {
+		mockInitializeHook.mockRestore()
+		mockHookRun.mockRestore()
+	})
+
 	afterEach(() => {
 		mockGetObject.mockClear()
 		mockGetObjects.mockClear()
-		mockFindHooksAndExecute.mockClear()
+		mockInitializeHook.mockClear()
+		mockHookRun.mockClear()
 	})
 
 	it('should not call createObjects adapter when the data array is empty', async () => {
@@ -125,22 +138,23 @@ describe('DatabaseController', () => {
 			fields: ['id'],
 		})
 
-		expect(mockFindHooksAndExecute).toHaveBeenCalledTimes(2)
-		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
+		expect(mockInitializeHook).toHaveBeenCalledTimes(1)
+		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
 			context: { sessionId: 'sessionId' },
 			newData: null,
-			operationType: hooks.OperationType.BeforeRead,
 			id: 'id',
 		})
 
-		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
-			className: 'TestClass',
-			context: { sessionId: 'sessionId' },
-			newData: null,
-			operationType: hooks.OperationType.AfterRead,
-			id: 'id',
-		})
+		expect(mockHookRun).toHaveBeenCalledTimes(2)
+		expect(mockHookRun).toHaveBeenNthCalledWith(
+			1,
+			hooks.OperationType.BeforeRead,
+		)
+		expect(mockHookRun).toHaveBeenNthCalledWith(
+			2,
+			hooks.OperationType.AfterRead,
+		)
 	})
 
 	it('should call findHooksAndExecute on getObjects', async () => {
@@ -156,22 +170,23 @@ describe('DatabaseController', () => {
 			fields: ['id'],
 		})
 
-		expect(mockFindHooksAndExecute).toHaveBeenCalledTimes(2)
-		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
+		expect(mockInitializeHook).toHaveBeenCalledTimes(1)
+		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
 			context: { sessionId: 'sessionId' },
 			newData: null,
-			operationType: hooks.OperationType.BeforeRead,
 			where: { id: { equalTo: 'id' } },
 		})
 
-		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
-			className: 'TestClass',
-			context: { sessionId: 'sessionId' },
-			newData: null,
-			operationType: hooks.OperationType.AfterRead,
-			where: { id: { equalTo: 'id' } },
-		})
+		expect(mockHookRun).toHaveBeenCalledTimes(2)
+		expect(mockHookRun).toHaveBeenNthCalledWith(
+			1,
+			hooks.OperationType.BeforeRead,
+		)
+		expect(mockHookRun).toHaveBeenNthCalledWith(
+			2,
+			hooks.OperationType.AfterRead,
+		)
 	})
 
 	it('should call findHooksAndExecute on updateObject', async () => {
@@ -187,24 +202,23 @@ describe('DatabaseController', () => {
 			fields: ['id'],
 		})
 
-		expect(mockFindHooksAndExecute).toHaveBeenCalledTimes(2)
-		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
-			className: 'TestClass',
-			context: { sessionId: 'sessionId' },
-			newData: {
-				name: 'test',
-			},
-			operationType: hooks.OperationType.BeforeUpdate,
-			id: 'id',
-		})
-
-		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
+		expect(mockInitializeHook).toHaveBeenCalledTimes(1)
+		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
 			context: { sessionId: 'sessionId' },
 			newData: { name: 'test' },
-			operationType: hooks.OperationType.AfterUpdate,
 			id: 'id',
 		})
+
+		expect(mockHookRun).toHaveBeenCalledTimes(2)
+		expect(mockHookRun).toHaveBeenNthCalledWith(
+			1,
+			hooks.OperationType.BeforeUpdate,
+		)
+		expect(mockHookRun).toHaveBeenNthCalledWith(
+			2,
+			hooks.OperationType.AfterUpdate,
+		)
 	})
 
 	it('should call findHooksAndExecute on updateObjects', async () => {
@@ -222,22 +236,23 @@ describe('DatabaseController', () => {
 			fields: ['id'],
 		})
 
-		expect(mockFindHooksAndExecute).toHaveBeenCalledTimes(2)
-		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
+		expect(mockInitializeHook).toHaveBeenCalledTimes(1)
+		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
 			context: { sessionId: 'sessionId' },
 			newData: { name: 'test' },
-			operationType: hooks.OperationType.BeforeUpdate,
 			where: { id: { equalTo: 'id' } },
 		})
 
-		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
-			className: 'TestClass',
-			context: { sessionId: 'sessionId' },
-			newData: { name: 'test' },
-			operationType: hooks.OperationType.AfterUpdate,
-			where: { id: { equalTo: 'id' } },
-		})
+		expect(mockHookRun).toHaveBeenCalledTimes(2)
+		expect(mockHookRun).toHaveBeenNthCalledWith(
+			1,
+			hooks.OperationType.BeforeUpdate,
+		)
+		expect(mockHookRun).toHaveBeenNthCalledWith(
+			2,
+			hooks.OperationType.AfterUpdate,
+		)
 	})
 
 	it('should call findHooksAndExecute on createObject', async () => {
@@ -252,22 +267,22 @@ describe('DatabaseController', () => {
 			fields: ['id'],
 		})
 
-		expect(mockFindHooksAndExecute).toHaveBeenCalledTimes(2)
-		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
-			className: 'TestClass',
-			context: { sessionId: 'sessionId' },
-			newData: {
-				name: 'test',
-			},
-			operationType: hooks.OperationType.BeforeCreate,
-		})
-
-		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
+		expect(mockInitializeHook).toHaveBeenCalledTimes(1)
+		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
 			context: { sessionId: 'sessionId' },
 			newData: { name: 'test' },
-			operationType: hooks.OperationType.AfterInsert,
 		})
+
+		expect(mockHookRun).toHaveBeenCalledTimes(2)
+		expect(mockHookRun).toHaveBeenNthCalledWith(
+			1,
+			hooks.OperationType.BeforeCreate,
+		)
+		expect(mockHookRun).toHaveBeenNthCalledWith(
+			2,
+			hooks.OperationType.AfterInsert,
+		)
 	})
 
 	it('should call findHooksAndExecute on createObjects', async () => {
@@ -284,20 +299,22 @@ describe('DatabaseController', () => {
 			fields: ['id'],
 		})
 
-		expect(mockFindHooksAndExecute).toHaveBeenCalledTimes(2)
-		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(1, {
+		expect(mockInitializeHook).toHaveBeenCalledTimes(1)
+		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
 			context: { sessionId: 'sessionId' },
 			newData: { name: 'test' },
-			operationType: hooks.OperationType.BeforeCreate,
 		})
 
-		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(2, {
-			className: 'TestClass',
-			context: { sessionId: 'sessionId' },
-			newData: { name: 'test' },
-			operationType: hooks.OperationType.AfterInsert,
-		})
+		expect(mockHookRun).toHaveBeenCalledTimes(2)
+		expect(mockHookRun).toHaveBeenNthCalledWith(
+			1,
+			hooks.OperationType.BeforeCreate,
+		)
+		expect(mockHookRun).toHaveBeenNthCalledWith(
+			2,
+			hooks.OperationType.AfterInsert,
+		)
 	})
 
 	it('should call findHooksAndExecute on deleteObject', async () => {
@@ -313,23 +330,24 @@ describe('DatabaseController', () => {
 			id: 'id',
 		})
 
-		// 4 before we get the object before
-		expect(mockFindHooksAndExecute).toHaveBeenCalledTimes(4)
-		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(3, {
+		expect(mockInitializeHook).toHaveBeenCalledTimes(2)
+		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
 			context: { sessionId: 'sessionId' },
 			newData: null,
-			operationType: hooks.OperationType.BeforeDelete,
 			id: 'id',
 		})
 
-		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(4, {
-			className: 'TestClass',
-			context: { sessionId: 'sessionId' },
-			newData: null,
-			operationType: hooks.OperationType.AfterDelete,
-			id: 'id',
-		})
+		// 4 because we have a getObject before the delete
+		expect(mockHookRun).toHaveBeenCalledTimes(4)
+		expect(mockHookRun).toHaveBeenNthCalledWith(
+			3,
+			hooks.OperationType.BeforeDelete,
+		)
+		expect(mockHookRun).toHaveBeenNthCalledWith(
+			4,
+			hooks.OperationType.AfterDelete,
+		)
 	})
 
 	it('should call findHooksAndExecute on deleteObjects', async () => {
@@ -345,23 +363,24 @@ describe('DatabaseController', () => {
 			fields: ['id'],
 		})
 
-		// 4 before we get objects before delete
-		expect(mockFindHooksAndExecute).toHaveBeenCalledTimes(4)
-		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(3, {
+		expect(mockInitializeHook).toHaveBeenCalledTimes(2)
+		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
 			context: { sessionId: 'sessionId' },
 			newData: null,
-			operationType: hooks.OperationType.BeforeDelete,
 			where: { id: { equalTo: 'id' } },
 		})
 
-		expect(mockFindHooksAndExecute).toHaveBeenNthCalledWith(4, {
-			className: 'TestClass',
-			context: { sessionId: 'sessionId' },
-			newData: null,
-			operationType: hooks.OperationType.AfterDelete,
-			where: { id: { equalTo: 'id' } },
-		})
+		// 4 because we have a getObject before the delete
+		expect(mockHookRun).toHaveBeenCalledTimes(4)
+		expect(mockHookRun).toHaveBeenNthCalledWith(
+			3,
+			hooks.OperationType.BeforeDelete,
+		)
+		expect(mockHookRun).toHaveBeenNthCalledWith(
+			4,
+			hooks.OperationType.AfterDelete,
+		)
 	})
 
 	it("should get where object on complex structure (AND or OR) when try to get object from pointer's class", async () => {

@@ -16,7 +16,6 @@ import { HookObject } from './HookObject'
 import { BeforeOperationType, OperationType } from '.'
 import type { Context } from '../graphql/interface'
 import * as permissions from './permissions'
-import type { PermissionProperties } from '../schema'
 
 describe('Permissions', () => {
 	const mockGetObject = mock(() => {})
@@ -78,14 +77,6 @@ describe('Permissions', () => {
 	})
 
 	it('should throw permission denied if no session id is provided but class require authentication', async () => {
-		const obj = new HookObject({
-			// @ts-expect-error
-			className: 'TestClass',
-			// @ts-expect-error
-			object: {},
-			operationType: OperationType.BeforeRead,
-		})
-
 		const context: Context = {
 			sessionId: '',
 			// @ts-expect-error
@@ -93,8 +84,17 @@ describe('Permissions', () => {
 			isRoot: false,
 		}
 
+		const obj = new HookObject({
+			// @ts-expect-error
+			className: 'TestClass',
+			context,
+			// @ts-expect-error
+			object: {},
+			operationType: OperationType.BeforeRead,
+		})
+
 		expect(
-			_checkPermissions(obj, context, BeforeOperationType.BeforeRead),
+			_checkPermissions(obj, BeforeOperationType.BeforeRead),
 		).rejects.toThrow('Permission denied to read class TestClass')
 	})
 
@@ -103,14 +103,6 @@ describe('Permissions', () => {
 			id: 'sessionId',
 			user: { id: 'userId' },
 		} as never)
-
-		const obj = new HookObject({
-			// @ts-expect-error
-			className: 'TestClass',
-			// @ts-expect-error
-			object: {},
-			operationType: OperationType.BeforeRead,
-		})
 
 		const context: Context = {
 			sessionId: 'sessionId',
@@ -124,8 +116,17 @@ describe('Permissions', () => {
 			isRoot: false,
 		}
 
+		const obj = new HookObject({
+			// @ts-expect-error
+			className: 'TestClass',
+			context,
+			// @ts-expect-error
+			object: {},
+			operationType: OperationType.BeforeRead,
+		})
+
 		expect(
-			_checkPermissions(obj, context, BeforeOperationType.BeforeRead),
+			_checkPermissions(obj, BeforeOperationType.BeforeRead),
 		).rejects.toThrow('Permission denied to read class TestClass')
 	})
 
@@ -134,14 +135,6 @@ describe('Permissions', () => {
 			id: 'sessionId',
 			user: { id: 'userId' },
 		} as never)
-
-		const obj = new HookObject({
-			// @ts-expect-error
-			className: 'TestClass',
-			// @ts-expect-error
-			object: {},
-			operationType: OperationType.BeforeRead,
-		})
 
 		const context: Context = {
 			sessionId: 'sessionId',
@@ -155,19 +148,19 @@ describe('Permissions', () => {
 			isRoot: false,
 		}
 
-		expect(_checkPermissions(obj, context, BeforeOperationType.BeforeRead))
-			.resolves
-	})
-
-	it('should not throw permission denied if client is root', async () => {
 		const obj = new HookObject({
 			// @ts-expect-error
 			className: 'TestClass',
+			context,
 			// @ts-expect-error
 			object: {},
 			operationType: OperationType.BeforeRead,
 		})
 
+		expect(_checkPermissions(obj, BeforeOperationType.BeforeRead)).resolves
+	})
+
+	it('should not throw permission denied if client is root', async () => {
 		const context: Context = {
 			sessionId: '',
 			user: {
@@ -176,8 +169,16 @@ describe('Permissions', () => {
 			isRoot: true,
 		}
 
-		expect(_checkPermissions(obj, context, BeforeOperationType.BeforeRead))
-			.resolves
+		const obj = new HookObject({
+			// @ts-expect-error
+			className: 'TestClass',
+			context,
+			// @ts-expect-error
+			object: {},
+			operationType: OperationType.BeforeRead,
+		})
+
+		expect(_checkPermissions(obj, BeforeOperationType.BeforeRead)).resolves
 	})
 
 	it('should call _checkPermission on beforeRead', async () => {
@@ -186,16 +187,10 @@ describe('Permissions', () => {
 			'defaultCheckPermissionOnRead',
 		).mockResolvedValue()
 
-		permissions.defaultCheckPermissionOnRead(
-			{} as never,
-			{ sessionId: 'sessionId', user: { id: 'userId' } } as never,
-		)
+		permissions.defaultCheckPermissionOnRead({} as never)
 
 		expect(spyBeforeRead).toHaveBeenCalledTimes(1)
-		expect(spyBeforeRead).toHaveBeenCalledWith(
-			{},
-			{ sessionId: 'sessionId', user: { id: 'userId' } },
-		)
+		expect(spyBeforeRead).toHaveBeenCalledWith({})
 
 		spyBeforeRead.mockRestore()
 	})
@@ -206,16 +201,16 @@ describe('Permissions', () => {
 			'defaultCheckPermissionOnCreate',
 		).mockResolvedValue()
 
-		permissions.defaultCheckPermissionOnCreate(
-			{} as never,
-			{ sessionId: 'sessionId', user: { id: 'userId' } } as never,
-		)
+		permissions.defaultCheckPermissionOnCreate({
+			sessionId: 'sessionId',
+			user: { id: 'userId' },
+		} as never)
 
 		expect(spyBeforeCreate).toHaveBeenCalledTimes(1)
-		expect(spyBeforeCreate).toHaveBeenCalledWith(
-			{},
-			{ sessionId: 'sessionId', user: { id: 'userId' } },
-		)
+		expect(spyBeforeCreate).toHaveBeenCalledWith({
+			sessionId: 'sessionId',
+			user: { id: 'userId' },
+		})
 
 		spyBeforeCreate.mockRestore()
 	})
@@ -226,16 +221,16 @@ describe('Permissions', () => {
 			'defaultCheckPermissionOnUpdate',
 		).mockResolvedValue()
 
-		permissions.defaultCheckPermissionOnUpdate(
-			{} as never,
-			{ sessionId: 'sessionId', user: { id: 'userId' } } as never,
-		)
+		permissions.defaultCheckPermissionOnUpdate({
+			sessionId: 'sessionId',
+			user: { id: 'userId' },
+		} as never)
 
 		expect(spyBeforeUpdate).toHaveBeenCalledTimes(1)
-		expect(spyBeforeUpdate).toHaveBeenCalledWith(
-			{},
-			{ sessionId: 'sessionId', user: { id: 'userId' } },
-		)
+		expect(spyBeforeUpdate).toHaveBeenCalledWith({
+			sessionId: 'sessionId',
+			user: { id: 'userId' },
+		})
 
 		spyBeforeUpdate.mockRestore()
 	})
@@ -246,16 +241,16 @@ describe('Permissions', () => {
 			'defaultCheckPermissionOnDelete',
 		).mockResolvedValue()
 
-		permissions.defaultCheckPermissionOnDelete(
-			{} as never,
-			{ sessionId: 'sessionId', user: { id: 'userId' } } as never,
-		)
+		permissions.defaultCheckPermissionOnDelete({
+			sessionId: 'sessionId',
+			user: { id: 'userId' },
+		} as never)
 
 		expect(spyBeforeDelete).toHaveBeenCalledTimes(1)
-		expect(spyBeforeDelete).toHaveBeenCalledWith(
-			{},
-			{ sessionId: 'sessionId', user: { id: 'userId' } },
-		)
+		expect(spyBeforeDelete).toHaveBeenCalledWith({
+			sessionId: 'sessionId',
+			user: { id: 'userId' },
+		})
 
 		spyBeforeDelete.mockRestore()
 	})

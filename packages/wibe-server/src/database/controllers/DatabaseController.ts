@@ -1,7 +1,7 @@
 import { WibeApp } from '../../..'
 import type { WibeSchemaTypes } from '../../../generated/wibe'
 import type { Context } from '../../graphql/interface'
-import { OperationType, findHooksAndExecute } from '../../hooks'
+import { OperationType, initializeHook } from '../../hooks'
 import type {
 	CreateObjectOptions,
 	CreateObjectsOptions,
@@ -273,13 +273,14 @@ export class DatabaseController {
 			(field) => !field.includes('.'),
 		)
 
-		await findHooksAndExecute({
+		const hook = await initializeHook({
 			className: params.className,
 			context: params.context,
 			newData: null,
-			operationType: OperationType.BeforeRead,
 			id: params.id,
 		})
+
+		await hook.run(OperationType.BeforeRead)
 
 		const dataOfCurrentObject = await this.adapter.getObject({
 			...params,
@@ -287,13 +288,7 @@ export class DatabaseController {
 			fields: [...fieldsWithoutPointers, ...(pointersFieldsId || [])],
 		})
 
-		await findHooksAndExecute({
-			className: params.className,
-			context: params.context,
-			newData: null,
-			operationType: OperationType.AfterRead,
-			id: params.id,
-		})
+		await hook.run(OperationType.AfterRead)
 
 		if (!dataOfCurrentObject) return null
 
@@ -326,13 +321,15 @@ export class DatabaseController {
 			params.context,
 		)
 
-		await findHooksAndExecute({
+		const hook = await initializeHook({
 			className: params.className,
 			context: params.context,
 			newData: null,
-			operationType: OperationType.BeforeRead,
 			where: params.where,
+			skipHooks: params.skipHooks,
 		})
+
+		await hook.run(OperationType.BeforeRead)
 
 		const dataOfCurrentObject = await this.adapter.getObjects({
 			...params,
@@ -341,13 +338,7 @@ export class DatabaseController {
 			fields: [...fieldsWithoutPointers, ...(pointersFieldsId || [])],
 		})
 
-		await findHooksAndExecute({
-			className: params.className,
-			context: params.context,
-			newData: null,
-			operationType: OperationType.AfterRead,
-			where: params.where,
-		})
+		await hook.run(OperationType.AfterRead)
 
 		return Promise.all(
 			dataOfCurrentObject.map((data) =>
@@ -366,24 +357,20 @@ export class DatabaseController {
 		K extends keyof WibeSchemaTypes[T],
 		W extends keyof WibeSchemaTypes[T],
 	>(params: CreateObjectOptions<T, K, W>) {
-		const arrayOfComputedData = await findHooksAndExecute({
+		const hook = await initializeHook({
 			className: params.className,
 			context: params.context,
 			newData: params.data,
-			operationType: OperationType.BeforeCreate,
 		})
+
+		const arrayOfComputedData = await hook.run(OperationType.BeforeCreate)
 
 		const res = await this.adapter.createObject({
 			...params,
 			data: arrayOfComputedData,
 		})
 
-		await findHooksAndExecute({
-			className: params.className,
-			newData: params.data,
-			operationType: OperationType.AfterInsert,
-			context: params.context,
-		})
+		await hook.run(OperationType.AfterInsert)
 
 		return res
 	}
@@ -395,15 +382,18 @@ export class DatabaseController {
 	>(params: CreateObjectsOptions<T, K, W>) {
 		if (params.data.length === 0) return []
 
-		const arrayOfComputedData = await Promise.all(
+		const hooks = await Promise.all(
 			params.data.map((newData) =>
-				findHooksAndExecute({
+				initializeHook({
 					className: params.className,
 					context: params.context,
 					newData,
-					operationType: OperationType.BeforeCreate,
 				}),
 			),
+		)
+
+		const arrayOfComputedData = await Promise.all(
+			hooks.map((hook) => hook.run(OperationType.BeforeCreate)),
 		)
 
 		const res = await this.adapter.createObjects({
@@ -412,14 +402,7 @@ export class DatabaseController {
 		})
 
 		await Promise.all(
-			params.data.map((newData) =>
-				findHooksAndExecute({
-					className: params.className,
-					context: params.context,
-					newData,
-					operationType: OperationType.AfterInsert,
-				}),
-			),
+			hooks.map((hook) => hook.run(OperationType.AfterInsert)),
 		)
 
 		return res
@@ -430,26 +413,21 @@ export class DatabaseController {
 		K extends keyof WibeSchemaTypes[T],
 		W extends keyof WibeSchemaTypes[T],
 	>(params: UpdateObjectOptions<T, K, W>) {
-		const arrayOfComputedData = await findHooksAndExecute({
+		const hook = await initializeHook({
 			className: params.className,
 			context: params.context,
 			newData: params.data,
-			operationType: OperationType.BeforeUpdate,
 			id: params.id,
 		})
+
+		const arrayOfComputedData = await hook.run(OperationType.BeforeUpdate)
 
 		const res = await this.adapter.updateObject({
 			...params,
 			data: arrayOfComputedData,
 		})
 
-		await findHooksAndExecute({
-			className: params.className,
-			newData: params.data,
-			operationType: OperationType.AfterUpdate,
-			context: params.context,
-			id: params.id,
-		})
+		await hook.run(OperationType.AfterUpdate)
 
 		return res
 	}
@@ -465,13 +443,14 @@ export class DatabaseController {
 			params.context,
 		)
 
-		const arrayOfComputedData = await findHooksAndExecute({
+		const hook = await initializeHook({
 			className: params.className,
 			context: params.context,
 			newData: params.data,
 			where: params.where,
-			operationType: OperationType.BeforeUpdate,
 		})
+
+		const arrayOfComputedData = await hook.run(OperationType.BeforeUpdate)
 
 		const res = await this.adapter.updateObjects({
 			...params,
@@ -479,13 +458,7 @@ export class DatabaseController {
 			where: whereObject,
 		})
 
-		await findHooksAndExecute({
-			className: params.className,
-			newData: params.data,
-			operationType: OperationType.AfterUpdate,
-			context: params.context,
-			where: params.where,
-		})
+		await hook.run(OperationType.AfterUpdate)
 
 		return res
 	}
@@ -498,23 +471,18 @@ export class DatabaseController {
 
 		if (!objectBeforeDelete) return null
 
-		await findHooksAndExecute({
+		const hook = await initializeHook({
 			className: params.className,
 			context: params.context,
 			newData: null,
-			operationType: OperationType.BeforeDelete,
 			id: params.id,
 		})
+
+		await hook.run(OperationType.BeforeDelete)
 
 		await this.adapter.deleteObject(params)
 
-		await findHooksAndExecute({
-			className: params.className,
-			context: params.context,
-			newData: null,
-			operationType: OperationType.AfterDelete,
-			id: params.id,
-		})
+		await hook.run(OperationType.AfterDelete)
 
 		return objectBeforeDelete
 	}
@@ -531,26 +499,21 @@ export class DatabaseController {
 
 		const objectsBeforeDelete = await this.getObjects(params)
 
-		await findHooksAndExecute({
+		const hook = await initializeHook({
 			className: params.className,
 			context: params.context,
 			newData: null,
-			operationType: OperationType.BeforeDelete,
 			where: params.where,
 		})
+
+		await hook.run(OperationType.BeforeDelete)
 
 		await this.adapter.deleteObjects({
 			...params,
 			where: whereObject,
 		})
 
-		await findHooksAndExecute({
-			className: params.className,
-			context: params.context,
-			newData: null,
-			operationType: OperationType.AfterDelete,
-			where: params.where,
-		})
+		await hook.run(OperationType.AfterDelete)
 
 		return objectsBeforeDelete
 	}

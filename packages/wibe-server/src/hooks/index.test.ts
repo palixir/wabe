@@ -1,92 +1,152 @@
-import { describe, expect, it, spyOn, mock } from 'bun:test'
+import {
+	beforeAll,
+	afterEach,
+	describe,
+	expect,
+	it,
+	spyOn,
+	mock,
+} from 'bun:test'
 import * as index from './index'
 import { WibeApp } from '../server'
 import { OperationType } from './index'
-import type { Context } from '../graphql/interface'
 
 describe('Hooks', () => {
-	it('should find and execute all the hooks and respect the priorities', async () => {
-		const spy_findHooksByPriority = spyOn(index, '_findHooksByPriority')
+	const mockGetObjects = mock(() => {})
+	const mockCallBack1 = mock(() => {})
+	const mockCallback2 = mock(() => {})
+	const mockCallback3 = mock(() => {})
 
-		const mockCallbackOne = mock(() => {})
-		const mockCallbackTwo = mock(() => {})
+	beforeAll(() => {
+		WibeApp.databaseController = {
+			getObjects: mockGetObjects,
+		} as any
 
 		WibeApp.config = {
 			hooks: [
 				{
-					operationType: OperationType.BeforeCreate,
-					priority: 0,
-					callback: mockCallbackOne,
+					callback: mockCallBack1,
+					operationType: OperationType.BeforeRead,
+					priority: 1,
 				},
 				{
+					callback: mockCallback2,
+					operationType: OperationType.BeforeRead,
+					priority: 2,
+				},
+				{
+					callback: mockCallback3,
 					operationType: OperationType.BeforeCreate,
 					priority: 1,
-					callback: mockCallbackTwo,
 				},
 			],
 		} as any
-
-		await index.findHooksAndExecute({
-			className: '_User',
-			newData: [
-				{
-					name: 'tata',
-				},
-			],
-			operationType: OperationType.BeforeCreate,
-			context: {
-				user: {
-					id: 'fakeId',
-					email: 'fakeEmail',
-				},
-			} as Context,
-		})
-
-		expect(mockCallbackOne).toHaveBeenCalledTimes(1)
-		expect(mockCallbackTwo).toHaveBeenCalledTimes(1)
-		expect(spy_findHooksByPriority.mock.calls[0][0].priority).toEqual(0)
-		expect(spy_findHooksByPriority.mock.calls[1][0].priority).toEqual(1)
 	})
 
-	it('should only call the hooks that match with the triggered operation type', async () => {
-		const spy_findHooksByPriority = spyOn(index, '_findHooksByPriority')
+	afterEach(() => {
+		mockGetObjects.mockClear()
+		mockCallBack1.mockClear()
+		mockCallback2.mockClear()
+		mockCallback3.mockClear()
+	})
 
-		const mockCallbackOne = mock(() => {})
-		const mockCallbackTwo = mock(() => {})
+	it('should run hook on BeforeRead with one object impacted', async () => {
+		mockGetObjects.mockResolvedValueOnce([
+			{ id: 'id', name: 'name' },
+		] as never)
 
-		WibeApp.config = {
-			hooks: [
-				{
-					operationType: OperationType.BeforeCreate,
-					priority: 0,
-					callback: mockCallbackOne,
-				},
-				{
-					operationType: OperationType.AfterInsert,
-					priority: 1,
-					callback: mockCallbackTwo,
-				},
-			],
-		} as any
-
-		await index.findHooksAndExecute({
-			className: '_User',
-			newData: [
-				{
-					name: 'tata',
-				},
-			],
-			operationType: OperationType.BeforeCreate,
-			context: {
-				user: {
-					id: 'fakeId',
-					email: 'fakeEmail',
-				},
-			} as Context,
+		const hooks = await index.initializeHook({
+			// @ts-expect-error
+			className: 'ClassName',
+			context: { isRoot: true },
+			newData: { name: 'test' },
+			id: 'id',
 		})
 
-		expect(mockCallbackOne).toHaveBeenCalledTimes(1)
-		expect(mockCallbackTwo).toHaveBeenCalledTimes(0)
-		expect(spy_findHooksByPriority.mock.calls[0][0].priority).toEqual(0)
+		await hooks.run(OperationType.BeforeRead)
+
+		expect(mockGetObjects).toHaveBeenCalledTimes(1)
+		expect(mockGetObjects).toHaveBeenCalledWith({
+			className: 'ClassName',
+			context: { isRoot: true },
+			fields: [],
+			where: { id: { equalTo: 'id' } },
+			skipHooks: true,
+		})
+
+		expect(mockCallBack1).toHaveBeenCalledTimes(1)
+
+		const hookObject = mockCallBack1.mock.calls[0][0] as any
+
+		expect(hookObject.object).toEqual({
+			id: 'id',
+			name: 'name',
+		})
+
+		expect(hookObject.context).toEqual({
+			isRoot: true,
+		})
+	})
+
+	it('should run hook on BeforeRead with 0 object impacted', async () => {
+		const hooks = await index.initializeHook({
+			// @ts-expect-error
+			className: 'ClassName',
+			context: { isRoot: true },
+			newData: { name: 'test' },
+		})
+
+		await hooks.run(OperationType.BeforeRead)
+
+		expect(mockGetObjects).toHaveBeenCalledTimes(0)
+
+		const hookObject = mockCallBack1.mock.calls[0][0] as any
+
+		expect(hookObject.object).toEqual({
+			name: 'test',
+		})
+
+		expect(hookObject.context).toEqual({
+			isRoot: true,
+		})
+	})
+
+	it('should run callback in priorities order', async () => {
+		const spy_findHooksByPriority = spyOn(index, '_findHooksByPriority')
+
+		mockGetObjects.mockResolvedValueOnce([
+			{ id: 'id', name: 'name' },
+		] as never)
+
+		const hooks = await index.initializeHook({
+			// @ts-expect-error
+			className: 'ClassName',
+			context: { isRoot: true },
+			newData: { name: 'test' },
+			id: 'id',
+		})
+
+		await hooks.run(OperationType.BeforeRead)
+
+		expect(spy_findHooksByPriority.mock.calls[0][0].priority).toEqual(1)
+		expect(spy_findHooksByPriority.mock.calls[1][0].priority).toEqual(2)
+	})
+
+	it('should call hook that is trigger by operation type', async () => {
+		mockGetObjects.mockResolvedValueOnce([
+			{ id: 'id', name: 'name' },
+		] as never)
+
+		const hooks = await index.initializeHook({
+			// @ts-expect-error
+			className: 'ClassName',
+			context: { isRoot: true },
+			newDate: { name: 'test' },
+			id: 'id',
+		})
+
+		await hooks.run(OperationType.BeforeRead)
+
+		expect(mockCallback3).toHaveBeenCalledTimes(0)
 	})
 })

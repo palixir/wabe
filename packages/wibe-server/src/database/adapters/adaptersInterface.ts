@@ -52,6 +52,7 @@ export interface GetObjectsOptions<
 	offset?: number
 	limit?: number
 	context: Context
+	skipHooks?: boolean
 }
 
 export interface CreateObjectOptions<

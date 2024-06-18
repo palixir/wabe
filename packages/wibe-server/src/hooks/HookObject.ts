@@ -7,22 +7,26 @@ export class HookObject<T extends keyof WibeSchemaTypes> {
 	private newData: TypedNewData<T>
 	private operationType: OperationType
 	public context: Context
+	public object: Record<keyof WibeSchemaTypes[T], any>
 
 	constructor({
 		newData,
 		className,
 		operationType,
 		context,
+		object,
 	}: {
 		className: T
 		newData: TypedNewData<T>
 		operationType: OperationType
 		context: Context
+		object: Record<keyof WibeSchemaTypes[T], any>
 	}) {
 		this.newData = newData
 		this.className = className
 		this.operationType = operationType
 		this.context = context
+		this.object = object
 	}
 
 	getUser() {

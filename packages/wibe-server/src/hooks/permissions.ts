@@ -37,10 +37,9 @@ export const _getPermissionPropertiesOfAClass = async ({
 
 export const _checkPermissions = async (
 	object: HookObject<any>,
-	context: Context,
 	operationType: BeforeOperationType,
 ) => {
-	if (context.isRoot) return
+	if (object.context.isRoot) return
 
 	const permissionOperation = convertOperationTypeToPermission(operationType)
 
@@ -53,7 +52,7 @@ export const _checkPermissions = async (
 
 	if (!permissionProperties) return
 
-	const sessionId = context.sessionId
+	const sessionId = object.context.sessionId
 
 	if (!permissionProperties.requireAuthentication) return
 
@@ -76,12 +75,12 @@ export const _checkPermissions = async (
 			`Permission denied to ${permissionOperation} class ${object.className}`,
 		)
 
-	if (context.user?.id !== res.user?.id)
+	if (object.context.user?.id !== res.user?.id)
 		throw new Error(
 			`Permission denied to ${permissionOperation} class ${object.className}`,
 		)
 
-	const roleName = context.user?.role?.name
+	const roleName = object.context.user?.role?.name
 
 	if (!roleName)
 		throw new Error(
@@ -95,13 +94,13 @@ export const _checkPermissions = async (
 }
 
 export const defaultCheckPermissionOnRead = (object: HookObject<any>) =>
-	_checkPermissions(object, object.context, BeforeOperationType.BeforeRead)
+	_checkPermissions(object, BeforeOperationType.BeforeRead)
 
 export const defaultCheckPermissionOnCreate = (object: HookObject<any>) =>
-	_checkPermissions(object, object.context, BeforeOperationType.BeforeCreate)
+	_checkPermissions(object, BeforeOperationType.BeforeCreate)
 
 export const defaultCheckPermissionOnUpdate = (object: HookObject<any>) =>
-	_checkPermissions(object, object.context, BeforeOperationType.BeforeUpdate)
+	_checkPermissions(object, BeforeOperationType.BeforeUpdate)
 
 export const defaultCheckPermissionOnDelete = (object: HookObject<any>) =>
-	_checkPermissions(object, object.context, BeforeOperationType.BeforeDelete)
+	_checkPermissions(object, BeforeOperationType.BeforeDelete)
