@@ -396,7 +396,7 @@ type Mutation {
   signInWith(input: SignInWithInput): SignInWithOutput
   signUpWith(input: SignUpWithInput): SignUpWithOutput
   signOut: Boolean
-  refresh: Boolean
+  refresh(input: RefreshInput): RefreshSessionOutput
   verifyChallenge(input: VerifyChallengeInput): Boolean
   createPost(input: CreatePostInput): CreatePostPayload
   createPosts(input: CreatePostsInput): PostConnection!
@@ -555,6 +555,16 @@ input SignUpWithAuthenticationEmailPasswordInput {
 
 input SignUpWithAuthenticationOtpInput {
   code: String
+}
+
+type RefreshSessionOutput {
+  accessToken: String!
+  refreshToken: String!
+}
+
+input RefreshInput {
+  accessToken: String!
+  refreshToken: String!
 }
 
 input VerifyChallengeInput {

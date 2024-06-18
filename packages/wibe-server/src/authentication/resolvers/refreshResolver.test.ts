@@ -6,6 +6,7 @@ import { Session } from '../Session'
 const context: Context = {
 	sessionId: 'sessionId',
 	user: {} as any,
+	isRoot: false,
 }
 
 describe('refreshResolver', () => {
@@ -15,11 +16,21 @@ describe('refreshResolver', () => {
 			'refresh',
 		).mockResolvedValue({} as any)
 
-		await refreshResolver(null, null, context)
+		await refreshResolver(
+			null,
+			{
+				input: {
+					accessToken: 'accessToken',
+					refreshToken: 'refreshToken',
+				},
+			},
+			context,
+		)
 
 		expect(spyRefreshSession).toHaveBeenCalledTimes(1)
 		expect(spyRefreshSession).toHaveBeenCalledWith(
-			context.sessionId,
+			'accessToken',
+			'refreshToken',
 			context,
 		)
 	})

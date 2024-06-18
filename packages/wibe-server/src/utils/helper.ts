@@ -65,7 +65,7 @@ export const setupTests = async () => {
 			name: databaseId,
 		},
 		authentication: {
-			roles: ['Client'],
+			roles: ['Client', 'Client2'],
 		},
 		port,
 		schema: {
@@ -95,6 +95,10 @@ export const setupTests = async () => {
 					permissions: {
 						read: {
 							authorizedRoles: ['Client'],
+							requireAuthentication: true,
+						},
+						delete: {
+							authorizedRoles: [],
 							requireAuthentication: true,
 						},
 					},

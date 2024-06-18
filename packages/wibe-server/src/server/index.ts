@@ -265,7 +265,8 @@ export class WibeApp {
 		await initializeRoles()
 
 		this.server.listen(WibeApp.config.port, ({ port }) => {
-			console.log(`Server is running on port ${port}`)
+			if (!process.env.TEST)
+				console.log(`Server is running on port ${port}`)
 		})
 	}
 

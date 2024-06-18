@@ -62,7 +62,7 @@ describe('Session', () => {
 		})
 	})
 
-	it('should returns user from access token and refresh the refresh token', async () => {
+	it('should return the user associated with an access token', async () => {
 		mockGetObjects.mockResolvedValue([
 			{
 				id: 'sessionId',

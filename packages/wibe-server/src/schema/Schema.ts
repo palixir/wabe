@@ -4,6 +4,7 @@ import type {
 	WibeSchemaTypes,
 } from '../../generated/wibe'
 import { signInWithResolver, signUpWithResolver } from '../authentication'
+import { refreshResolver } from '../authentication/resolvers/refreshResolver'
 import { signOutResolver } from '../authentication/resolvers/signOutResolver'
 import { verifyChallengeResolver } from '../authentication/resolvers/verifyChallenge'
 import { WibeApp } from '../server'
@@ -357,11 +358,9 @@ export class Schema {
 										id: { type: 'String' },
 										accessToken: {
 											type: 'String',
-											required: true,
 										},
 										refreshToken: {
 											type: 'String',
-											required: true,
 										},
 									},
 								},
@@ -400,8 +399,33 @@ export class Schema {
 								resolve: signOutResolver,
 							},
 							refresh: {
-								type: 'Boolean',
-								resolve: signOutResolver,
+								type: 'Object',
+								args: {
+									input: {
+										accessToken: {
+											type: 'String',
+											required: true,
+										},
+										refreshToken: {
+											type: 'String',
+											required: true,
+										},
+									},
+								},
+								outputObject: {
+									name: 'RefreshSessionOutput',
+									fields: {
+										accessToken: {
+											type: 'String',
+											required: true,
+										},
+										refreshToken: {
+											type: 'String',
+											required: true,
+										},
+									},
+								},
+								resolve: refreshResolver,
 							},
 							...(Object.keys(challengeInputObject.object.fields)
 								.length > 0

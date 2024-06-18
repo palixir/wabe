@@ -101,7 +101,11 @@ describe('SignInWith', () => {
 
 		expect(mockOnSendChallenge).toHaveBeenCalledTimes(1)
 
-		expect(res).toBe(true)
+		expect(res).toEqual({
+			accessToken: null,
+			refreshToken: null,
+			id: 'id',
+		})
 	})
 
 	it('should throw an error if no custom authentication configuration is provided', async () => {

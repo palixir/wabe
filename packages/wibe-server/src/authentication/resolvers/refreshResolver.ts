@@ -1,10 +1,15 @@
 import type { Context } from '../../graphql/interface'
 import { Session } from '../Session'
 
-export const refreshResolver = async (_: any, __: any, context: Context) => {
+export const refreshResolver = async (_: any, args: any, context: Context) => {
+	const {
+		input: { refreshToken, accessToken },
+	} = args
+
 	const session = new Session()
 
-	await session.refresh(context.sessionId, context)
+	const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
+		await session.refresh(accessToken, refreshToken, context)
 
-	return true
+	return { accessToken: newAccessToken, refreshToken: newRefreshToken }
 }

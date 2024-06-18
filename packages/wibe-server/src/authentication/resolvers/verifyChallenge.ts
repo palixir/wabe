@@ -30,7 +30,7 @@ export const verifyChallengeResolver = async (
 
 	const session = new Session()
 
-	await session.create(context.user.id, context)
+	await session.create(context.user?.id, context)
 
 	return true
 }

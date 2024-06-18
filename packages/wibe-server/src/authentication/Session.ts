@@ -41,6 +41,7 @@ export class Session {
 				'user.id',
 				// @ts-expect-error
 				'user.email',
+				// @ts-expect-error
 				'user.role.name',
 				'refreshToken',
 				'refreshTokenExpiresAt',
@@ -98,6 +99,8 @@ export class Session {
 	}
 
 	async delete(context: Context) {
+		if (!context.sessionId) return
+
 		await WibeApp.databaseController.deleteObject({
 			className: '_Session',
 			context,

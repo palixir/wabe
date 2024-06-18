@@ -35,6 +35,10 @@ export const signInWithResolver = async (
 		context,
 	})
 
+	const userId = user.id
+
+	if (!userId) throw new Error('Authentication failed')
+
 	// 2 - We call the onSendChallenge method of the provider
 	if (input.authentication?.secondaryFactor) {
 		const secondaryProvider =
@@ -44,12 +48,8 @@ export const signInWithResolver = async (
 
 		await secondaryProvider.provider.onSendChallenge()
 
-		return true
+		return { accessToken: null, refreshToken: null, id: userId }
 	}
-
-	const userId = user.id
-
-	if (!userId) throw new Error('Authentication failed')
 
 	const session = new Session()
 
