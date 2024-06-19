@@ -97,7 +97,7 @@ export const initializeHook = async <T extends keyof WibeSchemaTypes>({
 	context: Context
 	skipHooks?: boolean
 }) => {
-	if (skipHooks) return { run: () => {} }
+	if (skipHooks) return { run: async () => ({}) }
 
 	const objects =
 		id || where
