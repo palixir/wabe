@@ -18,14 +18,17 @@ enum SecondaryFactor {
 type _User {
   id: ID!
   post: Post
+  createdAt: Date!
+  updatedAt: Date!
   authentication: _UserAuthentication
   provider: AuthenticationProvider
   email: Email
   verifiedEmail: Boolean
   role: _Role
-  createdAt: Date
-  updatedAt: Date
 }
+
+"""Date scalar type"""
+scalar Date
 
 type _UserAuthentication {
   emailPassword: _UserAuthenticationEmailPassword
@@ -44,19 +47,16 @@ type _UserAuthenticationOtp {
   code: String
 }
 
-"""Date scalar type"""
-scalar Date
-
 """User class"""
 input _UserInput {
   post: PostPointerInput
+  createdAt: Date!
+  updatedAt: Date!
   authentication: _UserAuthenticationInput
   provider: AuthenticationProvider
   email: Email
   verifiedEmail: Boolean
   role: _RolePointerInput
-  createdAt: Date
-  updatedAt: Date
 }
 
 input _UserAuthenticationInput {
@@ -82,13 +82,13 @@ input _UserPointerInput {
 """User class"""
 input _UserCreateFieldsInput {
   post: PostPointerInput
+  createdAt: Date
+  updatedAt: Date
   authentication: _UserAuthenticationCreateFieldsInput
   provider: AuthenticationProvider
   email: Email
   verifiedEmail: Boolean
   role: _RolePointerInput
-  createdAt: Date
-  updatedAt: Date
 }
 
 input _UserAuthenticationCreateFieldsInput {
@@ -115,10 +115,14 @@ input _UserRelationInput {
 type Post {
   id: ID!
   name: String!
+  createdAt: Date!
+  updatedAt: Date!
 }
 
 input PostInput {
   name: String!
+  createdAt: Date!
+  updatedAt: Date!
 }
 
 """Input to link an object to a pointer Post"""
@@ -129,6 +133,8 @@ input PostPointerInput {
 
 input PostCreateFieldsInput {
   name: String
+  createdAt: Date
+  updatedAt: Date
 }
 
 """Input to add a relation to the class Post"""
@@ -186,6 +192,8 @@ type _Role {
   id: ID!
   name: String!
   users: _UserConnection
+  createdAt: Date!
+  updatedAt: Date!
 }
 
 type _UserConnection {
@@ -199,6 +207,8 @@ type _UserEdge {
 input _RoleInput {
   name: String!
   users: _UserRelationInput
+  createdAt: Date!
+  updatedAt: Date!
 }
 
 """Input to link an object to a pointer _Role"""
@@ -210,6 +220,8 @@ input _RolePointerInput {
 input _RoleCreateFieldsInput {
   name: String
   users: _UserRelationInput
+  createdAt: Date
+  updatedAt: Date
 }
 
 """Input to add a relation to the class _Role"""
@@ -240,13 +252,13 @@ type Query {
 input _UserWhereInput {
   id: IdWhereInput
   post: PostWhereInput
+  createdAt: DateWhereInput
+  updatedAt: DateWhereInput
   authentication: _UserAuthenticationWhereInput
   provider: AnyWhereInput
   email: EmailWhereInput
   verifiedEmail: BooleanWhereInput
   role: _RoleWhereInput
-  createdAt: DateWhereInput
-  updatedAt: DateWhereInput
   OR: [_UserWhereInput]
   AND: [_UserWhereInput]
 }
@@ -261,6 +273,8 @@ input IdWhereInput {
 input PostWhereInput {
   id: IdWhereInput
   name: StringWhereInput
+  createdAt: DateWhereInput
+  updatedAt: DateWhereInput
   OR: [PostWhereInput]
   AND: [PostWhereInput]
 }
@@ -270,6 +284,17 @@ input StringWhereInput {
   notEqualTo: String
   in: [String]
   notIn: [String]
+}
+
+input DateWhereInput {
+  equalTo: Date
+  notEqualTo: Date
+  in: [Date]
+  notIn: [Date]
+  lessThan: Date
+  lessThanOrEqualTo: Date
+  greaterThan: Date
+  greaterThanOrEqualTo: Date
 }
 
 input _UserAuthenticationWhereInput {
@@ -320,19 +345,10 @@ input _RoleWhereInput {
   id: IdWhereInput
   name: StringWhereInput
   users: _UserWhereInput
+  createdAt: DateWhereInput
+  updatedAt: DateWhereInput
   OR: [_RoleWhereInput]
   AND: [_RoleWhereInput]
-}
-
-input DateWhereInput {
-  equalTo: Date
-  notEqualTo: Date
-  in: [Date]
-  notIn: [Date]
-  lessThan: Date
-  lessThanOrEqualTo: Date
-  greaterThan: Date
-  greaterThanOrEqualTo: Date
 }
 
 type PostConnection {
@@ -446,13 +462,13 @@ input Update_UserInput {
 """User class"""
 input _UserUpdateFieldsInput {
   post: PostPointerInput
+  createdAt: Date
+  updatedAt: Date
   authentication: _UserAuthenticationUpdateFieldsInput
   provider: AuthenticationProvider
   email: Email
   verifiedEmail: Boolean
   role: _RolePointerInput
-  createdAt: Date
-  updatedAt: Date
 }
 
 input _UserAuthenticationUpdateFieldsInput {
@@ -509,8 +525,8 @@ input SecondCustomMutationSumInput {
 
 type SignInWithOutput {
   id: String
-  accessToken: String!
-  refreshToken: String!
+  accessToken: String
+  refreshToken: String
 }
 
 input SignInWithInput {
@@ -606,6 +622,8 @@ input UpdatePostInput {
 
 input PostUpdateFieldsInput {
   name: String
+  createdAt: Date
+  updatedAt: Date
 }
 
 input UpdatePostsInput {
@@ -711,6 +729,8 @@ input Update_RoleInput {
 input _RoleUpdateFieldsInput {
   name: String
   users: _UserRelationInput
+  createdAt: Date
+  updatedAt: Date
 }
 
 input Update_RolesInput {

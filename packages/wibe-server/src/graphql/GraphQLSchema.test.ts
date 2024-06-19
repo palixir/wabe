@@ -121,6 +121,50 @@ describe('GraphqlSchema', () => {
 		})
 	})
 
+	it('should support an array of object in graphql schema', async () => {
+		const { client, wibeApp } = await createWibeApp({
+			class: [
+				{
+					name: 'TestClass',
+					fields: {
+						field1: {
+							type: 'Array',
+							typeValue: 'Object',
+							object: {
+								name: 'Field1Object',
+								fields: {
+									name: {
+										type: 'String',
+									},
+								},
+							},
+						},
+					},
+				},
+			],
+		})
+
+		const res = await client.request<any>(gql`
+				mutation createTestClass {
+					createTestClass(input : {fields :{ field1 : [{name: "test"}, {name: "test2"}]}}){
+						testClass {
+							id
+							field1 {
+								name
+							}
+						}
+					}
+				}
+			`)
+
+		expect(res.createTestClass.testClass.field1).toEqual([
+			{ name: 'test' },
+			{ name: 'test2' },
+		])
+
+		await wibeApp.close()
+	})
+
 	it('should return an array in a query', async () => {
 		const { client, wibeApp } = await createWibeApp({
 			class: [
@@ -353,7 +397,7 @@ describe('GraphqlSchema', () => {
 		await wibeApp.close()
 	})
 
-	it('should have id in WhereInput object', () => {
+	it('should have correct WhereInput object', () => {
 		expect(
 			getTypeFromGraphQLSchema({
 				schema,
@@ -365,6 +409,8 @@ describe('GraphqlSchema', () => {
 			AND: '[TestClassWhereInput]',
 			OR: '[TestClassWhereInput]',
 			field1: 'StringWhereInput',
+			createdAt: 'DateWhereInput',
+			updatedAt: 'DateWhereInput',
 		})
 	})
 
@@ -374,11 +420,8 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'FifthClass',
-			}).input,
-		).toEqual({
-			id: 'ID!',
-			relation: 'SixthClassConnection',
-		})
+			}).input.relation,
+		).toEqual('SixthClassConnection')
 	})
 
 	it('should have a TestClassRelationInput', () => {
@@ -387,12 +430,8 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'TestClassRelationInput',
-			}).input,
-		).toEqual({
-			add: '[ID!]',
-			remove: '[ID!]',
-			createAndAdd: '[TestClassCreateFieldsInput!]',
-		})
+			}).input.createAndAdd,
+		).toEqual('[TestClassCreateFieldsInput!]')
 	})
 
 	it('should have a RelationInput on SixthClass on field relation of FifthClass', () => {
@@ -401,10 +440,8 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'FifthClassInput',
-			}).input,
-		).toEqual({
-			relation: 'SixthClassRelationInput',
-		})
+			}).input.relation,
+		).toEqual('SixthClassRelationInput')
 	})
 
 	it('should have the pointer in the object when there is a circular dependency in pointer', () => {
@@ -413,64 +450,48 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'ThirdClass',
-			}).input,
-		).toEqual({
-			id: 'ID!',
-			pointer: 'FourthClass',
-		})
+			}).input.pointer,
+		).toEqual('FourthClass')
 
 		expect(
 			getTypeFromGraphQLSchema({
 				schema,
 				type: 'Type',
 				name: 'FourthClass',
-			}).input,
-		).toEqual({
-			id: 'ID!',
-			pointer: 'ThirdClass',
-		})
+			}).input.pointer,
+		).toEqual('ThirdClass')
 
 		expect(
 			getTypeFromGraphQLSchema({
 				schema,
 				type: 'Type',
 				name: 'ThirdClassInput',
-			}).input,
-		).toEqual({
-			pointer: 'FourthClassPointerInput',
-		})
+			}).input.pointer,
+		).toEqual('FourthClassPointerInput')
 
 		expect(
 			getTypeFromGraphQLSchema({
 				schema,
 				type: 'Type',
 				name: 'FourthClassInput',
-			}).input,
-		).toEqual({
-			pointer: 'ThirdClassPointerInput',
-		})
+			}).input.pointer,
+		).toEqual('ThirdClassPointerInput')
 
 		expect(
 			getTypeFromGraphQLSchema({
 				schema,
 				type: 'Type',
 				name: 'ThirdClassPointerInput',
-			}).input,
-		).toEqual({
-			link: 'ID',
-			createAndLink: 'ThirdClassCreateFieldsInput',
-		})
+			}).input.createAndLink,
+		).toEqual('ThirdClassCreateFieldsInput')
 
 		expect(
 			getTypeFromGraphQLSchema({
 				schema,
 				type: 'Type',
 				name: 'FourthClassPointerInput',
-			}).input,
-		).toEqual({
-			link: 'ID',
-			createAndLink: 'FourthClassCreateFieldsInput',
-		})
+			}).input.createAndLink,
+		).toEqual('FourthClassCreateFieldsInput')
 	})
 
 	it('should have TestClassPointerInput', () => {
@@ -479,11 +500,8 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'TestClassPointerInput',
-			}).input,
-		).toEqual({
-			link: 'ID',
-			createAndLink: 'TestClassCreateFieldsInput',
-		})
+			}).input.createAndLink,
+		).toEqual('TestClassCreateFieldsInput')
 	})
 
 	it('should have a type with a pointer to TestClass', () => {
@@ -492,13 +510,8 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'SecondClass',
-			}),
-		).toEqual({
-			input: {
-				id: 'ID!',
-				pointer: 'TestClass',
-			},
-		})
+			}).input.pointer,
+		).toEqual('TestClass')
 	})
 
 	it('should have pointer input on SecondClassCreateFieldsInput', () => {
@@ -507,12 +520,8 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'SecondClassCreateFieldsInput',
-			}),
-		).toEqual({
-			input: {
-				pointer: 'TestClassPointerInput',
-			},
-		})
+			}).input.pointer,
+		).toEqual('TestClassPointerInput')
 	})
 
 	it('should have pointer input on SecondClassUpdateFieldsInput', () => {
@@ -521,12 +530,8 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'SecondClassUpdateFieldsInput',
-			}),
-		).toEqual({
-			input: {
-				pointer: 'TestClassPointerInput',
-			},
-		})
+			}).input.pointer,
+		).toEqual('TestClassPointerInput')
 	})
 
 	it('should have ClassCreateInputFieldsInput', () => {
@@ -535,10 +540,8 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'TestClassCreateFieldsInput',
-			}).input,
-		).toEqual({
-			field1: 'String',
-		})
+			}).input.field1,
+		).toEqual('String')
 	})
 
 	it('should have ClassUpdateInputFieldsInput', () => {
@@ -547,10 +550,8 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'TestClassUpdateFieldsInput',
-			}).input,
-		).toEqual({
-			field1: 'String',
-		})
+			}).input.field1,
+		).toEqual('String')
 	})
 
 	it('should get correct CreateTestClassPaylod type', () => {

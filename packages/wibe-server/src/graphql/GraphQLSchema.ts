@@ -498,22 +498,20 @@ export class GraphQLSchema {
 							...currentMutation,
 						})
 
-					if (currentMutation.type === 'Object') {
-						const objectGraphqlParser = graphqlParser({
-							schemaFields: currentMutation.outputObject.fields,
-							graphqlObjectType: 'Object',
-							allObjects: this.allObjects,
-						})
+					const objectGraphqlParser = graphqlParser({
+						schemaFields: currentMutation.outputObject.fields,
+						graphqlObjectType: 'Object',
+						allObjects: this.allObjects,
+					})
 
-						return new GraphQLObjectType({
-							name: currentMutation.outputObject.name,
-							fields: () => ({
-								...objectGraphqlParser.getGraphqlFields(
-									currentMutation.outputObject.name,
-								),
-							}),
-						})
-					}
+					return new GraphQLObjectType({
+						name: currentMutation.outputObject.name,
+						fields: () => ({
+							...objectGraphqlParser.getGraphqlFields(
+								currentMutation.outputObject.name,
+							),
+						}),
+					})
 				}
 
 				const outputType = getGraphqlOutputType()

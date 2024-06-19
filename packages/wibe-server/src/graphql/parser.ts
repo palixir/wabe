@@ -65,25 +65,6 @@ export const templateWhereInput: Record<
 	Array: ArrayWhereInput,
 }
 
-// For the moment we not support array of array (for sql database it's tricky)
-// Don't export this function
-// This function is only call by getGraphqlType
-const _getGraphqlTypeFromTemplate = ({
-	type,
-	typeValue,
-}: {
-	type: WibePrimaryTypes | 'Array'
-	typeValue?: WibePrimaryTypes
-}) => {
-	if (type === 'Array') {
-		if (!typeValue) throw new Error('Type value not found')
-
-		return new GraphQLList(templateScalarType[typeValue])
-	}
-
-	return templateScalarType[type]
-}
-
 interface GraphqlParserFactoryOptions {
 	graphqlObjectType: GraphqlObjectType
 	allObjects: AllObjects
@@ -155,6 +136,8 @@ export const GraphqlParser: GraphqlParserConstructor =
 
 						return acc
 					}
+
+					if (currentField.type === 'Array') return acc
 
 					const graphqlType = getGraphqlType({
 						...currentField,
@@ -368,10 +351,11 @@ export const GraphqlParser: GraphqlParserConstructor =
 			if (scalarExist) return scalarExist
 			if (enumExist) return enumExist
 
-			const graphqlType = _getGraphqlTypeFromTemplate({
-				type: type as WibePrimaryTypes,
-				typeValue,
-			})
+			const graphqlType =
+				type === 'Array' && typeValue
+					? new GraphQLList(templateScalarType[typeValue])
+					: // @ts-expect-error
+						templateScalarType[type]
 
 			if (!graphqlType) throw new Error(`${type} not exist in schema`)
 
@@ -439,6 +423,22 @@ export const GraphqlParser: GraphqlParserConstructor =
 						}
 
 						return acc
+					}
+
+					if (currentField.type === 'Array') {
+						if (currentField.typeValue === 'Object') {
+							acc[key] = {
+								type: new GraphQLList(
+									callback({
+										...currentField,
+										objectToParse: currentField.object,
+										nameOfTheObject: `${nameOfTheObject}${currentField.object.name}`,
+									}),
+								),
+							}
+
+							return acc
+						}
 					}
 
 					const graphqlType = getGraphqlType({

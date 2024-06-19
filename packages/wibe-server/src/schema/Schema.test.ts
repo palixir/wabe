@@ -50,6 +50,14 @@ describe('Schema', () => {
 				fields3: {
 					type: 'String',
 				},
+				createdAt: {
+					type: 'Date',
+					required: true,
+				},
+				updatedAt: {
+					type: 'Date',
+					required: true,
+				},
 			},
 		})
 
@@ -61,6 +69,14 @@ describe('Schema', () => {
 				},
 				field4: {
 					type: 'Int',
+				},
+				createdAt: {
+					type: 'Date',
+					required: true,
+				},
+				updatedAt: {
+					type: 'Date',
+					required: true,
 				},
 			},
 		})
@@ -129,6 +145,14 @@ describe('Schema', () => {
 				field2: {
 					type: 'Int',
 				},
+				createdAt: {
+					type: 'Date',
+					required: true,
+				},
+				updatedAt: {
+					type: 'Date',
+					required: true,
+				},
 			},
 			resolvers: {
 				queries: {
@@ -152,6 +176,14 @@ describe('Schema', () => {
 				},
 				field4: {
 					type: 'Int',
+				},
+				createdAt: {
+					type: 'Date',
+					required: true,
+				},
+				updatedAt: {
+					type: 'Date',
+					required: true,
 				},
 			},
 		})
@@ -204,6 +236,14 @@ describe('Schema', () => {
 				field2: {
 					type: 'Int',
 				},
+				createdAt: {
+					type: 'Date',
+					required: true,
+				},
+				updatedAt: {
+					type: 'Date',
+					required: true,
+				},
 			},
 		})
 
@@ -215,6 +255,14 @@ describe('Schema', () => {
 				},
 				field4: {
 					type: 'Int',
+				},
+				createdAt: {
+					type: 'Date',
+					required: true,
+				},
+				updatedAt: {
+					type: 'Date',
+					required: true,
 				},
 			},
 		})
@@ -270,6 +318,14 @@ describe('Schema', () => {
 				field2: {
 					type: 'Int',
 				},
+				createdAt: {
+					type: 'Date',
+					required: true,
+				},
+				updatedAt: {
+					type: 'Date',
+					required: true,
+				},
 			},
 		})
 
@@ -281,6 +337,14 @@ describe('Schema', () => {
 				},
 				field4: {
 					type: 'Int',
+				},
+				createdAt: {
+					type: 'Date',
+					required: true,
+				},
+				updatedAt: {
+					type: 'Date',
+					required: true,
 				},
 			},
 		})

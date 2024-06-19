@@ -46,8 +46,14 @@ type TypeFieldArray = {
 	required?: boolean
 	description?: string
 	defaultValue?: any[]
-	typeValue: WibePrimaryTypes
-}
+} & (
+	| {
+			// For the moment we only keep object and not array because we don't
+			// support array of array
+			typeValue: WibePrimaryTypes
+	  }
+	| { typeValue: 'Object'; object: ClassInterface }
+)
 
 type TypeFieldObject = {
 	type: 'Object'
@@ -218,14 +224,6 @@ export class Schema {
 					type: 'Date',
 					required: true,
 				},
-				createdAt: {
-					type: 'Date',
-					required: true,
-				},
-				updatedAt: {
-					type: 'Date',
-					required: true,
-				},
 			},
 		}
 	}
@@ -310,13 +308,6 @@ export class Schema {
 			role: {
 				type: 'Pointer',
 				class: '_Role',
-			},
-			// TODO : Automatically put this two fields for each class
-			createdAt: {
-				type: 'Date',
-			},
-			updatedAt: {
-				type: 'Date',
 			},
 		}
 
@@ -471,6 +462,32 @@ export class Schema {
 		}
 	}
 
+	defaultFields(): SchemaFields {
+		return {
+			// acl: {
+			// 	type: 'Object',
+			// 	object: {
+			// 		name: 'ACLObject',
+			// 		fields: {
+			// 			users: {
+			// 				type: 'Array',
+			// 				typeValue: 'Object',
+			// 			},
+			// 		},
+			// 	},
+			// 	required: true,
+			// },
+			createdAt: {
+				type: 'Date',
+				required: true,
+			},
+			updatedAt: {
+				type: 'Date',
+				required: true,
+			},
+		}
+	}
+
 	mergeClass(newClass: ClassInterface[]): ClassInterface[] {
 		const allUniqueClassName = [
 			...new Set(newClass.map((classItem) => classItem.name)),
@@ -505,7 +522,7 @@ export class Schema {
 						// We merge fields that have the same name and then we add the new fields
 						...acc.fields,
 						...classItem.fields,
-						// ...mergeField(classItem.fields, acc.fields),
+						...this.defaultFields(),
 					},
 					resolvers:
 						isQueriesEmpty || isMutationsEmpty
