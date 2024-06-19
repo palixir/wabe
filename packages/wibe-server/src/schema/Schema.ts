@@ -34,6 +34,13 @@ export type WibeGraphQLType =
 	| WibeSchemaEnums
 	| WibeSchemaScalars
 
+type Object = {
+	name: string
+	fields: SchemaFields
+	description?: string
+	required?: boolean
+}
+
 type TypeFieldBase<T, K extends WibeTypes> = {
 	type: K | WibeSchemaScalars | WibeSchemaEnums
 	required?: boolean
@@ -44,6 +51,7 @@ type TypeFieldBase<T, K extends WibeTypes> = {
 type TypeFieldArray = {
 	type: 'Array'
 	required?: boolean
+	requiredValue?: boolean
 	description?: string
 	defaultValue?: any[]
 } & (
@@ -52,14 +60,14 @@ type TypeFieldArray = {
 			// support array of array
 			typeValue: WibePrimaryTypes
 	  }
-	| { typeValue: 'Object'; object: ClassInterface }
+	| { typeValue: 'Object'; object: Object }
 )
 
 type TypeFieldObject = {
 	type: 'Object'
 	required?: boolean
 	description?: string
-	object: ClassInterface
+	object: Object
 	defaultValue?: any
 }
 
@@ -464,19 +472,56 @@ export class Schema {
 
 	defaultFields(): SchemaFields {
 		return {
-			// acl: {
-			// 	type: 'Object',
-			// 	object: {
-			// 		name: 'ACLObject',
-			// 		fields: {
-			// 			users: {
-			// 				type: 'Array',
-			// 				typeValue: 'Object',
-			// 			},
-			// 		},
-			// 	},
-			// 	required: true,
-			// },
+			acl: {
+				type: 'Object',
+				object: {
+					name: 'ACLObject',
+					fields: {
+						users: {
+							type: 'Array',
+							typeValue: 'Object',
+							object: {
+								name: 'UsersACL',
+								fields: {
+									userId: {
+										type: 'String',
+										required: true,
+									},
+									read: {
+										type: 'Boolean',
+										required: true,
+									},
+									write: {
+										type: 'Boolean',
+										required: true,
+									},
+								},
+							},
+						},
+						roles: {
+							type: 'Array',
+							typeValue: 'Object',
+							object: {
+								name: 'RolesACL',
+								fields: {
+									roleId: {
+										type: 'String',
+										required: true,
+									},
+									read: {
+										type: 'Boolean',
+										required: true,
+									},
+									write: {
+										type: 'Boolean',
+										required: true,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 			createdAt: {
 				type: 'Date',
 				required: true,

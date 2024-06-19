@@ -41,6 +41,35 @@ describe('GraphqlSchema', () => {
 		const wibeSchema = new Schema({
 			class: [
 				{
+					name: 'TestClass2',
+					fields: {
+						field1: {
+							type: 'Object',
+							required: true,
+							object: {
+								name: 'TestObject',
+								fields: {
+									testSubObject: {
+										type: 'Array',
+										typeValue: 'Object',
+										required: true,
+										object: {
+											name: 'FieldsObject',
+											required: true,
+											fields: {
+												name: {
+													type: 'String',
+													required: true,
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+				{
 					name: 'TestClass',
 					fields: { field1: { type: 'String' } },
 					resolvers: {
@@ -101,6 +130,35 @@ describe('GraphqlSchema', () => {
 						field6: { type: 'String' },
 					},
 				},
+				{
+					name: 'TestClassRequired',
+					fields: {
+						field7: {
+							type: 'String',
+							required: true,
+						},
+						field8: {
+							type: 'Array',
+							required: true,
+							requiredValue: true,
+							typeValue: 'Int',
+						},
+						field9: {
+							type: 'Array',
+							required: true,
+							typeValue: 'Object',
+							object: {
+								name: 'TestObjectArray',
+								fields: {
+									field10: {
+										type: 'Int',
+										required: true,
+									},
+								},
+							},
+						},
+					},
+				},
 			],
 		})
 
@@ -119,6 +177,58 @@ describe('GraphqlSchema', () => {
 			}),
 			types: [...types.scalars, ...types.enums, ...types.objects],
 		})
+	})
+
+	it('should have required field on object fields', async () => {
+		expect(
+			getTypeFromGraphQLSchema({
+				schema,
+				type: 'Type',
+				name: 'TestClassRequired',
+			}).input.field7,
+		).toEqual('String!')
+
+		expect(
+			getTypeFromGraphQLSchema({
+				schema,
+				type: 'Type',
+				name: 'TestClassRequired',
+			}).input.field8,
+		).toEqual('[Int!]!')
+
+		expect(
+			getTypeFromGraphQLSchema({
+				schema,
+				type: 'Type',
+				name: 'TestClassRequired',
+			}).input.field9,
+		).toEqual('[TestClassRequiredTestObjectArray]!')
+	})
+
+	it('should support object of array of object', async () => {
+		expect(
+			getTypeFromGraphQLSchema({
+				schema,
+				type: 'Type',
+				name: 'TestClass2',
+			}).input.field1,
+		).toEqual('TestClass2TestObject!')
+
+		expect(
+			getTypeFromGraphQLSchema({
+				schema,
+				type: 'Type',
+				name: 'TestClass2TestObject',
+			}).input.testSubObject,
+		).toEqual('[TestClass2TestObjectFieldsObject!]!')
+
+		expect(
+			getTypeFromGraphQLSchema({
+				schema,
+				type: 'Type',
+				name: 'TestClass2TestObjectFieldsObject',
+			}).input,
+		).toEqual({ name: 'String!' })
 	})
 
 	it('should support an array of object in graphql schema', async () => {
@@ -409,6 +519,7 @@ describe('GraphqlSchema', () => {
 			AND: '[TestClassWhereInput]',
 			OR: '[TestClassWhereInput]',
 			field1: 'StringWhereInput',
+			acl: 'TestClassACLObjectWhereInput',
 			createdAt: 'DateWhereInput',
 			updatedAt: 'DateWhereInput',
 		})

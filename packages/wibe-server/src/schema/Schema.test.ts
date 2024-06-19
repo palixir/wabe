@@ -58,6 +58,7 @@ describe('Schema', () => {
 					type: 'Date',
 					required: true,
 				},
+				acl: expect.any(Object),
 			},
 		})
 
@@ -78,6 +79,7 @@ describe('Schema', () => {
 					type: 'Date',
 					required: true,
 				},
+				acl: expect.any(Object),
 			},
 		})
 	})
@@ -153,6 +155,7 @@ describe('Schema', () => {
 					type: 'Date',
 					required: true,
 				},
+				acl: expect.any(Object),
 			},
 			resolvers: {
 				queries: {
@@ -185,6 +188,7 @@ describe('Schema', () => {
 					type: 'Date',
 					required: true,
 				},
+				acl: expect.any(Object),
 			},
 		})
 	})
@@ -244,6 +248,7 @@ describe('Schema', () => {
 					type: 'Date',
 					required: true,
 				},
+				acl: expect.any(Object),
 			},
 		})
 
@@ -264,6 +269,7 @@ describe('Schema', () => {
 					type: 'Date',
 					required: true,
 				},
+				acl: expect.any(Object),
 			},
 		})
 	})
@@ -326,6 +332,7 @@ describe('Schema', () => {
 					type: 'Date',
 					required: true,
 				},
+				acl: expect.any(Object),
 			},
 		})
 
@@ -346,6 +353,7 @@ describe('Schema', () => {
 					type: 'Date',
 					required: true,
 				},
+				acl: expect.any(Object),
 			},
 		})
 	})

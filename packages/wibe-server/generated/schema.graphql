@@ -18,6 +18,7 @@ enum SecondaryFactor {
 type _User {
   id: ID!
   post: Post
+  acl: _UserACLObject
   createdAt: Date!
   updatedAt: Date!
   authentication: _UserAuthentication
@@ -25,6 +26,23 @@ type _User {
   email: Email
   verifiedEmail: Boolean
   role: _Role
+}
+
+type _UserACLObject {
+  users: [_UserACLObjectUsersACL]
+  roles: [_UserACLObjectRolesACL]
+}
+
+type _UserACLObjectUsersACL {
+  userId: String!
+  read: Boolean!
+  write: Boolean!
+}
+
+type _UserACLObjectRolesACL {
+  roleId: String!
+  read: Boolean!
+  write: Boolean!
 }
 
 """Date scalar type"""
@@ -50,6 +68,7 @@ type _UserAuthenticationOtp {
 """User class"""
 input _UserInput {
   post: PostPointerInput
+  acl: _UserACLObjectInput
   createdAt: Date!
   updatedAt: Date!
   authentication: _UserAuthenticationInput
@@ -57,6 +76,23 @@ input _UserInput {
   email: Email
   verifiedEmail: Boolean
   role: _RolePointerInput
+}
+
+input _UserACLObjectInput {
+  users: [_UserACLObjectUsersACLInput]
+  roles: [_UserACLObjectRolesACLInput]
+}
+
+input _UserACLObjectUsersACLInput {
+  userId: String!
+  read: Boolean!
+  write: Boolean!
+}
+
+input _UserACLObjectRolesACLInput {
+  roleId: String!
+  read: Boolean!
+  write: Boolean!
 }
 
 input _UserAuthenticationInput {
@@ -82,6 +118,7 @@ input _UserPointerInput {
 """User class"""
 input _UserCreateFieldsInput {
   post: PostPointerInput
+  acl: _UserACLObjectCreateFieldsInput
   createdAt: Date
   updatedAt: Date
   authentication: _UserAuthenticationCreateFieldsInput
@@ -89,6 +126,23 @@ input _UserCreateFieldsInput {
   email: Email
   verifiedEmail: Boolean
   role: _RolePointerInput
+}
+
+input _UserACLObjectCreateFieldsInput {
+  users: [_UserACLObjectUsersACLCreateFieldsInput]
+  roles: [_UserACLObjectRolesACLCreateFieldsInput]
+}
+
+input _UserACLObjectUsersACLCreateFieldsInput {
+  userId: String
+  read: Boolean
+  write: Boolean
+}
+
+input _UserACLObjectRolesACLCreateFieldsInput {
+  roleId: String
+  read: Boolean
+  write: Boolean
 }
 
 input _UserAuthenticationCreateFieldsInput {
@@ -115,14 +169,50 @@ input _UserRelationInput {
 type Post {
   id: ID!
   name: String!
+  acl: PostACLObject
   createdAt: Date!
   updatedAt: Date!
 }
 
+type PostACLObject {
+  users: [PostACLObjectUsersACL]
+  roles: [PostACLObjectRolesACL]
+}
+
+type PostACLObjectUsersACL {
+  userId: String!
+  read: Boolean!
+  write: Boolean!
+}
+
+type PostACLObjectRolesACL {
+  roleId: String!
+  read: Boolean!
+  write: Boolean!
+}
+
 input PostInput {
   name: String!
+  acl: PostACLObjectInput
   createdAt: Date!
   updatedAt: Date!
+}
+
+input PostACLObjectInput {
+  users: [PostACLObjectUsersACLInput]
+  roles: [PostACLObjectRolesACLInput]
+}
+
+input PostACLObjectUsersACLInput {
+  userId: String!
+  read: Boolean!
+  write: Boolean!
+}
+
+input PostACLObjectRolesACLInput {
+  roleId: String!
+  read: Boolean!
+  write: Boolean!
 }
 
 """Input to link an object to a pointer Post"""
@@ -133,8 +223,26 @@ input PostPointerInput {
 
 input PostCreateFieldsInput {
   name: String
+  acl: PostACLObjectCreateFieldsInput
   createdAt: Date
   updatedAt: Date
+}
+
+input PostACLObjectCreateFieldsInput {
+  users: [PostACLObjectUsersACLCreateFieldsInput]
+  roles: [PostACLObjectRolesACLCreateFieldsInput]
+}
+
+input PostACLObjectUsersACLCreateFieldsInput {
+  userId: String
+  read: Boolean
+  write: Boolean
+}
+
+input PostACLObjectRolesACLCreateFieldsInput {
+  roleId: String
+  read: Boolean
+  write: Boolean
 }
 
 """Input to add a relation to the class Post"""
@@ -151,8 +259,26 @@ type _Session {
   accessTokenExpiresAt: Date!
   refreshToken: String
   refreshTokenExpiresAt: Date!
+  acl: _SessionACLObject
   createdAt: Date!
   updatedAt: Date!
+}
+
+type _SessionACLObject {
+  users: [_SessionACLObjectUsersACL]
+  roles: [_SessionACLObjectRolesACL]
+}
+
+type _SessionACLObjectUsersACL {
+  userId: String!
+  read: Boolean!
+  write: Boolean!
+}
+
+type _SessionACLObjectRolesACL {
+  roleId: String!
+  read: Boolean!
+  write: Boolean!
 }
 
 input _SessionInput {
@@ -161,8 +287,26 @@ input _SessionInput {
   accessTokenExpiresAt: Date!
   refreshToken: String
   refreshTokenExpiresAt: Date!
+  acl: _SessionACLObjectInput
   createdAt: Date!
   updatedAt: Date!
+}
+
+input _SessionACLObjectInput {
+  users: [_SessionACLObjectUsersACLInput]
+  roles: [_SessionACLObjectRolesACLInput]
+}
+
+input _SessionACLObjectUsersACLInput {
+  userId: String!
+  read: Boolean!
+  write: Boolean!
+}
+
+input _SessionACLObjectRolesACLInput {
+  roleId: String!
+  read: Boolean!
+  write: Boolean!
 }
 
 """Input to link an object to a pointer _Session"""
@@ -177,8 +321,26 @@ input _SessionCreateFieldsInput {
   accessTokenExpiresAt: Date
   refreshToken: String
   refreshTokenExpiresAt: Date
+  acl: _SessionACLObjectCreateFieldsInput
   createdAt: Date
   updatedAt: Date
+}
+
+input _SessionACLObjectCreateFieldsInput {
+  users: [_SessionACLObjectUsersACLCreateFieldsInput]
+  roles: [_SessionACLObjectRolesACLCreateFieldsInput]
+}
+
+input _SessionACLObjectUsersACLCreateFieldsInput {
+  userId: String
+  read: Boolean
+  write: Boolean
+}
+
+input _SessionACLObjectRolesACLCreateFieldsInput {
+  roleId: String
+  read: Boolean
+  write: Boolean
 }
 
 """Input to add a relation to the class _Session"""
@@ -192,6 +354,7 @@ type _Role {
   id: ID!
   name: String!
   users: _UserConnection
+  acl: _RoleACLObject
   createdAt: Date!
   updatedAt: Date!
 }
@@ -204,11 +367,46 @@ type _UserEdge {
   node: _User!
 }
 
+type _RoleACLObject {
+  users: [_RoleACLObjectUsersACL]
+  roles: [_RoleACLObjectRolesACL]
+}
+
+type _RoleACLObjectUsersACL {
+  userId: String!
+  read: Boolean!
+  write: Boolean!
+}
+
+type _RoleACLObjectRolesACL {
+  roleId: String!
+  read: Boolean!
+  write: Boolean!
+}
+
 input _RoleInput {
   name: String!
   users: _UserRelationInput
+  acl: _RoleACLObjectInput
   createdAt: Date!
   updatedAt: Date!
+}
+
+input _RoleACLObjectInput {
+  users: [_RoleACLObjectUsersACLInput]
+  roles: [_RoleACLObjectRolesACLInput]
+}
+
+input _RoleACLObjectUsersACLInput {
+  userId: String!
+  read: Boolean!
+  write: Boolean!
+}
+
+input _RoleACLObjectRolesACLInput {
+  roleId: String!
+  read: Boolean!
+  write: Boolean!
 }
 
 """Input to link an object to a pointer _Role"""
@@ -220,8 +418,26 @@ input _RolePointerInput {
 input _RoleCreateFieldsInput {
   name: String
   users: _UserRelationInput
+  acl: _RoleACLObjectCreateFieldsInput
   createdAt: Date
   updatedAt: Date
+}
+
+input _RoleACLObjectCreateFieldsInput {
+  users: [_RoleACLObjectUsersACLCreateFieldsInput]
+  roles: [_RoleACLObjectRolesACLCreateFieldsInput]
+}
+
+input _RoleACLObjectUsersACLCreateFieldsInput {
+  userId: String
+  read: Boolean
+  write: Boolean
+}
+
+input _RoleACLObjectRolesACLCreateFieldsInput {
+  roleId: String
+  read: Boolean
+  write: Boolean
 }
 
 """Input to add a relation to the class _Role"""
@@ -252,6 +468,7 @@ type Query {
 input _UserWhereInput {
   id: IdWhereInput
   post: PostWhereInput
+  acl: _UserACLObjectWhereInput
   createdAt: DateWhereInput
   updatedAt: DateWhereInput
   authentication: _UserAuthenticationWhereInput
@@ -273,6 +490,7 @@ input IdWhereInput {
 input PostWhereInput {
   id: IdWhereInput
   name: StringWhereInput
+  acl: PostACLObjectWhereInput
   createdAt: DateWhereInput
   updatedAt: DateWhereInput
   OR: [PostWhereInput]
@@ -286,6 +504,36 @@ input StringWhereInput {
   notIn: [String]
 }
 
+input PostACLObjectWhereInput {
+  users: [PostACLObjectUsersACLWhereInput]
+  roles: [PostACLObjectRolesACLWhereInput]
+  OR: [PostACLObjectWhereInput]
+  AND: [PostACLObjectWhereInput]
+}
+
+input PostACLObjectUsersACLWhereInput {
+  userId: StringWhereInput
+  read: BooleanWhereInput
+  write: BooleanWhereInput
+  OR: [PostACLObjectUsersACLWhereInput]
+  AND: [PostACLObjectUsersACLWhereInput]
+}
+
+input BooleanWhereInput {
+  equalTo: Boolean
+  notEqualTo: Boolean
+  in: [Boolean]
+  notIn: [Boolean]
+}
+
+input PostACLObjectRolesACLWhereInput {
+  roleId: StringWhereInput
+  read: BooleanWhereInput
+  write: BooleanWhereInput
+  OR: [PostACLObjectRolesACLWhereInput]
+  AND: [PostACLObjectRolesACLWhereInput]
+}
+
 input DateWhereInput {
   equalTo: Date
   notEqualTo: Date
@@ -295,6 +543,29 @@ input DateWhereInput {
   lessThanOrEqualTo: Date
   greaterThan: Date
   greaterThanOrEqualTo: Date
+}
+
+input _UserACLObjectWhereInput {
+  users: [_UserACLObjectUsersACLWhereInput]
+  roles: [_UserACLObjectRolesACLWhereInput]
+  OR: [_UserACLObjectWhereInput]
+  AND: [_UserACLObjectWhereInput]
+}
+
+input _UserACLObjectUsersACLWhereInput {
+  userId: StringWhereInput
+  read: BooleanWhereInput
+  write: BooleanWhereInput
+  OR: [_UserACLObjectUsersACLWhereInput]
+  AND: [_UserACLObjectUsersACLWhereInput]
+}
+
+input _UserACLObjectRolesACLWhereInput {
+  roleId: StringWhereInput
+  read: BooleanWhereInput
+  write: BooleanWhereInput
+  OR: [_UserACLObjectRolesACLWhereInput]
+  AND: [_UserACLObjectRolesACLWhereInput]
 }
 
 input _UserAuthenticationWhereInput {
@@ -334,21 +605,38 @@ The Any scalar type is used in operations and types that involve any type of val
 """
 scalar Any
 
-input BooleanWhereInput {
-  equalTo: Boolean
-  notEqualTo: Boolean
-  in: [Boolean]
-  notIn: [Boolean]
-}
-
 input _RoleWhereInput {
   id: IdWhereInput
   name: StringWhereInput
   users: _UserWhereInput
+  acl: _RoleACLObjectWhereInput
   createdAt: DateWhereInput
   updatedAt: DateWhereInput
   OR: [_RoleWhereInput]
   AND: [_RoleWhereInput]
+}
+
+input _RoleACLObjectWhereInput {
+  users: [_RoleACLObjectUsersACLWhereInput]
+  roles: [_RoleACLObjectRolesACLWhereInput]
+  OR: [_RoleACLObjectWhereInput]
+  AND: [_RoleACLObjectWhereInput]
+}
+
+input _RoleACLObjectUsersACLWhereInput {
+  userId: StringWhereInput
+  read: BooleanWhereInput
+  write: BooleanWhereInput
+  OR: [_RoleACLObjectUsersACLWhereInput]
+  AND: [_RoleACLObjectUsersACLWhereInput]
+}
+
+input _RoleACLObjectRolesACLWhereInput {
+  roleId: StringWhereInput
+  read: BooleanWhereInput
+  write: BooleanWhereInput
+  OR: [_RoleACLObjectRolesACLWhereInput]
+  AND: [_RoleACLObjectRolesACLWhereInput]
 }
 
 type PostConnection {
@@ -374,10 +662,34 @@ input _SessionWhereInput {
   accessTokenExpiresAt: DateWhereInput
   refreshToken: StringWhereInput
   refreshTokenExpiresAt: DateWhereInput
+  acl: _SessionACLObjectWhereInput
   createdAt: DateWhereInput
   updatedAt: DateWhereInput
   OR: [_SessionWhereInput]
   AND: [_SessionWhereInput]
+}
+
+input _SessionACLObjectWhereInput {
+  users: [_SessionACLObjectUsersACLWhereInput]
+  roles: [_SessionACLObjectRolesACLWhereInput]
+  OR: [_SessionACLObjectWhereInput]
+  AND: [_SessionACLObjectWhereInput]
+}
+
+input _SessionACLObjectUsersACLWhereInput {
+  userId: StringWhereInput
+  read: BooleanWhereInput
+  write: BooleanWhereInput
+  OR: [_SessionACLObjectUsersACLWhereInput]
+  AND: [_SessionACLObjectUsersACLWhereInput]
+}
+
+input _SessionACLObjectRolesACLWhereInput {
+  roleId: StringWhereInput
+  read: BooleanWhereInput
+  write: BooleanWhereInput
+  OR: [_SessionACLObjectRolesACLWhereInput]
+  AND: [_SessionACLObjectRolesACLWhereInput]
 }
 
 type _RoleConnection {
@@ -462,6 +774,7 @@ input Update_UserInput {
 """User class"""
 input _UserUpdateFieldsInput {
   post: PostPointerInput
+  acl: _UserACLObjectUpdateFieldsInput
   createdAt: Date
   updatedAt: Date
   authentication: _UserAuthenticationUpdateFieldsInput
@@ -469,6 +782,23 @@ input _UserUpdateFieldsInput {
   email: Email
   verifiedEmail: Boolean
   role: _RolePointerInput
+}
+
+input _UserACLObjectUpdateFieldsInput {
+  users: [_UserACLObjectUsersACLUpdateFieldsInput]
+  roles: [_UserACLObjectRolesACLUpdateFieldsInput]
+}
+
+input _UserACLObjectUsersACLUpdateFieldsInput {
+  userId: String
+  read: Boolean
+  write: Boolean
+}
+
+input _UserACLObjectRolesACLUpdateFieldsInput {
+  roleId: String
+  read: Boolean
+  write: Boolean
 }
 
 input _UserAuthenticationUpdateFieldsInput {
@@ -622,8 +952,26 @@ input UpdatePostInput {
 
 input PostUpdateFieldsInput {
   name: String
+  acl: PostACLObjectUpdateFieldsInput
   createdAt: Date
   updatedAt: Date
+}
+
+input PostACLObjectUpdateFieldsInput {
+  users: [PostACLObjectUsersACLUpdateFieldsInput]
+  roles: [PostACLObjectRolesACLUpdateFieldsInput]
+}
+
+input PostACLObjectUsersACLUpdateFieldsInput {
+  userId: String
+  read: Boolean
+  write: Boolean
+}
+
+input PostACLObjectRolesACLUpdateFieldsInput {
+  roleId: String
+  read: Boolean
+  write: Boolean
 }
 
 input UpdatePostsInput {
@@ -677,8 +1025,26 @@ input _SessionUpdateFieldsInput {
   accessTokenExpiresAt: Date
   refreshToken: String
   refreshTokenExpiresAt: Date
+  acl: _SessionACLObjectUpdateFieldsInput
   createdAt: Date
   updatedAt: Date
+}
+
+input _SessionACLObjectUpdateFieldsInput {
+  users: [_SessionACLObjectUsersACLUpdateFieldsInput]
+  roles: [_SessionACLObjectRolesACLUpdateFieldsInput]
+}
+
+input _SessionACLObjectUsersACLUpdateFieldsInput {
+  userId: String
+  read: Boolean
+  write: Boolean
+}
+
+input _SessionACLObjectRolesACLUpdateFieldsInput {
+  roleId: String
+  read: Boolean
+  write: Boolean
 }
 
 input Update_SessionsInput {
@@ -729,8 +1095,26 @@ input Update_RoleInput {
 input _RoleUpdateFieldsInput {
   name: String
   users: _UserRelationInput
+  acl: _RoleACLObjectUpdateFieldsInput
   createdAt: Date
   updatedAt: Date
+}
+
+input _RoleACLObjectUpdateFieldsInput {
+  users: [_RoleACLObjectUsersACLUpdateFieldsInput]
+  roles: [_RoleACLObjectRolesACLUpdateFieldsInput]
+}
+
+input _RoleACLObjectUsersACLUpdateFieldsInput {
+  userId: String
+  read: Boolean
+  write: Boolean
+}
+
+input _RoleACLObjectRolesACLUpdateFieldsInput {
+  roleId: String
+  read: Boolean
+  write: Boolean
 }
 
 input Update_RolesInput {

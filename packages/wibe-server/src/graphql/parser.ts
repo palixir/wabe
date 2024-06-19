@@ -127,7 +127,7 @@ export const GraphqlParser: GraphqlParserConstructor =
 					if (currentField.type === 'Object') {
 						acc[key] = {
 							type: callBackForObjectType({
-								required: currentField.required,
+								required: currentField.object.required,
 								description: currentField.description,
 								objectToParse: currentField.object,
 								nameOfTheObject: `${nameOfTheObject}${keyWithFirstLetterUppercase}`,
@@ -137,7 +137,26 @@ export const GraphqlParser: GraphqlParserConstructor =
 						return acc
 					}
 
-					if (currentField.type === 'Array') return acc
+					if (currentField.type === 'Array') {
+						if (currentField.typeValue === 'Object') {
+							const objectList = new GraphQLList(
+								callBackForObjectType({
+									required: currentField.object.required,
+									description: currentField.description,
+									objectToParse: currentField.object,
+									nameOfTheObject: `${nameOfTheObject}${currentField.object.name}`,
+								}),
+							)
+
+							acc[key] = {
+								type: currentField.required
+									? new GraphQLNonNull(objectList)
+									: objectList,
+							}
+						}
+
+						return acc
+					}
 
 					const graphqlType = getGraphqlType({
 						...currentField,
@@ -327,6 +346,7 @@ export const GraphqlParser: GraphqlParserConstructor =
 		const getGraphqlType = ({
 			type,
 			typeValue,
+			requiredValue,
 			isWhereType = false,
 		}: {
 			type:
@@ -335,6 +355,7 @@ export const GraphqlParser: GraphqlParserConstructor =
 				| WibeSchemaEnums
 				| WibeSchemaScalars
 			typeValue?: WibePrimaryTypes
+			requiredValue?: boolean
 			isWhereType?: boolean
 		}) => {
 			const scalarExist = scalars.find((scalar) => scalar.name === type)
@@ -353,7 +374,13 @@ export const GraphqlParser: GraphqlParserConstructor =
 
 			const graphqlType =
 				type === 'Array' && typeValue
-					? new GraphQLList(templateScalarType[typeValue])
+					? new GraphQLList(
+							requiredValue
+								? new GraphQLNonNull(
+										templateScalarType[typeValue],
+									)
+								: templateScalarType[typeValue],
+						)
 					: // @ts-expect-error
 						templateScalarType[type]
 
@@ -427,14 +454,19 @@ export const GraphqlParser: GraphqlParserConstructor =
 
 					if (currentField.type === 'Array') {
 						if (currentField.typeValue === 'Object') {
+							const objectList = new GraphQLList(
+								callback({
+									...currentField,
+									required: currentField.object.required,
+									objectToParse: currentField.object,
+									nameOfTheObject: `${nameOfTheObject}${currentField.object.name}`,
+								}),
+							)
+
 							acc[key] = {
-								type: new GraphQLList(
-									callback({
-										...currentField,
-										objectToParse: currentField.object,
-										nameOfTheObject: `${nameOfTheObject}${currentField.object.name}`,
-									}),
-								),
+								type: currentField.required
+									? new GraphQLNonNull(objectList)
+									: objectList,
 							}
 
 							return acc
