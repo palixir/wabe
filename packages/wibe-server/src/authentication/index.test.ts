@@ -29,6 +29,96 @@ describe('Authentication', () => {
 
 	afterEach(async () => {
 		await rootClient.request<any>(graphql.delete_Users)
+		await rootClient.request<any>(graphql.deleteTests)
+	})
+
+	it('should not authorize to read an object when an ACL protect the object on read for this role', async () => {
+		const res = await client.request<any>(graphql.signUpWith, {
+			input: {
+				authentication: {
+					emailPassword: {
+						email: 'email@test.fr',
+						password: 'password',
+					},
+				},
+			},
+		})
+
+		const resOfRoles = await rootClient.request<any>(gql`
+			query getRoles {
+					_roles(where: {name: {equalTo: "Client"}}) {
+			    edges {
+		    			node {
+		     			 	id
+		    			}
+		  			}
+					}
+			}
+		`)
+
+		const roleId = resOfRoles._roles.edges[0].node.id
+
+		await rootClient.request<any>(gql`
+			mutation updateUser {
+			  update_User(input: {id: "${res.signUpWith.id}", fields: {role: {link: "${roleId}"}}}) {
+		  			_user {
+		    			id
+		  			}
+					}
+			}
+		`)
+
+		const userClient = getUserClient(port, res.signUpWith.accessToken)
+
+		const objectCreated = await rootClient.request<any>(gql`
+				mutation createTest {
+					createTest(input:{fields:{name: "test"}}){
+						test{
+							id
+						}
+					}
+				}
+		`)
+
+		const objectId = objectCreated.createTest.test.id
+
+		await rootClient.request<any>(gql`
+			query testClass{
+				test(id: "${objectId}"){
+					id
+				}
+			}	
+		`)
+
+		await rootClient.request<any>(gql`
+			mutation updateACL{
+				updateTest(input:{id: "${objectId}", fields: {acl:{
+					roles: [{
+						roleId: "${roleId}",
+						read: false,
+						write:true
+					}]
+				}}}){
+					test{
+						id
+					}
+				}
+			}		
+		`)
+
+		expect(
+			userClient.request<any>(gql`
+				query tests{
+					tests{
+						edges{
+							node{
+								id
+							}
+						}
+					}
+				}
+			`),
+		).rejects.toThrow('Permission denied to read class Test')
 	})
 
 	it('should authorize a connected user to access to a protected resource', async () => {
@@ -285,6 +375,19 @@ describe('Authentication', () => {
 })
 
 const graphql = {
+	deleteTests: gql`
+		mutation deleteTests {
+  		deleteTests(
+    		input: {where: {name: {equalTo: "test"}}}
+  		) {
+    		edges {
+      		node {
+        		id
+      		}
+    		}
+  		}
+		}
+	`,
 	delete_Users: gql`
 		mutation delete_User {
   		delete_Users(

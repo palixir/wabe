@@ -99,16 +99,17 @@ export const initializeHook = async <T extends keyof WibeSchemaTypes>({
 }) => {
 	if (skipHooks) return { run: async () => ({}) }
 
-	const objects =
-		id || where
-			? await WibeApp.databaseController.getObjects({
-					className,
-					context: { isRoot: true },
-					fields: [],
-					where: where ? where : { id: { equalTo: id } },
-					skipHooks: true,
-				})
-			: [newData || {}]
+	const objects = await WibeApp.databaseController.getObjects({
+		className,
+		context: { isRoot: true },
+		fields: [],
+		where: where ? where : { id: { equalTo: id } },
+		skipHooks: true,
+	})
+
+	// We need to have at least one loop on all hooks
+	const objectsToMap =
+		objects && objects.length > 0 ? objects : [newData || {}]
 
 	return {
 		run: async (
@@ -117,7 +118,7 @@ export const initializeHook = async <T extends keyof WibeSchemaTypes>({
 			const hooksOrderByPriorities = getHooksOrderByPriorities()
 
 			const res = await Promise.all(
-				objects.map(async (object) => {
+				objectsToMap.map(async (object) => {
 					const hookObject = new HookObject({
 						className,
 						newData,

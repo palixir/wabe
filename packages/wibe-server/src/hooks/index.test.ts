@@ -98,7 +98,7 @@ describe('Hooks', () => {
 
 		await hooks.run(OperationType.BeforeRead)
 
-		expect(mockGetObjects).toHaveBeenCalledTimes(0)
+		expect(mockGetObjects).toHaveBeenCalledTimes(1)
 
 		const hookObject = mockCallBack1.mock.calls[0][0] as any
 

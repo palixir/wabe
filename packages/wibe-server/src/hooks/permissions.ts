@@ -1,20 +1,27 @@
 import { WibeApp } from '../..'
-import type { Context } from '../graphql/interface'
+import { _RoleAclObject } from '../../generated/wibe'
 import type { PermissionsOperations } from '../schema'
 import type { HookObject } from './HookObject'
-import { BeforeOperationType } from './index'
+import { OperationType } from './index'
 
-const convertOperationTypeToPermission = (
-	beforeOperationType: BeforeOperationType,
-) => {
-	const template: Record<BeforeOperationType, PermissionsOperations> = {
-		[BeforeOperationType.BeforeCreate]: 'create',
-		[BeforeOperationType.BeforeRead]: 'read',
-		[BeforeOperationType.BeforeDelete]: 'delete',
-		[BeforeOperationType.BeforeUpdate]: 'update',
+type ACL = {
+	roles: Array<{ roleId: string; read: boolean; write: boolean }>
+	users: Array<{ userId: string; read: boolean; write: boolean }>
+}
+
+const convertOperationTypeToPermission = (operationType: OperationType) => {
+	const template: Record<OperationType, PermissionsOperations> = {
+		[OperationType.BeforeCreate]: 'create',
+		[OperationType.AfterInsert]: 'create',
+		[OperationType.BeforeRead]: 'read',
+		[OperationType.AfterRead]: 'read',
+		[OperationType.BeforeDelete]: 'delete',
+		[OperationType.AfterDelete]: 'delete',
+		[OperationType.BeforeUpdate]: 'update',
+		[OperationType.AfterUpdate]: 'update',
 	}
 
-	return template[beforeOperationType]
+	return template[operationType]
 }
 
 export const _getPermissionPropertiesOfAClass = async ({
@@ -35,9 +42,67 @@ export const _getPermissionPropertiesOfAClass = async ({
 	return permission
 }
 
-export const _checkPermissions = async (
+const isReadOperation = (operationType: OperationType) =>
+	operationType === OperationType.BeforeRead ||
+	operationType === OperationType.AfterRead
+
+const isWriteOperation = (operationType: OperationType) =>
+	operationType === OperationType.BeforeCreate ||
+	operationType === OperationType.AfterInsert ||
+	operationType === OperationType.BeforeUpdate ||
+	operationType === OperationType.AfterUpdate ||
+	operationType === OperationType.BeforeDelete ||
+	operationType === OperationType.AfterDelete
+
+export const _checkACL = async (
+	hookObject: HookObject<any>,
+	operationType: OperationType,
+) => {
+	if (hookObject.context.isRoot) return
+
+	const concernedObject = hookObject.object
+	const acl = concernedObject.acl as ACL
+
+	if (!acl) return
+
+	const { roles, users } = acl
+
+	if (!roles && !users) return
+
+	const role = roles?.find(
+		(currentRole) =>
+			currentRole.roleId === hookObject.context.user?.role?.id,
+	)
+
+	const user = users?.find(
+		(currentUser) => currentUser.userId === hookObject.context.user?.id,
+	)
+
+	if (!role && !user)
+		throw new Error(
+			`Permission denied to ${convertOperationTypeToPermission(operationType)} class ${hookObject.className}`,
+		)
+
+	if (
+		isReadOperation(operationType) &&
+		((user && !user.read) || (role && !role.read))
+	)
+		throw new Error(
+			`Permission denied to read class ${hookObject.className}`,
+		)
+
+	if (
+		isWriteOperation(operationType) &&
+		((user && !user.write) || (role && !role.write))
+	)
+		throw new Error(
+			`Permission denied to write class ${hookObject.className}`,
+		)
+}
+
+export const _checkCLP = async (
 	object: HookObject<any>,
-	operationType: BeforeOperationType,
+	operationType: OperationType,
 ) => {
 	if (object.context.isRoot) return
 
@@ -93,14 +158,22 @@ export const _checkPermissions = async (
 		)
 }
 
+const _checkPermissions = async (
+	object: HookObject<any>,
+	operationType: OperationType,
+) => {
+	await _checkCLP(object, operationType)
+	await _checkACL(object, operationType)
+}
+
 export const defaultCheckPermissionOnRead = (object: HookObject<any>) =>
-	_checkPermissions(object, BeforeOperationType.BeforeRead)
+	_checkPermissions(object, OperationType.BeforeRead)
 
 export const defaultCheckPermissionOnCreate = (object: HookObject<any>) =>
-	_checkPermissions(object, BeforeOperationType.BeforeCreate)
+	_checkPermissions(object, OperationType.BeforeCreate)
 
 export const defaultCheckPermissionOnUpdate = (object: HookObject<any>) =>
-	_checkPermissions(object, BeforeOperationType.BeforeUpdate)
+	_checkPermissions(object, OperationType.BeforeUpdate)
 
 export const defaultCheckPermissionOnDelete = (object: HookObject<any>) =>
-	_checkPermissions(object, BeforeOperationType.BeforeDelete)
+	_checkPermissions(object, OperationType.BeforeDelete)
