@@ -65,7 +65,7 @@ export const setupTests = async () => {
 			name: databaseId,
 		},
 		authentication: {
-			roles: ['Client', 'Client2'],
+			roles: ['Client', 'Client2', 'Client3'],
 		},
 		port,
 		schema: {
@@ -91,13 +91,42 @@ export const setupTests = async () => {
 					name: 'Test',
 					fields: {
 						name: { type: 'String' },
+						pointer: {
+							type: 'Pointer',
+							// @ts-expect-error
+							class: 'Test2',
+						},
 					},
 					permissions: {
 						read: {
+							authorizedRoles: ['Client', 'Client2'],
+							requireAuthentication: true,
+						},
+						update: {
 							authorizedRoles: ['Client'],
 							requireAuthentication: true,
 						},
 						delete: {
+							authorizedRoles: ['Client'],
+							requireAuthentication: true,
+						},
+						create: {
+							authorizedRoles: ['Client2'],
+							requireAuthentication: true,
+						},
+					},
+				},
+				{
+					name: 'Test2',
+					fields: {
+						name: { type: 'String' },
+					},
+					permissions: {
+						read: {
+							authorizedRoles: ['Client2'],
+							requireAuthentication: true,
+						},
+						create: {
 							authorizedRoles: [],
 							requireAuthentication: true,
 						},

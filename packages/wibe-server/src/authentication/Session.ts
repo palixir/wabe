@@ -43,6 +43,8 @@ export class Session {
 				'user.email',
 				// @ts-expect-error
 				'user.role.name',
+				// @ts-expect-error
+				'user.role.id',
 				'refreshToken',
 				'refreshTokenExpiresAt',
 			],

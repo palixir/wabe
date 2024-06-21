@@ -78,14 +78,9 @@ export const _checkACL = async (
 		(currentUser) => currentUser.userId === hookObject.context.user?.id,
 	)
 
-	if (!role && !user)
-		throw new Error(
-			`Permission denied to ${convertOperationTypeToPermission(operationType)} class ${hookObject.className}`,
-		)
-
 	if (
 		isReadOperation(operationType) &&
-		((user && !user.read) || (role && !role.read))
+		((user && !user.read) || (role && !role.read) || (!role && !user))
 	)
 		throw new Error(
 			`Permission denied to read class ${hookObject.className}`,
@@ -93,7 +88,7 @@ export const _checkACL = async (
 
 	if (
 		isWriteOperation(operationType) &&
-		((user && !user.write) || (role && !role.write))
+		((user && !user.write) || (role && !role.write) || (!role && !user))
 	)
 		throw new Error(
 			`Permission denied to write class ${hookObject.className}`,
