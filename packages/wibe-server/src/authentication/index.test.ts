@@ -9,6 +9,63 @@ import {
 import type { WibeApp } from '..'
 import { gql, type GraphQLClient } from 'graphql-request'
 
+const createUserAndUpdateRole = async ({
+	anonymousClient,
+	rootClient,
+	roleName,
+	port,
+}: {
+	port: number
+	anonymousClient: GraphQLClient
+	rootClient: GraphQLClient
+	roleName: string
+}) => {
+	const res = await anonymousClient.request<any>(graphql.signUpWith, {
+		input: {
+			authentication: {
+				emailPassword: {
+					email: 'email@test.fr',
+					password: 'password',
+				},
+			},
+		},
+	})
+
+	const resOfRoles = await rootClient.request<any>(gql`
+			query getRoles {
+					_roles(where: {name: {equalTo: "${roleName}"}}) {
+			    edges {
+		    			node {
+		     			 	id
+		    			}
+		  			}
+					}
+			}
+		`)
+
+	const roleId = resOfRoles._roles.edges[0].node.id
+
+	await rootClient.request<any>(gql`
+			mutation updateUser {
+			  update_User(input: {id: "${res.signUpWith.id}", fields: {role: {link: "${roleId}"}}}) {
+		  			_user {
+		    			id
+		  			}
+					}
+			}
+		`)
+
+	const userClient = getUserClient(port, res.signUpWith.accessToken)
+
+	return {
+		userClient,
+		roleId,
+		userId: res.signUpWith.id,
+		accessToken: res.signUpWith.accessToken,
+		refreshToken: res.signUpWith.refreshToken,
+	}
+}
+
 describe('Authentication', () => {
 	let wibe: WibeApp
 	let port: number
@@ -33,42 +90,12 @@ describe('Authentication', () => {
 	})
 
 	it('should not authorize to read an object when an ACL protect the object on read for this role', async () => {
-		const res = await client.request<any>(graphql.signUpWith, {
-			input: {
-				authentication: {
-					emailPassword: {
-						email: 'email@test.fr',
-						password: 'password',
-					},
-				},
-			},
+		const { userClient, roleId } = await createUserAndUpdateRole({
+			anonymousClient: client,
+			port,
+			roleName: 'Client',
+			rootClient,
 		})
-
-		const resOfRoles = await rootClient.request<any>(gql`
-			query getRoles {
-					_roles(where: {name: {equalTo: "Client"}}) {
-			    edges {
-		    			node {
-		     			 	id
-		    			}
-		  			}
-					}
-			}
-		`)
-
-		const roleId = resOfRoles._roles.edges[0].node.id
-
-		await rootClient.request<any>(gql`
-			mutation updateUser {
-			  update_User(input: {id: "${res.signUpWith.id}", fields: {role: {link: "${roleId}"}}}) {
-		  			_user {
-		    			id
-		  			}
-					}
-			}
-		`)
-
-		const userClient = getUserClient(port, res.signUpWith.accessToken)
 
 		const objectCreated = await rootClient.request<any>(gql`
 				mutation createTest {
@@ -122,42 +149,12 @@ describe('Authentication', () => {
 	})
 
 	it('should authorize a connected user to access to a protected resource', async () => {
-		const res = await client.request<any>(graphql.signUpWith, {
-			input: {
-				authentication: {
-					emailPassword: {
-						email: 'email@test.fr',
-						password: 'password',
-					},
-				},
-			},
+		const { userClient } = await createUserAndUpdateRole({
+			anonymousClient: client,
+			port,
+			roleName: 'Client',
+			rootClient,
 		})
-
-		const resOfRoles = await rootClient.request<any>(gql`
-			query getRoles {
-					_roles(where: {name: {equalTo: "Client"}}) {
-			    edges {
-		    			node {
-		     			 	id
-		    			}
-		  			}
-					}
-			}
-		`)
-
-		const roleId = resOfRoles._roles.edges[0].node.id
-
-		await rootClient.request<any>(gql`
-			mutation updateUser {
-			  update_User(input: {id: "${res.signUpWith.id}", fields: {role: {link: "${roleId}"}}}) {
-		  			_user {
-		    			id
-		  			}
-					}
-			}
-		`)
-
-		const userClient = getUserClient(port, res.signUpWith.accessToken)
 
 		const resOfTest = await userClient.request<any>(gql`
 			query tests{
@@ -175,47 +172,18 @@ describe('Authentication', () => {
 	})
 
 	it('should authorize a connected user to access to protected resource after the user refresh his token', async () => {
-		const res = await client.request<any>(graphql.signUpWith, {
-			input: {
-				authentication: {
-					emailPassword: {
-						email: 'email@test.fr',
-						password: 'password',
-					},
-				},
-			},
-		})
-
-		const resOfRoles = await rootClient.request<any>(gql`
-			query getRoles {
-					_roles(where: {name: {equalTo: "Client"}}) {
-			    edges {
-		    			node {
-		     			 	id
-		    			}
-		  			}
-					}
-			}
-		`)
-
-		const roleId = resOfRoles._roles.edges[0].node.id
-
-		await rootClient.request<any>(gql`
-			mutation updateUser {
-			  update_User(input: {id: "${res.signUpWith.id}", fields: {role: {link: "${roleId}"}}}) {
-		  			_user {
-		    			id
-		  			}
-					}
-			}
-		`)
-
-		const userClient = getUserClient(port, res.signUpWith.accessToken)
+		const { userClient, refreshToken, accessToken } =
+			await createUserAndUpdateRole({
+				anonymousClient: client,
+				port,
+				roleName: 'Client',
+				rootClient,
+			})
 
 		const resAfterRefresh = await userClient.request<any>(graphql.refresh, {
 			input: {
-				accessToken: res.signUpWith.accessToken,
-				refreshToken: res.signUpWith.refreshToken,
+				accessToken,
+				refreshToken,
 			},
 		})
 
@@ -258,42 +226,12 @@ describe('Authentication', () => {
 	})
 
 	it("should not authorize to access to protected resource if the user doesn't had an authorized role", async () => {
-		const res = await client.request<any>(graphql.signUpWith, {
-			input: {
-				authentication: {
-					emailPassword: {
-						email: 'email@test.fr',
-						password: 'password',
-					},
-				},
-			},
+		const { userClient } = await createUserAndUpdateRole({
+			anonymousClient: client,
+			port,
+			roleName: 'Client2',
+			rootClient,
 		})
-
-		const resOfRoles = await rootClient.request<any>(gql`
-			query getRoles {
-					_roles(where: {name: {equalTo: "Client2"}}) {
-			    edges {
-		    			node {
-		     			 	id
-		    			}
-		  			}
-					}
-			}
-		`)
-
-		const roleId = resOfRoles._roles.edges[0].node.id
-
-		await rootClient.request<any>(gql`
-			mutation updateUser {
-			  update_User(input: {id: "${res.signUpWith.id}", fields: {role: {link: "${roleId}"}}}) {
-		  			_user {
-		    			id
-		  			}
-					}
-			}
-		`)
-
-		const userClient = getUserClient(port, res.signUpWith.accessToken)
 
 		expect(
 			userClient.request<any>(gql`
@@ -311,40 +249,12 @@ describe('Authentication', () => {
 	})
 
 	it('should not authorize to delete a test object to an user that have the right to read the same class', async () => {
-		const res = await client.request<any>(graphql.signUpWith, {
-			input: {
-				authentication: {
-					emailPassword: {
-						email: 'email@test.fr',
-						password: 'password',
-					},
-				},
-			},
+		const { userClient } = await createUserAndUpdateRole({
+			anonymousClient: client,
+			port,
+			roleName: 'Client',
+			rootClient,
 		})
-
-		const resOfRoles = await rootClient.request<any>(gql`
-			query getRoles {
-					_roles(where: {name: {equalTo: "Client"}}) {
-			    edges {
-		    			node {
-		     			 	id
-		    			}
-		  			}
-					}
-			}
-		`)
-
-		const roleId = resOfRoles._roles.edges[0].node.id
-
-		await rootClient.request<any>(gql`
-			mutation updateUser {
-			  update_User(input: {id: "${res.signUpWith.id}", fields: {role: {link: "${roleId}"}}}) {
-		  			_user {
-		    			id
-		  			}
-					}
-			}
-		`)
 
 		await rootClient.request<any>(gql`
 				mutation createTest{
@@ -355,8 +265,6 @@ describe('Authentication', () => {
 					}
 				}
 			`)
-
-		const userClient = getUserClient(port, res.signUpWith.accessToken)
 
 		expect(
 			userClient.request<any>(gql`
