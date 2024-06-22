@@ -33,7 +33,7 @@ const createUserAndUpdateRole = async ({
 
 	const resOfRoles = await rootClient.request<any>(gql`
 			query getRoles {
-					_roles(where: {name: {equalTo: "${roleName}"}}) {
+					roles(where: {name: {equalTo: "${roleName}"}}) {
 			    edges {
 		    			node {
 		     			 	id
@@ -43,12 +43,12 @@ const createUserAndUpdateRole = async ({
 			}
 		`)
 
-	const roleId = resOfRoles._roles.edges[0].node.id
+	const roleId = resOfRoles.roles.edges[0].node.id
 
 	await rootClient.request<any>(gql`
 			mutation updateUser {
-			  update_User(input: {id: "${res.signUpWith.id}", fields: {role: {link: "${roleId}"}}}) {
-		  			_user {
+			  updateUser(input: {id: "${res.signUpWith.id}", fields: {role: {link: "${roleId}"}}}) {
+		  			user {
 		    			id
 		  			}
 					}
@@ -85,7 +85,7 @@ describe('Authentication', () => {
 	})
 
 	afterEach(async () => {
-		await rootClient.request<any>(graphql.delete_Users)
+		await rootClient.request<any>(graphql.deleteUsers)
 		await rootClient.request<any>(graphql.deleteTests)
 	})
 
@@ -775,9 +775,9 @@ const graphql = {
   		}
 		}
 	`,
-	delete_Users: gql`
-		mutation delete_User {
-  		delete_Users(
+	deleteUsers: gql`
+		mutation deleteUser {
+  		deleteUsers(
     		input: {where: {authentication: {emailPassword: {email: {equalTo: "email@test.fr"}}}}}
   		) {
     		edges {

@@ -36,7 +36,7 @@
 // 		)
 
 // 		const user = await WibeApp.databaseController.getObjects({
-// 			className: '_User',
+// 			className: 'User',
 // 			where: {
 // 				authentication: {
 // 					// @ts-expect-error
@@ -58,7 +58,7 @@
 
 // 		if (user.length === 0) {
 // 			const user = await WibeApp.databaseController.createObject({
-// 				className: '_User',
+// 				className: 'User',
 // 				data: {
 // 					authentication: {
 // 						google: {

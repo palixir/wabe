@@ -32,7 +32,7 @@ export const signUpWithResolver = async (
 	})
 
 	const { id: userId } = await WibeApp.databaseController.createObject({
-		className: '_User',
+		className: 'User',
 		data: {
 			authentication: {
 				[name]: {

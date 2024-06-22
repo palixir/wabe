@@ -45,7 +45,7 @@ describe('Session', () => {
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
 		expect(mockGetObjects).toHaveBeenCalledWith({
-			className: '_Session',
+			className: 'Session',
 			where: {
 				accessToken: { equalTo: 'accessToken' },
 			},
@@ -87,7 +87,7 @@ describe('Session', () => {
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
 		expect(mockGetObjects).toHaveBeenCalledWith({
-			className: '_Session',
+			className: 'Session',
 			where: {
 				accessToken: { equalTo: 'accessToken' },
 			},
@@ -144,7 +144,7 @@ describe('Session', () => {
 
 		expect(mockCreateObject).toHaveBeenCalledTimes(1)
 		expect(mockCreateObject).toHaveBeenCalledWith({
-			className: '_Session',
+			className: 'Session',
 			context: expect.any(Object),
 			data: {
 				accessToken,
@@ -163,7 +163,7 @@ describe('Session', () => {
 
 		expect(mockDeleteObject).toHaveBeenCalledTimes(1)
 		expect(mockDeleteObject).toHaveBeenCalledWith({
-			className: '_Session',
+			className: 'Session',
 			context: { sessionId: 'sessionId' },
 			id: 'sessionId',
 		})
@@ -197,7 +197,7 @@ describe('Session', () => {
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
 		expect(mockGetObjects).toHaveBeenCalledWith({
-			className: '_Session',
+			className: 'Session',
 			where: {
 				accessToken: { equalTo: 'accessToken' },
 			},
@@ -207,7 +207,7 @@ describe('Session', () => {
 
 		expect(mockUpdateObject).toHaveBeenCalledTimes(1)
 		expect(mockUpdateObject).toHaveBeenCalledWith({
-			className: '_Session',
+			className: 'Session',
 			context: {},
 			id: 'sessionId',
 			data: {
@@ -263,7 +263,7 @@ describe('Session', () => {
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
 		expect(mockGetObjects).toHaveBeenCalledWith({
-			className: '_Session',
+			className: 'Session',
 			where: {
 				accessToken: { equalTo: 'accessToken' },
 			},
@@ -285,7 +285,7 @@ describe('Session', () => {
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
 		expect(mockGetObjects).toHaveBeenCalledWith({
-			className: '_Session',
+			className: 'Session',
 			where: {
 				accessToken: { equalTo: 'accessToken' },
 			},

@@ -208,14 +208,14 @@ export class Schema {
 		]
 	}
 
-	_sessionClass(): ClassInterface {
+	sessionClass(): ClassInterface {
 		return {
-			name: '_Session',
+			name: 'Session',
 			fields: {
 				user: {
 					type: 'Pointer',
 					required: true,
-					class: '_User',
+					class: 'User',
 				},
 				accessToken: {
 					type: 'String',
@@ -236,9 +236,9 @@ export class Schema {
 		}
 	}
 
-	_roleClass(): ClassInterface {
+	roleClass(): ClassInterface {
 		return {
-			name: '_Role',
+			name: 'Role',
 			fields: {
 				name: {
 					type: 'String',
@@ -246,13 +246,13 @@ export class Schema {
 				},
 				users: {
 					type: 'Relation',
-					class: '_User',
+					class: 'User',
 				},
 			},
 		}
 	}
 
-	_userClass(): ClassInterface {
+	userClass(): ClassInterface {
 		const customAuthenticationConfig =
 			WibeApp.config?.authentication?.customAuthenticationMethods || []
 
@@ -315,7 +315,7 @@ export class Schema {
 			},
 			role: {
 				type: 'Pointer',
-				class: '_Role',
+				class: 'Role',
 			},
 		}
 
@@ -446,7 +446,7 @@ export class Schema {
 		}
 
 		return {
-			name: '_User',
+			name: 'User',
 			fields,
 			resolvers,
 			permissions: {
@@ -588,9 +588,9 @@ export class Schema {
 	defaultClass(schema: SchemaInterface): ClassInterface[] {
 		return this.mergeClass([
 			...schema.class,
-			this._userClass(),
-			this._sessionClass(),
-			this._roleClass(),
+			this.userClass(),
+			this.sessionClass(),
+			this.roleClass(),
 		])
 	}
 }

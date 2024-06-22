@@ -71,7 +71,7 @@ export const setupTests = async () => {
 		schema: {
 			class: [
 				{
-					name: '_User',
+					name: 'User',
 					fields: {
 						name: { type: 'String' },
 						age: { type: 'Int' },

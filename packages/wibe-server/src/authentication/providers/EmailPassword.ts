@@ -18,7 +18,7 @@ export class EmailPassword
 	}: AuthenticationEventsOptions<EmailPasswordInterface>) {
 		// TODO : Use first here but need to refactor in graphql and mongoadapter to have first and not limit
 		const users = await WibeApp.databaseController.getObjects({
-			className: '_User',
+			className: 'User',
 			where: {
 				authentication: {
 					// @ts-expect-error
@@ -63,7 +63,7 @@ export class EmailPassword
 		context,
 	}: AuthenticationEventsOptions<EmailPasswordInterface>) {
 		const users = await WibeApp.databaseController.getObjects({
-			className: '_User',
+			className: 'User',
 			where: {
 				authentication: {
 					// @ts-expect-error

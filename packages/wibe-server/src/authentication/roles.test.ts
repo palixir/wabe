@@ -26,7 +26,7 @@ describe('Roles', () => {
 
 		expect(mockCreateObjects).toHaveBeenCalledTimes(1)
 		expect(mockCreateObjects).toHaveBeenCalledWith({
-			className: '_Role',
+			className: 'Role',
 			context: { isRoot: true },
 			data: [{ name: 'Role1' }, { name: 'Role2' }],
 		})

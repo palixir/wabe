@@ -49,7 +49,7 @@ const run = async () => {
 		schema: {
 			class: [
 				{
-					name: '_User',
+					name: 'User',
 					description: 'User class',
 					fields: {
 						post: {
@@ -138,9 +138,7 @@ const run = async () => {
 					permissions: {
 						create: {
 							requireAuthentication: true,
-							rolesAuthorization: {
-								Admin: true,
-							},
+							authorizedRoles: ['Admin'],
 						},
 					},
 				},
@@ -149,15 +147,6 @@ const run = async () => {
 				{
 					name: 'Phone',
 					description: 'Phone custom scalar type',
-				},
-			],
-			enums: [
-				{
-					name: 'Role',
-					values: {
-						Admin: 'Admin',
-						Member: 'Member',
-					},
 				},
 			],
 		},

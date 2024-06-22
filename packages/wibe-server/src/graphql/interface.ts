@@ -1,9 +1,9 @@
 import type { WobeResponse } from 'wobe'
-import type { _User } from '../../generated/wibe'
+import type { User } from '../../generated/wibe'
 
 export interface Context {
 	response?: WobeResponse
-	user?: _User | null
+	user?: User | null
 	sessionId?: string
 	isRoot: boolean
 }

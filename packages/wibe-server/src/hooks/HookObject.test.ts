@@ -7,7 +7,7 @@ describe('HookObject', () => {
 		const userData = { name: 'John Doe' }
 
 		const hookObject = new HookObject({
-			className: '_User',
+			className: 'User',
 			newData: userData as any,
 			context: {} as any,
 			operationType: OperationType.BeforeUpdate,
@@ -23,7 +23,7 @@ describe('HookObject', () => {
 		const userData = { name: 'John Doe', age: 30 }
 
 		const hookObject = new HookObject({
-			className: '_User',
+			className: 'User',
 			newData: userData as any,
 			operationType: OperationType.BeforeCreate,
 			context: {} as any,
@@ -43,7 +43,7 @@ describe('HookObject', () => {
 		const userData = { name: 'John Doe', age: 30 }
 
 		const hookObject = new HookObject({
-			className: '_User',
+			className: 'User',
 			newData: userData as any,
 			operationType: OperationType.AfterInsert,
 			context: {} as any,

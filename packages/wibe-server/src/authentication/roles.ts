@@ -10,7 +10,7 @@ export const initializeRoles = async () => {
 	}))
 
 	await WibeApp.databaseController.createObjects({
-		className: '_Role',
+		className: 'Role',
 		context: { isRoot: true },
 		data: objectsToCreate,
 	})

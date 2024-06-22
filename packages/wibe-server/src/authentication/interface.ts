@@ -1,4 +1,4 @@
-import type { _User } from '../../generated/wibe'
+import type { User } from '../../generated/wibe'
 import type { Context } from '../graphql/interface'
 import type { TypeField } from '../schema'
 
@@ -20,7 +20,7 @@ export type AuthenticationEventsOptions<T> = {
 export type ProviderInterface<T = any> = {
 	onSignIn: (
 		options: AuthenticationEventsOptions<T>,
-	) => Promise<{ user: Partial<_User> }>
+	) => Promise<{ user: Partial<User> }>
 	onSignUp: (
 		options: AuthenticationEventsOptions<T>,
 	) => Promise<{ authenticationDataToSave: T }>

@@ -162,7 +162,7 @@ describe('SignUpWith', () => {
 
 		expect(mockCreateObject).toHaveBeenCalledTimes(1)
 		expect(mockCreateObject).toHaveBeenCalledWith({
-			className: '_User',
+			className: 'User',
 			data: {
 				authentication: {
 					emailPassword: {

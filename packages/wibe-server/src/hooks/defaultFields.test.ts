@@ -13,8 +13,8 @@ describe('Default fields', () => {
 
 	describe('CreatedAt and UpdatedAt', () => {
 		it('should add createdAt and updatedAt value on insert operation type', async () => {
-			const hookObject = new HookObject<'_User'>({
-				className: '_User',
+			const hookObject = new HookObject<'User'>({
+				className: 'User',
 				operationType: OperationType.BeforeCreate,
 				newData: {
 					email: 'email@test.fr',
@@ -54,8 +54,8 @@ describe('Default fields', () => {
 		})
 
 		it('shoud add updatedAt value on update operation type', async () => {
-			const hookObject = new HookObject<'_User'>({
-				className: '_User',
+			const hookObject = new HookObject<'User'>({
+				className: 'User',
 				operationType: OperationType.BeforeUpdate,
 				newData: {
 					email: 'email@test.fr',
@@ -90,7 +90,7 @@ describe('Default fields', () => {
 				schema: {
 					class: [
 						{
-							name: '_User',
+							name: 'User',
 							fields: {
 								name: { type: 'String' },
 								age: { type: 'Int' },
@@ -106,8 +106,8 @@ describe('Default fields', () => {
 		})
 
 		it('should add the value if a default value is defined in schema but not specified', async () => {
-			const hookObject = new HookObject<'_User'>({
-				className: '_User',
+			const hookObject = new HookObject<'User'>({
+				className: 'User',
 				operationType: OperationType.BeforeCreate,
 				newData: {
 					id: 'id',
@@ -127,8 +127,8 @@ describe('Default fields', () => {
 		})
 
 		it('should not add a default value if a value is specified', async () => {
-			const hookObject = new HookObject<'_User'>({
-				className: '_User',
+			const hookObject = new HookObject<'User'>({
+				className: 'User',
 				operationType: OperationType.BeforeCreate,
 				newData: {
 					id: 'id',
