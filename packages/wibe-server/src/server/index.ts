@@ -10,7 +10,7 @@ import { type Hook, getDefaultHooks } from '../hooks'
 import { generateWibeFile } from './generateWibeFile'
 import { defaultAuthenticationMethods } from '../authentication/defaultAuthentication'
 import { Wobe } from 'wobe'
-import { WobeGraphqlYogaPlugin } from 'wobe-graphql-yoga'
+import { WobeGraphqlApolloPlugin } from 'wobe-graphql-apollo'
 import { Session } from '../authentication/Session'
 import { getCookieInRequestHeaders } from '../utils'
 import type { Context } from '../graphql/interface'
@@ -141,9 +141,9 @@ export class WibeApp {
 		})
 
 		this.server.usePlugin(
-			WobeGraphqlYogaPlugin({
-				schema,
-				maskedErrors: false,
+			WobeGraphqlApolloPlugin({
+				options: { schema },
+				graphqlEndpoint: '/graphql',
 				context: async ({ request }): Promise<Partial<Context>> => {
 					const headers = request.headers
 
