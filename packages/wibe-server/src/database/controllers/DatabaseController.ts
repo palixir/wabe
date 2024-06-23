@@ -370,7 +370,7 @@ export class DatabaseController {
 			data: arrayOfComputedData,
 		})
 
-		await hook.run(OperationType.AfterInsert)
+		await hook.run(OperationType.AfterCreate)
 
 		return res
 	}
@@ -402,7 +402,7 @@ export class DatabaseController {
 		})
 
 		await Promise.all(
-			hooks.map((hook) => hook.run(OperationType.AfterInsert)),
+			hooks.map((hook) => hook.run(OperationType.AfterCreate)),
 		)
 
 		return res

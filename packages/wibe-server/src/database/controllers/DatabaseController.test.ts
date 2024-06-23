@@ -281,7 +281,7 @@ describe('DatabaseController', () => {
 		)
 		expect(mockHookRun).toHaveBeenNthCalledWith(
 			2,
-			hooks.OperationType.AfterInsert,
+			hooks.OperationType.AfterCreate,
 		)
 	})
 
@@ -313,7 +313,7 @@ describe('DatabaseController', () => {
 		)
 		expect(mockHookRun).toHaveBeenNthCalledWith(
 			2,
-			hooks.OperationType.AfterInsert,
+			hooks.OperationType.AfterCreate,
 		)
 	})
 

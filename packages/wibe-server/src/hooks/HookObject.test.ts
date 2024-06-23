@@ -45,7 +45,7 @@ describe('HookObject', () => {
 		const hookObject = new HookObject({
 			className: 'User',
 			newData: userData as any,
-			operationType: OperationType.AfterInsert,
+			operationType: OperationType.AfterCreate,
 			context: {} as any,
 		})
 

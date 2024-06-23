@@ -12,7 +12,7 @@ type ACL = {
 const convertOperationTypeToPermission = (operationType: OperationType) => {
 	const template: Record<OperationType, PermissionsOperations> = {
 		[OperationType.BeforeCreate]: 'create',
-		[OperationType.AfterInsert]: 'create',
+		[OperationType.AfterCreate]: 'create',
 		[OperationType.BeforeRead]: 'read',
 		[OperationType.AfterRead]: 'read',
 		[OperationType.BeforeDelete]: 'delete',
@@ -48,7 +48,7 @@ const isReadOperation = (operationType: OperationType) =>
 
 const isWriteOperation = (operationType: OperationType) =>
 	operationType === OperationType.BeforeCreate ||
-	operationType === OperationType.AfterInsert ||
+	operationType === OperationType.AfterCreate ||
 	operationType === OperationType.BeforeUpdate ||
 	operationType === OperationType.AfterUpdate ||
 	operationType === OperationType.BeforeDelete ||

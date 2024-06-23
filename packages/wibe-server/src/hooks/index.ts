@@ -28,14 +28,14 @@ export enum BeforeOperationType {
 }
 
 export enum AfterOperationType {
-	AfterInsert = 'afterInsert',
+	AfterCreate = 'AfterCreate',
 	AfterUpdate = 'afterUpdate',
 	AfterDelete = 'afterDelete',
 	AfterRead = 'afterRead',
 }
 
 export enum OperationType {
-	AfterInsert = 'afterInsert',
+	AfterCreate = 'AfterCreate',
 	AfterUpdate = 'afterUpdate',
 	AfterDelete = 'afterDelete',
 	AfterRead = 'afterRead',
