@@ -159,6 +159,15 @@ describe('GraphqlSchema', () => {
 						},
 					},
 				},
+				{
+					name: 'TestClassFile',
+					fields: {
+						file: {
+							type: 'File',
+							required: true,
+						},
+					},
+				},
 			],
 		})
 
@@ -179,42 +188,14 @@ describe('GraphqlSchema', () => {
 		})
 	})
 
-	it.only('should support file type', async () => {
-		const { client, wibeApp, port } = await createWibeApp({
-			class: [
-				{
-					name: 'TestClass',
-					fields: {
-						field1: {
-							type: 'File',
-						},
-					},
-				},
-			],
-		})
-
-		const formData = new FormData()
-
-		formData.append(
-			'operations',
-			JSON.stringify({
-				query: 'mutation ($file: File!) {createTestClass(input: {fields: {field1: $file}}){testClass{id, field1}}}',
-				variables: { file: null },
-			}),
-		)
-
-		formData.append('map', JSON.stringify({ 0: ['variables.file'] }))
-
-		formData.append('0', new File(['a'], 'a.text', { type: 'text/plain' }))
-
-		const res = await fetch(`http://127.0.0.1:${port}/graphql`, {
-			method: 'POST',
-			body: formData,
-		})
-
-		console.log(await res.text())
-
-		await wibeApp.close()
+	it('should support file type', async () => {
+		expect(
+			getTypeFromGraphQLSchema({
+				schema,
+				type: 'Type',
+				name: 'TestClassFile',
+			}).input.file,
+		).toEqual('File!')
 	})
 
 	it('should have required field on object fields', async () => {

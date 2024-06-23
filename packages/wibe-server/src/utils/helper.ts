@@ -132,6 +132,12 @@ export const setupTests = async () => {
 						},
 					},
 				},
+				{
+					name: 'Test3',
+					fields: {
+						file: { type: 'File' },
+					},
+				},
 			],
 			scalars: [
 				{

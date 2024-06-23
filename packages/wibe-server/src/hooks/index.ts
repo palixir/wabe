@@ -1,5 +1,9 @@
 import type { WibeSchemaTypes } from '../../generated/wibe'
 import type { WhereType } from '../database'
+import {
+	defaultBeforeCreateUpload,
+	defaultBeforeUpdateUpload,
+} from '../files/hookUploadFile'
 import type { Context } from '../graphql/interface'
 import { WibeApp } from '../server'
 import { HookObject } from './HookObject'
@@ -8,7 +12,6 @@ import {
 	defaultBeforeCreateForDefaultValue,
 	defaultBeforeUpdateForUpdatedAt,
 } from './defaultFields'
-import { defaultBeforeCreateUpload, defaultBeforeUpdateUpload } from './file'
 import {
 	defaultCheckPermissionOnCreate,
 	defaultCheckPermissionOnDelete,

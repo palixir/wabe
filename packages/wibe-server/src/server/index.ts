@@ -15,6 +15,8 @@ import { Session } from '../authentication/Session'
 import { getCookieInRequestHeaders } from '../utils'
 import type { Context } from '../graphql/interface'
 import { initializeRoles } from '../authentication/roles'
+import type { FileConfig } from '../files'
+import { fileDevAdapter } from '../files/devAdapter'
 
 interface WibeConfig {
 	port: number
@@ -25,6 +27,7 @@ interface WibeConfig {
 	routes?: WibeRoute[]
 	rootKey: string
 	hooks?: Hook<any>[]
+	file: FileConfig
 }
 
 export class WibeApp {
@@ -41,6 +44,7 @@ export class WibeApp {
 		authentication,
 		rootKey,
 		hooks,
+		file,
 	}: WibeConfig) {
 		WibeApp.config = {
 			port,
@@ -50,6 +54,13 @@ export class WibeApp {
 			authentication,
 			rootKey,
 			hooks,
+			file: {
+				adapter:
+					file?.adapter ||
+					(process.env.NODE_ENV !== 'production'
+						? fileDevAdapter
+						: undefined),
+			},
 		}
 
 		this.server = new Wobe().get('/health', (context) => {

@@ -1,14 +1,7 @@
 import { WibeApp } from '../..'
-import type { HookObject } from './HookObject'
-
-const uploadBlob = async (file: File) => {
-	// await Bun.write('a.txt', file)
-
-	return 'acustomurl'
-}
+import type { HookObject } from '../hooks/HookObject'
 
 const handleFile = async (hookObject: HookObject<any>) => {
-	// console.log(hookObject.getNewData())
 	const newData = hookObject.getNewData()
 
 	const schema = WibeApp.config.schema.class.find(
@@ -21,10 +14,11 @@ const handleFile = async (hookObject: HookObject<any>) => {
 		Object.keys(newData).map(async (keyName) => {
 			if (schema.fields[keyName].type !== 'File') return
 
-			hookObject.upsertNewData(
-				keyName,
-				await uploadBlob(newData[keyName]),
-			)
+			if (WibeApp.config.file.adapter !== undefined)
+				hookObject.upsertNewData(
+					keyName,
+					await WibeApp.config.file.adapter(newData[keyName]),
+				)
 		}),
 	)
 }
