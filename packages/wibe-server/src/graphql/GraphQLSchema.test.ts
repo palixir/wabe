@@ -179,6 +179,23 @@ describe('GraphqlSchema', () => {
 		})
 	})
 
+	it.only('should support file type', async () => {
+		const { client, wibeApp } = await createWibeApp({
+			class: [
+				{
+					name: 'TestClass',
+					fields: {
+						field1: {
+							type: 'File',
+						},
+					},
+				},
+			],
+		})
+
+		await wibeApp.close()
+	})
+
 	it('should have required field on object fields', async () => {
 		expect(
 			getTypeFromGraphQLSchema({

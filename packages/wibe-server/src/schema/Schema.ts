@@ -16,6 +16,7 @@ export type WibePrimaryTypes =
 	| 'Boolean'
 	| 'Email'
 	| 'Date'
+	| 'File'
 
 export type WibeCustomTypes = 'Array' | 'Object'
 
@@ -85,6 +86,12 @@ type TypeFieldRelation = {
 	class: keyof WibeSchemaTypes
 }
 
+type TypeFieldFile = {
+	type: 'File'
+	required?: boolean
+	description?: string
+}
+
 export type TypeField =
 	| TypeFieldBase<string, 'String'>
 	| TypeFieldBase<number, 'Int'>
@@ -96,6 +103,7 @@ export type TypeField =
 	| TypeFieldObject
 	| TypeFieldPointer
 	| TypeFieldRelation
+	| TypeFieldFile
 
 export type SchemaFields = Record<string, TypeField>
 

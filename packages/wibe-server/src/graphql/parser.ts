@@ -20,6 +20,8 @@ import {
 	DateWhereInput,
 	EmailScalarType,
 	EmailWhereInput,
+	FileScalarType,
+	FileWhereInput,
 	FloatWhereInput,
 	IntWhereInput,
 	StringWhereInput,
@@ -50,6 +52,7 @@ export const templateScalarType: Record<WibePrimaryTypes, GraphQLScalarType> = {
 	Boolean: GraphQLBoolean,
 	Date: DateScalarType,
 	Email: EmailScalarType,
+	File: FileScalarType,
 }
 
 export const templateWhereInput: Record<
@@ -63,6 +66,7 @@ export const templateWhereInput: Record<
 	Date: DateWhereInput,
 	Email: EmailWhereInput,
 	Array: ArrayWhereInput,
+	File: FileWhereInput,
 }
 
 interface GraphqlParserFactoryOptions {

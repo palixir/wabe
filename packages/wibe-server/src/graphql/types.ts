@@ -1,4 +1,5 @@
 import {
+	Kind,
 	GraphQLBoolean,
 	GraphQLFloat,
 	GraphQLInputObjectType,
@@ -44,11 +45,72 @@ export const EmailScalarType = new GraphQLScalarType({
 	},
 })
 
+const parseFileValue = (value: any) => {
+	if (typeof value === 'string') return { _type: 'File', name: value }
+
+	if (
+		typeof value === 'object' &&
+		value._type === 'File' &&
+		typeof value.name === 'string'
+	)
+		return value
+
+	throw new Error('Invalid file')
+}
+
+export const FileScalarType = new GraphQLScalarType({
+	name: 'File',
+	description: 'File scalar type',
+	parseValue: parseFileValue,
+	serialize: (value: any) => {
+		if (typeof value === 'string') return value
+
+		if (
+			typeof value === 'object' &&
+			value._type === 'File' &&
+			value.name === 'string'
+		)
+			return value.name
+
+		throw new Error('Invalid file')
+	},
+	parseLiteral: (ast: any) => {
+		if (ast.kind === Kind.STRING) return parseFileValue(ast.value)
+
+		if (ast.kind === Kind.OBJECT) {
+			const type = ast.fields.find(
+				(field: any) => field.name.value === '__type',
+			)
+			const name = ast.fields.find(
+				(field: any) => field.name.value === 'name',
+			)
+
+			if (type?.value && name?.value)
+				return parseFileValue({
+					__type: type.value.value,
+					name: name.value.value,
+				})
+		}
+
+		throw new Error('Invalid file')
+	},
+})
+
 export const AnyWhereInput = new GraphQLInputObjectType({
 	name: 'AnyWhereInput',
 	fields: {
 		equalTo: { type: AnyScalarType },
 		notEqualTo: { type: AnyScalarType },
+	},
+})
+
+export const FileWhereInput = new GraphQLInputObjectType({
+	name: 'FileWhereInput',
+	fields: {
+		equalTo: { type: FileScalarType },
+		notEqualTo: { type: FileScalarType },
+		in: { type: new GraphQLList(FileScalarType) },
+		notInt: { type: new GraphQLList(FileScalarType) },
 	},
 })
 

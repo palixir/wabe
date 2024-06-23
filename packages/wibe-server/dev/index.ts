@@ -134,6 +134,7 @@ const run = async () => {
 					name: 'Post',
 					fields: {
 						name: { type: 'String', required: true },
+						test: { type: 'File' },
 					},
 					permissions: {
 						create: {

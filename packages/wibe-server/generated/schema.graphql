@@ -164,10 +164,14 @@ input UserRelationInput {
 type Post {
   id: ID!
   name: String!
+  test: File
   acl: PostACLObject
   createdAt: Date!
   updatedAt: Date!
 }
+
+"""File scalar type"""
+scalar File
 
 type PostACLObject {
   users: [PostACLObjectUsersACL]
@@ -188,6 +192,7 @@ type PostACLObjectRolesACL {
 
 input PostInput {
   name: String!
+  test: File
   acl: PostACLObjectInput
   createdAt: Date!
   updatedAt: Date!
@@ -218,6 +223,7 @@ input PostPointerInput {
 
 input PostCreateFieldsInput {
   name: String
+  test: File
   acl: PostACLObjectCreateFieldsInput
   createdAt: Date
   updatedAt: Date
@@ -485,6 +491,7 @@ input IdWhereInput {
 input PostWhereInput {
   id: IdWhereInput
   name: StringWhereInput
+  test: FileWhereInput
   acl: PostACLObjectWhereInput
   createdAt: DateWhereInput
   updatedAt: DateWhereInput
@@ -497,6 +504,13 @@ input StringWhereInput {
   notEqualTo: String
   in: [String]
   notIn: [String]
+}
+
+input FileWhereInput {
+  equalTo: File
+  notEqualTo: File
+  in: [File]
+  notInt: [File]
 }
 
 input PostACLObjectWhereInput {
@@ -947,6 +961,7 @@ input UpdatePostInput {
 
 input PostUpdateFieldsInput {
   name: String
+  test: File
   acl: PostACLObjectUpdateFieldsInput
   createdAt: Date
   updatedAt: Date
