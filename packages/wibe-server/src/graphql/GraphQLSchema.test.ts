@@ -31,7 +31,7 @@ const createWibeApp = async (schema: SchemaInterface) => {
 
 	const client = getGraphqlClient(port)
 
-	return { client, wibeApp }
+	return { client, wibeApp, port }
 }
 
 describe('GraphqlSchema', () => {
@@ -180,7 +180,7 @@ describe('GraphqlSchema', () => {
 	})
 
 	it.only('should support file type', async () => {
-		const { client, wibeApp } = await createWibeApp({
+		const { client, wibeApp, port } = await createWibeApp({
 			class: [
 				{
 					name: 'TestClass',
@@ -192,6 +192,27 @@ describe('GraphqlSchema', () => {
 				},
 			],
 		})
+
+		const formData = new FormData()
+
+		formData.append(
+			'operations',
+			JSON.stringify({
+				query: 'mutation ($file: File!) {createTestClass(input: {fields: {field1: $file}}){testClass{id, field1}}}',
+				variables: { file: null },
+			}),
+		)
+
+		formData.append('map', JSON.stringify({ 0: ['variables.file'] }))
+
+		formData.append('0', new File(['a'], 'a.text', { type: 'text/plain' }))
+
+		const res = await fetch(`http://127.0.0.1:${port}/graphql`, {
+			method: 'POST',
+			body: formData,
+		})
+
+		console.log(await res.text())
 
 		await wibeApp.close()
 	})

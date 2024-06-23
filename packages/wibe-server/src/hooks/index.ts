@@ -8,6 +8,7 @@ import {
 	defaultBeforeCreateForDefaultValue,
 	defaultBeforeUpdateForUpdatedAt,
 } from './defaultFields'
+import { defaultBeforeCreateUpload, defaultBeforeUpdateUpload } from './file'
 import {
 	defaultCheckPermissionOnCreate,
 	defaultCheckPermissionOnDelete,
@@ -194,5 +195,15 @@ export const getDefaultHooks = (): Hook<any>[] => [
 		operationType: OperationType.BeforeUpdate,
 		priority: 1,
 		callback: defaultBeforeUpdateForUpdatedAt,
+	},
+	{
+		operationType: OperationType.BeforeCreate,
+		priority: 1,
+		callback: defaultBeforeCreateUpload,
+	},
+	{
+		operationType: OperationType.BeforeUpdate,
+		priority: 1,
+		callback: defaultBeforeUpdateUpload,
 	},
 ]

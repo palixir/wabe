@@ -28,6 +28,7 @@ export const defaultBeforeCreateForDefaultValue = async (
 			!object.isFieldUpdate(field) &&
 			currentSchemaField.type !== 'Pointer' &&
 			currentSchemaField.type !== 'Relation' &&
+			currentSchemaField.type !== 'File' &&
 			currentSchemaField.defaultValue !== undefined
 		)
 			object.upsertNewData(field, currentSchemaField.defaultValue)
