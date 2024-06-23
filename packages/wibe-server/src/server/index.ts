@@ -10,7 +10,7 @@ import { type Hook, getDefaultHooks } from '../hooks'
 import { generateWibeFile } from './generateWibeFile'
 import { defaultAuthenticationMethods } from '../authentication/defaultAuthentication'
 import { Wobe } from 'wobe'
-import { WobeGraphqlApolloPlugin } from 'wobe-graphql-apollo'
+import { WobeGraphqlYogaPlugin } from 'wobe-graphql-yoga'
 import { Session } from '../authentication/Session'
 import { getCookieInRequestHeaders } from '../utils'
 import type { Context } from '../graphql/interface'
@@ -141,8 +141,10 @@ export class WibeApp {
 		})
 
 		this.server.usePlugin(
-			WobeGraphqlApolloPlugin({
-				options: { schema },
+			WobeGraphqlYogaPlugin({
+				schema,
+				maskedErrors: false,
+				// TODO: Maybe add cors here + the wobe cors for csrf on upload
 				graphqlEndpoint: '/graphql',
 				context: async ({ request }): Promise<Partial<Context>> => {
 					const headers = request.headers
