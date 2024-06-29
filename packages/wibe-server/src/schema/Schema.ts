@@ -218,7 +218,7 @@ export class Schema {
 
 	sessionClass(): ClassInterface {
 		return {
-			name: 'Session',
+			name: '_Session',
 			fields: {
 				user: {
 					type: 'Pointer',

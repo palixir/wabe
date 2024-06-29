@@ -363,7 +363,7 @@ describe('Schema', () => {
 
 		expect(schema.schema.class.length).toBe(3)
 		expect(schema.schema.class[0].name).toEqual('User')
-		expect(schema.schema.class[1].name).toEqual('Session')
+		expect(schema.schema.class[1].name).toEqual('_Session')
 		expect(schema.schema.class[2].name).toEqual('Role')
 	})
 

@@ -3,8 +3,8 @@
   "version": "0.0.1",
   "description": "wibe-server",
   "scripts": {
-    "build": "bun build --minify --outdir dist $(pwd)/src/index.ts --target=bun && bun generate:types",
-    "generate:types": "bun tsc --project .",
+    "build": "bun build --outdir dist $(pwd)/src/index.ts --target=bun && bun generate:types",
+    "generate:types": "tsc --project .",
     "lint": "biome lint . --no-errors-on-unmatched --config-path=../../",
     "ci": "bun lint $(pwd) && bun run test:bun src && bun test:node src",
     "format": "biome format --write .",

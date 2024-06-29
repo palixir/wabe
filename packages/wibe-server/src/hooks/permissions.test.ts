@@ -8,7 +8,7 @@ import {
 	spyOn,
 } from 'bun:test'
 import { _getPermissionPropertiesOfAClass, _checkCLP } from './permissions'
-import { WibeApp } from '../..'
+import { WibeApp } from '..'
 import { HookObject } from './HookObject'
 import { BeforeOperationType, OperationType } from '.'
 import type { Context } from '../graphql/interface'

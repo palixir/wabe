@@ -1,5 +1,4 @@
-import { WibeApp } from '../..'
-import { RoleAclObject } from '../../generated/wibe'
+import { WibeApp } from '..'
 import type { PermissionsOperations } from '../schema'
 import type { HookObject } from './HookObject'
 import { OperationType } from './index'
@@ -122,7 +121,7 @@ export const _checkCLP = async (
 		)
 
 	const res = await WibeApp.databaseController.getObject({
-		className: 'Session',
+		className: '_Session',
 		id: sessionId,
 		// @ts-expect-error
 		fields: ['id', 'user.id'],

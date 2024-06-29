@@ -253,102 +253,102 @@ input PostRelationInput {
   createAndAdd: [PostCreateFieldsInput!]
 }
 
-type Session {
+type _Session {
   id: ID!
   user: User
   accessToken: String!
   accessTokenExpiresAt: Date!
   refreshToken: String
   refreshTokenExpiresAt: Date!
-  acl: SessionACLObject
+  acl: _SessionACLObject
   createdAt: Date!
   updatedAt: Date!
 }
 
-type SessionACLObject {
-  users: [SessionACLObjectUsersACL]
-  roles: [SessionACLObjectRolesACL]
+type _SessionACLObject {
+  users: [_SessionACLObjectUsersACL]
+  roles: [_SessionACLObjectRolesACL]
 }
 
-type SessionACLObjectUsersACL {
+type _SessionACLObjectUsersACL {
   userId: String!
   read: Boolean!
   write: Boolean!
 }
 
-type SessionACLObjectRolesACL {
+type _SessionACLObjectRolesACL {
   roleId: String!
   read: Boolean!
   write: Boolean!
 }
 
-input SessionInput {
+input _SessionInput {
   user: UserPointerInput
   accessToken: String!
   accessTokenExpiresAt: Date!
   refreshToken: String
   refreshTokenExpiresAt: Date!
-  acl: SessionACLObjectInput
+  acl: _SessionACLObjectInput
   createdAt: Date!
   updatedAt: Date!
 }
 
-input SessionACLObjectInput {
-  users: [SessionACLObjectUsersACLInput]
-  roles: [SessionACLObjectRolesACLInput]
+input _SessionACLObjectInput {
+  users: [_SessionACLObjectUsersACLInput]
+  roles: [_SessionACLObjectRolesACLInput]
 }
 
-input SessionACLObjectUsersACLInput {
+input _SessionACLObjectUsersACLInput {
   userId: String!
   read: Boolean!
   write: Boolean!
 }
 
-input SessionACLObjectRolesACLInput {
+input _SessionACLObjectRolesACLInput {
   roleId: String!
   read: Boolean!
   write: Boolean!
 }
 
-"""Input to link an object to a pointer Session"""
-input SessionPointerInput {
+"""Input to link an object to a pointer _Session"""
+input _SessionPointerInput {
   link: ID
-  createAndLink: SessionCreateFieldsInput
+  createAndLink: _SessionCreateFieldsInput
 }
 
-input SessionCreateFieldsInput {
+input _SessionCreateFieldsInput {
   user: UserPointerInput
   accessToken: String
   accessTokenExpiresAt: Date
   refreshToken: String
   refreshTokenExpiresAt: Date
-  acl: SessionACLObjectCreateFieldsInput
+  acl: _SessionACLObjectCreateFieldsInput
   createdAt: Date
   updatedAt: Date
 }
 
-input SessionACLObjectCreateFieldsInput {
-  users: [SessionACLObjectUsersACLCreateFieldsInput]
-  roles: [SessionACLObjectRolesACLCreateFieldsInput]
+input _SessionACLObjectCreateFieldsInput {
+  users: [_SessionACLObjectUsersACLCreateFieldsInput]
+  roles: [_SessionACLObjectRolesACLCreateFieldsInput]
 }
 
-input SessionACLObjectUsersACLCreateFieldsInput {
+input _SessionACLObjectUsersACLCreateFieldsInput {
   userId: String
   read: Boolean
   write: Boolean
 }
 
-input SessionACLObjectRolesACLCreateFieldsInput {
+input _SessionACLObjectRolesACLCreateFieldsInput {
   roleId: String
   read: Boolean
   write: Boolean
 }
 
-"""Input to add a relation to the class Session"""
-input SessionRelationInput {
+"""Input to add a relation to the class _Session"""
+input _SessionRelationInput {
   add: [ID!]
   remove: [ID!]
-  createAndAdd: [SessionCreateFieldsInput!]
+  createAndAdd: [_SessionCreateFieldsInput!]
 }
 
 type Role {
@@ -459,8 +459,8 @@ type Query {
   helloWorld(name: String!): String
   post(id: ID): Post
   posts(where: PostWhereInput, offset: Int, limit: Int): PostConnection!
-  session(id: ID): Session
-  sessions(where: SessionWhereInput, offset: Int, limit: Int): SessionConnection!
+  _session(id: ID): _Session
+  _sessions(where: _SessionWhereInput, offset: Int, limit: Int): _SessionConnection!
   role(id: ID): Role
   roles(where: RoleWhereInput, offset: Int, limit: Int): RoleConnection!
 }
@@ -656,49 +656,49 @@ type PostEdge {
   node: Post!
 }
 
-type SessionConnection {
-  edges: [SessionEdge]
+type _SessionConnection {
+  edges: [_SessionEdge]
 }
 
-type SessionEdge {
-  node: Session!
+type _SessionEdge {
+  node: _Session!
 }
 
-input SessionWhereInput {
+input _SessionWhereInput {
   id: IdWhereInput
   user: UserWhereInput
   accessToken: StringWhereInput
   accessTokenExpiresAt: DateWhereInput
   refreshToken: StringWhereInput
   refreshTokenExpiresAt: DateWhereInput
-  acl: SessionACLObjectWhereInput
+  acl: _SessionACLObjectWhereInput
   createdAt: DateWhereInput
   updatedAt: DateWhereInput
-  OR: [SessionWhereInput]
-  AND: [SessionWhereInput]
+  OR: [_SessionWhereInput]
+  AND: [_SessionWhereInput]
 }
 
-input SessionACLObjectWhereInput {
-  users: [SessionACLObjectUsersACLWhereInput]
-  roles: [SessionACLObjectRolesACLWhereInput]
-  OR: [SessionACLObjectWhereInput]
-  AND: [SessionACLObjectWhereInput]
+input _SessionACLObjectWhereInput {
+  users: [_SessionACLObjectUsersACLWhereInput]
+  roles: [_SessionACLObjectRolesACLWhereInput]
+  OR: [_SessionACLObjectWhereInput]
+  AND: [_SessionACLObjectWhereInput]
 }
 
-input SessionACLObjectUsersACLWhereInput {
+input _SessionACLObjectUsersACLWhereInput {
   userId: StringWhereInput
   read: BooleanWhereInput
   write: BooleanWhereInput
-  OR: [SessionACLObjectUsersACLWhereInput]
-  AND: [SessionACLObjectUsersACLWhereInput]
+  OR: [_SessionACLObjectUsersACLWhereInput]
+  AND: [_SessionACLObjectUsersACLWhereInput]
 }
 
-input SessionACLObjectRolesACLWhereInput {
+input _SessionACLObjectRolesACLWhereInput {
   roleId: StringWhereInput
   read: BooleanWhereInput
   write: BooleanWhereInput
-  OR: [SessionACLObjectRolesACLWhereInput]
-  AND: [SessionACLObjectRolesACLWhereInput]
+  OR: [_SessionACLObjectRolesACLWhereInput]
+  AND: [_SessionACLObjectRolesACLWhereInput]
 }
 
 type RoleConnection {
@@ -741,12 +741,12 @@ type Mutation {
   updatePosts(input: UpdatePostsInput): PostConnection!
   deletePost(input: DeletePostInput): DeletePostPayload
   deletePosts(input: DeletePostsInput): PostConnection!
-  createSession(input: CreateSessionInput): CreateSessionPayload
-  createSessions(input: CreateSessionsInput): SessionConnection!
-  updateSession(input: UpdateSessionInput): UpdateSessionPayload
-  updateSessions(input: UpdateSessionsInput): SessionConnection!
-  deleteSession(input: DeleteSessionInput): DeleteSessionPayload
-  deleteSessions(input: DeleteSessionsInput): SessionConnection!
+  create_Session(input: Create_SessionInput): Create_SessionPayload
+  create_Sessions(input: Create_SessionsInput): _SessionConnection!
+  update_Session(input: Update_SessionInput): Update_SessionPayload
+  update_Sessions(input: Update_SessionsInput): _SessionConnection!
+  delete_Session(input: Delete_SessionInput): Delete_SessionPayload
+  delete_Sessions(input: Delete_SessionsInput): _SessionConnection!
   createRole(input: CreateRoleInput): CreateRolePayload
   createRoles(input: CreateRolesInput): RoleConnection!
   updateRole(input: UpdateRoleInput): UpdateRolePayload
@@ -1004,77 +1004,77 @@ input DeletePostsInput {
   where: PostWhereInput
 }
 
-type CreateSessionPayload {
-  session: Session
+type Create_SessionPayload {
+  _session: _Session
   clientMutationId: String
 }
 
-input CreateSessionInput {
-  fields: SessionCreateFieldsInput
+input Create_SessionInput {
+  fields: _SessionCreateFieldsInput
 }
 
-input CreateSessionsInput {
-  fields: [SessionCreateFieldsInput]!
+input Create_SessionsInput {
+  fields: [_SessionCreateFieldsInput]!
   offset: Int
   limit: Int
 }
 
-type UpdateSessionPayload {
-  session: Session
+type Update_SessionPayload {
+  _session: _Session
   clientMutationId: String
 }
 
-input UpdateSessionInput {
+input Update_SessionInput {
   id: ID
-  fields: SessionUpdateFieldsInput
+  fields: _SessionUpdateFieldsInput
 }
 
-input SessionUpdateFieldsInput {
+input _SessionUpdateFieldsInput {
   user: UserPointerInput
   accessToken: String
   accessTokenExpiresAt: Date
   refreshToken: String
   refreshTokenExpiresAt: Date
-  acl: SessionACLObjectUpdateFieldsInput
+  acl: _SessionACLObjectUpdateFieldsInput
   createdAt: Date
   updatedAt: Date
 }
 
-input SessionACLObjectUpdateFieldsInput {
-  users: [SessionACLObjectUsersACLUpdateFieldsInput]
-  roles: [SessionACLObjectRolesACLUpdateFieldsInput]
+input _SessionACLObjectUpdateFieldsInput {
+  users: [_SessionACLObjectUsersACLUpdateFieldsInput]
+  roles: [_SessionACLObjectRolesACLUpdateFieldsInput]
 }
 
-input SessionACLObjectUsersACLUpdateFieldsInput {
+input _SessionACLObjectUsersACLUpdateFieldsInput {
   userId: String
   read: Boolean
   write: Boolean
 }
 
-input SessionACLObjectRolesACLUpdateFieldsInput {
+input _SessionACLObjectRolesACLUpdateFieldsInput {
   roleId: String
   read: Boolean
   write: Boolean
 }
 
-input UpdateSessionsInput {
-  fields: SessionUpdateFieldsInput
-  where: SessionWhereInput
+input Update_SessionsInput {
+  fields: _SessionUpdateFieldsInput
+  where: _SessionWhereInput
   offset: Int
   limit: Int
 }
 
-type DeleteSessionPayload {
-  session: Session
+type Delete_SessionPayload {
+  _session: _Session
   clientMutationId: String
 }
 
-input DeleteSessionInput {
+input Delete_SessionInput {
   id: ID
 }
 
-input DeleteSessionsInput {
-  where: SessionWhereInput
+input Delete_SessionsInput {
+  where: _SessionWhereInput
 }
 
 type CreateRolePayload {

@@ -1,4 +1,4 @@
-import { WibeApp } from '../..'
+import { WibeApp } from '..'
 import { getClassFromClassName } from '../utils'
 import type { Context } from './interface'
 

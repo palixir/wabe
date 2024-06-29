@@ -1,4 +1,4 @@
-import { WibeApp } from '../..'
+import { WibeApp } from '..'
 import type { HookObject } from '../hooks/HookObject'
 
 const handleFile = async (hookObject: HookObject<any>) => {

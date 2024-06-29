@@ -23,6 +23,10 @@ export const verifyChallengeResolver = async (
 	const { provider, name } =
 		getAuthenticationMethod<SecondaryProviderInterface>(listOfFactor)
 
+	const userId = context.user?.id
+
+	if (!userId) throw new Error('Invalid user')
+
 	// @ts-expect-error
 	const res = await provider.onVerifyChallenge(input.factor[name])
 
@@ -30,7 +34,7 @@ export const verifyChallengeResolver = async (
 
 	const session = new Session()
 
-	await session.create(context.user?.id, context)
+	await session.create(userId, context)
 
 	return true
 }

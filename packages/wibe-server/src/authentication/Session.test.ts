@@ -4,7 +4,7 @@ import jwt, { type JwtPayload } from 'jsonwebtoken'
 import { Session } from './Session'
 import { WibeApp } from '../server'
 
-describe('Session', () => {
+describe('_Session', () => {
 	const mockGetObject = mock(() => Promise.resolve({}) as any)
 	const mockGetObjects = mock(() => Promise.resolve([]) as any)
 	const mockCreateObject = mock(() =>
@@ -45,7 +45,7 @@ describe('Session', () => {
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
 		expect(mockGetObjects).toHaveBeenCalledWith({
-			className: 'Session',
+			className: '_Session',
 			where: {
 				accessToken: { equalTo: 'accessToken' },
 			},
@@ -87,7 +87,7 @@ describe('Session', () => {
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
 		expect(mockGetObjects).toHaveBeenCalledWith({
-			className: 'Session',
+			className: '_Session',
 			where: {
 				accessToken: { equalTo: 'accessToken' },
 			},
@@ -144,7 +144,7 @@ describe('Session', () => {
 
 		expect(mockCreateObject).toHaveBeenCalledTimes(1)
 		expect(mockCreateObject).toHaveBeenCalledWith({
-			className: 'Session',
+			className: '_Session',
 			context: expect.any(Object),
 			data: {
 				accessToken,
@@ -163,7 +163,7 @@ describe('Session', () => {
 
 		expect(mockDeleteObject).toHaveBeenCalledTimes(1)
 		expect(mockDeleteObject).toHaveBeenCalledWith({
-			className: 'Session',
+			className: '_Session',
 			context: { sessionId: 'sessionId' },
 			id: 'sessionId',
 		})
@@ -197,7 +197,7 @@ describe('Session', () => {
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
 		expect(mockGetObjects).toHaveBeenCalledWith({
-			className: 'Session',
+			className: '_Session',
 			where: {
 				accessToken: { equalTo: 'accessToken' },
 			},
@@ -207,7 +207,7 @@ describe('Session', () => {
 
 		expect(mockUpdateObject).toHaveBeenCalledTimes(1)
 		expect(mockUpdateObject).toHaveBeenCalledWith({
-			className: 'Session',
+			className: '_Session',
 			context: {},
 			id: 'sessionId',
 			data: {
@@ -263,7 +263,7 @@ describe('Session', () => {
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
 		expect(mockGetObjects).toHaveBeenCalledWith({
-			className: 'Session',
+			className: '_Session',
 			where: {
 				accessToken: { equalTo: 'accessToken' },
 			},
@@ -281,11 +281,11 @@ describe('Session', () => {
 
 		expect(
 			session.refresh('accessToken', 'refreshToken', {} as any),
-		).rejects.toThrow('Session not found')
+		).rejects.toThrow('_Session not found')
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
 		expect(mockGetObjects).toHaveBeenCalledWith({
-			className: 'Session',
+			className: '_Session',
 			where: {
 				accessToken: { equalTo: 'accessToken' },
 			},
