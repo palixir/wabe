@@ -4,7 +4,7 @@ import { Schema } from './Schema'
 describe('Schema', () => {
 	it('should merge default class with custom class', () => {
 		const schema = new Schema({
-			class: [
+			classes: [
 				{
 					name: 'Class1',
 					fields: {
@@ -38,7 +38,7 @@ describe('Schema', () => {
 			],
 		})
 
-		expect(schema.schema.class[0]).toEqual({
+		expect(schema.schema.classes[0]).toEqual({
 			name: 'Class1',
 			fields: {
 				field1: {
@@ -62,7 +62,7 @@ describe('Schema', () => {
 			},
 		})
 
-		expect(schema.schema.class[1]).toEqual({
+		expect(schema.schema.classes[1]).toEqual({
 			name: 'Class2',
 			fields: {
 				field3: {
@@ -86,7 +86,7 @@ describe('Schema', () => {
 
 	it('should merge default class with custom class with resolvers', () => {
 		const schema = new Schema({
-			class: [
+			classes: [
 				{
 					name: 'Class1',
 					fields: {
@@ -137,7 +137,7 @@ describe('Schema', () => {
 			],
 		})
 
-		expect(schema.schema.class[0]).toEqual({
+		expect(schema.schema.classes[0]).toEqual({
 			name: 'Class1',
 			fields: {
 				field1: {
@@ -171,7 +171,7 @@ describe('Schema', () => {
 			},
 		})
 
-		expect(schema.schema.class[1]).toEqual({
+		expect(schema.schema.classes[1]).toEqual({
 			name: 'Class2',
 			fields: {
 				field3: {
@@ -195,7 +195,7 @@ describe('Schema', () => {
 
 	it('should merge default class with custom class with field with same name', () => {
 		const schema = new Schema({
-			class: [
+			classes: [
 				{
 					name: 'Class1',
 					fields: {
@@ -230,7 +230,7 @@ describe('Schema', () => {
 			],
 		})
 
-		expect(schema.schema.class[0]).toEqual({
+		expect(schema.schema.classes[0]).toEqual({
 			name: 'Class1',
 			fields: {
 				field1: {
@@ -252,7 +252,7 @@ describe('Schema', () => {
 			},
 		})
 
-		expect(schema.schema.class[1]).toEqual({
+		expect(schema.schema.classes[1]).toEqual({
 			name: 'Class2',
 			fields: {
 				field3: {
@@ -276,7 +276,7 @@ describe('Schema', () => {
 
 	it('should merge default class with custom class with same different description', () => {
 		const schema = new Schema({
-			class: [
+			classes: [
 				{
 					name: 'Class1',
 					description: 'Class1 description',
@@ -313,7 +313,7 @@ describe('Schema', () => {
 			],
 		})
 
-		expect(schema.schema.class[0]).toEqual({
+		expect(schema.schema.classes[0]).toEqual({
 			name: 'Class1',
 			description: 'new Class1 description',
 			fields: {
@@ -336,7 +336,7 @@ describe('Schema', () => {
 			},
 		})
 
-		expect(schema.schema.class[1]).toEqual({
+		expect(schema.schema.classes[1]).toEqual({
 			name: 'Class2',
 			fields: {
 				field3: {
@@ -359,17 +359,17 @@ describe('Schema', () => {
 	})
 
 	it('should add default class', () => {
-		const schema = new Schema({ class: [] })
+		const schema = new Schema({ classes: [] })
 
-		expect(schema.schema.class.length).toBe(3)
-		expect(schema.schema.class[0].name).toEqual('User')
-		expect(schema.schema.class[1].name).toEqual('_Session')
-		expect(schema.schema.class[2].name).toEqual('Role')
+		expect(schema.schema.classes.length).toBe(3)
+		expect(schema.schema.classes[0].name).toEqual('User')
+		expect(schema.schema.classes[1].name).toEqual('_Session')
+		expect(schema.schema.classes[2].name).toEqual('Role')
 	})
 
 	it('should add default enums', () => {
 		const schema = new Schema({
-			class: [],
+			classes: [],
 			enums: [
 				{
 					name: 'EnumTest',

@@ -19,7 +19,7 @@ describe('Server', () => {
 			},
 			port,
 			schema: {
-				class: [
+				classes: [
 					{
 						name: 'Collection1',
 						fields: { name: { type: 'String' } },
@@ -47,7 +47,7 @@ describe('Server', () => {
 			},
 			port,
 			schema: {
-				class: [
+				classes: [
 					{
 						name: 'Collection1',
 						fields: { name: { type: 'String' } },
@@ -82,7 +82,7 @@ describe('Server', () => {
 			},
 			port,
 			schema: {
-				class: [
+				classes: [
 					{
 						name: 'Collection1',
 						fields: { name: { type: 'String' } },
@@ -94,7 +94,7 @@ describe('Server', () => {
 		await wibe.start()
 
 		// _Session class is a default class so if it's present the schema is updated
-		const isSessionClassExist = WibeApp.config.schema.class.find(
+		const isSessionClassExist = WibeApp.config.schema.classes.find(
 			(schemaClass) => schemaClass.name === '_Session',
 		)
 

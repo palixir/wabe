@@ -44,7 +44,7 @@ describe('DatabaseController', () => {
 	beforeAll(() => {
 		WibeApp.config = {
 			schema: {
-				class: [
+				classes: [
 					{
 						name: 'TestClass',
 						fields: {

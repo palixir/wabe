@@ -69,7 +69,7 @@ export const setupTests = async () => {
 		},
 		port,
 		schema: {
-			class: [
+			classes: [
 				{
 					name: 'User',
 					fields: {

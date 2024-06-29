@@ -256,7 +256,7 @@ describe('Permissions', () => {
 			// @ts-expect-error
 			WibeApp.config = {
 				schema: {
-					class: [
+					classes: [
 						{
 							name: 'TestClass',
 							fields: {

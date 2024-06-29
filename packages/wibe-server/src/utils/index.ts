@@ -23,7 +23,7 @@ export const firstLetterInLowerCase = (str: string) => {
 }
 
 export const getClassFromClassName = (className: string): ClassInterface => {
-	const classInSchema = WibeApp.config.schema.class.find(
+	const classInSchema = WibeApp.config.schema.classes.find(
 		(schemaClass) => schemaClass.name === className,
 	)
 

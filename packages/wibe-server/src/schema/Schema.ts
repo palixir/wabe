@@ -182,7 +182,7 @@ export interface EnumInterface {
 }
 
 export interface SchemaInterface {
-	class: ClassInterface[]
+	classes: ClassInterface[]
 	scalars?: ScalarInterface[]
 	enums?: EnumInterface[]
 }
@@ -194,7 +194,7 @@ export class Schema {
 		// TODO : Add default scalars here
 		this.schema = {
 			...schema,
-			class: this.defaultClass(schema),
+			classes: this.defaultClass(schema),
 			enums: [...(schema.enums || []), ...this.defaultEnum()],
 		}
 	}
@@ -595,7 +595,7 @@ export class Schema {
 
 	defaultClass(schema: SchemaInterface): ClassInterface[] {
 		return this.mergeClass([
-			...schema.class,
+			...schema.classes,
 			this.userClass(),
 			this.sessionClass(),
 			this.roleClass(),

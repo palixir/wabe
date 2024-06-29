@@ -20,6 +20,7 @@ describe('Default fields', () => {
 					email: 'email@test.fr',
 				} as any,
 				context: {} as any,
+				object: {} as any,
 			})
 
 			const spyHookObjectUpsertNewData = spyOn(
@@ -61,6 +62,7 @@ describe('Default fields', () => {
 					email: 'email@test.fr',
 				} as any,
 				context: {} as any,
+				object: {} as any,
 			})
 
 			const spyHookObjectUpsertNewData = spyOn(
@@ -88,7 +90,7 @@ describe('Default fields', () => {
 		beforeAll(() => {
 			WibeApp.config = {
 				schema: {
-					class: [
+					classes: [
 						{
 							name: 'User',
 							fields: {
@@ -114,6 +116,7 @@ describe('Default fields', () => {
 					email: 'email@test.fr',
 				} as any,
 				context: {} as any,
+				object: {} as any,
 			})
 
 			const spyHookObjectUpsertNewData = spyOn(
@@ -136,6 +139,7 @@ describe('Default fields', () => {
 					isAdmin: true,
 				} as any,
 				context: {} as any,
+				object: {} as any,
 			})
 
 			const spyHookObjectUpsertNewData = spyOn(

@@ -61,7 +61,7 @@ export class GraphQLSchema {
 		const scalars = this.createScalars()
 		const enums = this.createEnums()
 
-		const classes = this.schemas.schema.class
+		const classes = this.schemas.schema.classes
 
 		const graphqlParser = GraphqlParser({ scalars, enums })
 

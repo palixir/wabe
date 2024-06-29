@@ -39,7 +39,7 @@ describe('GraphqlSchema', () => {
 
 	beforeAll(() => {
 		const wibeSchema = new Schema({
-			class: [
+			classes: [
 				{
 					name: 'TestClass2',
 					fields: {
@@ -252,7 +252,7 @@ describe('GraphqlSchema', () => {
 
 	it('should support an array of object in graphql schema', async () => {
 		const { client, wibeApp } = await createWibeApp({
-			class: [
+			classes: [
 				{
 					name: 'TestClass',
 					fields: {
@@ -296,7 +296,7 @@ describe('GraphqlSchema', () => {
 
 	it('should return an array in a query', async () => {
 		const { client, wibeApp } = await createWibeApp({
-			class: [
+			classes: [
 				{
 					name: 'TestClass',
 					fields: {
@@ -333,7 +333,7 @@ describe('GraphqlSchema', () => {
 
 	it('should return an object in a query', async () => {
 		const { client, wibeApp } = await createWibeApp({
-			class: [
+			classes: [
 				{
 					name: 'TestClass',
 					fields: {
@@ -378,7 +378,7 @@ describe('GraphqlSchema', () => {
 
 	it('should return an array in a mutation', async () => {
 		const { client, wibeApp } = await createWibeApp({
-			class: [
+			classes: [
 				{
 					name: 'TestClass',
 					fields: {
@@ -415,7 +415,7 @@ describe('GraphqlSchema', () => {
 
 	it('should return an object in a mutation', async () => {
 		const { client, wibeApp } = await createWibeApp({
-			class: [
+			classes: [
 				{
 					name: 'TestClass',
 					fields: {
@@ -460,7 +460,7 @@ describe('GraphqlSchema', () => {
 
 	it('should have a custom enum as value in type', async () => {
 		const { client, wibeApp } = await createWibeApp({
-			class: [
+			classes: [
 				{
 					name: 'TestClass',
 					fields: {
@@ -835,7 +835,7 @@ describe('GraphqlSchema', () => {
 
 	it('should create mutation with sub input', async () => {
 		const { client, wibeApp } = await createWibeApp({
-			class: [
+			classes: [
 				{
 					name: 'TestClass',
 					fields: { field1: { type: 'String' } },
@@ -888,7 +888,7 @@ describe('GraphqlSchema', () => {
 
 	it('should create mutation with sub sub input', async () => {
 		const { client, wibeApp } = await createWibeApp({
-			class: [
+			classes: [
 				{
 					name: 'TestClass',
 					fields: { field1: { type: 'String' } },
@@ -952,7 +952,7 @@ describe('GraphqlSchema', () => {
 
 	it('should create custom mutation with sub object and correct input name', async () => {
 		const { client, wibeApp } = await createWibeApp({
-			class: [
+			classes: [
 				{
 					name: 'TestClass',
 					fields: { field1: { type: 'String' } },
@@ -1028,7 +1028,7 @@ describe('GraphqlSchema', () => {
 
 	it('should create a sub object with the good type', async () => {
 		const { client, wibeApp } = await createWibeApp({
-			class: [
+			classes: [
 				{
 					name: 'TestClass',
 					fields: {
@@ -1098,7 +1098,7 @@ describe('GraphqlSchema', () => {
 
 	it('should create an object with a pointer (createAndLink)', async () => {
 		const { client, wibeApp } = await createWibeApp({
-			class: [
+			classes: [
 				{
 					name: 'TestClass',
 					fields: {
@@ -1154,7 +1154,7 @@ describe('GraphqlSchema', () => {
 
 	it('should link an object to a pointer', async () => {
 		const { client, wibeApp } = await createWibeApp({
-			class: [
+			classes: [
 				{
 					name: 'TestClass',
 					fields: {
@@ -1229,7 +1229,7 @@ describe('GraphqlSchema', () => {
 
 	it('should link a pointer on create multiple object', async () => {
 		const { client, wibeApp } = await createWibeApp({
-			class: [
+			classes: [
 				{
 					name: 'TestClass',
 					fields: {
@@ -1291,7 +1291,7 @@ describe('GraphqlSchema', () => {
 
 	it('should filter an object (on query) with pointer field', async () => {
 		const { client, wibeApp } = await createWibeApp({
-			class: [
+			classes: [
 				{
 					name: 'TestClass',
 					fields: {
@@ -1364,7 +1364,7 @@ describe('GraphqlSchema', () => {
 
 	it('should filter an object (on updates) with pointer field', async () => {
 		const { client, wibeApp } = await createWibeApp({
-			class: [
+			classes: [
 				{
 					name: 'TestClass',
 					fields: {
@@ -1440,7 +1440,7 @@ describe('GraphqlSchema', () => {
 
 	it('should filter an object (on deletes) with pointer field', async () => {
 		const { client, wibeApp } = await createWibeApp({
-			class: [
+			classes: [
 				{
 					name: 'TestClass',
 					fields: {
@@ -1515,7 +1515,7 @@ describe('GraphqlSchema', () => {
 
 	it('should create and link a pointer on update', async () => {
 		const { client, wibeApp } = await createWibeApp({
-			class: [
+			classes: [
 				{
 					name: 'TestClass',
 					fields: {
@@ -1599,7 +1599,7 @@ describe('GraphqlSchema', () => {
 
 	it('should link a pointer on update', async () => {
 		const { client, wibeApp } = await createWibeApp({
-			class: [
+			classes: [
 				{
 					name: 'TestClass',
 					fields: {
@@ -1686,7 +1686,7 @@ describe('GraphqlSchema', () => {
 
 	it('should link a pointer on update multiple object', async () => {
 		const { client, wibeApp } = await createWibeApp({
-			class: [
+			classes: [
 				{
 					name: 'TestClass',
 					fields: {
@@ -1770,7 +1770,7 @@ describe('GraphqlSchema', () => {
 
 	it('should return pointer data on delete an element', async () => {
 		const { client, wibeApp } = await createWibeApp({
-			class: [
+			classes: [
 				{
 					name: 'TestClass',
 					fields: {
@@ -1845,7 +1845,7 @@ describe('GraphqlSchema', () => {
 
 	it('should createAndAdd an object on a relation field (on create)', async () => {
 		const { client, wibeApp } = await createWibeApp({
-			class: [
+			classes: [
 				{
 					name: 'TestClass',
 					fields: {
@@ -1904,7 +1904,7 @@ describe('GraphqlSchema', () => {
 
 	it('should add an object on a relation field (on create)', async () => {
 		const { client, wibeApp } = await createWibeApp({
-			class: [
+			classes: [
 				{
 					name: 'TestClass',
 					fields: {
@@ -1973,7 +1973,7 @@ describe('GraphqlSchema', () => {
 
 	it('should createAndAdd an object on a relation field (on createMany)', async () => {
 		const { client, wibeApp } = await createWibeApp({
-			class: [
+			classes: [
 				{
 					name: 'TestClass',
 					fields: {
@@ -2036,7 +2036,7 @@ describe('GraphqlSchema', () => {
 
 	it('should add an object on a relation field (on createMany)', async () => {
 		const { client, wibeApp } = await createWibeApp({
-			class: [
+			classes: [
 				{
 					name: 'TestClass',
 					fields: {
@@ -2110,7 +2110,7 @@ describe('GraphqlSchema', () => {
 
 	it('should createAndAdd an object on a relation field (on update)', async () => {
 		const { client, wibeApp } = await createWibeApp({
-			class: [
+			classes: [
 				{
 					name: 'TestClass',
 					fields: {
@@ -2182,7 +2182,7 @@ describe('GraphqlSchema', () => {
 
 	it('should add an object on a relation field (on update)', async () => {
 		const { client, wibeApp } = await createWibeApp({
-			class: [
+			classes: [
 				{
 					name: 'TestClass',
 					fields: {
@@ -2264,7 +2264,7 @@ describe('GraphqlSchema', () => {
 
 	it('should remove an object on a relation field (on update)', async () => {
 		const { client, wibeApp } = await createWibeApp({
-			class: [
+			classes: [
 				{
 					name: 'TestClass',
 					fields: {
@@ -2350,7 +2350,7 @@ describe('GraphqlSchema', () => {
 
 	it('should createAndAdd an object on a relation field (on updateMany)', async () => {
 		const { client, wibeApp } = await createWibeApp({
-			class: [
+			classes: [
 				{
 					name: 'TestClass',
 					fields: {
@@ -2424,7 +2424,7 @@ describe('GraphqlSchema', () => {
 
 	it('should add an object on a relation field (on updateMany)', async () => {
 		const { client, wibeApp } = await createWibeApp({
-			class: [
+			classes: [
 				{
 					name: 'TestClass',
 					fields: {
@@ -2508,7 +2508,7 @@ describe('GraphqlSchema', () => {
 
 	it('should remove an object on a relation field (on updateMany)', async () => {
 		const { client, wibeApp } = await createWibeApp({
-			class: [
+			classes: [
 				{
 					name: 'TestClass',
 					fields: {
@@ -2596,7 +2596,7 @@ describe('GraphqlSchema', () => {
 
 	it('should remove an object on a relation field (on updateMany)', async () => {
 		const { client, wibeApp } = await createWibeApp({
-			class: [
+			classes: [
 				{
 					name: 'TestClass',
 					fields: {

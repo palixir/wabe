@@ -30,7 +30,7 @@ export const _getPermissionPropertiesOfAClass = async ({
 	className: string
 	operation: PermissionsOperations
 }) => {
-	const wibeClass = WibeApp.config.schema.class.find(
+	const wibeClass = WibeApp.config.schema.classes.find(
 		(c) => c.name === className,
 	)
 

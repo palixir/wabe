@@ -31,7 +31,7 @@ describe('Resolver', () => {
 
 		WibeApp.config = {
 			schema: {
-				class: [
+				classes: [
 					{
 						name: 'TestClass',
 						fields: {

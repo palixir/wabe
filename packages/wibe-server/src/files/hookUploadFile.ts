@@ -4,7 +4,7 @@ import type { HookObject } from '../hooks/HookObject'
 const handleFile = async (hookObject: HookObject<any>) => {
 	const newData = hookObject.getNewData()
 
-	const schema = WibeApp.config.schema.class.find(
+	const schema = WibeApp.config.schema.classes.find(
 		(currentClass) => currentClass.name === hookObject.className,
 	)
 

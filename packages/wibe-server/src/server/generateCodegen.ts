@@ -1,4 +1,3 @@
-import type { GraphQLSchema } from '../graphql'
 import type {
 	ClassInterface,
 	EnumInterface,
@@ -9,11 +8,11 @@ import type {
 export const generateWibeFile = ({
 	scalars,
 	enums,
-	schemas,
+	classes,
 }: {
 	enums?: EnumInterface[]
 	scalars?: ScalarInterface[]
-	schemas: ClassInterface[]
+	classes: ClassInterface[]
 }) => {
 	// Scalars
 	const listOfScalars = scalars?.map((scalar) => `"${scalar.name}"`) || []
@@ -29,8 +28,8 @@ export const generateWibeFile = ({
 		' | ',
 	)}`
 
-	// Types
-	const allNames = schemas
+	// Classes
+	const allNames = classes
 		.map((schema) => `${schema.name}: ${schema.name}`)
 		.filter((schema) => schema)
 
@@ -55,7 +54,7 @@ export const generateCodegen = async ({
 		`${generateWibeFile({
 			scalars: schema.scalars,
 			enums: schema.enums,
-			schemas: schema.class,
+			classes: schema.classes,
 		})}`,
 	)
 

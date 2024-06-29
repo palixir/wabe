@@ -48,7 +48,7 @@ export class DatabaseController {
 	}
 
 	_getPointerObject(className: string, fields: string[]): PointerFields {
-		const realClass = WibeApp.config.schema.class.find(
+		const realClass = WibeApp.config.schema.classes.find(
 			(c) => c.name.toLowerCase() === className.toLowerCase(),
 		)
 
@@ -94,7 +94,7 @@ export class DatabaseController {
 		originClassName: T,
 		pointerClassName: string,
 	) {
-		return WibeApp.config.schema.class.some(
+		return WibeApp.config.schema.classes.some(
 			(c) =>
 				c.name.toLowerCase() === originClassName.toLowerCase() &&
 				Object.values(c.fields).find(
@@ -110,7 +110,7 @@ export class DatabaseController {
 		originClassName: T,
 		pointerClassName: string,
 	) {
-		return WibeApp.config.schema.class.some(
+		return WibeApp.config.schema.classes.some(
 			(c) =>
 				c.name.toLowerCase() === originClassName.toLowerCase() &&
 				Object.values(c.fields).find(
@@ -201,7 +201,7 @@ export class DatabaseController {
 	) {
 		const whereKeys = Object.keys(where) as Array<keyof WhereType<T>>
 
-		const realClass = WibeApp.config.schema.class.find(
+		const realClass = WibeApp.config.schema.classes.find(
 			(c) => c.name.toLowerCase() === className.toLowerCase(),
 		)
 
