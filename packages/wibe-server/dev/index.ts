@@ -47,7 +47,7 @@ const run = async () => {
 		},
 		port: 3000,
 		schema: {
-			class: [
+			classes: [
 				{
 					name: 'User',
 					description: 'User class',
