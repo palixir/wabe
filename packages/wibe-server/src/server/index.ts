@@ -22,12 +22,14 @@ interface WibeConfig {
 	port: number
 	schema: SchemaInterface
 	database: DatabaseConfig
-	codegen?: boolean
+	codegen?: {
+		path?: string
+	}
 	authentication?: AuthenticationConfig
 	routes?: WibeRoute[]
 	rootKey: string
 	hooks?: Hook<any>[]
-	file: FileConfig
+	file?: FileConfig
 }
 
 export class WibeApp {
@@ -40,9 +42,9 @@ export class WibeApp {
 		port,
 		schema,
 		database,
-		codegen = true,
 		authentication,
 		rootKey,
+		codegen,
 		hooks,
 		file,
 	}: WibeConfig) {
@@ -57,9 +59,9 @@ export class WibeApp {
 			file: {
 				adapter:
 					file?.adapter ||
-					(process.env.NODE_ENV !== 'production'
+					((process.env.NODE_ENV !== 'production'
 						? fileDevAdapter
-						: undefined),
+						: () => {}) as any),
 			},
 		}
 
@@ -272,7 +274,12 @@ export class WibeApp {
 						schemas: wibeSchema.schema.class,
 					})}`,
 				)
+
 			Bun.write('generated/schema.graphql', printSchema(schema))
+
+			if (WibeApp.config.codegen.path) {
+				Bun.write(WibeApp.config.codegen.path, printSchema(schema))
+			}
 		}
 
 		await initializeRoles()

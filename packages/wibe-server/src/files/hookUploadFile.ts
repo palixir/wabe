@@ -14,7 +14,7 @@ const handleFile = async (hookObject: HookObject<any>) => {
 		Object.keys(newData).map(async (keyName) => {
 			if (schema.fields[keyName].type !== 'File') return
 
-			if (WibeApp.config.file.adapter !== undefined)
+			if (WibeApp.config.file?.adapter !== undefined)
 				hookObject.upsertNewData(
 					keyName,
 					await WibeApp.config.file.adapter(newData[keyName]),
