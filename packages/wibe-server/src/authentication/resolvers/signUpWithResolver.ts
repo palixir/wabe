@@ -16,7 +16,7 @@ export const signUpWithResolver = async (
 	context: WibeContext<any>,
 ) => {
 	// Create object call the provider signUp
-	const { id: userId } = await context.databaseController.createObject({
+	const { id: userId } = await context.wibe.databaseController.createObject({
 		className: 'User',
 		data: {
 			authentication: input.authentication,
@@ -34,13 +34,14 @@ export const signUpWithResolver = async (
 		isRoot: true,
 	})
 
-	if (context.config.authentication?.session?.cookieSession) {
+	if (context.wibe.config.authentication?.session?.cookieSession) {
 		context.response?.setCookie('refreshToken', refreshToken, {
 			httpOnly: true,
 			path: '/',
 			secure: process.env.NODE_ENV === 'production',
 			expires: new Date(
-				Date.now() + session.getRefreshTokenExpireIn(context.config),
+				Date.now() +
+					session.getRefreshTokenExpireIn(context.wibe.config),
 			),
 		})
 
@@ -49,7 +50,8 @@ export const signUpWithResolver = async (
 			path: '/',
 			secure: process.env.NODE_ENV === 'production',
 			expires: new Date(
-				Date.now() + session.getAccessTokenExpireIn(context.config),
+				Date.now() +
+					session.getAccessTokenExpireIn(context.wibe.config),
 			),
 		})
 	}

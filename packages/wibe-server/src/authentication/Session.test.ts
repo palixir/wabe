@@ -35,7 +35,7 @@ describe('_Session', () => {
 
 		const res = await session.meFromAccessToken('accessToken', {
 			isRoot: true,
-			databaseController,
+			wibe: { databaseController },
 		} as any)
 
 		expect(res.user).toBeNull()
@@ -57,7 +57,7 @@ describe('_Session', () => {
 				'refreshToken',
 				'refreshTokenExpiresAt',
 			],
-			context: { isRoot: true, databaseController },
+			context: { isRoot: true, wibe: { databaseController } },
 		})
 	})
 
@@ -80,7 +80,7 @@ describe('_Session', () => {
 
 		const { sessionId, user } = await session.meFromAccessToken(
 			'accessToken',
-			{ isRoot: true, databaseController } as any,
+			{ isRoot: true, wibe: { databaseController } } as any,
 		)
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
@@ -114,7 +114,7 @@ describe('_Session', () => {
 		const thirtyDays = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
 
 		const { accessToken, refreshToken } = await session.create('userId', {
-			databaseController,
+			wibe: { databaseController },
 		} as any)
 
 		expect(accessToken).not.toBeUndefined()
@@ -158,13 +158,15 @@ describe('_Session', () => {
 
 		await session.delete({
 			sessionId: 'sessionId',
-			databaseController,
+			wibe: {
+				databaseController,
+			},
 		} as any)
 
 		expect(mockDeleteObject).toHaveBeenCalledTimes(1)
 		expect(mockDeleteObject).toHaveBeenCalledWith({
 			className: '_Session',
-			context: { sessionId: 'sessionId', databaseController },
+			context: { sessionId: 'sessionId', wibe: { databaseController } },
 			id: 'sessionId',
 		})
 	})
@@ -189,7 +191,7 @@ describe('_Session', () => {
 		const { accessToken, refreshToken } = await session.refresh(
 			'accessToken',
 			'refreshToken',
-			{ databaseController } as any,
+			{ wibe: { databaseController } } as any,
 		)
 
 		expect(accessToken).not.toBeUndefined()
@@ -208,7 +210,7 @@ describe('_Session', () => {
 		expect(mockUpdateObject).toHaveBeenCalledTimes(1)
 		expect(mockUpdateObject).toHaveBeenCalledWith({
 			className: '_Session',
-			context: { databaseController },
+			context: expect.any(Object),
 			id: 'sessionId',
 			data: {
 				accessToken: expect.any(String),
@@ -255,7 +257,7 @@ describe('_Session', () => {
 		const { accessToken, refreshToken } = await session.refresh(
 			'accessToken',
 			'refreshToken',
-			{ databaseController } as any,
+			{ wibe: { databaseController } } as any,
 		)
 
 		expect(accessToken).toBe('accessToken')
@@ -281,7 +283,7 @@ describe('_Session', () => {
 
 		expect(
 			session.refresh('accessToken', 'refreshToken', {
-				databaseController,
+				wibe: { databaseController },
 			} as any),
 		).rejects.toThrow('_Session not found')
 
@@ -313,7 +315,7 @@ describe('_Session', () => {
 
 		expect(
 			session.refresh('accessToken', 'refreshToken', {
-				databaseController,
+				wibe: { databaseController },
 			} as any),
 		).rejects.toThrow('Refresh token expired')
 	})
@@ -337,7 +339,7 @@ describe('_Session', () => {
 
 		expect(
 			session.refresh('accessToken', 'wrongRefreshToken', {
-				databaseController,
+				wibe: { databaseController },
 			} as any),
 		).rejects.toThrow('Invalid refresh token')
 	})

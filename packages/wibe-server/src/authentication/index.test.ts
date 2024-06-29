@@ -709,6 +709,13 @@ describe('Authentication', () => {
 	})
 
 	it('should not authorize to access to protected resource if the user is not connected', async () => {
+		await createUserAndUpdateRole({
+			anonymousClient: client,
+			port,
+			roleName: 'Client3',
+			rootClient,
+		})
+
 		const userClient = getUserClient(port, 'invalidToken')
 
 		expect(

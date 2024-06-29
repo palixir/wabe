@@ -52,7 +52,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 		fields: string[],
 		context: WibeContext<T>,
 	): PointerFields {
-		const realClass = context.config.schema.classes.find(
+		const realClass = context.wibe.config.schema.classes.find(
 			// @ts-expect-error
 			(c) => c.name.toLowerCase() === className.toLowerCase(),
 		)
@@ -102,7 +102,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 	) {
 		if (!pointerClassName) return false
 
-		return context.config.schema.classes.some(
+		return context.wibe.config.schema.classes.some(
 			(c) =>
 				// @ts-expect-error
 				c.name.toLowerCase() === originClassName.toLowerCase() &&
@@ -123,7 +123,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 	) {
 		if (!pointerClassName) return false
 
-		return context.config.schema.classes.some(
+		return context.wibe.config.schema.classes.some(
 			(c) =>
 				// @ts-expect-error
 				c.name.toLowerCase() === originClassName.toLowerCase() &&
@@ -213,7 +213,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 	>(className: U, where: WhereType<U, K>, context: WibeContext<T>) {
 		const whereKeys = Object.keys(where) as Array<keyof WhereType<U, K>>
 
-		const realClass = context.config.schema.classes.find(
+		const realClass = context.wibe.config.schema.classes.find(
 			// @ts-expect-error
 			(c) => c.name.toLowerCase() === className.toLowerCase(),
 		)
@@ -289,18 +289,23 @@ export class DatabaseController<T extends WibeAppTypes> {
 			className: params.className,
 			context: params.context,
 			newData: null,
-			id: params.id,
 			skipHooks: params.skipHooks,
 		})
 
-		await hook.run(OperationType.BeforeRead)
+		await hook.run({
+			operationType: OperationType.BeforeRead,
+			id: params.id,
+		})
 
 		const dataOfCurrentObject = await this.adapter.getObject({
 			...params,
 			fields: [...fieldsWithoutPointers, ...(pointersFieldsId || [])],
 		})
 
-		await hook.run(OperationType.AfterRead)
+		await hook.run({
+			operationType: OperationType.AfterRead,
+			id: params.id,
+		})
 
 		if (!dataOfCurrentObject) return null
 
@@ -337,11 +342,13 @@ export class DatabaseController<T extends WibeAppTypes> {
 			className: params.className,
 			context: params.context,
 			newData: null,
-			where: params.where,
 			skipHooks: params.skipHooks,
 		})
 
-		await hook.run(OperationType.BeforeRead)
+		await hook.run({
+			operationType: OperationType.BeforeRead,
+			where: params.where,
+		})
 
 		const dataOfCurrentObject = await this.adapter.getObjects({
 			...params,
@@ -350,7 +357,10 @@ export class DatabaseController<T extends WibeAppTypes> {
 			fields: [...fieldsWithoutPointers, ...(pointersFieldsId || [])],
 		})
 
-		await hook.run(OperationType.AfterRead)
+		await hook.run({
+			operationType: OperationType.AfterRead,
+			where: params.where,
+		})
 
 		return Promise.all(
 			dataOfCurrentObject.map((data) =>
@@ -375,14 +385,16 @@ export class DatabaseController<T extends WibeAppTypes> {
 			newData: params.data,
 		})
 
-		const arrayOfComputedData = await hook.run(OperationType.BeforeCreate)
+		const arrayOfComputedData = await hook.run({
+			operationType: OperationType.BeforeCreate,
+		})
 
 		const res = await this.adapter.createObject({
 			...params,
 			data: arrayOfComputedData,
 		})
 
-		await hook.run(OperationType.AfterCreate)
+		await hook.run({ operationType: OperationType.AfterCreate, id: res.id })
 
 		return res
 	}
@@ -405,7 +417,9 @@ export class DatabaseController<T extends WibeAppTypes> {
 		)
 
 		const arrayOfComputedData = await Promise.all(
-			hooks.map((hook) => hook.run(OperationType.BeforeCreate)),
+			hooks.map((hook) =>
+				hook.run({ operationType: OperationType.BeforeCreate }),
+			),
 		)
 
 		const res = await this.adapter.createObjects({
@@ -413,8 +427,17 @@ export class DatabaseController<T extends WibeAppTypes> {
 			data: arrayOfComputedData,
 		})
 
+		const arrayOfId = res.map((result) => result.id)
+
 		await Promise.all(
-			hooks.map((hook) => hook.run(OperationType.AfterCreate)),
+			hooks.map((hook) =>
+				hook.run({
+					operationType: OperationType.AfterCreate,
+					where: {
+						id: { in: arrayOfId },
+					},
+				}),
+			),
 		)
 
 		return res
@@ -429,17 +452,22 @@ export class DatabaseController<T extends WibeAppTypes> {
 			className: params.className,
 			context: params.context,
 			newData: params.data,
-			id: params.id,
 		})
 
-		const arrayOfComputedData = await hook.run(OperationType.BeforeUpdate)
+		const arrayOfComputedData = await hook.run({
+			operationType: OperationType.BeforeUpdate,
+			id: params.id,
+		})
 
 		const res = await this.adapter.updateObject({
 			...params,
 			data: arrayOfComputedData,
 		})
 
-		await hook.run(OperationType.AfterUpdate)
+		await hook.run({
+			operationType: OperationType.AfterUpdate,
+			id: params.id,
+		})
 
 		return res
 	}
@@ -459,10 +487,12 @@ export class DatabaseController<T extends WibeAppTypes> {
 			className: params.className,
 			context: params.context,
 			newData: params.data,
-			where: params.where,
 		})
 
-		const arrayOfComputedData = await hook.run(OperationType.BeforeUpdate)
+		const arrayOfComputedData = await hook.run({
+			operationType: OperationType.BeforeUpdate,
+			where: params.where,
+		})
 
 		const res = await this.adapter.updateObjects({
 			...params,
@@ -470,7 +500,10 @@ export class DatabaseController<T extends WibeAppTypes> {
 			where: whereObject,
 		})
 
-		await hook.run(OperationType.AfterUpdate)
+		await hook.run({
+			operationType: OperationType.AfterUpdate,
+			where: params.where,
+		})
 
 		return res
 	}
@@ -487,14 +520,19 @@ export class DatabaseController<T extends WibeAppTypes> {
 			className: params.className,
 			context: params.context,
 			newData: null,
+		})
+
+		await hook.run({
+			operationType: OperationType.BeforeDelete,
 			id: params.id,
 		})
 
-		await hook.run(OperationType.BeforeDelete)
-
 		await this.adapter.deleteObject(params)
 
-		await hook.run(OperationType.AfterDelete)
+		await hook.run({
+			operationType: OperationType.AfterDelete,
+			id: params.id,
+		})
 
 		return objectBeforeDelete
 	}
@@ -515,17 +553,22 @@ export class DatabaseController<T extends WibeAppTypes> {
 			className: params.className,
 			context: params.context,
 			newData: null,
-			where: params.where,
 		})
 
-		await hook.run(OperationType.BeforeDelete)
+		await hook.run({
+			operationType: OperationType.BeforeDelete,
+			where: params.where,
+		})
 
 		await this.adapter.deleteObjects({
 			...params,
 			where: whereObject,
 		})
 
-		await hook.run(OperationType.AfterDelete)
+		await hook.run({
+			operationType: OperationType.AfterDelete,
+			where: params.where,
+		})
 
 		return objectsBeforeDelete
 	}

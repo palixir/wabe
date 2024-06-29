@@ -46,12 +46,14 @@ describe('Hooks', () => {
 
 		const hooks = await index.initializeHook({
 			className: 'ClassName',
-			context: { isRoot: true, databaseController, config },
+			context: {
+				isRoot: true,
+				wibe: { databaseController, config } as any,
+			},
 			newData: { name: 'test' },
-			id: 'id',
 		})
 
-		await hooks.run(OperationType.BeforeRead)
+		await hooks.run({ operationType: OperationType.BeforeRead, id: 'id' })
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
 		expect(mockGetObjects).toHaveBeenCalledWith({
@@ -79,23 +81,24 @@ describe('Hooks', () => {
 		})
 	})
 
-	it('should run hook on BeforeRead with 0 object impacted', async () => {
+	it('should run hook on BeforeCreate', async () => {
 		const hooks = await index.initializeHook({
 			className: 'ClassName',
-			context: { isRoot: true, databaseController, config },
+			context: {
+				isRoot: true,
+				wibe: { databaseController, config } as any,
+			},
 			newData: { name: 'test' },
 		})
 
-		await hooks.run(OperationType.BeforeRead)
+		await hooks.run({ operationType: OperationType.BeforeCreate })
 
-		expect(mockGetObjects).toHaveBeenCalledTimes(1)
+		expect(mockGetObjects).toHaveBeenCalledTimes(0)
 
 		// @ts-expect-error
-		const hookObject = mockCallBack1.mock.calls[0][0] as any
+		const hookObject = mockCallback3.mock.calls[0][0] as any
 
-		expect(hookObject.object).toEqual({
-			name: 'test',
-		})
+		expect(hookObject.object).toEqual({})
 
 		expect(hookObject.context).toEqual({
 			isRoot: true,
@@ -113,12 +116,14 @@ describe('Hooks', () => {
 
 		const hooks = await index.initializeHook({
 			className: 'ClassName',
-			context: { isRoot: true, databaseController, config },
+			context: {
+				isRoot: true,
+				wibe: { databaseController, config } as any,
+			},
 			newData: { name: 'test' },
-			id: 'id',
 		})
 
-		await hooks.run(OperationType.BeforeRead)
+		await hooks.run({ operationType: OperationType.BeforeRead, id: 'id' })
 
 		expect(spy_findHooksByPriority.mock.calls[0][0].priority).toEqual(1)
 		expect(spy_findHooksByPriority.mock.calls[1][0].priority).toEqual(2)
@@ -131,12 +136,14 @@ describe('Hooks', () => {
 
 		const hooks = await index.initializeHook({
 			className: 'ClassName',
-			context: { isRoot: true, databaseController, config },
+			context: {
+				isRoot: true,
+				wibe: { databaseController, config } as any,
+			},
 			newData: { name: 'test' },
-			id: 'id',
 		})
 
-		await hooks.run(OperationType.BeforeRead)
+		await hooks.run({ operationType: OperationType.BeforeRead, id: 'id' })
 
 		expect(mockCallback3).toHaveBeenCalledTimes(0)
 	})

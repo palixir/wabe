@@ -335,8 +335,10 @@ describe('Permissions', () => {
 					} as any,
 				} as any,
 				isRoot: false,
-				databaseController,
-				config,
+				wibe: {
+					databaseController,
+					config,
+				} as any,
 			}
 
 			const obj = new HookObject({
@@ -366,9 +368,11 @@ describe('Permissions', () => {
 						name: 'Admin',
 					} as any,
 				} as any,
-				databaseController,
 				isRoot: false,
-				config,
+				wibe: {
+					databaseController,
+					config,
+				} as any,
 			}
 
 			const obj = new HookObject({
@@ -387,9 +391,8 @@ describe('Permissions', () => {
 				user: {
 					id: '',
 				} as any,
-				databaseController,
 				isRoot: true,
-				config,
+				wibe: { databaseController, config } as any,
 			}
 
 			const obj = new HookObject({

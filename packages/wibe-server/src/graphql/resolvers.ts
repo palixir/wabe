@@ -139,7 +139,7 @@ export const queryForOneObject = (
 ) => {
 	const fields = getFieldsFromInfo(info, className)
 
-	return context.databaseController.getObject({
+	return context.wibe.databaseController.getObject({
 		className,
 		id,
 		fields,
@@ -156,7 +156,7 @@ export const queryForMultipleObject = async (
 ) => {
 	const fields = getFieldsFromInfo(info, className)
 
-	const objects = await context.databaseController.getObjects({
+	const objects = await context.wibe.databaseController.getObjects({
 		className,
 		where,
 		fields,
@@ -189,7 +189,7 @@ export const mutationToCreateObject = async (
 
 	return {
 		[firstLetterInLowerCase(className)]:
-			await context.databaseController.createObject({
+			await context.wibe.databaseController.createObject({
 				className,
 				data: updatedFieldsToCreate,
 				fields,
@@ -218,7 +218,7 @@ export const mutationToCreateMultipleObjects = async (
 		),
 	)
 
-	const objects = await context.databaseController.createObjects({
+	const objects = await context.wibe.databaseController.createObjects({
 		className,
 		data: updatedFieldsToCreate,
 		fields,
@@ -251,7 +251,7 @@ export const mutationToUpdateObject = async (
 
 	return {
 		[firstLetterInLowerCase(className)]:
-			await context.databaseController.updateObject({
+			await context.wibe.databaseController.updateObject({
 				className,
 				id: args.input?.id,
 				data: updatedFields,
@@ -278,7 +278,7 @@ export const mutationToUpdateMultipleObjects = async (
 		where: args.input?.where,
 	})
 
-	const objects = await context.databaseController.updateObjects({
+	const objects = await context.wibe.databaseController.updateObjects({
 		className,
 		where: args.input?.where,
 		data: updatedFields,
@@ -304,7 +304,7 @@ export const mutationToDeleteObject = async (
 
 	return {
 		[firstLetterInLowerCase(className)]:
-			await context.databaseController.deleteObject({
+			await context.wibe.databaseController.deleteObject({
 				className,
 				id: args.input?.id,
 				fields,
@@ -322,7 +322,7 @@ export const mutationToDeleteMultipleObjects = async (
 ) => {
 	const fields = getFieldsFromInfo(info, className)
 
-	const objects = await context.databaseController.deleteObjects({
+	const objects = await context.wibe.databaseController.deleteObjects({
 		className,
 		where: args.input?.where,
 		fields,

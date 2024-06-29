@@ -51,8 +51,10 @@ describe('Resolver', () => {
 	}
 
 	const context = {
-		databaseController,
-		config,
+		wibe: {
+			databaseController,
+			config,
+		},
 	}
 
 	beforeEach(() => {

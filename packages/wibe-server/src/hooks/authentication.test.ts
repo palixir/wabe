@@ -34,12 +34,14 @@ describe('Hooks authentication', () => {
 			className: 'User',
 			context: {
 				isRoot: true,
-				config: {
-					authentication: {
-						customAuthenticationMethods,
-					},
+				wibe: {
+					config: {
+						authentication: {
+							customAuthenticationMethods,
+						},
+					} as any,
+					databaseController: {} as any,
 				} as any,
-				databaseController: {} as any,
 			},
 			object: {},
 			operationType: OperationType.BeforeCreate,
@@ -70,12 +72,14 @@ describe('Hooks authentication', () => {
 			className: 'User',
 			context: {
 				isRoot: true,
-				config: {
-					authentication: {
-						customAuthenticationMethods,
-					},
+				wibe: {
+					config: {
+						authentication: {
+							customAuthenticationMethods,
+						},
+					} as any,
+					databaseController: {} as any,
 				} as any,
-				databaseController: {} as any,
 			},
 			object: {},
 			operationType: OperationType.BeforeUpdate,

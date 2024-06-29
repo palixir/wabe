@@ -32,7 +32,7 @@ export const _getPermissionPropertiesOfAClass = async ({
 	operation: PermissionsOperations
 	context: WibeContext<any>
 }) => {
-	const wibeClass = context.config.schema.classes.find(
+	const wibeClass = context.wibe.config.schema.classes.find(
 		(c) => c.name === className,
 	)
 
@@ -123,15 +123,14 @@ export const _checkCLP = async (
 			`Permission denied to ${permissionOperation} class ${object.className}`,
 		)
 
-	const res = await object.context.databaseController.getObject({
+	const res = await object.context.wibe.databaseController.getObject({
 		className: '_Session',
 		id: sessionId,
 		fields: ['id', 'user.id'],
 		// We need to set isRoot to true to avoid infinite loop
 		context: {
+			...object.context,
 			isRoot: true,
-			databaseController: object.context.databaseController,
-			config: object.context.config,
 		},
 	})
 

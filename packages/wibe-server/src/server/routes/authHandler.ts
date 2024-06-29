@@ -32,7 +32,7 @@ export const oauthHandlerCallback = async (
 		const codeVerifier = context.res.getCookie('code_verifier')
 		const provider = context.res.getCookie('provider')
 
-		await getGraphqlClient(wibeContext.config.port).request<any>(
+		await getGraphqlClient(wibeContext.wibe.config.port).request<any>(
 			gql`
 				mutation signInWith(
 					$authorizationCode: String!
@@ -57,12 +57,12 @@ export const oauthHandlerCallback = async (
 		)
 
 		context.redirect(
-			wibeContext.config.authentication?.successRedirectPath || '/',
+			wibeContext.wibe.config.authentication?.successRedirectPath || '/',
 		)
 	} catch (error) {
 		console.error(error)
 		context.redirect(
-			wibeContext.config.authentication?.failureRedirectPath || '/',
+			wibeContext.wibe.config.authentication?.failureRedirectPath || '/',
 		)
 	}
 }
@@ -72,7 +72,7 @@ export const authHandler = async (
 	wibeContext: WibeContext<any>,
 	provider: ProviderEnum,
 ) => {
-	if (!wibeContext.config) throw new Error('Wibe config not found')
+	if (!wibeContext.wibe.config) throw new Error('Wibe config not found')
 
 	context.res.setCookie('provider', provider, {
 		httpOnly: true,
@@ -83,7 +83,7 @@ export const authHandler = async (
 
 	switch (provider) {
 		case ProviderEnum.google: {
-			const googleOauth = new Google(wibeContext.config)
+			const googleOauth = new Google(wibeContext.wibe.config)
 
 			const state = generateRandomValues()
 			const codeVerifier = generateRandomValues()
@@ -125,13 +125,13 @@ export const authHandler = async (
 
 	// if (!code || !codeVerifier) throw new Error('Authentication failed')
 
-	// const { authentication } = context.config
+	// const { authentication } = context.wibe.config
 
 	// if (!authentication) throw new Error('Authentication config not found')
 
 	// try {
 	// 	// Here we can't use the classic graphql client because provider is dynamic
-	// await getGraphqlClient(context.config.port).request<any>(gql`
+	// await getGraphqlClient(context.wibe.config.port).request<any>(gql`
 	// 	mutation signInWith(
 	// 		$authorizationCode: String!
 	// 		$codeVerifier: String!
