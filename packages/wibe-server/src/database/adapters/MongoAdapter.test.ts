@@ -70,7 +70,6 @@ describe('Mongo adapter', () => {
 		const res = await mongoAdapter.getObjects({
 			className: 'User',
 			where: {
-				// @ts-expect-error
 				id: { notEqualTo: insertedObjects[0].id },
 			},
 			context,
@@ -99,7 +98,6 @@ describe('Mongo adapter', () => {
 		const res = await mongoAdapter.getObjects({
 			className: 'User',
 			where: {
-				// @ts-expect-error
 				id: { equalTo: insertedObjects[0].id },
 			},
 			context,
@@ -128,7 +126,6 @@ describe('Mongo adapter', () => {
 		const res = await mongoAdapter.getObjects({
 			className: 'User',
 			where: {
-				// @ts-expect-error
 				id: { in: insertedObjects.map((obj) => obj.id) },
 			},
 			context,
@@ -157,7 +154,6 @@ describe('Mongo adapter', () => {
 		const res = await mongoAdapter.getObjects({
 			className: 'User',
 			where: {
-				// @ts-expect-error
 				id: { notIn: insertedObjects.map((obj) => obj.id) },
 			},
 			context,
@@ -209,7 +205,24 @@ describe('Mongo adapter', () => {
 
 		if (!insertedObjects) fail()
 
-		// @ts-expect-error
+		expect(insertedObjects[0].id).toBeDefined()
+	})
+
+	it('should always return id', async () => {
+		const insertedObjects = await mongoAdapter.createObjects({
+			className: 'User',
+			data: [
+				{
+					name: 'Lucas',
+					age: 20,
+				},
+			],
+			context,
+			fields: ['age'],
+		})
+
+		if (!insertedObjects) fail
+
 		expect(insertedObjects[0].id).toBeDefined()
 	})
 
@@ -526,16 +539,46 @@ describe('Mongo adapter', () => {
 		})
 
 		expect(res?.id).toEqual(insertedObject?.id)
+	})
 
-		const res2 = await mongoAdapter.getObject({
-			id: insertedObject?.id.toString(),
+	it('should get all fields when * is specified', async () => {
+		const insertedObject = await mongoAdapter.createObject({
 			className: 'User',
-			fields: ['name'],
+			data: {
+				name: 'John',
+				age: 20,
+			},
+			fields: ['name', 'id'],
 			context,
 		})
 
-		// @ts-ignore
-		expect(res2.id).toEqual(undefined)
+		if (!insertedObject) fail()
+
+		const id = insertedObject.id
+
+		expect(id).toBeDefined()
+
+		const field = await mongoAdapter.getObject({
+			className: 'User',
+			id: id.toString(),
+			fields: ['*'],
+			context,
+		})
+
+		expect(field).toEqual({
+			name: 'John',
+			age: 20,
+			id: expect.any(String),
+			acl: undefined,
+			authentication: undefined,
+			createdAt: undefined,
+			email: undefined,
+			verifiedEmail: undefined,
+			provider: undefined,
+			role: undefined,
+			updatedAt: undefined,
+			__typename: undefined,
+		})
 	})
 
 	it('should get one object with specific field and * fields', async () => {
@@ -564,6 +607,7 @@ describe('Mongo adapter', () => {
 
 		expect(field).toEqual({
 			name: 'John',
+			id: expect.any(String),
 		})
 	})
 
@@ -1263,6 +1307,7 @@ describe('Mongo adapter', () => {
 				},
 			},
 			context,
+			fields: ['authentication'],
 		})
 
 		expect(res.length).toEqual(1)
@@ -1272,5 +1317,41 @@ describe('Mongo adapter', () => {
 		expect(res[0].authentication?.emailPassword?.password).toEqual(
 			'password',
 		)
+	})
+
+	it('should request sub object in object with selection fields', async () => {
+		await mongoAdapter.createObject({
+			className: 'User',
+			context,
+			data: {
+				authentication: {
+					emailPassword: {
+						email: 'email@test.fr',
+						password: 'password',
+					},
+				},
+			},
+		})
+
+		const res = await mongoAdapter.getObjects({
+			className: 'User',
+			where: {
+				authentication: {
+					// @ts-expect-error
+					emailPassword: {
+						email: { equalTo: 'email@test.fr' },
+					},
+				},
+			},
+			context,
+			// @ts-expect-error
+			fields: ['authentication.emailPassword.email'],
+		})
+
+		expect(res.length).toEqual(1)
+		expect(res[0].authentication?.emailPassword?.email).toEqual(
+			'email@test.fr',
+		)
+		expect(res[0].authentication?.emailPassword?.password).toBeUndefined()
 	})
 })

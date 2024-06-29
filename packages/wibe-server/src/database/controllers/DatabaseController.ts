@@ -9,6 +9,7 @@ import type {
 	DeleteObjectsOptions,
 	GetObjectOptions,
 	GetObjectsOptions,
+	OutputType,
 	UpdateObjectOptions,
 	UpdateObjectsOptions,
 	WhereType,
@@ -140,7 +141,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 		U extends keyof T['types'],
 		K extends keyof T['types'][U],
 	>(
-		objectData: Pick<T['types'][U], K> | null,
+		objectData: OutputType<U, K> | null,
 		pointersObject: PointerObject,
 		originClassName: U,
 		context: WibeContext<T>,
@@ -289,6 +290,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 			context: params.context,
 			newData: null,
 			id: params.id,
+			skipHooks: params.skipHooks,
 		})
 
 		await hook.run(OperationType.BeforeRead)

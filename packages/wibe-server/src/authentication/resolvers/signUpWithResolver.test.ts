@@ -46,66 +46,10 @@ describe('SignUpWith', () => {
 		},
 	}
 
-	const context = {
-		databaseController: mockDatabaseController,
-		config,
-	} as any
-
 	beforeEach(() => {
 		mockCreateObject.mockClear()
 		mockOnLogin.mockClear()
 		mockOnSignUp.mockClear()
-	})
-
-	it('should throw an error if no custom authentication configuration is provided', async () => {
-		expect(
-			signUpWithResolver(
-				{},
-				{
-					input: {
-						authentication: {
-							emailPassword: {
-								email: 'email@test.fr',
-								password: 'password',
-							},
-						},
-					},
-				},
-				{
-					config: {
-						authentication: undefined,
-						databaseController: mockDatabaseController,
-					},
-				} as any,
-			),
-		).rejects.toThrow('No custom authentication methods found')
-	})
-
-	it('should throw an error if a custom authentication is provided but not in the custom authentication config', async () => {
-		expect(
-			signUpWithResolver(
-				{},
-				{
-					input: {
-						authentication: {
-							emailPassword: {
-								email: 'email@test.fr',
-								password: 'password',
-							},
-						},
-					},
-				},
-				{
-					config: {
-						authentication: {
-							customAuthenticationMethods: [
-								{ name: 'phonePassword' },
-							],
-						},
-					},
-				} as any,
-			),
-		).rejects.toThrow('No available custom authentication methods found')
 	})
 
 	it('should signUpWith email and password when the user not exist', async () => {
@@ -148,14 +92,6 @@ describe('SignUpWith', () => {
 			accessToken: 'accessToken',
 			id: 'userId',
 		})
-		expect(mockOnSignUp).toHaveBeenCalledTimes(1)
-		expect(mockOnSignUp).toHaveBeenCalledWith({
-			input: {
-				email: 'email@test.fr',
-				password: 'password',
-			},
-			context: expect.any(Object),
-		})
 
 		expect(mockCreateObject).toHaveBeenCalledTimes(1)
 		expect(mockCreateObject).toHaveBeenCalledWith({
@@ -163,7 +99,7 @@ describe('SignUpWith', () => {
 			data: {
 				authentication: {
 					emailPassword: {
-						email: 'email@com.fr',
+						email: 'email@test.fr',
 						password: 'password',
 					},
 				},

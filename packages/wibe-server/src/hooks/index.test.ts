@@ -57,7 +57,7 @@ describe('Hooks', () => {
 		expect(mockGetObjects).toHaveBeenCalledWith({
 			className: 'ClassName',
 			context: { isRoot: true, databaseController, config },
-			fields: [],
+			fields: ['*'],
 			where: { id: { equalTo: 'id' } },
 			skipHooks: true,
 		})

@@ -20,6 +20,8 @@ import {
 import {
 	defaultCallAuthenticationProviderOnBeforeCreateUser,
 	defaultCallAuthenticationProviderOnBeforeUpdateUser,
+	defaultCreateSessionOnAfterCreateUser,
+	defaultCreateSessionOnAfterUpdateUser,
 } from './authentication'
 
 export enum OperationType {
@@ -102,7 +104,7 @@ export const initializeHook = async <T extends keyof WibeAppTypes['types']>({
 			databaseController: context.databaseController,
 			config: context.config,
 		},
-		fields: [],
+		fields: ['*'],
 		where: where ? where : { id: { equalTo: id } },
 		skipHooks: true,
 	})
@@ -116,10 +118,25 @@ export const initializeHook = async <T extends keyof WibeAppTypes['types']>({
 	return {
 		run: async (
 			operationType: OperationType,
+			objectId?: string,
 		): Promise<Record<keyof WibeAppTypes['types'][T], any>> => {
 			const hooksOrderByPriorities = getHooksOrderByPriorities(
 				context.config,
 			)
+
+			// const insertedObject = objectId
+			// 	? await context.databaseController.getObject({
+			// 			// @ts-expect-error
+			// 			className,
+			// 			context: {
+			// 				...context,
+			// 				isRoot: true,
+			// 			},
+			// 			fields: ['*'],
+			// 			id: objectId,
+			// 			skipHooks: true,
+			// 		})
+			// 	: {}
 
 			const res = await Promise.all(
 				objectsToMap.map(async (object) => {
@@ -220,4 +237,14 @@ export const getDefaultHooks = (): Hook<any>[] => [
 		priority: 1,
 		callback: defaultCallAuthenticationProviderOnBeforeUpdateUser,
 	},
+	// {
+	// 	operationType: OperationType.AfterCreate,
+	// 	priority: 1,
+	// 	callback: defaultCreateSessionOnAfterCreateUser,
+	// },
+	// {
+	// 	operationType: OperationType.AfterUpdate,
+	// 	priority: 1,
+	// 	callback: defaultCreateSessionOnAfterUpdateUser,
+	// },
 ]

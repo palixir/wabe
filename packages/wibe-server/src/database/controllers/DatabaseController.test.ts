@@ -660,6 +660,7 @@ describe('DatabaseController', () => {
 			{
 				name: 'name',
 				pointerToAnotherClass: 'idOfAnotherClass',
+				id: '',
 			},
 			{
 				pointerToAnotherClass: {

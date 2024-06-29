@@ -45,8 +45,9 @@ export interface GetObjectOptions<
 > {
 	className: T
 	id: string
-	fields?: Array<K>
+	fields?: Array<K | '*'>
 	context: WibeContext<any>
+	skipHooks?: boolean
 }
 
 export interface GetObjectsOptions<
@@ -55,7 +56,7 @@ export interface GetObjectsOptions<
 > {
 	className: T
 	where?: WhereType<T, K>
-	fields?: Array<K>
+	fields?: Array<K | '*'>
 	offset?: number
 	limit?: number
 	context: WibeContext<any>
@@ -69,7 +70,7 @@ export interface CreateObjectOptions<
 > {
 	className: T
 	data: Record<W, any>
-	fields?: Array<K>
+	fields?: Array<K | '*'>
 	context: WibeContext<any>
 }
 export interface CreateObjectsOptions<
@@ -79,7 +80,7 @@ export interface CreateObjectsOptions<
 > {
 	className: T
 	data: Array<Record<W, any>>
-	fields?: Array<K>
+	fields?: Array<K | '*'>
 	offset?: number
 	limit?: number
 	context: WibeContext<any>
@@ -93,7 +94,7 @@ export interface UpdateObjectOptions<
 	className: T
 	id: string
 	data: Partial<Record<W, any>>
-	fields?: Array<K>
+	fields?: Array<K | '*'>
 	context: WibeContext<any>
 }
 
@@ -105,7 +106,7 @@ export interface UpdateObjectsOptions<
 	className: T
 	where: WhereType<T, W>
 	data: Partial<Record<W, any>>
-	fields?: Array<K>
+	fields?: Array<K | '*'>
 	offset?: number
 	limit?: number
 	context: WibeContext<any>
@@ -117,7 +118,7 @@ export interface DeleteObjectOptions<
 > {
 	className: T
 	id: string
-	fields?: Array<K>
+	fields?: Array<K | '*'>
 	context: WibeContext<any>
 }
 
@@ -127,7 +128,7 @@ export interface DeleteObjectsOptions<
 > {
 	className: T
 	where: WhereType<T, K>
-	fields?: Array<K>
+	fields?: Array<K | '*'>
 	offset?: number
 	limit?: number
 	context: WibeContext<any>
@@ -136,7 +137,7 @@ export interface DeleteObjectsOptions<
 export type OutputType<
 	T extends keyof WibeAppTypes['types'],
 	K extends keyof WibeAppTypes['types'][T],
-> = Pick<WibeAppTypes['types'][T], K>
+> = Pick<WibeAppTypes['types'][T], K> & { id: string }
 
 export interface DatabaseAdapter {
 	connect(): Promise<any>

@@ -1,8 +1,6 @@
 import type { SignUpWithInput } from '../../../generated/wibe'
 import type { WibeContext } from '../../server/interface'
 import { Session } from '../Session'
-import type { ProviderInterface } from '../interface'
-import { getAuthenticationMethod } from '../utils'
 
 // 0 - Get the authentication method
 // 1 - We check if the signUp is possible (call onSign)
@@ -17,23 +15,7 @@ export const signUpWithResolver = async (
 	},
 	context: WibeContext<any>,
 ) => {
-	// const { provider, name } = getAuthenticationMethod<any, ProviderInterface>(
-	// 	Object.keys(input.authentication || {}),
-	// 	context,
-	// )
-
-	// const inputOfTheGoodAuthenticationMethod =
-	// 	// @ts-expect-error
-	// 	input.authentication[name]
-
-	// const { authenticationDataToSave } = await provider.onSignUp({
-	// 	input: inputOfTheGoodAuthenticationMethod,
-	// 	context: {
-	// 		...context,
-	// 		isRoot: true,
-	// 	},
-	// })
-
+	// Create object call the provider signUp
 	const { id: userId } = await context.databaseController.createObject({
 		className: 'User',
 		data: {

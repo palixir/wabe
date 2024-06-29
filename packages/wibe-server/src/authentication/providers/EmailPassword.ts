@@ -30,6 +30,7 @@ export class EmailPassword
 				...context,
 				isRoot: true,
 			},
+			fields: ['authentication'],
 		})
 
 		if (users.length === 0)

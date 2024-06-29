@@ -197,7 +197,7 @@ describe('GraphqlSchema', () => {
 						input: {fields: {authentication: {emailPassword: {email: "test@gmail.com", password: "password"}}}}
   				) {
 				    user {
-     					id
+     					email
     				}
   				}
 				}
