@@ -1,5 +1,5 @@
 import { WibeApp } from '../..'
-import type { SignInWithInput } from '../../../generated/wibe'
+import type { SignInWithInput } from '../../generated/wibe'
 import type { Context } from '../../graphql/interface'
 import { Session } from '../Session'
 import type {

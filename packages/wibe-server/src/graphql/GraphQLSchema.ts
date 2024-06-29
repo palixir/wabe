@@ -29,7 +29,7 @@ import type {
 	Schema,
 } from '../schema'
 import { GraphqlParser, type GraphqlParserFactory } from './parser'
-import type { WibeSchemaTypes } from '../../generated/wibe'
+import type { WibeSchemaTypes } from '../generated/wibe'
 import { firstLetterInLowerCase } from '../utils'
 import { IdWhereInput } from './types'
 

@@ -9,7 +9,7 @@
 
 		"moduleResolution": "bundler",
 		"verbatimModuleSyntax": false,
-		"outFile": "dist/index.d.ts",
+		"outDir":"dist",
 		"declaration": true,
 		"emitDeclarationOnly": true,
 
@@ -22,6 +22,6 @@
 		"noPropertyAccessFromIndexSignature": false
 	},
 	"exclude": ["node_modules", "dist", "**/*.test.ts"],
-	"include": ["src/**/*.ts", "generated/*.ts"]
+	"include": ["src/**/*.ts", "src/generated/*.ts"]
 }
 

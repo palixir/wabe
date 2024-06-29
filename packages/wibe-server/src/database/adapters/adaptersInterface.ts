@@ -1,4 +1,4 @@
-import type { WibeSchemaTypes } from '../../../generated/wibe'
+import type { WibeSchemaTypes } from '../../generated/wibe'
 import type { Context } from '../../graphql/interface'
 
 type WhereAggregation<T extends keyof WibeSchemaTypes> = {

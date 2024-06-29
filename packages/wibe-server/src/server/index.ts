@@ -262,12 +262,13 @@ export class WibeApp {
 			process.env.NODE_ENV !== 'test' &&
 			WibeApp.config.codegen
 		) {
-			const contentOfCodegenFile =
-				await Bun.file('generated/wibe.ts').text()
+			const typeFile = `${import.meta.dirname}/generated/wibe.ts`
+
+			const contentOfCodegenFile = await Bun.file(typeFile).text()
 
 			if (!contentOfCodegenFile.includes('WibeSchemaTypes'))
 				Bun.write(
-					'generated/wibe.ts',
+					typeFile,
 					`${contentOfCodegenFile}\n\n${generateWibeFile({
 						scalars: wibeSchema.schema.scalars,
 						enums: wibeSchema.schema.enums,
@@ -275,7 +276,10 @@ export class WibeApp {
 					})}`,
 				)
 
-			Bun.write('generated/schema.graphql', printSchema(schema))
+			Bun.write(
+				`${import.meta.dirname}/generated/schema.graphql`,
+				printSchema(schema),
+			)
 
 			if (WibeApp.config.codegen.path) {
 				Bun.write(WibeApp.config.codegen.path, printSchema(schema))
