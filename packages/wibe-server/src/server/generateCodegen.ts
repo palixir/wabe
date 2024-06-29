@@ -1,4 +1,10 @@
-import type { ClassInterface, EnumInterface, ScalarInterface } from '../schema'
+import type { GraphQLSchema } from '../graphql'
+import type {
+	ClassInterface,
+	EnumInterface,
+	ScalarInterface,
+	SchemaInterface,
+} from '../schema'
 
 export const generateWibeFile = ({
 	scalars,
@@ -33,4 +39,25 @@ export const generateWibeFile = ({
 	)}\n}`
 
 	return `${wibeScalarType}\n\n${wibeEnumsGlobalTypesString}\n\n${globalWibeTypeString}`
+}
+
+export const generateCodegen = async ({
+	schema,
+	graphqlSchema,
+	path,
+}: {
+	schema: SchemaInterface
+	graphqlSchema: string
+	path: string
+}) => {
+	Bun.write(
+		`${path}/wibe.ts`,
+		`${generateWibeFile({
+			scalars: schema.scalars,
+			enums: schema.enums,
+			schemas: schema.class,
+		})}`,
+	)
+
+	Bun.write(`${path}/schema.graphql`, graphqlSchema)
 }

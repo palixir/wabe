@@ -7,7 +7,7 @@ import { GraphQLSchema as WibeGraphQLSchema } from '../graphql'
 import type { AuthenticationConfig } from '../authentication/interface'
 import { type WibeRoute, defaultRoutes } from './routes'
 import { type Hook, getDefaultHooks } from '../hooks'
-import { generateWibeFile } from './generateWibeFile'
+import { generateCodegen } from './generateCodegen'
 import { defaultAuthenticationMethods } from '../authentication/defaultAuthentication'
 import { Wobe } from 'wobe'
 import { WobeGraphqlYogaPlugin } from 'wobe-graphql-yoga'
@@ -262,27 +262,18 @@ export class WibeApp {
 			process.env.NODE_ENV !== 'test' &&
 			WibeApp.config.codegen
 		) {
-			const typeFile = `${import.meta.dirname}/generated/wibe.ts`
-
-			const contentOfCodegenFile = await Bun.file(typeFile).text()
-
-			if (!contentOfCodegenFile.includes('WibeSchemaTypes'))
-				Bun.write(
-					typeFile,
-					`${contentOfCodegenFile}\n\n${generateWibeFile({
-						scalars: wibeSchema.schema.scalars,
-						enums: wibeSchema.schema.enums,
-						schemas: wibeSchema.schema.class,
-					})}`,
-				)
-
-			Bun.write(
-				`${import.meta.dirname}/generated/schema.graphql`,
-				printSchema(schema),
-			)
+			generateCodegen({
+				graphqlSchema: printSchema(schema),
+				path: `${import.meta.dirname}/generated`,
+				schema: wibeSchema.schema,
+			})
 
 			if (WibeApp.config.codegen.path) {
-				Bun.write(WibeApp.config.codegen.path, printSchema(schema))
+				generateCodegen({
+					graphqlSchema: printSchema(schema),
+					path: WibeApp.config.codegen.path,
+					schema: wibeSchema.schema,
+				})
 			}
 		}
 
