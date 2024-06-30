@@ -27,7 +27,7 @@ import {
 	StringWhereInput,
 	type AllObjects,
 } from '../graphql'
-import type { WibeSchemaEnums, WibeSchemaScalars } from '../generated/wibe'
+import type { WibeSchemaEnums, WibeSchemaScalars } from '../../generated/wibe'
 
 type GraphqlObjectType =
 	| 'Object'

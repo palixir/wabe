@@ -1,4 +1,4 @@
-import type { WibeSchemaTypes } from '../generated/wibe'
+import type { WibeSchemaTypes } from '../../generated/wibe'
 import type { WhereType } from '../database'
 import {
 	defaultBeforeCreateUpload,

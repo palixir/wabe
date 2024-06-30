@@ -2,7 +2,7 @@ import type {
 	WibeSchemaScalars,
 	WibeSchemaEnums,
 	WibeSchemaTypes,
-} from '../generated/wibe'
+} from '../../generated/wibe'
 import { signInWithResolver, signUpWithResolver } from '../authentication'
 import { refreshResolver } from '../authentication/resolvers/refreshResolver'
 import { signOutResolver } from '../authentication/resolvers/signOutResolver'

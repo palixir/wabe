@@ -44,14 +44,19 @@ export const generateCodegen = async ({
 	schema,
 	graphqlSchema,
 	path,
+	fileContent,
 }: {
+	fileContent: string
 	schema: SchemaInterface
 	graphqlSchema: string
 	path: string
 }) => {
+	// We don't generate file that already contains wibe types
+	if (fileContent.includes('WibeSchemaTypes')) return
+
 	Bun.write(
 		`${path}/wibe.ts`,
-		`${generateWibeFile({
+		`${fileContent}\n\n${generateWibeFile({
 			scalars: schema.scalars,
 			enums: schema.enums,
 			classes: schema.classes,

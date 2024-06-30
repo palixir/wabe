@@ -5,7 +5,7 @@ import type {
 	WibeSchemaEnums,
 	WibeSchemaScalars,
 	WibeSchemaTypes,
-} from '../src/generated/wibe'
+} from '../generated/wibe'
 
 const run = async () => {
 	await runDatabase()
@@ -15,6 +15,10 @@ const run = async () => {
 		scalars: WibeSchemaScalars
 		enums: WibeSchemaEnums
 	}>({
+		codegen: {
+			enabled: true,
+			path: `${import.meta.dirname}/../generated/`,
+		},
 		rootKey:
 			'0uwFvUxM$ceFuF1aEtTtZMa7DUN2NZudqgY5ve5W*QCyb58cwMj9JeoaV@d#%29v&aJzswuudVU1%nAT+rxS0Bh&OkgBYc0PH18*',
 		authentication: {

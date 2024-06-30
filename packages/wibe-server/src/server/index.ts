@@ -22,9 +22,12 @@ interface WibeConfig {
 	port: number
 	schema: SchemaInterface
 	database: DatabaseConfig
-	codegen?: {
-		path?: string
-	}
+	codegen?:
+		| {
+				enabled: true
+				path: string
+		  }
+		| { enabled?: false }
 	authentication?: AuthenticationConfig
 	routes?: WibeRoute[]
 	rootKey: string
@@ -276,14 +279,13 @@ export class WibeApp<T extends WibeAppTypes> {
 			process.env.NODE_ENV !== 'test' &&
 			WibeApp.config.codegen
 		) {
-			generateCodegen({
-				graphqlSchema: printSchema(schema),
-				path: `${import.meta.dirname}/generated`,
-				schema: wibeSchema.schema,
-			})
+			if (WibeApp.config.codegen.enabled && WibeApp.config.codegen.path) {
+				const fileContent = await Bun.file(
+					`${WibeApp.config.codegen.path}/wibe.ts`,
+				).text()
 
-			if (WibeApp.config.codegen.path) {
 				generateCodegen({
+					fileContent,
 					graphqlSchema: printSchema(schema),
 					path: WibeApp.config.codegen.path,
 					schema: wibeSchema.schema,

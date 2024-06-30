@@ -1,5 +1,5 @@
 import { WibeApp, type WibeAppTypes } from '../..'
-import type { WibeSchemaTypes } from '../../generated/wibe'
+import type { WibeSchemaTypes } from '../../../generated/wibe'
 import { OperationType, initializeHook } from '../../hooks'
 import type { Context } from '../../server/interface'
 import type {

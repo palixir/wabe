@@ -1,5 +1,5 @@
 import type { GraphQLResolveInfo, SelectionSetNode } from 'graphql'
-import type { WibeSchemaTypes } from '../generated/wibe'
+import type { WibeSchemaTypes } from '../../generated/wibe'
 import type { Context } from '../server/interface'
 import { firstLetterInLowerCase } from '../utils'
 import {

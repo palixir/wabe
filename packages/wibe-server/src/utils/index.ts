@@ -1,4 +1,4 @@
-import { getSdk } from '../generated/wibe'
+import { getSdk } from '../../generated/wibe'
 import type { ClassInterface } from '../schema'
 import { WibeApp } from '../server'
 import { getGraphqlClient } from './helper'

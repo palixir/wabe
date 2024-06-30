@@ -1,4 +1,4 @@
-import type { SignUpWithInput } from '../../generated/wibe'
+import type { SignUpWithInput } from '../../../generated/wibe'
 import type { Context } from '../../server/interface'
 import { WibeApp } from '../../server'
 import { Session } from '../Session'

@@ -2,7 +2,7 @@ import type { CodegenConfig } from '@graphql-codegen/cli'
 
 const config: CodegenConfig = {
 	overwrite: true,
-	schema: './src/generated/schema.graphql',
+	schema: './generated/schema.graphql',
 	generates: {
 		'./generated/wibe.ts': {
 			plugins: [
