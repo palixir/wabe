@@ -1,11 +1,10 @@
-import type { WibeSchemaTypes } from '../../generated/wibe'
 import type { WhereType } from '../database'
 import {
 	defaultBeforeCreateUpload,
 	defaultBeforeUpdateUpload,
 } from '../files/hookUploadFile'
 import type { Context } from '../server/interface'
-import { WibeApp, WibeAppTypes } from '../server'
+import { WibeApp, type WibeAppTypes } from '../server'
 import { HookObject } from './HookObject'
 import {
 	defaultBeforeCreateForCreatedAt,
@@ -19,21 +18,6 @@ import {
 	defaultCheckPermissionOnUpdate,
 } from './permissions'
 
-// Here we have duplicated code but we need before and after type to simplify default hooks (permission)
-export enum BeforeOperationType {
-	BeforeCreate = 'beforeInsert',
-	BeforeUpdate = 'beforeUpdate',
-	BeforeDelete = 'beforeDelete',
-	BeforeRead = 'beforeRead',
-}
-
-export enum AfterOperationType {
-	AfterCreate = 'AfterCreate',
-	AfterUpdate = 'afterUpdate',
-	AfterDelete = 'afterDelete',
-	AfterRead = 'afterRead',
-}
-
 export enum OperationType {
 	AfterCreate = 'AfterCreate',
 	AfterUpdate = 'afterUpdate',
@@ -45,7 +29,7 @@ export enum OperationType {
 	BeforeRead = 'beforeRead',
 }
 
-export type Hook<T extends keyof WibeSchemaTypes> = {
+export type Hook<T extends keyof WibeAppTypes['types']> = {
 	operationType: OperationType
 	// If the className is undefined the hook is called on each class
 	className?: T
@@ -56,8 +40,8 @@ export type Hook<T extends keyof WibeSchemaTypes> = {
 	callback: (hookObject: HookObject<T>) => Promise<void> | void
 }
 
-export type TypedNewData<T extends keyof WibeSchemaTypes> = Record<
-	keyof WibeSchemaTypes[T],
+export type TypedNewData<T extends keyof WibeAppTypes['types']> = Record<
+	keyof WibeAppTypes['types'][T],
 	any
 > | null
 

@@ -12,6 +12,15 @@ import {
 	GraphQLString,
 } from 'graphql'
 import { pluralize } from 'wibe-pluralize'
+import type { WibeAppTypes } from '..'
+import type {
+	ClassInterface,
+	MutationResolver,
+	QueryResolver,
+	Schema,
+} from '../schema'
+import { firstLetterInLowerCase } from '../utils'
+import { GraphqlParser, type GraphqlParserFactory } from './parser'
 import {
 	mutationToCreateMultipleObjects,
 	mutationToCreateObject,
@@ -22,15 +31,6 @@ import {
 	queryForMultipleObject,
 	queryForOneObject,
 } from './resolvers'
-import type {
-	ClassInterface,
-	MutationResolver,
-	QueryResolver,
-	Schema,
-} from '../schema'
-import { GraphqlParser, type GraphqlParserFactory } from './parser'
-import type { WibeSchemaTypes } from '../../generated/wibe'
-import { firstLetterInLowerCase } from '../utils'
 import { IdWhereInput } from './types'
 
 type AllPossibleObject =
@@ -632,7 +632,7 @@ export class GraphQLSchema {
 						args,
 						ctx,
 						info,
-						className as keyof WibeSchemaTypes,
+						className as keyof WibeAppTypes['types'],
 					),
 			},
 			[pluralize(classNameWithFirstLetterLowerCase)]: {
@@ -649,7 +649,7 @@ export class GraphQLSchema {
 						args,
 						ctx,
 						info,
-						className as keyof WibeSchemaTypes,
+						className as keyof WibeAppTypes['types'],
 					),
 			},
 		} as Record<string, GraphQLFieldConfig<any, any, any>>
@@ -762,7 +762,7 @@ export class GraphQLSchema {
 						args,
 						ctx,
 						info,
-						className as keyof WibeSchemaTypes,
+						className as keyof WibeAppTypes['types'],
 					),
 			},
 			[`create${pluralize(className)}`]: {
@@ -775,7 +775,7 @@ export class GraphQLSchema {
 						args,
 						ctx,
 						info,
-						className as keyof WibeSchemaTypes,
+						className as keyof WibeAppTypes['types'],
 					),
 			},
 			[`update${className}`]: {
@@ -788,7 +788,7 @@ export class GraphQLSchema {
 						args,
 						ctx,
 						info,
-						className as keyof WibeSchemaTypes,
+						className as keyof WibeAppTypes['types'],
 					),
 			},
 			[`update${pluralize(className)}`]: {
@@ -801,7 +801,7 @@ export class GraphQLSchema {
 						args,
 						ctx,
 						info,
-						className as keyof WibeSchemaTypes,
+						className as keyof WibeAppTypes['types'],
 					),
 			},
 			[`delete${className}`]: {
@@ -818,7 +818,7 @@ export class GraphQLSchema {
 						args,
 						ctx,
 						info,
-						className as keyof WibeSchemaTypes,
+						className as keyof WibeAppTypes['types'],
 					),
 			},
 			[`delete${pluralize(className)}`]: {
@@ -831,7 +831,7 @@ export class GraphQLSchema {
 						args,
 						ctx,
 						info,
-						className as keyof WibeSchemaTypes,
+						className as keyof WibeAppTypes['types'],
 					),
 			},
 		} as Record<string, GraphQLFieldConfig<any, any, any>>

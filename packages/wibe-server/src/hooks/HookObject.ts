@@ -1,13 +1,13 @@
 import type { OperationType, TypedNewData } from '.'
-import type { WibeSchemaTypes } from '../../generated/wibe'
+import type { WibeAppTypes } from '../server'
 import type { Context } from '../server/interface'
 
-export class HookObject<T extends keyof WibeSchemaTypes> {
+export class HookObject<T extends keyof WibeAppTypes['types']> {
 	public className: T
 	private newData: TypedNewData<T>
 	private operationType: OperationType
 	public context: Context
-	public object: Record<keyof WibeSchemaTypes[T], any>
+	public object: Record<keyof WibeAppTypes['types'][T], any>
 
 	constructor({
 		newData,
@@ -20,7 +20,7 @@ export class HookObject<T extends keyof WibeSchemaTypes> {
 		newData: TypedNewData<T>
 		operationType: OperationType
 		context: Context
-		object: Record<keyof WibeSchemaTypes[T], any>
+		object: Record<keyof WibeAppTypes['types'][T], any>
 	}) {
 		this.newData = newData
 		this.className = className
@@ -33,11 +33,11 @@ export class HookObject<T extends keyof WibeSchemaTypes> {
 		return this.context.user
 	}
 
-	isFieldUpdate(field: keyof WibeSchemaTypes[T]) {
+	isFieldUpdate(field: keyof WibeAppTypes['types'][T]) {
 		return this.newData && !!this.newData[field]
 	}
 
-	upsertNewData(field: keyof WibeSchemaTypes[T], value: any) {
+	upsertNewData(field: keyof WibeAppTypes['types'][T], value: any) {
 		if (!this.newData) return
 
 		if (!this.operationType.includes('before'))
@@ -48,7 +48,7 @@ export class HookObject<T extends keyof WibeSchemaTypes> {
 		this.newData[field] = value
 	}
 
-	getNewData(): Record<keyof WibeSchemaTypes[T], any> {
+	getNewData(): Record<keyof WibeAppTypes['types'][T], any> {
 		return this.newData || ({} as any)
 	}
 }

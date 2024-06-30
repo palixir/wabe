@@ -11,8 +11,8 @@ import {
 	type GraphQLScalarType,
 	GraphQLString,
 } from 'graphql'
-import type { ClassInterface, SchemaFields, WibePrimaryTypes } from '../schema'
 import {
+	type AllObjects,
 	AnyWhereInput,
 	ArrayWhereInput,
 	BooleanWhereInput,
@@ -25,9 +25,9 @@ import {
 	FloatWhereInput,
 	IntWhereInput,
 	StringWhereInput,
-	type AllObjects,
 } from '../graphql'
-import type { WibeSchemaEnums, WibeSchemaScalars } from '../../generated/wibe'
+import type { ClassInterface, SchemaFields, WibePrimaryTypes } from '../schema'
+import type { WibeAppTypes } from '../server'
 
 type GraphqlObjectType =
 	| 'Object'
@@ -356,8 +356,8 @@ export const GraphqlParser: GraphqlParserConstructor =
 			type:
 				| WibePrimaryTypes
 				| 'Array'
-				| WibeSchemaEnums
-				| WibeSchemaScalars
+				| WibeAppTypes['enums']
+				| WibeAppTypes['scalars']
 			typeValue?: WibePrimaryTypes
 			requiredValue?: boolean
 			isWhereType?: boolean
