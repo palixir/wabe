@@ -1,5 +1,5 @@
 import type { User } from '../generated/wibe'
-import type { Context } from '../graphql/interface'
+import type { Context } from '../server/interface'
 import type { TypeField } from '../schema'
 
 export enum ProviderEnum {

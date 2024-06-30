@@ -1,5 +1,5 @@
 import type { VerifyChallengeInput } from '../../generated/wibe'
-import type { Context } from '../../graphql/interface'
+import type { Context } from '../../server/interface'
 import { Session } from '../Session'
 import type { SecondaryProviderInterface } from '../interface'
 import { getAuthenticationMethod } from '../utils'

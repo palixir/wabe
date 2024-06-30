@@ -154,6 +154,6 @@ export const setupTests = async () => {
 }
 
 export const closeTests = async (wibe: WibeApp) => {
-	await WibeApp.databaseController.adapter?.close()
+	await wibe.databaseController.adapter?.close()
 	await wibe.close()
 }

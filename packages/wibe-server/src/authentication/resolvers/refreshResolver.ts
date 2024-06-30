@@ -1,4 +1,4 @@
-import type { Context } from '../../graphql/interface'
+import type { Context } from '../../server/interface'
 import { Session } from '../Session'
 
 export const refreshResolver = async (_: any, args: any, context: Context) => {

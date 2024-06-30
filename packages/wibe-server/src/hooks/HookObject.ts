@@ -1,6 +1,6 @@
 import type { OperationType, TypedNewData } from '.'
 import type { WibeSchemaTypes } from '../generated/wibe'
-import type { Context } from '../graphql/interface'
+import type { Context } from '../server/interface'
 
 export class HookObject<T extends keyof WibeSchemaTypes> {
 	public className: T

@@ -1,14 +1,5 @@
-import {
-	describe,
-	expect,
-	it,
-	mock,
-	spyOn,
-	beforeAll,
-	beforeEach,
-} from 'bun:test'
+import { describe, expect, it, mock, spyOn, beforeEach } from 'bun:test'
 import { EmailPassword } from './EmailPassword'
-import { WibeApp } from '../../server'
 
 describe('Email password', () => {
 	const mockGetObjects = mock(() => Promise.resolve([]))
@@ -18,12 +9,10 @@ describe('Email password', () => {
 
 	const spyBunPasswordVerify = spyOn(Bun.password, 'verify')
 
-	beforeAll(() => {
-		WibeApp.databaseController = {
-			getObjects: mockGetObjects,
-			createObject: mockCreateObject,
-		} as any
-	})
+	const databaseController = {
+		getObjects: mockGetObjects,
+		createObject: mockCreateObject,
+	} as any
 
 	beforeEach(() => {
 		mockGetObjects.mockClear()
@@ -42,7 +31,7 @@ describe('Email password', () => {
 		const {
 			authenticationDataToSave: { email, password },
 		} = await emailPassword.onSignUp({
-			context: {} as any,
+			context: { databaseController } as any,
 			input: { email: 'email@test.fr', password: 'password' },
 		})
 
@@ -71,7 +60,7 @@ describe('Email password', () => {
 		spyBunPasswordVerify.mockResolvedValue(true)
 
 		const { user } = await emailPassword.onSignIn({
-			context: {} as any,
+			context: { databaseController } as any,
 			input: { email: 'email@test.fr', password: 'password' },
 		})
 
@@ -98,7 +87,7 @@ describe('Email password', () => {
 
 		expect(
 			emailPassword.onSignIn({
-				context: {} as any,
+				context: { databaseController } as any,
 				// @ts-expect-error
 				input: { email: 'email@test.fr' },
 			}),
@@ -110,7 +99,7 @@ describe('Email password', () => {
 
 		expect(
 			emailPassword.onSignIn({
-				context: {} as any,
+				context: { databaseController } as any,
 				input: {
 					email: 'invalidEmail@test.fr',
 					password: 'password',
@@ -136,7 +125,7 @@ describe('Email password', () => {
 
 		expect(
 			emailPassword.onSignIn({
-				context: {} as any,
+				context: { databaseController } as any,
 				input: {
 					email: 'invalidEmail@test.fr',
 					password: 'password',

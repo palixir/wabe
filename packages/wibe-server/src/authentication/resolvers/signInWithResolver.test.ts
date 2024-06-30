@@ -1,7 +1,7 @@
 import { describe, expect, it, beforeEach, mock, spyOn } from 'bun:test'
 import { WibeApp } from '../../server'
 import { signInWithResolver } from './signInWithResolver'
-import type { Context } from '../../graphql/interface'
+import type { Context } from '../../server/interface'
 import { Session } from '../Session'
 
 describe('SignInWith', () => {
@@ -25,17 +25,11 @@ describe('SignInWith', () => {
 	const mockOnSendChallenge = mock(() => Promise.resolve())
 	const mockOnVerifyChallenge = mock(() => Promise.resolve(true))
 
-	const mockDatabaseController = {
-		createObject: mockCreateObject,
-	}
-
 	beforeEach(() => {
 		mockCreateObject.mockClear()
 		mockOnLogin.mockClear()
 		mockOnSignUp.mockClear()
 
-		// @ts-expect-error
-		WibeApp.databaseController = mockDatabaseController
 		// @ts-expect-error
 		WibeApp.config = {
 			authentication: {

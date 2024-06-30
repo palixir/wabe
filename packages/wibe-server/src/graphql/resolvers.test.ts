@@ -10,7 +10,17 @@ describe('Resolver', () => {
 	const mockCreateObject = mock(() => {})
 	const mockCreateObjects = mock(() => {})
 
-	const context = {}
+	const databaseController = {
+		updateObject: mockUpdateObject,
+		getObject: mockGetObject,
+		getObjects: mockGetObjects,
+		createObject: mockCreateObject,
+		createObjects: mockCreateObjects,
+	} as any
+
+	const context = {
+		databaseController,
+	}
 
 	beforeEach(() => {
 		mockUpdateObject.mockClear()
@@ -21,14 +31,6 @@ describe('Resolver', () => {
 	})
 
 	beforeAll(() => {
-		WibeApp.databaseController = {
-			updateObject: mockUpdateObject,
-			getObject: mockGetObject,
-			getObjects: mockGetObjects,
-			createObject: mockCreateObject,
-			createObjects: mockCreateObjects,
-		} as any
-
 		WibeApp.config = {
 			schema: {
 				classes: [

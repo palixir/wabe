@@ -1,7 +1,6 @@
 import { describe, expect, it, beforeEach, mock, spyOn } from 'bun:test'
 import { WibeApp } from '../../server'
 import { signUpWithResolver } from './signUpWithResolver'
-import type { Context } from '../../graphql/interface'
 import { Session } from '../Session'
 
 describe('SignUpWith', () => {
@@ -27,13 +26,15 @@ describe('SignUpWith', () => {
 		createObject: mockCreateObject,
 	}
 
+	const context = {
+		databaseController: mockDatabaseController,
+	} as any
+
 	beforeEach(() => {
 		mockCreateObject.mockClear()
 		mockOnLogin.mockClear()
 		mockOnSignUp.mockClear()
 
-		// @ts-expect-error
-		WibeApp.databaseController = mockDatabaseController
 		// @ts-expect-error
 		WibeApp.config = {
 			authentication: {
@@ -73,7 +74,7 @@ describe('SignUpWith', () => {
 						},
 					},
 				},
-				{} as Context,
+				context,
 			),
 		).rejects.toThrow('No custom authentication methods found')
 	})
@@ -108,7 +109,7 @@ describe('SignUpWith', () => {
 						},
 					},
 				},
-				{} as Context,
+				context,
 			),
 		).rejects.toThrow('No available custom authentication methods found')
 	})
@@ -143,6 +144,7 @@ describe('SignUpWith', () => {
 			},
 			{
 				response: mockResponse,
+				databaseController: mockDatabaseController,
 			} as any,
 		)
 
@@ -157,7 +159,7 @@ describe('SignUpWith', () => {
 				email: 'email@test.fr',
 				password: 'password',
 			},
-			context: expect.anything(),
+			context: expect.any(Object),
 		})
 
 		expect(mockCreateObject).toHaveBeenCalledTimes(1)
@@ -204,7 +206,9 @@ describe('SignUpWith', () => {
 			},
 		)
 
+		// @ts-expect-error
 		const refreshTokenExpiresIn = mockSetCookie.mock.calls[0][2].expires
+		// @ts-expect-error
 		const accessTokenExpiresIn = mockSetCookie.mock.calls[1][2].expires
 
 		// - 1000 to avoid flaky

@@ -1,7 +1,6 @@
 import type { GraphQLResolveInfo, SelectionSetNode } from 'graphql'
-import { WibeApp } from '..'
 import type { WibeSchemaTypes } from '../generated/wibe'
-import type { Context } from '../graphql/interface'
+import type { Context } from '../server/interface'
 import { firstLetterInLowerCase } from '../utils'
 import {
 	type InputFields,
@@ -140,7 +139,7 @@ export const queryForOneObject = (
 ) => {
 	const fields = getFieldsFromInfo(info, className)
 
-	return WibeApp.databaseController.getObject({
+	return context.databaseController.getObject({
 		className,
 		id,
 		fields,
@@ -157,7 +156,7 @@ export const queryForMultipleObject = async (
 ) => {
 	const fields = getFieldsFromInfo(info, className)
 
-	const objects = await WibeApp.databaseController.getObjects({
+	const objects = await context.databaseController.getObjects({
 		className,
 		where,
 		fields,
@@ -190,7 +189,7 @@ export const mutationToCreateObject = async (
 
 	return {
 		[firstLetterInLowerCase(className)]:
-			await WibeApp.databaseController.createObject({
+			await context.databaseController.createObject({
 				className,
 				data: updatedFieldsToCreate,
 				fields,
@@ -219,7 +218,7 @@ export const mutationToCreateMultipleObjects = async (
 		),
 	)
 
-	const objects = await WibeApp.databaseController.createObjects({
+	const objects = await context.databaseController.createObjects({
 		className,
 		data: updatedFieldsToCreate,
 		fields,
@@ -252,7 +251,7 @@ export const mutationToUpdateObject = async (
 
 	return {
 		[firstLetterInLowerCase(className)]:
-			await WibeApp.databaseController.updateObject({
+			await context.databaseController.updateObject({
 				className,
 				id: args.input?.id,
 				data: updatedFields,
@@ -279,7 +278,7 @@ export const mutationToUpdateMultipleObjects = async (
 		where: args.input?.where,
 	})
 
-	const objects = await WibeApp.databaseController.updateObjects({
+	const objects = await context.databaseController.updateObjects({
 		className,
 		where: args.input?.where,
 		data: updatedFields,
@@ -305,7 +304,7 @@ export const mutationToDeleteObject = async (
 
 	return {
 		[firstLetterInLowerCase(className)]:
-			await WibeApp.databaseController.deleteObject({
+			await context.databaseController.deleteObject({
 				className,
 				id: args.input?.id,
 				fields,
@@ -323,7 +322,7 @@ export const mutationToDeleteMultipleObjects = async (
 ) => {
 	const fields = getFieldsFromInfo(info, className)
 
-	const objects = await WibeApp.databaseController.deleteObjects({
+	const objects = await context.databaseController.deleteObjects({
 		className,
 		where: args.input?.where,
 		fields,

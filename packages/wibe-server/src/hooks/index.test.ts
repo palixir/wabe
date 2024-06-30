@@ -17,11 +17,11 @@ describe('Hooks', () => {
 	const mockCallback2 = mock(() => {})
 	const mockCallback3 = mock(() => {})
 
-	beforeAll(() => {
-		WibeApp.databaseController = {
-			getObjects: mockGetObjects,
-		} as any
+	const databaseController = {
+		getObjects: mockGetObjects,
+	} as any
 
+	beforeAll(() => {
 		WibeApp.config = {
 			hooks: [
 				{
@@ -58,7 +58,7 @@ describe('Hooks', () => {
 		const hooks = await index.initializeHook({
 			// @ts-expect-error
 			className: 'ClassName',
-			context: { isRoot: true },
+			context: { isRoot: true, databaseController },
 			newData: { name: 'test' },
 			id: 'id',
 		})
@@ -68,7 +68,7 @@ describe('Hooks', () => {
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
 		expect(mockGetObjects).toHaveBeenCalledWith({
 			className: 'ClassName',
-			context: { isRoot: true },
+			context: { isRoot: true, databaseController },
 			fields: [],
 			where: { id: { equalTo: 'id' } },
 			skipHooks: true,
@@ -85,6 +85,7 @@ describe('Hooks', () => {
 
 		expect(hookObject.context).toEqual({
 			isRoot: true,
+			databaseController: expect.any(Object),
 		})
 	})
 
@@ -92,7 +93,7 @@ describe('Hooks', () => {
 		const hooks = await index.initializeHook({
 			// @ts-expect-error
 			className: 'ClassName',
-			context: { isRoot: true },
+			context: { isRoot: true, databaseController },
 			newData: { name: 'test' },
 		})
 
@@ -108,6 +109,7 @@ describe('Hooks', () => {
 
 		expect(hookObject.context).toEqual({
 			isRoot: true,
+			databaseController: expect.any(Object),
 		})
 	})
 
@@ -121,7 +123,7 @@ describe('Hooks', () => {
 		const hooks = await index.initializeHook({
 			// @ts-expect-error
 			className: 'ClassName',
-			context: { isRoot: true },
+			context: { isRoot: true, databaseController },
 			newData: { name: 'test' },
 			id: 'id',
 		})
@@ -140,7 +142,7 @@ describe('Hooks', () => {
 		const hooks = await index.initializeHook({
 			// @ts-expect-error
 			className: 'ClassName',
-			context: { isRoot: true },
+			context: { isRoot: true, databaseController },
 			newDate: { name: 'test' },
 			id: 'id',
 		})

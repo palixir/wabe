@@ -1,4 +1,3 @@
-import { WibeApp } from '../../server'
 import type {
 	AuthenticationEventsOptions,
 	ProviderInterface,
@@ -17,7 +16,7 @@ export class EmailPassword
 		context,
 	}: AuthenticationEventsOptions<EmailPasswordInterface>) {
 		// TODO : Use first here but need to refactor in graphql and mongoadapter to have first and not limit
-		const users = await WibeApp.databaseController.getObjects({
+		const users = await context.databaseController.getObjects({
 			className: 'User',
 			where: {
 				authentication: {
@@ -62,7 +61,7 @@ export class EmailPassword
 		input,
 		context,
 	}: AuthenticationEventsOptions<EmailPasswordInterface>) {
-		const users = await WibeApp.databaseController.getObjects({
+		const users = await context.databaseController.getObjects({
 			className: 'User',
 			where: {
 				authentication: {

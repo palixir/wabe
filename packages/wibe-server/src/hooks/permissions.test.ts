@@ -11,7 +11,7 @@ import { _getPermissionPropertiesOfAClass, _checkCLP } from './permissions'
 import { WibeApp } from '..'
 import { HookObject } from './HookObject'
 import { BeforeOperationType, OperationType } from '.'
-import type { Context } from '../graphql/interface'
+import type { Context } from '../server/interface'
 import * as permissions from './permissions'
 
 describe('Permissions', () => {
@@ -252,6 +252,10 @@ describe('Permissions', () => {
 	describe('Class Level Permissions', () => {
 		const mockGetObject = mock(() => {})
 
+		const databaseController = {
+			getObject: mockGetObject,
+		} as any
+
 		beforeAll(() => {
 			// @ts-expect-error
 			WibeApp.config = {
@@ -277,11 +281,6 @@ describe('Permissions', () => {
 						},
 					],
 				},
-			}
-
-			WibeApp.databaseController = {
-				// @ts-expect-error
-				getObject: mockGetObject,
 			}
 		})
 
@@ -314,6 +313,7 @@ describe('Permissions', () => {
 				// @ts-expect-error
 				user: {},
 				isRoot: false,
+				databaseController,
 			}
 
 			const obj = new HookObject({
@@ -325,9 +325,9 @@ describe('Permissions', () => {
 				operationType: OperationType.BeforeRead,
 			})
 
-			expect(
-				_checkCLP(obj, BeforeOperationType.BeforeRead),
-			).rejects.toThrow('Permission denied to read class TestClass')
+			expect(_checkCLP(obj, OperationType.BeforeRead)).rejects.toThrow(
+				'Permission denied to read class TestClass',
+			)
 		})
 
 		it('should throw permission denied if role is not an authorized role', async () => {
@@ -343,9 +343,10 @@ describe('Permissions', () => {
 					role: {
 						id: 'roleId',
 						name: 'Role',
-					},
-				},
+					} as any,
+				} as any,
 				isRoot: false,
+				databaseController,
 			}
 
 			const obj = new HookObject({
@@ -357,9 +358,9 @@ describe('Permissions', () => {
 				operationType: OperationType.BeforeRead,
 			})
 
-			expect(
-				_checkCLP(obj, BeforeOperationType.BeforeRead),
-			).rejects.toThrow('Permission denied to read class TestClass')
+			expect(_checkCLP(obj, OperationType.BeforeRead)).rejects.toThrow(
+				'Permission denied to read class TestClass',
+			)
 		})
 
 		it('should not throw permission denied if valid session id is provided', async () => {
@@ -375,8 +376,9 @@ describe('Permissions', () => {
 					role: {
 						id: 'roleId',
 						name: 'Admin',
-					},
-				},
+					} as any,
+				} as any,
+				databaseController,
 				isRoot: false,
 			}
 
@@ -389,7 +391,7 @@ describe('Permissions', () => {
 				operationType: OperationType.BeforeRead,
 			})
 
-			expect(_checkCLP(obj, BeforeOperationType.BeforeRead)).resolves
+			expect(_checkCLP(obj, OperationType.BeforeRead)).resolves
 		})
 
 		it('should not throw permission denied if client is root', async () => {
@@ -397,7 +399,8 @@ describe('Permissions', () => {
 				sessionId: '',
 				user: {
 					id: '',
-				},
+				} as any,
+				databaseController,
 				isRoot: true,
 			}
 
@@ -410,7 +413,7 @@ describe('Permissions', () => {
 				operationType: OperationType.BeforeRead,
 			})
 
-			expect(_checkCLP(obj, BeforeOperationType.BeforeRead)).resolves
+			expect(_checkCLP(obj, OperationType.BeforeRead)).resolves
 		})
 
 		it('should call _checkPermission on beforeRead', async () => {

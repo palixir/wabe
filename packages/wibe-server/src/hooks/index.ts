@@ -4,7 +4,7 @@ import {
 	defaultBeforeCreateUpload,
 	defaultBeforeUpdateUpload,
 } from '../files/hookUploadFile'
-import type { Context } from '../graphql/interface'
+import type { Context } from '../server/interface'
 import { WibeApp } from '../server'
 import { HookObject } from './HookObject'
 import {
@@ -103,9 +103,12 @@ export const initializeHook = async <T extends keyof WibeSchemaTypes>({
 }) => {
 	if (skipHooks) return { run: async () => ({}) }
 
-	const objects = await WibeApp.databaseController.getObjects({
+	const objects = await context.databaseController.getObjects({
 		className,
-		context: { isRoot: true },
+		context: {
+			isRoot: true,
+			databaseController: context.databaseController,
+		},
 		fields: [],
 		where: where ? where : { id: { equalTo: id } },
 		skipHooks: true,

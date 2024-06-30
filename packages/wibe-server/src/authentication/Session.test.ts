@@ -1,8 +1,7 @@
-import { describe, expect, it, beforeAll, mock, beforeEach } from 'bun:test'
+import { describe, expect, it, mock, beforeEach } from 'bun:test'
 import { fail } from 'node:assert'
 import jwt, { type JwtPayload } from 'jsonwebtoken'
 import { Session } from './Session'
-import { WibeApp } from '../server'
 
 describe('_Session', () => {
 	const mockGetObject = mock(() => Promise.resolve({}) as any)
@@ -13,15 +12,13 @@ describe('_Session', () => {
 	const mockDeleteObject = mock(() => Promise.resolve()) as any
 	const mockUpdateObject = mock(() => Promise.resolve()) as any
 
-	beforeAll(() => {
-		WibeApp.databaseController = {
-			getObject: mockGetObject,
-			getObjects: mockGetObjects,
-			createObject: mockCreateObject,
-			deleteObject: mockDeleteObject,
-			updateObject: mockUpdateObject,
-		} as any
-	})
+	const databaseController = {
+		getObject: mockGetObject,
+		getObjects: mockGetObjects,
+		createObject: mockCreateObject,
+		deleteObject: mockDeleteObject,
+		updateObject: mockUpdateObject,
+	}
 
 	beforeEach(() => {
 		mockGetObject.mockClear()
@@ -38,7 +35,8 @@ describe('_Session', () => {
 
 		const res = await session.meFromAccessToken('accessToken', {
 			isRoot: true,
-		})
+			databaseController,
+		} as any)
 
 		expect(res.user).toBeNull()
 		expect(res.sessionId).toBeNull()
@@ -59,7 +57,7 @@ describe('_Session', () => {
 				'refreshToken',
 				'refreshTokenExpiresAt',
 			],
-			context: { isRoot: true },
+			context: { isRoot: true, databaseController },
 		})
 	})
 
@@ -82,7 +80,7 @@ describe('_Session', () => {
 
 		const { sessionId, user } = await session.meFromAccessToken(
 			'accessToken',
-			{ isRoot: true } as any,
+			{ isRoot: true, databaseController } as any,
 		)
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
@@ -115,10 +113,9 @@ describe('_Session', () => {
 		const fifteenMinutes = new Date(Date.now() + 1000 * 60 * 15)
 		const thirtyDays = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
 
-		const { accessToken, refreshToken } = await session.create(
-			'userId',
-			{} as any,
-		)
+		const { accessToken, refreshToken } = await session.create('userId', {
+			databaseController,
+		} as any)
 
 		expect(accessToken).not.toBeUndefined()
 		expect(refreshToken).not.toBeUndefined()
@@ -159,12 +156,15 @@ describe('_Session', () => {
 	it('should delete a session', async () => {
 		const session = new Session()
 
-		await session.delete({ sessionId: 'sessionId' } as any)
+		await session.delete({
+			sessionId: 'sessionId',
+			databaseController,
+		} as any)
 
 		expect(mockDeleteObject).toHaveBeenCalledTimes(1)
 		expect(mockDeleteObject).toHaveBeenCalledWith({
 			className: '_Session',
-			context: { sessionId: 'sessionId' },
+			context: { sessionId: 'sessionId', databaseController },
 			id: 'sessionId',
 		})
 	})
@@ -189,7 +189,7 @@ describe('_Session', () => {
 		const { accessToken, refreshToken } = await session.refresh(
 			'accessToken',
 			'refreshToken',
-			{} as any,
+			{ databaseController } as any,
 		)
 
 		expect(accessToken).not.toBeUndefined()
@@ -208,7 +208,7 @@ describe('_Session', () => {
 		expect(mockUpdateObject).toHaveBeenCalledTimes(1)
 		expect(mockUpdateObject).toHaveBeenCalledWith({
 			className: '_Session',
-			context: {},
+			context: { databaseController },
 			id: 'sessionId',
 			data: {
 				accessToken: expect.any(String),
@@ -255,7 +255,7 @@ describe('_Session', () => {
 		const { accessToken, refreshToken } = await session.refresh(
 			'accessToken',
 			'refreshToken',
-			{} as any,
+			{ databaseController } as any,
 		)
 
 		expect(accessToken).toBe('accessToken')
@@ -280,7 +280,9 @@ describe('_Session', () => {
 		const session = new Session()
 
 		expect(
-			session.refresh('accessToken', 'refreshToken', {} as any),
+			session.refresh('accessToken', 'refreshToken', {
+				databaseController,
+			} as any),
 		).rejects.toThrow('_Session not found')
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
@@ -310,7 +312,9 @@ describe('_Session', () => {
 		const session = new Session()
 
 		expect(
-			session.refresh('accessToken', 'refreshToken', {} as any),
+			session.refresh('accessToken', 'refreshToken', {
+				databaseController,
+			} as any),
 		).rejects.toThrow('Refresh token expired')
 	})
 
@@ -332,7 +336,9 @@ describe('_Session', () => {
 		const session = new Session()
 
 		expect(
-			session.refresh('accessToken', 'wrongRefreshToken', {} as any),
+			session.refresh('accessToken', 'wrongRefreshToken', {
+				databaseController,
+			} as any),
 		).rejects.toThrow('Invalid refresh token')
 	})
 })

@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken'
 import { WibeApp } from '../server'
-import type { Context } from '../graphql/interface'
+import type { Context } from '../server/interface'
 import type { _Session, User } from '../generated/wibe'
 
 export class Session {
@@ -29,7 +29,7 @@ export class Session {
 		accessToken: string,
 		context: Context,
 	): Promise<{ sessionId: string; user: User | null }> {
-		const sessions = await WibeApp.databaseController.getObjects({
+		const sessions = await context.databaseController.getObjects({
 			className: '_Session',
 			where: {
 				accessToken: { equalTo: accessToken },
@@ -77,7 +77,7 @@ export class Session {
 			import.meta.env.JWT_SECRET || 'dev',
 		)
 
-		const { id } = await WibeApp.databaseController.createObject({
+		const { id } = await context.databaseController.createObject({
 			className: '_Session',
 			context,
 			data: {
@@ -103,7 +103,7 @@ export class Session {
 	async delete(context: Context) {
 		if (!context.sessionId) return
 
-		await WibeApp.databaseController.deleteObject({
+		await context.databaseController.deleteObject({
 			className: '_Session',
 			context,
 			id: context.sessionId,
@@ -111,7 +111,7 @@ export class Session {
 	}
 
 	async refresh(accessToken: string, refreshToken: string, context: Context) {
-		const session = await WibeApp.databaseController.getObjects({
+		const session = await context.databaseController.getObjects({
 			className: '_Session',
 			where: {
 				accessToken: { equalTo: accessToken },
@@ -165,7 +165,7 @@ export class Session {
 			import.meta.env.JWT_SECRET || 'dev',
 		)
 
-		await WibeApp.databaseController.updateObject({
+		await context.databaseController.updateObject({
 			className: '_Session',
 			context,
 			id,

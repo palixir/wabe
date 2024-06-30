@@ -1,5 +1,5 @@
 import type { SignUpWithInput } from '../../generated/wibe'
-import type { Context } from '../../graphql/interface'
+import type { Context } from '../../server/interface'
 import { WibeApp } from '../../server'
 import { Session } from '../Session'
 import type { ProviderInterface } from '../interface'
@@ -28,10 +28,13 @@ export const signUpWithResolver = async (
 
 	const { authenticationDataToSave } = await provider.onSignUp({
 		input: inputOfTheGoodAuthenticationMethod,
-		context: { isRoot: true } as Context,
+		context: {
+			...context,
+			isRoot: true,
+		},
 	})
 
-	const { id: userId } = await WibeApp.databaseController.createObject({
+	const { id: userId } = await context.databaseController.createObject({
 		className: 'User',
 		data: {
 			authentication: {
@@ -40,14 +43,18 @@ export const signUpWithResolver = async (
 				},
 			},
 		},
-		context: { isRoot: true } as Context,
+		context: {
+			...context,
+			isRoot: true,
+		},
 	})
 
 	const session = new Session()
 
 	const { accessToken, refreshToken } = await session.create(userId, {
+		...context,
 		isRoot: true,
-	} as Context)
+	})
 
 	if (WibeApp.config.authentication?.session?.cookieSession) {
 		context.response?.setCookie('refreshToken', refreshToken, {

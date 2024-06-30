@@ -5,11 +5,11 @@ import { initializeRoles } from './roles'
 describe('Roles', () => {
 	const mockCreateObjects = mock(() => {})
 
-	beforeAll(() => {
-		WibeApp.databaseController = {
-			createObjects: mockCreateObjects,
-		} as any
+	const databaseController = {
+		createObjects: mockCreateObjects,
+	} as any
 
+	beforeAll(() => {
 		WibeApp.config = {
 			authentication: {
 				roles: ['Role1', 'Role2'],
@@ -22,12 +22,12 @@ describe('Roles', () => {
 	})
 
 	it('should create all roles', async () => {
-		await initializeRoles()
+		await initializeRoles(databaseController)
 
 		expect(mockCreateObjects).toHaveBeenCalledTimes(1)
 		expect(mockCreateObjects).toHaveBeenCalledWith({
 			className: 'Role',
-			context: { isRoot: true },
+			context: { isRoot: true, databaseController },
 			data: [{ name: 'Role1' }, { name: 'Role2' }],
 		})
 	})
@@ -39,7 +39,7 @@ describe('Roles', () => {
 			},
 		} as any
 
-		await initializeRoles()
+		await initializeRoles(databaseController)
 
 		expect(mockCreateObjects).toHaveBeenCalledTimes(0)
 	})

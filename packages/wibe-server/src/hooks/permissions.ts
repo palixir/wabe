@@ -120,13 +120,16 @@ export const _checkCLP = async (
 			`Permission denied to ${permissionOperation} class ${object.className}`,
 		)
 
-	const res = await WibeApp.databaseController.getObject({
+	const res = await object.context.databaseController.getObject({
 		className: '_Session',
 		id: sessionId,
 		// @ts-expect-error
 		fields: ['id', 'user.id'],
 		// We need to set isRoot to true to avoid infinite loop
-		context: { isRoot: true },
+		context: {
+			isRoot: true,
+			databaseController: object.context.databaseController,
+		},
 	})
 
 	if (!res)

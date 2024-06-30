@@ -13,7 +13,7 @@ import { Wobe } from 'wobe'
 import { WobeGraphqlYogaPlugin } from 'wobe-graphql-yoga'
 import { Session } from '../authentication/Session'
 import { getCookieInRequestHeaders } from '../utils'
-import type { Context } from '../graphql/interface'
+import type { Context } from './interface'
 import { initializeRoles } from '../authentication/roles'
 import type { FileConfig } from '../files'
 import { fileDevAdapter } from '../files/devAdapter'
@@ -36,7 +36,7 @@ export class WibeApp {
 	private server: Wobe
 
 	static config: WibeConfig
-	static databaseController: DatabaseController
+	public databaseController: DatabaseController
 
 	constructor({
 		port,
@@ -75,7 +75,7 @@ export class WibeApp {
 			databaseUrl: database.url,
 		})
 
-		WibeApp.databaseController = new DatabaseController(databaseAdapter)
+		this.databaseController = new DatabaseController(databaseAdapter)
 
 		this.loadDefaultRoutes()
 		this.loadHooks()
@@ -131,7 +131,7 @@ export class WibeApp {
 				'Root key need to be greater or equal than 64 characters',
 			)
 
-		await WibeApp.databaseController.connect()
+		await this.databaseController.connect()
 
 		const wibeSchema = new Schema(WibeApp.config.schema)
 
@@ -163,7 +163,10 @@ export class WibeApp {
 					const headers = request.headers
 
 					if (headers.get('Wibe-Root-Key') === WibeApp.config.rootKey)
-						return { isRoot: true }
+						return {
+							isRoot: true,
+							databaseController: this.databaseController,
+						}
 
 					const getAccessToken = () => {
 						const isCookieSession =
@@ -184,19 +187,24 @@ export class WibeApp {
 					if (!accessToken)
 						return {
 							isRoot: false,
+							databaseController: this.databaseController,
 						}
 
 					const session = new Session()
 
 					const { user, sessionId } = await session.meFromAccessToken(
 						accessToken,
-						{ isRoot: true } as Context,
+						{
+							isRoot: true,
+							databaseController: this.databaseController,
+						},
 					)
 
 					return {
 						isRoot: false,
 						sessionId,
 						user,
+						databaseController: this.databaseController,
 					}
 				},
 				graphqlMiddleware: async (resolve, res) => {
@@ -277,7 +285,7 @@ export class WibeApp {
 			}
 		}
 
-		await initializeRoles()
+		await initializeRoles(this.databaseController)
 
 		this.server.listen(WibeApp.config.port, ({ port }) => {
 			if (!process.env.TEST)
@@ -286,7 +294,7 @@ export class WibeApp {
 	}
 
 	async close() {
-		await WibeApp.databaseController.close()
+		await this.databaseController.close()
 		this.server.stop()
 	}
 }

@@ -35,7 +35,7 @@
 // 			idToken,
 // 		)
 
-// 		const user = await WibeApp.databaseController.getObjects({
+// 		const user = await context.databaseController.getObjects({
 // 			className: 'User',
 // 			where: {
 // 				authentication: {
@@ -57,7 +57,7 @@
 // 		}
 
 // 		if (user.length === 0) {
-// 			const user = await WibeApp.databaseController.createObject({
+// 			const user = await context.databaseController.createObject({
 // 				className: 'User',
 // 				data: {
 // 					authentication: {
