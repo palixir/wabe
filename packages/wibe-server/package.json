@@ -5,7 +5,8 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "bun build --outdir dist $(pwd)/src/index.ts --target=bun && bun generate:types",
-    "generate:types": "tsc --project .",
+    "generate:types": "tsc --project $(pwd)/tsconfig.build.json",
+    "check":"tsc --project $(pwd)/tsconfig.json",
     "lint": "biome lint . --no-errors-on-unmatched --config-path=../../",
     "ci": "bun lint $(pwd) && bun run test:bun src && bun test:node src",
     "format": "biome format --write .",

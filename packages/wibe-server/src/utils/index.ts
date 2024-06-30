@@ -1,13 +1,12 @@
 import { getSdk } from '../../generated/wibe'
 import type { ClassInterface } from '../schema'
-import { WibeApp } from '../server'
+import type { WibeAppTypes, WibeConfig } from '../server'
 import { getGraphqlClient } from './helper'
 
-export const getClient = () => {
-	if (!WibeApp.config.port)
-		throw new Error('WibeApp.config.port is not defined')
+export const getClient = (config: WibeConfig<WibeAppTypes>) => {
+	if (!config.port) throw new Error('config.port is not defined')
 
-	const client = getGraphqlClient(WibeApp.config.port)
+	const client = getGraphqlClient(config.port)
 
 	return getSdk(client)
 }
@@ -22,8 +21,11 @@ export const firstLetterInLowerCase = (str: string) => {
 	)
 }
 
-export const getClassFromClassName = (className: string): ClassInterface => {
-	const classInSchema = WibeApp.config.schema.classes.find(
+export const getClassFromClassName = <T extends WibeAppTypes>(
+	className: string,
+	config: WibeConfig<any>,
+): ClassInterface<T> => {
+	const classInSchema = config.schema.classes.find(
 		(schemaClass) => schemaClass.name === className,
 	)
 

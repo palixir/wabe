@@ -87,25 +87,23 @@ describe('Default fields', () => {
 	})
 
 	describe('Default value', () => {
-		beforeAll(() => {
-			WibeApp.config = {
-				schema: {
-					classes: [
-						{
-							name: 'User',
-							fields: {
-								name: { type: 'String' },
-								age: { type: 'Int' },
-								isAdmin: {
-									type: 'Boolean',
-									defaultValue: false,
-								},
+		const config = {
+			schema: {
+				classes: [
+					{
+						name: 'User',
+						fields: {
+							name: { type: 'String' },
+							age: { type: 'Int' },
+							isAdmin: {
+								type: 'Boolean',
+								defaultValue: false,
 							},
 						},
-					],
-				},
-			} as any
-		})
+					},
+				],
+			},
+		} as any
 
 		it('should add the value if a default value is defined in schema but not specified', async () => {
 			const hookObject = new HookObject<'User'>({
@@ -115,7 +113,7 @@ describe('Default fields', () => {
 					id: 'id',
 					email: 'email@test.fr',
 				} as any,
-				context: {} as any,
+				context: { config } as any,
 				object: {} as any,
 			})
 
@@ -138,7 +136,7 @@ describe('Default fields', () => {
 					email: 'email@test.fr',
 					isAdmin: true,
 				} as any,
-				context: {} as any,
+				context: { config } as any,
 				object: {} as any,
 			})
 

@@ -1,13 +1,8 @@
-import type {
-	WibeSchemaScalars,
-	WibeSchemaEnums,
-	WibeSchemaTypes,
-} from '../../generated/wibe'
 import { signInWithResolver, signUpWithResolver } from '../authentication'
 import { refreshResolver } from '../authentication/resolvers/refreshResolver'
 import { signOutResolver } from '../authentication/resolvers/signOutResolver'
 import { verifyChallengeResolver } from '../authentication/resolvers/verifyChallenge'
-import { WibeApp } from '../server'
+import type { WibeConfig, WibeAppTypes } from '../server'
 
 export type WibePrimaryTypes =
 	| 'String'
@@ -22,34 +17,23 @@ export type WibeCustomTypes = 'Array' | 'Object'
 
 export type WibeRelationTypes = 'Pointer' | 'Relation'
 
-export type WibeTypes =
-	| WibeSchemaScalars
-	| WibeSchemaEnums
-	| WibeCustomTypes
-	| WibePrimaryTypes
-	| WibeRelationTypes
+export type WibeTypes = WibeCustomTypes | WibePrimaryTypes | WibeRelationTypes
 
-export type WibeGraphQLType =
-	| WibePrimaryTypes
-	| WibeCustomTypes
-	| WibeSchemaEnums
-	| WibeSchemaScalars
-
-type Object = {
+type Object<T extends WibeAppTypes> = {
 	name: string
-	fields: SchemaFields
+	fields: SchemaFields<T>
 	description?: string
 	required?: boolean
 }
 
-type TypeFieldBase<T, K extends WibeTypes> = {
-	type: K | WibeSchemaScalars | WibeSchemaEnums
+type TypeFieldBase<U, K extends WibeTypes> = {
+	type: K
 	required?: boolean
 	description?: string
-	defaultValue?: T
+	defaultValue?: U
 }
 
-type TypeFieldArray = {
+type TypeFieldArray<T extends WibeAppTypes> = {
 	type: 'Array'
 	required?: boolean
 	requiredValue?: boolean
@@ -61,29 +45,29 @@ type TypeFieldArray = {
 			// support array of array
 			typeValue: WibePrimaryTypes
 	  }
-	| { typeValue: 'Object'; object: Object }
+	| { typeValue: 'Object'; object: Object<T> }
 )
 
-type TypeFieldObject = {
+type TypeFieldObject<T extends WibeAppTypes> = {
 	type: 'Object'
 	required?: boolean
 	description?: string
-	object: Object
+	object: Object<T>
 	defaultValue?: any
 }
 
-type TypeFieldPointer = {
+type TypeFieldPointer<T extends WibeAppTypes> = {
 	type: 'Pointer'
 	required?: boolean
 	description?: string
-	class: keyof WibeSchemaTypes
+	class: keyof T['types']
 }
 
-type TypeFieldRelation = {
+type TypeFieldRelation<T extends WibeAppTypes> = {
 	type: 'Relation'
 	required?: boolean
 	description?: string
-	class: keyof WibeSchemaTypes
+	class: keyof T['types']
 }
 
 type TypeFieldFile = {
@@ -92,55 +76,71 @@ type TypeFieldFile = {
 	description?: string
 }
 
-export type TypeField =
+type TypeFieldCustomScalars<T extends WibeAppTypes> = {
+	type: T['scalars']
+	required?: boolean
+	description?: string
+	defaultValue?: any
+}
+
+type TypeFieldCustomEnums<T extends WibeAppTypes> = {
+	type: T['enums']
+	required?: boolean
+	description?: string
+	defaultValue?: any
+}
+
+export type TypeField<T extends WibeAppTypes> =
 	| TypeFieldBase<string, 'String'>
 	| TypeFieldBase<number, 'Int'>
 	| TypeFieldBase<number, 'Float'>
 	| TypeFieldBase<boolean, 'Boolean'>
 	| TypeFieldBase<Date, 'Date'>
 	| TypeFieldBase<string, 'Email'>
-	| TypeFieldArray
-	| TypeFieldObject
-	| TypeFieldPointer
-	| TypeFieldRelation
+	| TypeFieldArray<T>
+	| TypeFieldObject<T>
+	| TypeFieldPointer<T>
+	| TypeFieldRelation<T>
 	| TypeFieldFile
+	| TypeFieldCustomScalars<T>
+	| TypeFieldCustomEnums<T>
 
-export type SchemaFields = Record<string, TypeField>
+export type SchemaFields<T extends WibeAppTypes> = Record<string, TypeField<T>>
 
-export type QueryResolver = {
+export type QueryResolver<T extends WibeAppTypes> = {
 	required?: boolean
 	description?: string
 	args?: {
-		[key: string]: TypeField
+		[key: string]: TypeField<T>
 	}
 	resolve: (...args: any) => any
 } & (
 	| { type: WibePrimaryTypes }
-	| { type: 'Object'; outputObject: ClassInterface }
+	| { type: 'Object'; outputObject: ClassInterface<T> }
 	| { type: 'Array'; typeValue: WibePrimaryTypes }
 )
 
-export type MutationResolver = {
+export type MutationResolver<T extends WibeAppTypes> = {
 	required?: boolean
 	description?: string
 	args?: {
 		input: {
-			[key: string]: TypeField
+			[key: string]: TypeField<T>
 		}
 	}
 	resolve: (...args: any) => any
 } & (
 	| { type: WibePrimaryTypes }
-	| { type: 'Object'; outputObject: ClassInterface }
+	| { type: 'Object'; outputObject: ClassInterface<T> }
 	| { type: 'Array'; typeValue: WibePrimaryTypes }
 )
 
-export type TypeResolver = {
+export type TypeResolver<T extends WibeAppTypes> = {
 	queries?: {
-		[key: string]: QueryResolver
+		[key: string]: QueryResolver<T>
 	}
 	mutations?: {
-		[key: string]: MutationResolver
+		[key: string]: MutationResolver<T>
 	}
 }
 
@@ -159,11 +159,11 @@ export type Permissions = Partial<
 	Record<PermissionsOperations, PermissionProperties>
 >
 
-export interface ClassInterface {
+export interface ClassInterface<T extends WibeAppTypes> {
 	name: string
-	fields: SchemaFields
+	fields: SchemaFields<T>
 	description?: string
-	resolvers?: TypeResolver
+	resolvers?: TypeResolver<T>
 	permissions?: Permissions
 }
 
@@ -181,21 +181,23 @@ export interface EnumInterface {
 	description?: string
 }
 
-export interface SchemaInterface {
-	classes: ClassInterface[]
+export interface SchemaInterface<T extends WibeAppTypes> {
+	classes: ClassInterface<T>[]
 	scalars?: ScalarInterface[]
 	enums?: EnumInterface[]
 }
 
-export class Schema {
-	public schema: SchemaInterface
+export class Schema<T extends WibeAppTypes> {
+	public schema: SchemaInterface<T>
+	private config: WibeConfig<T>
 
-	constructor(schema: SchemaInterface) {
+	constructor(config: WibeConfig<T>) {
+		this.config = config
 		// TODO : Add default scalars here
 		this.schema = {
-			...schema,
-			classes: this.defaultClass(schema),
-			enums: [...(schema.enums || []), ...this.defaultEnum()],
+			...config.schema,
+			classes: this.defaultClass(config.schema),
+			enums: [...(config.schema.enums || []), ...this.defaultEnum()],
 		}
 	}
 
@@ -216,7 +218,7 @@ export class Schema {
 		]
 	}
 
-	sessionClass(): ClassInterface {
+	sessionClass(): ClassInterface<T> {
 		return {
 			name: '_Session',
 			fields: {
@@ -244,7 +246,7 @@ export class Schema {
 		}
 	}
 
-	roleClass(): ClassInterface {
+	roleClass(): ClassInterface<T> {
 		return {
 			name: 'Role',
 			fields: {
@@ -260,9 +262,9 @@ export class Schema {
 		}
 	}
 
-	userClass(): ClassInterface {
+	userClass(): ClassInterface<T> {
 		const customAuthenticationConfig =
-			WibeApp.config?.authentication?.customAuthenticationMethods || []
+			this.config.authentication?.customAuthenticationMethods || []
 
 		const allAuthenticationMethods = customAuthenticationConfig.reduce(
 			(acc, authenticationMethod) => {
@@ -278,27 +280,30 @@ export class Schema {
 
 				return acc
 			},
-			{} as SchemaFields,
+			{} as SchemaFields<T>,
 		)
 
 		const allSecondaryFactorAuthenticationMethods =
-			customAuthenticationConfig.reduce((acc, authenticationMethod) => {
-				if (!authenticationMethod.isSecondaryFactor) return acc
+			customAuthenticationConfig.reduce(
+				(acc, authenticationMethod) => {
+					if (!authenticationMethod.isSecondaryFactor) return acc
 
-				acc[authenticationMethod.name] = {
-					type: 'Object',
-					object: {
-						name: authenticationMethod.name,
-						fields: {
-							...authenticationMethod.input,
+					acc[authenticationMethod.name] = {
+						type: 'Object',
+						object: {
+							name: authenticationMethod.name,
+							fields: {
+								...authenticationMethod.input,
+							},
 						},
-					},
-				}
+					}
 
-				return acc
-			}, {} as SchemaFields)
+					return acc
+				},
+				{} as SchemaFields<T>,
+			)
 
-		const authenticationObject: TypeFieldObject = {
+		const authenticationObject: TypeFieldObject<T> = {
 			type: 'Object',
 			object: {
 				name: 'Authentication',
@@ -308,7 +313,7 @@ export class Schema {
 			},
 		}
 
-		const fields: SchemaFields = {
+		const fields: SchemaFields<T> = {
 			...(customAuthenticationConfig.length > 0
 				? { authentication: authenticationObject }
 				: {}),
@@ -327,7 +332,7 @@ export class Schema {
 			},
 		}
 
-		const authenticationInput: TypeFieldObject = {
+		const authenticationInput: TypeFieldObject<T> = {
 			type: 'Object',
 			object: {
 				name: 'Authentication',
@@ -343,7 +348,7 @@ export class Schema {
 			},
 		}
 
-		const challengeInputObject: TypeFieldObject = {
+		const challengeInputObject: TypeFieldObject<T> = {
 			type: 'Object',
 			object: {
 				name: 'Factor',
@@ -353,7 +358,7 @@ export class Schema {
 			},
 		}
 
-		const resolvers: TypeResolver = {
+		const resolvers: TypeResolver<T> = {
 			mutations: {
 				...(customAuthenticationConfig.length > 0
 					? {
@@ -478,7 +483,7 @@ export class Schema {
 		}
 	}
 
-	defaultFields(): SchemaFields {
+	defaultFields(): SchemaFields<T> {
 		return {
 			acl: {
 				type: 'Object',
@@ -541,7 +546,7 @@ export class Schema {
 		}
 	}
 
-	mergeClass(newClass: ClassInterface[]): ClassInterface[] {
+	mergeClass(newClass: ClassInterface<T>[]): ClassInterface<T>[] {
 		const allUniqueClassName = [
 			...new Set(newClass.map((classItem) => classItem.name)),
 		]
@@ -551,49 +556,52 @@ export class Schema {
 				(localClass) => localClass.name === uniqueClass,
 			)
 
-			return allClassWithSameName.reduce((acc, classItem) => {
-				const resolvers: TypeResolver = {
-					mutations: {
-						...acc.resolvers?.mutations,
-						...classItem.resolvers?.mutations,
-					},
-					queries: {
-						...acc.resolvers?.queries,
-						...classItem.resolvers?.queries,
-					},
-				}
+			return allClassWithSameName.reduce(
+				(acc, classItem) => {
+					const resolvers: TypeResolver<T> = {
+						mutations: {
+							...acc.resolvers?.mutations,
+							...classItem.resolvers?.mutations,
+						},
+						queries: {
+							...acc.resolvers?.queries,
+							...classItem.resolvers?.queries,
+						},
+					}
 
-				const isMutationsEmpty =
-					Object.keys(resolvers.mutations || {}).length > 0
-				const isQueriesEmpty =
-					Object.keys(resolvers.queries || {}).length > 0
+					const isMutationsEmpty =
+						Object.keys(resolvers.mutations || {}).length > 0
+					const isQueriesEmpty =
+						Object.keys(resolvers.queries || {}).length > 0
 
-				return {
-					...acc,
-					...classItem,
-					fields: {
-						// We merge fields that have the same name and then we add the new fields
-						...acc.fields,
-						...classItem.fields,
-						...this.defaultFields(),
-					},
-					resolvers:
-						isQueriesEmpty || isMutationsEmpty
-							? {
-									mutations: isMutationsEmpty
-										? resolvers.mutations
-										: undefined,
-									queries: isQueriesEmpty
-										? resolvers.queries
-										: undefined,
-								}
-							: undefined,
-				}
-			}, allClassWithSameName[0] as ClassInterface)
+					return {
+						...acc,
+						...classItem,
+						fields: {
+							// We merge fields that have the same name and then we add the new fields
+							...acc.fields,
+							...classItem.fields,
+							...this.defaultFields(),
+						},
+						resolvers:
+							isQueriesEmpty || isMutationsEmpty
+								? {
+										mutations: isMutationsEmpty
+											? resolvers.mutations
+											: undefined,
+										queries: isQueriesEmpty
+											? resolvers.queries
+											: undefined,
+									}
+								: undefined,
+					}
+				},
+				allClassWithSameName[0] as ClassInterface<T>,
+			)
 		})
 	}
 
-	defaultClass(schema: SchemaInterface): ClassInterface[] {
+	defaultClass(schema: SchemaInterface<T>): ClassInterface<T>[] {
 		return this.mergeClass([
 			...schema.classes,
 			this.userClass(),

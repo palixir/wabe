@@ -1,30 +1,17 @@
-import {
-	describe,
-	expect,
-	it,
-	beforeAll,
-	mock,
-	beforeEach,
-	spyOn,
-} from 'bun:test'
+import { describe, expect, it, beforeEach, mock, spyOn } from 'bun:test'
 import { verifyChallengeResolver } from './verifyChallenge'
-import type { Context } from '../../graphql/interface'
-import { WibeApp } from '../../server'
+import type { Context } from '../../server/interface'
 import { Session } from '../Session'
-
-const context: Context = {
-	sessionId: 'sessionId',
-	user: {
-		id: 'userId',
-	},
-}
 
 describe('verifyChallenge', () => {
 	const mockOnVerifyChallenge = mock(() => Promise.resolve(true))
 
-	beforeAll(() => {
-		// @ts-expect-error
-		WibeApp.config = {
+	const context: Context = {
+		sessionId: 'sessionId',
+		user: {
+			id: 'userId',
+		} as any,
+		config: {
 			authentication: {
 				customAuthenticationMethods: [
 					{
@@ -42,8 +29,8 @@ describe('verifyChallenge', () => {
 					},
 				],
 			},
-		}
-	})
+		},
+	} as any
 
 	beforeEach(() => {
 		mockOnVerifyChallenge.mockClear()

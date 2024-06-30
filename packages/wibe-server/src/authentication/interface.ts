@@ -1,6 +1,7 @@
 import type { User } from '../../generated/wibe'
 import type { Context } from '../server/interface'
 import type { TypeField } from '../schema'
+import type { WibeAppTypes } from '../server'
 
 export enum ProviderEnum {
 	google = 'google',
@@ -14,7 +15,7 @@ export interface ProviderConfig {
 
 export type AuthenticationEventsOptions<T> = {
 	input: T
-	context: Context
+	context: Context<any>
 }
 
 export type ProviderInterface<T = any> = {
@@ -32,12 +33,13 @@ export type SecondaryProviderInterface<T = any> = {
 }
 
 export type CustomAuthenticationMethods<
-	K = ProviderInterface | SecondaryProviderInterface,
-	T = Record<string, TypeField>,
+	T extends WibeAppTypes,
+	U = ProviderInterface | SecondaryProviderInterface,
+	K = Record<string, TypeField<T>>,
 > = {
 	name: string
-	input: T
-	provider: K
+	input: K
+	provider: U
 	isSecondaryFactor?: boolean
 }
 
@@ -58,13 +60,13 @@ export interface SessionConfig {
 	cookieSession?: boolean
 }
 
-export interface AuthenticationConfig {
+export interface AuthenticationConfig<T extends WibeAppTypes> {
 	session?: SessionConfig
 	roles?: RoleConfig
 	successRedirectPath?: string
 	failureRedirectPath?: string
 	providers?: Partial<Record<ProviderEnum, ProviderConfig>>
-	customAuthenticationMethods?: CustomAuthenticationMethods[]
+	customAuthenticationMethods?: CustomAuthenticationMethods<T>[]
 }
 
 // Example of url to request in front end : https://accounts.google.com/o/oauth2/auth?client_id=${client_id}&redirect_uri=${'http://localhost:3000/auth/test'}&scope=${'email'}&response_type=code&access_type=offline

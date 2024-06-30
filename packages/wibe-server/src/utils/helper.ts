@@ -1,8 +1,13 @@
-import { v4 as uuid } from 'uuid'
-import { GraphQLClient } from 'graphql-request'
-import { WibeApp, type WibeAppTypes } from '../server'
-import { DatabaseEnum } from '../database'
 import getPort from 'get-port'
+import { GraphQLClient } from 'graphql-request'
+import { v4 as uuid } from 'uuid'
+import type {
+	WibeSchemaEnums,
+	WibeSchemaScalars,
+	WibeSchemaTypes,
+} from '../../generated/wibe'
+import { DatabaseEnum } from '../database'
+import { WibeApp } from '../server'
 
 type NotNill<T> = T extends null | undefined ? never : T
 
@@ -17,6 +22,12 @@ export type DeepRequired<T> = T extends Primitive
 					? DeepRequired<U2>
 					: DeepRequired<T[P]>
 		}
+
+export type DevWibeAppTypes = {
+	types: WibeSchemaTypes
+	scalars: WibeSchemaScalars
+	enums: WibeSchemaEnums
+}
 
 export const notEmpty = <T>(value: T | null | undefined): value is T =>
 	value !== null && value !== undefined
@@ -56,7 +67,7 @@ export const setupTests = async () => {
 
 	const port = await getPort()
 
-	const wibe = new WibeApp({
+	const wibe = new WibeApp<DevWibeAppTypes>({
 		rootKey:
 			'0uwFvUxM$ceFuF1aEtTtZMa7DUN2NZudqgY5ve5W*QCyb58cwMj9JeoaV@d#%29v&aJzswuudVU1%nAT+rxS0Bh&OkgBYc0PH18*',
 		database: {
@@ -153,7 +164,7 @@ export const setupTests = async () => {
 	return { wibe, port }
 }
 
-export const closeTests = async (wibe: WibeApp<WibeAppTypes>) => {
+export const closeTests = async (wibe: WibeApp<DevWibeAppTypes>) => {
 	await wibe.databaseController.adapter?.close()
 	await wibe.close()
 }

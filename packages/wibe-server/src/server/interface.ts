@@ -1,12 +1,13 @@
 import type { WobeResponse } from 'wobe'
+import type { WibeAppTypes, WibeConfig } from '.'
 import type { User } from '../../generated/wibe'
 import type { DatabaseController } from '../database'
-import type { WibeAppTypes } from '.'
 
-export interface Context {
+export interface Context<T extends WibeAppTypes> {
 	response?: WobeResponse
 	user?: User | null
 	sessionId?: string
 	isRoot: boolean
-	databaseController: DatabaseController<WibeAppTypes>
+	databaseController: DatabaseController<T>
+	config: WibeConfig<T>
 }

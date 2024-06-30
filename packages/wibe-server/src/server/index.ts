@@ -18,9 +18,9 @@ import { initializeRoles } from '../authentication/roles'
 import type { FileConfig } from '../files'
 import { fileDevAdapter } from '../files/devAdapter'
 
-interface WibeConfig {
+export interface WibeConfig<T extends WibeAppTypes> {
 	port: number
-	schema: SchemaInterface
+	schema: SchemaInterface<T>
 	database: DatabaseConfig
 	codegen?:
 		| {
@@ -28,7 +28,7 @@ interface WibeConfig {
 				path: string
 		  }
 		| { enabled?: false }
-	authentication?: AuthenticationConfig
+	authentication?: AuthenticationConfig<T>
 	routes?: WibeRoute[]
 	rootKey: string
 	hooks?: Hook<any>[]
@@ -42,9 +42,9 @@ export type WibeAppTypes = {
 }
 
 export class WibeApp<T extends WibeAppTypes> {
-	private server: Wobe
+	public server: Wobe
 
-	static config: WibeConfig
+	public config: WibeConfig<T>
 	public databaseController: DatabaseController<T>
 
 	constructor({
@@ -56,8 +56,8 @@ export class WibeApp<T extends WibeAppTypes> {
 		codegen,
 		hooks,
 		file,
-	}: WibeConfig) {
-		WibeApp.config = {
+	}: WibeConfig<T>) {
+		this.config = {
 			port,
 			schema,
 			database,
@@ -92,21 +92,18 @@ export class WibeApp<T extends WibeAppTypes> {
 	}
 
 	loadAuthenticationMethods() {
-		WibeApp.config.authentication = {
-			...WibeApp.config.authentication,
+		this.config.authentication = {
+			...this.config.authentication,
 			customAuthenticationMethods: [
-				...defaultAuthenticationMethods(),
-				...(WibeApp.config.authentication
-					?.customAuthenticationMethods || []),
+				...defaultAuthenticationMethods<T>(),
+				...(this.config.authentication?.customAuthenticationMethods ||
+					[]),
 			],
 		}
 	}
 
 	loadHooks() {
-		WibeApp.config.hooks = [
-			...getDefaultHooks(),
-			...(WibeApp.config.hooks || []),
-		]
+		this.config.hooks = [...getDefaultHooks(), ...(this.config.hooks || [])]
 	}
 
 	loadDefaultRoutes() {
@@ -135,16 +132,16 @@ export class WibeApp<T extends WibeAppTypes> {
 	}
 
 	async start() {
-		if (WibeApp.config.rootKey.length < 64)
+		if (this.config.rootKey.length < 64)
 			throw new Error(
 				'Root key need to be greater or equal than 64 characters',
 			)
 
 		await this.databaseController.connect()
 
-		const wibeSchema = new Schema(WibeApp.config.schema)
+		const wibeSchema = new Schema(this.config)
 
-		WibeApp.config.schema = wibeSchema.schema
+		this.config.schema = wibeSchema.schema
 
 		const graphqlSchema = new WibeGraphQLSchema(wibeSchema)
 
@@ -168,19 +165,19 @@ export class WibeApp<T extends WibeAppTypes> {
 				maskedErrors: false,
 				// TODO: Maybe add cors here + the wobe cors for csrf on upload
 				graphqlEndpoint: '/graphql',
-				context: async ({ request }): Promise<Partial<Context>> => {
+				context: async ({ request }): Promise<Context<T>> => {
 					const headers = request.headers
 
-					if (headers.get('Wibe-Root-Key') === WibeApp.config.rootKey)
+					if (headers.get('Wibe-Root-Key') === this.config.rootKey)
 						return {
 							isRoot: true,
 							databaseController: this.databaseController,
+							config: this.config,
 						}
 
 					const getAccessToken = () => {
 						const isCookieSession =
-							!!WibeApp.config.authentication?.session
-								?.cookieSession
+							!!this.config.authentication?.session?.cookieSession
 
 						if (isCookieSession)
 							return getCookieInRequestHeaders(
@@ -197,6 +194,7 @@ export class WibeApp<T extends WibeAppTypes> {
 						return {
 							isRoot: false,
 							databaseController: this.databaseController,
+							config: this.config,
 						}
 
 					const session = new Session()
@@ -206,6 +204,7 @@ export class WibeApp<T extends WibeAppTypes> {
 						{
 							isRoot: true,
 							databaseController: this.databaseController,
+							config: this.config,
 						},
 					)
 
@@ -214,12 +213,13 @@ export class WibeApp<T extends WibeAppTypes> {
 						sessionId,
 						user,
 						databaseController: this.databaseController,
+						config: this.config,
 					}
 				},
 				graphqlMiddleware: async (resolve, res) => {
 					const response = await resolve()
 
-					if (WibeApp.config.authentication?.session?.cookieSession) {
+					if (this.config.authentication?.session?.cookieSession) {
 						// TODO : Add tests for this
 						const accessToken = getCookieInRequestHeaders(
 							'accessToken',
@@ -249,7 +249,9 @@ export class WibeApp<T extends WibeAppTypes> {
 									path: '/',
 									expires: new Date(
 										Date.now() +
-											session.getAccessTokenExpireIn(),
+											session.getAccessTokenExpireIn(
+												this.config,
+											),
 									),
 									secure:
 										process.env.NODE_ENV === 'production',
@@ -261,7 +263,9 @@ export class WibeApp<T extends WibeAppTypes> {
 									path: '/',
 									expires: new Date(
 										Date.now() +
-											session.getRefreshTokenExpireIn(),
+											session.getRefreshTokenExpireIn(
+												this.config,
+											),
 									),
 									secure:
 										process.env.NODE_ENV === 'production',
@@ -277,25 +281,25 @@ export class WibeApp<T extends WibeAppTypes> {
 		if (
 			process.env.NODE_ENV !== 'production' &&
 			process.env.NODE_ENV !== 'test' &&
-			WibeApp.config.codegen
+			this.config.codegen
 		) {
-			if (WibeApp.config.codegen.enabled && WibeApp.config.codegen.path) {
+			if (this.config.codegen.enabled && this.config.codegen.path) {
 				const fileContent = await Bun.file(
-					`${WibeApp.config.codegen.path}/wibe.ts`,
+					`${this.config.codegen.path}/wibe.ts`,
 				).text()
 
 				generateCodegen({
 					fileContent,
 					graphqlSchema: printSchema(schema),
-					path: WibeApp.config.codegen.path,
+					path: this.config.codegen.path,
 					schema: wibeSchema.schema,
 				})
 			}
 		}
 
-		await initializeRoles(this.databaseController)
+		await initializeRoles(this.databaseController, this.config)
 
-		this.server.listen(WibeApp.config.port, ({ port }) => {
+		this.server.listen(this.config.port, ({ port }) => {
 			if (!process.env.TEST)
 				console.log(`Server is running on port ${port}`)
 		})

@@ -1,10 +1,9 @@
-import { WibeApp } from '..'
 import type { HookObject } from '../hooks/HookObject'
 
 const handleFile = async (hookObject: HookObject<any>) => {
 	const newData = hookObject.getNewData()
 
-	const schema = WibeApp.config.schema.classes.find(
+	const schema = hookObject.context.config.schema.classes.find(
 		(currentClass) => currentClass.name === hookObject.className,
 	)
 
@@ -14,10 +13,12 @@ const handleFile = async (hookObject: HookObject<any>) => {
 		Object.keys(newData).map(async (keyName) => {
 			if (schema.fields[keyName].type !== 'File') return
 
-			if (WibeApp.config.file?.adapter !== undefined)
+			if (hookObject.context.config.file?.adapter !== undefined)
 				hookObject.upsertNewData(
 					keyName,
-					await WibeApp.config.file.adapter(newData[keyName]),
+					await hookObject.context.config.file.adapter(
+						newData[keyName],
+					),
 				)
 		}),
 	)

@@ -10,24 +10,30 @@ import {
 import { fail } from 'node:assert'
 import { ObjectId } from 'mongodb'
 import type { WibeApp } from '../..'
-import { closeTests, setupTests } from '../../utils/helper'
+import {
+	type DevWibeAppTypes,
+	closeTests,
+	setupTests,
+} from '../../utils/helper'
 import { type MongoAdapter, buildMongoWhereQuery } from './MongoAdapter'
 import type { Context } from '../../server/interface'
 
 describe('Mongo adapter', () => {
-	let mongoAdapter: MongoAdapter
-	let wibe: WibeApp
+	let mongoAdapter: MongoAdapter<DevWibeAppTypes>
+	let wibe: WibeApp<DevWibeAppTypes>
 	let context: Context
 
 	beforeAll(async () => {
 		const setup = await setupTests()
 		wibe = setup.wibe
 
-		mongoAdapter = wibe.databaseController.adapter as MongoAdapter
+		// @ts-expect-error
+		mongoAdapter = wibe.databaseController.adapter
 
 		context = {
 			isRoot: true,
 			databaseController: wibe.databaseController,
+			config: wibe.config,
 		} as Context
 	})
 

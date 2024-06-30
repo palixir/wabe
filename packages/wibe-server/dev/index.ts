@@ -69,6 +69,10 @@ const run = async () => {
 							type: 'Pointer',
 							class: 'Post',
 						},
+						tata: {
+							type: 'Phone',
+							defaultValue: 0,
+						},
 					},
 					resolvers: {
 						queries: {

@@ -29,10 +29,10 @@ export const createAndLink = async ({
 }: {
 	createAndLink: CreateAndLink
 	fieldName: string
-	context: Context
+	context: Context<any>
 	className: string
 }) => {
-	const classInSchema = getClassFromClassName(className)
+	const classInSchema = getClassFromClassName(className, context.config)
 
 	const { id } = await context.databaseController.createObject({
 		// @ts-expect-error
@@ -53,10 +53,10 @@ export const createAndAdd = async ({
 }: {
 	createAndAdd: CreateAndAdd
 	fieldName: string
-	context: Context
+	context: Context<any>
 	className: string
 }) => {
-	const classInSchema = getClassFromClassName(className)
+	const classInSchema = getClassFromClassName(className, context.config)
 
 	const result = await context.databaseController.createObjects({
 		// @ts-expect-error
@@ -80,7 +80,7 @@ export const add = async ({
 }: {
 	add: Add
 	fieldName: string
-	context: Context
+	context: Context<any>
 	typeOfExecution: TypeOfExecution
 	id?: string
 	className: string
@@ -88,7 +88,7 @@ export const add = async ({
 }) => {
 	if (typeOfExecution === 'create') return add
 
-	const classInSchema = getClassFromClassName(className)
+	const classInSchema = getClassFromClassName(className, context.config)
 
 	const fieldInClass = classInSchema.fields[fieldName]
 
@@ -147,7 +147,7 @@ export const remove = async ({
 }: {
 	remove: Remove
 	fieldName: string
-	context: Context
+	context: Context<any>
 	typeOfExecution: TypeOfExecution
 	id?: string
 	className: string
@@ -156,7 +156,7 @@ export const remove = async ({
 	if (typeOfExecution === 'create') return []
 
 	if (typeOfExecution === 'update' && id) {
-		const classInSchema = getClassFromClassName(className)
+		const classInSchema = getClassFromClassName(className, context.config)
 
 		const fieldInClass = classInSchema.fields[fieldName]
 

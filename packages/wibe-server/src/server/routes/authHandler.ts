@@ -1,5 +1,5 @@
 import type { Context } from 'wobe'
-import { WibeApp } from '..'
+import type { Context as WibeContext } from '../interface'
 import { ProviderEnum } from '../../authentication/interface'
 import { getGraphqlClient } from '../../utils/helper'
 import { gql } from 'graphql-request'
@@ -17,7 +17,10 @@ import { generateRandomValues } from '../../authentication/oauth/utils'
 - Validate and sign in with google provider (back)
 */
 
-export const oauthHandlerCallback = async (context: Context) => {
+export const oauthHandlerCallback = async (
+	context: Context,
+	wibeContext: WibeContext<any>,
+) => {
 	try {
 		const state = context.query.state
 		const code = context.query.code
@@ -29,7 +32,7 @@ export const oauthHandlerCallback = async (context: Context) => {
 		const codeVerifier = context.res.getCookie('code_verifier')
 		const provider = context.res.getCookie('provider')
 
-		await getGraphqlClient(WibeApp.config.port).request<any>(
+		await getGraphqlClient(wibeContext.config.port).request<any>(
 			gql`
 				mutation signInWith(
 					$authorizationCode: String!
@@ -54,18 +57,22 @@ export const oauthHandlerCallback = async (context: Context) => {
 		)
 
 		context.redirect(
-			WibeApp.config.authentication?.successRedirectPath || '/',
+			wibeContext.config.authentication?.successRedirectPath || '/',
 		)
 	} catch (error) {
 		console.error(error)
 		context.redirect(
-			WibeApp.config.authentication?.failureRedirectPath || '/',
+			wibeContext.config.authentication?.failureRedirectPath || '/',
 		)
 	}
 }
 
-export const authHandler = async (context: Context, provider: ProviderEnum) => {
-	if (!WibeApp.config) throw new Error('Wibe config not found')
+export const authHandler = async (
+	context: Context,
+	wibeContext: WibeContext<any>,
+	provider: ProviderEnum,
+) => {
+	if (!wibeContext.config) throw new Error('Wibe config not found')
 
 	context.res.setCookie('provider', provider, {
 		httpOnly: true,
@@ -76,7 +83,7 @@ export const authHandler = async (context: Context, provider: ProviderEnum) => {
 
 	switch (provider) {
 		case ProviderEnum.google: {
-			const googleOauth = new Google()
+			const googleOauth = new Google(wibeContext.config)
 
 			const state = generateRandomValues()
 			const codeVerifier = generateRandomValues()
@@ -118,13 +125,13 @@ export const authHandler = async (context: Context, provider: ProviderEnum) => {
 
 	// if (!code || !codeVerifier) throw new Error('Authentication failed')
 
-	// const { authentication } = WibeApp.config
+	// const { authentication } = context.config
 
 	// if (!authentication) throw new Error('Authentication config not found')
 
 	// try {
 	// 	// Here we can't use the classic graphql client because provider is dynamic
-	// await getGraphqlClient(WibeApp.config.port).request<any>(gql`
+	// await getGraphqlClient(context.config.port).request<any>(gql`
 	// 	mutation signInWith(
 	// 		$authorizationCode: String!
 	// 		$codeVerifier: String!

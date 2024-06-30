@@ -1,34 +1,36 @@
+import type { WibeAppTypes } from '..'
 import type { CustomAuthenticationMethods } from './interface'
 import { EmailPassword } from './providers/EmailPassword'
 
-export const defaultAuthenticationMethods =
-	(): CustomAuthenticationMethods[] => [
-		{
-			name: 'emailPassword',
-			input: {
-				email: {
-					type: 'Email',
-					required: true,
-				},
-				password: {
-					type: 'String',
-					required: true,
-				},
+export const defaultAuthenticationMethods = <
+	T extends WibeAppTypes,
+>(): CustomAuthenticationMethods<T>[] => [
+	{
+		name: 'emailPassword',
+		input: {
+			email: {
+				type: 'Email',
+				required: true,
 			},
-			provider: new EmailPassword(),
+			password: {
+				type: 'String',
+				required: true,
+			},
 		},
-		// {
-		// 	name: 'google',
-		// 	input: {
-		// 		authorizationCode: {
-		// 			type: 'String',
-		// 			required: true,
-		// 		},
-		// 		codeVerifier: {
-		// 			type: 'String',
-		// 			required: true,
-		// 		},
-		// 	},
-		// 	provider: new Google(),
-		// },
-	]
+		provider: new EmailPassword(),
+	},
+	// {
+	// 	name: 'google',
+	// 	input: {
+	// 		authorizationCode: {
+	// 			type: 'String',
+	// 			required: true,
+	// 		},
+	// 		codeVerifier: {
+	// 			type: 'String',
+	// 			required: true,
+	// 		},
+	// 	},
+	// 	provider: new Google(),
+	// },
+]

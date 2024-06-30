@@ -1,7 +1,6 @@
-import { describe, expect, it, beforeAll, mock, beforeEach } from 'bun:test'
+import { describe, expect, it, mock, beforeEach } from 'bun:test'
 import type { GraphQLResolveInfo } from 'graphql'
 import { executeRelationOnFields, extractFieldsFromSetNode } from './resolvers'
-import { WibeApp } from '../server'
 
 describe('Resolver', () => {
 	const mockUpdateObject = mock(() => {})
@@ -18,8 +17,43 @@ describe('Resolver', () => {
 		createObjects: mockCreateObjects,
 	} as any
 
+	const config = {
+		schema: {
+			classes: [
+				{
+					name: 'TestClass',
+					fields: {
+						name: {
+							type: 'String',
+						},
+						field1: {
+							type: 'String',
+						},
+					},
+				},
+				{
+					name: 'TestClass2',
+					fields: {
+						name: {
+							type: 'String',
+						},
+						age: {
+							type: 'Int',
+						},
+						field2: {
+							type: 'Pointer',
+							// @ts-expect-error
+							class: 'TestClass',
+						},
+					},
+				},
+			],
+		},
+	}
+
 	const context = {
 		databaseController,
+		config,
 	}
 
 	beforeEach(() => {
@@ -28,42 +62,6 @@ describe('Resolver', () => {
 		mockGetObject.mockClear()
 		mockCreateObject.mockClear()
 		mockCreateObjects.mockClear()
-	})
-
-	beforeAll(() => {
-		WibeApp.config = {
-			schema: {
-				classes: [
-					{
-						name: 'TestClass',
-						fields: {
-							name: {
-								type: 'String',
-							},
-							field1: {
-								type: 'String',
-							},
-						},
-					},
-					{
-						name: 'TestClass2',
-						fields: {
-							name: {
-								type: 'String',
-							},
-							age: {
-								type: 'Int',
-							},
-							field2: {
-								type: 'Pointer',
-								// @ts-expect-error
-								class: 'TestClass',
-							},
-						},
-					},
-				],
-			},
-		}
 	})
 
 	describe('getFieldsFromInfo', () => {

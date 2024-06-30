@@ -1,16 +1,16 @@
-import { describe, expect, it, beforeAll } from 'bun:test'
-import { v4 as uuid } from 'uuid'
-import { WibeApp } from '../server'
+import { beforeAll, describe, expect, it } from 'bun:test'
 import getPort from 'get-port'
-import { DatabaseEnum } from '../database'
+import { GraphQLObjectType, GraphQLSchema } from 'graphql'
 import { gql } from 'graphql-request'
-import { getGraphqlClient } from '../utils/helper'
+import { v4 as uuid } from 'uuid'
+import { DatabaseEnum } from '../database'
 import { Schema, type SchemaInterface } from '../schema'
-import { GraphQLSchema, GraphQLObjectType } from 'graphql'
+import { WibeApp } from '../server'
+import { type DevWibeAppTypes, getGraphqlClient } from '../utils/helper'
 import { GraphQLSchema as WibeGraphQLSchema } from './GraphQLSchema'
 import { getTypeFromGraphQLSchema } from './parseGraphqlSchema'
 
-const createWibeApp = async (schema: SchemaInterface) => {
+const createWibeApp = async (schema: SchemaInterface<DevWibeAppTypes>) => {
 	const databaseId = uuid()
 
 	const port = await getPort()
@@ -39,27 +39,29 @@ describe('GraphqlSchema', () => {
 
 	beforeAll(() => {
 		const wibeSchema = new Schema({
-			classes: [
-				{
-					name: 'TestClass2',
-					fields: {
-						field1: {
-							type: 'Object',
-							required: true,
-							object: {
-								name: 'TestObject',
-								fields: {
-									testSubObject: {
-										type: 'Array',
-										typeValue: 'Object',
-										required: true,
-										object: {
-											name: 'FieldsObject',
+			schema: {
+				classes: [
+					{
+						name: 'TestClass2',
+						fields: {
+							field1: {
+								type: 'Object',
+								required: true,
+								object: {
+									name: 'TestObject',
+									fields: {
+										testSubObject: {
+											type: 'Array',
+											typeValue: 'Object',
 											required: true,
-											fields: {
-												name: {
-													type: 'String',
-													required: true,
+											object: {
+												name: 'FieldsObject',
+												required: true,
+												fields: {
+													name: {
+														type: 'String',
+														required: true,
+													},
 												},
 											},
 										},
@@ -68,108 +70,108 @@ describe('GraphqlSchema', () => {
 							},
 						},
 					},
-				},
-				{
-					name: 'TestClass',
-					fields: { field1: { type: 'String' } },
-					resolvers: {
-						mutations: {
-							customMutation: {
-								type: 'Boolean',
-								resolve: () => true,
+					{
+						name: 'TestClass',
+						fields: { field1: { type: 'String' } },
+						resolvers: {
+							mutations: {
+								customMutation: {
+									type: 'Boolean',
+									resolve: () => true,
+								},
+							},
+							queries: {
+								customQuery: {
+									type: 'Boolean',
+									resolve: () => true,
+								},
 							},
 						},
-						queries: {
-							customQuery: {
-								type: 'Boolean',
-								resolve: () => true,
+					},
+					{
+						name: 'SecondClass',
+						fields: {
+							// @ts-expect-error
+							pointer: { type: 'Pointer', class: 'TestClass' },
+						},
+					},
+					{
+						name: 'ThirdClass',
+						fields: {
+							pointer: {
+								type: 'Pointer',
+								// @ts-expect-error
+								class: 'FourthClass',
 							},
 						},
 					},
-				},
-				{
-					name: 'SecondClass',
-					fields: {
-						// @ts-expect-error
-						pointer: { type: 'Pointer', class: 'TestClass' },
-					},
-				},
-				{
-					name: 'ThirdClass',
-					fields: {
-						pointer: {
-							type: 'Pointer',
-							// @ts-expect-error
-							class: 'FourthClass',
+					{
+						name: 'FourthClass',
+						fields: {
+							pointer: {
+								type: 'Pointer',
+								// @ts-expect-error
+								class: 'ThirdClass',
+							},
 						},
 					},
-				},
-				{
-					name: 'FourthClass',
-					fields: {
-						pointer: {
-							type: 'Pointer',
-							// @ts-expect-error
-							class: 'ThirdClass',
+					{
+						name: 'FifthClass',
+						fields: {
+							relation: {
+								type: 'Relation',
+								// @ts-expect-error
+								class: 'SixthClass',
+							},
 						},
 					},
-				},
-				{
-					name: 'FifthClass',
-					fields: {
-						relation: {
-							type: 'Relation',
-							// @ts-expect-error
-							class: 'SixthClass',
+					{
+						name: 'SixthClass',
+						fields: {
+							field6: { type: 'String' },
 						},
 					},
-				},
-				{
-					name: 'SixthClass',
-					fields: {
-						field6: { type: 'String' },
-					},
-				},
-				{
-					name: 'TestClassRequired',
-					fields: {
-						field7: {
-							type: 'String',
-							required: true,
-						},
-						field8: {
-							type: 'Array',
-							required: true,
-							requiredValue: true,
-							typeValue: 'Int',
-						},
-						field9: {
-							type: 'Array',
-							required: true,
-							typeValue: 'Object',
-							object: {
-								name: 'TestObjectArray',
-								fields: {
-									field10: {
-										type: 'Int',
-										required: true,
+					{
+						name: 'TestClassRequired',
+						fields: {
+							field7: {
+								type: 'String',
+								required: true,
+							},
+							field8: {
+								type: 'Array',
+								required: true,
+								requiredValue: true,
+								typeValue: 'Int',
+							},
+							field9: {
+								type: 'Array',
+								required: true,
+								typeValue: 'Object',
+								object: {
+									name: 'TestObjectArray',
+									fields: {
+										field10: {
+											type: 'Int',
+											required: true,
+										},
 									},
 								},
 							},
 						},
 					},
-				},
-				{
-					name: 'TestClassFile',
-					fields: {
-						file: {
-							type: 'File',
-							required: true,
+					{
+						name: 'TestClassFile',
+						fields: {
+							file: {
+								type: 'File',
+								required: true,
+							},
 						},
 					},
-				},
-			],
-		})
+				],
+			},
+		} as any)
 
 		const graphqlSchema = new WibeGraphQLSchema(wibeSchema)
 

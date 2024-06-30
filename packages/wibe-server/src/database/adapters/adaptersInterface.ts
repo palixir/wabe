@@ -39,7 +39,7 @@ export interface GetObjectOptions<
 	className: T
 	id: string
 	fields?: Array<K>
-	context: Context
+	context: Context<any>
 }
 
 export interface GetObjectsOptions<
@@ -51,7 +51,7 @@ export interface GetObjectsOptions<
 	fields?: Array<K>
 	offset?: number
 	limit?: number
-	context: Context
+	context: Context<any>
 	skipHooks?: boolean
 }
 
@@ -63,7 +63,7 @@ export interface CreateObjectOptions<
 	className: T
 	data: Record<W, any>
 	fields?: Array<K>
-	context: Context
+	context: Context<any>
 }
 export interface CreateObjectsOptions<
 	T extends keyof WibeAppTypes['types'],
@@ -75,7 +75,7 @@ export interface CreateObjectsOptions<
 	fields?: Array<K>
 	offset?: number
 	limit?: number
-	context: Context
+	context: Context<any>
 }
 
 export interface UpdateObjectOptions<
@@ -87,7 +87,7 @@ export interface UpdateObjectOptions<
 	id: string
 	data: Record<W, any>
 	fields?: Array<K>
-	context: Context
+	context: Context<any>
 }
 
 export interface UpdateObjectsOptions<
@@ -101,7 +101,7 @@ export interface UpdateObjectsOptions<
 	fields?: Array<K>
 	offset?: number
 	limit?: number
-	context: Context
+	context: Context<any>
 }
 
 export interface DeleteObjectOptions<
@@ -111,7 +111,7 @@ export interface DeleteObjectOptions<
 	className: T
 	id: string
 	fields?: Array<K>
-	context: Context
+	context: Context<any>
 }
 
 export interface DeleteObjectsOptions<
@@ -123,7 +123,7 @@ export interface DeleteObjectsOptions<
 	fields?: Array<K>
 	offset?: number
 	limit?: number
-	context: Context
+	context: Context<any>
 }
 
 export interface DatabaseAdapter {

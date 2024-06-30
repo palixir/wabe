@@ -3,12 +3,10 @@ import {
 	it,
 	expect,
 	mock,
-	beforeAll,
 	afterEach,
 	spyOn,
 	afterAll,
 } from 'bun:test'
-import { WibeApp } from '../../server'
 import { DatabaseController } from '..'
 import * as hooks from '../../hooks/index'
 
@@ -41,66 +39,70 @@ describe('DatabaseController', () => {
 		deleteObjects: mockDeleteObjects,
 	}))
 
-	beforeAll(() => {
-		WibeApp.config = {
-			schema: {
-				classes: [
-					{
-						name: 'TestClass',
-						fields: {
-							fieldX: {
-								type: 'String',
-							},
-							pointerToAnotherClass: {
-								type: 'Pointer',
-								// @ts-expect-error
-								class: 'AnotherClass',
-							},
-							pointerToAnotherClass2: {
-								type: 'Pointer',
-								// @ts-expect-error
-								class: 'AnotherClass2',
-							},
+	const config = {
+		schema: {
+			classes: [
+				{
+					name: 'TestClass',
+					fields: {
+						fieldX: {
+							type: 'String',
+						},
+						pointerToAnotherClass: {
+							type: 'Pointer',
+							// @ts-expect-error
+							class: 'AnotherClass',
+						},
+						pointerToAnotherClass2: {
+							type: 'Pointer',
+							// @ts-expect-error
+							class: 'AnotherClass2',
 						},
 					},
-					{
-						name: 'AnotherClass',
-						fields: {
-							field1: {
-								type: 'String',
-							},
+				},
+				{
+					name: 'AnotherClass',
+					fields: {
+						field1: {
+							type: 'String',
 						},
 					},
-					{
-						name: 'AnotherClass2',
-						fields: {
-							field3: {
-								type: 'String',
-							},
+				},
+				{
+					name: 'AnotherClass2',
+					fields: {
+						field3: {
+							type: 'String',
 						},
 					},
-					{
-						name: 'AnotherClass3',
-						fields: {
-							field4: {
-								type: 'String',
-							},
+				},
+				{
+					name: 'AnotherClass3',
+					fields: {
+						field4: {
+							type: 'String',
 						},
 					},
-					{
-						name: 'AnotherClass4',
-						fields: {
-							relationToAnotherClass3: {
-								type: 'Relation',
-								// @ts-expect-error
-								class: 'AnotherClass3',
-							},
+				},
+				{
+					name: 'AnotherClass4',
+					fields: {
+						relationToAnotherClass3: {
+							type: 'Relation',
+							// @ts-expect-error
+							class: 'AnotherClass3',
 						},
 					},
-				],
-			},
-		}
-	})
+				},
+			],
+		},
+	} as any
+
+	const context = {
+		isRoot: true,
+		config,
+		sessionId: 'sessionId',
+	} as any
 
 	afterAll(() => {
 		mockInitializeHook.mockRestore()
@@ -120,7 +122,7 @@ describe('DatabaseController', () => {
 		await databaseController.createObjects({
 			// @ts-expect-error
 			className: 'TestClass',
-			context: { isRoot: true },
+			context,
 			data: [],
 		})
 
@@ -133,7 +135,7 @@ describe('DatabaseController', () => {
 		await databaseController.getObject({
 			// @ts-expect-error
 			className: 'TestClass',
-			context: { sessionId: 'sessionId' } as any,
+			context,
 			id: 'id',
 			fields: ['id'],
 		})
@@ -141,7 +143,11 @@ describe('DatabaseController', () => {
 		expect(mockInitializeHook).toHaveBeenCalledTimes(1)
 		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
-			context: { sessionId: 'sessionId' },
+			context: {
+				sessionId: 'sessionId',
+				config,
+				isRoot: true,
+			},
 			newData: null,
 			id: 'id',
 		})
@@ -165,7 +171,7 @@ describe('DatabaseController', () => {
 		await databaseController.getObjects({
 			// @ts-expect-error
 			className: 'TestClass',
-			context: { sessionId: 'sessionId' } as any,
+			context,
 			where: { id: { equalTo: 'id' } },
 			fields: ['id'],
 		})
@@ -173,7 +179,7 @@ describe('DatabaseController', () => {
 		expect(mockInitializeHook).toHaveBeenCalledTimes(1)
 		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
-			context: { sessionId: 'sessionId' },
+			context: { sessionId: 'sessionId', config, isRoot: true },
 			newData: null,
 			where: { id: { equalTo: 'id' } },
 		})
@@ -195,7 +201,7 @@ describe('DatabaseController', () => {
 		await databaseController.updateObject({
 			// @ts-expect-error
 			className: 'TestClass',
-			context: { sessionId: 'sessionId' } as any,
+			context,
 			id: 'id',
 			// @ts-expect-error
 			data: { name: 'test' },
@@ -203,9 +209,10 @@ describe('DatabaseController', () => {
 		})
 
 		expect(mockInitializeHook).toHaveBeenCalledTimes(1)
+		console.log(mockInitializeHook.mock.calls[0])
 		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
-			context: { sessionId: 'sessionId' },
+			context: { sessionId: 'sessionId', config, isRoot: true },
 			newData: { name: 'test' },
 			id: 'id',
 		})
@@ -229,7 +236,7 @@ describe('DatabaseController', () => {
 		await databaseController.updateObjects({
 			// @ts-expect-error
 			className: 'TestClass',
-			context: { sessionId: 'sessionId' } as any,
+			context,
 			where: { id: { equalTo: 'id' } },
 			// @ts-expect-error
 			data: { name: 'test' },
@@ -239,7 +246,7 @@ describe('DatabaseController', () => {
 		expect(mockInitializeHook).toHaveBeenCalledTimes(1)
 		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
-			context: { sessionId: 'sessionId' },
+			context: { sessionId: 'sessionId', config, isRoot: true },
 			newData: { name: 'test' },
 			where: { id: { equalTo: 'id' } },
 		})
@@ -261,7 +268,7 @@ describe('DatabaseController', () => {
 		await databaseController.createObject({
 			// @ts-expect-error
 			className: 'TestClass',
-			context: { sessionId: 'sessionId' } as any,
+			context,
 			// @ts-expect-error
 			data: { name: 'test' },
 			fields: ['id'],
@@ -270,7 +277,7 @@ describe('DatabaseController', () => {
 		expect(mockInitializeHook).toHaveBeenCalledTimes(1)
 		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
-			context: { sessionId: 'sessionId' },
+			context: { sessionId: 'sessionId', config, isRoot: true },
 			newData: { name: 'test' },
 		})
 
@@ -293,7 +300,7 @@ describe('DatabaseController', () => {
 		await databaseController.createObjects({
 			// @ts-expect-error
 			className: 'TestClass',
-			context: { sessionId: 'sessionId' } as any,
+			context,
 			// @ts-expect-error
 			data: [{ name: 'test' }],
 			fields: ['id'],
@@ -302,7 +309,7 @@ describe('DatabaseController', () => {
 		expect(mockInitializeHook).toHaveBeenCalledTimes(1)
 		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
-			context: { sessionId: 'sessionId' },
+			context: { sessionId: 'sessionId', config, isRoot: true },
 			newData: { name: 'test' },
 		})
 
@@ -325,7 +332,7 @@ describe('DatabaseController', () => {
 		await databaseController.deleteObject({
 			// @ts-expect-error
 			className: 'TestClass',
-			context: { sessionId: 'sessionId' } as any,
+			context,
 			fields: ['id'],
 			id: 'id',
 		})
@@ -333,7 +340,7 @@ describe('DatabaseController', () => {
 		expect(mockInitializeHook).toHaveBeenCalledTimes(2)
 		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
-			context: { sessionId: 'sessionId' },
+			context: { sessionId: 'sessionId', config, isRoot: true },
 			newData: null,
 			id: 'id',
 		})
@@ -358,7 +365,7 @@ describe('DatabaseController', () => {
 		await databaseController.deleteObjects({
 			// @ts-expect-error
 			className: 'TestClass',
-			context: { sessionId: 'sessionId' } as any,
+			context,
 			where: { id: { equalTo: 'id' } },
 			fields: ['id'],
 		})
@@ -366,7 +373,7 @@ describe('DatabaseController', () => {
 		expect(mockInitializeHook).toHaveBeenCalledTimes(2)
 		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
-			context: { sessionId: 'sessionId' },
+			context: { sessionId: 'sessionId', config, isRoot: true },
 			newData: null,
 			where: { id: { equalTo: 'id' } },
 		})
@@ -407,7 +414,7 @@ describe('DatabaseController', () => {
 						},
 					],
 				},
-				{ isRoot: true },
+				context,
 			)
 
 		expect(res).toEqual({
@@ -441,7 +448,7 @@ describe('DatabaseController', () => {
 				{
 					pointerToAnotherClass: { field1: { equalTo: 'value' } },
 				},
-				{ isRoot: true },
+				context,
 			)
 
 		expect(res).toEqual({
@@ -473,6 +480,7 @@ describe('DatabaseController', () => {
 				pointerToAnotherClass: { field1: { equalTo: 'value' } },
 			},
 			fields: ['id'],
+			context,
 		})
 
 		// One time for the call above and one to get all objects of the pointer class
@@ -481,6 +489,7 @@ describe('DatabaseController', () => {
 			className: 'AnotherClass',
 			where: { field1: { equalTo: 'value' } },
 			fields: ['id'],
+			context,
 		})
 	})
 
@@ -500,6 +509,7 @@ describe('DatabaseController', () => {
 				// @ts-expect-error
 				'pointerToAnotherClass',
 			],
+			context,
 		})
 
 		expect(res).toEqual({
@@ -517,6 +527,7 @@ describe('DatabaseController', () => {
 				// @ts-expect-error
 				'AnotherClass4',
 				'AnotherClass3',
+				context,
 			),
 		).toBe(true)
 	})
@@ -528,6 +539,7 @@ describe('DatabaseController', () => {
 			databaseController._isRelationField(
 				'AnotherClass3' as any,
 				'AnotherClass4',
+				context,
 			),
 		).toBe(false)
 	})
@@ -557,6 +569,7 @@ describe('DatabaseController', () => {
 				// @ts-expect-error
 				'relationToAnotherClass3.field4',
 			],
+			context,
 		})
 
 		expect(res).toEqual({
@@ -579,6 +592,7 @@ describe('DatabaseController', () => {
 			className: 'AnotherClass4',
 			id: '123',
 			fields: ['relationToAnotherClass3'],
+			context,
 		})
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
@@ -586,6 +600,7 @@ describe('DatabaseController', () => {
 			className: 'AnotherClass3',
 			where: { id: { in: ['anotherClass3Id'] } },
 			fields: ['id', 'field4'],
+			context,
 		})
 	})
 
@@ -616,6 +631,7 @@ describe('DatabaseController', () => {
 				// @ts-expect-error
 				'relationToAnotherClass3.field4',
 			],
+			context,
 		})
 
 		expect(res).toEqual([
@@ -640,11 +656,13 @@ describe('DatabaseController', () => {
 			className: 'AnotherClass4',
 			where: { id: { equalTo: '123' } },
 			fields: ['relationToAnotherClass3'],
+			context,
 		})
 		expect(mockGetObjects).toHaveBeenNthCalledWith(2, {
 			className: 'AnotherClass3',
 			where: { id: { in: ['anotherClass3Id'] } },
 			fields: ['id', 'field4'],
+			context,
 		})
 	})
 
@@ -666,7 +684,7 @@ describe('DatabaseController', () => {
 				},
 			},
 			'TestClass',
-			{ isRoot: true },
+			context,
 		)
 
 		expect(mockGetObject).toHaveBeenCalledTimes(1)
@@ -674,7 +692,7 @@ describe('DatabaseController', () => {
 			className: 'AnotherClass',
 			fields: ['field1'],
 			id: 'idOfAnotherClass',
-			context: { isRoot: true },
+			context,
 		})
 	})
 
@@ -685,6 +703,7 @@ describe('DatabaseController', () => {
 			databaseController._isPointerField(
 				'testClass' as any,
 				'anotherClass',
+				context,
 			),
 		).toBe(true)
 	})
@@ -696,6 +715,7 @@ describe('DatabaseController', () => {
 			databaseController._isPointerField(
 				'anotherClass' as any,
 				'anotherClass2',
+				context,
 			),
 		).toBe(false)
 	})
@@ -707,6 +727,7 @@ describe('DatabaseController', () => {
 			databaseController._isPointerField(
 				'invalidClass' as any,
 				'anotherClass2',
+				context,
 			),
 		).toBe(false)
 	})
@@ -721,7 +742,7 @@ describe('DatabaseController', () => {
 		]
 
 		expect(
-			databaseController._getPointerObject('TestClass', fields),
+			databaseController._getPointerObject('TestClass', fields, context),
 		).toEqual({
 			pointers: {
 				pointerToAnotherClass: {
@@ -744,7 +765,7 @@ describe('DatabaseController', () => {
 		]
 
 		expect(
-			databaseController._getPointerObject('TestClass', fields),
+			databaseController._getPointerObject('TestClass', fields, context),
 		).toEqual({
 			pointers: {
 				pointerToAnotherClass: {
@@ -775,6 +796,7 @@ describe('DatabaseController', () => {
 			// @ts-expect-error
 			className: 'TestClass',
 			id: '123',
+			context,
 		})
 
 		expect(mockGetObject).toHaveBeenCalledTimes(1)
@@ -782,6 +804,7 @@ describe('DatabaseController', () => {
 			className: 'TestClass',
 			id: '123',
 			fields: [],
+			context,
 		})
 	})
 
@@ -799,6 +822,7 @@ describe('DatabaseController', () => {
 			id: '123',
 			// @ts-expect-error
 			fields: ['name'],
+			context,
 		})
 
 		expect(res).toEqual({
@@ -812,6 +836,7 @@ describe('DatabaseController', () => {
 			className: 'TestClass',
 			id: '123',
 			fields: ['name'],
+			context,
 		})
 	})
 
@@ -840,6 +865,7 @@ describe('DatabaseController', () => {
 				// @ts-expect-error
 				'pointerToAnotherClass.name',
 			],
+			context,
 		})
 
 		expect(res).toEqual({
@@ -856,12 +882,14 @@ describe('DatabaseController', () => {
 			className: 'TestClass',
 			id: '123',
 			fields: ['name', 'pointerToAnotherClass'],
+			context,
 		})
 
 		expect(mockGetObject).toHaveBeenNthCalledWith(2, {
 			className: 'AnotherClass',
 			id: 'anotherClassId',
 			fields: ['id', 'name'],
+			context,
 		})
 	})
 
@@ -897,6 +925,7 @@ describe('DatabaseController', () => {
 				// @ts-expect-error
 				'pointerToAnotherClass2.age',
 			],
+			context,
 		})
 
 		expect(res).toEqual({
@@ -916,18 +945,21 @@ describe('DatabaseController', () => {
 			className: 'TestClass',
 			id: '123',
 			fields: ['name', 'pointerToAnotherClass', 'pointerToAnotherClass2'],
+			context,
 		})
 
 		expect(mockGetObject).toHaveBeenNthCalledWith(2, {
 			className: 'AnotherClass',
 			id: 'anotherClassId',
 			fields: ['id', 'name'],
+			context,
 		})
 
 		expect(mockGetObject).toHaveBeenNthCalledWith(3, {
 			className: 'AnotherClass2',
 			id: 'anotherClass2Id',
 			fields: ['age'],
+			context,
 		})
 	})
 
@@ -944,6 +976,7 @@ describe('DatabaseController', () => {
 			// @ts-expect-error
 			className: 'TestClass',
 			id: '123',
+			context,
 		})
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
@@ -951,6 +984,7 @@ describe('DatabaseController', () => {
 			className: 'TestClass',
 			id: '123',
 			fields: [],
+			context,
 		})
 	})
 
@@ -972,6 +1006,7 @@ describe('DatabaseController', () => {
 				// @ts-expect-error
 				'name',
 			],
+			context,
 		})
 
 		expect(res).toEqual([
@@ -989,6 +1024,7 @@ describe('DatabaseController', () => {
 			className: 'TestClass',
 			id: '123',
 			fields: ['name'],
+			context,
 		})
 	})
 
@@ -1019,6 +1055,7 @@ describe('DatabaseController', () => {
 				// @ts-expect-error
 				'pointerToAnotherClass.name',
 			],
+			context,
 		})
 
 		expect(res).toEqual([
@@ -1037,6 +1074,7 @@ describe('DatabaseController', () => {
 			className: 'AnotherClass',
 			id: 'anotherClassId',
 			fields: ['id', 'name'],
+			context,
 		})
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
@@ -1044,6 +1082,7 @@ describe('DatabaseController', () => {
 			className: 'TestClass',
 			id: '123',
 			fields: ['name', 'pointerToAnotherClass'],
+			context,
 		})
 	})
 
@@ -1081,6 +1120,7 @@ describe('DatabaseController', () => {
 				// @ts-expect-error
 				'pointerToAnotherClass2.age',
 			],
+			context,
 		})
 
 		expect(res).toEqual([
@@ -1102,11 +1142,13 @@ describe('DatabaseController', () => {
 			className: 'AnotherClass',
 			id: 'anotherClassId',
 			fields: ['id', 'name'],
+			context,
 		})
 		expect(mockGetObject).toHaveBeenNthCalledWith(2, {
 			className: 'AnotherClass2',
 			id: 'anotherClass2Id',
 			fields: ['age'],
+			context,
 		})
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
@@ -1114,6 +1156,7 @@ describe('DatabaseController', () => {
 			className: 'TestClass',
 			id: '123',
 			fields: ['name', 'pointerToAnotherClass', 'pointerToAnotherClass2'],
+			context,
 		})
 	})
 })

@@ -1,6 +1,5 @@
 import type { SignUpWithInput } from '../../../generated/wibe'
 import type { Context } from '../../server/interface'
-import { WibeApp } from '../../server'
 import { Session } from '../Session'
 import type { ProviderInterface } from '../interface'
 import { getAuthenticationMethod } from '../utils'
@@ -16,10 +15,11 @@ export const signUpWithResolver = async (
 	}: {
 		input: SignUpWithInput
 	},
-	context: Context,
+	context: Context<any>,
 ) => {
-	const { provider, name } = getAuthenticationMethod<ProviderInterface>(
+	const { provider, name } = getAuthenticationMethod<any, ProviderInterface>(
 		Object.keys(input.authentication || {}),
+		context,
 	)
 
 	const inputOfTheGoodAuthenticationMethod =
@@ -56,19 +56,23 @@ export const signUpWithResolver = async (
 		isRoot: true,
 	})
 
-	if (WibeApp.config.authentication?.session?.cookieSession) {
+	if (context.config.authentication?.session?.cookieSession) {
 		context.response?.setCookie('refreshToken', refreshToken, {
 			httpOnly: true,
 			path: '/',
 			secure: process.env.NODE_ENV === 'production',
-			expires: new Date(Date.now() + session.getRefreshTokenExpireIn()),
+			expires: new Date(
+				Date.now() + session.getRefreshTokenExpireIn(context.config),
+			),
 		})
 
 		context.response?.setCookie('accessToken', accessToken, {
 			httpOnly: true,
 			path: '/',
 			secure: process.env.NODE_ENV === 'production',
-			expires: new Date(Date.now() + session.getAccessTokenExpireIn()),
+			expires: new Date(
+				Date.now() + session.getAccessTokenExpireIn(context.config),
+			),
 		})
 	}
 

@@ -26,64 +26,14 @@ describe('SignUpWith', () => {
 		createObject: mockCreateObject,
 	}
 
-	const context = {
-		databaseController: mockDatabaseController,
-	} as any
-
-	beforeEach(() => {
-		mockCreateObject.mockClear()
-		mockOnLogin.mockClear()
-		mockOnSignUp.mockClear()
-
-		// @ts-expect-error
-		WibeApp.config = {
-			authentication: {
-				session: {
-					cookieSession: true,
-				},
-				customAuthenticationMethods: [
-					{
-						name: 'emailPassword',
-						input: {
-							email: { type: 'Email', required: true },
-							password: { type: 'String', required: true },
-						},
-						provider: {
-							onSignUp: mockOnSignUp,
-							onSignIn: mockOnLogin,
-						},
-					},
-				],
+	const config = {
+		authentication: {
+			session: {
+				cookieSession: true,
 			},
-		}
-	})
-
-	it('should throw an error if no custom authentication configuration is provided', async () => {
-		WibeApp.config.authentication = undefined
-
-		expect(
-			signUpWithResolver(
-				{},
-				{
-					input: {
-						authentication: {
-							emailPassword: {
-								email: 'email@test.fr',
-								password: 'password',
-							},
-						},
-					},
-				},
-				context,
-			),
-		).rejects.toThrow('No custom authentication methods found')
-	})
-
-	it('should throw an error if a custom authentication is provided but not in the custom authentication config', async () => {
-		WibeApp.config.authentication = {
 			customAuthenticationMethods: [
 				{
-					name: 'phonePassword',
+					name: 'emailPassword',
 					input: {
 						email: { type: 'Email', required: true },
 						password: { type: 'String', required: true },
@@ -94,8 +44,21 @@ describe('SignUpWith', () => {
 					},
 				},
 			],
-		}
+		},
+	}
 
+	const context = {
+		databaseController: mockDatabaseController,
+		config,
+	} as any
+
+	beforeEach(() => {
+		mockCreateObject.mockClear()
+		mockOnLogin.mockClear()
+		mockOnSignUp.mockClear()
+	})
+
+	it('should throw an error if no custom authentication configuration is provided', async () => {
 		expect(
 			signUpWithResolver(
 				{},
@@ -109,7 +72,39 @@ describe('SignUpWith', () => {
 						},
 					},
 				},
-				context,
+				{
+					config: {
+						authentication: undefined,
+						databaseController: mockDatabaseController,
+					},
+				} as any,
+			),
+		).rejects.toThrow('No custom authentication methods found')
+	})
+
+	it('should throw an error if a custom authentication is provided but not in the custom authentication config', async () => {
+		expect(
+			signUpWithResolver(
+				{},
+				{
+					input: {
+						authentication: {
+							emailPassword: {
+								email: 'email@test.fr',
+								password: 'password',
+							},
+						},
+					},
+				},
+				{
+					config: {
+						authentication: {
+							customAuthenticationMethods: [
+								{ name: 'phonePassword' },
+							],
+						},
+					},
+				} as any,
 			),
 		).rejects.toThrow('No available custom authentication methods found')
 	})
@@ -145,6 +140,7 @@ describe('SignUpWith', () => {
 			{
 				response: mockResponse,
 				databaseController: mockDatabaseController,
+				config,
 			} as any,
 		)
 

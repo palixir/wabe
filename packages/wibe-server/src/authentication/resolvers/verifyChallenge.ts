@@ -11,7 +11,7 @@ export const verifyChallengeResolver = async (
 	}: {
 		input: VerifyChallengeInput
 	},
-	context: Context,
+	context: Context<any>,
 ) => {
 	if (!input.factor) throw new Error('One factor is required')
 
@@ -20,8 +20,10 @@ export const verifyChallengeResolver = async (
 	if (Object.keys(input.factor).length !== 1)
 		throw new Error('Only one factor is allowed')
 
-	const { provider, name } =
-		getAuthenticationMethod<SecondaryProviderInterface>(listOfFactor)
+	const { provider, name } = getAuthenticationMethod<
+		any,
+		SecondaryProviderInterface
+	>(listOfFactor, context)
 
 	const userId = context.user?.id
 

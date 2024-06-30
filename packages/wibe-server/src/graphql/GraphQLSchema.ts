@@ -20,6 +20,7 @@ import type {
 	Schema,
 } from '../schema'
 import { firstLetterInLowerCase } from '../utils'
+import type { DevWibeAppTypes } from '../utils/helper'
 import { GraphqlParser, type GraphqlParserFactory } from './parser'
 import {
 	mutationToCreateMultipleObjects,
@@ -46,11 +47,11 @@ type AllPossibleObject =
 export type AllObjects = Record<string, Record<AllPossibleObject, any>>
 
 export class GraphQLSchema {
-	private schemas: Schema
+	private schemas: Schema<DevWibeAppTypes>
 
 	private allObjects: AllObjects
 
-	constructor(schemas: Schema) {
+	constructor(schemas: Schema<any>) {
 		this.schemas = schemas
 		this.allObjects = {}
 	}
@@ -200,7 +201,7 @@ export class GraphQLSchema {
 		wibeClass,
 		graphqlParser,
 	}: {
-		wibeClass: ClassInterface
+		wibeClass: ClassInterface<DevWibeAppTypes>
 		graphqlParser: GraphqlParserFactory
 	}) {
 		const { name, fields, description } = wibeClass
@@ -228,7 +229,7 @@ export class GraphQLSchema {
 		wibeClass,
 		inputCreateFields,
 	}: {
-		wibeClass: ClassInterface
+		wibeClass: ClassInterface<DevWibeAppTypes>
 		inputCreateFields: GraphQLInputObjectType
 	}) {
 		const { name } = wibeClass
@@ -249,7 +250,7 @@ export class GraphQLSchema {
 		wibeClass,
 		inputCreateFields,
 	}: {
-		wibeClass: ClassInterface
+		wibeClass: ClassInterface<DevWibeAppTypes>
 		inputCreateFields: GraphQLInputObjectType
 	}) {
 		const { name } = wibeClass
@@ -277,7 +278,7 @@ export class GraphQLSchema {
 		wibeClass,
 		graphqlParser,
 	}: {
-		wibeClass: ClassInterface
+		wibeClass: ClassInterface<DevWibeAppTypes>
 		graphqlParser: GraphqlParserFactory
 	}) {
 		const { name, fields, description } = wibeClass
@@ -303,7 +304,7 @@ export class GraphQLSchema {
 		wibeClass,
 		graphqlParser,
 	}: {
-		wibeClass: ClassInterface
+		wibeClass: ClassInterface<DevWibeAppTypes>
 		graphqlParser: GraphqlParserFactory
 	}) {
 		const { name, fields, description } = wibeClass
@@ -329,7 +330,7 @@ export class GraphQLSchema {
 		wibeClass,
 		graphqlParser,
 	}: {
-		wibeClass: ClassInterface
+		wibeClass: ClassInterface<DevWibeAppTypes>
 		graphqlParser: GraphqlParserFactory
 	}) {
 		const { name, fields, description } = wibeClass
@@ -355,7 +356,7 @@ export class GraphQLSchema {
 		wibeClass,
 		graphqlParser,
 	}: {
-		wibeClass: ClassInterface
+		wibeClass: ClassInterface<DevWibeAppTypes>
 		graphqlParser: GraphqlParserFactory
 	}) {
 		const { name, fields, description } = wibeClass
@@ -394,7 +395,7 @@ export class GraphQLSchema {
 		wibeClass,
 	}: {
 		object: GraphQLObjectType
-		wibeClass: ClassInterface
+		wibeClass: ClassInterface<DevWibeAppTypes>
 	}) {
 		const edgeObject = new GraphQLObjectType({
 			name: `${wibeClass.name}Edge`,
@@ -415,7 +416,7 @@ export class GraphQLSchema {
 
 	createCompleteObject(
 		graphqlParser: GraphqlParserFactory,
-		wibeClass: ClassInterface,
+		wibeClass: ClassInterface<DevWibeAppTypes>,
 	) {
 		const object = this.createObject({ graphqlParser, wibeClass })
 
@@ -470,7 +471,7 @@ export class GraphQLSchema {
 		resolvers,
 		graphqlParser,
 	}: {
-		resolvers: Record<string, MutationResolver>
+		resolvers: Record<string, MutationResolver<DevWibeAppTypes>>
 		graphqlParser: GraphqlParserFactory
 	}) {
 		return Object.keys(resolvers).reduce(
@@ -547,7 +548,7 @@ export class GraphQLSchema {
 		resolvers,
 		graphqlParser,
 	}: {
-		resolvers: Record<string, QueryResolver>
+		resolvers: Record<string, QueryResolver<DevWibeAppTypes>>
 		graphqlParser: GraphqlParserFactory
 	}) {
 		return Object.keys(resolvers).reduce(

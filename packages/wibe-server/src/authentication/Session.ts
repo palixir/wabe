@@ -1,24 +1,24 @@
 import jwt from 'jsonwebtoken'
-import { WibeApp } from '../server'
 import type { Context } from '../server/interface'
 import type { _Session, User } from '../../generated/wibe'
+import type { WibeConfig } from '../server'
 
 export class Session {
 	private accessToken: string | undefined = undefined
 	private refreshToken: string | undefined = undefined
 
-	getAccessTokenExpireIn() {
+	getAccessTokenExpireIn(config: WibeConfig<any>) {
 		const customExpiresIn =
-			WibeApp.config?.authentication?.session?.accessTokenExpiresIn
+			config?.authentication?.session?.accessTokenExpiresIn
 
 		if (!customExpiresIn) return 1000 * 60 * 15 // 15 minutes in ms
 
 		return customExpiresIn
 	}
 
-	getRefreshTokenExpireIn() {
+	getRefreshTokenExpireIn(config: WibeConfig<any>) {
 		const customExpiresIn =
-			WibeApp.config?.authentication?.session?.refreshTokenExpiresIn
+			config?.authentication?.session?.refreshTokenExpiresIn
 
 		if (!customExpiresIn) return 1000 * 60 * 60 * 24 * 30 // 30 days in ms
 
@@ -27,7 +27,7 @@ export class Session {
 
 	async meFromAccessToken(
 		accessToken: string,
-		context: Context,
+		context: Context<any>,
 	): Promise<{ sessionId: string; user: User | null }> {
 		const sessions = await context.databaseController.getObjects({
 			className: '_Session',
@@ -55,12 +55,12 @@ export class Session {
 		return { sessionId: session?.id ?? null, user: user ?? null }
 	}
 
-	async create(userId: string, context: Context) {
+	async create(userId: string, context: Context<any>) {
 		this.accessToken = jwt.sign(
 			{
 				userId,
 				iat: Date.now(),
-				exp: Date.now() + this.getAccessTokenExpireIn(),
+				exp: Date.now() + this.getAccessTokenExpireIn(context.config),
 			},
 			import.meta.env.JWT_SECRET || 'dev',
 		)
@@ -69,7 +69,7 @@ export class Session {
 			{
 				userId,
 				iat: Date.now(),
-				exp: Date.now() + this.getRefreshTokenExpireIn(),
+				exp: Date.now() + this.getRefreshTokenExpireIn(context.config),
 			},
 			import.meta.env.JWT_SECRET || 'dev',
 		)
@@ -80,11 +80,11 @@ export class Session {
 			data: {
 				accessToken: this.accessToken,
 				accessTokenExpiresAt: new Date(
-					Date.now() + this.getAccessTokenExpireIn(),
+					Date.now() + this.getAccessTokenExpireIn(context.config),
 				),
 				refreshToken: this.refreshToken,
 				refreshTokenExpiresAt: new Date(
-					Date.now() + this.getRefreshTokenExpireIn(),
+					Date.now() + this.getRefreshTokenExpireIn(context.config),
 				),
 				user: userId,
 			},
@@ -97,7 +97,7 @@ export class Session {
 		}
 	}
 
-	async delete(context: Context) {
+	async delete(context: Context<any>) {
 		if (!context.sessionId) return
 
 		await context.databaseController.deleteObject({
@@ -107,7 +107,11 @@ export class Session {
 		})
 	}
 
-	async refresh(accessToken: string, refreshToken: string, context: Context) {
+	async refresh(
+		accessToken: string,
+		refreshToken: string,
+		context: Context<any>,
+	) {
 		const session = await context.databaseController.getObjects({
 			className: '_Session',
 			where: {
@@ -129,7 +133,9 @@ export class Session {
 		if (refreshTokenExpiresAt < new Date(Date.now()))
 			throw new Error('Refresh token expired')
 
-		const refreshTokenExpireIn = this.getRefreshTokenExpireIn()
+		const refreshTokenExpireIn = this.getRefreshTokenExpireIn(
+			context.config,
+		)
 
 		// We refresh only if the refresh token is about to expire (75% of the time)
 		if (
@@ -148,7 +154,7 @@ export class Session {
 			{
 				userId: user?.id,
 				iat: Date.now(),
-				exp: this.getAccessTokenExpireIn(),
+				exp: this.getAccessTokenExpireIn(context.config),
 			},
 			import.meta.env.JWT_SECRET || 'dev',
 		)
@@ -157,7 +163,7 @@ export class Session {
 			{
 				userId: user?.id,
 				iat: Date.now(),
-				exp: this.getRefreshTokenExpireIn(),
+				exp: this.getRefreshTokenExpireIn(context.config),
 			},
 			import.meta.env.JWT_SECRET || 'dev',
 		)
@@ -169,11 +175,11 @@ export class Session {
 			data: {
 				accessToken: newAccessToken,
 				accessTokenExpiresAt: new Date(
-					Date.now() + this.getAccessTokenExpireIn(),
+					Date.now() + this.getAccessTokenExpireIn(context.config),
 				),
 				refreshToken: newRefreshToken,
 				refreshTokenExpiresAt: new Date(
-					Date.now() + this.getRefreshTokenExpireIn(),
+					Date.now() + this.getRefreshTokenExpireIn(context.config),
 				),
 			},
 		})

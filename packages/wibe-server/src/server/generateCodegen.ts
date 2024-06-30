@@ -4,6 +4,7 @@ import type {
 	ScalarInterface,
 	SchemaInterface,
 } from '../schema'
+import type { DevWibeAppTypes } from '../utils/helper'
 
 export const generateWibeFile = ({
 	scalars,
@@ -12,7 +13,7 @@ export const generateWibeFile = ({
 }: {
 	enums?: EnumInterface[]
 	scalars?: ScalarInterface[]
-	classes: ClassInterface[]
+	classes: ClassInterface<DevWibeAppTypes>[]
 }) => {
 	// Scalars
 	const listOfScalars = scalars?.map((scalar) => `"${scalar.name}"`) || []
@@ -47,7 +48,7 @@ export const generateCodegen = async ({
 	fileContent,
 }: {
 	fileContent: string
-	schema: SchemaInterface
+	schema: SchemaInterface<any>
 	graphqlSchema: string
 	path: string
 }) => {

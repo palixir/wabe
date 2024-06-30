@@ -1,6 +1,6 @@
-import { WibeApp } from '../..'
 import type { SignInWithInput } from '../../../generated/wibe'
 import type { Context } from '../../server/interface'
+import type { DevWibeAppTypes } from '../../utils/helper'
 import { Session } from '../Session'
 import type {
 	ProviderInterface,
@@ -19,11 +19,12 @@ export const signInWithResolver = async (
 	}: {
 		input: SignInWithInput
 	},
-	context: Context,
+	context: Context<DevWibeAppTypes>,
 ) => {
-	const { provider, name } = getAuthenticationMethod<ProviderInterface>(
-		Object.keys(input.authentication || {}),
-	)
+	const { provider, name } = getAuthenticationMethod<
+		DevWibeAppTypes,
+		ProviderInterface
+	>(Object.keys(input.authentication || {}), context)
 
 	const inputOfTheGoodAuthenticationMethod =
 		// @ts-expect-error
@@ -41,10 +42,10 @@ export const signInWithResolver = async (
 
 	// 2 - We call the onSendChallenge method of the provider
 	if (input.authentication?.secondaryFactor) {
-		const secondaryProvider =
-			getAuthenticationMethod<SecondaryProviderInterface>([
-				input.authentication.secondaryFactor,
-			])
+		const secondaryProvider = getAuthenticationMethod<
+			DevWibeAppTypes,
+			SecondaryProviderInterface
+		>([input.authentication.secondaryFactor], context)
 
 		await secondaryProvider.provider.onSendChallenge()
 
@@ -55,19 +56,23 @@ export const signInWithResolver = async (
 
 	const { refreshToken, accessToken } = await session.create(userId, context)
 
-	if (WibeApp.config.authentication?.session?.cookieSession) {
+	if (context.config.authentication?.session?.cookieSession) {
 		context.response?.setCookie('refreshToken', refreshToken, {
 			httpOnly: true,
 			path: '/',
 			secure: process.env.NODE_ENV === 'production',
-			expires: new Date(Date.now() + session.getRefreshTokenExpireIn()),
+			expires: new Date(
+				Date.now() + session.getRefreshTokenExpireIn(context.config),
+			),
 		})
 
 		context.response?.setCookie('accessToken', accessToken, {
 			httpOnly: true,
 			path: '/',
 			secure: process.env.NODE_ENV === 'production',
-			expires: new Date(Date.now() + session.getAccessTokenExpireIn()),
+			expires: new Date(
+				Date.now() + session.getAccessTokenExpireIn(context.config),
+			),
 		})
 	}
 

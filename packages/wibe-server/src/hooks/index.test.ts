@@ -1,14 +1,5 @@
-import {
-	beforeAll,
-	afterEach,
-	describe,
-	expect,
-	it,
-	spyOn,
-	mock,
-} from 'bun:test'
+import { afterEach, describe, expect, it, spyOn, mock } from 'bun:test'
 import * as index from './index'
-import { WibeApp } from '../server'
 import { OperationType } from './index'
 
 describe('Hooks', () => {
@@ -21,27 +12,25 @@ describe('Hooks', () => {
 		getObjects: mockGetObjects,
 	} as any
 
-	beforeAll(() => {
-		WibeApp.config = {
-			hooks: [
-				{
-					callback: mockCallBack1,
-					operationType: OperationType.BeforeRead,
-					priority: 1,
-				},
-				{
-					callback: mockCallback2,
-					operationType: OperationType.BeforeRead,
-					priority: 2,
-				},
-				{
-					callback: mockCallback3,
-					operationType: OperationType.BeforeCreate,
-					priority: 1,
-				},
-			],
-		} as any
-	})
+	const config = {
+		hooks: [
+			{
+				callback: mockCallBack1,
+				operationType: OperationType.BeforeRead,
+				priority: 1,
+			},
+			{
+				callback: mockCallback2,
+				operationType: OperationType.BeforeRead,
+				priority: 2,
+			},
+			{
+				callback: mockCallback3,
+				operationType: OperationType.BeforeCreate,
+				priority: 1,
+			},
+		],
+	} as any
 
 	afterEach(() => {
 		mockGetObjects.mockClear()
@@ -58,7 +47,7 @@ describe('Hooks', () => {
 		const hooks = await index.initializeHook({
 			// @ts-expect-error
 			className: 'ClassName',
-			context: { isRoot: true, databaseController },
+			context: { isRoot: true, databaseController, config },
 			newData: { name: 'test' },
 			id: 'id',
 		})
@@ -68,7 +57,7 @@ describe('Hooks', () => {
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
 		expect(mockGetObjects).toHaveBeenCalledWith({
 			className: 'ClassName',
-			context: { isRoot: true, databaseController },
+			context: { isRoot: true, databaseController, config },
 			fields: [],
 			where: { id: { equalTo: 'id' } },
 			skipHooks: true,
@@ -86,6 +75,7 @@ describe('Hooks', () => {
 		expect(hookObject.context).toEqual({
 			isRoot: true,
 			databaseController: expect.any(Object),
+			config,
 		})
 	})
 
@@ -93,7 +83,7 @@ describe('Hooks', () => {
 		const hooks = await index.initializeHook({
 			// @ts-expect-error
 			className: 'ClassName',
-			context: { isRoot: true, databaseController },
+			context: { isRoot: true, databaseController, config },
 			newData: { name: 'test' },
 		})
 
@@ -110,6 +100,7 @@ describe('Hooks', () => {
 		expect(hookObject.context).toEqual({
 			isRoot: true,
 			databaseController: expect.any(Object),
+			config,
 		})
 	})
 
@@ -123,7 +114,7 @@ describe('Hooks', () => {
 		const hooks = await index.initializeHook({
 			// @ts-expect-error
 			className: 'ClassName',
-			context: { isRoot: true, databaseController },
+			context: { isRoot: true, databaseController, config },
 			newData: { name: 'test' },
 			id: 'id',
 		})
@@ -142,8 +133,8 @@ describe('Hooks', () => {
 		const hooks = await index.initializeHook({
 			// @ts-expect-error
 			className: 'ClassName',
-			context: { isRoot: true, databaseController },
-			newDate: { name: 'test' },
+			context: { isRoot: true, databaseController, config },
+			newData: { name: 'test' },
 			id: 'id',
 		})
 

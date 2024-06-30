@@ -26,14 +26,14 @@ export const defaultRoutes = (): WibeRoute[] => [
 				throw new Error('Authentication failed, provider not found')
 
 			// TODO: Maybe check if the value is in the enum
-			return authHandler(context, provider as ProviderEnum)
+			return authHandler(context, {} as any, provider as ProviderEnum)
 		},
 	},
 	{
 		method: 'GET',
 		path: '/auth/oauth/callback',
 		handler: async (context: Context) => {
-			return oauthHandlerCallback(context)
+			return oauthHandlerCallback(context, {} as any)
 		},
 	},
 ]

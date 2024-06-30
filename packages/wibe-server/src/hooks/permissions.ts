@@ -1,5 +1,5 @@
-import { WibeApp } from '..'
 import type { PermissionsOperations } from '../schema'
+import type { Context } from '../server/interface'
 import type { HookObject } from './HookObject'
 import { OperationType } from './index'
 
@@ -26,11 +26,13 @@ const convertOperationTypeToPermission = (operationType: OperationType) => {
 export const _getPermissionPropertiesOfAClass = async ({
 	className,
 	operation,
+	context,
 }: {
 	className: string
 	operation: PermissionsOperations
+	context: Context<any>
 }) => {
-	const wibeClass = WibeApp.config.schema.classes.find(
+	const wibeClass = context.config.schema.classes.find(
 		(c) => c.name === className,
 	)
 
@@ -107,6 +109,7 @@ export const _checkCLP = async (
 	const permissionProperties = await _getPermissionPropertiesOfAClass({
 		className: object.className,
 		operation: permissionOperation,
+		context: object.context,
 	})
 
 	if (!permissionProperties) return
@@ -128,6 +131,7 @@ export const _checkCLP = async (
 		context: {
 			isRoot: true,
 			databaseController: object.context.databaseController,
+			config: object.context.config,
 		},
 	})
 

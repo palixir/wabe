@@ -10,7 +10,7 @@ import {
 import { _getPermissionPropertiesOfAClass, _checkCLP } from './permissions'
 import { WibeApp } from '..'
 import { HookObject } from './HookObject'
-import { BeforeOperationType, OperationType } from '.'
+import { OperationType } from '.'
 import type { Context } from '../server/interface'
 import * as permissions from './permissions'
 
@@ -256,42 +256,40 @@ describe('Permissions', () => {
 			getObject: mockGetObject,
 		} as any
 
-		beforeAll(() => {
-			// @ts-expect-error
-			WibeApp.config = {
-				schema: {
-					classes: [
-						{
-							name: 'TestClass',
-							fields: {
-								field1: { type: 'String' },
-							},
-							permissions: {
-								read: {
-									requireAuthentication: true,
-									authorizedRoles: ['Admin'],
-								},
-							},
-						},
-						{
-							name: 'TestClass2',
-							fields: {
-								field2: { type: 'String' },
-							},
-						},
-					],
-				},
-			}
-		})
-
 		beforeEach(() => {
 			mockGetObject.mockClear()
 		})
+
+		const config = {
+			schema: {
+				classes: [
+					{
+						name: 'TestClass',
+						fields: {
+							field1: { type: 'String' },
+						},
+						permissions: {
+							read: {
+								requireAuthentication: true,
+								authorizedRoles: ['Admin'],
+							},
+						},
+					},
+					{
+						name: 'TestClass2',
+						fields: {
+							field2: { type: 'String' },
+						},
+					},
+				],
+			},
+		} as any
 
 		it('should get the permission for a given className', async () => {
 			const permission = await _getPermissionPropertiesOfAClass({
 				className: 'TestClass',
 				operation: 'read',
+				context: { config } as any,
 			})
 
 			expect(permission).toEqual({
@@ -302,6 +300,7 @@ describe('Permissions', () => {
 			const permission2 = await _getPermissionPropertiesOfAClass({
 				className: 'TestClass2',
 				operation: 'read',
+				context: { config } as any,
 			})
 
 			expect(permission2).toBeUndefined()
@@ -314,6 +313,7 @@ describe('Permissions', () => {
 				user: {},
 				isRoot: false,
 				databaseController,
+				config,
 			}
 
 			const obj = new HookObject({
@@ -347,6 +347,7 @@ describe('Permissions', () => {
 				} as any,
 				isRoot: false,
 				databaseController,
+				config,
 			}
 
 			const obj = new HookObject({
@@ -380,6 +381,7 @@ describe('Permissions', () => {
 				} as any,
 				databaseController,
 				isRoot: false,
+				config,
 			}
 
 			const obj = new HookObject({
@@ -389,6 +391,7 @@ describe('Permissions', () => {
 				// @ts-expect-error
 				object: {},
 				operationType: OperationType.BeforeRead,
+				config: { schema: {} },
 			})
 
 			expect(_checkCLP(obj, OperationType.BeforeRead)).resolves

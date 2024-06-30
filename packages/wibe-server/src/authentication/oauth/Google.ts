@@ -1,5 +1,5 @@
 import { OAuth2Client } from '.'
-import { WibeApp } from '../../server'
+import type { WibeConfig } from '../../server'
 import type { OAuth2ProviderWithPKCE, Tokens } from './utils'
 
 const authorizeEndpoint = 'https://accounts.google.com/o/oauth2/v2/auth'
@@ -21,13 +21,13 @@ export class Google implements OAuth2ProviderWithPKCE {
 	private client: OAuth2Client
 	private clientSecret: string
 
-	constructor() {
-		const googleConfig = WibeApp.config.authentication?.providers?.google
+	constructor(config: WibeConfig<any>) {
+		const googleConfig = config.authentication?.providers?.google
 
 		if (!googleConfig) throw new Error('Google config not found')
 
 		const redirectURI = `http://127.0.0.1:${
-			WibeApp?.config?.port || 3000
+			config.port || 3000
 		}/auth/oauth/callback`
 
 		this.client = new OAuth2Client(

@@ -28,6 +28,7 @@ import {
 } from '../graphql'
 import type { ClassInterface, SchemaFields, WibePrimaryTypes } from '../schema'
 import type { WibeAppTypes } from '../server'
+import type { DevWibeAppTypes } from '../utils/helper'
 
 type GraphqlObjectType =
 	| 'Object'
@@ -39,7 +40,7 @@ type GraphqlObjectType =
 type ParseObjectOptions = {
 	required?: boolean
 	description?: string
-	objectToParse: ClassInterface
+	objectToParse: ClassInterface<any>
 	nameOfTheObject: string
 }
 
@@ -72,7 +73,7 @@ export const templateWhereInput: Record<
 interface GraphqlParserFactoryOptions {
 	graphqlObjectType: GraphqlObjectType
 	allObjects: AllObjects
-	schemaFields: SchemaFields
+	schemaFields: SchemaFields<DevWibeAppTypes>
 }
 
 interface GraphqlParserConstructorOptions {
@@ -112,7 +113,7 @@ export const GraphqlParser: GraphqlParserConstructor =
 			isWhereType = false,
 			nameOfTheObject,
 		}: {
-			objectToParse: ClassInterface
+			objectToParse: ClassInterface<DevWibeAppTypes>
 			forceRequiredToFalse?: boolean
 			isWhereType?: boolean
 			callBackForObjectType: ParseObjectCallback

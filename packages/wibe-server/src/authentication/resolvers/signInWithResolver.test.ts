@@ -1,7 +1,5 @@
 import { describe, expect, it, beforeEach, mock, spyOn } from 'bun:test'
-import { WibeApp } from '../../server'
 import { signInWithResolver } from './signInWithResolver'
-import type { Context } from '../../server/interface'
 import { Session } from '../Session'
 
 describe('SignInWith', () => {
@@ -25,13 +23,8 @@ describe('SignInWith', () => {
 	const mockOnSendChallenge = mock(() => Promise.resolve())
 	const mockOnVerifyChallenge = mock(() => Promise.resolve(true))
 
-	beforeEach(() => {
-		mockCreateObject.mockClear()
-		mockOnLogin.mockClear()
-		mockOnSignUp.mockClear()
-
-		// @ts-expect-error
-		WibeApp.config = {
+	const context = {
+		config: {
 			authentication: {
 				session: {
 					cookieSession: true,
@@ -63,7 +56,13 @@ describe('SignInWith', () => {
 					},
 				],
 			},
-		}
+		},
+	}
+
+	beforeEach(() => {
+		mockCreateObject.mockClear()
+		mockOnLogin.mockClear()
+		mockOnSignUp.mockClear()
 	})
 
 	it('should call the secondary factor authentication on signIn', async () => {
@@ -81,7 +80,7 @@ describe('SignInWith', () => {
 					},
 				},
 			},
-			{} as any,
+			context,
 		)
 
 		expect(mockOnLogin).toHaveBeenCalledTimes(1)
@@ -90,7 +89,7 @@ describe('SignInWith', () => {
 				email: 'email@test.fr',
 				password: 'password',
 			},
-			context: expect.anything(),
+			context: expect.any(Object),
 		})
 
 		expect(mockOnSendChallenge).toHaveBeenCalledTimes(1)
@@ -103,8 +102,6 @@ describe('SignInWith', () => {
 	})
 
 	it('should throw an error if no custom authentication configuration is provided', async () => {
-		WibeApp.config.authentication = undefined
-
 		expect(
 			signInWithResolver(
 				{},
@@ -118,28 +115,12 @@ describe('SignInWith', () => {
 						},
 					},
 				},
-				{} as Context,
+				{ config: { authentication: undefined } } as any,
 			),
 		).rejects.toThrow('No custom authentication methods found')
 	})
 
 	it('should throw an error if a custom authentication is provided but not in the custom authentication config', async () => {
-		WibeApp.config.authentication = {
-			customAuthenticationMethods: [
-				{
-					name: 'phonePassword',
-					input: {
-						email: { type: 'Email', required: true },
-						password: { type: 'String', required: true },
-					},
-					provider: {
-						onSignUp: mockOnSignUp,
-						onSignIn: mockOnLogin,
-					},
-				},
-			],
-		}
-
 		expect(
 			signInWithResolver(
 				{},
@@ -153,7 +134,31 @@ describe('SignInWith', () => {
 						},
 					},
 				},
-				{} as Context,
+				{
+					config: {
+						authentication: {
+							customAuthenticationMethods: [
+								{
+									name: 'phonePassword',
+									input: {
+										email: {
+											type: 'Email',
+											required: true,
+										},
+										password: {
+											type: 'String',
+											required: true,
+										},
+									},
+									provider: {
+										onSignUp: mockOnSignUp,
+										onSignIn: mockOnLogin,
+									},
+								},
+							],
+						},
+					},
+				} as any,
 			),
 		).rejects.toThrow('No available custom authentication methods found')
 	})
@@ -187,6 +192,7 @@ describe('SignInWith', () => {
 			},
 			{
 				response: mockResponse,
+				config: context.config,
 			} as any,
 		)
 
@@ -201,7 +207,7 @@ describe('SignInWith', () => {
 				email: 'email@test.fr',
 				password: 'password',
 			},
-			context: expect.anything(),
+			context: expect.any(Object),
 		})
 
 		expect(mockSetCookie).toHaveBeenCalledTimes(2)

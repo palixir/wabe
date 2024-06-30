@@ -1,5 +1,4 @@
-import { beforeAll, describe, expect, it, mock, afterEach } from 'bun:test'
-import { WibeApp } from '..'
+import { describe, expect, it, mock, afterEach } from 'bun:test'
 import { initializeRoles } from './roles'
 
 describe('Roles', () => {
@@ -9,37 +8,31 @@ describe('Roles', () => {
 		createObjects: mockCreateObjects,
 	} as any
 
-	beforeAll(() => {
-		WibeApp.config = {
-			authentication: {
-				roles: ['Role1', 'Role2'],
-			},
-		} as any
-	})
+	const config = {
+		authentication: {
+			roles: ['Role1', 'Role2'],
+		},
+	} as any
 
 	afterEach(() => {
 		mockCreateObjects.mockClear()
 	})
 
 	it('should create all roles', async () => {
-		await initializeRoles(databaseController)
+		await initializeRoles(databaseController, config)
 
 		expect(mockCreateObjects).toHaveBeenCalledTimes(1)
 		expect(mockCreateObjects).toHaveBeenCalledWith({
 			className: 'Role',
-			context: { isRoot: true, databaseController },
+			context: { isRoot: true, databaseController, config },
 			data: [{ name: 'Role1' }, { name: 'Role2' }],
 		})
 	})
 
 	it('should call database if there is no roles', async () => {
-		WibeApp.config = {
-			authentication: {
-				roles: [],
-			},
-		} as any
-
-		await initializeRoles(databaseController)
+		await initializeRoles(databaseController, {
+			authentication: { roles: [] },
+		} as any)
 
 		expect(mockCreateObjects).toHaveBeenCalledTimes(0)
 	})

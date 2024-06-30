@@ -4,7 +4,7 @@ import {
 	defaultBeforeUpdateUpload,
 } from '../files/hookUploadFile'
 import type { Context } from '../server/interface'
-import { WibeApp, type WibeAppTypes } from '../server'
+import type { WibeConfig, WibeAppTypes } from '../server'
 import { HookObject } from './HookObject'
 import {
 	defaultBeforeCreateForCreatedAt,
@@ -29,7 +29,7 @@ export enum OperationType {
 	BeforeRead = 'beforeRead',
 }
 
-export type Hook<T extends keyof WibeAppTypes['types']> = {
+export type Hook<T extends WibeAppTypes> = {
 	operationType: OperationType
 	// If the className is undefined the hook is called on each class
 	className?: T
@@ -51,20 +51,22 @@ export const _findHooksByPriority = async <
 	className,
 	operationType,
 	priority,
+	config,
 }: {
 	operationType: OperationType
 	className: T
 	priority: number
+	config: WibeConfig<any>
 }) =>
-	WibeApp.config.hooks?.filter(
+	config.hooks?.filter(
 		(hook) =>
 			hook.operationType === operationType &&
 			hook.priority === priority &&
 			(className === hook.className || !hook.className),
 	) || []
 
-const getHooksOrderByPriorities = () =>
-	WibeApp.config.hooks
+const getHooksOrderByPriorities = (config: WibeConfig<any>) =>
+	config.hooks
 		?.reduce((acc, hook) => {
 			if (!acc.includes(hook.priority)) acc.push(hook.priority)
 
@@ -84,7 +86,7 @@ export const initializeHook = async <T extends keyof WibeAppTypes['types']>({
 	where?: WhereType<any>
 	className: T
 	newData: TypedNewData<any>
-	context: Context
+	context: Context<any>
 	skipHooks?: boolean
 }) => {
 	if (skipHooks) return { run: async () => ({}) }
@@ -94,6 +96,7 @@ export const initializeHook = async <T extends keyof WibeAppTypes['types']>({
 		context: {
 			isRoot: true,
 			databaseController: context.databaseController,
+			config: context.config,
 		},
 		fields: [],
 		where: where ? where : { id: { equalTo: id } },
@@ -102,13 +105,17 @@ export const initializeHook = async <T extends keyof WibeAppTypes['types']>({
 
 	// We need to have at least one loop on all hooks
 	const objectsToMap =
-		objects && objects.length > 0 ? objects : [newData || {}]
+		objects && objects.length > 0
+			? objects
+			: ([newData || {}] as Array<any>)
 
 	return {
 		run: async (
 			operationType: OperationType,
 		): Promise<Record<keyof WibeAppTypes['types'][T], any>> => {
-			const hooksOrderByPriorities = getHooksOrderByPriorities()
+			const hooksOrderByPriorities = getHooksOrderByPriorities(
+				context.config,
+			)
 
 			const res = await Promise.all(
 				objectsToMap.map(async (object) => {
@@ -129,6 +136,7 @@ export const initializeHook = async <T extends keyof WibeAppTypes['types']>({
 								className,
 								operationType,
 								priority,
+								config: context.config,
 							})
 
 							await Promise.all(

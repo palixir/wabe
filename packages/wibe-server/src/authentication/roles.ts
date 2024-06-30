@@ -1,9 +1,10 @@
-import { type DatabaseController, WibeApp, type WibeAppTypes } from '..'
+import type { DatabaseController, WibeConfig } from '..'
 
 export const initializeRoles = async (
-	databaseController: DatabaseController<WibeAppTypes>,
+	databaseController: DatabaseController<any>,
+	config: WibeConfig<any>,
 ) => {
-	const roles = WibeApp.config?.authentication?.roles || []
+	const roles = config?.authentication?.roles || []
 
 	if (roles.length === 0) return
 
@@ -13,7 +14,7 @@ export const initializeRoles = async (
 
 	await databaseController.createObjects({
 		className: 'Role',
-		context: { isRoot: true, databaseController },
+		context: { isRoot: true, databaseController, config },
 		data: objectsToCreate,
 	})
 }
