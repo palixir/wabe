@@ -5,7 +5,7 @@ import {
 	defaultBeforeUpdateUpload,
 } from '../files/hookUploadFile'
 import type { Context } from '../server/interface'
-import { WibeApp } from '../server'
+import { WibeApp, WibeAppTypes } from '../server'
 import { HookObject } from './HookObject'
 import {
 	defaultBeforeCreateForCreatedAt,
@@ -61,7 +61,9 @@ export type TypedNewData<T extends keyof WibeSchemaTypes> = Record<
 	any
 > | null
 
-export const _findHooksByPriority = async <T extends keyof WibeSchemaTypes>({
+export const _findHooksByPriority = async <
+	T extends keyof WibeAppTypes['types'],
+>({
 	className,
 	operationType,
 	priority,
@@ -86,7 +88,7 @@ const getHooksOrderByPriorities = () =>
 		}, [] as number[])
 		.sort((a, b) => a - b) || []
 
-export const initializeHook = async <T extends keyof WibeSchemaTypes>({
+export const initializeHook = async <T extends keyof WibeAppTypes['types']>({
 	className,
 	newData,
 	context,
@@ -96,7 +98,7 @@ export const initializeHook = async <T extends keyof WibeSchemaTypes>({
 }: {
 	id?: string
 	where?: WhereType<any>
-	className: keyof WibeSchemaTypes
+	className: T
 	newData: TypedNewData<any>
 	context: Context
 	skipHooks?: boolean
@@ -121,7 +123,7 @@ export const initializeHook = async <T extends keyof WibeSchemaTypes>({
 	return {
 		run: async (
 			operationType: OperationType,
-		): Promise<Record<keyof WibeSchemaTypes[T], any>> => {
+		): Promise<Record<keyof WibeAppTypes['types'][T], any>> => {
 			const hooksOrderByPriorities = getHooksOrderByPriorities()
 
 			const res = await Promise.all(

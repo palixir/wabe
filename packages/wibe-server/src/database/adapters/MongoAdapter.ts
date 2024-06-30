@@ -20,10 +20,9 @@ import type {
 	WhereType,
 	DeleteObjectOptions,
 } from './adaptersInterface'
-import type { WibeSchemaTypes } from '../../generated/wibe'
-import { WibeApp } from '../..'
+import type { WibeAppTypes } from '../../server'
 
-export const buildMongoWhereQuery = <T extends keyof WibeSchemaTypes>(
+export const buildMongoWhereQuery = <T extends keyof WibeAppTypes['types']>(
 	where?: WhereType<T>,
 ): Record<string, any> => {
 	if (!where) return {}
@@ -118,7 +117,7 @@ export const buildMongoWhereQuery = <T extends keyof WibeSchemaTypes>(
 	)
 }
 
-export class MongoAdapter implements DatabaseAdapter {
+export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 	public options: AdapterOptions
 	public database?: Db
 	private client: MongoClient
@@ -145,21 +144,19 @@ export class MongoAdapter implements DatabaseAdapter {
 		return this.client.close()
 	}
 
-	async createClassIfNotExist(className: string) {
+	async createClassIfNotExist(className: keyof T['types']) {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 
+		// @ts-expect-error
 		const collection = this.database.collection(className)
 
 		return collection
 	}
 
-	async getObject<
-		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T],
-	>(
-		params: GetObjectOptions<T, K>,
-	): Promise<Pick<WibeSchemaTypes[T], K> | null> {
+	async getObject<U extends keyof T['types'], K extends keyof T['types'][U]>(
+		params: GetObjectOptions<U, K>,
+	): Promise<Pick<T['types'][U], K> | null> {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 
@@ -196,13 +193,12 @@ export class MongoAdapter implements DatabaseAdapter {
 		return {
 			...resultWithout_Id,
 			...(isIdInProjection ? { id: _id.toString() } : undefined),
-		} as Pick<WibeSchemaTypes[T], K>
+		} as Pick<T['types'][U], K>
 	}
 
-	async getObjects<
-		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T],
-	>(params: GetObjectsOptions<T, K>): Promise<Pick<WibeSchemaTypes[T], K>[]> {
+	async getObjects<U extends keyof T['types'], K extends keyof T['types'][U]>(
+		params: GetObjectsOptions<U, K>,
+	): Promise<Pick<T['types'][U], K>[]> {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 
@@ -244,17 +240,15 @@ export class MongoAdapter implements DatabaseAdapter {
 			return {
 				...resultWithout_Id,
 				...(isIdInProjection ? { id: _id.toString() } : undefined),
-			} as Pick<WibeSchemaTypes[T], K>
+			} as Pick<T['types'][U], K>
 		})
 	}
 
 	async createObject<
-		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T],
-		W extends keyof WibeSchemaTypes[T],
-	>(
-		params: CreateObjectOptions<T, K, W>,
-	): Promise<Pick<WibeSchemaTypes[T], K>> {
+		U extends keyof T['types'],
+		K extends keyof T['types'][U],
+		W extends keyof T['types'][U],
+	>(params: CreateObjectOptions<U, K, W>): Promise<Pick<T['types'][U], K>> {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 
@@ -271,12 +265,12 @@ export class MongoAdapter implements DatabaseAdapter {
 	}
 
 	async createObjects<
-		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T],
-		W extends keyof WibeSchemaTypes[T],
+		U extends keyof T['types'],
+		K extends keyof T['types'][U],
+		W extends keyof T['types'][U],
 	>(
-		params: CreateObjectsOptions<T, K, W>,
-	): Promise<Pick<WibeSchemaTypes[T], K>[]> {
+		params: CreateObjectsOptions<U, K, W>,
+	): Promise<Pick<T['types'][U], K>[]> {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 
@@ -301,16 +295,14 @@ export class MongoAdapter implements DatabaseAdapter {
 			context,
 		})
 
-		return allObjects as Pick<WibeSchemaTypes[T], K>[]
+		return allObjects as Pick<T['types'][U], K>[]
 	}
 
 	async updateObject<
-		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T],
-		W extends keyof WibeSchemaTypes[T],
-	>(
-		params: UpdateObjectOptions<T, K, W>,
-	): Promise<Pick<WibeSchemaTypes[T], K>> {
+		U extends keyof T['types'],
+		K extends keyof T['types'][U],
+		W extends keyof T['types'][U],
+	>(params: UpdateObjectOptions<U, K, W>): Promise<Pick<T['types'][U], K>> {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 
@@ -328,12 +320,12 @@ export class MongoAdapter implements DatabaseAdapter {
 	}
 
 	async updateObjects<
-		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T],
-		W extends keyof WibeSchemaTypes[T],
+		U extends keyof T['types'],
+		K extends keyof T['types'][U],
+		W extends keyof T['types'][U],
 	>(
-		params: UpdateObjectsOptions<T, K, W>,
-	): Promise<Pick<WibeSchemaTypes[T], K>[]> {
+		params: UpdateObjectsOptions<U, K, W>,
+	): Promise<Pick<T['types'][U], K>[]> {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 
@@ -360,7 +352,7 @@ export class MongoAdapter implements DatabaseAdapter {
 		})
 
 		const orStatement = objectsBeforeUpdate.map((object) => ({
-			id: { equalTo: new ObjectId(object.id) },
+			id: { equalTo: ObjectId.createFromHexString(object.id) },
 		}))
 
 		const objects = await context.databaseController.getObjects({
@@ -378,9 +370,9 @@ export class MongoAdapter implements DatabaseAdapter {
 	}
 
 	async deleteObject<
-		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T],
-	>(params: DeleteObjectOptions<T, K>) {
+		U extends keyof T['types'],
+		K extends keyof T['types'][U],
+	>(params: DeleteObjectOptions<U, K>) {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 
@@ -392,9 +384,9 @@ export class MongoAdapter implements DatabaseAdapter {
 	}
 
 	async deleteObjects<
-		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T],
-	>(params: DeleteObjectsOptions<T, K>) {
+		U extends keyof T['types'],
+		K extends keyof T['types'][U],
+	>(params: DeleteObjectsOptions<U, K>) {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 

@@ -32,11 +32,17 @@ interface WibeConfig {
 	file?: FileConfig
 }
 
-export class WibeApp {
+export type WibeAppTypes = {
+	types: Record<any, any>
+	scalars: string
+	enums: string
+}
+
+export class WibeApp<T extends WibeAppTypes> {
 	private server: Wobe
 
 	static config: WibeConfig
-	public databaseController: DatabaseController
+	public databaseController: DatabaseController<T>
 
 	constructor({
 		port,
@@ -75,7 +81,7 @@ export class WibeApp {
 			databaseUrl: database.url,
 		})
 
-		this.databaseController = new DatabaseController(databaseAdapter)
+		this.databaseController = new DatabaseController<T>(databaseAdapter)
 
 		this.loadDefaultRoutes()
 		this.loadHooks()

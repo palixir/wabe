@@ -1,8 +1,8 @@
-import type { WibeSchemaTypes } from '../../generated/wibe'
 import type { Context } from '../../server/interface'
+import type { WibeAppTypes } from '../../server'
 
-type WhereAggregation<T extends keyof WibeSchemaTypes> = {
-	[key in keyof WibeSchemaTypes[T] | 'id']: {
+type WhereAggregation<T extends keyof WibeAppTypes['types']> = {
+	[key in keyof WibeAppTypes['types'][T] | 'id']: {
 		equalTo?: any
 		notEqualTo?: any
 		greaterThan?: any
@@ -16,12 +16,12 @@ type WhereAggregation<T extends keyof WibeSchemaTypes> = {
 	}
 }
 
-type WhereConditional<T extends keyof WibeSchemaTypes> = {
+type WhereConditional<T extends keyof WibeAppTypes['types']> = {
 	OR?: Array<WhereType<T>>
 	AND?: Array<WhereType<T>>
 }
 
-export type WhereType<T extends keyof WibeSchemaTypes> = Partial<
+export type WhereType<T extends keyof WibeAppTypes['types']> = Partial<
 	WhereAggregation<T>
 > &
 	WhereConditional<T>
@@ -33,8 +33,8 @@ export interface AdapterOptions {
 
 // TODO: It could be cool if fields type supports something like user.id, user.email
 export interface GetObjectOptions<
-	T extends keyof WibeSchemaTypes,
-	K extends keyof WibeSchemaTypes[T],
+	T extends keyof WibeAppTypes['types'],
+	K extends keyof WibeAppTypes['types'][T],
 > {
 	className: T
 	id: string
@@ -43,8 +43,8 @@ export interface GetObjectOptions<
 }
 
 export interface GetObjectsOptions<
-	T extends keyof WibeSchemaTypes,
-	K extends keyof WibeSchemaTypes[T],
+	T extends keyof WibeAppTypes['types'],
+	K extends keyof WibeAppTypes['types'][T],
 > {
 	className: T
 	where?: WhereType<T>
@@ -56,9 +56,9 @@ export interface GetObjectsOptions<
 }
 
 export interface CreateObjectOptions<
-	T extends keyof WibeSchemaTypes,
-	K extends keyof WibeSchemaTypes[T],
-	W extends keyof WibeSchemaTypes[T],
+	T extends keyof WibeAppTypes['types'],
+	K extends keyof WibeAppTypes['types'][T],
+	W extends keyof WibeAppTypes['types'][T],
 > {
 	className: T
 	data: Record<W, any>
@@ -66,9 +66,9 @@ export interface CreateObjectOptions<
 	context: Context
 }
 export interface CreateObjectsOptions<
-	T extends keyof WibeSchemaTypes,
-	K extends keyof WibeSchemaTypes[T],
-	W extends keyof WibeSchemaTypes[T],
+	T extends keyof WibeAppTypes['types'],
+	K extends keyof WibeAppTypes['types'][T],
+	W extends keyof WibeAppTypes['types'][T],
 > {
 	className: T
 	data: Array<Record<W, any>>
@@ -79,9 +79,9 @@ export interface CreateObjectsOptions<
 }
 
 export interface UpdateObjectOptions<
-	T extends keyof WibeSchemaTypes,
-	K extends keyof WibeSchemaTypes[T],
-	W extends keyof WibeSchemaTypes[T],
+	T extends keyof WibeAppTypes['types'],
+	K extends keyof WibeAppTypes['types'][T],
+	W extends keyof WibeAppTypes['types'][T],
 > {
 	className: T
 	id: string
@@ -91,9 +91,9 @@ export interface UpdateObjectOptions<
 }
 
 export interface UpdateObjectsOptions<
-	T extends keyof WibeSchemaTypes,
-	K extends keyof WibeSchemaTypes[T],
-	W extends keyof WibeSchemaTypes[T],
+	T extends keyof WibeAppTypes['types'],
+	K extends keyof WibeAppTypes['types'][T],
+	W extends keyof WibeAppTypes['types'][T],
 > {
 	className: T
 	where: WhereType<T>
@@ -105,8 +105,8 @@ export interface UpdateObjectsOptions<
 }
 
 export interface DeleteObjectOptions<
-	T extends keyof WibeSchemaTypes,
-	K extends keyof WibeSchemaTypes[T],
+	T extends keyof WibeAppTypes['types'],
+	K extends keyof WibeAppTypes['types'][T],
 > {
 	className: T
 	id: string
@@ -115,8 +115,8 @@ export interface DeleteObjectOptions<
 }
 
 export interface DeleteObjectsOptions<
-	T extends keyof WibeSchemaTypes,
-	K extends keyof WibeSchemaTypes[T],
+	T extends keyof WibeAppTypes['types'],
+	K extends keyof WibeAppTypes['types'][T],
 > {
 	className: T
 	where: WhereType<T>
@@ -133,52 +133,54 @@ export interface DatabaseAdapter {
 	createClassIfNotExist(className: string): Promise<any>
 
 	getObject<
-		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T],
+		T extends keyof WibeAppTypes['types'],
+		K extends keyof WibeAppTypes['types'][T],
 	>(
 		params: GetObjectOptions<T, K>,
-	): Promise<Pick<WibeSchemaTypes[T], K> | null>
+	): Promise<Pick<WibeAppTypes['types'][T], K> | null>
 	getObjects<
-		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T],
-	>(params: GetObjectsOptions<T, K>): Promise<Pick<WibeSchemaTypes[T], K>[]>
+		T extends keyof WibeAppTypes['types'],
+		K extends keyof WibeAppTypes['types'][T],
+	>(
+		params: GetObjectsOptions<T, K>,
+	): Promise<Pick<WibeAppTypes['types'][T], K>[]>
 
 	createObject<
-		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T],
-		W extends keyof WibeSchemaTypes[T],
+		T extends keyof WibeAppTypes['types'],
+		K extends keyof WibeAppTypes['types'][T],
+		W extends keyof WibeAppTypes['types'][T],
 	>(
 		params: CreateObjectOptions<T, K, W>,
-	): Promise<Pick<WibeSchemaTypes[T], K>>
+	): Promise<Pick<WibeAppTypes['types'][T], K>>
 	createObjects<
-		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T],
-		W extends keyof WibeSchemaTypes[T],
+		T extends keyof WibeAppTypes['types'],
+		K extends keyof WibeAppTypes['types'][T],
+		W extends keyof WibeAppTypes['types'][T],
 	>(
 		params: CreateObjectsOptions<T, K, W>,
-	): Promise<Pick<WibeSchemaTypes[T], K>[]>
+	): Promise<Pick<WibeAppTypes['types'][T], K>[]>
 
 	updateObject<
-		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T],
-		W extends keyof WibeSchemaTypes[T],
+		T extends keyof WibeAppTypes['types'],
+		K extends keyof WibeAppTypes['types'][T],
+		W extends keyof WibeAppTypes['types'][T],
 	>(
 		params: UpdateObjectOptions<T, K, W>,
-	): Promise<Pick<WibeSchemaTypes[T], K>>
+	): Promise<Pick<WibeAppTypes['types'][T], K>>
 	updateObjects<
-		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T],
-		W extends keyof WibeSchemaTypes[T],
+		T extends keyof WibeAppTypes['types'],
+		K extends keyof WibeAppTypes['types'][T],
+		W extends keyof WibeAppTypes['types'][T],
 	>(
 		params: UpdateObjectsOptions<T, K, W>,
-	): Promise<Pick<WibeSchemaTypes[T], K>[]>
+	): Promise<Pick<WibeAppTypes['types'][T], K>[]>
 
 	deleteObject<
-		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T],
+		T extends keyof WibeAppTypes['types'],
+		K extends keyof WibeAppTypes['types'][T],
 	>(params: DeleteObjectOptions<T, K>): Promise<void>
 	deleteObjects<
-		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T],
+		T extends keyof WibeAppTypes['types'],
+		K extends keyof WibeAppTypes['types'][T],
 	>(params: DeleteObjectsOptions<T, K>): Promise<void>
 }

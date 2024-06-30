@@ -1,11 +1,20 @@
 import { runDatabase } from 'wibe-mongodb-launcher'
 import { WibeApp } from '../src'
 import { DatabaseEnum } from '../src/database'
+import type {
+	WibeSchemaEnums,
+	WibeSchemaScalars,
+	WibeSchemaTypes,
+} from '../src/generated/wibe'
 
 const run = async () => {
 	await runDatabase()
 
-	const wibe = new WibeApp({
+	const wibe = new WibeApp<{
+		types: WibeSchemaTypes
+		scalars: WibeSchemaScalars
+		enums: WibeSchemaEnums
+	}>({
 		rootKey:
 			'0uwFvUxM$ceFuF1aEtTtZMa7DUN2NZudqgY5ve5W*QCyb58cwMj9JeoaV@d#%29v&aJzswuudVU1%nAT+rxS0Bh&OkgBYc0PH18*',
 		authentication: {

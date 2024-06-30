@@ -37,13 +37,9 @@ export class Session {
 			limit: 1,
 			fields: [
 				'id',
-				// @ts-expect-error
 				'user.id',
-				// @ts-expect-error
 				'user.email',
-				// @ts-expect-error
 				'user.role.name',
-				// @ts-expect-error
 				'user.role.id',
 				'refreshToken',
 				'refreshTokenExpiresAt',
@@ -53,6 +49,7 @@ export class Session {
 
 		const session = sessions[0]
 
+		// @ts-expect-error
 		const user = session?.user
 
 		return { sessionId: session?.id ?? null, user: user ?? null }

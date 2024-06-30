@@ -1,7 +1,7 @@
-import { WibeApp } from '../..'
+import { WibeApp, type WibeAppTypes } from '../..'
 import type { WibeSchemaTypes } from '../../generated/wibe'
-import type { Context } from '../../server/interface'
 import { OperationType, initializeHook } from '../../hooks'
+import type { Context } from '../../server/interface'
 import type {
 	CreateObjectOptions,
 	CreateObjectsOptions,
@@ -28,7 +28,7 @@ interface PointerFields {
 	pointers: PointerObject
 }
 
-export class DatabaseController {
+export class DatabaseController<T extends WibeAppTypes> {
 	public adapter: DatabaseAdapter
 
 	constructor(adapter: DatabaseAdapter) {
@@ -47,8 +47,12 @@ export class DatabaseController {
 		return this.adapter.createClassIfNotExist(className)
 	}
 
-	_getPointerObject(className: string, fields: string[]): PointerFields {
+	_getPointerObject(
+		className: keyof T['types'],
+		fields: string[],
+	): PointerFields {
 		const realClass = WibeApp.config.schema.classes.find(
+			// @ts-expect-error
 			(c) => c.name.toLowerCase() === className.toLowerCase(),
 		)
 
@@ -90,12 +94,13 @@ export class DatabaseController {
 		)
 	}
 
-	_isRelationField<T extends keyof WibeSchemaTypes>(
-		originClassName: T,
+	_isRelationField<U extends keyof T['types']>(
+		originClassName: U,
 		pointerClassName: string,
 	) {
 		return WibeApp.config.schema.classes.some(
 			(c) =>
+				// @ts-expect-error
 				c.name.toLowerCase() === originClassName.toLowerCase() &&
 				Object.values(c.fields).find(
 					(field) =>
@@ -106,12 +111,13 @@ export class DatabaseController {
 		)
 	}
 
-	_isPointerField<T extends keyof WibeSchemaTypes>(
-		originClassName: T,
+	_isPointerField<U extends keyof T['types']>(
+		originClassName: U,
 		pointerClassName: string,
 	) {
 		return WibeApp.config.schema.classes.some(
 			(c) =>
+				// @ts-expect-error
 				c.name.toLowerCase() === originClassName.toLowerCase() &&
 				Object.values(c.fields).find(
 					(field) =>
@@ -123,14 +129,14 @@ export class DatabaseController {
 	}
 
 	async _getFinalObjectWithPointer<
-		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T],
+		U extends keyof T['types'],
+		K extends keyof T['types'][U],
 	>(
-		objectData: Pick<WibeSchemaTypes[T], K> | null,
+		objectData: Pick<T['types'][U], K> | null,
 		pointersObject: PointerObject,
-		originClassName: T,
+		originClassName: U,
 		context: Context,
-	) {
+	): Promise<Record<any, any>> {
 		return Object.entries(pointersObject).reduce(
 			async (
 				accPromise,
@@ -145,9 +151,7 @@ export class DatabaseController {
 
 				if (isPointer) {
 					const pointerObject = await this.getObject({
-						// @ts-expect-error
 						className: pointerClass,
-						// @ts-expect-error
 						fields: fieldsOfPointerClass,
 						// @ts-expect-error
 						id: objectData[pointerField],
@@ -167,9 +171,7 @@ export class DatabaseController {
 
 				if (isRelation) {
 					const relationObjects = await this.getObjects({
-						// @ts-expect-error
 						className: pointerClass,
-						// @ts-expect-error
 						fields: fieldsOfPointerClass,
 						// @ts-expect-error
 						where: { id: { in: objectData[pointerField] } },
@@ -190,18 +192,19 @@ export class DatabaseController {
 			},
 			Promise.resolve({
 				...objectData,
-			}),
+			} as Record<any, any>),
 		)
 	}
 
-	async _getWhereObjectWithPointerOrRelation<T extends keyof WibeSchemaTypes>(
-		className: T,
-		where: WhereType<T>,
+	async _getWhereObjectWithPointerOrRelation<U extends keyof T['types']>(
+		className: U,
+		where: WhereType<U>,
 		context: Context,
 	) {
-		const whereKeys = Object.keys(where) as Array<keyof WhereType<T>>
+		const whereKeys = Object.keys(where) as Array<keyof WhereType<U>>
 
 		const realClass = WibeApp.config.schema.classes.find(
+			// @ts-expect-error
 			(c) => c.name.toLowerCase() === className.toLowerCase(),
 		)
 
@@ -256,12 +259,9 @@ export class DatabaseController {
 		}
 	}
 
-	async getObject<
-		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T],
-	>(
-		params: GetObjectOptions<T, K>,
-	): Promise<Pick<WibeSchemaTypes[T], K> | null> {
+	async getObject<U extends keyof T['types'], K extends keyof T['types'][U]>(
+		params: GetObjectOptions<U, K>,
+	): Promise<Pick<T['types'][U], K> | null> {
 		const fields = (params.fields || []) as string[]
 
 		const { pointersFieldsId, pointers } = this._getPointerObject(
@@ -284,7 +284,6 @@ export class DatabaseController {
 
 		const dataOfCurrentObject = await this.adapter.getObject({
 			...params,
-			// @ts-expect-error
 			fields: [...fieldsWithoutPointers, ...(pointersFieldsId || [])],
 		})
 
@@ -300,10 +299,9 @@ export class DatabaseController {
 		) as any
 	}
 
-	async getObjects<
-		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T],
-	>(params: GetObjectsOptions<T, K>): Promise<Pick<WibeSchemaTypes[T], K>[]> {
+	async getObjects<U extends keyof T['types'], K extends keyof T['types'][U]>(
+		params: GetObjectsOptions<U, K>,
+	): Promise<Pick<T['types'][U], K>[]> {
 		const fields = (params.fields || []) as string[]
 
 		const { pointersFieldsId, pointers } = this._getPointerObject(
@@ -334,7 +332,6 @@ export class DatabaseController {
 		const dataOfCurrentObject = await this.adapter.getObjects({
 			...params,
 			where: params.where ? where : undefined,
-			// @ts-expect-error
 			fields: [...fieldsWithoutPointers, ...(pointersFieldsId || [])],
 		})
 
@@ -349,14 +346,14 @@ export class DatabaseController {
 					params.context,
 				),
 			),
-		) as Promise<Pick<WibeSchemaTypes[T], K>[]>
+		) as Promise<Pick<T['types'][U], K>[]>
 	}
 
 	async createObject<
-		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T],
-		W extends keyof WibeSchemaTypes[T],
-	>(params: CreateObjectOptions<T, K, W>) {
+		U extends keyof T['types'],
+		K extends keyof T['types'][U],
+		W extends keyof T['types'][U],
+	>(params: CreateObjectOptions<U, K, W>) {
 		const hook = await initializeHook({
 			className: params.className,
 			context: params.context,
@@ -376,10 +373,10 @@ export class DatabaseController {
 	}
 
 	async createObjects<
-		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T],
-		W extends keyof WibeSchemaTypes[T],
-	>(params: CreateObjectsOptions<T, K, W>) {
+		U extends keyof T['types'],
+		K extends keyof T['types'][U],
+		W extends keyof T['types'][U],
+	>(params: CreateObjectsOptions<U, K, W>) {
 		if (params.data.length === 0) return []
 
 		const hooks = await Promise.all(
@@ -409,10 +406,10 @@ export class DatabaseController {
 	}
 
 	async updateObject<
-		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T],
-		W extends keyof WibeSchemaTypes[T],
-	>(params: UpdateObjectOptions<T, K, W>) {
+		U extends keyof T['types'],
+		K extends keyof T['types'][U],
+		W extends keyof T['types'][U],
+	>(params: UpdateObjectOptions<U, K, W>) {
 		const hook = await initializeHook({
 			className: params.className,
 			context: params.context,
@@ -433,10 +430,10 @@ export class DatabaseController {
 	}
 
 	async updateObjects<
-		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T],
-		W extends keyof WibeSchemaTypes[T],
-	>(params: UpdateObjectsOptions<T, K, W>) {
+		U extends keyof T['types'],
+		K extends keyof T['types'][U],
+		W extends keyof T['types'][U],
+	>(params: UpdateObjectsOptions<U, K, W>) {
 		const whereObject = await this._getWhereObjectWithPointerOrRelation(
 			params.className,
 			params.where || {},
@@ -464,9 +461,9 @@ export class DatabaseController {
 	}
 
 	async deleteObject<
-		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T],
-	>(params: DeleteObjectOptions<T, K>) {
+		U extends keyof T['types'],
+		K extends keyof T['types'][U],
+	>(params: DeleteObjectOptions<U, K>) {
 		const objectBeforeDelete = await this.getObject(params)
 
 		if (!objectBeforeDelete) return null
@@ -488,9 +485,9 @@ export class DatabaseController {
 	}
 
 	async deleteObjects<
-		T extends keyof WibeSchemaTypes,
-		K extends keyof WibeSchemaTypes[T],
-	>(params: DeleteObjectsOptions<T, K>) {
+		U extends keyof T['types'],
+		K extends keyof T['types'][U],
+	>(params: DeleteObjectsOptions<U, K>) {
 		const whereObject = await this._getWhereObjectWithPointerOrRelation(
 			params.className,
 			params.where || {},

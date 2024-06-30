@@ -178,7 +178,6 @@ export const remove = async ({
 	if (typeOfExecution === 'updateMany' && where) {
 		const allObjectsMatchedWithWhere =
 			await context.databaseController.getObjects({
-				// @ts-expect-error
 				className,
 				where,
 				fields: ['id'],
@@ -190,10 +189,8 @@ export const remove = async ({
 				const olderValues = object[fieldName]?.[fieldName] || []
 
 				return context.databaseController.updateObject({
-					// @ts-expect-error
 					className,
 					id: object.id,
-					// @ts-expect-error
 					data: {
 						[fieldName]: olderValues.filter(
 							(olderValue: any) => !remove.includes(olderValue),

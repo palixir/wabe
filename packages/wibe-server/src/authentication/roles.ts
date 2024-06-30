@@ -1,7 +1,7 @@
-import { type DatabaseController, WibeApp } from '..'
+import { type DatabaseController, WibeApp, type WibeAppTypes } from '..'
 
 export const initializeRoles = async (
-	databaseController: DatabaseController,
+	databaseController: DatabaseController<WibeAppTypes>,
 ) => {
 	const roles = WibeApp.config?.authentication?.roles || []
 

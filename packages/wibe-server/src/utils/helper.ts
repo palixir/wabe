@@ -1,6 +1,6 @@
 import { v4 as uuid } from 'uuid'
 import { GraphQLClient } from 'graphql-request'
-import { WibeApp } from '../server'
+import { WibeApp, type WibeAppTypes } from '../server'
 import { DatabaseEnum } from '../database'
 import getPort from 'get-port'
 
@@ -153,7 +153,7 @@ export const setupTests = async () => {
 	return { wibe, port }
 }
 
-export const closeTests = async (wibe: WibeApp) => {
+export const closeTests = async (wibe: WibeApp<WibeAppTypes>) => {
 	await wibe.databaseController.adapter?.close()
 	await wibe.close()
 }
