@@ -8,7 +8,12 @@ import {
 	it,
 } from 'bun:test'
 import type { WibeApp } from '../../server'
-import { closeTests, getGraphqlClient, setupTests } from '../../utils/helper'
+import {
+	type DevWibeAppTypes,
+	closeTests,
+	getGraphqlClient,
+	setupTests,
+} from '../../utils/helper'
 import { type GraphQLClient, gql } from 'graphql-request'
 
 const cleanUsers = async (client: GraphQLClient) => {
@@ -23,7 +28,7 @@ const cleanUsers = async (client: GraphQLClient) => {
 }
 
 describe('GraphQL : E2E', () => {
-	let wibe: WibeApp
+	let wibe: WibeApp<DevWibeAppTypes>
 	let port: number
 	let client: GraphQLClient
 

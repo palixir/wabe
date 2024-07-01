@@ -1,10 +1,15 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test'
 import type { WibeApp } from '../../server'
 import { type GraphQLClient, gql } from 'graphql-request'
-import { closeTests, getGraphqlClient, setupTests } from '../../utils/helper'
+import {
+	type DevWibeAppTypes,
+	closeTests,
+	getGraphqlClient,
+	setupTests,
+} from '../../utils/helper'
 
 describe('GraphQL : Scalars', () => {
-	let wibe: WibeApp
+	let wibe: WibeApp<DevWibeAppTypes>
 	let port: number
 	let client: GraphQLClient
 

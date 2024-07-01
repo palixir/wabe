@@ -42,7 +42,6 @@ describe('Resolver', () => {
 						},
 						field2: {
 							type: 'Pointer',
-							// @ts-expect-error
 							class: 'TestClass',
 						},
 					},
@@ -572,6 +571,7 @@ describe('Resolver', () => {
 
 		const updatedFields = await executeRelationOnFields({
 			className: 'TestClass',
+			// @ts-expect-error
 			fields,
 			context: context as any,
 		})

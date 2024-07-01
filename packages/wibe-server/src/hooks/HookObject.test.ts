@@ -1,16 +1,18 @@
 import { describe, expect, it } from 'bun:test'
 import { HookObject } from './HookObject'
 import { OperationType } from '.'
+import type { DevWibeAppTypes } from '../utils/helper'
 
 describe('HookObject', () => {
 	it('should return correctly value depends on the update state of the field', () => {
 		const userData = { name: 'John Doe' }
 
-		const hookObject = new HookObject({
+		const hookObject = new HookObject<DevWibeAppTypes>({
 			className: 'User',
-			newData: userData as any,
+			newData: userData,
 			context: {} as any,
 			operationType: OperationType.BeforeUpdate,
+			object: {},
 		})
 
 		// @ts-expect-error
@@ -27,13 +29,13 @@ describe('HookObject', () => {
 			newData: userData as any,
 			operationType: OperationType.BeforeCreate,
 			context: {} as any,
+			object: {},
 		})
 
 		// @ts-expect-error
 		hookObject.upsertNewData('name', 'tata')
 
 		expect(hookObject.getNewData()).toEqual({
-			// @ts-expect-error
 			name: 'tata',
 			age: 30,
 		})
@@ -47,6 +49,7 @@ describe('HookObject', () => {
 			newData: userData as any,
 			operationType: OperationType.AfterCreate,
 			context: {} as any,
+			object: {},
 		})
 
 		// @ts-expect-error
@@ -55,7 +58,6 @@ describe('HookObject', () => {
 		)
 
 		expect(hookObject.getNewData()).toEqual({
-			// @ts-expect-error
 			name: 'John Doe',
 			age: 30,
 		})

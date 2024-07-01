@@ -73,9 +73,7 @@ describe('WibeGraphqlParser', () => {
 		const simpleObject = graphqlParser({
 			graphqlObjectType: {} as any,
 			schemaFields: {} as any,
-			allGraphQLInputObjectType: {} as any,
-			allGraphQLObjectType: {} as any,
-			allGraphQLWhereInputObjectType: {} as any,
+			allObjects: {} as any,
 		})._parseWibeObject({
 			description: 'A simple object',
 			required: true,
@@ -114,9 +112,7 @@ describe('WibeGraphqlParser', () => {
 		const recursiveObject = graphqlParser({
 			graphqlObjectType: {} as any,
 			schemaFields: {} as any,
-			allGraphQLInputObjectType: {} as any,
-			allGraphQLObjectType: {} as any,
-			allGraphQLWhereInputObjectType: {} as any,
+			allObjects: {} as any,
 		})._parseWibeObject({
 			description: 'A recursive object',
 			required: true,
@@ -172,9 +168,7 @@ describe('WibeGraphqlParser', () => {
 				name: { type: 'String', required: true },
 			},
 			graphqlObjectType: 'Object',
-			allGraphQLInputObjectType: [],
-			allGraphQLObjectType: [],
-			allGraphQLWhereInputObjectType: [],
+			allObjects: {},
 		}).getGraphqlFields('SimpleObject')
 
 		expect(simpleObject).toEqual({
@@ -203,9 +197,7 @@ describe('WibeGraphqlParser', () => {
 				},
 			},
 			graphqlObjectType: 'Object',
-			allGraphQLInputObjectType: [],
-			allGraphQLObjectType: [],
-			allGraphQLWhereInputObjectType: [],
+			allObjects: {},
 		}).getGraphqlFields('SimpleObject')
 
 		const expectedGraphqlObject = new GraphQLObjectType({

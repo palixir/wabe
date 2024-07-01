@@ -1166,12 +1166,17 @@ describe('Mongo adapter', () => {
 			age: { greaterThan: 20 },
 			OR: [
 				{
+					// @ts-expect-error
 					age: { lessThan: 10 },
 				},
-				{ name: { equalTo: 'John' } },
+				{
+					// @ts-expect-error
+					name: { equalTo: 'John' },
+				},
 				{
 					OR: [
 						{
+							// @ts-expect-error
 							name: { equalTo: 'Tata' },
 						},
 					],
@@ -1179,12 +1184,17 @@ describe('Mongo adapter', () => {
 			],
 			AND: [
 				{
+					// @ts-expect-error
 					age: { lessThan: 10 },
 				},
-				{ name: { equalTo: 'John' } },
+				{
+					// @ts-expect-error
+					name: { equalTo: 'John' },
+				},
 				{
 					AND: [
 						{
+							// @ts-expect-error
 							name: { equalTo: 'Tata' },
 						},
 					],
@@ -1215,12 +1225,14 @@ describe('Mongo adapter', () => {
 	})
 
 	it('should build empty where query for mongoAdapter if operation not exist', () => {
+		// @ts-expect-error
 		const where = buildMongoWhereQuery({ name: { notExist: 'John' } })
 
 		expect(where).toEqual({})
 	})
 
 	it('should build empty where query for mongoAdapter if operation not exist', () => {
+		// @ts-expect-error
 		const where = buildMongoWhereQuery({ name: { notExist: 'John' } })
 
 		expect(where).toEqual({})

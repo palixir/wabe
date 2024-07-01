@@ -1,14 +1,5 @@
-import {
-	describe,
-	expect,
-	it,
-	beforeAll,
-	beforeEach,
-	mock,
-	spyOn,
-} from 'bun:test'
+import { describe, expect, it, beforeEach, mock, spyOn } from 'bun:test'
 import { _getPermissionPropertiesOfAClass, _checkCLP } from './permissions'
-import { WibeApp } from '..'
 import { HookObject } from './HookObject'
 import { OperationType } from '.'
 import type { Context } from '../server/interface'
@@ -307,7 +298,7 @@ describe('Permissions', () => {
 		})
 
 		it('should throw permission denied if no session id is provided but class require authentication', async () => {
-			const context: Context = {
+			const context: Context<any> = {
 				sessionId: '',
 				// @ts-expect-error
 				user: {},
@@ -317,10 +308,8 @@ describe('Permissions', () => {
 			}
 
 			const obj = new HookObject({
-				// @ts-expect-error
 				className: 'TestClass',
 				context,
-				// @ts-expect-error
 				object: {},
 				operationType: OperationType.BeforeRead,
 			})
@@ -336,7 +325,7 @@ describe('Permissions', () => {
 				user: { id: 'userId' },
 			} as never)
 
-			const context: Context = {
+			const context: Context<any> = {
 				sessionId: 'sessionId',
 				user: {
 					id: 'userId',
@@ -351,10 +340,8 @@ describe('Permissions', () => {
 			}
 
 			const obj = new HookObject({
-				// @ts-expect-error
 				className: 'TestClass',
 				context,
-				// @ts-expect-error
 				object: {},
 				operationType: OperationType.BeforeRead,
 			})
@@ -370,7 +357,7 @@ describe('Permissions', () => {
 				user: { id: 'userId' },
 			} as never)
 
-			const context: Context = {
+			const context: Context<any> = {
 				sessionId: 'sessionId',
 				user: {
 					id: 'userId',
@@ -385,33 +372,29 @@ describe('Permissions', () => {
 			}
 
 			const obj = new HookObject({
-				// @ts-expect-error
 				className: 'TestClass',
 				context,
-				// @ts-expect-error
 				object: {},
 				operationType: OperationType.BeforeRead,
-				config: { schema: {} },
 			})
 
 			expect(_checkCLP(obj, OperationType.BeforeRead)).resolves
 		})
 
 		it('should not throw permission denied if client is root', async () => {
-			const context: Context = {
+			const context: Context<any> = {
 				sessionId: '',
 				user: {
 					id: '',
 				} as any,
 				databaseController,
 				isRoot: true,
+				config,
 			}
 
 			const obj = new HookObject({
-				// @ts-expect-error
 				className: 'TestClass',
 				context,
-				// @ts-expect-error
 				object: {},
 				operationType: OperationType.BeforeRead,
 			})

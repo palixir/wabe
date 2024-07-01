@@ -3,7 +3,7 @@ import type { WibeAppTypes } from '../server'
 import type { Context } from '../server/interface'
 
 export class HookObject<T extends WibeAppTypes, K = keyof T['types']> {
-	public className: T
+	public className: string
 	private newData?: TypedNewData<K>
 	private operationType: OperationType
 	public context: Context<T>
@@ -16,13 +16,15 @@ export class HookObject<T extends WibeAppTypes, K = keyof T['types']> {
 		context,
 		object,
 	}: {
-		className: T
-		newData?: TypedNewData<T>
+		className: K
+		newData?: TypedNewData<K>
 		operationType: OperationType
 		context: Context<T>
 		object: Record<keyof WibeAppTypes['types'][T], any>
 	}) {
 		this.newData = newData
+		// We need to cast the className to use it in comparaison
+		// @ts-expect-error
 		this.className = className
 		this.operationType = operationType
 		this.context = context

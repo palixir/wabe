@@ -45,7 +45,6 @@ describe('Hooks', () => {
 		] as never)
 
 		const hooks = await index.initializeHook({
-			// @ts-expect-error
 			className: 'ClassName',
 			context: { isRoot: true, databaseController, config },
 			newData: { name: 'test' },
@@ -65,6 +64,7 @@ describe('Hooks', () => {
 
 		expect(mockCallBack1).toHaveBeenCalledTimes(1)
 
+		// @ts-expect-error
 		const hookObject = mockCallBack1.mock.calls[0][0] as any
 
 		expect(hookObject.object).toEqual({
@@ -81,7 +81,6 @@ describe('Hooks', () => {
 
 	it('should run hook on BeforeRead with 0 object impacted', async () => {
 		const hooks = await index.initializeHook({
-			// @ts-expect-error
 			className: 'ClassName',
 			context: { isRoot: true, databaseController, config },
 			newData: { name: 'test' },
@@ -91,6 +90,7 @@ describe('Hooks', () => {
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
 
+		// @ts-expect-error
 		const hookObject = mockCallBack1.mock.calls[0][0] as any
 
 		expect(hookObject.object).toEqual({
@@ -112,7 +112,6 @@ describe('Hooks', () => {
 		] as never)
 
 		const hooks = await index.initializeHook({
-			// @ts-expect-error
 			className: 'ClassName',
 			context: { isRoot: true, databaseController, config },
 			newData: { name: 'test' },
@@ -131,7 +130,6 @@ describe('Hooks', () => {
 		] as never)
 
 		const hooks = await index.initializeHook({
-			// @ts-expect-error
 			className: 'ClassName',
 			context: { isRoot: true, databaseController, config },
 			newData: { name: 'test' },

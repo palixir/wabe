@@ -388,6 +388,7 @@ describe('DatabaseController', () => {
 					AND: [
 						{
 							pointerToAnotherClass: {
+								// @ts-expect-error
 								field1: { equalTo: 'value' },
 							},
 						},
@@ -425,6 +426,7 @@ describe('DatabaseController', () => {
 			await databaseController._getWhereObjectWithPointerOrRelation(
 				'TestClass',
 				{
+					// @ts-expect-error
 					pointerToAnotherClass: { field1: { equalTo: 'value' } },
 				},
 				context,
@@ -481,7 +483,7 @@ describe('DatabaseController', () => {
 		const res = await databaseController.getObject({
 			className: 'TestClass',
 			id: '123',
-			fields: ['pointerToAnotherClass'],
+			fields: ['id', 'pointerToAnotherClass'],
 			context,
 		})
 
@@ -968,7 +970,7 @@ describe('DatabaseController', () => {
 			where: {
 				id: { equalTo: '123' },
 			},
-			fields: ['name'],
+			fields: ['id', 'name'],
 			context,
 		})
 
@@ -987,7 +989,7 @@ describe('DatabaseController', () => {
 			where: {
 				id: { equalTo: '123' },
 			},
-			fields: ['name'],
+			fields: ['id', 'name'],
 			context,
 		})
 	})
@@ -1015,6 +1017,7 @@ describe('DatabaseController', () => {
 				},
 			},
 			fields: [
+				'id',
 				'name',
 				'pointerToAnotherClass.id',
 				'pointerToAnotherClass.name',
@@ -1025,6 +1028,7 @@ describe('DatabaseController', () => {
 		expect(res).toEqual([
 			{
 				id: '123',
+				// @ts-expect-error
 				pointerToAnotherClass: {
 					id: 'anotherClassId',
 					name: 'anotherClassName',
@@ -1048,7 +1052,7 @@ describe('DatabaseController', () => {
 					equalTo: '123',
 				},
 			},
-			fields: ['name', 'pointerToAnotherClass'],
+			fields: ['id', 'name', 'pointerToAnotherClass'],
 			context,
 		})
 	})
@@ -1081,6 +1085,7 @@ describe('DatabaseController', () => {
 				},
 			},
 			fields: [
+				'id',
 				'name',
 				'pointerToAnotherClass.id',
 				'pointerToAnotherClass.name',
@@ -1092,6 +1097,7 @@ describe('DatabaseController', () => {
 		expect(res).toEqual([
 			{
 				id: '123',
+				// @ts-expect-error
 				pointerToAnotherClass: {
 					id: 'anotherClassId',
 					name: 'anotherClassName',
@@ -1119,7 +1125,12 @@ describe('DatabaseController', () => {
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
 		expect(mockGetObjects).toHaveBeenNthCalledWith(1, {
 			className: 'TestClass',
-			fields: ['name', 'pointerToAnotherClass', 'pointerToAnotherClass2'],
+			fields: [
+				'id',
+				'name',
+				'pointerToAnotherClass',
+				'pointerToAnotherClass2',
+			],
 			context,
 			where: {
 				id: { equalTo: '123' },

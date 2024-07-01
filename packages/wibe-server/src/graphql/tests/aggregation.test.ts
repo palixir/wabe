@@ -1,7 +1,12 @@
 import { beforeAll, afterAll, describe, it, expect } from 'bun:test'
 import { type GraphQLClient, gql } from 'graphql-request'
 import type { WibeApp } from '../../server'
-import { closeTests, getGraphqlClient, setupTests } from '../../utils/helper'
+import {
+	type DevWibeAppTypes,
+	closeTests,
+	getGraphqlClient,
+	setupTests,
+} from '../../utils/helper'
 
 const graphql = {
 	users: gql`
@@ -37,7 +42,7 @@ const graphql = {
 }
 
 describe('GraphQL : aggregation', () => {
-	let wibe: WibeApp
+	let wibe: WibeApp<DevWibeAppTypes>
 	let port: number
 	let client: GraphQLClient
 

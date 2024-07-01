@@ -91,7 +91,6 @@ describe('GraphqlSchema', () => {
 					{
 						name: 'SecondClass',
 						fields: {
-							// @ts-expect-error
 							pointer: { type: 'Pointer', class: 'TestClass' },
 						},
 					},
@@ -100,7 +99,6 @@ describe('GraphqlSchema', () => {
 						fields: {
 							pointer: {
 								type: 'Pointer',
-								// @ts-expect-error
 								class: 'FourthClass',
 							},
 						},
@@ -110,7 +108,6 @@ describe('GraphqlSchema', () => {
 						fields: {
 							pointer: {
 								type: 'Pointer',
-								// @ts-expect-error
 								class: 'ThirdClass',
 							},
 						},
@@ -120,7 +117,6 @@ describe('GraphqlSchema', () => {
 						fields: {
 							relation: {
 								type: 'Relation',
-								// @ts-expect-error
 								class: 'SixthClass',
 							},
 						},
