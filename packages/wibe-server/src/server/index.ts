@@ -2,7 +2,7 @@ import type { DatabaseConfig } from '../database'
 import { DatabaseController } from '../database/controllers/DatabaseController'
 import { MongoAdapter } from '../database/adapters/MongoAdapter'
 import { Schema, type SchemaInterface } from '../schema/Schema'
-import { GraphQLObjectType, GraphQLSchema, printSchema } from 'graphql'
+import { GraphQLObjectType, GraphQLSchema } from 'graphql'
 import { GraphQLSchema as WibeGraphQLSchema } from '../graphql'
 import type { AuthenticationConfig } from '../authentication/interface'
 import { type WibeRoute, defaultRoutes } from './routes'
@@ -159,6 +159,19 @@ export class WibeApp<T extends WibeAppTypes> {
 			types: [...types.scalars, ...types.enums, ...types.objects],
 		})
 
+		if (
+			process.env.NODE_ENV !== 'production' &&
+			process.env.NODE_ENV !== 'test' &&
+			this.config.codegen
+		) {
+			if (this.config.codegen.enabled && this.config.codegen.path) {
+				generateCodegen({
+					path: this.config.codegen.path,
+					schema: wibeSchema.schema,
+				})
+			}
+		}
+
 		this.server.usePlugin(
 			WobeGraphqlYogaPlugin({
 				schema,
@@ -277,25 +290,6 @@ export class WibeApp<T extends WibeAppTypes> {
 				},
 			}),
 		)
-
-		if (
-			process.env.NODE_ENV !== 'production' &&
-			process.env.NODE_ENV !== 'test' &&
-			this.config.codegen
-		) {
-			if (this.config.codegen.enabled && this.config.codegen.path) {
-				const fileContent = await Bun.file(
-					`${this.config.codegen.path}/wibe.ts`,
-				).text()
-
-				generateCodegen({
-					fileContent,
-					graphqlSchema: printSchema(schema),
-					path: this.config.codegen.path,
-					schema: wibeSchema.schema,
-				})
-			}
-		}
 
 		await initializeRoles(this.databaseController, this.config)
 

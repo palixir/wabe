@@ -6,24 +6,25 @@
   "scripts": {
     "build": "bun build --outdir dist $(pwd)/src/index.ts --target=bun && bun generate:types",
     "generate:types": "tsc --project $(pwd)/tsconfig.build.json",
-    "check":"tsc --project $(pwd)/tsconfig.json",
+    "check": "tsc --project $(pwd)/tsconfig.json",
     "lint": "biome lint . --no-errors-on-unmatched --config-path=../../",
     "ci": "bun check && bun lint $(pwd) && bun run test:bun src && bun test:node src",
     "format": "biome format --write .",
-    "dev": "bun codegen && bun run --watch dev/index.ts",
-    "codegen": "graphql-codegen --config codegen.ts"
+    "dev": "bun run dev/codegen.ts && bun run --watch dev/index.ts"
   },
   "dependencies": {
+    "@graphql-codegen/core": "4.0.2",
+    "@graphql-codegen/typescript": "4.0.1",
+    "@graphql-codegen/typescript-graphql-request": "6.2.0",
+    "@graphql-codegen/typescript-operations": "4.0.1",
+    "@graphql-tools/graphql-file-loader": "^8.0.1",
+    "@graphql-tools/load": "^8.0.2",
     "jsonwebtoken": "9.0.2",
     "mongodb": "6.3.0",
     "wobe": "1.1.1",
     "wobe-graphql-yoga": "1.2.4"
   },
   "devDependencies": {
-    "@graphql-codegen/cli": "5.0.0",
-    "@graphql-codegen/typescript": "4.0.1",
-    "@graphql-codegen/typescript-graphql-request": "6.2.0",
-    "@graphql-codegen/typescript-operations": "4.0.1",
     "@parcel/watcher": "2.3.0",
     "@types/bun": "1.1.5",
     "@types/jsonwebtoken": "9.0.6",
