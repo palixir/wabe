@@ -21,7 +21,7 @@ import type { Context } from '../../server/interface'
 describe('Mongo adapter', () => {
 	let mongoAdapter: MongoAdapter<DevWibeAppTypes>
 	let wibe: WibeApp<DevWibeAppTypes>
-	let context: Context
+	let context: Context<any>
 
 	beforeAll(async () => {
 		const setup = await setupTests()
@@ -34,7 +34,7 @@ describe('Mongo adapter', () => {
 			isRoot: true,
 			databaseController: wibe.databaseController,
 			config: wibe.config,
-		} as Context
+		} as Context<any>
 	})
 
 	afterAll(async () => {
@@ -436,6 +436,7 @@ describe('Mongo adapter', () => {
 			className: 'User',
 			fields: ['name'],
 			context,
+			where: {},
 		})
 
 		expect(res.length).toEqual(5)
@@ -570,6 +571,7 @@ describe('Mongo adapter', () => {
 		const objects = await mongoAdapter.getObjects({
 			className: 'User',
 			fields: ['name'],
+			context,
 		})
 
 		expect(objects.length).toEqual(0)
@@ -860,6 +862,7 @@ describe('Mongo adapter', () => {
 				className: 'User',
 				id: '5f9b3b3b3b3b3b3b3b3b3b3b',
 				fields: ['name'],
+				context,
 			}),
 		).toEqual(null)
 	})
@@ -1163,7 +1166,6 @@ describe('Mongo adapter', () => {
 			age: { greaterThan: 20 },
 			OR: [
 				{
-					// @ts-expect-error
 					age: { lessThan: 10 },
 				},
 				{ name: { equalTo: 'John' } },
@@ -1177,7 +1179,6 @@ describe('Mongo adapter', () => {
 			],
 			AND: [
 				{
-					// @ts-expect-error
 					age: { lessThan: 10 },
 				},
 				{ name: { equalTo: 'John' } },
@@ -1214,14 +1215,12 @@ describe('Mongo adapter', () => {
 	})
 
 	it('should build empty where query for mongoAdapter if operation not exist', () => {
-		// @ts-expect-error
 		const where = buildMongoWhereQuery({ name: { notExist: 'John' } })
 
 		expect(where).toEqual({})
 	})
 
 	it('should build empty where query for mongoAdapter if operation not exist', () => {
-		// @ts-expect-error
 		const where = buildMongoWhereQuery({ name: { notExist: 'John' } })
 
 		expect(where).toEqual({})
@@ -1234,7 +1233,7 @@ describe('Mongo adapter', () => {
 			data: {
 				authentication: {
 					emailPassword: {
-						identifier: 'email@test.fr',
+						email: 'email@test.fr',
 						password: 'password',
 					},
 				},
@@ -1247,7 +1246,7 @@ describe('Mongo adapter', () => {
 				authentication: {
 					// @ts-expect-error
 					emailPassword: {
-						identifier: { equalTo: 'email@test.fr' },
+						email: { equalTo: 'email@test.fr' },
 					},
 				},
 			},
@@ -1255,7 +1254,7 @@ describe('Mongo adapter', () => {
 		})
 
 		expect(res.length).toEqual(1)
-		expect(res[0].authentication?.emailPassword?.identifier).toEqual(
+		expect(res[0].authentication?.emailPassword?.email).toEqual(
 			'email@test.fr',
 		)
 		expect(res[0].authentication?.emailPassword?.password).toEqual(

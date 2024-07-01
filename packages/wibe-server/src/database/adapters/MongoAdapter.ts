@@ -1,12 +1,4 @@
-import {
-	type ChangeStream,
-	type ChangeStreamDocument,
-	type Document,
-	type Db,
-	type Filter,
-	MongoClient,
-	ObjectId,
-} from 'mongodb'
+import { type Db, type Filter, MongoClient, ObjectId } from 'mongodb'
 import type {
 	AdapterOptions,
 	DatabaseAdapter,
@@ -22,12 +14,15 @@ import type {
 } from './adaptersInterface'
 import type { WibeAppTypes } from '../../server'
 
-export const buildMongoWhereQuery = <T extends keyof WibeAppTypes['types']>(
-	where?: WhereType<T>,
+export const buildMongoWhereQuery = <
+	T extends keyof WibeAppTypes['types'],
+	K extends keyof WibeAppTypes['types'][T],
+>(
+	where?: WhereType<T, K>,
 ): Record<string, any> => {
 	if (!where) return {}
 
-	const objectKeys = Object.keys(where) as Array<keyof WhereType<T>>
+	const objectKeys = Object.keys(where) as Array<keyof WhereType<T, K>>
 
 	return objectKeys.reduce(
 		(acc, key) => {
@@ -101,7 +96,7 @@ export const buildMongoWhereQuery = <T extends keyof WibeAppTypes['types']>(
 			}
 
 			if (typeof value === 'object') {
-				const where = buildMongoWhereQuery(value as WhereType<T>)
+				const where = buildMongoWhereQuery(value as WhereType<T, K>)
 				const entries = Object.entries(where)
 
 				if (entries.length > 0)
@@ -121,9 +116,6 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 	public options: AdapterOptions
 	public database?: Db
 	private client: MongoClient
-	private streams: Array<
-		ChangeStream<Document, ChangeStreamDocument<Document>>
-	> = []
 
 	constructor(options: AdapterOptions) {
 		this.options = options
@@ -137,10 +129,6 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 	}
 
 	async close() {
-		for (const stream of this.streams) {
-			stream.close()
-		}
-
 		return this.client.close()
 	}
 
@@ -204,7 +192,7 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 
 		const { className, fields, where, offset, limit } = params
 
-		const whereBuilded = buildMongoWhereQuery<T>(where)
+		const whereBuilded = buildMongoWhereQuery<T, K>(where)
 
 		const objectOfFieldsToGet = fields?.reduce(
 			(acc, prev) => {
@@ -288,7 +276,7 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 
 		const allObjects = await context.databaseController.getObjects({
 			className,
-			where: { OR: orStatement } as WhereType<T>,
+			where: { OR: orStatement } as WhereType<T, K>,
 			fields,
 			offset,
 			limit,
@@ -310,7 +298,7 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 
 		const res = await this.updateObjects({
 			className,
-			where: { id: { equalTo: new ObjectId(id) } } as WhereType<T>,
+			where: { id: { equalTo: new ObjectId(id) } } as WhereType<T, W>,
 			data,
 			fields,
 			context,
@@ -332,7 +320,7 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 		const { className, where, data, fields, offset, limit, context } =
 			params
 
-		const whereBuilded = buildMongoWhereQuery<T>(where)
+		const whereBuilded = buildMongoWhereQuery<T, W>(where)
 
 		const collection = await this.createClassIfNotExist(className)
 
@@ -340,6 +328,7 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 			{
 				className,
 				where,
+				// @ts-expect-error
 				fields: ['id'],
 				offset,
 				limit,
@@ -352,6 +341,7 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 		})
 
 		const orStatement = objectsBeforeUpdate.map((object) => ({
+			// @ts-expect-error
 			id: { equalTo: ObjectId.createFromHexString(object.id) },
 		}))
 
@@ -359,7 +349,7 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 			className,
 			where: {
 				OR: orStatement,
-			} as WhereType<T>,
+			} as WhereType<T, K>,
 			fields,
 			offset,
 			limit,

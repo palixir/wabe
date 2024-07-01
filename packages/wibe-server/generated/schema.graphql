@@ -12,7 +12,8 @@ enum SecondaryFactor {
 """User class"""
 type User {
   id: ID!
-  post: Post
+  name: String
+  age: Int
   acl: UserACLObject
   createdAt: Date!
   updatedAt: Date!
@@ -62,7 +63,8 @@ type UserAuthenticationOtp {
 
 """User class"""
 input UserInput {
-  post: PostPointerInput
+  name: String
+  age: Int
   acl: UserACLObjectInput
   createdAt: Date!
   updatedAt: Date!
@@ -112,7 +114,8 @@ input UserPointerInput {
 
 """User class"""
 input UserCreateFieldsInput {
-  post: PostPointerInput
+  name: String
+  age: Int
   acl: UserACLObjectCreateFieldsInput
   createdAt: Date
   updatedAt: Date
@@ -468,7 +471,8 @@ type Query {
 """User class"""
 input UserWhereInput {
   id: IdWhereInput
-  post: PostWhereInput
+  name: StringWhereInput
+  age: IntWhereInput
   acl: UserACLObjectWhereInput
   createdAt: DateWhereInput
   updatedAt: DateWhereInput
@@ -488,17 +492,6 @@ input IdWhereInput {
   notIn: [String]
 }
 
-input PostWhereInput {
-  id: IdWhereInput
-  name: StringWhereInput
-  test: FileWhereInput
-  acl: PostACLObjectWhereInput
-  createdAt: DateWhereInput
-  updatedAt: DateWhereInput
-  OR: [PostWhereInput]
-  AND: [PostWhereInput]
-}
-
 input StringWhereInput {
   equalTo: String
   notEqualTo: String
@@ -506,52 +499,15 @@ input StringWhereInput {
   notIn: [String]
 }
 
-input FileWhereInput {
-  equalTo: File
-  notEqualTo: File
-  in: [File]
-  notInt: [File]
-}
-
-input PostACLObjectWhereInput {
-  users: [PostACLObjectUsersACLWhereInput]
-  roles: [PostACLObjectRolesACLWhereInput]
-  OR: [PostACLObjectWhereInput]
-  AND: [PostACLObjectWhereInput]
-}
-
-input PostACLObjectUsersACLWhereInput {
-  userId: StringWhereInput
-  read: BooleanWhereInput
-  write: BooleanWhereInput
-  OR: [PostACLObjectUsersACLWhereInput]
-  AND: [PostACLObjectUsersACLWhereInput]
-}
-
-input BooleanWhereInput {
-  equalTo: Boolean
-  notEqualTo: Boolean
-  in: [Boolean]
-  notIn: [Boolean]
-}
-
-input PostACLObjectRolesACLWhereInput {
-  roleId: StringWhereInput
-  read: BooleanWhereInput
-  write: BooleanWhereInput
-  OR: [PostACLObjectRolesACLWhereInput]
-  AND: [PostACLObjectRolesACLWhereInput]
-}
-
-input DateWhereInput {
-  equalTo: Date
-  notEqualTo: Date
-  in: [Date]
-  notIn: [Date]
-  lessThan: Date
-  lessThanOrEqualTo: Date
-  greaterThan: Date
-  greaterThanOrEqualTo: Date
+input IntWhereInput {
+  equalTo: Int
+  notEqualTo: Int
+  lessThan: Int
+  lessThanOrEqualTo: Int
+  greaterThan: Int
+  greaterThanOrEqualTo: Int
+  in: [Int]
+  notIn: [Int]
 }
 
 input UserACLObjectWhereInput {
@@ -569,12 +525,30 @@ input UserACLObjectUsersACLWhereInput {
   AND: [UserACLObjectUsersACLWhereInput]
 }
 
+input BooleanWhereInput {
+  equalTo: Boolean
+  notEqualTo: Boolean
+  in: [Boolean]
+  notIn: [Boolean]
+}
+
 input UserACLObjectRolesACLWhereInput {
   roleId: StringWhereInput
   read: BooleanWhereInput
   write: BooleanWhereInput
   OR: [UserACLObjectRolesACLWhereInput]
   AND: [UserACLObjectRolesACLWhereInput]
+}
+
+input DateWhereInput {
+  equalTo: Date
+  notEqualTo: Date
+  in: [Date]
+  notIn: [Date]
+  lessThan: Date
+  lessThanOrEqualTo: Date
+  greaterThan: Date
+  greaterThanOrEqualTo: Date
 }
 
 input UserAuthenticationWhereInput {
@@ -654,6 +628,47 @@ type PostConnection {
 
 type PostEdge {
   node: Post!
+}
+
+input PostWhereInput {
+  id: IdWhereInput
+  name: StringWhereInput
+  test: FileWhereInput
+  acl: PostACLObjectWhereInput
+  createdAt: DateWhereInput
+  updatedAt: DateWhereInput
+  OR: [PostWhereInput]
+  AND: [PostWhereInput]
+}
+
+input FileWhereInput {
+  equalTo: File
+  notEqualTo: File
+  in: [File]
+  notInt: [File]
+}
+
+input PostACLObjectWhereInput {
+  users: [PostACLObjectUsersACLWhereInput]
+  roles: [PostACLObjectRolesACLWhereInput]
+  OR: [PostACLObjectWhereInput]
+  AND: [PostACLObjectWhereInput]
+}
+
+input PostACLObjectUsersACLWhereInput {
+  userId: StringWhereInput
+  read: BooleanWhereInput
+  write: BooleanWhereInput
+  OR: [PostACLObjectUsersACLWhereInput]
+  AND: [PostACLObjectUsersACLWhereInput]
+}
+
+input PostACLObjectRolesACLWhereInput {
+  roleId: StringWhereInput
+  read: BooleanWhereInput
+  write: BooleanWhereInput
+  OR: [PostACLObjectRolesACLWhereInput]
+  AND: [PostACLObjectRolesACLWhereInput]
 }
 
 type _SessionConnection {
@@ -782,7 +797,8 @@ input UpdateUserInput {
 
 """User class"""
 input UserUpdateFieldsInput {
-  post: PostPointerInput
+  name: String
+  age: Int
   acl: UserACLObjectUpdateFieldsInput
   createdAt: Date
   updatedAt: Date

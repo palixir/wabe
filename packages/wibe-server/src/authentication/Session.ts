@@ -32,6 +32,7 @@ export class Session {
 		const sessions = await context.databaseController.getObjects({
 			className: '_Session',
 			where: {
+				// @ts-expect-error
 				accessToken: { equalTo: accessToken },
 			},
 			limit: 1,
@@ -115,6 +116,7 @@ export class Session {
 		const session = await context.databaseController.getObjects({
 			className: '_Session',
 			where: {
+				// @ts-expect-error
 				accessToken: { equalTo: accessToken },
 			},
 			fields: ['id', 'user', 'refreshToken', 'refreshTokenExpiresAt'],

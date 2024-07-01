@@ -83,7 +83,7 @@ export const initializeHook = async <T extends keyof WibeAppTypes['types']>({
 	skipHooks,
 }: {
 	id?: string
-	where?: WhereType<any>
+	where?: WhereType<any, any>
 	className: T
 	newData: TypedNewData<any>
 	context: Context<any>

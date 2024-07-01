@@ -8,7 +8,7 @@
     "generate:types": "tsc --project $(pwd)/tsconfig.build.json",
     "check":"tsc --project $(pwd)/tsconfig.json",
     "lint": "biome lint . --no-errors-on-unmatched --config-path=../../",
-    "ci": "bun lint $(pwd) && bun run test:bun src && bun test:node src",
+    "ci": "bun check && bun lint $(pwd) && bun run test:bun src && bun test:node src",
     "format": "biome format --write .",
     "dev": "bun codegen && bun run --watch dev/index.ts",
     "codegen": "graphql-codegen --config codegen.ts"

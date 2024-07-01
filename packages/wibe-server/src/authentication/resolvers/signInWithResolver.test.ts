@@ -235,7 +235,9 @@ describe('SignInWith', () => {
 			},
 		)
 
+		// @ts-expect-error
 		const refreshTokenExpiresIn = mockSetCookie.mock.calls[0][2].expires
+		// @ts-expect-error
 		const accessTokenExpiresIn = mockSetCookie.mock.calls[1][2].expires
 
 		// - 1000 to avoid flaky

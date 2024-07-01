@@ -1,13 +1,13 @@
 import { describe, expect, it, spyOn } from 'bun:test'
 import { refreshResolver } from './refreshResolver'
-import type { Context } from '../../graphql/interface'
+import type { Context } from '../../server/interface'
 import { Session } from '../Session'
 
-const context: Context = {
+const context: Context<any> = {
 	sessionId: 'sessionId',
 	user: {} as any,
 	isRoot: false,
-}
+} as Context<any>
 
 describe('refreshResolver', () => {
 	it('should refresh the session', async () => {

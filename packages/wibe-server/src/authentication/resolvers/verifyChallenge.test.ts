@@ -6,7 +6,7 @@ import { Session } from '../Session'
 describe('verifyChallenge', () => {
 	const mockOnVerifyChallenge = mock(() => Promise.resolve(true))
 
-	const context: Context = {
+	const context: Context<any> = {
 		sessionId: 'sessionId',
 		user: {
 			id: 'userId',

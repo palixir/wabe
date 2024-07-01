@@ -50,12 +50,10 @@ describe('DatabaseController', () => {
 						},
 						pointerToAnotherClass: {
 							type: 'Pointer',
-							// @ts-expect-error
 							class: 'AnotherClass',
 						},
 						pointerToAnotherClass2: {
 							type: 'Pointer',
-							// @ts-expect-error
 							class: 'AnotherClass2',
 						},
 					},
@@ -89,7 +87,6 @@ describe('DatabaseController', () => {
 					fields: {
 						relationToAnotherClass3: {
 							type: 'Relation',
-							// @ts-expect-error
 							class: 'AnotherClass3',
 						},
 					},
@@ -120,7 +117,6 @@ describe('DatabaseController', () => {
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
 		await databaseController.createObjects({
-			// @ts-expect-error
 			className: 'TestClass',
 			context,
 			data: [],
@@ -133,7 +129,6 @@ describe('DatabaseController', () => {
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
 		await databaseController.getObject({
-			// @ts-expect-error
 			className: 'TestClass',
 			context,
 			id: 'id',
@@ -169,7 +164,6 @@ describe('DatabaseController', () => {
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
 		await databaseController.getObjects({
-			// @ts-expect-error
 			className: 'TestClass',
 			context,
 			where: { id: { equalTo: 'id' } },
@@ -199,17 +193,14 @@ describe('DatabaseController', () => {
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
 		await databaseController.updateObject({
-			// @ts-expect-error
 			className: 'TestClass',
 			context,
 			id: 'id',
-			// @ts-expect-error
 			data: { name: 'test' },
 			fields: ['id'],
 		})
 
 		expect(mockInitializeHook).toHaveBeenCalledTimes(1)
-		console.log(mockInitializeHook.mock.calls[0])
 		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
 			context: { sessionId: 'sessionId', config, isRoot: true },
@@ -234,11 +225,9 @@ describe('DatabaseController', () => {
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
 		await databaseController.updateObjects({
-			// @ts-expect-error
 			className: 'TestClass',
 			context,
 			where: { id: { equalTo: 'id' } },
-			// @ts-expect-error
 			data: { name: 'test' },
 			fields: ['id'],
 		})
@@ -266,10 +255,8 @@ describe('DatabaseController', () => {
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
 		await databaseController.createObject({
-			// @ts-expect-error
 			className: 'TestClass',
 			context,
-			// @ts-expect-error
 			data: { name: 'test' },
 			fields: ['id'],
 		})
@@ -298,10 +285,8 @@ describe('DatabaseController', () => {
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
 		await databaseController.createObjects({
-			// @ts-expect-error
 			className: 'TestClass',
 			context,
-			// @ts-expect-error
 			data: [{ name: 'test' }],
 			fields: ['id'],
 		})
@@ -330,7 +315,6 @@ describe('DatabaseController', () => {
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
 		await databaseController.deleteObject({
-			// @ts-expect-error
 			className: 'TestClass',
 			context,
 			fields: ['id'],
@@ -363,7 +347,6 @@ describe('DatabaseController', () => {
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
 		await databaseController.deleteObjects({
-			// @ts-expect-error
 			className: 'TestClass',
 			context,
 			where: { id: { equalTo: 'id' } },
@@ -400,7 +383,6 @@ describe('DatabaseController', () => {
 
 		const res =
 			await databaseController._getWhereObjectWithPointerOrRelation(
-				// @ts-expect-error
 				'TestClass',
 				{
 					AND: [
@@ -420,13 +402,11 @@ describe('DatabaseController', () => {
 		expect(res).toEqual({
 			AND: [
 				{
-					// @ts-expect-error
 					pointerToAnotherClass: {
 						in: ['anotherClassId', 'anotherClassId2'],
 					},
 				},
 				{
-					// @ts-expect-error
 					fieldX: { equalTo: 'value' },
 				},
 			],
@@ -443,7 +423,6 @@ describe('DatabaseController', () => {
 
 		const res =
 			await databaseController._getWhereObjectWithPointerOrRelation(
-				// @ts-expect-error
 				'TestClass',
 				{
 					pointerToAnotherClass: { field1: { equalTo: 'value' } },
@@ -452,7 +431,6 @@ describe('DatabaseController', () => {
 			)
 
 		expect(res).toEqual({
-			// @ts-expect-error
 			pointerToAnotherClass: {
 				in: ['anotherClassId', 'anotherClassId2'],
 			},
@@ -473,7 +451,6 @@ describe('DatabaseController', () => {
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
 		await databaseController.getObjects({
-			// @ts-expect-error
 			className: 'TestClass',
 			where: {
 				// @ts-expect-error
@@ -502,19 +479,14 @@ describe('DatabaseController', () => {
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
 		const res = await databaseController.getObject({
-			// @ts-expect-error
 			className: 'TestClass',
 			id: '123',
-			fields: [
-				// @ts-expect-error
-				'pointerToAnotherClass',
-			],
+			fields: ['pointerToAnotherClass'],
 			context,
 		})
 
 		expect(res).toEqual({
 			id: '123',
-			// @ts-expect-error
 			pointerToAnotherClass: 'pointerAnotherClassId',
 		})
 	})
@@ -524,7 +496,6 @@ describe('DatabaseController', () => {
 
 		expect(
 			databaseController._isRelationField(
-				// @ts-expect-error
 				'AnotherClass4',
 				'AnotherClass3',
 				context,
@@ -560,13 +531,11 @@ describe('DatabaseController', () => {
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
 		const res = await databaseController.getObject({
-			// @ts-expect-error
 			className: 'AnotherClass4',
 			id: '123',
 			fields: [
-				// @ts-expect-error
+				'id',
 				'relationToAnotherClass3.id',
-				// @ts-expect-error
 				'relationToAnotherClass3.field4',
 			],
 			context,
@@ -591,7 +560,7 @@ describe('DatabaseController', () => {
 		expect(mockGetObject).toHaveBeenCalledWith({
 			className: 'AnotherClass4',
 			id: '123',
-			fields: ['relationToAnotherClass3'],
+			fields: ['id', 'relationToAnotherClass3'],
 			context,
 		})
 
@@ -622,13 +591,11 @@ describe('DatabaseController', () => {
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
 		const res = await databaseController.getObjects({
-			// @ts-expect-error
 			className: 'AnotherClass4',
 			where: { id: { equalTo: '123' } },
 			fields: [
-				// @ts-expect-error
+				'id',
 				'relationToAnotherClass3.id',
-				// @ts-expect-error
 				'relationToAnotherClass3.field4',
 			],
 			context,
@@ -655,7 +622,7 @@ describe('DatabaseController', () => {
 		expect(mockGetObjects).toHaveBeenNthCalledWith(1, {
 			className: 'AnotherClass4',
 			where: { id: { equalTo: '123' } },
-			fields: ['relationToAnotherClass3'],
+			fields: ['id', 'relationToAnotherClass3'],
 			context,
 		})
 		expect(mockGetObjects).toHaveBeenNthCalledWith(2, {
@@ -673,7 +640,6 @@ describe('DatabaseController', () => {
 
 		await databaseController._getFinalObjectWithPointer(
 			{
-				// @ts-expect-error
 				name: 'name',
 				pointerToAnotherClass: 'idOfAnotherClass',
 			},
@@ -793,7 +759,6 @@ describe('DatabaseController', () => {
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
 		await databaseController.getObject({
-			// @ts-expect-error
 			className: 'TestClass',
 			id: '123',
 			context,
@@ -817,17 +782,14 @@ describe('DatabaseController', () => {
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
 		const res = await databaseController.getObject({
-			// @ts-expect-error
 			className: 'TestClass',
 			id: '123',
-			// @ts-expect-error
-			fields: ['name'],
+			fields: ['id', 'name'],
 			context,
 		})
 
 		expect(res).toEqual({
 			id: '123',
-			// @ts-expect-error
 			name: 'name',
 		})
 
@@ -835,7 +797,7 @@ describe('DatabaseController', () => {
 		expect(mockGetObject).toHaveBeenNthCalledWith(1, {
 			className: 'TestClass',
 			id: '123',
-			fields: ['name'],
+			fields: ['id', 'name'],
 			context,
 		})
 	})
@@ -854,15 +816,12 @@ describe('DatabaseController', () => {
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
 		const res = await databaseController.getObject({
-			// @ts-expect-error
 			className: 'TestClass',
 			id: '123',
 			fields: [
-				// @ts-expect-error
+				'id',
 				'name',
-				// @ts-expect-error
 				'pointerToAnotherClass.id',
-				// @ts-expect-error
 				'pointerToAnotherClass.name',
 			],
 			context,
@@ -881,7 +840,7 @@ describe('DatabaseController', () => {
 		expect(mockGetObject).toHaveBeenNthCalledWith(1, {
 			className: 'TestClass',
 			id: '123',
-			fields: ['name', 'pointerToAnotherClass'],
+			fields: ['id', 'name', 'pointerToAnotherClass'],
 			context,
 		})
 
@@ -912,17 +871,13 @@ describe('DatabaseController', () => {
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
 		const res = await databaseController.getObject({
-			// @ts-expect-error
 			className: 'TestClass',
 			id: '123',
 			fields: [
-				// @ts-expect-error
+				'id',
 				'name',
-				// @ts-expect-error
 				'pointerToAnotherClass.id',
-				// @ts-expect-error
 				'pointerToAnotherClass.name',
-				// @ts-expect-error
 				'pointerToAnotherClass2.age',
 			],
 			context,
@@ -944,7 +899,12 @@ describe('DatabaseController', () => {
 		expect(mockGetObject).toHaveBeenNthCalledWith(1, {
 			className: 'TestClass',
 			id: '123',
-			fields: ['name', 'pointerToAnotherClass', 'pointerToAnotherClass2'],
+			fields: [
+				'id',
+				'name',
+				'pointerToAnotherClass',
+				'pointerToAnotherClass2',
+			],
 			context,
 		})
 
@@ -973,16 +933,21 @@ describe('DatabaseController', () => {
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
 		await databaseController.getObjects({
-			// @ts-expect-error
 			className: 'TestClass',
-			id: '123',
+			where: {
+				id: {
+					equalTo: '123',
+				},
+			},
 			context,
 		})
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
 		expect(mockGetObjects).toHaveBeenNthCalledWith(1, {
 			className: 'TestClass',
-			id: '123',
+			where: {
+				id: { equalTo: '123' },
+			},
 			fields: [],
 			context,
 		})
@@ -999,20 +964,17 @@ describe('DatabaseController', () => {
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
 		const res = await databaseController.getObjects({
-			// @ts-expect-error
 			className: 'TestClass',
-			id: '123',
-			fields: [
-				// @ts-expect-error
-				'name',
-			],
+			where: {
+				id: { equalTo: '123' },
+			},
+			fields: ['name'],
 			context,
 		})
 
 		expect(res).toEqual([
 			{
 				id: '123',
-				// @ts-expect-error
 				name: 'name',
 			},
 		])
@@ -1022,7 +984,9 @@ describe('DatabaseController', () => {
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
 		expect(mockGetObjects).toHaveBeenNthCalledWith(1, {
 			className: 'TestClass',
-			id: '123',
+			where: {
+				id: { equalTo: '123' },
+			},
 			fields: ['name'],
 			context,
 		})
@@ -1044,15 +1008,15 @@ describe('DatabaseController', () => {
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
 		const res = await databaseController.getObjects({
-			// @ts-expect-error
 			className: 'TestClass',
-			id: '123',
+			where: {
+				id: {
+					equalTo: '123',
+				},
+			},
 			fields: [
-				// @ts-expect-error
 				'name',
-				// @ts-expect-error
 				'pointerToAnotherClass.id',
-				// @ts-expect-error
 				'pointerToAnotherClass.name',
 			],
 			context,
@@ -1061,7 +1025,6 @@ describe('DatabaseController', () => {
 		expect(res).toEqual([
 			{
 				id: '123',
-				// @ts-expect-error
 				pointerToAnotherClass: {
 					id: 'anotherClassId',
 					name: 'anotherClassName',
@@ -1080,7 +1043,11 @@ describe('DatabaseController', () => {
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
 		expect(mockGetObjects).toHaveBeenNthCalledWith(1, {
 			className: 'TestClass',
-			id: '123',
+			where: {
+				id: {
+					equalTo: '123',
+				},
+			},
 			fields: ['name', 'pointerToAnotherClass'],
 			context,
 		})
@@ -1107,17 +1074,16 @@ describe('DatabaseController', () => {
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
 		const res = await databaseController.getObjects({
-			// @ts-expect-error
 			className: 'TestClass',
-			id: '123',
+			where: {
+				id: {
+					equalTo: '123',
+				},
+			},
 			fields: [
-				// @ts-expect-error
 				'name',
-				// @ts-expect-error
 				'pointerToAnotherClass.id',
-				// @ts-expect-error
 				'pointerToAnotherClass.name',
-				// @ts-expect-error
 				'pointerToAnotherClass2.age',
 			],
 			context,
@@ -1126,7 +1092,6 @@ describe('DatabaseController', () => {
 		expect(res).toEqual([
 			{
 				id: '123',
-				// @ts-expect-error
 				pointerToAnotherClass: {
 					id: 'anotherClassId',
 					name: 'anotherClassName',
@@ -1154,9 +1119,11 @@ describe('DatabaseController', () => {
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
 		expect(mockGetObjects).toHaveBeenNthCalledWith(1, {
 			className: 'TestClass',
-			id: '123',
 			fields: ['name', 'pointerToAnotherClass', 'pointerToAnotherClass2'],
 			context,
+			where: {
+				id: { equalTo: '123' },
+			},
 		})
 	})
 })

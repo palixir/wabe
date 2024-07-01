@@ -202,12 +202,11 @@ export class DatabaseController<T extends WibeAppTypes> {
 		)
 	}
 
-	async _getWhereObjectWithPointerOrRelation<U extends keyof T['types']>(
-		className: U,
-		where: WhereType<U>,
-		context: Context<T>,
-	) {
-		const whereKeys = Object.keys(where) as Array<keyof WhereType<U>>
+	async _getWhereObjectWithPointerOrRelation<
+		U extends keyof T['types'],
+		K extends keyof T['types'][U],
+	>(className: U, where: WhereType<U, K>, context: Context<T>) {
+		const whereKeys = Object.keys(where) as Array<keyof WhereType<U, K>>
 
 		const realClass = context.config.schema.classes.find(
 			// @ts-expect-error
@@ -341,6 +340,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 		const dataOfCurrentObject = await this.adapter.getObjects({
 			...params,
 			where: params.where ? where : undefined,
+			// @ts-expect-error
 			fields: [...fieldsWithoutPointers, ...(pointersFieldsId || [])],
 		})
 

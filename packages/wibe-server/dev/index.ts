@@ -65,13 +65,11 @@ const run = async () => {
 					name: 'User',
 					description: 'User class',
 					fields: {
-						post: {
-							type: 'Pointer',
-							class: 'Post',
+						name: {
+							type: 'String',
 						},
-						tata: {
-							type: 'Phone',
-							defaultValue: 0,
+						age: {
+							type: 'Int',
 						},
 					},
 					resolvers: {

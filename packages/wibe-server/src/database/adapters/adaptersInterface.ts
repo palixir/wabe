@@ -1,8 +1,12 @@
 import type { Context } from '../../server/interface'
 import type { WibeAppTypes } from '../../server'
 
-type WhereAggregation<T extends keyof WibeAppTypes['types']> = {
-	[key in keyof WibeAppTypes['types'][T] | 'id']: {
+type WhereAggregation<
+	T extends keyof WibeAppTypes['types'],
+	K extends keyof WibeAppTypes['types'][T],
+> = Record<
+	K | 'id',
+	{
 		equalTo?: any
 		notEqualTo?: any
 		greaterThan?: any
@@ -14,17 +18,20 @@ type WhereAggregation<T extends keyof WibeAppTypes['types']> = {
 		contains?: any
 		notContains?: any
 	}
+>
+
+type WhereConditional<
+	T extends keyof WibeAppTypes['types'],
+	K extends keyof WibeAppTypes['types'][T],
+> = {
+	OR?: Array<WhereType<T, K>>
+	AND?: Array<WhereType<T, K>>
 }
 
-type WhereConditional<T extends keyof WibeAppTypes['types']> = {
-	OR?: Array<WhereType<T>>
-	AND?: Array<WhereType<T>>
-}
-
-export type WhereType<T extends keyof WibeAppTypes['types']> = Partial<
-	WhereAggregation<T>
-> &
-	WhereConditional<T>
+export type WhereType<
+	T extends keyof WibeAppTypes['types'],
+	K extends keyof WibeAppTypes['types'][T],
+> = Partial<WhereAggregation<T, K>> & WhereConditional<T, K>
 
 export interface AdapterOptions {
 	databaseUrl: string
@@ -47,7 +54,7 @@ export interface GetObjectsOptions<
 	K extends keyof WibeAppTypes['types'][T],
 > {
 	className: T
-	where?: WhereType<T>
+	where?: WhereType<T, K>
 	fields?: Array<K>
 	offset?: number
 	limit?: number
@@ -85,7 +92,7 @@ export interface UpdateObjectOptions<
 > {
 	className: T
 	id: string
-	data: Record<W, any>
+	data: Partial<Record<W, any>>
 	fields?: Array<K>
 	context: Context<any>
 }
@@ -96,8 +103,8 @@ export interface UpdateObjectsOptions<
 	W extends keyof WibeAppTypes['types'][T],
 > {
 	className: T
-	where: WhereType<T>
-	data: Record<W, any>
+	where: WhereType<T, W>
+	data: Partial<Record<W, any>>
 	fields?: Array<K>
 	offset?: number
 	limit?: number
@@ -119,7 +126,7 @@ export interface DeleteObjectsOptions<
 	K extends keyof WibeAppTypes['types'][T],
 > {
 	className: T
-	where: WhereType<T>
+	where: WhereType<T, K>
 	fields?: Array<K>
 	offset?: number
 	limit?: number

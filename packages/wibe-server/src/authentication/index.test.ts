@@ -1,13 +1,14 @@
-import { beforeAll, afterAll, describe, expect, it, afterEach } from 'bun:test'
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'bun:test'
+import { type GraphQLClient, gql } from 'graphql-request'
+import type { WibeApp } from '..'
 import {
+	type DevWibeAppTypes,
 	closeTests,
 	getAnonymousClient,
 	getGraphqlClient,
 	getUserClient,
 	setupTests,
 } from '../utils/helper'
-import type { WibeApp } from '..'
-import { gql, type GraphQLClient } from 'graphql-request'
 
 const createUserAndUpdateRole = async ({
 	anonymousClient,
@@ -67,7 +68,7 @@ const createUserAndUpdateRole = async ({
 }
 
 describe('Authentication', () => {
-	let wibe: WibeApp
+	let wibe: WibeApp<DevWibeAppTypes>
 	let port: number
 	let client: GraphQLClient
 	let rootClient: GraphQLClient
