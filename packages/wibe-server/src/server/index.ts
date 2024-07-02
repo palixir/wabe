@@ -162,15 +162,15 @@ export class WibeApp<T extends WibeAppTypes> {
 		if (
 			process.env.NODE_ENV !== 'production' &&
 			process.env.NODE_ENV !== 'test' &&
-			this.config.codegen
-		) {
-			if (this.config.codegen.enabled && this.config.codegen.path) {
-				generateCodegen({
-					path: this.config.codegen.path,
-					schema: wibeSchema.schema,
-				})
-			}
-		}
+			this.config.codegen &&
+			this.config.codegen.enabled &&
+			this.config.codegen.path
+		)
+			generateCodegen({
+				path: this.config.codegen.path,
+				schema: wibeSchema.schema,
+				graphqlSchema: schema,
+			})
 
 		this.server.usePlugin(
 			WobeGraphqlYogaPlugin({

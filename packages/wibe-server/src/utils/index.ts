@@ -1,9 +1,15 @@
-import { getSdk } from '../generated/wibe'
+import * as wibeFile from '../generated/wibe'
 import type { ClassInterface } from '../schema'
 import type { WibeAppTypes, WibeConfig } from '../server'
 import { getGraphqlClient } from './helper'
 
 export const getClient = (config: WibeConfig<WibeAppTypes>) => {
+	// We do this to avoid failing import when wibe.ts is not already generated
+	// @ts-ignore
+	const getSdk = wibeFile.getSdk
+
+	if (!getSdk) return
+
 	if (!config.port) throw new Error('config.port is not defined')
 
 	const client = getGraphqlClient(config.port)

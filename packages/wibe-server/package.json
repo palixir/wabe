@@ -10,7 +10,7 @@
     "lint": "biome lint . --no-errors-on-unmatched --config-path=../../",
     "ci": "bun check && bun lint $(pwd) && bun run test:bun src && bun test:node src",
     "format": "biome format --write .",
-    "dev": "bun run dev/codegen.ts && bun run --watch dev/index.ts"
+    "dev": " bun run --watch dev/index.ts"
   },
   "dependencies": {
     "@graphql-codegen/core": "4.0.2",

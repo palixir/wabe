@@ -17,7 +17,7 @@ const run = async () => {
 	}>({
 		codegen: {
 			enabled: true,
-			path: `${import.meta.dirname}/../generated/`,
+			path: `${import.meta.dirname}/../src/generated/`,
 		},
 		rootKey:
 			'0uwFvUxM$ceFuF1aEtTtZMa7DUN2NZudqgY5ve5W*QCyb58cwMj9JeoaV@d#%29v&aJzswuudVU1%nAT+rxS0Bh&OkgBYc0PH18*',

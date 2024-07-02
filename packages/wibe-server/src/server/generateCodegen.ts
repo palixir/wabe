@@ -54,14 +54,14 @@ export const generateWibeFile = ({
 }
 
 export const generateGraphqlTypes = async ({
-	graphqlSchema,
+	graphqlSchemaContent,
 	path,
-}: { path: string; graphqlSchema: GraphQLSchema }) => {
+}: { path: string; graphqlSchemaContent: string }) => {
 	const config = {
 		documents: [],
 		config: {},
 		filename: `${path}/wibe.ts`,
-		schema: parse(printSchema(graphqlSchema)),
+		schema: parse(graphqlSchemaContent),
 		plugins: [
 			{ typescript: {} },
 			{ 'typescript-graphql-request': {} },
@@ -82,16 +82,16 @@ export const generateGraphqlTypes = async ({
 export const generateCodegen = async ({
 	schema,
 	path,
+	graphqlSchema,
 }: {
 	schema: SchemaInterface<any>
 	path: string
+	graphqlSchema: GraphQLSchema
 }) => {
-	const graphqlSchema = await loadSchema(`${path}/schema.graphql`, {
-		loaders: [new GraphQLFileLoader()],
-	})
+	const graphqlSchemaContent = printSchema(graphqlSchema)
 
 	const graphqlOutput = await generateGraphqlTypes({
-		graphqlSchema,
+		graphqlSchemaContent,
 		path,
 	})
 
@@ -112,5 +112,5 @@ export const generateCodegen = async ({
 	} catch {}
 
 	Bun.write(`${path}/wibe.ts`, `${graphqlOutput}\n\n${wibeOutput}`)
-	Bun.write(`${path}/schema.graphql`, printSchema(graphqlSchema))
+	Bun.write(`${path}/schema.graphql`, graphqlSchemaContent)
 }
