@@ -5,7 +5,7 @@ import type {
 	WibeSchemaEnums,
 	WibeSchemaScalars,
 	WibeSchemaTypes,
-} from '../generated/wibe'
+} from '../src/generated/wibe'
 
 const run = async () => {
 	await runDatabase()

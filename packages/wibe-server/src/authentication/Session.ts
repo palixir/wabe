@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken'
 import type { Context } from '../server/interface'
-import type { _Session, User } from '../../generated/wibe'
+import type { _Session, User } from '../generated/wibe'
 import type { WibeConfig } from '../server'
 
 export class Session {
