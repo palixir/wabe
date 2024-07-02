@@ -1,5 +1,5 @@
 import { getClassFromClassName } from '../utils'
-import type { Context } from '../server/interface'
+import type { WibeContext } from '../server/interface'
 
 type CreateAndLink = any
 type Link = string
@@ -29,7 +29,7 @@ export const createAndLink = async ({
 }: {
 	createAndLink: CreateAndLink
 	fieldName: string
-	context: Context<any>
+	context: WibeContext<any>
 	className: string
 }) => {
 	const classInSchema = getClassFromClassName(className, context.config)
@@ -53,7 +53,7 @@ export const createAndAdd = async ({
 }: {
 	createAndAdd: CreateAndAdd
 	fieldName: string
-	context: Context<any>
+	context: WibeContext<any>
 	className: string
 }) => {
 	const classInSchema = getClassFromClassName(className, context.config)
@@ -80,7 +80,7 @@ export const add = async ({
 }: {
 	add: Add
 	fieldName: string
-	context: Context<any>
+	context: WibeContext<any>
 	typeOfExecution: TypeOfExecution
 	id?: string
 	className: string
@@ -147,7 +147,7 @@ export const remove = async ({
 }: {
 	remove: Remove
 	fieldName: string
-	context: Context<any>
+	context: WibeContext<any>
 	typeOfExecution: TypeOfExecution
 	id?: string
 	className: string

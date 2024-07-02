@@ -1,5 +1,5 @@
 import type { WibeAppTypes } from '../server'
-import type { Context } from '../server/interface'
+import type { WibeContext } from '../server/interface'
 import type {
 	CustomAuthenticationMethods,
 	ProviderInterface,
@@ -11,7 +11,7 @@ export const getAuthenticationMethod = <
 	U extends ProviderInterface | SecondaryProviderInterface,
 >(
 	listOfMethods: string[],
-	context: Context<any>,
+	context: WibeContext<any>,
 ): CustomAuthenticationMethods<T, U> => {
 	const customAuthenticationConfig =
 		context.config?.authentication?.customAuthenticationMethods

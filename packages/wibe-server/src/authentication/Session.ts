@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-import type { Context } from '../server/interface'
+import type { WibeContext } from '../server/interface'
 import type { _Session, User } from '../generated/wibe'
 import type { WibeConfig } from '../server'
 
@@ -27,7 +27,7 @@ export class Session {
 
 	async meFromAccessToken(
 		accessToken: string,
-		context: Context<any>,
+		context: WibeContext<any>,
 	): Promise<{ sessionId: string; user: User | null }> {
 		const sessions = await context.databaseController.getObjects({
 			className: '_Session',
@@ -56,7 +56,7 @@ export class Session {
 		return { sessionId: session?.id ?? null, user: user ?? null }
 	}
 
-	async create(userId: string, context: Context<any>) {
+	async create(userId: string, context: WibeContext<any>) {
 		this.accessToken = jwt.sign(
 			{
 				userId,
@@ -98,7 +98,7 @@ export class Session {
 		}
 	}
 
-	async delete(context: Context<any>) {
+	async delete(context: WibeContext<any>) {
 		if (!context.sessionId) return
 
 		await context.databaseController.deleteObject({
@@ -111,7 +111,7 @@ export class Session {
 	async refresh(
 		accessToken: string,
 		refreshToken: string,
-		context: Context<any>,
+		context: WibeContext<any>,
 	) {
 		const session = await context.databaseController.getObjects({
 			className: '_Session',

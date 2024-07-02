@@ -1,5 +1,5 @@
 import type { PermissionsOperations } from '../schema'
-import type { Context } from '../server/interface'
+import type { WibeContext } from '../server/interface'
 import type { HookObject } from './HookObject'
 import { OperationType } from './index'
 
@@ -30,7 +30,7 @@ export const _getPermissionPropertiesOfAClass = async ({
 }: {
 	className: string
 	operation: PermissionsOperations
-	context: Context<any>
+	context: WibeContext<any>
 }) => {
 	const wibeClass = context.config.schema.classes.find(
 		(c) => c.name === className,

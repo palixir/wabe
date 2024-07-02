@@ -1,5 +1,5 @@
 import type { SignUpWithInput } from '../../generated/wibe'
-import type { Context } from '../../server/interface'
+import type { WibeContext } from '../../server/interface'
 import { Session } from '../Session'
 import type { ProviderInterface } from '../interface'
 import { getAuthenticationMethod } from '../utils'
@@ -15,7 +15,7 @@ export const signUpWithResolver = async (
 	}: {
 		input: SignUpWithInput
 	},
-	context: Context<any>,
+	context: WibeContext<any>,
 ) => {
 	const { provider, name } = getAuthenticationMethod<any, ProviderInterface>(
 		Object.keys(input.authentication || {}),

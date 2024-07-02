@@ -1,5 +1,5 @@
 import type { User } from '../generated/wibe'
-import type { Context } from '../server/interface'
+import type { WibeContext } from '../server/interface'
 import type { TypeField } from '../schema'
 import type { WibeAppTypes } from '../server'
 
@@ -15,7 +15,7 @@ export interface ProviderConfig {
 
 export type AuthenticationEventsOptions<T> = {
 	input: T
-	context: Context<any>
+	context: WibeContext<any>
 }
 
 export type ProviderInterface<T = any> = {

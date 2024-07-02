@@ -1,5 +1,5 @@
 import type { Context } from 'wobe'
-import type { Context as WibeContext } from '../interface'
+import type { WibeContext } from '../interface'
 import { ProviderEnum } from '../../authentication/interface'
 import { getGraphqlClient } from '../../utils/helper'
 import { gql } from 'graphql-request'

@@ -1,5 +1,5 @@
 import type { VerifyChallengeInput } from '../../generated/wibe'
-import type { Context } from '../../server/interface'
+import type { WibeContext } from '../../server/interface'
 import { Session } from '../Session'
 import type { SecondaryProviderInterface } from '../interface'
 import { getAuthenticationMethod } from '../utils'
@@ -11,7 +11,7 @@ export const verifyChallengeResolver = async (
 	}: {
 		input: VerifyChallengeInput
 	},
-	context: Context<any>,
+	context: WibeContext<any>,
 ) => {
 	if (!input.factor) throw new Error('One factor is required')
 

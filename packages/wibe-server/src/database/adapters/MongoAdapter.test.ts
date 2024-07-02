@@ -16,12 +16,12 @@ import {
 	setupTests,
 } from '../../utils/helper'
 import { type MongoAdapter, buildMongoWhereQuery } from './MongoAdapter'
-import type { Context } from '../../server/interface'
+import type { WibeContext } from '../../server/interface'
 
 describe('Mongo adapter', () => {
 	let mongoAdapter: MongoAdapter<DevWibeAppTypes>
 	let wibe: WibeApp<DevWibeAppTypes>
-	let context: Context<any>
+	let context: WibeContext<any>
 
 	beforeAll(async () => {
 		const setup = await setupTests()
@@ -34,7 +34,7 @@ describe('Mongo adapter', () => {
 			isRoot: true,
 			databaseController: wibe.databaseController,
 			config: wibe.config,
-		} as Context<any>
+		} as WibeContext<any>
 	})
 
 	afterAll(async () => {

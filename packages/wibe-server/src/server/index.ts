@@ -13,7 +13,7 @@ import { Wobe } from 'wobe'
 import { WobeGraphqlYogaPlugin } from 'wobe-graphql-yoga'
 import { Session } from '../authentication/Session'
 import { getCookieInRequestHeaders } from '../utils'
-import type { Context } from './interface'
+import type { WibeContext } from './interface'
 import { initializeRoles } from '../authentication/roles'
 import type { FileConfig } from '../files'
 import { fileDevAdapter } from '../files/devAdapter'
@@ -178,7 +178,7 @@ export class WibeApp<T extends WibeAppTypes> {
 				maskedErrors: false,
 				// TODO: Maybe add cors here + the wobe cors for csrf on upload
 				graphqlEndpoint: '/graphql',
-				context: async ({ request }): Promise<Context<T>> => {
+				context: async ({ request }): Promise<WibeContext<T>> => {
 					const headers = request.headers
 
 					if (headers.get('Wibe-Root-Key') === this.config.rootKey)
@@ -304,3 +304,5 @@ export class WibeApp<T extends WibeAppTypes> {
 		this.server.stop()
 	}
 }
+
+export { generateCodegen }

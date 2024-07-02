@@ -1,12 +1,12 @@
 import type { OperationType, TypedNewData } from '.'
 import type { WibeAppTypes } from '../server'
-import type { Context } from '../server/interface'
+import type { WibeContext } from '../server/interface'
 
 export class HookObject<T extends WibeAppTypes, K = keyof T['types']> {
 	public className: string
 	private newData?: TypedNewData<K>
 	private operationType: OperationType
-	public context: Context<T>
+	public context: WibeContext<T>
 	public object: Record<keyof WibeAppTypes['types'][T], any>
 
 	constructor({
@@ -19,7 +19,7 @@ export class HookObject<T extends WibeAppTypes, K = keyof T['types']> {
 		className: K
 		newData?: TypedNewData<K>
 		operationType: OperationType
-		context: Context<T>
+		context: WibeContext<T>
 		object: Record<keyof WibeAppTypes['types'][T], any>
 	}) {
 		this.newData = newData

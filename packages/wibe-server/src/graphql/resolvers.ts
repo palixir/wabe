@@ -1,6 +1,6 @@
 import type { GraphQLResolveInfo, SelectionSetNode } from 'graphql'
 import type { WibeAppTypes } from '..'
-import type { Context } from '../server/interface'
+import type { WibeContext } from '../server/interface'
 import { firstLetterInLowerCase } from '../utils'
 import {
 	type InputFields,
@@ -69,7 +69,7 @@ export const executeRelationOnFields = async ({
 }: {
 	className: string
 	fields: InputFields
-	context: Context<any>
+	context: WibeContext<any>
 	id?: string
 	where?: any
 	typeOfExecution?: TypeOfExecution
@@ -133,7 +133,7 @@ export const executeRelationOnFields = async ({
 export const queryForOneObject = (
 	_: any,
 	{ id }: any,
-	context: Context<any>,
+	context: WibeContext<any>,
 	info: GraphQLResolveInfo,
 	className: keyof WibeAppTypes['types'],
 ) => {
@@ -150,7 +150,7 @@ export const queryForOneObject = (
 export const queryForMultipleObject = async (
 	_: any,
 	{ where, offset, limit }: any,
-	context: Context<any>,
+	context: WibeContext<any>,
 	info: GraphQLResolveInfo,
 	className: keyof WibeAppTypes['types'],
 ) => {
@@ -175,7 +175,7 @@ export const queryForMultipleObject = async (
 export const mutationToCreateObject = async (
 	_: any,
 	args: any,
-	context: Context<any>,
+	context: WibeContext<any>,
 	info: GraphQLResolveInfo,
 	className: keyof WibeAppTypes['types'],
 ) => {
@@ -201,7 +201,7 @@ export const mutationToCreateObject = async (
 export const mutationToCreateMultipleObjects = async (
 	_: any,
 	args: any,
-	context: Context<any>,
+	context: WibeContext<any>,
 	info: GraphQLResolveInfo,
 	className: keyof WibeAppTypes['types'],
 ) => {
@@ -235,7 +235,7 @@ export const mutationToCreateMultipleObjects = async (
 export const mutationToUpdateObject = async (
 	_: any,
 	args: any,
-	context: Context<any>,
+	context: WibeContext<any>,
 	info: GraphQLResolveInfo,
 	className: keyof WibeAppTypes['types'],
 ) => {
@@ -264,7 +264,7 @@ export const mutationToUpdateObject = async (
 export const mutationToUpdateMultipleObjects = async (
 	_: any,
 	args: any,
-	context: Context<any>,
+	context: WibeContext<any>,
 	info: GraphQLResolveInfo,
 	className: keyof WibeAppTypes['types'],
 ) => {
@@ -296,7 +296,7 @@ export const mutationToUpdateMultipleObjects = async (
 export const mutationToDeleteObject = async (
 	_: any,
 	args: any,
-	context: Context<any>,
+	context: WibeContext<any>,
 	info: GraphQLResolveInfo,
 	className: keyof WibeAppTypes['types'],
 ) => {
@@ -316,7 +316,7 @@ export const mutationToDeleteObject = async (
 export const mutationToDeleteMultipleObjects = async (
 	_: any,
 	args: any,
-	context: Context<any>,
+	context: WibeContext<any>,
 	info: GraphQLResolveInfo,
 	className: keyof WibeAppTypes['types'],
 ) => {

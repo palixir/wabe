@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "bun build --outdir dist $(pwd)/src/index.ts --target=bun && bun generate:types",
-    "generate:types": "dts-bundle-generator -o dist/index.d.ts src/index.ts --no-check",
+    "generate:types": "dts-bundle-generator -o dist/index.d.ts src/index.ts --no-check --external-imports=wobe",
     "check": "tsc --project $(pwd)/tsconfig.json",
     "lint": "biome lint . --no-errors-on-unmatched --config-path=../../",
     "ci": "bun check && bun lint $(pwd) && bun run test:bun src && bun test:node src",

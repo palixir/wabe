@@ -19,7 +19,7 @@ export type WibeRelationTypes = 'Pointer' | 'Relation'
 
 export type WibeTypes = WibeCustomTypes | WibePrimaryTypes | WibeRelationTypes
 
-type Object<T extends WibeAppTypes> = {
+type WibeObject<T extends WibeAppTypes> = {
 	name: string
 	fields: SchemaFields<T>
 	description?: string
@@ -45,14 +45,14 @@ type TypeFieldArray<T extends WibeAppTypes> = {
 			// support array of array
 			typeValue: WibePrimaryTypes
 	  }
-	| { typeValue: 'Object'; object: Object<T> }
+	| { typeValue: 'Object'; object: WibeObject<T> }
 )
 
 type TypeFieldObject<T extends WibeAppTypes> = {
 	type: 'Object'
 	required?: boolean
 	description?: string
-	object: Object<T>
+	object: WibeObject<T>
 	defaultValue?: any
 }
 
@@ -155,7 +155,7 @@ export interface PermissionProperties {
 	authorizedRoles: Array<string>
 }
 
-export type Permissions = Partial<
+export type ClassPermissions = Partial<
 	Record<PermissionsOperations, PermissionProperties>
 >
 
@@ -164,7 +164,7 @@ export interface ClassInterface<T extends WibeAppTypes> {
 	fields: SchemaFields<T>
 	description?: string
 	resolvers?: TypeResolver<T>
-	permissions?: Permissions
+	permissions?: ClassPermissions
 }
 
 export interface ScalarInterface {

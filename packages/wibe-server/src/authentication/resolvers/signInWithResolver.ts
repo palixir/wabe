@@ -1,5 +1,5 @@
 import type { SignInWithInput } from '../../generated/wibe'
-import type { Context } from '../../server/interface'
+import type { WibeContext } from '../../server/interface'
 import type { DevWibeAppTypes } from '../../utils/helper'
 import { Session } from '../Session'
 import type {
@@ -19,7 +19,7 @@ export const signInWithResolver = async (
 	}: {
 		input: SignInWithInput
 	},
-	context: Context<DevWibeAppTypes>,
+	context: WibeContext<DevWibeAppTypes>,
 ) => {
 	const { provider, name } = getAuthenticationMethod<
 		DevWibeAppTypes,

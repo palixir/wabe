@@ -3,7 +3,7 @@ import {
 	defaultBeforeCreateUpload,
 	defaultBeforeUpdateUpload,
 } from '../files/hookUploadFile'
-import type { Context } from '../server/interface'
+import type { WibeContext } from '../server/interface'
 import type { WibeConfig, WibeAppTypes } from '../server'
 import { HookObject } from './HookObject'
 import {
@@ -86,7 +86,7 @@ export const initializeHook = async <T extends keyof WibeAppTypes['types']>({
 	where?: WhereType<any, any>
 	className: T
 	newData: TypedNewData<any>
-	context: Context<any>
+	context: WibeContext<any>
 	skipHooks?: boolean
 }) => {
 	if (skipHooks) return { run: async () => ({}) }

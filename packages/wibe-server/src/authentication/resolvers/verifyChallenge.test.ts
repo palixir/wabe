@@ -1,12 +1,12 @@
 import { describe, expect, it, beforeEach, mock, spyOn } from 'bun:test'
 import { verifyChallengeResolver } from './verifyChallenge'
-import type { Context } from '../../server/interface'
+import type { WibeContext } from '../../server/interface'
 import { Session } from '../Session'
 
 describe('verifyChallenge', () => {
 	const mockOnVerifyChallenge = mock(() => Promise.resolve(true))
 
-	const context: Context<any> = {
+	const context: WibeContext<any> = {
 		sessionId: 'sessionId',
 		user: {
 			id: 'userId',

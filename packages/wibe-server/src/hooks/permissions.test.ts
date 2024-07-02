@@ -2,7 +2,7 @@ import { describe, expect, it, beforeEach, mock, spyOn } from 'bun:test'
 import { _getPermissionPropertiesOfAClass, _checkCLP } from './permissions'
 import { HookObject } from './HookObject'
 import { OperationType } from '.'
-import type { Context } from '../server/interface'
+import type { WibeContext } from '../server/interface'
 import * as permissions from './permissions'
 
 describe('Permissions', () => {
@@ -298,7 +298,7 @@ describe('Permissions', () => {
 		})
 
 		it('should throw permission denied if no session id is provided but class require authentication', async () => {
-			const context: Context<any> = {
+			const context: WibeContext<any> = {
 				sessionId: '',
 				// @ts-expect-error
 				user: {},
@@ -325,7 +325,7 @@ describe('Permissions', () => {
 				user: { id: 'userId' },
 			} as never)
 
-			const context: Context<any> = {
+			const context: WibeContext<any> = {
 				sessionId: 'sessionId',
 				user: {
 					id: 'userId',
@@ -357,7 +357,7 @@ describe('Permissions', () => {
 				user: { id: 'userId' },
 			} as never)
 
-			const context: Context<any> = {
+			const context: WibeContext<any> = {
 				sessionId: 'sessionId',
 				user: {
 					id: 'userId',
@@ -382,7 +382,7 @@ describe('Permissions', () => {
 		})
 
 		it('should not throw permission denied if client is root', async () => {
-			const context: Context<any> = {
+			const context: WibeContext<any> = {
 				sessionId: '',
 				user: {
 					id: '',

@@ -1,6 +1,6 @@
 import type { WibeAppTypes } from '../..'
 import { OperationType, initializeHook } from '../../hooks'
-import type { Context } from '../../server/interface'
+import type { WibeContext } from '../../server/interface'
 import type {
 	CreateObjectOptions,
 	CreateObjectsOptions,
@@ -49,7 +49,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 	_getPointerObject(
 		className: keyof T['types'],
 		fields: string[],
-		context: Context<T>,
+		context: WibeContext<T>,
 	): PointerFields {
 		const realClass = context.config.schema.classes.find(
 			// @ts-expect-error
@@ -97,7 +97,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 	_isRelationField<U extends keyof T['types']>(
 		originClassName: U,
 		pointerClassName: string,
-		context: Context<T>,
+		context: WibeContext<T>,
 	) {
 		return context.config.schema.classes.some(
 			(c) =>
@@ -116,7 +116,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 	_isPointerField<U extends keyof T['types']>(
 		originClassName: U,
 		pointerClassName: string,
-		context: Context<T>,
+		context: WibeContext<T>,
 	) {
 		return context.config.schema.classes.some(
 			(c) =>
@@ -139,7 +139,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 		objectData: Pick<T['types'][U], K> | null,
 		pointersObject: PointerObject,
 		originClassName: U,
-		context: Context<T>,
+		context: WibeContext<T>,
 	): Promise<Record<any, any>> {
 		return Object.entries(pointersObject).reduce(
 			async (
@@ -205,7 +205,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 	async _getWhereObjectWithPointerOrRelation<
 		U extends keyof T['types'],
 		K extends keyof T['types'][U],
-	>(className: U, where: WhereType<U, K>, context: Context<T>) {
+	>(className: U, where: WhereType<U, K>, context: WibeContext<T>) {
 		const whereKeys = Object.keys(where) as Array<keyof WhereType<U, K>>
 
 		const realClass = context.config.schema.classes.find(
