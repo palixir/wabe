@@ -1,4 +1,4 @@
-import type { SignInWithInput } from '../../generated/wibe'
+import type { SignInWithInput } from '../../../generated/wibe'
 import type { WibeContext } from '../../server/interface'
 import type { DevWibeAppTypes } from '../../utils/helper'
 import { Session } from '../Session'

@@ -1,4 +1,4 @@
-import * as wibeFile from '../generated/wibe'
+import * as wibeFile from '../../generated/wibe'
 import type { ClassInterface } from '../schema'
 import type { WibeAppTypes, WibeConfig } from '../server'
 import { getGraphqlClient } from './helper'

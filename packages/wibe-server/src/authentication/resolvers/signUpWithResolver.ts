@@ -1,4 +1,4 @@
-import type { SignUpWithInput } from '../../generated/wibe'
+import type { SignUpWithInput } from '../../../generated/wibe'
 import type { WibeContext } from '../../server/interface'
 import { Session } from '../Session'
 import type { ProviderInterface } from '../interface'

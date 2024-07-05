@@ -5,7 +5,7 @@ import type {
 	WibeSchemaEnums,
 	WibeSchemaScalars,
 	WibeSchemaTypes,
-} from '../generated/wibe'
+} from '../../generated/wibe'
 import { DatabaseEnum } from '../database'
 import { WibeApp } from '../server'
 
