@@ -133,6 +133,11 @@ export interface DeleteObjectsOptions<
 	context: WibeContext<any>
 }
 
+export type OutputType<
+	T extends keyof WibeAppTypes['types'],
+	K extends keyof WibeAppTypes['types'][T],
+> = Pick<WibeAppTypes['types'][T], K>
+
 export interface DatabaseAdapter {
 	connect(): Promise<any>
 	close(): Promise<any>
@@ -142,45 +147,33 @@ export interface DatabaseAdapter {
 	getObject<
 		T extends keyof WibeAppTypes['types'],
 		K extends keyof WibeAppTypes['types'][T],
-	>(
-		params: GetObjectOptions<T, K>,
-	): Promise<Pick<WibeAppTypes['types'][T], K> | null>
+	>(params: GetObjectOptions<T, K>): Promise<OutputType<T, K> | null>
 	getObjects<
 		T extends keyof WibeAppTypes['types'],
 		K extends keyof WibeAppTypes['types'][T],
-	>(
-		params: GetObjectsOptions<T, K>,
-	): Promise<Pick<WibeAppTypes['types'][T], K>[]>
+	>(params: GetObjectsOptions<T, K>): Promise<OutputType<T, K>[]>
 
 	createObject<
 		T extends keyof WibeAppTypes['types'],
 		K extends keyof WibeAppTypes['types'][T],
 		W extends keyof WibeAppTypes['types'][T],
-	>(
-		params: CreateObjectOptions<T, K, W>,
-	): Promise<Pick<WibeAppTypes['types'][T], K>>
+	>(params: CreateObjectOptions<T, K, W>): Promise<OutputType<T, K>>
 	createObjects<
 		T extends keyof WibeAppTypes['types'],
 		K extends keyof WibeAppTypes['types'][T],
 		W extends keyof WibeAppTypes['types'][T],
-	>(
-		params: CreateObjectsOptions<T, K, W>,
-	): Promise<Pick<WibeAppTypes['types'][T], K>[]>
+	>(params: CreateObjectsOptions<T, K, W>): Promise<OutputType<T, K>[]>
 
 	updateObject<
 		T extends keyof WibeAppTypes['types'],
 		K extends keyof WibeAppTypes['types'][T],
 		W extends keyof WibeAppTypes['types'][T],
-	>(
-		params: UpdateObjectOptions<T, K, W>,
-	): Promise<Pick<WibeAppTypes['types'][T], K>>
+	>(params: UpdateObjectOptions<T, K, W>): Promise<OutputType<T, K>>
 	updateObjects<
 		T extends keyof WibeAppTypes['types'],
 		K extends keyof WibeAppTypes['types'][T],
 		W extends keyof WibeAppTypes['types'][T],
-	>(
-		params: UpdateObjectsOptions<T, K, W>,
-	): Promise<Pick<WibeAppTypes['types'][T], K>[]>
+	>(params: UpdateObjectsOptions<T, K, W>): Promise<OutputType<T, K>[]>
 
 	deleteObject<
 		T extends keyof WibeAppTypes['types'],

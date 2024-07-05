@@ -168,6 +168,13 @@ const run = async () => {
 		},
 	})
 
+	const res = await wibe.databaseController.getObject({
+		className: 'User',
+		context: {} as any,
+		id: 'id',
+		fields: ['id', 'role.id'],
+	})
+
 	await wibe.start()
 }
 
