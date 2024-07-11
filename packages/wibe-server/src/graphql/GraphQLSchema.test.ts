@@ -186,6 +186,48 @@ describe('GraphqlSchema', () => {
 		})
 	})
 
+	it('should request an object with pointer in same class (issue #5)', async () => {
+		const { client, wibeApp } = await createWibeApp({
+			classes: [],
+		})
+
+		await client.request<any>(gql`
+				mutation createOnboarding {
+					createUser(
+						input: {fields: {authentication: {emailPassword: {email: "test@gmail.com", password: "password"}}}}
+  				) {
+				    user {
+     					id
+    				}
+  				}
+				}
+			`)
+
+		const res = await client.request<any>(gql`
+			query users{
+				users{
+					edges{
+						node{
+							authentication{
+								emailPassword{
+									email
+									password
+								}
+							}
+						}
+					}
+				}
+			}
+			`)
+
+		expect(res.users.edges[0].node.authentication.emailPassword).toEqual({
+			email: 'test@gmail.com',
+			password: 'password',
+		})
+
+		await wibeApp.close()
+	})
+
 	it('should support file type', async () => {
 		expect(
 			getTypeFromGraphQLSchema({

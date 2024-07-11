@@ -91,6 +91,22 @@ describe('DatabaseController', () => {
 						},
 					},
 				},
+				{
+					name: 'ClassWithObject',
+					fields: {
+						object: {
+							type: 'Object',
+							object: {
+								name: 'ObjectName',
+								fields: {
+									objectField: {
+										type: 'String',
+									},
+								},
+							},
+						},
+					},
+				},
 			],
 		},
 	} as any
@@ -499,8 +515,8 @@ describe('DatabaseController', () => {
 		expect(
 			databaseController._isRelationField(
 				'AnotherClass4',
-				'AnotherClass3',
 				context,
+				'AnotherClass3',
 			),
 		).toBe(true)
 	})
@@ -511,8 +527,8 @@ describe('DatabaseController', () => {
 		expect(
 			databaseController._isRelationField(
 				'AnotherClass3' as any,
-				'AnotherClass4',
 				context,
+				'AnotherClass4',
 			),
 		).toBe(false)
 	})
@@ -670,8 +686,8 @@ describe('DatabaseController', () => {
 		expect(
 			databaseController._isPointerField(
 				'testClass' as any,
-				'anotherClass',
 				context,
+				'anotherClass',
 			),
 		).toBe(true)
 	})
@@ -682,8 +698,8 @@ describe('DatabaseController', () => {
 		expect(
 			databaseController._isPointerField(
 				'anotherClass' as any,
-				'anotherClass2',
 				context,
+				'anotherClass2',
 			),
 		).toBe(false)
 	})
@@ -694,9 +710,25 @@ describe('DatabaseController', () => {
 		expect(
 			databaseController._isPointerField(
 				'invalidClass' as any,
-				'anotherClass2',
 				context,
+				'anotherClass2',
 			),
+		).toBe(false)
+	})
+
+	it('should return false if the pointer classname is undefined', () => {
+		const databaseController = new DatabaseController(mockAdapter() as any)
+
+		expect(
+			databaseController._isPointerField('testClass' as any, context),
+		).toBe(false)
+	})
+
+	it('should return false if the relation classname is undefined', () => {
+		const databaseController = new DatabaseController(mockAdapter() as any)
+
+		expect(
+			databaseController._isRelationField('testClass' as any, context),
 		).toBe(false)
 	})
 

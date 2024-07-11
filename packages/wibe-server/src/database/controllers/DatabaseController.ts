@@ -17,7 +17,7 @@ import type {
 type PointerObject = Record<
 	string,
 	{
-		pointerClass: string
+		pointerClass?: string
 		fieldsOfPointerClass: Array<string>
 	}
 >
@@ -96,9 +96,11 @@ export class DatabaseController<T extends WibeAppTypes> {
 
 	_isRelationField<U extends keyof T['types']>(
 		originClassName: U,
-		pointerClassName: string,
 		context: WibeContext<T>,
+		pointerClassName?: string,
 	) {
+		if (!pointerClassName) return false
+
 		return context.config.schema.classes.some(
 			(c) =>
 				// @ts-expect-error
@@ -115,9 +117,11 @@ export class DatabaseController<T extends WibeAppTypes> {
 
 	_isPointerField<U extends keyof T['types']>(
 		originClassName: U,
-		pointerClassName: string,
 		context: WibeContext<T>,
+		pointerClassName?: string,
 	) {
+		if (!pointerClassName) return false
+
 		return context.config.schema.classes.some(
 			(c) =>
 				// @ts-expect-error
@@ -150,11 +154,11 @@ export class DatabaseController<T extends WibeAppTypes> {
 
 				const isPointer = this._isPointerField(
 					originClassName,
-					pointerClass,
 					context,
+					pointerClass,
 				)
 
-				if (isPointer) {
+				if (isPointer && pointerClass) {
 					const pointerObject = await this.getObject({
 						className: pointerClass,
 						fields: fieldsOfPointerClass,
@@ -171,11 +175,11 @@ export class DatabaseController<T extends WibeAppTypes> {
 
 				const isRelation = this._isRelationField(
 					originClassName,
-					pointerClass,
 					context,
+					pointerClass,
 				)
 
-				if (isRelation) {
+				if (isRelation && pointerClass) {
 					const relationObjects = await this.getObjects({
 						className: pointerClass,
 						fields: fieldsOfPointerClass,
