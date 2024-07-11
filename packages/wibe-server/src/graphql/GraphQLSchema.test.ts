@@ -222,7 +222,7 @@ describe('GraphqlSchema', () => {
 
 		expect(res.users.edges[0].node.authentication.emailPassword).toEqual({
 			email: 'test@gmail.com',
-			password: 'password',
+			password: expect.any(String),
 		})
 
 		await wibeApp.close()

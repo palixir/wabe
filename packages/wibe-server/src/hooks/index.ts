@@ -17,6 +17,10 @@ import {
 	defaultCheckPermissionOnRead,
 	defaultCheckPermissionOnUpdate,
 } from './permissions'
+import {
+	defaultCallAuthenticationProviderOnBeforeCreateUser,
+	defaultCallAuthenticationProviderOnBeforeUpdateUser,
+} from './authentication'
 
 export enum OperationType {
 	AfterCreate = 'AfterCreate',
@@ -205,5 +209,15 @@ export const getDefaultHooks = (): Hook<any>[] => [
 		operationType: OperationType.BeforeUpdate,
 		priority: 1,
 		callback: defaultBeforeUpdateUpload,
+	},
+	{
+		operationType: OperationType.BeforeCreate,
+		priority: 1,
+		callback: defaultCallAuthenticationProviderOnBeforeCreateUser,
+	},
+	{
+		operationType: OperationType.BeforeUpdate,
+		priority: 1,
+		callback: defaultCallAuthenticationProviderOnBeforeUpdateUser,
 	},
 ]

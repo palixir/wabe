@@ -26,7 +26,10 @@ export class EmailPassword
 					},
 				},
 			},
-			context,
+			context: {
+				...context,
+				isRoot: true,
+			},
 		})
 
 		if (users.length === 0)

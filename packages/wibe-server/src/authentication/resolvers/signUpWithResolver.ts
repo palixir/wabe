@@ -17,31 +17,27 @@ export const signUpWithResolver = async (
 	},
 	context: WibeContext<any>,
 ) => {
-	const { provider, name } = getAuthenticationMethod<any, ProviderInterface>(
-		Object.keys(input.authentication || {}),
-		context,
-	)
+	// const { provider, name } = getAuthenticationMethod<any, ProviderInterface>(
+	// 	Object.keys(input.authentication || {}),
+	// 	context,
+	// )
 
-	const inputOfTheGoodAuthenticationMethod =
-		// @ts-expect-error
-		input.authentication[name]
+	// const inputOfTheGoodAuthenticationMethod =
+	// 	// @ts-expect-error
+	// 	input.authentication[name]
 
-	const { authenticationDataToSave } = await provider.onSignUp({
-		input: inputOfTheGoodAuthenticationMethod,
-		context: {
-			...context,
-			isRoot: true,
-		},
-	})
+	// const { authenticationDataToSave } = await provider.onSignUp({
+	// 	input: inputOfTheGoodAuthenticationMethod,
+	// 	context: {
+	// 		...context,
+	// 		isRoot: true,
+	// 	},
+	// })
 
 	const { id: userId } = await context.databaseController.createObject({
 		className: 'User',
 		data: {
-			authentication: {
-				[name]: {
-					...authenticationDataToSave,
-				},
-			},
+			authentication: input.authentication,
 		},
 		context: {
 			...context,

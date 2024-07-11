@@ -1,5 +1,4 @@
 import { describe, expect, it, beforeEach, mock, spyOn } from 'bun:test'
-import { WibeApp } from '../../server'
 import { signUpWithResolver } from './signUpWithResolver'
 import { Session } from '../Session'
 
