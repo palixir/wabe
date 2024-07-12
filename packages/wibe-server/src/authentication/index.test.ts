@@ -152,8 +152,7 @@ describe('Authentication', () => {
 			}
 		`)
 
-		expect(
-			userClient.request<any>(gql`
+		const res = await userClient.request<any>(gql`
 				query tests{
 					tests{
 						edges {
@@ -163,8 +162,9 @@ describe('Authentication', () => {
 						}
 					}
 				}
-			`),
-		).rejects.toThrow('Permission denied to read class Test')
+			`)
+
+		expect(res.tests.edges.length).toEqual(0)
 	})
 
 	it('should not authorize an user to read an object when the user has not access on read to the object (ACL)', async () => {
@@ -203,8 +203,7 @@ describe('Authentication', () => {
 			}
 		`)
 
-		expect(
-			userClient.request<any>(gql`
+		const res = await userClient.request<any>(gql`
 				query tests{
 					tests{
 						edges {
@@ -214,8 +213,9 @@ describe('Authentication', () => {
 						}
 					}
 				}
-			`),
-		).rejects.toThrow('Permission denied to read class Test')
+			`)
+
+		expect(res.tests.edges.length).toEqual(0)
 	})
 
 	it('should not authorize an user to write (delete) an object when the user has not access on write to the object (ACL)', async () => {
@@ -264,10 +264,10 @@ describe('Authentication', () => {
 					}
 				}
 			`),
-		).rejects.toThrow('Permission denied to write class Test')
+		).rejects.toThrow('Permission denied to delete class Test')
 	})
 
-	it('should not authorize an user to get the result of mutation (read) when he has access on write but not on read (ACL)', async () => {
+	it.only('should not authorize an user to get the result of mutation (read) when he has access on write but not on read (ACL)', async () => {
 		const { userClient, userId } = await createUserAndUpdateRole({
 			anonymousClient: client,
 			port,

@@ -55,6 +55,7 @@ const isWriteOperation = (operationType: OperationType) =>
 	operationType === OperationType.BeforeDelete ||
 	operationType === OperationType.AfterDelete
 
+// Only call when we have id
 export const _checkACL = async (
 	hookObject: HookObject<any>,
 	operationType: OperationType,

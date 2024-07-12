@@ -1,6 +1,7 @@
 import type { WibeAppTypes } from '../..'
 import { OperationType, initializeHook } from '../../hooks'
 import type { WibeContext } from '../../server/interface'
+import { notEmpty } from '../../utils/helper'
 import type {
 	CreateObjectOptions,
 	CreateObjectsOptions,
@@ -218,16 +219,16 @@ export class DatabaseController<T extends WibeAppTypes> {
 			(c) => c.name.toLowerCase() === className.toLowerCase(),
 		)
 
-		const newWhereObject = await whereKeys.reduce(async (acc, key) => {
+		const newWhereObject = await whereKeys.reduce(async (acc, whereKey) => {
 			const currentAcc = await acc
 
-			const fieldName = key as string
+			const typedWhereKey = whereKey as string
 
-			const field = realClass?.fields[fieldName]
+			const field = realClass?.fields[typedWhereKey]
 
-			if (fieldName === 'AND' || fieldName === 'OR') {
+			if (typedWhereKey === 'AND' || typedWhereKey === 'OR') {
 				const newWhere = await Promise.all(
-					(where[fieldName] as any).map((whereObject: any) =>
+					(where[typedWhereKey] as any).map((whereObject: any) =>
 						this._getWhereObjectWithPointerOrRelation(
 							className,
 							whereObject,
@@ -238,7 +239,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 
 				return {
 					...currentAcc,
-					[fieldName]: newWhere,
+					[typedWhereKey]: newWhere,
 				}
 			}
 
@@ -252,13 +253,13 @@ export class DatabaseController<T extends WibeAppTypes> {
 				className: fieldTargetClass,
 				fields: ['id'],
 				// @ts-expect-error
-				where: { ...where[fieldName] },
+				where: where[fieldName],
 				context,
 			})
 
 			return {
 				...acc,
-				[fieldName]: {
+				[typedWhereKey]: {
 					in: objects.map((object) => object.id),
 				},
 			}
@@ -267,6 +268,37 @@ export class DatabaseController<T extends WibeAppTypes> {
 		return {
 			...where,
 			...newWhereObject,
+		}
+	}
+
+	_buildWhereWithACL<
+		U extends keyof T['types'],
+		K extends keyof T['types'][U],
+	>(where: WhereType<U, K>, context: WibeContext<T>): WhereType<U, K> {
+		const roleId = context.user?.role?.id
+		const userId = context.user?.id
+
+		return {
+			// @ts-expect-error
+			AND: [
+				{ ...where },
+				roleId || userId
+					? {
+							OR: [
+								roleId
+									? {
+											roleId: { contains: roleId },
+										}
+									: undefined,
+								userId
+									? {
+											userId: { contains: userId },
+										}
+									: undefined,
+							].filter(notEmpty),
+						}
+					: undefined,
+			].filter(notEmpty),
 		}
 	}
 
@@ -307,8 +339,6 @@ export class DatabaseController<T extends WibeAppTypes> {
 			id: params.id,
 		})
 
-		if (!dataOfCurrentObject) throw new Error('Object not found')
-
 		return this._getFinalObjectWithPointer(
 			dataOfCurrentObject,
 			pointers,
@@ -338,6 +368,11 @@ export class DatabaseController<T extends WibeAppTypes> {
 			params.context,
 		)
 
+		const whereWithACLCondition = this._buildWhereWithACL(
+			where,
+			params.context,
+		)
+
 		const hook = await initializeHook({
 			className: params.className,
 			context: params.context,
@@ -352,7 +387,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 
 		const dataOfCurrentObject = await this.adapter.getObjects({
 			...params,
-			where: params.where ? where : undefined,
+			where: params.where ? whereWithACLCondition : undefined,
 			// @ts-expect-error
 			fields: [...fieldsWithoutPointers, ...(pointersFieldsId || [])],
 		})
