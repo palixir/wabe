@@ -58,7 +58,7 @@ describe('Hooks', () => {
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
 		expect(mockGetObjects).toHaveBeenCalledWith({
 			className: 'ClassName',
-			context: { isRoot: true, databaseController, config },
+			context: { isRoot: true, wibe: { databaseController, config } },
 			fields: ['*'],
 			where: { id: { equalTo: 'id' } },
 			skipHooks: true,
@@ -76,8 +76,10 @@ describe('Hooks', () => {
 
 		expect(hookObject.context).toEqual({
 			isRoot: true,
-			databaseController: expect.any(Object),
-			config,
+			wibe: {
+				databaseController: expect.any(Object),
+				config,
+			},
 		})
 	})
 
@@ -102,8 +104,7 @@ describe('Hooks', () => {
 
 		expect(hookObject.context).toEqual({
 			isRoot: true,
-			databaseController: expect.any(Object),
-			config,
+			wibe: { databaseController: expect.any(Object), config },
 		})
 	})
 

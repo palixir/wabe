@@ -276,11 +276,13 @@ describe('Permissions', () => {
 			},
 		} as any
 
+		const context = { wibe: { config } } as any
+
 		it('should get the permission for a given className', async () => {
 			const permission = await _getPermissionPropertiesOfAClass({
 				className: 'TestClass',
 				operation: 'read',
-				context: { config } as any,
+				context,
 			})
 
 			expect(permission).toEqual({
@@ -291,7 +293,7 @@ describe('Permissions', () => {
 			const permission2 = await _getPermissionPropertiesOfAClass({
 				className: 'TestClass2',
 				operation: 'read',
-				context: { config } as any,
+				context,
 			})
 
 			expect(permission2).toBeUndefined()
@@ -303,8 +305,7 @@ describe('Permissions', () => {
 				// @ts-expect-error
 				user: {},
 				isRoot: false,
-				databaseController,
-				config,
+				wibe: { databaseController, config } as any,
 			}
 
 			const obj = new HookObject({

@@ -113,7 +113,7 @@ describe('DatabaseController', () => {
 
 	const context = {
 		isRoot: true,
-		config,
+		wibe: { config },
 		sessionId: 'sessionId',
 	} as any
 
@@ -156,7 +156,7 @@ describe('DatabaseController', () => {
 			className: 'TestClass',
 			context: {
 				sessionId: 'sessionId',
-				config,
+				wibe: { config },
 				isRoot: true,
 			},
 			newData: null,
@@ -188,7 +188,7 @@ describe('DatabaseController', () => {
 		expect(mockInitializeHook).toHaveBeenCalledTimes(1)
 		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
-			context: { sessionId: 'sessionId', config, isRoot: true },
+			context: { sessionId: 'sessionId', wibe: { config }, isRoot: true },
 			newData: null,
 		})
 
@@ -217,7 +217,7 @@ describe('DatabaseController', () => {
 		expect(mockInitializeHook).toHaveBeenCalledTimes(1)
 		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
-			context: { sessionId: 'sessionId', config, isRoot: true },
+			context: { sessionId: 'sessionId', wibe: { config }, isRoot: true },
 			newData: { name: 'test' },
 		})
 
@@ -248,7 +248,7 @@ describe('DatabaseController', () => {
 		expect(mockInitializeHook).toHaveBeenCalledTimes(1)
 		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
-			context: { sessionId: 'sessionId', config, isRoot: true },
+			context: { sessionId: 'sessionId', wibe: { config }, isRoot: true },
 			newData: { name: 'test' },
 		})
 
@@ -278,7 +278,7 @@ describe('DatabaseController', () => {
 		expect(mockInitializeHook).toHaveBeenCalledTimes(1)
 		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
-			context: { sessionId: 'sessionId', config, isRoot: true },
+			context: { sessionId: 'sessionId', wibe: { config }, isRoot: true },
 			newData: { name: 'test' },
 		})
 
@@ -308,7 +308,7 @@ describe('DatabaseController', () => {
 		expect(mockInitializeHook).toHaveBeenCalledTimes(1)
 		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
-			context: { sessionId: 'sessionId', config, isRoot: true },
+			context: { sessionId: 'sessionId', wibe: { config }, isRoot: true },
 			newData: { name: 'test' },
 		})
 
@@ -337,7 +337,7 @@ describe('DatabaseController', () => {
 		expect(mockInitializeHook).toHaveBeenCalledTimes(2)
 		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
-			context: { sessionId: 'sessionId', config, isRoot: true },
+			context: { sessionId: 'sessionId', wibe: { config }, isRoot: true },
 			newData: null,
 		})
 
@@ -368,7 +368,7 @@ describe('DatabaseController', () => {
 		expect(mockInitializeHook).toHaveBeenCalledTimes(2)
 		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
-			context: { sessionId: 'sessionId', config, isRoot: true },
+			context: { sessionId: 'sessionId', wibe: { config }, isRoot: true },
 			newData: null,
 		})
 

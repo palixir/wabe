@@ -46,6 +46,10 @@ describe('SignUpWith', () => {
 		},
 	}
 
+	const context = {
+		wibe: { config, databaseController: mockDatabaseController },
+	} as any
+
 	beforeEach(() => {
 		mockCreateObject.mockClear()
 		mockOnLogin.mockClear()
@@ -81,9 +85,8 @@ describe('SignUpWith', () => {
 				},
 			},
 			{
+				...context,
 				response: mockResponse,
-				databaseController: mockDatabaseController,
-				config,
 			} as any,
 		)
 

@@ -31,7 +31,7 @@ describe('Email password', () => {
 		const {
 			authenticationDataToSave: { email, password },
 		} = await emailPassword.onSignUp({
-			context: { databaseController } as any,
+			context: { wibe: { databaseController } } as any,
 			input: { email: 'email@test.fr', password: 'password' },
 		})
 
@@ -60,7 +60,7 @@ describe('Email password', () => {
 		spyBunPasswordVerify.mockResolvedValue(true)
 
 		const { user } = await emailPassword.onSignIn({
-			context: { databaseController } as any,
+			context: { wibe: { databaseController } } as any,
 			input: { email: 'email@test.fr', password: 'password' },
 		})
 
@@ -88,7 +88,7 @@ describe('Email password', () => {
 
 		expect(
 			emailPassword.onSignIn({
-				context: { databaseController } as any,
+				context: { wibe: { databaseController } } as any,
 				// @ts-expect-error
 				input: { email: 'email@test.fr' },
 			}),
@@ -100,7 +100,7 @@ describe('Email password', () => {
 
 		expect(
 			emailPassword.onSignIn({
-				context: { databaseController } as any,
+				context: { wibe: { databaseController } } as any,
 				input: {
 					email: 'invalidEmail@test.fr',
 					password: 'password',
@@ -126,7 +126,7 @@ describe('Email password', () => {
 
 		expect(
 			emailPassword.onSignIn({
-				context: { databaseController } as any,
+				context: { wibe: { databaseController } } as any,
 				input: {
 					email: 'invalidEmail@test.fr',
 					password: 'password',
