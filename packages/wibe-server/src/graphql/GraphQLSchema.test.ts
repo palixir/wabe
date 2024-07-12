@@ -1760,9 +1760,6 @@ describe('GraphqlSchema', () => {
 						edges {
 							node {
 								name
-								field2 {
-									field1
-								}
 							}
 						}
 					}
@@ -2371,7 +2368,7 @@ describe('GraphqlSchema', () => {
 						field2 {
 							edges {
   							node {
-  							   field1
+  							   id
   							}
 							}
 						}

@@ -902,15 +902,15 @@ describe('Mongo adapter', () => {
 		])
 	})
 
-	it("should return null if the object doesn't exist", async () => {
+	it("should throw object not found if the object doesn't exist", async () => {
 		expect(
-			await mongoAdapter.getObject({
+			mongoAdapter.getObject({
 				className: 'User',
 				id: '5f9b3b3b3b3b3b3b3b3b3b3b',
 				fields: ['name'],
 				context,
 			}),
-		).toEqual(null)
+		).rejects.toThrow('Object not found')
 	})
 
 	it('should create object and return the created object', async () => {
@@ -1162,13 +1162,13 @@ describe('Mongo adapter', () => {
 			context,
 		})
 
-		const resAfterDelete = await mongoAdapter.getObject({
-			className: 'User',
-			id: id.toString(),
-			context,
-		})
-
-		expect(resAfterDelete).toBeNull()
+		expect(
+			mongoAdapter.getObject({
+				className: 'User',
+				id: id.toString(),
+				context,
+			}),
+		).rejects.toThrow('Object not found')
 	})
 
 	it('should delete multiple object', async () => {

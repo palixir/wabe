@@ -272,7 +272,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 
 	async getObject<U extends keyof T['types'], K extends keyof T['types'][U]>(
 		params: GetObjectOptions<U, K>,
-	): Promise<Pick<T['types'][U], K> | null> {
+	): Promise<Pick<T['types'][U], K>> {
 		const fields = (params.fields || []) as string[]
 
 		const { pointersFieldsId, pointers } = this._getPointerObject(
@@ -307,7 +307,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 			id: params.id,
 		})
 
-		if (!dataOfCurrentObject) return null
+		if (!dataOfCurrentObject) throw new Error('Object not found')
 
 		return this._getFinalObjectWithPointer(
 			dataOfCurrentObject,

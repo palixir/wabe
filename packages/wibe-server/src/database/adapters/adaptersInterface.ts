@@ -148,7 +148,7 @@ export interface DatabaseAdapter {
 	getObject<
 		T extends keyof WibeAppTypes['types'],
 		K extends keyof WibeAppTypes['types'][T],
-	>(params: GetObjectOptions<T, K>): Promise<OutputType<T, K> | null>
+	>(params: GetObjectOptions<T, K>): Promise<OutputType<T, K>>
 	getObjects<
 		T extends keyof WibeAppTypes['types'],
 		K extends keyof WibeAppTypes['types'][T],

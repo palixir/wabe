@@ -145,7 +145,7 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 
 	async getObject<U extends keyof T['types'], K extends keyof T['types'][U]>(
 		params: GetObjectOptions<U, K>,
-	): Promise<OutputType<U, K> | null> {
+	): Promise<OutputType<U, K>> {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 
@@ -171,7 +171,9 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 			},
 		)
 
-		if (!res) return null
+		if (!res) {
+			throw new Error('Object not found')
+		}
 
 		const { _id, ...resultWithout_Id } = res
 

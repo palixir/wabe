@@ -144,12 +144,12 @@ describe('GraphQL : E2E', () => {
 			])
 		})
 
-		it('should get an object that not exist', async () => {
+		it("should throw an error object not found if the object doesn't exist", async () => {
 			expect(
-				await client.request<any>(graphql.user, {
+				client.request<any>(graphql.user, {
 					id: '65356f69ea1fe46431076723',
 				}),
-			).toEqual({ user: null })
+			).rejects.toThrow('Object not found')
 		})
 
 		it('should get an object', async () => {

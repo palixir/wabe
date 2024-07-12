@@ -360,7 +360,7 @@ describe('Resolver', () => {
 
 		expect(mockGetObject).toHaveBeenCalledTimes(1)
 		expect(mockGetObject).toHaveBeenCalledWith({
-			className: 'TestClass',
+			className: 'TestClass2',
 			fields: ['field2'],
 			id: 'id',
 			context,
@@ -390,7 +390,7 @@ describe('Resolver', () => {
 
 		expect(mockGetObject).toHaveBeenCalledTimes(1)
 		expect(mockGetObject).toHaveBeenCalledWith({
-			className: 'TestClass',
+			className: 'TestClass2',
 			fields: ['field2'],
 			id: 'id',
 			context,

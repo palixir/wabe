@@ -142,6 +142,7 @@ describe('DatabaseController', () => {
 	})
 
 	it('should call findHooksAndExecute on getObject', async () => {
+		mockGetObject.mockResolvedValue({} as never)
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
 		await databaseController.getObject({

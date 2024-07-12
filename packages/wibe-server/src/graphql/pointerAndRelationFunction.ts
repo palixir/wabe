@@ -94,16 +94,13 @@ export const add = async ({
 
 	if (typeOfExecution === 'update' && id) {
 		const currentValue = await context.wibe.databaseController.getObject({
-			// @ts-expect-error
-			className: fieldInClass.class,
+			className,
 			id,
 			fields: [fieldName],
 			context,
 		})
 
-		if (!currentValue) return [...add]
-
-		return [...currentValue[fieldName], ...add]
+		return [...(currentValue[fieldName] || []), ...add]
 	}
 
 	// For update many we need to get all objects that match the where and add the new value
@@ -156,22 +153,14 @@ export const remove = async ({
 	if (typeOfExecution === 'create') return []
 
 	if (typeOfExecution === 'update' && id) {
-		const classInSchema = getClassFromClassName(
-			className,
-			context.wibe.config,
-		)
-
-		const fieldInClass = classInSchema.fields[fieldName]
-
 		const currentValue = await context.wibe.databaseController.getObject({
-			// @ts-expect-error
-			className: fieldInClass.class,
+			className,
 			id,
 			fields: [fieldName],
 			context,
 		})
 
-		const olderValues = currentValue?.[fieldName] || []
+		const olderValues = currentValue[fieldName] || []
 
 		return olderValues.filter(
 			(olderValue: any) => !remove.includes(olderValue),
