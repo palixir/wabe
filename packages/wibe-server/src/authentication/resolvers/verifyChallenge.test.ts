@@ -11,23 +11,25 @@ describe('verifyChallenge', () => {
 		user: {
 			id: 'userId',
 		} as any,
-		config: {
-			authentication: {
-				customAuthenticationMethods: [
-					{
-						name: 'fakeOtp',
-						input: {
-							code: {
-								type: 'String',
-								required: true,
+		wibe: {
+			config: {
+				authentication: {
+					customAuthenticationMethods: [
+						{
+							name: 'fakeOtp',
+							input: {
+								code: {
+									type: 'String',
+									required: true,
+								},
+							},
+							provider: {
+								onVerifyChallenge: mockOnVerifyChallenge,
+								onSendChallenge: () => Promise.resolve(),
 							},
 						},
-						provider: {
-							onVerifyChallenge: mockOnVerifyChallenge,
-							onSendChallenge: () => Promise.resolve(),
-						},
-					},
-				],
+					],
+				},
 			},
 		},
 	} as any

@@ -20,8 +20,6 @@ import {
 import {
 	defaultCallAuthenticationProviderOnBeforeCreateUser,
 	defaultCallAuthenticationProviderOnBeforeUpdateUser,
-	defaultCreateSessionOnAfterCreateUser,
-	defaultCreateSessionOnAfterUpdateUser,
 } from './authentication'
 
 export enum OperationType {
@@ -84,12 +82,8 @@ export const initializeHook = async <T extends keyof WibeAppTypes['types']>({
 	className,
 	newData,
 	context,
-	id,
-	where,
 	skipHooks,
 }: {
-	id?: string
-	where?: WhereType<any, any>
 	className: T
 	newData: TypedNewData<any>
 	context: WibeContext<any>
@@ -97,46 +91,36 @@ export const initializeHook = async <T extends keyof WibeAppTypes['types']>({
 }) => {
 	if (skipHooks) return { run: async () => ({}) }
 
-	const objects = await context.databaseController.getObjects({
-		className,
-		context: {
-			isRoot: true,
-			databaseController: context.databaseController,
-			config: context.config,
-		},
-		fields: ['*'],
-		where: where ? where : { id: { equalTo: id } },
-		skipHooks: true,
-	})
-
-	// We need to have at least one loop on all hooks
-	const objectsToMap =
-		objects && objects.length > 0
-			? objects
-			: ([newData || {}] as Array<any>)
-
 	return {
-		run: async (
-			operationType: OperationType,
-			objectId?: string,
-		): Promise<Record<keyof WibeAppTypes['types'][T], any>> => {
+		run: async ({
+			operationType,
+			where,
+			id,
+		}: {
+			operationType: OperationType
+			id?: string
+			where?: WhereType<any, any>
+		}): Promise<Record<keyof WibeAppTypes['types'][T], any>> => {
 			const hooksOrderByPriorities = getHooksOrderByPriorities(
-				context.config,
+				context.wibe.config,
 			)
 
-			// const insertedObject = objectId
-			// 	? await context.databaseController.getObject({
-			// 			// @ts-expect-error
-			// 			className,
-			// 			context: {
-			// 				...context,
-			// 				isRoot: true,
-			// 			},
-			// 			fields: ['*'],
-			// 			id: objectId,
-			// 			skipHooks: true,
-			// 		})
-			// 	: {}
+			const objects =
+				// Before create we don't have any objects
+				operationType !== OperationType.BeforeCreate
+					? await context.wibe.databaseController.getObjects({
+							className,
+							context: {
+								...context,
+								isRoot: true,
+							},
+							fields: ['*'],
+							where: where ? where : { id: { equalTo: id } },
+							skipHooks: true,
+						})
+					: [{}]
+
+			const objectsToMap = objects.length > 0 ? objects : [newData || {}]
 
 			const res = await Promise.all(
 				objectsToMap.map(async (object) => {
@@ -157,7 +141,7 @@ export const initializeHook = async <T extends keyof WibeAppTypes['types']>({
 								className,
 								operationType,
 								priority,
-								config: context.config,
+								config: context.wibe.config,
 							})
 
 							await Promise.all(

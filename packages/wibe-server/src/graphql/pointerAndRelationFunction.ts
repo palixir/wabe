@@ -32,9 +32,9 @@ export const createAndLink = async ({
 	context: WibeContext<any>
 	className: string
 }) => {
-	const classInSchema = getClassFromClassName(className, context.config)
+	const classInSchema = getClassFromClassName(className, context.wibe.config)
 
-	const { id } = await context.databaseController.createObject({
+	const { id } = await context.wibe.databaseController.createObject({
 		// @ts-expect-error
 		className: classInSchema.fields[fieldName].class,
 		data: createAndLink,
@@ -56,9 +56,9 @@ export const createAndAdd = async ({
 	context: WibeContext<any>
 	className: string
 }) => {
-	const classInSchema = getClassFromClassName(className, context.config)
+	const classInSchema = getClassFromClassName(className, context.wibe.config)
 
-	const result = await context.databaseController.createObjects({
+	const result = await context.wibe.databaseController.createObjects({
 		// @ts-expect-error
 		className: classInSchema.fields[fieldName].class,
 		data: createAndAdd,
@@ -88,12 +88,12 @@ export const add = async ({
 }) => {
 	if (typeOfExecution === 'create') return add
 
-	const classInSchema = getClassFromClassName(className, context.config)
+	const classInSchema = getClassFromClassName(className, context.wibe.config)
 
 	const fieldInClass = classInSchema.fields[fieldName]
 
 	if (typeOfExecution === 'update' && id) {
-		const currentValue = await context.databaseController.getObject({
+		const currentValue = await context.wibe.databaseController.getObject({
 			// @ts-expect-error
 			className: fieldInClass.class,
 			id,
@@ -110,7 +110,7 @@ export const add = async ({
 	// So we doesn't update the field for updateMany
 	if (typeOfExecution === 'updateMany' && where) {
 		const allObjectsMatchedWithWhere =
-			await context.databaseController.getObjects({
+			await context.wibe.databaseController.getObjects({
 				// @ts-expect-error
 				className: fieldInClass.class,
 				where,
@@ -122,7 +122,7 @@ export const add = async ({
 			allObjectsMatchedWithWhere.map(async (object: any) => {
 				const currentValue = object[fieldName]
 
-				return context.databaseController.updateObject({
+				return context.wibe.databaseController.updateObject({
 					// @ts-expect-error
 					className: classInSchema.fields[fieldName].class,
 					id: object.id,
@@ -156,11 +156,14 @@ export const remove = async ({
 	if (typeOfExecution === 'create') return []
 
 	if (typeOfExecution === 'update' && id) {
-		const classInSchema = getClassFromClassName(className, context.config)
+		const classInSchema = getClassFromClassName(
+			className,
+			context.wibe.config,
+		)
 
 		const fieldInClass = classInSchema.fields[fieldName]
 
-		const currentValue = await context.databaseController.getObject({
+		const currentValue = await context.wibe.databaseController.getObject({
 			// @ts-expect-error
 			className: fieldInClass.class,
 			id,
@@ -177,7 +180,7 @@ export const remove = async ({
 
 	if (typeOfExecution === 'updateMany' && where) {
 		const allObjectsMatchedWithWhere =
-			await context.databaseController.getObjects({
+			await context.wibe.databaseController.getObjects({
 				className,
 				where,
 				fields: ['id'],
@@ -188,7 +191,7 @@ export const remove = async ({
 			allObjectsMatchedWithWhere.map(async (object: any) => {
 				const olderValues = object[fieldName]?.[fieldName] || []
 
-				return context.databaseController.updateObject({
+				return context.wibe.databaseController.updateObject({
 					className,
 					id: object.id,
 					data: {

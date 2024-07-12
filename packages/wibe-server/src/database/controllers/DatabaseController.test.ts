@@ -113,7 +113,7 @@ describe('DatabaseController', () => {
 
 	const context = {
 		isRoot: true,
-		config,
+		wibe: { config },
 		sessionId: 'sessionId',
 	} as any
 
@@ -156,22 +156,21 @@ describe('DatabaseController', () => {
 			className: 'TestClass',
 			context: {
 				sessionId: 'sessionId',
-				config,
+				wibe: { config },
 				isRoot: true,
 			},
 			newData: null,
-			id: 'id',
 		})
 
 		expect(mockHookRun).toHaveBeenCalledTimes(2)
-		expect(mockHookRun).toHaveBeenNthCalledWith(
-			1,
-			hooks.OperationType.BeforeRead,
-		)
-		expect(mockHookRun).toHaveBeenNthCalledWith(
-			2,
-			hooks.OperationType.AfterRead,
-		)
+		expect(mockHookRun).toHaveBeenNthCalledWith(1, {
+			operationType: hooks.OperationType.BeforeRead,
+			id: 'id',
+		})
+		expect(mockHookRun).toHaveBeenNthCalledWith(2, {
+			operationType: hooks.OperationType.AfterRead,
+			id: 'id',
+		})
 	})
 
 	it('should call findHooksAndExecute on getObjects', async () => {
@@ -189,20 +188,19 @@ describe('DatabaseController', () => {
 		expect(mockInitializeHook).toHaveBeenCalledTimes(1)
 		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
-			context: { sessionId: 'sessionId', config, isRoot: true },
+			context: { sessionId: 'sessionId', wibe: { config }, isRoot: true },
 			newData: null,
-			where: { id: { equalTo: 'id' } },
 		})
 
 		expect(mockHookRun).toHaveBeenCalledTimes(2)
-		expect(mockHookRun).toHaveBeenNthCalledWith(
-			1,
-			hooks.OperationType.BeforeRead,
-		)
-		expect(mockHookRun).toHaveBeenNthCalledWith(
-			2,
-			hooks.OperationType.AfterRead,
-		)
+		expect(mockHookRun).toHaveBeenNthCalledWith(1, {
+			operationType: hooks.OperationType.BeforeRead,
+			where: { id: { equalTo: 'id' } },
+		})
+		expect(mockHookRun).toHaveBeenNthCalledWith(2, {
+			operationType: hooks.OperationType.AfterRead,
+			where: { id: { equalTo: 'id' } },
+		})
 	})
 
 	it('should call findHooksAndExecute on updateObject', async () => {
@@ -219,20 +217,19 @@ describe('DatabaseController', () => {
 		expect(mockInitializeHook).toHaveBeenCalledTimes(1)
 		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
-			context: { sessionId: 'sessionId', config, isRoot: true },
+			context: { sessionId: 'sessionId', wibe: { config }, isRoot: true },
 			newData: { name: 'test' },
-			id: 'id',
 		})
 
 		expect(mockHookRun).toHaveBeenCalledTimes(2)
-		expect(mockHookRun).toHaveBeenNthCalledWith(
-			1,
-			hooks.OperationType.BeforeUpdate,
-		)
-		expect(mockHookRun).toHaveBeenNthCalledWith(
-			2,
-			hooks.OperationType.AfterUpdate,
-		)
+		expect(mockHookRun).toHaveBeenNthCalledWith(1, {
+			operationType: hooks.OperationType.BeforeUpdate,
+			id: 'id',
+		})
+		expect(mockHookRun).toHaveBeenNthCalledWith(2, {
+			operationType: hooks.OperationType.AfterUpdate,
+			id: 'id',
+		})
 	})
 
 	it('should call findHooksAndExecute on updateObjects', async () => {
@@ -251,23 +248,24 @@ describe('DatabaseController', () => {
 		expect(mockInitializeHook).toHaveBeenCalledTimes(1)
 		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
-			context: { sessionId: 'sessionId', config, isRoot: true },
+			context: { sessionId: 'sessionId', wibe: { config }, isRoot: true },
 			newData: { name: 'test' },
-			where: { id: { equalTo: 'id' } },
 		})
 
 		expect(mockHookRun).toHaveBeenCalledTimes(2)
-		expect(mockHookRun).toHaveBeenNthCalledWith(
-			1,
-			hooks.OperationType.BeforeUpdate,
-		)
-		expect(mockHookRun).toHaveBeenNthCalledWith(
-			2,
-			hooks.OperationType.AfterUpdate,
-		)
+		expect(mockHookRun).toHaveBeenNthCalledWith(1, {
+			operationType: hooks.OperationType.BeforeUpdate,
+			where: { id: { equalTo: 'id' } },
+		})
+		expect(mockHookRun).toHaveBeenNthCalledWith(2, {
+			operationType: hooks.OperationType.AfterUpdate,
+			where: { id: { equalTo: 'id' } },
+		})
 	})
 
 	it('should call findHooksAndExecute on createObject', async () => {
+		mockCreateObject.mockResolvedValue({ id: 'id' } as never)
+
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
 		await databaseController.createObject({
@@ -280,23 +278,23 @@ describe('DatabaseController', () => {
 		expect(mockInitializeHook).toHaveBeenCalledTimes(1)
 		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
-			context: { sessionId: 'sessionId', config, isRoot: true },
+			context: { sessionId: 'sessionId', wibe: { config }, isRoot: true },
 			newData: { name: 'test' },
 		})
 
 		expect(mockHookRun).toHaveBeenCalledTimes(2)
-		expect(mockHookRun).toHaveBeenNthCalledWith(
-			1,
-			hooks.OperationType.BeforeCreate,
-		)
-		expect(mockHookRun).toHaveBeenNthCalledWith(
-			2,
-			hooks.OperationType.AfterCreate,
-		)
+		expect(mockHookRun).toHaveBeenNthCalledWith(1, {
+			operationType: hooks.OperationType.BeforeCreate,
+		})
+		expect(mockHookRun).toHaveBeenNthCalledWith(2, {
+			operationType: hooks.OperationType.AfterCreate,
+			id: 'id',
+		})
 	})
 
 	it('should call findHooksAndExecute on createObjects', async () => {
-		mockGetObjects.mockResolvedValue([] as never)
+		mockGetObjects.mockResolvedValue([{ id: 'id' }] as never)
+		mockCreateObjects.mockResolvedValue([{ id: 'id' }] as never)
 
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
@@ -310,19 +308,18 @@ describe('DatabaseController', () => {
 		expect(mockInitializeHook).toHaveBeenCalledTimes(1)
 		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
-			context: { sessionId: 'sessionId', config, isRoot: true },
+			context: { sessionId: 'sessionId', wibe: { config }, isRoot: true },
 			newData: { name: 'test' },
 		})
 
 		expect(mockHookRun).toHaveBeenCalledTimes(2)
-		expect(mockHookRun).toHaveBeenNthCalledWith(
-			1,
-			hooks.OperationType.BeforeCreate,
-		)
-		expect(mockHookRun).toHaveBeenNthCalledWith(
-			2,
-			hooks.OperationType.AfterCreate,
-		)
+		expect(mockHookRun).toHaveBeenNthCalledWith(1, {
+			operationType: hooks.OperationType.BeforeCreate,
+		})
+		expect(mockHookRun).toHaveBeenNthCalledWith(2, {
+			operationType: hooks.OperationType.AfterCreate,
+			where: { id: { in: ['id'] } },
+		})
 	})
 
 	it('should call findHooksAndExecute on deleteObject', async () => {
@@ -340,21 +337,20 @@ describe('DatabaseController', () => {
 		expect(mockInitializeHook).toHaveBeenCalledTimes(2)
 		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
-			context: { sessionId: 'sessionId', config, isRoot: true },
+			context: { sessionId: 'sessionId', wibe: { config }, isRoot: true },
 			newData: null,
-			id: 'id',
 		})
 
 		// 4 because we have a getObject before the delete
 		expect(mockHookRun).toHaveBeenCalledTimes(4)
-		expect(mockHookRun).toHaveBeenNthCalledWith(
-			3,
-			hooks.OperationType.BeforeDelete,
-		)
-		expect(mockHookRun).toHaveBeenNthCalledWith(
-			4,
-			hooks.OperationType.AfterDelete,
-		)
+		expect(mockHookRun).toHaveBeenNthCalledWith(3, {
+			operationType: hooks.OperationType.BeforeDelete,
+			id: 'id',
+		})
+		expect(mockHookRun).toHaveBeenNthCalledWith(4, {
+			operationType: hooks.OperationType.AfterDelete,
+			id: 'id',
+		})
 	})
 
 	it('should call findHooksAndExecute on deleteObjects', async () => {
@@ -372,21 +368,20 @@ describe('DatabaseController', () => {
 		expect(mockInitializeHook).toHaveBeenCalledTimes(2)
 		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
-			context: { sessionId: 'sessionId', config, isRoot: true },
+			context: { sessionId: 'sessionId', wibe: { config }, isRoot: true },
 			newData: null,
-			where: { id: { equalTo: 'id' } },
 		})
 
 		// 4 because we have a getObject before the delete
 		expect(mockHookRun).toHaveBeenCalledTimes(4)
-		expect(mockHookRun).toHaveBeenNthCalledWith(
-			3,
-			hooks.OperationType.BeforeDelete,
-		)
-		expect(mockHookRun).toHaveBeenNthCalledWith(
-			4,
-			hooks.OperationType.AfterDelete,
-		)
+		expect(mockHookRun).toHaveBeenNthCalledWith(3, {
+			operationType: hooks.OperationType.BeforeDelete,
+			where: { id: { equalTo: 'id' } },
+		})
+		expect(mockHookRun).toHaveBeenNthCalledWith(4, {
+			operationType: hooks.OperationType.AfterDelete,
+			where: { id: { equalTo: 'id' } },
+		})
 	})
 
 	it("should get where object on complex structure (AND or OR) when try to get object from pointer's class", async () => {

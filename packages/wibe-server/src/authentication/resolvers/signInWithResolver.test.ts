@@ -24,37 +24,39 @@ describe('SignInWith', () => {
 	const mockOnVerifyChallenge = mock(() => Promise.resolve(true))
 
 	const context = {
-		config: {
-			authentication: {
-				session: {
-					cookieSession: true,
-				},
-				customAuthenticationMethods: [
-					{
-						name: 'emailPassword',
-						input: {
-							email: { type: 'Email', required: true },
-							password: { type: 'String', required: true },
-						},
-						provider: {
-							onSignUp: mockOnSignUp,
-							onSignIn: mockOnLogin,
-						},
+		wibe: {
+			config: {
+				authentication: {
+					session: {
+						cookieSession: true,
 					},
-					{
-						name: 'otp',
-						input: {
-							code: {
-								type: 'String',
-								required: true,
+					customAuthenticationMethods: [
+						{
+							name: 'emailPassword',
+							input: {
+								email: { type: 'Email', required: true },
+								password: { type: 'String', required: true },
+							},
+							provider: {
+								onSignUp: mockOnSignUp,
+								onSignIn: mockOnLogin,
 							},
 						},
-						provider: {
-							onSendChallenge: mockOnSendChallenge,
-							onVerifyChallenge: mockOnVerifyChallenge,
+						{
+							name: 'otp',
+							input: {
+								code: {
+									type: 'String',
+									required: true,
+								},
+							},
+							provider: {
+								onSendChallenge: mockOnSendChallenge,
+								onVerifyChallenge: mockOnVerifyChallenge,
+							},
 						},
-					},
-				],
+					],
+				},
 			},
 		},
 	}
@@ -115,7 +117,7 @@ describe('SignInWith', () => {
 						},
 					},
 				},
-				{ config: { authentication: undefined } } as any,
+				{ wibe: { config: { authentication: undefined } } } as any,
 			),
 		).rejects.toThrow('No custom authentication methods found')
 	})
@@ -135,27 +137,29 @@ describe('SignInWith', () => {
 					},
 				},
 				{
-					config: {
-						authentication: {
-							customAuthenticationMethods: [
-								{
-									name: 'phonePassword',
-									input: {
-										email: {
-											type: 'Email',
-											required: true,
+					wibe: {
+						config: {
+							authentication: {
+								customAuthenticationMethods: [
+									{
+										name: 'phonePassword',
+										input: {
+											email: {
+												type: 'Email',
+												required: true,
+											},
+											password: {
+												type: 'String',
+												required: true,
+											},
 										},
-										password: {
-											type: 'String',
-											required: true,
+										provider: {
+											onSignUp: mockOnSignUp,
+											onSignIn: mockOnLogin,
 										},
 									},
-									provider: {
-										onSignUp: mockOnSignUp,
-										onSignIn: mockOnLogin,
-									},
-								},
-							],
+								],
+							},
 						},
 					},
 				} as any,
@@ -191,8 +195,8 @@ describe('SignInWith', () => {
 				},
 			},
 			{
+				...context,
 				response: mockResponse,
-				config: context.config,
 			} as any,
 		)
 

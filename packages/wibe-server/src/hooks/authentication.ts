@@ -51,7 +51,7 @@ export const createSessionAfterCreateUser = async (
 		},
 	)
 
-	await context.databaseController.updateObject({
+	await context.wibe.databaseController.updateObject({
 		className: 'User',
 		context: {
 			...context,
@@ -64,13 +64,14 @@ export const createSessionAfterCreateUser = async (
 		},
 	})
 
-	if (context.config.authentication?.session?.cookieSession) {
+	if (context.wibe.config.authentication?.session?.cookieSession) {
 		context.response?.setCookie('refreshToken', refreshToken, {
 			httpOnly: true,
 			path: '/',
 			secure: process.env.NODE_ENV === 'production',
 			expires: new Date(
-				Date.now() + session.getRefreshTokenExpireIn(context.config),
+				Date.now() +
+					session.getRefreshTokenExpireIn(context.wibe.config),
 			),
 		})
 
@@ -79,7 +80,8 @@ export const createSessionAfterCreateUser = async (
 			path: '/',
 			secure: process.env.NODE_ENV === 'production',
 			expires: new Date(
-				Date.now() + session.getAccessTokenExpireIn(context.config),
+				Date.now() +
+					session.getAccessTokenExpireIn(context.wibe.config),
 			),
 		})
 	}

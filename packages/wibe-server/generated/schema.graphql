@@ -22,7 +22,6 @@ type User {
   email: Email
   verifiedEmail: Boolean
   role: Role
-  sessions: _SessionConnection
 }
 
 type UserACLObject {
@@ -62,14 +61,6 @@ type UserAuthenticationOtp {
   code: String
 }
 
-type _SessionConnection {
-  edges: [_SessionEdge]
-}
-
-type _SessionEdge {
-  node: _Session!
-}
-
 """User class"""
 input UserInput {
   name: String
@@ -82,7 +73,6 @@ input UserInput {
   email: Email
   verifiedEmail: Boolean
   role: RolePointerInput
-  sessions: _SessionRelationInput
 }
 
 input UserACLObjectInput {
@@ -134,7 +124,6 @@ input UserCreateFieldsInput {
   email: Email
   verifiedEmail: Boolean
   role: RolePointerInput
-  sessions: _SessionRelationInput
 }
 
 input UserACLObjectCreateFieldsInput {
@@ -492,7 +481,6 @@ input UserWhereInput {
   email: EmailWhereInput
   verifiedEmail: BooleanWhereInput
   role: RoleWhereInput
-  sessions: _SessionWhereInput
   OR: [UserWhereInput]
   AND: [UserWhereInput]
 }
@@ -634,43 +622,6 @@ input RoleACLObjectRolesACLWhereInput {
   AND: [RoleACLObjectRolesACLWhereInput]
 }
 
-input _SessionWhereInput {
-  id: IdWhereInput
-  user: UserWhereInput
-  accessToken: StringWhereInput
-  accessTokenExpiresAt: DateWhereInput
-  refreshToken: StringWhereInput
-  refreshTokenExpiresAt: DateWhereInput
-  acl: _SessionACLObjectWhereInput
-  createdAt: DateWhereInput
-  updatedAt: DateWhereInput
-  OR: [_SessionWhereInput]
-  AND: [_SessionWhereInput]
-}
-
-input _SessionACLObjectWhereInput {
-  users: [_SessionACLObjectUsersACLWhereInput]
-  roles: [_SessionACLObjectRolesACLWhereInput]
-  OR: [_SessionACLObjectWhereInput]
-  AND: [_SessionACLObjectWhereInput]
-}
-
-input _SessionACLObjectUsersACLWhereInput {
-  userId: StringWhereInput
-  read: BooleanWhereInput
-  write: BooleanWhereInput
-  OR: [_SessionACLObjectUsersACLWhereInput]
-  AND: [_SessionACLObjectUsersACLWhereInput]
-}
-
-input _SessionACLObjectRolesACLWhereInput {
-  roleId: StringWhereInput
-  read: BooleanWhereInput
-  write: BooleanWhereInput
-  OR: [_SessionACLObjectRolesACLWhereInput]
-  AND: [_SessionACLObjectRolesACLWhereInput]
-}
-
 type PostConnection {
   edges: [PostEdge]
 }
@@ -718,6 +669,51 @@ input PostACLObjectRolesACLWhereInput {
   write: BooleanWhereInput
   OR: [PostACLObjectRolesACLWhereInput]
   AND: [PostACLObjectRolesACLWhereInput]
+}
+
+type _SessionConnection {
+  edges: [_SessionEdge]
+}
+
+type _SessionEdge {
+  node: _Session!
+}
+
+input _SessionWhereInput {
+  id: IdWhereInput
+  user: UserWhereInput
+  accessToken: StringWhereInput
+  accessTokenExpiresAt: DateWhereInput
+  refreshToken: StringWhereInput
+  refreshTokenExpiresAt: DateWhereInput
+  acl: _SessionACLObjectWhereInput
+  createdAt: DateWhereInput
+  updatedAt: DateWhereInput
+  OR: [_SessionWhereInput]
+  AND: [_SessionWhereInput]
+}
+
+input _SessionACLObjectWhereInput {
+  users: [_SessionACLObjectUsersACLWhereInput]
+  roles: [_SessionACLObjectRolesACLWhereInput]
+  OR: [_SessionACLObjectWhereInput]
+  AND: [_SessionACLObjectWhereInput]
+}
+
+input _SessionACLObjectUsersACLWhereInput {
+  userId: StringWhereInput
+  read: BooleanWhereInput
+  write: BooleanWhereInput
+  OR: [_SessionACLObjectUsersACLWhereInput]
+  AND: [_SessionACLObjectUsersACLWhereInput]
+}
+
+input _SessionACLObjectRolesACLWhereInput {
+  roleId: StringWhereInput
+  read: BooleanWhereInput
+  write: BooleanWhereInput
+  OR: [_SessionACLObjectRolesACLWhereInput]
+  AND: [_SessionACLObjectRolesACLWhereInput]
 }
 
 type RoleConnection {
@@ -811,7 +807,6 @@ input UserUpdateFieldsInput {
   email: Email
   verifiedEmail: Boolean
   role: RolePointerInput
-  sessions: _SessionRelationInput
 }
 
 input UserACLObjectUpdateFieldsInput {

@@ -266,7 +266,7 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 			}),
 		)
 
-		const allObjects = await context.databaseController.getObjects({
+		const allObjects = await context.wibe.databaseController.getObjects({
 			className,
 			where: { OR: orStatement } as WhereType<T, K>,
 			fields,
@@ -314,8 +314,8 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 
 		const collection = await this.createClassIfNotExist(className)
 
-		const objectsBeforeUpdate = await context.databaseController.getObjects(
-			{
+		const objectsBeforeUpdate =
+			await context.wibe.databaseController.getObjects({
 				className,
 				where,
 				// @ts-expect-error
@@ -323,8 +323,7 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 				offset,
 				limit,
 				context,
-			},
-		)
+			})
 
 		await collection.updateMany(whereBuilded, {
 			$set: data,
@@ -335,7 +334,7 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 			id: { equalTo: ObjectId.createFromHexString(object.id) },
 		}))
 
-		const objects = await context.databaseController.getObjects({
+		const objects = await context.wibe.databaseController.getObjects({
 			className,
 			where: {
 				OR: orStatement,

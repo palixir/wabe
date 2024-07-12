@@ -32,8 +32,10 @@ describe('Mongo adapter', () => {
 
 		context = {
 			isRoot: true,
-			databaseController: wibe.databaseController,
-			config: wibe.config,
+			wibe: {
+				databaseController: wibe.databaseController,
+				config: wibe.config,
+			},
 		} as WibeContext<any>
 	})
 

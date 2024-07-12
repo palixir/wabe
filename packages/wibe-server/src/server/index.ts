@@ -184,8 +184,7 @@ export class WibeApp<T extends WibeAppTypes> {
 					if (headers.get('Wibe-Root-Key') === this.config.rootKey)
 						return {
 							isRoot: true,
-							databaseController: this.databaseController,
-							config: this.config,
+							wibe: this,
 						}
 
 					const getAccessToken = () => {
@@ -206,8 +205,7 @@ export class WibeApp<T extends WibeAppTypes> {
 					if (!accessToken)
 						return {
 							isRoot: false,
-							databaseController: this.databaseController,
-							config: this.config,
+							wibe: this,
 						}
 
 					const session = new Session()
@@ -216,8 +214,7 @@ export class WibeApp<T extends WibeAppTypes> {
 						accessToken,
 						{
 							isRoot: true,
-							databaseController: this.databaseController,
-							config: this.config,
+							wibe: this,
 						},
 					)
 
@@ -225,8 +222,7 @@ export class WibeApp<T extends WibeAppTypes> {
 						isRoot: false,
 						sessionId,
 						user,
-						databaseController: this.databaseController,
-						config: this.config,
+						wibe: this,
 					}
 				},
 				graphqlMiddleware: async (resolve, res) => {
