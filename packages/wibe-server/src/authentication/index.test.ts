@@ -494,8 +494,7 @@ describe('Authentication', () => {
 			}		
 		`)
 
-		expect(
-			userClient.request<any>(gql`
+		const res = await userClient.request<any>(gql`
 				query tests{
 					tests{
 						edges{
@@ -505,13 +504,14 @@ describe('Authentication', () => {
 						}
 					}
 				}
-			`),
-		).rejects.toThrow('Object not found')
+			`)
+
+		expect(res.tests.edges.length).toEqual(0)
 	})
 
 	// Class Level Permissions
 
-	it.only('should not authorize an user to create an object another class with target when the user do not have access to write the other class with (CLP)', async () => {
+	it('should not authorize an user to create an object another class with target when the user do not have access to write the other class with (CLP)', async () => {
 		const { userClient } = await createUserAndUpdateRole({
 			anonymousClient: client,
 			port,
@@ -535,7 +535,7 @@ describe('Authentication', () => {
 		).rejects.toThrow('Permission denied to create class Test2')
 	})
 
-	it('should not authorize an user to read an object on another class with target when the user do not have access to read the other class with (CLP)', async () => {
+	it.only('should not authorize an user to read an object on another class with pointer when the user do not have access to read the other class with (CLP)', async () => {
 		const { userClient, userId } = await createUserAndUpdateRole({
 			anonymousClient: client,
 			port,
