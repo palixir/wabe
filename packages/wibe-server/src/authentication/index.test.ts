@@ -162,7 +162,7 @@ describe('Authentication', () => {
 		expect(res.tests.edges.length).toEqual(0)
 	})
 
-	it.only('should not authorize an user to write (delete) an object when the user has not access on write to the object (ACL)', async () => {
+	it('should not authorize an user to write (delete) an object when the user has not access on write to the object (ACL)', async () => {
 		const { userClient, userId } = await createUserAndUpdateRole({
 			anonymousClient: client,
 			port,
@@ -208,7 +208,7 @@ describe('Authentication', () => {
 					}
 				}
 			`),
-		).rejects.toThrow('Permission denied to write class Test')
+		).rejects.toThrow('Object not found')
 	})
 
 	it('should not authorize an user to get the result of mutation (read) when he has access on write but not on read (ACL)', async () => {
@@ -257,7 +257,7 @@ describe('Authentication', () => {
 					}
 				}
 			`),
-		).rejects.toThrow('Permission denied to read class Test')
+		).rejects.toThrow('Object not found')
 	})
 
 	it('should not authorize an user to write (update) an object when the user has not access on write to the object (ACL)', async () => {
@@ -306,7 +306,7 @@ describe('Authentication', () => {
 					}
 				}
 			`),
-		).rejects.toThrow('Permission denied to write class Test')
+		).rejects.toThrow('Object not found')
 	})
 
 	it('should authorize an user to read an object when the user has access on read to the object (ACL)', async () => {
@@ -406,7 +406,7 @@ describe('Authentication', () => {
 					}
 				}
 			`),
-		).rejects.toThrow('Permission denied to write class Test')
+		).rejects.toThrow('Object not found')
 	})
 
 	it('should not authorize to update an object when an ACL protect the object on write for this role (ACL)', async () => {
@@ -455,7 +455,7 @@ describe('Authentication', () => {
 					}
 				}
 			`),
-		).rejects.toThrow('Permission denied to write class Test')
+		).rejects.toThrow('Object not found')
 	})
 
 	it('should not authorize to read an object when an ACL protect the object on read for this role (ACL)', async () => {
@@ -506,12 +506,12 @@ describe('Authentication', () => {
 					}
 				}
 			`),
-		).rejects.toThrow('Permission denied to read class Test')
+		).rejects.toThrow('Object not found')
 	})
 
 	// Class Level Permissions
 
-	it('should not authorize an user to create an object another class with target when the user do not have access to write the other class with (CLP)', async () => {
+	it.only('should not authorize an user to create an object another class with target when the user do not have access to write the other class with (CLP)', async () => {
 		const { userClient } = await createUserAndUpdateRole({
 			anonymousClient: client,
 			port,

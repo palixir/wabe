@@ -386,9 +386,16 @@ export class DatabaseController<T extends WibeAppTypes> {
 			id: params.id,
 		})
 
+		const whereWithACLCondition = this._buildWhereWithACL(
+			{},
+			params.context,
+			'read',
+		)
+
 		const dataOfCurrentObject = await this.adapter.getObject({
 			...params,
 			fields: [...fieldsWithoutPointers, ...(pointersFieldsId || [])],
+			where: whereWithACLCondition,
 		})
 
 		await hook.run({
@@ -552,9 +559,16 @@ export class DatabaseController<T extends WibeAppTypes> {
 			id: params.id,
 		})
 
+		const whereWithACLCondition = this._buildWhereWithACL(
+			{},
+			params.context,
+			'write',
+		)
+
 		const res = await this.adapter.updateObject({
 			...params,
 			data: arrayOfComputedData,
+			where: whereWithACLCondition,
 		})
 
 		await hook.run({
@@ -587,10 +601,16 @@ export class DatabaseController<T extends WibeAppTypes> {
 			where: params.where,
 		})
 
+		const whereWithACLCondition = this._buildWhereWithACL(
+			whereObject,
+			params.context,
+			'write',
+		)
+
 		const res = await this.adapter.updateObjects({
 			...params,
 			data: arrayOfComputedData,
-			where: whereObject,
+			where: whereWithACLCondition,
 		})
 
 		await hook.run({
@@ -620,7 +640,16 @@ export class DatabaseController<T extends WibeAppTypes> {
 			id: params.id,
 		})
 
-		await this.adapter.deleteObject(params)
+		const whereWithACLCondition = this._buildWhereWithACL(
+			{},
+			params.context,
+			'write',
+		)
+
+		await this.adapter.deleteObject({
+			...params,
+			where: whereWithACLCondition,
+		})
 
 		await hook.run({
 			operationType: OperationType.AfterDelete,
@@ -653,9 +682,15 @@ export class DatabaseController<T extends WibeAppTypes> {
 			where: params.where,
 		})
 
+		const whereWithACLCondition = this._buildWhereWithACL(
+			whereObject,
+			params.context,
+			'write',
+		)
+
 		await this.adapter.deleteObjects({
 			...params,
-			where: whereObject,
+			where: whereWithACLCondition,
 		})
 
 		await hook.run({
