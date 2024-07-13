@@ -62,45 +62,45 @@ export const _checkACL = async (
 ) => {
 	if (hookObject.context.isRoot) return
 
-	const concernedObject = hookObject.object
-	const acl = concernedObject.acl as ACL
+	// const concernedObject = hookObject.object
+	// const acl = concernedObject.acl as ACL
 
-	if (!acl) return
+	// if (!acl) return
 
-	const { roles, users } = acl
+	// const { roles, users } = acl
 
-	if (!roles && !users) return
+	// if (!roles && !users) return
 
-	const role = roles?.find(
-		(currentRole) =>
-			currentRole.roleId === hookObject.context.user?.role?.id,
-	)
+	// const role = roles?.find(
+	// 	(currentRole) =>
+	// 		currentRole.roleId === hookObject.context.user?.role?.id,
+	// )
 
-	const user = users?.find(
-		(currentUser) => currentUser.userId === hookObject.context.user?.id,
-	)
+	// const user = users?.find(
+	// 	(currentUser) => currentUser.userId === hookObject.context.user?.id,
+	// )
 
-	// User permission is more granular so it always had the priority
-	if (
-		isReadOperation(operationType) &&
-		((user && !user.read) ||
-			(user && !user.read && role && !role.read) ||
-			(!role && !user))
-	) {
-		throw new Error(
-			`Permission denied to read class ${hookObject.className}`,
-		)
-	}
+	// // User permission is more granular so it always had the priority
+	// if (
+	// 	isReadOperation(operationType) &&
+	// 	((user && !user.read) ||
+	// 		(user && !user.read && role && !role.read) ||
+	// 		(!role && !user))
+	// ) {
+	// 	throw new Error(
+	// 		`Permission denied to read class ${hookObject.className}`,
+	// 	)
+	// }
 
-	if (
-		isWriteOperation(operationType) &&
-		((user && !user.write) ||
-			(user && !user.write && role && !role.write) ||
-			(!role && !user))
-	)
-		throw new Error(
-			`Permission denied to write class ${hookObject.className}`,
-		)
+	// if (
+	// 	isWriteOperation(operationType) &&
+	// 	((user && !user.write) ||
+	// 		(user && !user.write && role && !role.write) ||
+	// 		(!role && !user))
+	// )
+	// 	throw new Error(
+	// 		`Permission denied to write class ${hookObject.className}`,
+	// 	)
 }
 
 export const _checkCLP = async (

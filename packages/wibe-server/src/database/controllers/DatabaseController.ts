@@ -302,7 +302,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 													acl: {
 														users: {
 															userId: {
-																in: userId,
+																in: [userId],
 															},
 														},
 													},
@@ -311,7 +311,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 													acl: {
 														users: {
 															[operation]: {
-																in: true,
+																in: [true],
 															},
 														},
 													},
@@ -326,7 +326,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 													acl: {
 														users: {
 															userId: {
-																notIn: userId,
+																notIn: [userId],
 															},
 														},
 													},
@@ -335,7 +335,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 													acl: {
 														roles: {
 															roleId: {
-																in: roleId,
+																in: [roleId],
 															},
 														},
 													},
@@ -344,7 +344,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 													acl: {
 														roles: {
 															[operation]: {
-																in: true,
+																in: [true],
 															},
 														},
 													},
@@ -445,7 +445,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 
 		const dataOfCurrentObject = await this.adapter.getObjects({
 			...params,
-			where: params.where ? whereWithACLCondition : undefined,
+			where: whereWithACLCondition,
 			// @ts-expect-error
 			fields: [...fieldsWithoutPointers, ...(pointersFieldsId || [])],
 		})

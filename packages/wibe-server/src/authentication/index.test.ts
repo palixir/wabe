@@ -111,7 +111,7 @@ describe('Authentication', () => {
 	// 	console.log(res.createUser.user.sessions)
 	// })
 
-	it.only('should not authorize an user to read an object when the user has not access on read to the object (ACL)', async () => {
+	it('should not authorize an user to read an object when the user has not access on read to the object (ACL)', async () => {
 		const { userClient, userId } = await createUserAndUpdateRole({
 			anonymousClient: client,
 			port,
@@ -162,7 +162,7 @@ describe('Authentication', () => {
 		expect(res.tests.edges.length).toEqual(0)
 	})
 
-	it('should not authorize an user to write (delete) an object when the user has not access on write to the object (ACL)', async () => {
+	it.only('should not authorize an user to write (delete) an object when the user has not access on write to the object (ACL)', async () => {
 		const { userClient, userId } = await createUserAndUpdateRole({
 			anonymousClient: client,
 			port,
