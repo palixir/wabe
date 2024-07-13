@@ -45,6 +45,7 @@ export interface GetObjectOptions<
 > {
 	className: T
 	id: string
+	where?: WhereType<T, K>
 	fields?: Array<K | '*'>
 	context: WibeContext<any>
 	skipHooks?: boolean
@@ -93,6 +94,7 @@ export interface UpdateObjectOptions<
 > {
 	className: T
 	id: string
+	where?: WhereType<T, K>
 	data: Partial<Record<W, any>>
 	fields?: Array<K | '*'>
 	context: WibeContext<any>
@@ -118,6 +120,7 @@ export interface DeleteObjectOptions<
 > {
 	className: T
 	id: string
+	where?: WhereType<T, K>
 	fields?: Array<K | '*'>
 	context: WibeContext<any>
 }

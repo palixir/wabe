@@ -208,7 +208,7 @@ describe('Authentication', () => {
 					}
 				}
 			`),
-		).rejects.toThrow('Permission denied to delete class Test')
+		).rejects.toThrow('Permission denied to write class Test')
 	})
 
 	it('should not authorize an user to get the result of mutation (read) when he has access on write but not on read (ACL)', async () => {
