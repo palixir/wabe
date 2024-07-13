@@ -7,10 +7,9 @@ import {
 	spyOn,
 	afterAll,
 } from 'bun:test'
-import { DatabaseController, WhereType } from '..'
+import { DatabaseController, type WhereType } from '..'
 import * as hooks from '../../hooks/index'
-import { WibeContext } from '../../server/interface'
-import { DevWibeAppTypes } from '../../utils/helper'
+import type { WibeContext } from '../../server/interface'
 
 describe('DatabaseController', () => {
 	const mockGetObject = mock(() => {})
@@ -131,7 +130,34 @@ describe('DatabaseController', () => {
 		mockHookRun.mockClear()
 	})
 
-	it('should create new where include the ACL from context', () => {
+	it('should create new where include the ACL from context when isRoot = true', () => {
+		const databaseController = new DatabaseController(mockAdapter() as any)
+
+		const where: WhereType<any, any> = {
+			id: { equalTo: 'id' },
+		}
+
+		const context: WibeContext<any> = {
+			isRoot: true,
+			wibe: {} as any,
+			user: {
+				id: 'userId',
+				role: {
+					id: 'roleId',
+				} as any,
+			} as any,
+		}
+
+		const newWhere = databaseController._buildWhereWithACL(
+			where,
+			context,
+			'read',
+		)
+
+		expect(newWhere).toEqual(where)
+	})
+
+	it('should create new where include the ACL from context on read operation', () => {
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
 		const where: WhereType<any, any> = {
@@ -149,15 +175,44 @@ describe('DatabaseController', () => {
 			} as any,
 		}
 
-		const newWhere = databaseController._buildWhereWithACL(where, context)
+		const newWhere = databaseController._buildWhereWithACL(
+			where,
+			context,
+			'read',
+		)
+
+		// Soit user y est donc read doit etre à true soit user y est pas et donc role read doit etre à true
 
 		expect(newWhere).toEqual({
 			AND: [
 				{ id: { equalTo: 'id' } },
 				{
 					OR: [
-						{ roleId: { contains: 'roleId' } },
-						{ userId: { contains: 'userId' } },
+						{
+							AND: [
+								{
+									acl: {
+										users: { userId: { in: 'userId' } },
+									},
+								},
+								{ acl: { users: { read: { in: true } } } },
+							],
+						},
+						{
+							AND: [
+								{
+									acl: {
+										users: { userId: { notIn: 'userId' } },
+									},
+								},
+								{
+									acl: {
+										roles: { roleId: { in: 'roleId' } },
+									},
+								},
+								{ acl: { roles: { read: { in: true } } } },
+							],
+						},
 					],
 				},
 			],
@@ -179,13 +234,28 @@ describe('DatabaseController', () => {
 			} as any,
 		}
 
-		const newWhere = databaseController._buildWhereWithACL(where, context)
+		const newWhere = databaseController._buildWhereWithACL(
+			where,
+			context,
+			'write',
+		)
 
 		expect(newWhere).toEqual({
 			AND: [
 				{ id: { equalTo: 'id' } },
 				{
-					OR: [{ userId: { contains: 'userId' } }],
+					OR: [
+						{
+							AND: [
+								{
+									acl: {
+										users: { userId: { in: 'userId' } },
+									},
+								},
+								{ acl: { users: { write: { in: true } } } },
+							],
+						},
+					],
 				},
 			],
 		} as any)
@@ -204,7 +274,11 @@ describe('DatabaseController', () => {
 			user: {} as any,
 		}
 
-		const newWhere = databaseController._buildWhereWithACL(where, context)
+		const newWhere = databaseController._buildWhereWithACL(
+			where,
+			context,
+			'read',
+		)
 
 		expect(newWhere).toEqual({
 			AND: [{ id: { equalTo: 'id' } }],
@@ -549,11 +623,10 @@ describe('DatabaseController', () => {
 		await databaseController.getObjects({
 			className: 'TestClass',
 			where: {
-				AND: [
-					// @ts-expect-error
-					{ pointerToAnotherClass: { field1: { equalTo: 'value' } } },
-				],
+				// @ts-expect-error
+				pointerToAnotherClass: { field1: { equalTo: 'value' } },
 			},
+
 			fields: ['id'],
 			context,
 		})
@@ -1049,7 +1122,7 @@ describe('DatabaseController', () => {
 
 		await databaseController.getObjects({
 			className: 'TestClass',
-			where: expect.any(Object),
+			where: { id: { equalTo: '123' } },
 			context,
 		})
 
@@ -1074,7 +1147,7 @@ describe('DatabaseController', () => {
 
 		const res = await databaseController.getObjects({
 			className: 'TestClass',
-			where: expect.any(Object),
+			where: { id: { equalTo: '123' } },
 			fields: ['id', 'name'],
 			context,
 		})

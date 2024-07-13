@@ -111,63 +111,7 @@ describe('Authentication', () => {
 	// 	console.log(res.createUser.user.sessions)
 	// })
 
-	it('should not authorize an user to read when the user has access on read but role do not has access on read(ACL)', async () => {
-		const { userClient, userId, roleId } = await createUserAndUpdateRole({
-			anonymousClient: client,
-			port,
-			roleName: 'Client',
-			rootClient,
-		})
-
-		const objectCreated = await rootClient.request<any>(gql`
-				mutation createTest {
-					createTest(input:{fields:{name: "test"}}){
-						test{
-							id
-						}
-					}
-				}
-		`)
-
-		const objectId = objectCreated.createTest.test.id
-
-		await rootClient.request<any>(gql`
-			mutation updateACL{
-				updateTest(input:{id: "${objectId}", fields: {acl:{
-					users: [{
-						userId: "${userId}",
-						read: true,
-						write: false
-					}],
-					roles: [{
-						roleId: "${roleId}",
-						read: false,
-						write: false
-					}]
-				}}}){
-					test{
-						id
-					}
-				}
-			}
-		`)
-
-		const res = await userClient.request<any>(gql`
-				query tests{
-					tests{
-						edges {
-							node {
-								id
-							}
-						}
-					}
-				}
-			`)
-
-		expect(res.tests.edges.length).toEqual(0)
-	})
-
-	it('should not authorize an user to read an object when the user has not access on read to the object (ACL)', async () => {
+	it.only('should not authorize an user to read an object when the user has not access on read to the object (ACL)', async () => {
 		const { userClient, userId } = await createUserAndUpdateRole({
 			anonymousClient: client,
 			port,
@@ -267,7 +211,7 @@ describe('Authentication', () => {
 		).rejects.toThrow('Permission denied to delete class Test')
 	})
 
-	it.only('should not authorize an user to get the result of mutation (read) when he has access on write but not on read (ACL)', async () => {
+	it('should not authorize an user to get the result of mutation (read) when he has access on write but not on read (ACL)', async () => {
 		const { userClient, userId } = await createUserAndUpdateRole({
 			anonymousClient: client,
 			port,

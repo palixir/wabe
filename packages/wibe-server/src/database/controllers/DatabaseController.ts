@@ -253,7 +253,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 				className: fieldTargetClass,
 				fields: ['id'],
 				// @ts-expect-error
-				where: where[fieldName],
+				where: where[typedWhereKey],
 				context,
 			})
 
@@ -274,25 +274,82 @@ export class DatabaseController<T extends WibeAppTypes> {
 	_buildWhereWithACL<
 		U extends keyof T['types'],
 		K extends keyof T['types'][U],
-	>(where: WhereType<U, K>, context: WibeContext<T>): WhereType<U, K> {
+	>(
+		where: WhereType<U, K>,
+		context: WibeContext<T>,
+		operation: 'write' | 'read',
+	): WhereType<U, K> {
+		if (context.isRoot) return where
+
 		const roleId = context.user?.role?.id
 		const userId = context.user?.id
+
+		// If we have an user we good right we return
+		// If we don't have user we check role
+		// If the role is good we return
 
 		return {
 			// @ts-expect-error
 			AND: [
 				{ ...where },
-				roleId || userId
+				userId || roleId
 					? {
 							OR: [
-								roleId
-									? {
-											roleId: { contains: roleId },
-										}
-									: undefined,
 								userId
 									? {
-											userId: { contains: userId },
+											AND: [
+												{
+													acl: {
+														users: {
+															userId: {
+																in: userId,
+															},
+														},
+													},
+												},
+												{
+													acl: {
+														users: {
+															[operation]: {
+																in: true,
+															},
+														},
+													},
+												},
+											],
+										}
+									: undefined,
+								roleId
+									? {
+											AND: [
+												{
+													acl: {
+														users: {
+															userId: {
+																notIn: userId,
+															},
+														},
+													},
+												},
+												{
+													acl: {
+														roles: {
+															roleId: {
+																in: roleId,
+															},
+														},
+													},
+												},
+												{
+													acl: {
+														roles: {
+															[operation]: {
+																in: true,
+															},
+														},
+													},
+												},
+											],
 										}
 									: undefined,
 							].filter(notEmpty),
@@ -371,6 +428,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 		const whereWithACLCondition = this._buildWhereWithACL(
 			where,
 			params.context,
+			'read',
 		)
 
 		const hook = await initializeHook({
