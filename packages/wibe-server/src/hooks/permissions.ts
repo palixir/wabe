@@ -43,66 +43,6 @@ export const _getPermissionPropertiesOfAClass = async ({
 	return permission
 }
 
-const isReadOperation = (operationType: OperationType) =>
-	operationType === OperationType.BeforeRead ||
-	operationType === OperationType.AfterRead
-
-const isWriteOperation = (operationType: OperationType) =>
-	operationType === OperationType.BeforeCreate ||
-	operationType === OperationType.AfterCreate ||
-	operationType === OperationType.BeforeUpdate ||
-	operationType === OperationType.AfterUpdate ||
-	operationType === OperationType.BeforeDelete ||
-	operationType === OperationType.AfterDelete
-
-// Only call when we have id
-export const _checkACL = async (
-	hookObject: HookObject<any>,
-	operationType: OperationType,
-) => {
-	if (hookObject.context.isRoot) return
-
-	// const concernedObject = hookObject.object
-	// const acl = concernedObject.acl as ACL
-
-	// if (!acl) return
-
-	// const { roles, users } = acl
-
-	// if (!roles && !users) return
-
-	// const role = roles?.find(
-	// 	(currentRole) =>
-	// 		currentRole.roleId === hookObject.context.user?.role?.id,
-	// )
-
-	// const user = users?.find(
-	// 	(currentUser) => currentUser.userId === hookObject.context.user?.id,
-	// )
-
-	// // User permission is more granular so it always had the priority
-	// if (
-	// 	isReadOperation(operationType) &&
-	// 	((user && !user.read) ||
-	// 		(user && !user.read && role && !role.read) ||
-	// 		(!role && !user))
-	// ) {
-	// 	throw new Error(
-	// 		`Permission denied to read class ${hookObject.className}`,
-	// 	)
-	// }
-
-	// if (
-	// 	isWriteOperation(operationType) &&
-	// 	((user && !user.write) ||
-	// 		(user && !user.write && role && !role.write) ||
-	// 		(!role && !user))
-	// )
-	// 	throw new Error(
-	// 		`Permission denied to write class ${hookObject.className}`,
-	// 	)
-}
-
 export const _checkCLP = async (
 	object: HookObject<any>,
 	operationType: OperationType,
@@ -165,22 +105,14 @@ export const _checkCLP = async (
 		)
 }
 
-const _checkPermissions = async (
-	object: HookObject<any>,
-	operationType: OperationType,
-) => {
-	await _checkCLP(object, operationType)
-	await _checkACL(object, operationType)
-}
-
 export const defaultCheckPermissionOnRead = (object: HookObject<any>) =>
-	_checkPermissions(object, OperationType.BeforeRead)
+	_checkCLP(object, OperationType.BeforeRead)
 
 export const defaultCheckPermissionOnCreate = (object: HookObject<any>) =>
-	_checkPermissions(object, OperationType.BeforeCreate)
+	_checkCLP(object, OperationType.BeforeCreate)
 
 export const defaultCheckPermissionOnUpdate = (object: HookObject<any>) =>
-	_checkPermissions(object, OperationType.BeforeUpdate)
+	_checkCLP(object, OperationType.BeforeUpdate)
 
 export const defaultCheckPermissionOnDelete = (object: HookObject<any>) =>
-	_checkPermissions(object, OperationType.BeforeDelete)
+	_checkCLP(object, OperationType.BeforeDelete)

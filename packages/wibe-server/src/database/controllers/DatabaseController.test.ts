@@ -735,6 +735,7 @@ describe('DatabaseController', () => {
 			id: '123',
 			fields: ['id', 'relationToAnotherClass3'],
 			context,
+			where: {},
 		})
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
@@ -833,6 +834,7 @@ describe('DatabaseController', () => {
 			fields: ['field1'],
 			id: 'idOfAnotherClass',
 			context,
+			where: {},
 		})
 	})
 
@@ -960,6 +962,7 @@ describe('DatabaseController', () => {
 			id: '123',
 			fields: [],
 			context,
+			where: {},
 		})
 	})
 
@@ -989,6 +992,7 @@ describe('DatabaseController', () => {
 			id: '123',
 			fields: ['id', 'name'],
 			context,
+			where: {},
 		})
 	})
 
@@ -1032,6 +1036,7 @@ describe('DatabaseController', () => {
 			id: '123',
 			fields: ['id', 'name', 'pointerToAnotherClass'],
 			context,
+			where: {},
 		})
 
 		expect(mockGetObject).toHaveBeenNthCalledWith(2, {
@@ -1039,6 +1044,7 @@ describe('DatabaseController', () => {
 			id: 'anotherClassId',
 			fields: ['id', 'name'],
 			context,
+			where: {},
 		})
 	})
 
@@ -1096,6 +1102,7 @@ describe('DatabaseController', () => {
 				'pointerToAnotherClass2',
 			],
 			context,
+			where: {},
 		})
 
 		expect(mockGetObject).toHaveBeenNthCalledWith(2, {
@@ -1103,6 +1110,7 @@ describe('DatabaseController', () => {
 			id: 'anotherClassId',
 			fields: ['id', 'name'],
 			context,
+			where: {},
 		})
 
 		expect(mockGetObject).toHaveBeenNthCalledWith(3, {
@@ -1110,6 +1118,7 @@ describe('DatabaseController', () => {
 			id: 'anotherClass2Id',
 			fields: ['age'],
 			context,
+			where: {},
 		})
 	})
 
@@ -1220,6 +1229,7 @@ describe('DatabaseController', () => {
 			id: 'anotherClassId',
 			fields: ['id', 'name'],
 			context,
+			where: {},
 		})
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
@@ -1288,12 +1298,14 @@ describe('DatabaseController', () => {
 			id: 'anotherClassId',
 			fields: ['id', 'name'],
 			context,
+			where: {},
 		})
 		expect(mockGetObject).toHaveBeenNthCalledWith(2, {
 			className: 'AnotherClass2',
 			id: 'anotherClass2Id',
 			fields: ['age'],
 			context,
+			where: {},
 		})
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
