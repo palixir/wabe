@@ -535,7 +535,7 @@ describe('Authentication', () => {
 		).rejects.toThrow('Permission denied to create class Test2')
 	})
 
-	it.only('should not authorize an user to read an object on another class with pointer when the user do not have access to read the other class with (CLP)', async () => {
+	it('should not authorize an user to read an object on another class with pointer when the user do not have access to read the other class with (CLP)', async () => {
 		const { userClient, userId } = await createUserAndUpdateRole({
 			anonymousClient: client,
 			port,
@@ -557,6 +557,23 @@ describe('Authentication', () => {
 		`)
 
 		const pointerId = objectCreated.createTest.test.pointer.id
+		const testId = objectCreated.createTest.test.id
+
+		await rootClient.request<any>(gql`
+			mutation updateACL{
+				updateTest(input:{id: "${testId}", fields: {acl:{
+					users: [{
+						userId: "${userId}",
+						read: true,
+						write: false
+					}]
+				}}}){
+					test{
+						id
+					}
+				}
+			}
+		`)
 
 		await rootClient.request<any>(gql`
 			mutation updateACL{
