@@ -361,7 +361,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 
 	async getObject<U extends keyof T['types'], K extends keyof T['types'][U]>(
 		params: GetObjectOptions<U, K>,
-	): Promise<Pick<T['types'][U], K>> {
+	): Promise<OutputType<U, K>> {
 		const fields = (params.fields || []) as string[]
 
 		const { pointersFieldsId, pointers } = this._getPointerObject(
@@ -394,6 +394,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 
 		const dataOfCurrentObject = await this.adapter.getObject({
 			...params,
+			// @ts-expect-error
 			fields: [...fieldsWithoutPointers, ...(pointersFieldsId || [])],
 			where: whereWithACLCondition,
 		})
@@ -413,7 +414,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 
 	async getObjects<U extends keyof T['types'], K extends keyof T['types'][U]>(
 		params: GetObjectsOptions<U, K>,
-	): Promise<Pick<T['types'][U], K>[]> {
+	): Promise<OutputType<U, K>[]> {
 		const fields = (params.fields || []) as string[]
 
 		const { pointersFieldsId, pointers } = this._getPointerObject(
@@ -471,7 +472,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 					params.context,
 				),
 			),
-		) as Promise<Pick<T['types'][U], K>[]>
+		) as Promise<OutputType<U, K>[]>
 	}
 
 	async createObject<
@@ -565,6 +566,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 			'write',
 		)
 
+		// @ts-expect-error
 		const res = await this.adapter.updateObject({
 			...params,
 			data: arrayOfComputedData,
@@ -646,6 +648,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 			'write',
 		)
 
+		// @ts-expect-error
 		await this.adapter.deleteObject({
 			...params,
 			where: whereWithACLCondition,

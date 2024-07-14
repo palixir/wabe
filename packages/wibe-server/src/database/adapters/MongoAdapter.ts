@@ -342,7 +342,6 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 		})
 
 		const orStatement = objectsBeforeUpdate.map((object) => ({
-			// @ts-expect-error
 			id: { equalTo: ObjectId.createFromHexString(object.id) },
 		}))
 

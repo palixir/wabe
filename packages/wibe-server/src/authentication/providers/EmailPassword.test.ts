@@ -65,7 +65,6 @@ describe('Email password', () => {
 		})
 
 		expect(user).toEqual({
-			// @ts-expect-error
 			id: 'userId',
 			authentication: {
 				emailPassword: {
