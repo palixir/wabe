@@ -126,10 +126,13 @@ export class Session {
 				accessToken: { equalTo: accessToken },
 			},
 			fields: ['id', 'user', 'refreshToken', 'refreshTokenExpiresAt'],
-			context,
+			context: {
+				...context,
+				isRoot: true,
+			},
 		})
 
-		if (!session.length) throw new Error('_Session not found')
+		if (!session.length) throw new Error('Session not found')
 
 		const {
 			refreshTokenExpiresAt,
@@ -178,7 +181,10 @@ export class Session {
 
 		await context.wibe.databaseController.updateObject({
 			className: '_Session',
-			context,
+			context: {
+				...context,
+				isRoot: true,
+			},
 			id,
 			data: {
 				accessToken: newAccessToken,

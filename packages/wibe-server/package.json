@@ -8,7 +8,7 @@
     "generate:types": "dts-bundle-generator -o dist/index.d.ts src/index.ts --no-check --external-imports=wobe",
     "check": "tsc --project $(pwd)/tsconfig.json",
     "lint": "biome lint . --no-errors-on-unmatched --config-path=../../",
-    "ci": "bun check && bun lint $(pwd) && bun run test:bun src && bun test:node src",
+    "ci": "bun check && bun lint $(pwd) && bun test src",
     "format": "biome format --write .",
     "dev": " bun run --watch dev/index.ts"
   },

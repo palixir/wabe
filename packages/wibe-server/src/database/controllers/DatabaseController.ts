@@ -1,6 +1,7 @@
 import type { WibeAppTypes } from '../..'
 import { OperationType, initializeHook } from '../../hooks'
 import type { WibeContext } from '../../server/interface'
+import { notEmpty } from '../../utils/helper'
 import type {
 	CreateObjectOptions,
 	CreateObjectsOptions,
@@ -218,16 +219,16 @@ export class DatabaseController<T extends WibeAppTypes> {
 			(c) => c.name.toLowerCase() === className.toLowerCase(),
 		)
 
-		const newWhereObject = await whereKeys.reduce(async (acc, key) => {
+		const newWhereObject = await whereKeys.reduce(async (acc, whereKey) => {
 			const currentAcc = await acc
 
-			const fieldName = key as string
+			const typedWhereKey = whereKey as string
 
-			const field = realClass?.fields[fieldName]
+			const field = realClass?.fields[typedWhereKey]
 
-			if (fieldName === 'AND' || fieldName === 'OR') {
+			if (typedWhereKey === 'AND' || typedWhereKey === 'OR') {
 				const newWhere = await Promise.all(
-					(where[fieldName] as any).map((whereObject: any) =>
+					(where[typedWhereKey] as any).map((whereObject: any) =>
 						this._getWhereObjectWithPointerOrRelation(
 							className,
 							whereObject,
@@ -238,7 +239,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 
 				return {
 					...currentAcc,
-					[fieldName]: newWhere,
+					[typedWhereKey]: newWhere,
 				}
 			}
 
@@ -252,13 +253,13 @@ export class DatabaseController<T extends WibeAppTypes> {
 				className: fieldTargetClass,
 				fields: ['id'],
 				// @ts-expect-error
-				where: { ...where[fieldName] },
+				where: where[typedWhereKey],
 				context,
 			})
 
 			return {
 				...acc,
-				[fieldName]: {
+				[typedWhereKey]: {
 					in: objects.map((object) => object.id),
 				},
 			}
@@ -270,9 +271,97 @@ export class DatabaseController<T extends WibeAppTypes> {
 		}
 	}
 
+	_buildWhereWithACL<
+		U extends keyof T['types'],
+		K extends keyof T['types'][U],
+	>(
+		where: WhereType<U, K>,
+		context: WibeContext<T>,
+		operation: 'write' | 'read',
+	): WhereType<U, K> {
+		if (context.isRoot) return where
+
+		const roleId = context.user?.role?.id
+		const userId = context.user?.id
+
+		// If we have an user we good right we return
+		// If we don't have user we check role
+		// If the role is good we return
+
+		return {
+			// @ts-expect-error
+			AND: [
+				{ ...where },
+				userId || roleId
+					? {
+							OR: [
+								userId
+									? {
+											AND: [
+												{
+													acl: {
+														users: {
+															userId: {
+																in: [userId],
+															},
+														},
+													},
+												},
+												{
+													acl: {
+														users: {
+															[operation]: {
+																in: [true],
+															},
+														},
+													},
+												},
+											],
+										}
+									: undefined,
+								roleId
+									? {
+											AND: [
+												{
+													acl: {
+														users: {
+															userId: {
+																notIn: [userId],
+															},
+														},
+													},
+												},
+												{
+													acl: {
+														roles: {
+															roleId: {
+																in: [roleId],
+															},
+														},
+													},
+												},
+												{
+													acl: {
+														roles: {
+															[operation]: {
+																in: [true],
+															},
+														},
+													},
+												},
+											],
+										}
+									: undefined,
+							].filter(notEmpty),
+						}
+					: undefined,
+			].filter(notEmpty),
+		}
+	}
+
 	async getObject<U extends keyof T['types'], K extends keyof T['types'][U]>(
 		params: GetObjectOptions<U, K>,
-	): Promise<Pick<T['types'][U], K>> {
+	): Promise<OutputType<U, K>> {
 		const fields = (params.fields || []) as string[]
 
 		const { pointersFieldsId, pointers } = this._getPointerObject(
@@ -297,17 +386,23 @@ export class DatabaseController<T extends WibeAppTypes> {
 			id: params.id,
 		})
 
+		const whereWithACLCondition = this._buildWhereWithACL(
+			{},
+			params.context,
+			'read',
+		)
+
 		const dataOfCurrentObject = await this.adapter.getObject({
 			...params,
+			// @ts-expect-error
 			fields: [...fieldsWithoutPointers, ...(pointersFieldsId || [])],
+			where: whereWithACLCondition,
 		})
 
 		await hook.run({
 			operationType: OperationType.AfterRead,
 			id: params.id,
 		})
-
-		if (!dataOfCurrentObject) throw new Error('Object not found')
 
 		return this._getFinalObjectWithPointer(
 			dataOfCurrentObject,
@@ -319,7 +414,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 
 	async getObjects<U extends keyof T['types'], K extends keyof T['types'][U]>(
 		params: GetObjectsOptions<U, K>,
-	): Promise<Pick<T['types'][U], K>[]> {
+	): Promise<OutputType<U, K>[]> {
 		const fields = (params.fields || []) as string[]
 
 		const { pointersFieldsId, pointers } = this._getPointerObject(
@@ -338,6 +433,12 @@ export class DatabaseController<T extends WibeAppTypes> {
 			params.context,
 		)
 
+		const whereWithACLCondition = this._buildWhereWithACL(
+			where,
+			params.context,
+			'read',
+		)
+
 		const hook = await initializeHook({
 			className: params.className,
 			context: params.context,
@@ -352,7 +453,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 
 		const dataOfCurrentObject = await this.adapter.getObjects({
 			...params,
-			where: params.where ? where : undefined,
+			where: whereWithACLCondition,
 			// @ts-expect-error
 			fields: [...fieldsWithoutPointers, ...(pointersFieldsId || [])],
 		})
@@ -371,7 +472,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 					params.context,
 				),
 			),
-		) as Promise<Pick<T['types'][U], K>[]>
+		) as Promise<OutputType<U, K>[]>
 	}
 
 	async createObject<
@@ -459,9 +560,17 @@ export class DatabaseController<T extends WibeAppTypes> {
 			id: params.id,
 		})
 
+		const whereWithACLCondition = this._buildWhereWithACL(
+			{},
+			params.context,
+			'write',
+		)
+
+		// @ts-expect-error
 		const res = await this.adapter.updateObject({
 			...params,
 			data: arrayOfComputedData,
+			where: whereWithACLCondition,
 		})
 
 		await hook.run({
@@ -494,10 +603,16 @@ export class DatabaseController<T extends WibeAppTypes> {
 			where: params.where,
 		})
 
+		const whereWithACLCondition = this._buildWhereWithACL(
+			whereObject,
+			params.context,
+			'write',
+		)
+
 		const res = await this.adapter.updateObjects({
 			...params,
 			data: arrayOfComputedData,
-			where: whereObject,
+			where: whereWithACLCondition,
 		})
 
 		await hook.run({
@@ -527,7 +642,17 @@ export class DatabaseController<T extends WibeAppTypes> {
 			id: params.id,
 		})
 
-		await this.adapter.deleteObject(params)
+		const whereWithACLCondition = this._buildWhereWithACL(
+			{},
+			params.context,
+			'write',
+		)
+
+		// @ts-expect-error
+		await this.adapter.deleteObject({
+			...params,
+			where: whereWithACLCondition,
+		})
 
 		await hook.run({
 			operationType: OperationType.AfterDelete,
@@ -560,9 +685,15 @@ export class DatabaseController<T extends WibeAppTypes> {
 			where: params.where,
 		})
 
+		const whereWithACLCondition = this._buildWhereWithACL(
+			whereObject,
+			params.context,
+			'write',
+		)
+
 		await this.adapter.deleteObjects({
 			...params,
-			where: whereObject,
+			where: whereWithACLCondition,
 		})
 
 		await hook.run({

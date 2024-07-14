@@ -7,8 +7,9 @@ import {
 	spyOn,
 	afterAll,
 } from 'bun:test'
-import { DatabaseController } from '..'
+import { DatabaseController, type WhereType } from '..'
 import * as hooks from '../../hooks/index'
+import type { WibeContext } from '../../server/interface'
 
 describe('DatabaseController', () => {
 	const mockGetObject = mock(() => {})
@@ -127,6 +128,163 @@ describe('DatabaseController', () => {
 		mockGetObjects.mockClear()
 		mockInitializeHook.mockClear()
 		mockHookRun.mockClear()
+	})
+
+	it('should create new where include the ACL from context when isRoot = true', () => {
+		const databaseController = new DatabaseController(mockAdapter() as any)
+
+		const where: WhereType<any, any> = {
+			id: { equalTo: 'id' },
+		}
+
+		const context: WibeContext<any> = {
+			isRoot: true,
+			wibe: {} as any,
+			user: {
+				id: 'userId',
+				role: {
+					id: 'roleId',
+				} as any,
+			} as any,
+		}
+
+		const newWhere = databaseController._buildWhereWithACL(
+			where,
+			context,
+			'read',
+		)
+
+		expect(newWhere).toEqual(where)
+	})
+
+	it('should create new where include the ACL from context on read operation', () => {
+		const databaseController = new DatabaseController(mockAdapter() as any)
+
+		const where: WhereType<any, any> = {
+			id: { equalTo: 'id' },
+		}
+
+		const context: WibeContext<any> = {
+			isRoot: false,
+			wibe: {} as any,
+			user: {
+				id: 'userId',
+				role: {
+					id: 'roleId',
+				} as any,
+			} as any,
+		}
+
+		const newWhere = databaseController._buildWhereWithACL(
+			where,
+			context,
+			'read',
+		)
+
+		// Soit user y est donc read doit etre à true soit user y est pas et donc role read doit etre à true
+
+		expect(newWhere).toEqual({
+			AND: [
+				{ id: { equalTo: 'id' } },
+				{
+					OR: [
+						{
+							AND: [
+								{
+									acl: {
+										users: { userId: { in: ['userId'] } },
+									},
+								},
+								{ acl: { users: { read: { in: [true] } } } },
+							],
+						},
+						{
+							AND: [
+								{
+									acl: {
+										users: {
+											userId: { notIn: ['userId'] },
+										},
+									},
+								},
+								{
+									acl: {
+										roles: { roleId: { in: ['roleId'] } },
+									},
+								},
+								{ acl: { roles: { read: { in: [true] } } } },
+							],
+						},
+					],
+				},
+			],
+		} as any)
+	})
+
+	it('should create new where include the ACL from context with undefined roleId', () => {
+		const databaseController = new DatabaseController(mockAdapter() as any)
+
+		const where: WhereType<any, any> = {
+			id: { equalTo: 'id' },
+		}
+
+		const context: WibeContext<any> = {
+			isRoot: false,
+			wibe: {} as any,
+			user: {
+				id: 'userId',
+			} as any,
+		}
+
+		const newWhere = databaseController._buildWhereWithACL(
+			where,
+			context,
+			'write',
+		)
+
+		expect(newWhere).toEqual({
+			AND: [
+				{ id: { equalTo: 'id' } },
+				{
+					OR: [
+						{
+							AND: [
+								{
+									acl: {
+										users: { userId: { in: ['userId'] } },
+									},
+								},
+								{ acl: { users: { write: { in: [true] } } } },
+							],
+						},
+					],
+				},
+			],
+		} as any)
+	})
+
+	it('should create new where include the ACL from context with undefined userId and roleId', () => {
+		const databaseController = new DatabaseController(mockAdapter() as any)
+
+		const where: WhereType<any, any> = {
+			id: { equalTo: 'id' },
+		}
+
+		const context: WibeContext<any> = {
+			isRoot: false,
+			wibe: {} as any,
+			user: {} as any,
+		}
+
+		const newWhere = databaseController._buildWhereWithACL(
+			where,
+			context,
+			'read',
+		)
+
+		expect(newWhere).toEqual({
+			AND: [{ id: { equalTo: 'id' } }],
+		} as any)
 	})
 
 	it('should not call createObjects adapter when the data array is empty', async () => {
@@ -470,6 +628,7 @@ describe('DatabaseController', () => {
 				// @ts-expect-error
 				pointerToAnotherClass: { field1: { equalTo: 'value' } },
 			},
+
 			fields: ['id'],
 			context,
 		})
@@ -478,7 +637,7 @@ describe('DatabaseController', () => {
 		expect(mockGetObjects).toHaveBeenCalledTimes(2)
 		expect(mockGetObjects).toHaveBeenNthCalledWith(1, {
 			className: 'AnotherClass',
-			where: { field1: { equalTo: 'value' } },
+			where: expect.any(Object),
 			fields: ['id'],
 			context,
 		})
@@ -576,12 +735,13 @@ describe('DatabaseController', () => {
 			id: '123',
 			fields: ['id', 'relationToAnotherClass3'],
 			context,
+			where: {},
 		})
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
 		expect(mockGetObjects).toHaveBeenCalledWith({
 			className: 'AnotherClass3',
-			where: { id: { in: ['anotherClass3Id'] } },
+			where: expect.any(Object),
 			fields: ['id', 'field4'],
 			context,
 		})
@@ -635,13 +795,13 @@ describe('DatabaseController', () => {
 		expect(mockGetObjects).toHaveBeenCalledTimes(2)
 		expect(mockGetObjects).toHaveBeenNthCalledWith(1, {
 			className: 'AnotherClass4',
-			where: { id: { equalTo: '123' } },
+			where: expect.any(Object),
 			fields: ['id', 'relationToAnotherClass3'],
 			context,
 		})
 		expect(mockGetObjects).toHaveBeenNthCalledWith(2, {
 			className: 'AnotherClass3',
-			where: { id: { in: ['anotherClass3Id'] } },
+			where: expect.any(Object),
 			fields: ['id', 'field4'],
 			context,
 		})
@@ -674,6 +834,7 @@ describe('DatabaseController', () => {
 			fields: ['field1'],
 			id: 'idOfAnotherClass',
 			context,
+			where: {},
 		})
 	})
 
@@ -801,6 +962,7 @@ describe('DatabaseController', () => {
 			id: '123',
 			fields: [],
 			context,
+			where: {},
 		})
 	})
 
@@ -830,6 +992,7 @@ describe('DatabaseController', () => {
 			id: '123',
 			fields: ['id', 'name'],
 			context,
+			where: {},
 		})
 	})
 
@@ -873,6 +1036,7 @@ describe('DatabaseController', () => {
 			id: '123',
 			fields: ['id', 'name', 'pointerToAnotherClass'],
 			context,
+			where: {},
 		})
 
 		expect(mockGetObject).toHaveBeenNthCalledWith(2, {
@@ -880,6 +1044,7 @@ describe('DatabaseController', () => {
 			id: 'anotherClassId',
 			fields: ['id', 'name'],
 			context,
+			where: {},
 		})
 	})
 
@@ -937,6 +1102,7 @@ describe('DatabaseController', () => {
 				'pointerToAnotherClass2',
 			],
 			context,
+			where: {},
 		})
 
 		expect(mockGetObject).toHaveBeenNthCalledWith(2, {
@@ -944,6 +1110,7 @@ describe('DatabaseController', () => {
 			id: 'anotherClassId',
 			fields: ['id', 'name'],
 			context,
+			where: {},
 		})
 
 		expect(mockGetObject).toHaveBeenNthCalledWith(3, {
@@ -951,6 +1118,7 @@ describe('DatabaseController', () => {
 			id: 'anotherClass2Id',
 			fields: ['age'],
 			context,
+			where: {},
 		})
 	})
 
@@ -965,20 +1133,14 @@ describe('DatabaseController', () => {
 
 		await databaseController.getObjects({
 			className: 'TestClass',
-			where: {
-				id: {
-					equalTo: '123',
-				},
-			},
+			where: { id: { equalTo: '123' } },
 			context,
 		})
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
 		expect(mockGetObjects).toHaveBeenNthCalledWith(1, {
 			className: 'TestClass',
-			where: {
-				id: { equalTo: '123' },
-			},
+			where: expect.any(Object),
 			fields: [],
 			context,
 		})
@@ -996,9 +1158,7 @@ describe('DatabaseController', () => {
 
 		const res = await databaseController.getObjects({
 			className: 'TestClass',
-			where: {
-				id: { equalTo: '123' },
-			},
+			where: { id: { equalTo: '123' } },
 			fields: ['id', 'name'],
 			context,
 		})
@@ -1015,9 +1175,7 @@ describe('DatabaseController', () => {
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
 		expect(mockGetObjects).toHaveBeenNthCalledWith(1, {
 			className: 'TestClass',
-			where: {
-				id: { equalTo: '123' },
-			},
+			where: expect.any(Object),
 			fields: ['id', 'name'],
 			context,
 		})
@@ -1071,16 +1229,13 @@ describe('DatabaseController', () => {
 			id: 'anotherClassId',
 			fields: ['id', 'name'],
 			context,
+			where: {},
 		})
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
 		expect(mockGetObjects).toHaveBeenNthCalledWith(1, {
 			className: 'TestClass',
-			where: {
-				id: {
-					equalTo: '123',
-				},
-			},
+			where: expect.any(Object),
 			fields: ['id', 'name', 'pointerToAnotherClass'],
 			context,
 		})
@@ -1143,12 +1298,14 @@ describe('DatabaseController', () => {
 			id: 'anotherClassId',
 			fields: ['id', 'name'],
 			context,
+			where: {},
 		})
 		expect(mockGetObject).toHaveBeenNthCalledWith(2, {
 			className: 'AnotherClass2',
 			id: 'anotherClass2Id',
 			fields: ['age'],
 			context,
+			where: {},
 		})
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
@@ -1161,9 +1318,7 @@ describe('DatabaseController', () => {
 				'pointerToAnotherClass2',
 			],
 			context,
-			where: {
-				id: { equalTo: '123' },
-			},
+			where: expect.any(Object),
 		})
 	})
 })

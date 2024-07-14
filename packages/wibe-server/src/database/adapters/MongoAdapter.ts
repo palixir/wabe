@@ -151,6 +151,8 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 
 		const { className, id, fields } = params
 
+		const whereBuilded = buildMongoWhereQuery<T, K>(params.where)
+
 		const objectOfFieldsToGet = fields?.reduce(
 			(acc, prev) => {
 				acc[prev] = 1
@@ -162,7 +164,7 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 		const collection = await this.createClassIfNotExist(className)
 
 		const res = await collection.findOne(
-			{ _id: new ObjectId(id) } as Filter<any>,
+			{ _id: new ObjectId(id), ...whereBuilded } as Filter<any>,
 			{
 				projection:
 					fields && fields.length > 0 && !fields.includes('*')
@@ -292,7 +294,12 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 
 		const res = await this.updateObjects({
 			className,
-			where: { id: { equalTo: new ObjectId(id) } } as WhereType<T, W>,
+			where: {
+				AND: [
+					{ id: { equalTo: new ObjectId(id) } },
+					{ ...(params.where || {}) },
+				],
+			} as WhereType<T, W>,
 			data,
 			fields,
 			context,
@@ -327,12 +334,14 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 				context,
 			})
 
+		if (objectsBeforeUpdate.length === 0)
+			throw new Error('Object not found')
+
 		await collection.updateMany(whereBuilded, {
 			$set: data,
 		})
 
 		const orStatement = objectsBeforeUpdate.map((object) => ({
-			// @ts-expect-error
 			id: { equalTo: ObjectId.createFromHexString(object.id) },
 		}))
 
@@ -359,9 +368,16 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 
 		const { className, id } = params
 
+		const whereBuilded = buildMongoWhereQuery<T, K>(params.where)
+
 		const collection = await this.createClassIfNotExist(className)
 
-		await collection.deleteOne({ _id: new ObjectId(id) })
+		const res = await collection.deleteOne({
+			_id: new ObjectId(id),
+			...whereBuilded,
+		})
+
+		if (res.deletedCount === 0) throw new Error('Object not found')
 	}
 
 	async deleteObjects<

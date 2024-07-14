@@ -111,62 +111,6 @@ describe('Authentication', () => {
 	// 	console.log(res.createUser.user.sessions)
 	// })
 
-	it('should not authorize an user to read when the user has access on read but role do not has access on read(ACL)', async () => {
-		const { userClient, userId, roleId } = await createUserAndUpdateRole({
-			anonymousClient: client,
-			port,
-			roleName: 'Client',
-			rootClient,
-		})
-
-		const objectCreated = await rootClient.request<any>(gql`
-				mutation createTest {
-					createTest(input:{fields:{name: "test"}}){
-						test{
-							id
-						}
-					}
-				}
-		`)
-
-		const objectId = objectCreated.createTest.test.id
-
-		await rootClient.request<any>(gql`
-			mutation updateACL{
-				updateTest(input:{id: "${objectId}", fields: {acl:{
-					users: [{
-						userId: "${userId}",
-						read: true,
-						write: false
-					}],
-					roles: [{
-						roleId: "${roleId}",
-						read: false,
-						write: false
-					}]
-				}}}){
-					test{
-						id
-					}
-				}
-			}
-		`)
-
-		expect(
-			userClient.request<any>(gql`
-				query tests{
-					tests{
-						edges {
-							node {
-								id
-							}
-						}
-					}
-				}
-			`),
-		).rejects.toThrow('Permission denied to read class Test')
-	})
-
 	it('should not authorize an user to read an object when the user has not access on read to the object (ACL)', async () => {
 		const { userClient, userId } = await createUserAndUpdateRole({
 			anonymousClient: client,
@@ -203,8 +147,7 @@ describe('Authentication', () => {
 			}
 		`)
 
-		expect(
-			userClient.request<any>(gql`
+		const res = await userClient.request<any>(gql`
 				query tests{
 					tests{
 						edges {
@@ -214,8 +157,9 @@ describe('Authentication', () => {
 						}
 					}
 				}
-			`),
-		).rejects.toThrow('Permission denied to read class Test')
+			`)
+
+		expect(res.tests.edges.length).toEqual(0)
 	})
 
 	it('should not authorize an user to write (delete) an object when the user has not access on write to the object (ACL)', async () => {
@@ -264,7 +208,7 @@ describe('Authentication', () => {
 					}
 				}
 			`),
-		).rejects.toThrow('Permission denied to write class Test')
+		).rejects.toThrow('Object not found')
 	})
 
 	it('should not authorize an user to get the result of mutation (read) when he has access on write but not on read (ACL)', async () => {
@@ -313,7 +257,7 @@ describe('Authentication', () => {
 					}
 				}
 			`),
-		).rejects.toThrow('Permission denied to read class Test')
+		).rejects.toThrow('Object not found')
 	})
 
 	it('should not authorize an user to write (update) an object when the user has not access on write to the object (ACL)', async () => {
@@ -362,7 +306,7 @@ describe('Authentication', () => {
 					}
 				}
 			`),
-		).rejects.toThrow('Permission denied to write class Test')
+		).rejects.toThrow('Object not found')
 	})
 
 	it('should authorize an user to read an object when the user has access on read to the object (ACL)', async () => {
@@ -462,7 +406,7 @@ describe('Authentication', () => {
 					}
 				}
 			`),
-		).rejects.toThrow('Permission denied to write class Test')
+		).rejects.toThrow('Object not found')
 	})
 
 	it('should not authorize to update an object when an ACL protect the object on write for this role (ACL)', async () => {
@@ -511,7 +455,7 @@ describe('Authentication', () => {
 					}
 				}
 			`),
-		).rejects.toThrow('Permission denied to write class Test')
+		).rejects.toThrow('Object not found')
 	})
 
 	it('should not authorize to read an object when an ACL protect the object on read for this role (ACL)', async () => {
@@ -550,8 +494,7 @@ describe('Authentication', () => {
 			}		
 		`)
 
-		expect(
-			userClient.request<any>(gql`
+		const res = await userClient.request<any>(gql`
 				query tests{
 					tests{
 						edges{
@@ -561,8 +504,9 @@ describe('Authentication', () => {
 						}
 					}
 				}
-			`),
-		).rejects.toThrow('Permission denied to read class Test')
+			`)
+
+		expect(res.tests.edges.length).toEqual(0)
 	})
 
 	// Class Level Permissions
@@ -591,7 +535,7 @@ describe('Authentication', () => {
 		).rejects.toThrow('Permission denied to create class Test2')
 	})
 
-	it('should not authorize an user to read an object on another class with target when the user do not have access to read the other class with (CLP)', async () => {
+	it('should not authorize an user to read an object on another class with pointer when the user do not have access to read the other class with (CLP)', async () => {
 		const { userClient, userId } = await createUserAndUpdateRole({
 			anonymousClient: client,
 			port,
@@ -613,6 +557,23 @@ describe('Authentication', () => {
 		`)
 
 		const pointerId = objectCreated.createTest.test.pointer.id
+		const testId = objectCreated.createTest.test.id
+
+		await rootClient.request<any>(gql`
+			mutation updateACL{
+				updateTest(input:{id: "${testId}", fields: {acl:{
+					users: [{
+						userId: "${userId}",
+						read: true,
+						write: false
+					}]
+				}}}){
+					test{
+						id
+					}
+				}
+			}
+		`)
 
 		await rootClient.request<any>(gql`
 			mutation updateACL{

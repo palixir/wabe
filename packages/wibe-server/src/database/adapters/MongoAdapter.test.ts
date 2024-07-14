@@ -52,6 +52,126 @@ describe('Mongo adapter', () => {
 			)
 	})
 
+	it('should support where on getObject for additional check (acl for example)', async () => {
+		const insertedObjects = await mongoAdapter.createObjects({
+			className: 'User',
+			data: [
+				{
+					name: 'Lucas',
+					age: 20,
+				},
+				{
+					name: 'LucasBis',
+					age: 18,
+				},
+			],
+			fields: [],
+			context,
+		})
+
+		expect(
+			mongoAdapter.getObject({
+				className: 'User',
+				where: {
+					name: { equalTo: 'InvalidName' },
+				},
+				id: insertedObjects[0].id,
+				context,
+			}),
+		).rejects.toThrow('Object not found')
+
+		const res = await mongoAdapter.getObject({
+			className: 'User',
+			where: {
+				name: { equalTo: 'Lucas' },
+			},
+			id: insertedObjects[0].id,
+			context,
+		})
+
+		expect(res.name).toEqual('Lucas')
+	})
+
+	it('should support where on updateObject for additional check (acl for example)', async () => {
+		const insertedObjects = await mongoAdapter.createObjects({
+			className: 'User',
+			data: [
+				{
+					name: 'Lucas',
+					age: 20,
+				},
+				{
+					name: 'LucasBis',
+					age: 18,
+				},
+			],
+			fields: [],
+			context,
+		})
+
+		expect(
+			mongoAdapter.updateObject({
+				className: 'User',
+				where: {
+					name: { equalTo: 'InvalidName' },
+				},
+				id: insertedObjects[0].id,
+				context,
+				data: { name: 'Lucas2' },
+			}),
+		).rejects.toThrow('Object not found')
+
+		const res = await mongoAdapter.updateObject({
+			className: 'User',
+			where: {
+				name: { equalTo: 'Lucas' },
+			},
+			id: insertedObjects[0].id,
+			context,
+			data: { name: 'Lucas2' },
+		})
+
+		expect(res.name).toEqual('Lucas2')
+	})
+
+	it('should support where on delete for additional check (acl for example)', async () => {
+		const insertedObjects = await mongoAdapter.createObjects({
+			className: 'User',
+			data: [
+				{
+					name: 'Lucas',
+					age: 20,
+				},
+				{
+					name: 'LucasBis',
+					age: 18,
+				},
+			],
+			fields: [],
+			context,
+		})
+
+		expect(
+			mongoAdapter.deleteObject({
+				className: 'User',
+				where: {
+					name: { equalTo: 'InvalidName' },
+				},
+				id: insertedObjects[0].id,
+				context,
+			}),
+		).rejects.toThrow('Object not found')
+
+		await mongoAdapter.deleteObject({
+			className: 'User',
+			where: {
+				name: { equalTo: 'Lucas' },
+			},
+			id: insertedObjects[0].id,
+			context,
+		})
+	})
+
 	it('should support notEqualTo on _id', async () => {
 		const insertedObjects = await mongoAdapter.createObjects({
 			className: 'User',

@@ -285,7 +285,7 @@ describe('_Session', () => {
 			session.refresh('accessToken', 'refreshToken', {
 				wibe: { databaseController },
 			} as any),
-		).rejects.toThrow('_Session not found')
+		).rejects.toThrow('Session not found')
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
 		expect(mockGetObjects).toHaveBeenCalledWith({
