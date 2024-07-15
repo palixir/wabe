@@ -1,10 +1,11 @@
-import type { OperationType, TypedNewData } from '.'
+import type { OperationType } from '.'
+import type { MutationData } from '../database'
 import type { WibeAppTypes } from '../server'
 import type { WibeContext } from '../server/interface'
 
 export class HookObject<T extends WibeAppTypes, K = keyof T['types']> {
 	public className: string
-	private newData?: TypedNewData<K>
+	private newData: MutationData<T> | undefined
 	private operationType: OperationType
 	public context: WibeContext<T>
 	public object: Record<keyof WibeAppTypes['types'][T], any>
@@ -17,7 +18,7 @@ export class HookObject<T extends WibeAppTypes, K = keyof T['types']> {
 		object,
 	}: {
 		className: K
-		newData?: TypedNewData<K>
+		newData?: MutationData<T>
 		operationType: OperationType
 		context: WibeContext<T>
 		object: Record<keyof WibeAppTypes['types'][T], any>
@@ -50,7 +51,7 @@ export class HookObject<T extends WibeAppTypes, K = keyof T['types']> {
 		this.newData[field] = value
 	}
 
-	getNewData(): TypedNewData<T> {
+	getNewData(): MutationData<T> {
 		return this.newData || ({} as any)
 	}
 }

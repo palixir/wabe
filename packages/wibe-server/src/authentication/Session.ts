@@ -95,6 +95,7 @@ export class Session {
 				),
 				user: userId,
 			},
+			fields: ['id'],
 		})
 
 		return {
@@ -111,6 +112,7 @@ export class Session {
 			className: '_Session',
 			context,
 			id: context.sessionId,
+			fields: [],
 		})
 	}
 
@@ -198,6 +200,7 @@ export class Session {
 						this.getRefreshTokenExpireIn(context.wibe.config),
 				),
 			},
+			fields: [],
 		})
 
 		return {

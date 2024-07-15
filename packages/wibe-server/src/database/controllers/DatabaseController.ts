@@ -374,14 +374,14 @@ export class DatabaseController<T extends WibeAppTypes> {
 			(field) => !field.includes('.'),
 		)
 
-		const hook = initializeHook({
-			className: params.className,
-			context: params.context,
-			newData: null,
-			skipHooks: params.skipHooks,
-		})
+		const hook = !params.skipHooks
+			? initializeHook({
+					className: params.className,
+					context: params.context,
+				})
+			: undefined
 
-		await hook.runOnSingleObject({
+		await hook?.runOnSingleObject({
 			operationType: OperationType.BeforeRead,
 			id: params.id,
 		})
@@ -399,7 +399,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 			where: whereWithACLCondition,
 		})
 
-		await hook.runOnSingleObject({
+		await hook?.runOnSingleObject({
 			operationType: OperationType.AfterRead,
 			object,
 		})
@@ -439,14 +439,14 @@ export class DatabaseController<T extends WibeAppTypes> {
 			'read',
 		)
 
-		const hook = initializeHook({
-			className: params.className,
-			context: params.context,
-			newData: null,
-			skipHooks: params.skipHooks,
-		})
+		const hook = !params.skipHooks
+			? initializeHook({
+					className: params.className,
+					context: params.context,
+				})
+			: undefined
 
-		await hook.runOnMultipleObjects({
+		await hook?.runOnMultipleObjects({
 			operationType: OperationType.BeforeRead,
 			where: whereWithACLCondition,
 		})
@@ -458,7 +458,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 			fields: [...fieldsWithoutPointers, ...(pointersFieldsId || [])],
 		})
 
-		await hook.runOnMultipleObjects({
+		await hook?.runOnMultipleObjects({
 			operationType: OperationType.AfterRead,
 			objects,
 		})
@@ -500,7 +500,15 @@ export class DatabaseController<T extends WibeAppTypes> {
 			object,
 		})
 
-		return object
+		const objectToReturn = await this.getObject({
+			className: params.className,
+			context: params.context,
+			fields: params.fields,
+			id: object.id,
+			skipHooks: true,
+		})
+
+		return objectToReturn
 	}
 
 	async createObjects<
@@ -536,6 +544,8 @@ export class DatabaseController<T extends WibeAppTypes> {
 			data: arrayOfComputedData,
 		})
 
+		const objectsId = objects.map((object) => object.id)
+
 		await Promise.all(
 			hooks.map((hook) =>
 				hook.runOnMultipleObjects({
@@ -545,7 +555,16 @@ export class DatabaseController<T extends WibeAppTypes> {
 			),
 		)
 
-		return objects
+		const objectsToReturn = await this.getObjects({
+			className: params.className,
+			context: params.context,
+			fields: params.fields,
+			// @ts-expect-error
+			where: { id: { in: objectsId } },
+			skipHooks: true,
+		})
+
+		return objectsToReturn
 	}
 
 	async updateObject<
@@ -581,7 +600,15 @@ export class DatabaseController<T extends WibeAppTypes> {
 			object,
 		})
 
-		return object
+		const objectToReturn = await this.getObject({
+			className: params.className,
+			context: params.context,
+			fields: params.fields,
+			id: object.id,
+			skipHooks: true,
+		})
+
+		return objectToReturn
 	}
 
 	async updateObjects<
@@ -618,12 +645,23 @@ export class DatabaseController<T extends WibeAppTypes> {
 			where: whereWithACLCondition,
 		})
 
+		const objectsId = objects.map((object) => object.id)
+
 		await hook.runOnMultipleObjects({
 			operationType: OperationType.AfterUpdate,
 			objects,
 		})
 
-		return objects
+		const objectsToReturn = await this.getObjects({
+			className: params.className,
+			context: params.context,
+			fields: params.fields,
+			// @ts-expect-error
+			where: { id: { in: objectsId } },
+			skipHooks: true,
+		})
+
+		return objectsToReturn
 	}
 
 	async deleteObject<
@@ -633,7 +671,6 @@ export class DatabaseController<T extends WibeAppTypes> {
 		const hook = initializeHook({
 			className: params.className,
 			context: params.context,
-			newData: null,
 		})
 
 		const whereWithACLCondition = this._buildWhereWithACL(
@@ -676,7 +713,6 @@ export class DatabaseController<T extends WibeAppTypes> {
 		const hook = initializeHook({
 			className: params.className,
 			context: params.context,
-			newData: null,
 		})
 
 		const whereWithACLCondition = this._buildWhereWithACL(

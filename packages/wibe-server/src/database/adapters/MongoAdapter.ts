@@ -240,14 +240,18 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 
 		const { className, data, fields, context } = params
 
-		const res = await this.createObjects({
+		const collection = await this.createClassIfNotExist(className)
+
+		const res = await collection.insertOne(data, {})
+
+		const object = await context.wibe.databaseController.getObject({
 			className,
-			data: [data],
-			fields,
+			id: res.insertedId.toString(),
 			context,
+			fields,
 		})
 
-		return res[0]
+		return object
 	}
 
 	async createObjects<
@@ -290,22 +294,32 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 
-		const { className, id, data, fields, context } = params
+		const { className, id, data, fields, context, where } = params
 
-		const res = await this.updateObjects({
+		const whereBuilded = where ? buildMongoWhereQuery<T, W>(where) : {}
+
+		const collection = await this.createClassIfNotExist(className)
+
+		const res = await collection.updateOne(
+			{
+				_id: new ObjectId(id),
+				...whereBuilded,
+			},
+			{
+				$set: data,
+			},
+		)
+
+		if (res.matchedCount === 0) throw new Error('Object not found')
+
+		const object = await context.wibe.databaseController.getObject({
 			className,
-			where: {
-				AND: [
-					{ id: { equalTo: new ObjectId(id) } },
-					{ ...(params.where || {}) },
-				],
-			} as WhereType<T, W>,
-			data,
-			fields,
 			context,
+			fields,
+			id,
 		})
 
-		return res[0]
+		return object
 	}
 
 	async updateObjects<

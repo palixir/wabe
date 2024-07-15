@@ -38,6 +38,11 @@ export interface AdapterOptions {
 	databaseName: string
 }
 
+export type MutationData<T extends keyof WibeAppTypes['types']> = Record<
+	keyof WibeAppTypes['types'][T],
+	any
+>
+
 // TODO: It could be cool if fields type supports something like user.id, user.email
 export interface GetObjectOptions<
 	T extends keyof WibeAppTypes['types'],
@@ -46,7 +51,7 @@ export interface GetObjectOptions<
 	className: T
 	id: string
 	where?: WhereType<T, K>
-	fields?: Array<K | '*'>
+	fields: Array<K | '*'>
 	context: WibeContext<any>
 	skipHooks?: boolean
 }
@@ -57,7 +62,7 @@ export interface GetObjectsOptions<
 > {
 	className: T
 	where?: WhereType<T, K>
-	fields?: Array<K | '*'>
+	fields: Array<K | '*'>
 	offset?: number
 	limit?: number
 	context: WibeContext<any>
@@ -70,8 +75,8 @@ export interface CreateObjectOptions<
 	W extends keyof WibeAppTypes['types'][T],
 > {
 	className: T
-	data: Record<W, any>
-	fields?: Array<K | '*'>
+	data: MutationData<W>
+	fields: Array<K | '*'>
 	context: WibeContext<any>
 }
 export interface CreateObjectsOptions<
@@ -80,8 +85,8 @@ export interface CreateObjectsOptions<
 	W extends keyof WibeAppTypes['types'][T],
 > {
 	className: T
-	data: Array<Record<W, any>>
-	fields?: Array<K | '*'>
+	data: Array<MutationData<W>>
+	fields: Array<K | '*'>
 	offset?: number
 	limit?: number
 	context: WibeContext<any>
@@ -94,9 +99,9 @@ export interface UpdateObjectOptions<
 > {
 	className: T
 	id: string
-	where?: WhereType<T, K>
-	data: Partial<Record<W, any>>
-	fields?: Array<K | '*'>
+	where?: WhereType<T, W>
+	data: MutationData<W>
+	fields: Array<K | '*'>
 	context: WibeContext<any>
 }
 
@@ -107,8 +112,8 @@ export interface UpdateObjectsOptions<
 > {
 	className: T
 	where: WhereType<T, W>
-	data: Partial<Record<W, any>>
-	fields?: Array<K | '*'>
+	data: MutationData<W>
+	fields: Array<K | '*'>
 	offset?: number
 	limit?: number
 	context: WibeContext<any>
@@ -121,7 +126,7 @@ export interface DeleteObjectOptions<
 	className: T
 	id: string
 	where?: WhereType<T, K>
-	fields?: Array<K | '*'>
+	fields: Array<K | '*'>
 	context: WibeContext<any>
 }
 
@@ -131,7 +136,7 @@ export interface DeleteObjectsOptions<
 > {
 	className: T
 	where: WhereType<T, K>
-	fields?: Array<K | '*'>
+	fields: Array<K | '*'>
 	offset?: number
 	limit?: number
 	context: WibeContext<any>

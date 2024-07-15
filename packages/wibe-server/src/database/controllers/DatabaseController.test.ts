@@ -296,6 +296,7 @@ describe('DatabaseController', () => {
 			className: 'TestClass',
 			context,
 			data: [],
+			fields: ['*'],
 		})
 
 		expect(mockCreateObjects).toHaveBeenCalledTimes(0)
@@ -320,7 +321,6 @@ describe('DatabaseController', () => {
 				wibe: { config },
 				isRoot: true,
 			},
-			newData: null,
 		})
 
 		expect(mockRunOnSingleObject).toHaveBeenCalledTimes(2)
@@ -350,7 +350,6 @@ describe('DatabaseController', () => {
 		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
 			context: { sessionId: 'sessionId', wibe: { config }, isRoot: true },
-			newData: null,
 		})
 
 		expect(mockRunOnMultipleObject).toHaveBeenCalledTimes(2)
@@ -365,6 +364,11 @@ describe('DatabaseController', () => {
 	})
 
 	it('should call findHooksAndExecute on updateObject', async () => {
+		mockRunOnSingleObject.mockResolvedValue({
+			newData: {},
+		} as never)
+		mockUpdateObject.mockResolvedValue({} as never)
+
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
 		await databaseController.updateObject({
@@ -382,19 +386,22 @@ describe('DatabaseController', () => {
 			newData: { name: 'test' },
 		})
 
-		expect(mockHookRun).toHaveBeenCalledTimes(2)
-		expect(mockHookRun).toHaveBeenNthCalledWith(1, {
+		expect(mockRunOnSingleObject).toHaveBeenCalledTimes(2)
+		expect(mockRunOnSingleObject).toHaveBeenNthCalledWith(1, {
 			operationType: hooks.OperationType.BeforeUpdate,
 			id: 'id',
 		})
-		expect(mockHookRun).toHaveBeenNthCalledWith(2, {
+		expect(mockRunOnSingleObject).toHaveBeenNthCalledWith(2, {
 			operationType: hooks.OperationType.AfterUpdate,
-			id: 'id',
+			object: {},
 		})
 	})
 
 	it('should call findHooksAndExecute on updateObjects', async () => {
-		mockGetObjects.mockResolvedValue([] as never)
+		mockRunOnMultipleObject.mockResolvedValue({
+			newData: {},
+		} as never)
+		mockUpdateObjects.mockResolvedValue([] as never)
 
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
@@ -413,14 +420,14 @@ describe('DatabaseController', () => {
 			newData: { name: 'test' },
 		})
 
-		expect(mockHookRun).toHaveBeenCalledTimes(2)
-		expect(mockHookRun).toHaveBeenNthCalledWith(1, {
+		expect(mockRunOnMultipleObject).toHaveBeenCalledTimes(2)
+		expect(mockRunOnMultipleObject).toHaveBeenNthCalledWith(1, {
 			operationType: hooks.OperationType.BeforeUpdate,
 			where: { id: { equalTo: 'id' } },
 		})
-		expect(mockHookRun).toHaveBeenNthCalledWith(2, {
+		expect(mockRunOnMultipleObject).toHaveBeenNthCalledWith(2, {
 			operationType: hooks.OperationType.AfterUpdate,
-			where: { id: { equalTo: 'id' } },
+			objects: [],
 		})
 	})
 
@@ -443,13 +450,15 @@ describe('DatabaseController', () => {
 			newData: { name: 'test' },
 		})
 
-		expect(mockHookRun).toHaveBeenCalledTimes(2)
-		expect(mockHookRun).toHaveBeenNthCalledWith(1, {
+		expect(mockRunOnSingleObject).toHaveBeenCalledTimes(2)
+		expect(mockRunOnSingleObject).toHaveBeenNthCalledWith(1, {
 			operationType: hooks.OperationType.BeforeCreate,
 		})
-		expect(mockHookRun).toHaveBeenNthCalledWith(2, {
+		expect(mockRunOnSingleObject).toHaveBeenNthCalledWith(2, {
 			operationType: hooks.OperationType.AfterCreate,
-			id: 'id',
+			object: {
+				id: 'id',
+			},
 		})
 	})
 
@@ -473,19 +482,17 @@ describe('DatabaseController', () => {
 			newData: { name: 'test' },
 		})
 
-		expect(mockHookRun).toHaveBeenCalledTimes(2)
-		expect(mockHookRun).toHaveBeenNthCalledWith(1, {
+		expect(mockRunOnMultipleObject).toHaveBeenCalledTimes(2)
+		expect(mockRunOnMultipleObject).toHaveBeenNthCalledWith(1, {
 			operationType: hooks.OperationType.BeforeCreate,
 		})
-		expect(mockHookRun).toHaveBeenNthCalledWith(2, {
+		expect(mockRunOnMultipleObject).toHaveBeenNthCalledWith(2, {
 			operationType: hooks.OperationType.AfterCreate,
-			where: { id: { in: ['id'] } },
+			objects: [{ id: 'id' }],
 		})
 	})
 
 	it('should call findHooksAndExecute on deleteObject', async () => {
-		mockGetObject.mockResolvedValue({ name: 'test' } as never)
-
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
 		await databaseController.deleteObject({
@@ -499,24 +506,21 @@ describe('DatabaseController', () => {
 		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
 			context: { sessionId: 'sessionId', wibe: { config }, isRoot: true },
-			newData: null,
 		})
 
 		// 4 because we have a getObject before the delete
-		expect(mockHookRun).toHaveBeenCalledTimes(4)
-		expect(mockHookRun).toHaveBeenNthCalledWith(3, {
+		expect(mockRunOnSingleObject).toHaveBeenCalledTimes(4)
+		expect(mockRunOnSingleObject).toHaveBeenNthCalledWith(3, {
 			operationType: hooks.OperationType.BeforeDelete,
 			id: 'id',
 		})
-		expect(mockHookRun).toHaveBeenNthCalledWith(4, {
+		expect(mockRunOnSingleObject).toHaveBeenNthCalledWith(4, {
 			operationType: hooks.OperationType.AfterDelete,
-			id: 'id',
+			object: undefined, // Because we don't mock deleteObject in databaseController
 		})
 	})
 
 	it('should call findHooksAndExecute on deleteObjects', async () => {
-		mockGetObjects.mockResolvedValue([{ name: 'test' }] as never)
-
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
 		await databaseController.deleteObjects({
@@ -530,18 +534,16 @@ describe('DatabaseController', () => {
 		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
 			context: { sessionId: 'sessionId', wibe: { config }, isRoot: true },
-			newData: null,
 		})
 
 		// 4 because we have a getObject before the delete
-		expect(mockHookRun).toHaveBeenCalledTimes(4)
-		expect(mockHookRun).toHaveBeenNthCalledWith(3, {
+		expect(mockRunOnMultipleObject).toHaveBeenCalledTimes(4)
+		expect(mockRunOnMultipleObject).toHaveBeenNthCalledWith(3, {
 			operationType: hooks.OperationType.BeforeDelete,
 			where: { id: { equalTo: 'id' } },
 		})
-		expect(mockHookRun).toHaveBeenNthCalledWith(4, {
+		expect(mockRunOnMultipleObject).toHaveBeenNthCalledWith(4, {
 			operationType: hooks.OperationType.AfterDelete,
-			where: { id: { equalTo: 'id' } },
 		})
 	})
 
@@ -956,13 +958,14 @@ describe('DatabaseController', () => {
 			className: 'TestClass',
 			id: '123',
 			context,
+			fields: ['*'],
 		})
 
 		expect(mockGetObject).toHaveBeenCalledTimes(1)
 		expect(mockGetObject).toHaveBeenNthCalledWith(1, {
 			className: 'TestClass',
 			id: '123',
-			fields: [],
+			fields: ['*'],
 			context,
 			where: {},
 		})
@@ -1137,13 +1140,14 @@ describe('DatabaseController', () => {
 			className: 'TestClass',
 			where: { id: { equalTo: '123' } },
 			context,
+			fields: ['*'],
 		})
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
 		expect(mockGetObjects).toHaveBeenNthCalledWith(1, {
 			className: 'TestClass',
 			where: expect.any(Object),
-			fields: [],
+			fields: ['*'],
 			context,
 		})
 	})

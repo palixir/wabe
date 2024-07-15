@@ -108,6 +108,7 @@ describe('SignUpWith', () => {
 				},
 			},
 			context: expect.any(Object),
+			fields: ['id'],
 		})
 
 		expect(mockCreateSession).toHaveBeenCalledTimes(1)

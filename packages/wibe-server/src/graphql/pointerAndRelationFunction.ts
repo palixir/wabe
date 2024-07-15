@@ -127,6 +127,7 @@ export const add = async ({
 						[fieldName]: [...(currentValue || []), ...add],
 					},
 					context,
+					fields: [],
 				})
 			}),
 		)
@@ -189,6 +190,7 @@ export const remove = async ({
 						),
 					},
 					context,
+					fields: [],
 				})
 			}),
 		)

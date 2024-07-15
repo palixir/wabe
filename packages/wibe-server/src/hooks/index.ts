@@ -1,4 +1,4 @@
-import type { OutputType, WhereType } from '../database'
+import type { MutationData, OutputType, WhereType } from '../database'
 import {
 	defaultBeforeCreateUpload,
 	defaultBeforeUpdateUpload,
@@ -47,7 +47,7 @@ export type Hook<T extends WibeAppTypes> = {
 export type TypedNewData<T extends keyof WibeAppTypes['types']> = Record<
 	keyof WibeAppTypes['types'][T],
 	any
-> | null
+>
 
 export const _findHooksByPriority = async <
 	T extends keyof WibeAppTypes['types'],
@@ -82,12 +82,10 @@ export const initializeHook = <T extends keyof WibeAppTypes['types']>({
 	className,
 	newData,
 	context,
-	skipHooks,
 }: {
 	className: T
-	newData: TypedNewData<any>
+	newData?: TypedNewData<any>
 	context: WibeContext<any>
-	skipHooks?: boolean
 }): {
 	runOnSingleObject: (options: {
 		operationType: OperationType
@@ -95,7 +93,7 @@ export const initializeHook = <T extends keyof WibeAppTypes['types']>({
 		object?: OutputType<any, any>
 	}) => Promise<{
 		object: OutputType<any, any>
-		newData: TypedNewData<any>
+		newData: MutationData<T>
 	}>
 	runOnMultipleObjects: (options: {
 		operationType: OperationType
@@ -103,16 +101,9 @@ export const initializeHook = <T extends keyof WibeAppTypes['types']>({
 		objects?: OutputType<any, any>[]
 	}) => Promise<{
 		objects: OutputType<any, any>[]
-		newData: Array<TypedNewData<any>>
+		newData: Array<MutationData<T>>
 	}>
 } => {
-	if (skipHooks)
-		return {
-			// @ts-expect-error
-			runOnSingleObject: async () => ({ object: {}, newData: {} }),
-			runOnMultipleObjects: async () => ({ objects: [], newData: [{}] }),
-		}
-
 	const computeObject = async ({
 		id,
 		object,
@@ -162,6 +153,7 @@ export const initializeHook = <T extends keyof WibeAppTypes['types']>({
 				isRoot: true,
 			},
 			where,
+			fields: ['*'],
 			skipHooks: true,
 		})
 

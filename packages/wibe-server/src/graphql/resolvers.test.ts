@@ -467,6 +467,7 @@ describe('Resolver', () => {
 			data: { field2: ['olderId', 'idToAdd'] },
 			id: 'objectId',
 			context,
+			fields: [],
 		})
 
 		expect(updatedFields).toEqual({
@@ -510,6 +511,7 @@ describe('Resolver', () => {
 			data: { field2: [] },
 			id: 'objectId',
 			context,
+			fields: [],
 		})
 
 		expect(updatedFields).toEqual({
