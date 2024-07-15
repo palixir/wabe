@@ -86,24 +86,7 @@ export const initializeHook = <T extends keyof WibeAppTypes['types']>({
 	className: T
 	newData?: TypedNewData<any>
 	context: WibeContext<any>
-}): {
-	runOnSingleObject: (options: {
-		operationType: OperationType
-		id?: string
-		object?: OutputType<any, any>
-	}) => Promise<{
-		object: OutputType<any, any>
-		newData: MutationData<T>
-	}>
-	runOnMultipleObjects: (options: {
-		operationType: OperationType
-		where?: WhereType<any, any>
-		objects?: OutputType<any, any>[]
-	}) => Promise<{
-		objects: OutputType<any, any>[]
-		newData: Array<MutationData<T>>
-	}>
-} => {
+}) => {
 	const computeObject = async ({
 		id,
 		object,

@@ -1,4 +1,5 @@
 import type { WibeAppTypes } from '../..'
+import type { InMemoryCache } from '../../cache/InMemoryCache'
 import { OperationType, initializeHook } from '../../hooks'
 import type { WibeContext } from '../../server/interface'
 import { notEmpty } from '../../utils/helper'
@@ -31,6 +32,7 @@ interface PointerFields {
 
 export class DatabaseController<T extends WibeAppTypes> {
 	public adapter: DatabaseAdapter
+	public inMemoryCache: InMemoryCache<OutputType<any, any>>
 
 	constructor(adapter: DatabaseAdapter) {
 		this.adapter = adapter
@@ -359,6 +361,10 @@ export class DatabaseController<T extends WibeAppTypes> {
 		}
 	}
 
+	_buildCacheKey<U extends keyof T['types']>(className: U, id: string) {
+		return `${String(className)}-${id}`
+	}
+
 	async getObject<U extends keyof T['types'], K extends keyof T['types'][U]>(
 		params: GetObjectOptions<U, K>,
 	): Promise<OutputType<U, K>> {
@@ -399,6 +405,11 @@ export class DatabaseController<T extends WibeAppTypes> {
 			where: whereWithACLCondition,
 		})
 
+		this.inMemoryCache.set(
+			this._buildCacheKey(params.className, object.id),
+			object,
+		)
+
 		await hook?.runOnSingleObject({
 			operationType: OperationType.AfterRead,
 			object,
@@ -422,7 +433,6 @@ export class DatabaseController<T extends WibeAppTypes> {
 	async getObjects<U extends keyof T['types'], K extends keyof T['types'][U]>(
 		params: GetObjectsOptions<U, K>,
 	): Promise<OutputType<U, K>[]> {
-		// console.log('GetObject : ', params.className)
 		const fields = (params.fields || []) as string[]
 
 		const { pointersFieldsId, pointers } = this._getPointerObject(

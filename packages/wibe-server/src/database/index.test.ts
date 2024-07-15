@@ -44,6 +44,28 @@ describe('Database', () => {
 		})
 	})
 
+	it('should call getObjects adapter only 4 times (lower is better) for one read query (performance test) without mutation in hooks', async () => {
+		const spyGetObjectAdapter = spyOn(
+			wibe.databaseController.adapter,
+			'getObjects',
+		)
+
+		await wibe.databaseController.createObject({
+			className: 'User',
+			context,
+			data: { name: 'Lucas' },
+			fields: [],
+		})
+
+		await wibe.databaseController.getObjects({
+			className: 'User',
+			context,
+			fields: ['id'],
+		})
+
+		expect(spyGetObjectAdapter).toHaveBeenCalledTimes(4)
+	})
+
 	it('should get the good value in output of getObject after mutation on after hook', async () => {
 		const mockUpdateObject = mock(async () => {
 			// Directly use adapter to avoid mock runMultipleObjects
