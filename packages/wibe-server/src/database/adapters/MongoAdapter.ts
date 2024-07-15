@@ -376,13 +376,14 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 	async deleteObject<
 		U extends keyof T['types'],
 		K extends keyof T['types'][U],
-	>(params: DeleteObjectOptions<U, K>) {
+		W extends keyof T['types'][U],
+	>(params: DeleteObjectOptions<U, K, W>) {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 
 		const { className, id } = params
 
-		const whereBuilded = buildMongoWhereQuery<T, K>(params.where)
+		const whereBuilded = buildMongoWhereQuery(params.where)
 
 		const collection = await this.createClassIfNotExist(className)
 
@@ -397,7 +398,8 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 	async deleteObjects<
 		U extends keyof T['types'],
 		K extends keyof T['types'][U],
-	>(params: DeleteObjectsOptions<U, K>) {
+		W extends keyof T['types'][U],
+	>(params: DeleteObjectsOptions<U, K, W>) {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 

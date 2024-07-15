@@ -122,10 +122,11 @@ export interface UpdateObjectsOptions<
 export interface DeleteObjectOptions<
 	T extends keyof WibeAppTypes['types'],
 	K extends keyof WibeAppTypes['types'][T],
+	W extends keyof WibeAppTypes['types'][T],
 > {
 	className: T
 	id: string
-	where?: WhereType<T, K>
+	where?: WhereType<T, W>
 	fields: Array<K | '*'>
 	context: WibeContext<any>
 }
@@ -133,9 +134,10 @@ export interface DeleteObjectOptions<
 export interface DeleteObjectsOptions<
 	T extends keyof WibeAppTypes['types'],
 	K extends keyof WibeAppTypes['types'][T],
+	W extends keyof WibeAppTypes['types'][T],
 > {
 	className: T
-	where: WhereType<T, K>
+	where: WhereType<T, W>
 	fields: Array<K | '*'>
 	offset?: number
 	limit?: number
@@ -187,9 +189,11 @@ export interface DatabaseAdapter {
 	deleteObject<
 		T extends keyof WibeAppTypes['types'],
 		K extends keyof WibeAppTypes['types'][T],
-	>(params: DeleteObjectOptions<T, K>): Promise<void>
+		W extends keyof WibeAppTypes['types'][T],
+	>(params: DeleteObjectOptions<T, K, W>): Promise<void>
 	deleteObjects<
 		T extends keyof WibeAppTypes['types'],
 		K extends keyof WibeAppTypes['types'][T],
-	>(params: DeleteObjectsOptions<T, K>): Promise<void>
+		W extends keyof WibeAppTypes['types'][T],
+	>(params: DeleteObjectsOptions<T, K, W>): Promise<void>
 }

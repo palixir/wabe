@@ -404,8 +404,15 @@ export class DatabaseController<T extends WibeAppTypes> {
 			object,
 		})
 
+		const objectToReturn = await this.adapter.getObject({
+			...params,
+			// @ts-expect-error
+			fields: [...fieldsWithoutPointers, ...(pointersFieldsId || [])],
+			where: whereWithACLCondition,
+		})
+
 		return this._getFinalObjectWithPointer(
-			object,
+			objectToReturn,
 			pointers,
 			params.className,
 			params.context,
@@ -415,6 +422,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 	async getObjects<U extends keyof T['types'], K extends keyof T['types'][U]>(
 		params: GetObjectsOptions<U, K>,
 	): Promise<OutputType<U, K>[]> {
+		// console.log('GetObject : ', params.className)
 		const fields = (params.fields || []) as string[]
 
 		const { pointersFieldsId, pointers } = this._getPointerObject(
@@ -463,8 +471,15 @@ export class DatabaseController<T extends WibeAppTypes> {
 			objects,
 		})
 
+		const objectsToReturn = await this.adapter.getObjects({
+			...params,
+			where: whereWithACLCondition,
+			// @ts-expect-error
+			fields: [...fieldsWithoutPointers, ...(pointersFieldsId || [])],
+		})
+
 		return Promise.all(
-			objects.map((object) =>
+			objectsToReturn.map((object) =>
 				this._getFinalObjectWithPointer(
 					object,
 					pointers,
@@ -667,7 +682,8 @@ export class DatabaseController<T extends WibeAppTypes> {
 	async deleteObject<
 		U extends keyof T['types'],
 		K extends keyof T['types'][U],
-	>(params: DeleteObjectOptions<U, K>) {
+		W extends keyof T['types'][U],
+	>(params: DeleteObjectOptions<U, K, W>) {
 		const hook = initializeHook({
 			className: params.className,
 			context: params.context,
@@ -679,6 +695,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 			'write',
 		)
 
+		// @ts-expect-error
 		const objectBeforeDelete = await this.getObject(params)
 
 		const { object } = await hook.runOnSingleObject({
@@ -686,7 +703,6 @@ export class DatabaseController<T extends WibeAppTypes> {
 			id: params.id,
 		})
 
-		// @ts-expect-error
 		await this.adapter.deleteObject({
 			...params,
 			where: whereWithACLCondition,
@@ -703,7 +719,8 @@ export class DatabaseController<T extends WibeAppTypes> {
 	async deleteObjects<
 		U extends keyof T['types'],
 		K extends keyof T['types'][U],
-	>(params: DeleteObjectsOptions<U, K>) {
+		W extends keyof T['types'][U],
+	>(params: DeleteObjectsOptions<U, K, W>) {
 		const whereObject = await this._getWhereObjectWithPointerOrRelation(
 			params.className,
 			params.where || {},
@@ -721,6 +738,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 			'write',
 		)
 
+		// @ts-expect-error
 		const objectBeforeDelete = await this.getObjects(params)
 
 		const { objects } = await hook.runOnMultipleObjects({
