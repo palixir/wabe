@@ -21,13 +21,13 @@ describe('DatabaseController', () => {
 	const mockDeleteObject = mock(() => {})
 	const mockDeleteObjects = mock(() => {})
 
-	const mockHookRun = mock(() => {})
+	const mockRunOnSingleObject = mock(() => {})
+	const mockRunOnMultipleObject = mock(() => {})
 
-	const mockInitializeHook = spyOn(hooks, 'initializeHook').mockResolvedValue(
-		{
-			run: mockHookRun,
-		} as any,
-	)
+	const mockInitializeHook = spyOn(hooks, 'initializeHook').mockReturnValue({
+		runOnSingleObject: mockRunOnSingleObject,
+		runOnMultipleObjects: mockRunOnMultipleObject,
+	} as never)
 
 	const mockAdapter = mock(() => ({
 		getObject: mockGetObject,
@@ -120,14 +120,16 @@ describe('DatabaseController', () => {
 
 	afterAll(() => {
 		mockInitializeHook.mockRestore()
-		mockHookRun.mockRestore()
+		mockRunOnSingleObject.mockRestore()
+		mockRunOnMultipleObject.mockRestore()
 	})
 
 	afterEach(() => {
 		mockGetObject.mockClear()
 		mockGetObjects.mockClear()
 		mockInitializeHook.mockClear()
-		mockHookRun.mockClear()
+		mockRunOnSingleObject.mockClear()
+		mockRunOnMultipleObject.mockClear()
 	})
 
 	it('should create new where include the ACL from context when isRoot = true', () => {
@@ -321,14 +323,14 @@ describe('DatabaseController', () => {
 			newData: null,
 		})
 
-		expect(mockHookRun).toHaveBeenCalledTimes(2)
-		expect(mockHookRun).toHaveBeenNthCalledWith(1, {
+		expect(mockRunOnSingleObject).toHaveBeenCalledTimes(2)
+		expect(mockRunOnSingleObject).toHaveBeenNthCalledWith(1, {
 			operationType: hooks.OperationType.BeforeRead,
 			id: 'id',
 		})
-		expect(mockHookRun).toHaveBeenNthCalledWith(2, {
+		expect(mockRunOnSingleObject).toHaveBeenNthCalledWith(2, {
 			operationType: hooks.OperationType.AfterRead,
-			id: 'id',
+			object: {},
 		})
 	})
 
@@ -351,14 +353,14 @@ describe('DatabaseController', () => {
 			newData: null,
 		})
 
-		expect(mockHookRun).toHaveBeenCalledTimes(2)
-		expect(mockHookRun).toHaveBeenNthCalledWith(1, {
+		expect(mockRunOnMultipleObject).toHaveBeenCalledTimes(2)
+		expect(mockRunOnMultipleObject).toHaveBeenNthCalledWith(1, {
 			operationType: hooks.OperationType.BeforeRead,
 			where: { id: { equalTo: 'id' } },
 		})
-		expect(mockHookRun).toHaveBeenNthCalledWith(2, {
+		expect(mockRunOnMultipleObject).toHaveBeenNthCalledWith(2, {
 			operationType: hooks.OperationType.AfterRead,
-			where: { id: { equalTo: 'id' } },
+			objects: [],
 		})
 	})
 

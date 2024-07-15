@@ -50,7 +50,7 @@ export class HookObject<T extends WibeAppTypes, K = keyof T['types']> {
 		this.newData[field] = value
 	}
 
-	getNewData(): Record<keyof WibeAppTypes['types'][T], any> {
+	getNewData(): TypedNewData<T> {
 		return this.newData || ({} as any)
 	}
 }

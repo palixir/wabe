@@ -1,4 +1,4 @@
-import type { WhereType } from '../database'
+import type { OutputType, WhereType } from '../database'
 import {
 	defaultBeforeCreateUpload,
 	defaultBeforeUpdateUpload,
@@ -69,7 +69,7 @@ export const _findHooksByPriority = async <
 			(className === hook.className || !hook.className),
 	) || []
 
-const getHooksOrderByPriorities = (config: WibeConfig<any>) =>
+const _getHooksOrderByPriorities = (config: WibeConfig<any>) =>
 	config.hooks
 		?.reduce((acc, hook) => {
 			if (!acc.includes(hook.priority)) acc.push(hook.priority)
@@ -78,7 +78,7 @@ const getHooksOrderByPriorities = (config: WibeConfig<any>) =>
 		}, [] as number[])
 		.sort((a, b) => a - b) || []
 
-export const initializeHook = async <T extends keyof WibeAppTypes['types']>({
+export const initializeHook = <T extends keyof WibeAppTypes['types']>({
 	className,
 	newData,
 	context,
@@ -88,42 +88,157 @@ export const initializeHook = async <T extends keyof WibeAppTypes['types']>({
 	newData: TypedNewData<any>
 	context: WibeContext<any>
 	skipHooks?: boolean
-}) => {
-	if (skipHooks) return { run: async () => ({}) }
+}): {
+	runOnSingleObject: (options: {
+		operationType: OperationType
+		id?: string
+		object?: OutputType<any, any>
+	}) => Promise<{
+		object: OutputType<any, any>
+		newData: TypedNewData<any>
+	}>
+	runOnMultipleObjects: (options: {
+		operationType: OperationType
+		where?: WhereType<any, any>
+		objects?: OutputType<any, any>[]
+	}) => Promise<{
+		objects: OutputType<any, any>[]
+		newData: Array<TypedNewData<any>>
+	}>
+} => {
+	if (skipHooks)
+		return {
+			// @ts-expect-error
+			runOnSingleObject: async () => ({ object: {}, newData: {} }),
+			runOnMultipleObjects: async () => ({ objects: [], newData: [{}] }),
+		}
+
+	const computeObject = async ({
+		id,
+		object,
+		operationType,
+	}: {
+		id?: string
+		object?: OutputType<any, any>
+		operationType: OperationType
+	}): Promise<OutputType<any, any>> => {
+		if (object) return object
+
+		// @ts-expect-error
+		if (operationType === OperationType.BeforeCreate) return newData
+
+		if (!id) throw new Error('Object not found tata')
+
+		return context.wibe.databaseController.getObject({
+			// @ts-expect-error
+			className,
+			context: {
+				...context,
+				isRoot: true,
+			},
+			id,
+			skipHooks: true,
+		})
+	}
+
+	const computeObjects = async ({
+		objects,
+		operationType,
+		where,
+	}: {
+		where?: WhereType<any, any>
+		objects?: OutputType<any, any>[]
+		operationType: OperationType
+	}): Promise<OutputType<any, any>[]> => {
+		if (objects) return objects
+
+		// @ts-expect-error
+		if (operationType === OperationType.BeforeCreate) return [newData]
+
+		const res = await context.wibe.databaseController.getObjects({
+			className,
+			context: {
+				...context,
+				isRoot: true,
+			},
+			where,
+			skipHooks: true,
+		})
+
+		// @ts-expect-error
+		if (res.length === 0) return [{}]
+
+		return res
+	}
 
 	return {
-		run: async ({
+		runOnSingleObject: async ({
 			operationType,
-			where,
 			id,
+			object: inputObject,
 		}: {
 			operationType: OperationType
 			id?: string
-			where?: WhereType<any, any>
-		}): Promise<Record<keyof WibeAppTypes['types'][T], any>> => {
-			const hooksOrderByPriorities = getHooksOrderByPriorities(
+			object?: OutputType<any, any>
+		}) => {
+			const hooksOrderByPriorities = _getHooksOrderByPriorities(
 				context.wibe.config,
 			)
 
-			const objects =
-				// Before create we don't have any objects
-				operationType !== OperationType.BeforeCreate
-					? await context.wibe.databaseController.getObjects({
-							className,
-							context: {
-								...context,
-								isRoot: true,
-							},
-							fields: ['*'],
-							where: where ? where : { id: { equalTo: id } },
-							skipHooks: true,
-						})
-					: [{}]
+			const object = await computeObject({
+				id,
+				operationType,
+				object: inputObject,
+			})
 
-			const objectsToMap = objects.length > 0 ? objects : [newData || {}]
+			const hookObject = new HookObject({
+				className,
+				newData,
+				operationType,
+				context,
+				object,
+			})
 
-			const res = await Promise.all(
-				objectsToMap.map(async (object) => {
+			// We need to keep the order of the data but we need to execute the hooks in parallel
+			await hooksOrderByPriorities.reduce(async (acc, priority) => {
+				await acc
+
+				const hooksToCompute = await _findHooksByPriority({
+					className,
+					operationType,
+					priority,
+					config: context.wibe.config,
+				})
+
+				await Promise.all(
+					hooksToCompute.map((hook) => hook.callback(hookObject)),
+				)
+			}, Promise.resolve())
+
+			return { object, newData: hookObject.getNewData() }
+		},
+
+		runOnMultipleObjects: async ({
+			operationType,
+			where,
+			objects: inputObjects,
+		}: {
+			operationType: OperationType
+			where?: WhereType<any, any>
+			objects?: OutputType<any, any>[]
+		}) => {
+			const hooksOrderByPriorities = _getHooksOrderByPriorities(
+				context.wibe.config,
+			)
+
+			const objects = await computeObjects({
+				where,
+				operationType,
+				objects: inputObjects,
+			})
+
+			const newDataAfterHooks = await Promise.all(
+				objects.map(async (object) => {
 					const hookObject = new HookObject({
 						className,
 						newData,
@@ -157,10 +272,7 @@ export const initializeHook = async <T extends keyof WibeAppTypes['types']>({
 				}),
 			)
 
-			// Here we return the first element because we had a map on all the objects
-			// But the input of each object (params.data) is the same so the result of each output
-			// will be the same. Index 0 is arbitrary
-			return res[0]
+			return { objects, newData: newDataAfterHooks }
 		},
 	}
 }

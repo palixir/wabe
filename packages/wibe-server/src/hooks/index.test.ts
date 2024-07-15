@@ -100,7 +100,7 @@ describe('Hooks', () => {
 		// @ts-expect-error
 		const hookObject = mockCallback3.mock.calls[0][0] as any
 
-		expect(hookObject.object).toEqual({})
+		expect(hookObject.object).toEqual({ name: 'test' })
 
 		expect(hookObject.context).toEqual({
 			isRoot: true,

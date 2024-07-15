@@ -374,14 +374,14 @@ export class DatabaseController<T extends WibeAppTypes> {
 			(field) => !field.includes('.'),
 		)
 
-		const hook = await initializeHook({
+		const hook = initializeHook({
 			className: params.className,
 			context: params.context,
 			newData: null,
 			skipHooks: params.skipHooks,
 		})
 
-		await hook.run({
+		await hook.runOnSingleObject({
 			operationType: OperationType.BeforeRead,
 			id: params.id,
 		})
@@ -392,20 +392,20 @@ export class DatabaseController<T extends WibeAppTypes> {
 			'read',
 		)
 
-		const dataOfCurrentObject = await this.adapter.getObject({
+		const object = await this.adapter.getObject({
 			...params,
 			// @ts-expect-error
 			fields: [...fieldsWithoutPointers, ...(pointersFieldsId || [])],
 			where: whereWithACLCondition,
 		})
 
-		await hook.run({
+		await hook.runOnSingleObject({
 			operationType: OperationType.AfterRead,
-			id: params.id,
+			object,
 		})
 
 		return this._getFinalObjectWithPointer(
-			dataOfCurrentObject,
+			object,
 			pointers,
 			params.className,
 			params.context,
@@ -439,34 +439,34 @@ export class DatabaseController<T extends WibeAppTypes> {
 			'read',
 		)
 
-		const hook = await initializeHook({
+		const hook = initializeHook({
 			className: params.className,
 			context: params.context,
 			newData: null,
 			skipHooks: params.skipHooks,
 		})
 
-		await hook.run({
+		await hook.runOnMultipleObjects({
 			operationType: OperationType.BeforeRead,
-			where: params.where,
+			where: whereWithACLCondition,
 		})
 
-		const dataOfCurrentObject = await this.adapter.getObjects({
+		const objects = await this.adapter.getObjects({
 			...params,
 			where: whereWithACLCondition,
 			// @ts-expect-error
 			fields: [...fieldsWithoutPointers, ...(pointersFieldsId || [])],
 		})
 
-		await hook.run({
+		await hook.runOnMultipleObjects({
 			operationType: OperationType.AfterRead,
-			where: params.where,
+			objects,
 		})
 
 		return Promise.all(
-			dataOfCurrentObject.map((data) =>
+			objects.map((object) =>
 				this._getFinalObjectWithPointer(
-					data,
+					object,
 					pointers,
 					params.className,
 					params.context,
@@ -480,24 +480,27 @@ export class DatabaseController<T extends WibeAppTypes> {
 		K extends keyof T['types'][U],
 		W extends keyof T['types'][U],
 	>(params: CreateObjectOptions<U, K, W>) {
-		const hook = await initializeHook({
+		const hook = initializeHook({
 			className: params.className,
 			context: params.context,
 			newData: params.data,
 		})
 
-		const arrayOfComputedData = await hook.run({
+		const { newData } = await hook.runOnSingleObject({
 			operationType: OperationType.BeforeCreate,
 		})
 
-		const res = await this.adapter.createObject({
+		const object = await this.adapter.createObject({
 			...params,
-			data: arrayOfComputedData,
+			data: newData,
 		})
 
-		await hook.run({ operationType: OperationType.AfterCreate, id: res.id })
+		await hook.runOnSingleObject({
+			operationType: OperationType.AfterCreate,
+			object,
+		})
 
-		return res
+		return object
 	}
 
 	async createObjects<
@@ -518,30 +521,31 @@ export class DatabaseController<T extends WibeAppTypes> {
 		)
 
 		const arrayOfComputedData = await Promise.all(
-			hooks.map((hook) =>
-				hook.run({ operationType: OperationType.BeforeCreate }),
+			hooks.map(
+				async (hook) =>
+					(
+						await hook.runOnMultipleObjects({
+							operationType: OperationType.BeforeCreate,
+						})
+					).newData[0],
 			),
 		)
 
-		const res = await this.adapter.createObjects({
+		const objects = await this.adapter.createObjects({
 			...params,
 			data: arrayOfComputedData,
 		})
 
-		const arrayOfId = res.map((result) => result.id)
-
 		await Promise.all(
 			hooks.map((hook) =>
-				hook.run({
+				hook.runOnMultipleObjects({
 					operationType: OperationType.AfterCreate,
-					where: {
-						id: { in: arrayOfId },
-					},
+					objects,
 				}),
 			),
 		)
 
-		return res
+		return objects
 	}
 
 	async updateObject<
@@ -549,13 +553,13 @@ export class DatabaseController<T extends WibeAppTypes> {
 		K extends keyof T['types'][U],
 		W extends keyof T['types'][U],
 	>(params: UpdateObjectOptions<U, K, W>) {
-		const hook = await initializeHook({
+		const hook = initializeHook({
 			className: params.className,
 			context: params.context,
 			newData: params.data,
 		})
 
-		const arrayOfComputedData = await hook.run({
+		const { newData } = await hook.runOnSingleObject({
 			operationType: OperationType.BeforeUpdate,
 			id: params.id,
 		})
@@ -566,19 +570,18 @@ export class DatabaseController<T extends WibeAppTypes> {
 			'write',
 		)
 
-		// @ts-expect-error
-		const res = await this.adapter.updateObject({
+		const object = await this.adapter.updateObject({
 			...params,
-			data: arrayOfComputedData,
+			data: newData,
 			where: whereWithACLCondition,
 		})
 
-		await hook.run({
+		await hook.runOnSingleObject({
 			operationType: OperationType.AfterUpdate,
-			id: params.id,
+			object,
 		})
 
-		return res
+		return object
 	}
 
 	async updateObjects<
@@ -592,15 +595,10 @@ export class DatabaseController<T extends WibeAppTypes> {
 			params.context,
 		)
 
-		const hook = await initializeHook({
+		const hook = initializeHook({
 			className: params.className,
 			context: params.context,
 			newData: params.data,
-		})
-
-		const arrayOfComputedData = await hook.run({
-			operationType: OperationType.BeforeUpdate,
-			where: params.where,
 		})
 
 		const whereWithACLCondition = this._buildWhereWithACL(
@@ -609,37 +607,33 @@ export class DatabaseController<T extends WibeAppTypes> {
 			'write',
 		)
 
-		const res = await this.adapter.updateObjects({
-			...params,
-			data: arrayOfComputedData,
+		const { newData } = await hook.runOnMultipleObjects({
+			operationType: OperationType.BeforeUpdate,
 			where: whereWithACLCondition,
 		})
 
-		await hook.run({
-			operationType: OperationType.AfterUpdate,
-			where: params.where,
+		const objects = await this.adapter.updateObjects({
+			...params,
+			data: newData[0],
+			where: whereWithACLCondition,
 		})
 
-		return res
+		await hook.runOnMultipleObjects({
+			operationType: OperationType.AfterUpdate,
+			objects,
+		})
+
+		return objects
 	}
 
 	async deleteObject<
 		U extends keyof T['types'],
 		K extends keyof T['types'][U],
 	>(params: DeleteObjectOptions<U, K>) {
-		const objectBeforeDelete = await this.getObject(params)
-
-		if (!objectBeforeDelete) return null
-
-		const hook = await initializeHook({
+		const hook = initializeHook({
 			className: params.className,
 			context: params.context,
 			newData: null,
-		})
-
-		await hook.run({
-			operationType: OperationType.BeforeDelete,
-			id: params.id,
 		})
 
 		const whereWithACLCondition = this._buildWhereWithACL(
@@ -648,15 +642,22 @@ export class DatabaseController<T extends WibeAppTypes> {
 			'write',
 		)
 
+		const objectBeforeDelete = await this.getObject(params)
+
+		const { object } = await hook.runOnSingleObject({
+			operationType: OperationType.BeforeDelete,
+			id: params.id,
+		})
+
 		// @ts-expect-error
 		await this.adapter.deleteObject({
 			...params,
 			where: whereWithACLCondition,
 		})
 
-		await hook.run({
+		await hook.runOnSingleObject({
 			operationType: OperationType.AfterDelete,
-			id: params.id,
+			object,
 		})
 
 		return objectBeforeDelete
@@ -672,17 +673,10 @@ export class DatabaseController<T extends WibeAppTypes> {
 			params.context,
 		)
 
-		const objectsBeforeDelete = await this.getObjects(params)
-
-		const hook = await initializeHook({
+		const hook = initializeHook({
 			className: params.className,
 			context: params.context,
 			newData: null,
-		})
-
-		await hook.run({
-			operationType: OperationType.BeforeDelete,
-			where: params.where,
 		})
 
 		const whereWithACLCondition = this._buildWhereWithACL(
@@ -691,16 +685,23 @@ export class DatabaseController<T extends WibeAppTypes> {
 			'write',
 		)
 
+		const objectBeforeDelete = await this.getObjects(params)
+
+		const { objects } = await hook.runOnMultipleObjects({
+			operationType: OperationType.BeforeDelete,
+			where: whereWithACLCondition,
+		})
+
 		await this.adapter.deleteObjects({
 			...params,
 			where: whereWithACLCondition,
 		})
 
-		await hook.run({
+		await hook.runOnMultipleObjects({
 			operationType: OperationType.AfterDelete,
-			where: params.where,
+			objects,
 		})
 
-		return objectsBeforeDelete
+		return objectBeforeDelete
 	}
 }
