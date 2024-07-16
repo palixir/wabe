@@ -1,5 +1,5 @@
 import type { WibeAppTypes } from '../..'
-import type { InMemoryCache } from '../../cache/InMemoryCache'
+import { InMemoryCache } from '../../cache/InMemoryCache'
 import { OperationType, initializeHook } from '../../hooks'
 import type { WibeContext } from '../../server/interface'
 import { notEmpty } from '../../utils/helper'
@@ -32,10 +32,11 @@ interface PointerFields {
 
 export class DatabaseController<T extends WibeAppTypes> {
 	public adapter: DatabaseAdapter
-	public inMemoryCache: InMemoryCache<OutputType<any, any>>
+	public inMemoryCache: InMemoryCache<OutputType<any, any> | undefined>
 
 	constructor(adapter: DatabaseAdapter) {
 		this.adapter = adapter
+		this.inMemoryCache = new InMemoryCache({ interval: 5000 })
 	}
 
 	async connect() {
@@ -361,66 +362,88 @@ export class DatabaseController<T extends WibeAppTypes> {
 		}
 	}
 
-	_buildCacheKey<U extends keyof T['types']>(className: U, id: string) {
-		return `${String(className)}-${id}`
+	_buildCacheKey<U extends keyof T['types']>(
+		className: U,
+		id: string,
+		fields: Array<string>,
+	) {
+		return `${String(className)}-${id}-${fields.join(',')}`
 	}
 
 	async getObject<U extends keyof T['types'], K extends keyof T['types'][U]>(
 		params: GetObjectOptions<U, K>,
 	): Promise<OutputType<U, K>> {
-		const fields = (params.fields || []) as string[]
+		const fields = params.fields as string[]
+
+		const { context, className, skipHooks, id, where } = params
 
 		const { pointersFieldsId, pointers } = this._getPointerObject(
-			params.className,
+			className,
 			fields,
-			params.context,
+			context,
+		)
+
+		const hook = !skipHooks
+			? initializeHook({
+					className,
+					context,
+				})
+			: undefined
+
+		await hook?.runOnSingleObject({
+			operationType: OperationType.BeforeRead,
+			id,
+		})
+
+		const whereWithACLCondition = this._buildWhereWithACL(
+			where || {},
+			context,
+			'read',
 		)
 
 		const fieldsWithoutPointers = fields.filter(
 			(field) => !field.includes('.'),
 		)
 
-		const hook = !params.skipHooks
-			? initializeHook({
-					className: params.className,
-					context: params.context,
-				})
-			: undefined
-
-		await hook?.runOnSingleObject({
-			operationType: OperationType.BeforeRead,
-			id: params.id,
-		})
-
-		const whereWithACLCondition = this._buildWhereWithACL(
-			{},
-			params.context,
-			'read',
-		)
+		const fieldsWithPointerFields = [
+			...fieldsWithoutPointers,
+			...(pointersFieldsId || []),
+		]
 
 		const object = await this.adapter.getObject({
-			...params,
+			className,
+			context,
+			id,
 			// @ts-expect-error
-			fields: [...fieldsWithoutPointers, ...(pointersFieldsId || [])],
+			fields: fieldsWithPointerFields,
 			where: whereWithACLCondition,
 		})
 
-		this.inMemoryCache.set(
-			this._buildCacheKey(params.className, object.id),
-			object,
+		const keyCache = this._buildCacheKey(
+			className,
+			object.id,
+			fieldsWithPointerFields,
 		)
+
+		this.inMemoryCache.set(keyCache, object)
 
 		await hook?.runOnSingleObject({
 			operationType: OperationType.AfterRead,
 			object,
 		})
 
-		const objectToReturn = await this.adapter.getObject({
-			...params,
-			// @ts-expect-error
-			fields: [...fieldsWithoutPointers, ...(pointersFieldsId || [])],
-			where: whereWithACLCondition,
-		})
+		const cacheObject = this.inMemoryCache.get(keyCache)
+
+		const objectToReturn = cacheObject
+			? cacheObject
+			: await this.adapter.getObject({
+					className,
+					id,
+					context,
+					// @ts-expect-error
+					fields: fieldsWithPointerFields,
+					where: whereWithACLCondition,
+				})
 
 		return this._getFinalObjectWithPointer(
 			objectToReturn,
@@ -469,12 +492,28 @@ export class DatabaseController<T extends WibeAppTypes> {
 			where: whereWithACLCondition,
 		})
 
+		const fieldsWithPointerFields = [
+			...fieldsWithoutPointers,
+			...(pointersFieldsId || []),
+		]
+
 		const objects = await this.adapter.getObjects({
 			...params,
 			where: whereWithACLCondition,
 			// @ts-expect-error
-			fields: [...fieldsWithoutPointers, ...(pointersFieldsId || [])],
+			fields: fieldsWithPointerFields,
 		})
+
+		objects.map((object) =>
+			this.inMemoryCache.set(
+				this._buildCacheKey(
+					params.className,
+					object.id,
+					fieldsWithPointerFields,
+				),
+				object,
+			),
+		)
 
 		await hook?.runOnMultipleObjects({
 			operationType: OperationType.AfterRead,
@@ -505,10 +544,12 @@ export class DatabaseController<T extends WibeAppTypes> {
 		K extends keyof T['types'][U],
 		W extends keyof T['types'][U],
 	>(params: CreateObjectOptions<U, K, W>) {
+		const { className, context, data, fields } = params
+
 		const hook = initializeHook({
-			className: params.className,
-			context: params.context,
-			newData: params.data,
+			className,
+			context,
+			newData: data,
 		})
 
 		const { newData } = await hook.runOnSingleObject({
@@ -516,9 +557,19 @@ export class DatabaseController<T extends WibeAppTypes> {
 		})
 
 		const object = await this.adapter.createObject({
-			...params,
+			className,
+			context,
+			fields,
 			data: newData,
 		})
+
+		const keyCache = this._buildCacheKey(
+			className,
+			object.id,
+			fields as string[],
+		)
+
+		this.inMemoryCache.set(keyCache, undefined)
 
 		await hook.runOnSingleObject({
 			operationType: OperationType.AfterCreate,
@@ -526,9 +577,9 @@ export class DatabaseController<T extends WibeAppTypes> {
 		})
 
 		const objectToReturn = await this.getObject({
-			className: params.className,
-			context: params.context,
-			fields: params.fields,
+			className,
+			context,
+			fields,
 			id: object.id,
 			skipHooks: true,
 		})
@@ -540,14 +591,21 @@ export class DatabaseController<T extends WibeAppTypes> {
 		U extends keyof T['types'],
 		K extends keyof T['types'][U],
 		W extends keyof T['types'][U],
-	>(params: CreateObjectsOptions<U, K, W>) {
-		if (params.data.length === 0) return []
+	>({
+		data,
+		fields,
+		className,
+		context,
+		limit,
+		offset,
+	}: CreateObjectsOptions<U, K, W>) {
+		if (data.length === 0) return []
 
 		const hooks = await Promise.all(
-			params.data.map((newData) =>
+			data.map((newData) =>
 				initializeHook({
-					className: params.className,
-					context: params.context,
+					className,
+					context,
 					newData,
 				}),
 			),
@@ -565,11 +623,25 @@ export class DatabaseController<T extends WibeAppTypes> {
 		)
 
 		const objects = await this.adapter.createObjects({
-			...params,
+			className,
+			fields,
+			context,
 			data: arrayOfComputedData,
+			limit,
+			offset,
 		})
 
 		const objectsId = objects.map((object) => object.id)
+
+		for (const id of objectsId) {
+			const keyCache = this._buildCacheKey(
+				className,
+				id,
+				fields as string[],
+			)
+
+			this.inMemoryCache.set(keyCache, undefined)
+		}
 
 		await Promise.all(
 			hooks.map((hook) =>
@@ -581,12 +653,14 @@ export class DatabaseController<T extends WibeAppTypes> {
 		)
 
 		const objectsToReturn = await this.getObjects({
-			className: params.className,
-			context: params.context,
-			fields: params.fields,
+			className,
+			context,
+			fields,
 			// @ts-expect-error
 			where: { id: { in: objectsId } },
 			skipHooks: true,
+			limit,
+			offset,
 		})
 
 		return objectsToReturn
@@ -596,29 +670,40 @@ export class DatabaseController<T extends WibeAppTypes> {
 		U extends keyof T['types'],
 		K extends keyof T['types'][U],
 		W extends keyof T['types'][U],
-	>(params: UpdateObjectOptions<U, K, W>) {
+	>({ id, className, context, data, fields }: UpdateObjectOptions<U, K, W>) {
 		const hook = initializeHook({
-			className: params.className,
-			context: params.context,
-			newData: params.data,
+			className,
+			context,
+			newData: data,
 		})
 
 		const { newData } = await hook.runOnSingleObject({
 			operationType: OperationType.BeforeUpdate,
-			id: params.id,
+			id,
 		})
 
 		const whereWithACLCondition = this._buildWhereWithACL(
 			{},
-			params.context,
+			context,
 			'write',
 		)
 
 		const object = await this.adapter.updateObject({
-			...params,
+			className,
+			fields,
+			id,
+			context,
 			data: newData,
 			where: whereWithACLCondition,
 		})
+
+		const keyCache = this._buildCacheKey(
+			className,
+			object.id,
+			fields as string[],
+		)
+
+		this.inMemoryCache.set(keyCache, undefined)
 
 		await hook.runOnSingleObject({
 			operationType: OperationType.AfterUpdate,
@@ -626,9 +711,9 @@ export class DatabaseController<T extends WibeAppTypes> {
 		})
 
 		const objectToReturn = await this.getObject({
-			className: params.className,
-			context: params.context,
-			fields: params.fields,
+			className,
+			context,
+			fields,
 			id: object.id,
 			skipHooks: true,
 		})
@@ -640,22 +725,30 @@ export class DatabaseController<T extends WibeAppTypes> {
 		U extends keyof T['types'],
 		K extends keyof T['types'][U],
 		W extends keyof T['types'][U],
-	>(params: UpdateObjectsOptions<U, K, W>) {
+	>({
+		className,
+		where,
+		context,
+		fields,
+		data,
+		limit,
+		offset,
+	}: UpdateObjectsOptions<U, K, W>) {
 		const whereObject = await this._getWhereObjectWithPointerOrRelation(
-			params.className,
-			params.where || {},
-			params.context,
+			className,
+			where || {},
+			context,
 		)
 
 		const hook = initializeHook({
-			className: params.className,
-			context: params.context,
-			newData: params.data,
+			className,
+			context,
+			newData: data,
 		})
 
 		const whereWithACLCondition = this._buildWhereWithACL(
 			whereObject,
-			params.context,
+			context,
 			'write',
 		)
 
@@ -665,12 +758,26 @@ export class DatabaseController<T extends WibeAppTypes> {
 		})
 
 		const objects = await this.adapter.updateObjects({
-			...params,
+			className,
+			context,
+			fields,
 			data: newData[0],
 			where: whereWithACLCondition,
+			limit,
+			offset,
 		})
 
 		const objectsId = objects.map((object) => object.id)
+
+		for (const id of objectsId) {
+			const keyCache = this._buildCacheKey(
+				className,
+				id,
+				fields as string[],
+			)
+
+			this.inMemoryCache.set(keyCache, undefined)
+		}
 
 		await hook.runOnMultipleObjects({
 			operationType: OperationType.AfterUpdate,
@@ -678,12 +785,14 @@ export class DatabaseController<T extends WibeAppTypes> {
 		})
 
 		const objectsToReturn = await this.getObjects({
-			className: params.className,
-			context: params.context,
-			fields: params.fields,
+			className,
+			context,
+			fields,
 			// @ts-expect-error
 			where: { id: { in: objectsId } },
 			skipHooks: true,
+			limit,
+			offset,
 		})
 
 		return objectsToReturn

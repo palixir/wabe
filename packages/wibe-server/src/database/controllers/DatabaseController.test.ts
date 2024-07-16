@@ -302,7 +302,7 @@ describe('DatabaseController', () => {
 		expect(mockCreateObjects).toHaveBeenCalledTimes(0)
 	})
 
-	it('should call findHooksAndExecute on getObject', async () => {
+	it('should call hooks on getObject', async () => {
 		mockGetObject.mockResolvedValue({} as never)
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
@@ -334,7 +334,7 @@ describe('DatabaseController', () => {
 		})
 	})
 
-	it('should call findHooksAndExecute on getObjects', async () => {
+	it('should call hooks on getObjects', async () => {
 		mockGetObjects.mockResolvedValue([] as never)
 
 		const databaseController = new DatabaseController(mockAdapter() as any)
@@ -363,11 +363,12 @@ describe('DatabaseController', () => {
 		})
 	})
 
-	it('should call findHooksAndExecute on updateObject', async () => {
+	it('should call hooks on updateObject', async () => {
 		mockRunOnSingleObject.mockResolvedValue({
 			newData: {},
 		} as never)
-		mockUpdateObject.mockResolvedValue({} as never)
+		mockUpdateObject.mockResolvedValue({ id: 'id' } as never)
+		mockGetObject.mockResolvedValue({ id: 'id' } as never)
 
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
@@ -393,11 +394,11 @@ describe('DatabaseController', () => {
 		})
 		expect(mockRunOnSingleObject).toHaveBeenNthCalledWith(2, {
 			operationType: hooks.OperationType.AfterUpdate,
-			object: {},
+			object: { id: 'id' },
 		})
 	})
 
-	it('should call findHooksAndExecute on updateObjects', async () => {
+	it('should call hooks on updateObjects', async () => {
 		mockRunOnMultipleObject.mockResolvedValue({
 			newData: {},
 		} as never)
@@ -431,7 +432,7 @@ describe('DatabaseController', () => {
 		})
 	})
 
-	it('should call findHooksAndExecute on createObject', async () => {
+	it('should call hooks on createObject', async () => {
 		mockCreateObject.mockResolvedValue({ id: 'id' } as never)
 
 		const databaseController = new DatabaseController(mockAdapter() as any)
@@ -462,7 +463,7 @@ describe('DatabaseController', () => {
 		})
 	})
 
-	it('should call findHooksAndExecute on createObjects', async () => {
+	it('should call hooks on createObjects', async () => {
 		mockGetObjects.mockResolvedValue([{ id: 'id' }] as never)
 		mockCreateObjects.mockResolvedValue([{ id: 'id' }] as never)
 
@@ -492,7 +493,7 @@ describe('DatabaseController', () => {
 		})
 	})
 
-	it('should call findHooksAndExecute on deleteObject', async () => {
+	it('should call hooks on deleteObject', async () => {
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
 		await databaseController.deleteObject({
@@ -520,7 +521,7 @@ describe('DatabaseController', () => {
 		})
 	})
 
-	it('should call findHooksAndExecute on deleteObjects', async () => {
+	it('should call hooks on deleteObjects', async () => {
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
 		await databaseController.deleteObjects({

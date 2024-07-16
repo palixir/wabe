@@ -64,6 +64,7 @@ describe('Hooks', () => {
 			context: { isRoot: true, wibe: { databaseController, config } },
 			id: 'id',
 			skipHooks: true,
+			fields: ['*'],
 		})
 
 		expect(mockCallBack1).toHaveBeenCalledTimes(1)

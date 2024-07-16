@@ -1,4 +1,7 @@
 export interface InMemoryCacheOptions {
+	/**
+	 * Interval in ms to clear the cache
+	 */
 	interval: number
 }
 

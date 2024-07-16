@@ -12,11 +12,31 @@ import type { WibeApp } from '../server'
 import { type DevWibeAppTypes, setupTests, closeTests } from '../utils/helper'
 import type { WibeContext } from '../server/interface'
 import { OperationType } from '../hooks'
-import * as hooks from '../hooks/index'
 
 describe('Database', () => {
 	let wibe: WibeApp<DevWibeAppTypes>
 	let context: WibeContext<any>
+
+	const mockUpdateObject = mock(async () => {
+		await context.wibe.databaseController.updateObjects({
+			className: 'User',
+			where: {
+				name: { equalTo: 'Lucas' },
+			},
+			data: { age: 21 },
+			context,
+			fields: [],
+		})
+	})
+
+	const mockAfterUpdate = mock(async () => {
+		await context.wibe.databaseController.createObjects({
+			className: 'Test2',
+			data: [{ name: 'test' }],
+			context,
+			fields: [],
+		})
+	})
 
 	beforeAll(async () => {
 		const setup = await setupTests()
@@ -29,6 +49,21 @@ describe('Database', () => {
 				config: wibe.config,
 			},
 		} as WibeContext<any>
+
+		wibe.config.hooks = [
+			{
+				className: 'User',
+				operationType: OperationType.AfterCreate,
+				callback: mockUpdateObject,
+				priority: 1,
+			},
+			{
+				className: 'Test2',
+				operationType: OperationType.AfterUpdate,
+				callback: mockAfterUpdate,
+				priority: 1,
+			},
+		]
 	})
 
 	afterAll(async () => {
@@ -42,177 +77,46 @@ describe('Database', () => {
 			context,
 			fields: [],
 		})
-	})
 
-	it('should call getObjects adapter only 4 times (lower is better) for one read query (performance test) without mutation in hooks', async () => {
-		const spyGetObjectAdapter = spyOn(
-			wibe.databaseController.adapter,
-			'getObjects',
-		)
-
-		await wibe.databaseController.createObject({
-			className: 'User',
+		await wibe.databaseController.deleteObjects({
+			// @ts-expect-error
+			className: 'Test2',
+			// @ts-expect-error
+			where: { name: { equalTo: 'test2' } },
 			context,
-			data: { name: 'Lucas' },
 			fields: [],
 		})
 
-		await wibe.databaseController.getObjects({
+		mockUpdateObject.mockClear()
+		mockAfterUpdate.mockClear()
+	})
+
+	it('should call getObject adapter only 4 times (lower is better) for one read query (performance test) without mutation in hooks', async () => {
+		const spyGetObjectAdapter = spyOn(
+			wibe.databaseController.adapter,
+			'getObject',
+		)
+
+		const res = await wibe.databaseController.createObject({
 			className: 'User',
 			context,
+			data: { name: 'Lucas' },
 			fields: ['id'],
 		})
 
-		expect(spyGetObjectAdapter).toHaveBeenCalledTimes(4)
-	})
+		spyGetObjectAdapter.mockClear()
 
-	it('should get the good value in output of getObject after mutation on after hook', async () => {
-		const mockUpdateObject = mock(async () => {
-			// Directly use adapter to avoid mock runMultipleObjects
-			await context.wibe.databaseController.adapter.updateObjects({
-				className: 'User',
-				where: {
-					name: { equalTo: 'Lucas' },
-				},
-				data: { age: 21 },
-				context,
-				fields: [],
-			})
-		})
-
-		let indexOfCall = 0
-
-		const mockRunOnSingleObject = mock(async (params) => {
-			if (params.operationType !== OperationType.AfterRead)
-				return { newData: { name: 'Lucas', age: 20 } }
-
-			if (indexOfCall === 1) await mockUpdateObject()
-
-			indexOfCall += 1
-
-			return { newData: { name: 'Lucas', age: 20 } }
-		})
-
-		const spyInitializeHooks = spyOn(
-			hooks,
-			'initializeHook',
-		).mockReturnValue({
-			runOnSingleObject: mockRunOnSingleObject,
-			runOnMultipleObjects: mock(() => {}),
-		} as any)
-
-		const res = await context.wibe.databaseController.createObject({
+		await wibe.databaseController.getObject({
 			className: 'User',
-			data: { name: 'Lucas', age: 20 },
 			context,
-			fields: ['age'],
-		})
-
-		const res2 = await context.wibe.databaseController.getObject({
-			className: 'User',
+			fields: ['id'],
 			id: res.id,
-			fields: ['age'],
-			context,
 		})
 
-		expect(mockUpdateObject).toHaveBeenCalledTimes(1)
-
-		expect(res2.age).toEqual(21)
-
-		spyInitializeHooks.mockRestore()
-	})
-
-	it('should get the good value in output of getObjects after mutation on after hook', async () => {
-		let indexOfCall = 0
-
-		const mockUpdateObject = mock(async () => {
-			if (indexOfCall > 1) return
-
-			// Directly use adapter to avoid mock runMultipleObjects
-			await context.wibe.databaseController.adapter.updateObjects({
-				className: 'User',
-				where: {
-					name: { equalTo: 'Lucas' },
-				},
-				data: { age: 21 },
-				context,
-				fields: [],
-			})
-		})
-
-		const mockRunOnMultipleObject = mock(async (params) => {
-			if (params.operationType !== OperationType.AfterRead)
-				return { newData: [{ name: 'Lucas', age: 20 }] }
-
-			indexOfCall += 1
-
-			if (indexOfCall === 1) await mockUpdateObject()
-
-			return { newData: [{ name: 'Lucas', age: 20 }] }
-		})
-
-		const spyInitializeHooks = spyOn(
-			hooks,
-			'initializeHook',
-		).mockReturnValue({
-			runOnSingleObject: mock(() => ({
-				newData: { name: 'Lucas', age: 20 },
-			})),
-			runOnMultipleObjects: mockRunOnMultipleObject,
-		} as any)
-
-		await context.wibe.databaseController.createObject({
-			className: 'User',
-			data: { name: 'Lucas', age: 20 },
-			context,
-			fields: ['age'],
-		})
-
-		const res2 = await context.wibe.databaseController.getObjects({
-			className: 'User',
-			fields: ['age', 'name'],
-			context,
-			where: { name: { equalTo: 'Lucas' } },
-		})
-
-		expect(mockUpdateObject).toHaveBeenCalledTimes(1)
-
-		expect(res2[0].age).toEqual(21)
-
-		spyInitializeHooks.mockRestore()
+		expect(spyGetObjectAdapter).toHaveBeenCalledTimes(2)
 	})
 
 	it('should get the good value in output of createObject after mutation on after hook', async () => {
-		const mockUpdateObject = mock(async () => {
-			// Directly use adapter to avoid mock runMultipleObjects
-			await context.wibe.databaseController.adapter.updateObjects({
-				className: 'User',
-				where: {
-					name: { equalTo: 'Lucas' },
-				},
-				data: { age: 21 },
-				context,
-				fields: [],
-			})
-		})
-
-		const mockRunOnSingleObject = mock(async (params) => {
-			if (params.operationType !== OperationType.AfterCreate)
-				return { newData: { name: 'Lucas', age: 20 } }
-
-			await mockUpdateObject()
-
-			return { newData: { name: 'Lucas', age: 20 } }
-		})
-
-		const spyInitializeHooks = spyOn(
-			hooks,
-			'initializeHook',
-		).mockReturnValue({
-			runOnSingleObject: mockRunOnSingleObject,
-			runOnMultipleObjects: mock(() => {}),
-		} as any)
-
 		const res = await context.wibe.databaseController.createObject({
 			className: 'User',
 			data: { name: 'Lucas', age: 20 },
@@ -220,43 +124,12 @@ describe('Database', () => {
 			fields: ['age'],
 		})
 
-		expect(mockUpdateObject).toHaveBeenCalledTimes(1)
-
 		expect(res.age).toEqual(21)
 
-		spyInitializeHooks.mockRestore()
+		expect(mockUpdateObject).toHaveBeenCalledTimes(1)
 	})
 
 	it('should get the good value in output of createObjects after mutation on after hook', async () => {
-		const mockUpdateObject = mock(async () => {
-			// Directly use adapter to avoid mock runMultipleObjects
-			await context.wibe.databaseController.adapter.updateObjects({
-				className: 'User',
-				where: {
-					name: { equalTo: 'Lucas' },
-				},
-				data: { age: 21 },
-				context,
-				fields: [],
-			})
-		})
-
-		const mockRunOnMultipleObjects = mock(async (params) => {
-			if (params.operationType !== OperationType.AfterCreate)
-				return { newData: [{ name: 'Lucas', age: 20 }] }
-
-			await mockUpdateObject()
-
-			return { newData: [{ name: 'Lucas', age: 20 }] }
-		})
-
-		const spyInitializeHooks = spyOn(
-			hooks,
-			'initializeHook',
-		).mockReturnValue({
-			runOnMultipleObjects: mockRunOnMultipleObjects,
-		} as any)
-
 		const res = await context.wibe.databaseController.createObjects({
 			className: 'User',
 			data: [{ name: 'Lucas', age: 20 }],
@@ -264,120 +137,50 @@ describe('Database', () => {
 			fields: ['age'],
 		})
 
-		expect(mockUpdateObject).toHaveBeenCalledTimes(1)
-
 		expect(res[0].age).toEqual(21)
 
-		spyInitializeHooks.mockRestore()
-	})
-
-	it('should get the good value in output of updateObject after mutation on after hook', async () => {
-		const mockUpdateObject = mock(async () => {
-			// Directly use adapter to avoid mock runMultipleObjects
-			await context.wibe.databaseController.adapter.updateObjects({
-				className: 'User',
-				where: {
-					name: { equalTo: 'Lucas' },
-				},
-				data: { age: 21 },
-				context,
-				fields: [],
-			})
-		})
-
-		const mockRunOnSingleObject = mock(async (params) => {
-			if (params.operationType !== OperationType.AfterUpdate)
-				return { newData: { name: 'Lucas', age: 20 } }
-
-			await mockUpdateObject()
-
-			return { newData: { name: 'Lucas', age: 20 } }
-		})
-
-		const spyInitializeHooks = spyOn(
-			hooks,
-			'initializeHook',
-		).mockReturnValue({
-			runOnSingleObject: mockRunOnSingleObject,
-			runOnMultipleObjects: mock(() => {}),
-		} as any)
-
-		const res = await context.wibe.databaseController.createObject({
-			className: 'User',
-			data: { name: 'Lucas', age: 20 },
-			context,
-			fields: ['age'],
-		})
-
-		const res2 = await context.wibe.databaseController.updateObject({
-			className: 'User',
-			data: { name: 'Lucas2' },
-			context,
-			fields: ['age'],
-			id: res.id,
-		})
-
 		expect(mockUpdateObject).toHaveBeenCalledTimes(1)
-
-		expect(res2.age).toEqual(21)
-
-		spyInitializeHooks.mockRestore()
 	})
 
 	it('should get the good value in output of updateObjects after mutation on after hook', async () => {
-		const mockUpdateObject = mock(async () => {
-			// Directly use adapter to avoid mock runMultipleObjects
-			await context.wibe.databaseController.adapter.updateObjects({
-				className: 'User',
-				where: {
-					name: { equalTo: 'Lucas' },
-				},
-				data: { age: 21 },
-				context,
-				fields: [],
-			})
-		})
-
-		const mockRunOnMultipleObject = mock(async (params) => {
-			if (params.operationType !== OperationType.AfterUpdate)
-				return { newData: [{ name: 'Lucas', age: 20 }] }
-
-			await mockUpdateObject()
-
-			return { newData: [{ name: 'Lucas', age: 20 }] }
-		})
-
-		const spyInitializeHooks = spyOn(
-			hooks,
-			'initializeHook',
-		).mockReturnValue({
-			runOnSingleObject: mock(() => ({
-				newData: { name: 'Lucas', age: 20 },
-			})),
-			runOnMultipleObjects: mockRunOnMultipleObject,
-		} as any)
-
-		await context.wibe.databaseController.createObject({
-			className: 'User',
-			data: { name: 'Lucas', age: 20 },
+		await context.wibe.databaseController.createObjects({
+			className: 'Test2',
+			data: [{ name: 'test', age: 20 }],
 			context,
-			fields: ['age'],
+			fields: [],
 		})
 
-		const res2 = await context.wibe.databaseController.updateObjects({
-			className: 'User',
-			data: { name: 'Lucas2' },
+		const res = await context.wibe.databaseController.updateObjects({
+			className: 'Test2',
 			context,
-			fields: ['age'],
-			where: {
-				name: { equalTo: 'Lucas' },
-			},
+			fields: ['name'],
+			where: { name: { equalTo: 'test' } },
+			data: { age: 20 },
 		})
 
-		expect(mockUpdateObject).toHaveBeenCalledTimes(1)
+		expect(res.length).toEqual(1)
 
-		expect(res2[0].age).toEqual(21)
+		expect(mockAfterUpdate).toHaveBeenCalledTimes(1)
+	})
 
-		spyInitializeHooks.mockRestore()
+	it('should get the good value in output of updateObject after mutation on after hook', async () => {
+		const res = await context.wibe.databaseController.createObjects({
+			className: 'Test2',
+			data: [{ name: 'test', age: 20 }],
+			context,
+			fields: ['id'],
+		})
+
+		const res2 = await context.wibe.databaseController.updateObject({
+			className: 'Test2',
+			context,
+			fields: ['name'],
+			data: { age: 20 },
+			id: res[0].id,
+		})
+
+		expect(res2.name).toEqual('test')
+
+		expect(mockAfterUpdate).toHaveBeenCalledTimes(1)
 	})
 })

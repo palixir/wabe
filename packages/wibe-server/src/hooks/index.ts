@@ -101,7 +101,7 @@ export const initializeHook = <T extends keyof WibeAppTypes['types']>({
 		// @ts-expect-error
 		if (operationType === OperationType.BeforeCreate) return newData
 
-		if (!id) throw new Error('Object not found tata')
+		if (!id) throw new Error('Object not found')
 
 		return context.wibe.databaseController.getObject({
 			// @ts-expect-error
@@ -112,6 +112,7 @@ export const initializeHook = <T extends keyof WibeAppTypes['types']>({
 			},
 			id,
 			skipHooks: true,
+			fields: ['*'],
 		})
 	}
 
