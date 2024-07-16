@@ -59,9 +59,10 @@ export interface GetObjectOptions<
 export interface GetObjectsOptions<
 	T extends keyof WibeAppTypes['types'],
 	K extends keyof WibeAppTypes['types'][T],
+	W extends keyof WibeAppTypes['types'][T],
 > {
 	className: T
-	where?: WhereType<T, K>
+	where?: WhereType<T, W>
 	fields: Array<K | '*'>
 	offset?: number
 	limit?: number
@@ -162,7 +163,8 @@ export interface DatabaseAdapter {
 	getObjects<
 		T extends keyof WibeAppTypes['types'],
 		K extends keyof WibeAppTypes['types'][T],
-	>(params: GetObjectsOptions<T, K>): Promise<OutputType<T, K>[]>
+		W extends keyof WibeAppTypes['types'][T],
+	>(params: GetObjectsOptions<T, K, W>): Promise<OutputType<T, K>[]>
 
 	createObject<
 		T extends keyof WibeAppTypes['types'],

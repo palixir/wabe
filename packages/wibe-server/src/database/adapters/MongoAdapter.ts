@@ -185,15 +185,17 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 		} as OutputType<U, K>
 	}
 
-	async getObjects<U extends keyof T['types'], K extends keyof T['types'][U]>(
-		params: GetObjectsOptions<U, K>,
-	): Promise<OutputType<U, K>[]> {
+	async getObjects<
+		U extends keyof T['types'],
+		K extends keyof T['types'][U],
+		W extends keyof T['types'][U],
+	>(params: GetObjectsOptions<U, K, W>): Promise<OutputType<U, K>[]> {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 
 		const { className, fields, where, offset, limit } = params
 
-		const whereBuilded = buildMongoWhereQuery<T, K>(where)
+		const whereBuilded = buildMongoWhereQuery(where)
 
 		const objectOfFieldsToGet = fields?.reduce(
 			(acc, prev) => {
@@ -341,7 +343,6 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 			await context.wibe.databaseController.getObjects({
 				className,
 				where,
-				// @ts-expect-error
 				fields: ['id'],
 				offset,
 				limit,

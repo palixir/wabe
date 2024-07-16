@@ -370,16 +370,19 @@ export class DatabaseController<T extends WibeAppTypes> {
 		return `${String(className)}-${id}-${fields.join(',')}`
 	}
 
-	async getObject<U extends keyof T['types'], K extends keyof T['types'][U]>(
-		params: GetObjectOptions<U, K>,
-	): Promise<OutputType<U, K>> {
-		const fields = params.fields as string[]
-
-		const { context, className, skipHooks, id, where } = params
+	async getObject<U extends keyof T['types'], K extends keyof T['types'][U]>({
+		fields,
+		className,
+		context,
+		skipHooks,
+		id,
+		where,
+	}: GetObjectOptions<U, K>): Promise<OutputType<U, K>> {
+		const typedFields = fields as string[]
 
 		const { pointersFieldsId, pointers } = this._getPointerObject(
 			className,
-			fields,
+			typedFields,
 			context,
 		)
 
@@ -401,7 +404,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 			'read',
 		)
 
-		const fieldsWithoutPointers = fields.filter(
+		const fieldsWithoutPointers = typedFields.filter(
 			(field) => !field.includes('.'),
 		)
 
@@ -448,42 +451,53 @@ export class DatabaseController<T extends WibeAppTypes> {
 		return this._getFinalObjectWithPointer(
 			objectToReturn,
 			pointers,
-			params.className,
-			params.context,
+			className,
+			context,
 		) as any
 	}
 
-	async getObjects<U extends keyof T['types'], K extends keyof T['types'][U]>(
-		params: GetObjectsOptions<U, K>,
-	): Promise<OutputType<U, K>[]> {
-		const fields = (params.fields || []) as string[]
+	async getObjects<
+		U extends keyof T['types'],
+		K extends keyof T['types'][U],
+		W extends keyof T['types'][U],
+	>({
+		className,
+		fields,
+		context,
+		where,
+		skipHooks,
+		limit,
+		offset,
+	}: GetObjectsOptions<U, K, W>): Promise<OutputType<U, K>[]> {
+		const typedFields = fields as string[]
 
 		const { pointersFieldsId, pointers } = this._getPointerObject(
-			params.className,
-			fields,
-			params.context,
+			className,
+			typedFields,
+			context,
 		)
 
-		const fieldsWithoutPointers = fields.filter(
+		const fieldsWithoutPointers = typedFields.filter(
 			(field) => !field.includes('.'),
 		)
 
-		const where = await this._getWhereObjectWithPointerOrRelation(
-			params.className,
-			params.where || {},
-			params.context,
-		)
+		const whereWithPointer =
+			await this._getWhereObjectWithPointerOrRelation(
+				className,
+				where || {},
+				context,
+			)
 
 		const whereWithACLCondition = this._buildWhereWithACL(
-			where,
-			params.context,
+			whereWithPointer,
+			context,
 			'read',
 		)
 
-		const hook = !params.skipHooks
+		const hook = !skipHooks
 			? initializeHook({
-					className: params.className,
-					context: params.context,
+					className,
+					context,
 				})
 			: undefined
 
@@ -498,16 +512,18 @@ export class DatabaseController<T extends WibeAppTypes> {
 		]
 
 		const objects = await this.adapter.getObjects({
-			...params,
+			className,
+			context,
+			limit,
+			offset,
 			where: whereWithACLCondition,
-			// @ts-expect-error
 			fields: fieldsWithPointerFields,
 		})
 
 		objects.map((object) =>
 			this.inMemoryCache.set(
 				this._buildCacheKey(
-					params.className,
+					className,
 					object.id,
 					fieldsWithPointerFields,
 				),
@@ -521,10 +537,12 @@ export class DatabaseController<T extends WibeAppTypes> {
 		})
 
 		const objectsToReturn = await this.adapter.getObjects({
-			...params,
+			className,
+			context,
+			limit,
+			offset,
 			where: whereWithACLCondition,
-			// @ts-expect-error
-			fields: [...fieldsWithoutPointers, ...(pointersFieldsId || [])],
+			fields: fieldsWithPointerFields,
 		})
 
 		return Promise.all(
@@ -532,8 +550,8 @@ export class DatabaseController<T extends WibeAppTypes> {
 				this._getFinalObjectWithPointer(
 					object,
 					pointers,
-					params.className,
-					params.context,
+					className,
+					context,
 				),
 			),
 		) as Promise<OutputType<U, K>[]>
@@ -543,9 +561,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 		U extends keyof T['types'],
 		K extends keyof T['types'][U],
 		W extends keyof T['types'][U],
-	>(params: CreateObjectOptions<U, K, W>) {
-		const { className, context, data, fields } = params
-
+	>({ className, context, data, fields }: CreateObjectOptions<U, K, W>) {
 		const hook = initializeHook({
 			className,
 			context,
@@ -656,7 +672,6 @@ export class DatabaseController<T extends WibeAppTypes> {
 			className,
 			context,
 			fields,
-			// @ts-expect-error
 			where: { id: { in: objectsId } },
 			skipHooks: true,
 			limit,
@@ -788,7 +803,6 @@ export class DatabaseController<T extends WibeAppTypes> {
 			className,
 			context,
 			fields,
-			// @ts-expect-error
 			where: { id: { in: objectsId } },
 			skipHooks: true,
 			limit,
@@ -802,28 +816,35 @@ export class DatabaseController<T extends WibeAppTypes> {
 		U extends keyof T['types'],
 		K extends keyof T['types'][U],
 		W extends keyof T['types'][U],
-	>(params: DeleteObjectOptions<U, K, W>) {
+	>({ context, className, id, fields }: DeleteObjectOptions<U, K, W>) {
 		const hook = initializeHook({
-			className: params.className,
-			context: params.context,
+			className,
+			context,
 		})
 
 		const whereWithACLCondition = this._buildWhereWithACL(
 			{},
-			params.context,
+			context,
 			'write',
 		)
 
-		// @ts-expect-error
-		const objectBeforeDelete = await this.getObject(params)
+		const objectBeforeDelete = await this.getObject({
+			className,
+			fields,
+			id,
+			context,
+		})
 
 		const { object } = await hook.runOnSingleObject({
 			operationType: OperationType.BeforeDelete,
-			id: params.id,
+			id,
 		})
 
 		await this.adapter.deleteObject({
-			...params,
+			className,
+			context,
+			fields,
+			id,
 			where: whereWithACLCondition,
 		})
 
@@ -839,26 +860,39 @@ export class DatabaseController<T extends WibeAppTypes> {
 		U extends keyof T['types'],
 		K extends keyof T['types'][U],
 		W extends keyof T['types'][U],
-	>(params: DeleteObjectsOptions<U, K, W>) {
+	>({
+		className,
+		context,
+		fields,
+		where,
+		limit,
+		offset,
+	}: DeleteObjectsOptions<U, K, W>) {
 		const whereObject = await this._getWhereObjectWithPointerOrRelation(
-			params.className,
-			params.where || {},
-			params.context,
+			className,
+			where || {},
+			context,
 		)
 
 		const hook = initializeHook({
-			className: params.className,
-			context: params.context,
+			className,
+			context,
 		})
 
 		const whereWithACLCondition = this._buildWhereWithACL(
 			whereObject,
-			params.context,
+			context,
 			'write',
 		)
 
-		// @ts-expect-error
-		const objectBeforeDelete = await this.getObjects(params)
+		const objectBeforeDelete = await this.getObjects({
+			className,
+			where,
+			fields,
+			context,
+			limit,
+			offset,
+		})
 
 		const { objects } = await hook.runOnMultipleObjects({
 			operationType: OperationType.BeforeDelete,
@@ -866,7 +900,11 @@ export class DatabaseController<T extends WibeAppTypes> {
 		})
 
 		await this.adapter.deleteObjects({
-			...params,
+			className,
+			context,
+			fields,
+			limit,
+			offset,
 			where: whereWithACLCondition,
 		})
 
