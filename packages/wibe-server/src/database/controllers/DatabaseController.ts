@@ -575,7 +575,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 		const object = await this.adapter.createObject({
 			className,
 			context,
-			fields,
+			fields: ['*'],
 			data: newData,
 		})
 

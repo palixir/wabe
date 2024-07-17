@@ -37,7 +37,8 @@ export const callAuthenticationProvider = async (
 export const createSessionAfterCreateUser = async (
 	hookObject: HookObject<any>,
 ) => {
-	if (hookObject.className !== 'User') return
+	if (hookObject.className !== 'User' || !hookObject.object.authentication)
+		return
 
 	const session = new Session()
 

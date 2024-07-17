@@ -90,31 +90,26 @@ describe('Authentication', () => {
 		await rootClient.request<any>(graphql.deleteTests)
 	})
 
-	// it('should not connect an user when he is created with createUser mutation without authentication method', async () => {
-	// 	const res = await rootClient.request<any>(gql`
-	// 		mutation createUser{
-	// 			createUser(input:{fields: {authentication: {emailPassword: {email:"test@gmail.com", password: "password"}}}}){
-	// 				user {
-	// 					id
-	// 					sessions {
-	// 						edges {
-	// 							node {
-	// 								accessToken
-	// 								refreshToken
-	// 							}
-	// 						}
-	// 					}
-	// 				}
-	// 			}
-	// 		}`)
+	it('should not connect an user when he is created with createUser mutation without authentication method', async () => {
+		const res = await rootClient.request<any>(gql`
+			mutation createUser{
+				createUser(input:{fields: {name: "test"}}){
+					user {
+						id
+						sessions {
+							edges {
+								node {
+									accessToken
+									refreshToken
+								}
+							}
+						}
+					}
+				}
+			}`)
 
-	// 	console.log(res.createUser.user.sessions)
-
-	// 	// expect(res.createUser.user.sessions.edges[0].node).toEqual({
-	// 	// 	accessToken: expect.any(String),
-	// 	// 	refreshToken: expect.any(String),
-	// 	// })
-	// })
+		expect(res.createUser.user.sessions.edges.length).toEqual(0)
+	})
 
 	it('should connect an user when he is created with createUser mutation', async () => {
 		const res = await rootClient.request<any>(gql`
