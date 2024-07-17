@@ -52,15 +52,16 @@ export const createSessionAfterCreateUser = async (
 	)
 
 	await context.wibe.databaseController.updateObject({
-		className: 'User',
+		className: '_Session',
 		context: {
 			...context,
 			isRoot: true,
 		},
-		id: hookObject.object.id,
-		fields: ['sessions'],
+		id: sessionId,
+		fields: [],
 		data: {
-			sessions: [...(hookObject.object.sessions || []), sessionId],
+			accessToken,
+			refreshToken,
 		},
 	})
 

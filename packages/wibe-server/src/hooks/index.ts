@@ -3,9 +3,15 @@ import {
 	defaultBeforeCreateUpload,
 	defaultBeforeUpdateUpload,
 } from '../files/hookUploadFile'
+import type { WibeAppTypes, WibeConfig } from '../server'
 import type { WibeContext } from '../server/interface'
-import type { WibeConfig, WibeAppTypes } from '../server'
 import { HookObject } from './HookObject'
+import {
+	defaultCallAuthenticationProviderOnBeforeCreateUser,
+	defaultCallAuthenticationProviderOnBeforeUpdateUser,
+	defaultCreateSessionOnAfterCreateUser,
+	defaultCreateSessionOnAfterUpdateUser,
+} from './authentication'
 import {
 	defaultBeforeCreateForCreatedAt,
 	defaultBeforeCreateForDefaultValue,
@@ -17,10 +23,6 @@ import {
 	defaultCheckPermissionOnRead,
 	defaultCheckPermissionOnUpdate,
 } from './permissions'
-import {
-	defaultCallAuthenticationProviderOnBeforeCreateUser,
-	defaultCallAuthenticationProviderOnBeforeUpdateUser,
-} from './authentication'
 
 export enum OperationType {
 	AfterCreate = 'AfterCreate',
@@ -221,14 +223,14 @@ export const getDefaultHooks = (): Hook<any>[] => [
 		priority: 1,
 		callback: defaultCallAuthenticationProviderOnBeforeUpdateUser,
 	},
-	// {
-	// 	operationType: OperationType.AfterCreate,
-	// 	priority: 1,
-	// 	callback: defaultCreateSessionOnAfterCreateUser,
-	// },
-	// {
-	// 	operationType: OperationType.AfterUpdate,
-	// 	priority: 1,
-	// 	callback: defaultCreateSessionOnAfterUpdateUser,
-	// },
+	{
+		operationType: OperationType.AfterCreate,
+		priority: 1,
+		callback: defaultCreateSessionOnAfterCreateUser,
+	},
+	{
+		operationType: OperationType.AfterUpdate,
+		priority: 1,
+		callback: defaultCreateSessionOnAfterUpdateUser,
+	},
 ]

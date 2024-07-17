@@ -330,10 +330,10 @@ export class Schema<T extends WibeAppTypes> {
 				type: 'Pointer',
 				class: 'Role',
 			},
-			// sessions: {
-			// 	type: 'Relation',
-			// 	class: '_Session',
-			// },
+			sessions: {
+				type: 'Relation',
+				class: '_Session',
+			},
 		}
 
 		const authenticationInput: TypeFieldObject<T> = {

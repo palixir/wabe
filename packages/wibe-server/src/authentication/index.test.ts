@@ -90,7 +90,7 @@ describe('Authentication', () => {
 		await rootClient.request<any>(graphql.deleteTests)
 	})
 
-	// it.only('should connect an user when he is created with createUser mutation', async () => {
+	// it('should not connect an user when he is created with createUser mutation without authentication method', async () => {
 	// 	const res = await rootClient.request<any>(gql`
 	// 		mutation createUser{
 	// 			createUser(input:{fields: {authentication: {emailPassword: {email:"test@gmail.com", password: "password"}}}}){
@@ -99,8 +99,8 @@ describe('Authentication', () => {
 	// 					sessions {
 	// 						edges {
 	// 							node {
-	// 								id
 	// 								accessToken
+	// 								refreshToken
 	// 							}
 	// 						}
 	// 					}
@@ -109,7 +109,36 @@ describe('Authentication', () => {
 	// 		}`)
 
 	// 	console.log(res.createUser.user.sessions)
+
+	// 	// expect(res.createUser.user.sessions.edges[0].node).toEqual({
+	// 	// 	accessToken: expect.any(String),
+	// 	// 	refreshToken: expect.any(String),
+	// 	// })
 	// })
+
+	it('should connect an user when he is created with createUser mutation', async () => {
+		const res = await rootClient.request<any>(gql`
+			mutation createUser{
+				createUser(input:{fields: {authentication: {emailPassword: {email:"test@gmail.com", password: "password"}}}}){
+					user {
+						id
+						sessions {
+							edges {
+								node {
+									accessToken
+									refreshToken
+								}
+							}
+						}
+					}
+				}
+			}`)
+
+		expect(res.createUser.user.sessions.edges[0].node).toEqual({
+			accessToken: expect.any(String),
+			refreshToken: expect.any(String),
+		})
+	})
 
 	it('should not authorize an user to read an object when the user has not access on read to the object (ACL)', async () => {
 		const { userClient, userId } = await createUserAndUpdateRole({
