@@ -38,6 +38,11 @@ export interface AdapterOptions {
 	databaseName: string
 }
 
+export type MutationData<T extends keyof WibeAppTypes['types']> = Record<
+	keyof WibeAppTypes['types'][T],
+	any
+>
+
 // TODO: It could be cool if fields type supports something like user.id, user.email
 export interface GetObjectOptions<
 	T extends keyof WibeAppTypes['types'],
@@ -46,7 +51,7 @@ export interface GetObjectOptions<
 	className: T
 	id: string
 	where?: WhereType<T, K>
-	fields?: Array<K | '*'>
+	fields: Array<K | '*'>
 	context: WibeContext<any>
 	skipHooks?: boolean
 }
@@ -54,10 +59,11 @@ export interface GetObjectOptions<
 export interface GetObjectsOptions<
 	T extends keyof WibeAppTypes['types'],
 	K extends keyof WibeAppTypes['types'][T],
+	W extends keyof WibeAppTypes['types'][T],
 > {
 	className: T
-	where?: WhereType<T, K>
-	fields?: Array<K | '*'>
+	where?: WhereType<T, W>
+	fields: Array<K | '*'>
 	offset?: number
 	limit?: number
 	context: WibeContext<any>
@@ -70,8 +76,8 @@ export interface CreateObjectOptions<
 	W extends keyof WibeAppTypes['types'][T],
 > {
 	className: T
-	data: Record<W, any>
-	fields?: Array<K | '*'>
+	data: MutationData<W>
+	fields: Array<K | '*'>
 	context: WibeContext<any>
 }
 export interface CreateObjectsOptions<
@@ -80,8 +86,8 @@ export interface CreateObjectsOptions<
 	W extends keyof WibeAppTypes['types'][T],
 > {
 	className: T
-	data: Array<Record<W, any>>
-	fields?: Array<K | '*'>
+	data: Array<MutationData<W>>
+	fields: Array<K | '*'>
 	offset?: number
 	limit?: number
 	context: WibeContext<any>
@@ -94,9 +100,9 @@ export interface UpdateObjectOptions<
 > {
 	className: T
 	id: string
-	where?: WhereType<T, K>
-	data: Partial<Record<W, any>>
-	fields?: Array<K | '*'>
+	where?: WhereType<T, W>
+	data: MutationData<W>
+	fields: Array<K | '*'>
 	context: WibeContext<any>
 }
 
@@ -107,8 +113,8 @@ export interface UpdateObjectsOptions<
 > {
 	className: T
 	where: WhereType<T, W>
-	data: Partial<Record<W, any>>
-	fields?: Array<K | '*'>
+	data: MutationData<W>
+	fields: Array<K | '*'>
 	offset?: number
 	limit?: number
 	context: WibeContext<any>
@@ -117,21 +123,23 @@ export interface UpdateObjectsOptions<
 export interface DeleteObjectOptions<
 	T extends keyof WibeAppTypes['types'],
 	K extends keyof WibeAppTypes['types'][T],
+	W extends keyof WibeAppTypes['types'][T],
 > {
 	className: T
 	id: string
-	where?: WhereType<T, K>
-	fields?: Array<K | '*'>
+	where?: WhereType<T, W>
+	fields: Array<K | '*'>
 	context: WibeContext<any>
 }
 
 export interface DeleteObjectsOptions<
 	T extends keyof WibeAppTypes['types'],
 	K extends keyof WibeAppTypes['types'][T],
+	W extends keyof WibeAppTypes['types'][T],
 > {
 	className: T
-	where: WhereType<T, K>
-	fields?: Array<K | '*'>
+	where: WhereType<T, W>
+	fields: Array<K | '*'>
 	offset?: number
 	limit?: number
 	context: WibeContext<any>
@@ -155,7 +163,8 @@ export interface DatabaseAdapter {
 	getObjects<
 		T extends keyof WibeAppTypes['types'],
 		K extends keyof WibeAppTypes['types'][T],
-	>(params: GetObjectsOptions<T, K>): Promise<OutputType<T, K>[]>
+		W extends keyof WibeAppTypes['types'][T],
+	>(params: GetObjectsOptions<T, K, W>): Promise<OutputType<T, K>[]>
 
 	createObject<
 		T extends keyof WibeAppTypes['types'],
@@ -182,9 +191,11 @@ export interface DatabaseAdapter {
 	deleteObject<
 		T extends keyof WibeAppTypes['types'],
 		K extends keyof WibeAppTypes['types'][T],
-	>(params: DeleteObjectOptions<T, K>): Promise<void>
+		W extends keyof WibeAppTypes['types'][T],
+	>(params: DeleteObjectOptions<T, K, W>): Promise<void>
 	deleteObjects<
 		T extends keyof WibeAppTypes['types'],
 		K extends keyof WibeAppTypes['types'][T],
-	>(params: DeleteObjectsOptions<T, K>): Promise<void>
+		W extends keyof WibeAppTypes['types'][T],
+	>(params: DeleteObjectsOptions<T, K, W>): Promise<void>
 }

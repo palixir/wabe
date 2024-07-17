@@ -77,6 +77,7 @@ describe('Mongo adapter', () => {
 				},
 				id: insertedObjects[0].id,
 				context,
+				fields: ['*'],
 			}),
 		).rejects.toThrow('Object not found')
 
@@ -87,6 +88,7 @@ describe('Mongo adapter', () => {
 			},
 			id: insertedObjects[0].id,
 			context,
+			fields: ['*'],
 		})
 
 		expect(res.name).toEqual('Lucas')
@@ -118,6 +120,7 @@ describe('Mongo adapter', () => {
 				id: insertedObjects[0].id,
 				context,
 				data: { name: 'Lucas2' },
+				fields: ['*'],
 			}),
 		).rejects.toThrow('Object not found')
 
@@ -129,6 +132,7 @@ describe('Mongo adapter', () => {
 			id: insertedObjects[0].id,
 			context,
 			data: { name: 'Lucas2' },
+			fields: ['*'],
 		})
 
 		expect(res.name).toEqual('Lucas2')
@@ -159,6 +163,7 @@ describe('Mongo adapter', () => {
 				},
 				id: insertedObjects[0].id,
 				context,
+				fields: ['*'],
 			}),
 		).rejects.toThrow('Object not found')
 
@@ -169,6 +174,7 @@ describe('Mongo adapter', () => {
 			},
 			id: insertedObjects[0].id,
 			context,
+			fields: ['*'],
 		})
 	})
 
@@ -195,6 +201,7 @@ describe('Mongo adapter', () => {
 				id: { notEqualTo: insertedObjects[0].id },
 			},
 			context,
+			fields: ['*'],
 		})
 
 		expect(res.length).toEqual(1)
@@ -223,6 +230,7 @@ describe('Mongo adapter', () => {
 				id: { equalTo: insertedObjects[0].id },
 			},
 			context,
+			fields: ['*'],
 		})
 
 		expect(res.length).toEqual(1)
@@ -251,6 +259,7 @@ describe('Mongo adapter', () => {
 				id: { in: insertedObjects.map((obj) => obj.id) },
 			},
 			context,
+			fields: ['*'],
 		})
 
 		expect(res.length).toEqual(2)
@@ -279,6 +288,7 @@ describe('Mongo adapter', () => {
 				id: { notIn: insertedObjects.map((obj) => obj.id) },
 			},
 			context,
+			fields: ['*'],
 		})
 
 		expect(res.length).toEqual(0)
@@ -358,6 +368,7 @@ describe('Mongo adapter', () => {
 				},
 			],
 			context,
+			fields: ['*'],
 		})
 
 		if (!insertedObjects) fail()
@@ -387,9 +398,14 @@ describe('Mongo adapter', () => {
 		const res = await mongoAdapter.getObjects({
 			className: 'User',
 			where: {
-				id: { equalTo: new ObjectId(insertedObjects[0].id) },
+				id: {
+					equalTo: ObjectId.createFromHexString(
+						insertedObjects[0].id,
+					),
+				},
 			},
 			context,
+			fields: ['*'],
 		})
 
 		expect(res.length).toEqual(1)
@@ -637,6 +653,7 @@ describe('Mongo adapter', () => {
 				],
 			},
 			context,
+			fields: ['*'],
 		})
 
 		expect(res2.length).toEqual(0)
@@ -915,6 +932,7 @@ describe('Mongo adapter', () => {
 					],
 				},
 				context,
+				fields: ['*'],
 			}),
 		).toEqual([])
 
@@ -943,6 +961,7 @@ describe('Mongo adapter', () => {
 					age: { greaterThan: 21 },
 				},
 				context,
+				fields: ['*'],
 			}),
 		).toEqual([])
 
@@ -972,6 +991,7 @@ describe('Mongo adapter', () => {
 					name: { lessThan: 'John1' },
 				},
 				context,
+				fields: ['*'],
 			}),
 		).toEqual([])
 
@@ -1131,6 +1151,7 @@ describe('Mongo adapter', () => {
 				age: 20,
 			},
 			context,
+			fields: ['*'],
 		})
 
 		if (!insertedObject) fail()
@@ -1183,6 +1204,7 @@ describe('Mongo adapter', () => {
 				},
 			],
 			context,
+			fields: ['*'],
 		})
 
 		if (!insertedObjects) fail()
@@ -1237,6 +1259,7 @@ describe('Mongo adapter', () => {
 				age: 20,
 			},
 			context,
+			fields: ['*'],
 		})
 
 		if (!insertedObject) fail()
@@ -1269,6 +1292,7 @@ describe('Mongo adapter', () => {
 				age: 20,
 			},
 			context,
+			fields: ['*'],
 		})
 
 		if (!insertedObject) fail()
@@ -1287,6 +1311,7 @@ describe('Mongo adapter', () => {
 				className: 'User',
 				id: id.toString(),
 				context,
+				fields: ['*'],
 			}),
 		).rejects.toThrow('Object not found')
 	})
@@ -1299,6 +1324,7 @@ describe('Mongo adapter', () => {
 				age: 18,
 			},
 			context,
+			fields: ['*'],
 		})
 
 		await mongoAdapter.createObject({
@@ -1308,6 +1334,7 @@ describe('Mongo adapter', () => {
 				age: 18,
 			},
 			context,
+			fields: ['*'],
 		})
 
 		await mongoAdapter.deleteObjects({
@@ -1321,6 +1348,7 @@ describe('Mongo adapter', () => {
 			className: 'User',
 			where: { age: { equalTo: 18 } },
 			context,
+			fields: ['*'],
 		})
 
 		expect(resAfterDelete.length).toEqual(0)
@@ -1416,6 +1444,7 @@ describe('Mongo adapter', () => {
 					},
 				},
 			},
+			fields: ['*'],
 		})
 
 		const res = await mongoAdapter.getObjects({
@@ -1453,6 +1482,7 @@ describe('Mongo adapter', () => {
 					},
 				},
 			},
+			fields: ['*'],
 		})
 
 		const res = await mongoAdapter.getObjects({

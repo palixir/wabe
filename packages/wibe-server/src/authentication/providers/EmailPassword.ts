@@ -76,6 +76,7 @@ export class EmailPassword
 				},
 			},
 			context,
+			fields: [],
 		})
 
 		if (users.length > 0) throw new Error('User already exists')

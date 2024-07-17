@@ -26,6 +26,7 @@ describe('Roles', () => {
 			className: 'Role',
 			context: { isRoot: true, wibe: { databaseController, config } },
 			data: [{ name: 'Role1' }, { name: 'Role2' }],
+			fields: [],
 		})
 	})
 

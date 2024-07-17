@@ -32,7 +32,6 @@ export class Session {
 		const sessions = await context.wibe.databaseController.getObjects({
 			className: '_Session',
 			where: {
-				// @ts-expect-error
 				accessToken: { equalTo: accessToken },
 			},
 			limit: 1,
@@ -95,6 +94,7 @@ export class Session {
 				),
 				user: userId,
 			},
+			fields: ['id'],
 		})
 
 		return {
@@ -111,6 +111,7 @@ export class Session {
 			className: '_Session',
 			context,
 			id: context.sessionId,
+			fields: [],
 		})
 	}
 
@@ -122,7 +123,6 @@ export class Session {
 		const session = await context.wibe.databaseController.getObjects({
 			className: '_Session',
 			where: {
-				// @ts-expect-error
 				accessToken: { equalTo: accessToken },
 			},
 			fields: ['id', 'user', 'refreshToken', 'refreshTokenExpiresAt'],
@@ -198,6 +198,7 @@ export class Session {
 						this.getRefreshTokenExpireIn(context.wibe.config),
 				),
 			},
+			fields: [],
 		})
 
 		return {
