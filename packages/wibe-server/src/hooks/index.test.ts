@@ -3,12 +3,14 @@ import * as index from './index'
 import { OperationType } from './index'
 
 describe('Hooks', () => {
+	const mockGetObject = mock(() => {})
 	const mockGetObjects = mock(() => {})
 	const mockCallBack1 = mock(() => {})
 	const mockCallback2 = mock(() => {})
 	const mockCallback3 = mock(() => {})
 
 	const databaseController = {
+		getObject: mockGetObject,
 		getObjects: mockGetObjects,
 	} as any
 
@@ -40,11 +42,9 @@ describe('Hooks', () => {
 	})
 
 	it('should run hook on BeforeRead with one object impacted', async () => {
-		mockGetObjects.mockResolvedValueOnce([
-			{ id: 'id', name: 'name' },
-		] as never)
+		mockGetObject.mockResolvedValueOnce({ id: 'id', name: 'name' } as never)
 
-		const hooks = await index.initializeHook({
+		const hooks = index.initializeHook({
 			className: 'ClassName',
 			context: {
 				isRoot: true,
@@ -53,15 +53,18 @@ describe('Hooks', () => {
 			newData: { name: 'test' },
 		})
 
-		await hooks.run({ operationType: OperationType.BeforeRead, id: 'id' })
+		await hooks.runOnSingleObject({
+			operationType: OperationType.BeforeRead,
+			id: 'id',
+		})
 
-		expect(mockGetObjects).toHaveBeenCalledTimes(1)
-		expect(mockGetObjects).toHaveBeenCalledWith({
+		expect(mockGetObject).toHaveBeenCalledTimes(1)
+		expect(mockGetObject).toHaveBeenCalledWith({
 			className: 'ClassName',
 			context: { isRoot: true, wibe: { databaseController, config } },
-			fields: ['*'],
-			where: { id: { equalTo: 'id' } },
+			id: 'id',
 			skipHooks: true,
+			fields: ['*'],
 		})
 
 		expect(mockCallBack1).toHaveBeenCalledTimes(1)
@@ -84,7 +87,7 @@ describe('Hooks', () => {
 	})
 
 	it('should run hook on BeforeCreate', async () => {
-		const hooks = await index.initializeHook({
+		const hooks = index.initializeHook({
 			className: 'ClassName',
 			context: {
 				isRoot: true,
@@ -93,14 +96,16 @@ describe('Hooks', () => {
 			newData: { name: 'test' },
 		})
 
-		await hooks.run({ operationType: OperationType.BeforeCreate })
+		await hooks.runOnSingleObject({
+			operationType: OperationType.BeforeCreate,
+		})
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(0)
 
 		// @ts-expect-error
 		const hookObject = mockCallback3.mock.calls[0][0] as any
 
-		expect(hookObject.object).toEqual({})
+		expect(hookObject.object).toEqual({ name: 'test' })
 
 		expect(hookObject.context).toEqual({
 			isRoot: true,
@@ -115,7 +120,7 @@ describe('Hooks', () => {
 			{ id: 'id', name: 'name' },
 		] as never)
 
-		const hooks = await index.initializeHook({
+		const hooks = index.initializeHook({
 			className: 'ClassName',
 			context: {
 				isRoot: true,
@@ -124,7 +129,10 @@ describe('Hooks', () => {
 			newData: { name: 'test' },
 		})
 
-		await hooks.run({ operationType: OperationType.BeforeRead, id: 'id' })
+		await hooks.runOnSingleObject({
+			operationType: OperationType.BeforeRead,
+			id: 'id',
+		})
 
 		expect(spy_findHooksByPriority.mock.calls[0][0].priority).toEqual(1)
 		expect(spy_findHooksByPriority.mock.calls[1][0].priority).toEqual(2)
@@ -135,7 +143,7 @@ describe('Hooks', () => {
 			{ id: 'id', name: 'name' },
 		] as never)
 
-		const hooks = await index.initializeHook({
+		const hooks = index.initializeHook({
 			className: 'ClassName',
 			context: {
 				isRoot: true,
@@ -144,7 +152,10 @@ describe('Hooks', () => {
 			newData: { name: 'test' },
 		})
 
-		await hooks.run({ operationType: OperationType.BeforeRead, id: 'id' })
+		await hooks.runOnSingleObject({
+			operationType: OperationType.BeforeRead,
+			id: 'id',
+		})
 
 		expect(mockCallback3).toHaveBeenCalledTimes(0)
 	})

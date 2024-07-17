@@ -25,6 +25,7 @@ export const signUpWithResolver = async (
 			...context,
 			isRoot: true,
 		},
+		fields: ['id'],
 	})
 
 	const session = new Session()

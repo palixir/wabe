@@ -131,6 +131,7 @@ export const setupTests = async () => {
 					name: 'Test2',
 					fields: {
 						name: { type: 'String' },
+						age: { type: 'Int' },
 					},
 					permissions: {
 						read: {

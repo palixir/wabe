@@ -16,5 +16,6 @@ export const initializeRoles = async (
 		className: 'Role',
 		context: { isRoot: true, wibe: { databaseController, config } as any },
 		data: objectsToCreate,
+		fields: [],
 	})
 }

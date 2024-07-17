@@ -1,4 +1,5 @@
 import type { WibeAppTypes } from '../..'
+import { InMemoryCache } from '../../cache/InMemoryCache'
 import { OperationType, initializeHook } from '../../hooks'
 import type { WibeContext } from '../../server/interface'
 import { notEmpty } from '../../utils/helper'
@@ -31,9 +32,11 @@ interface PointerFields {
 
 export class DatabaseController<T extends WibeAppTypes> {
 	public adapter: DatabaseAdapter
+	public inMemoryCache: InMemoryCache<OutputType<any, any> | undefined>
 
 	constructor(adapter: DatabaseAdapter) {
 		this.adapter = adapter
+		this.inMemoryCache = new InMemoryCache({ interval: 5000 })
 	}
 
 	async connect() {
@@ -359,117 +362,196 @@ export class DatabaseController<T extends WibeAppTypes> {
 		}
 	}
 
-	async getObject<U extends keyof T['types'], K extends keyof T['types'][U]>(
-		params: GetObjectOptions<U, K>,
-	): Promise<OutputType<U, K>> {
-		const fields = (params.fields || []) as string[]
+	_buildCacheKey<U extends keyof T['types']>(
+		className: U,
+		id: string,
+		fields: Array<string>,
+	) {
+		return `${String(className)}-${id}-${fields.join(',')}`
+	}
+
+	async getObject<U extends keyof T['types'], K extends keyof T['types'][U]>({
+		fields,
+		className,
+		context,
+		skipHooks,
+		id,
+		where,
+	}: GetObjectOptions<U, K>): Promise<OutputType<U, K>> {
+		const typedFields = fields as string[]
 
 		const { pointersFieldsId, pointers } = this._getPointerObject(
-			params.className,
-			fields,
-			params.context,
+			className,
+			typedFields,
+			context,
 		)
 
-		const fieldsWithoutPointers = fields.filter(
-			(field) => !field.includes('.'),
-		)
+		const hook = !skipHooks
+			? initializeHook({
+					className,
+					context,
+				})
+			: undefined
 
-		const hook = await initializeHook({
-			className: params.className,
-			context: params.context,
-			newData: null,
-			skipHooks: params.skipHooks,
-		})
-
-		await hook.run({
+		await hook?.runOnSingleObject({
 			operationType: OperationType.BeforeRead,
-			id: params.id,
+			id,
 		})
 
 		const whereWithACLCondition = this._buildWhereWithACL(
-			{},
-			params.context,
+			where || {},
+			context,
 			'read',
 		)
 
-		const dataOfCurrentObject = await this.adapter.getObject({
-			...params,
+		const fieldsWithoutPointers = typedFields.filter(
+			(field) => !field.includes('.'),
+		)
+
+		const fieldsWithPointerFields = [
+			...fieldsWithoutPointers,
+			...(pointersFieldsId || []),
+		]
+
+		const object = await this.adapter.getObject({
+			className,
+			context,
+			id,
 			// @ts-expect-error
-			fields: [...fieldsWithoutPointers, ...(pointersFieldsId || [])],
+			fields: fieldsWithPointerFields,
 			where: whereWithACLCondition,
 		})
 
-		await hook.run({
+		const keyCache = this._buildCacheKey(
+			className,
+			object.id,
+			fieldsWithPointerFields,
+		)
+
+		this.inMemoryCache.set(keyCache, object)
+
+		await hook?.runOnSingleObject({
 			operationType: OperationType.AfterRead,
-			id: params.id,
+			object,
 		})
 
+		const cacheObject = this.inMemoryCache.get(keyCache)
+
+		const objectToReturn = cacheObject
+			? cacheObject
+			: await this.adapter.getObject({
+					className,
+					id,
+					context,
+					// @ts-expect-error
+					fields: fieldsWithPointerFields,
+					where: whereWithACLCondition,
+				})
+
 		return this._getFinalObjectWithPointer(
-			dataOfCurrentObject,
+			objectToReturn,
 			pointers,
-			params.className,
-			params.context,
+			className,
+			context,
 		) as any
 	}
 
-	async getObjects<U extends keyof T['types'], K extends keyof T['types'][U]>(
-		params: GetObjectsOptions<U, K>,
-	): Promise<OutputType<U, K>[]> {
-		const fields = (params.fields || []) as string[]
+	async getObjects<
+		U extends keyof T['types'],
+		K extends keyof T['types'][U],
+		W extends keyof T['types'][U],
+	>({
+		className,
+		fields,
+		context,
+		where,
+		skipHooks,
+		limit,
+		offset,
+	}: GetObjectsOptions<U, K, W>): Promise<OutputType<U, K>[]> {
+		const typedFields = fields as string[]
 
 		const { pointersFieldsId, pointers } = this._getPointerObject(
-			params.className,
-			fields,
-			params.context,
+			className,
+			typedFields,
+			context,
 		)
 
-		const fieldsWithoutPointers = fields.filter(
+		const fieldsWithoutPointers = typedFields.filter(
 			(field) => !field.includes('.'),
 		)
 
-		const where = await this._getWhereObjectWithPointerOrRelation(
-			params.className,
-			params.where || {},
-			params.context,
-		)
+		const whereWithPointer =
+			await this._getWhereObjectWithPointerOrRelation(
+				className,
+				where || {},
+				context,
+			)
 
 		const whereWithACLCondition = this._buildWhereWithACL(
-			where,
-			params.context,
+			whereWithPointer,
+			context,
 			'read',
 		)
 
-		const hook = await initializeHook({
-			className: params.className,
-			context: params.context,
-			newData: null,
-			skipHooks: params.skipHooks,
-		})
+		const hook = !skipHooks
+			? initializeHook({
+					className,
+					context,
+				})
+			: undefined
 
-		await hook.run({
+		await hook?.runOnMultipleObjects({
 			operationType: OperationType.BeforeRead,
-			where: params.where,
-		})
-
-		const dataOfCurrentObject = await this.adapter.getObjects({
-			...params,
 			where: whereWithACLCondition,
-			// @ts-expect-error
-			fields: [...fieldsWithoutPointers, ...(pointersFieldsId || [])],
 		})
 
-		await hook.run({
+		const fieldsWithPointerFields = [
+			...fieldsWithoutPointers,
+			...(pointersFieldsId || []),
+		]
+
+		const objects = await this.adapter.getObjects({
+			className,
+			context,
+			limit,
+			offset,
+			where: whereWithACLCondition,
+			fields: fieldsWithPointerFields,
+		})
+
+		objects.map((object) =>
+			this.inMemoryCache.set(
+				this._buildCacheKey(
+					className,
+					object.id,
+					fieldsWithPointerFields,
+				),
+				object,
+			),
+		)
+
+		await hook?.runOnMultipleObjects({
 			operationType: OperationType.AfterRead,
-			where: params.where,
+			objects,
+		})
+
+		const objectsToReturn = await this.adapter.getObjects({
+			className,
+			context,
+			limit,
+			offset,
+			where: whereWithACLCondition,
+			fields: fieldsWithPointerFields,
 		})
 
 		return Promise.all(
-			dataOfCurrentObject.map((data) =>
+			objectsToReturn.map((object) =>
 				this._getFinalObjectWithPointer(
-					data,
+					object,
 					pointers,
-					params.className,
-					params.context,
+					className,
+					context,
 				),
 			),
 		) as Promise<OutputType<U, K>[]>
@@ -479,184 +561,296 @@ export class DatabaseController<T extends WibeAppTypes> {
 		U extends keyof T['types'],
 		K extends keyof T['types'][U],
 		W extends keyof T['types'][U],
-	>(params: CreateObjectOptions<U, K, W>) {
-		const hook = await initializeHook({
-			className: params.className,
-			context: params.context,
-			newData: params.data,
+	>({ className, context, data, fields }: CreateObjectOptions<U, K, W>) {
+		const hook = initializeHook({
+			className,
+			context,
+			newData: data,
 		})
 
-		const arrayOfComputedData = await hook.run({
+		const { newData } = await hook.runOnSingleObject({
 			operationType: OperationType.BeforeCreate,
 		})
 
-		const res = await this.adapter.createObject({
-			...params,
-			data: arrayOfComputedData,
+		const object = await this.adapter.createObject({
+			className,
+			context,
+			fields,
+			data: newData,
 		})
 
-		await hook.run({ operationType: OperationType.AfterCreate, id: res.id })
+		const keyCache = this._buildCacheKey(
+			className,
+			object.id,
+			fields as string[],
+		)
 
-		return res
+		this.inMemoryCache.set(keyCache, undefined)
+
+		await hook.runOnSingleObject({
+			operationType: OperationType.AfterCreate,
+			object,
+		})
+
+		const objectToReturn = await this.getObject({
+			className,
+			context,
+			fields,
+			id: object.id,
+			skipHooks: true,
+		})
+
+		return objectToReturn
 	}
 
 	async createObjects<
 		U extends keyof T['types'],
 		K extends keyof T['types'][U],
 		W extends keyof T['types'][U],
-	>(params: CreateObjectsOptions<U, K, W>) {
-		if (params.data.length === 0) return []
+	>({
+		data,
+		fields,
+		className,
+		context,
+		limit,
+		offset,
+	}: CreateObjectsOptions<U, K, W>) {
+		if (data.length === 0) return []
 
 		const hooks = await Promise.all(
-			params.data.map((newData) =>
+			data.map((newData) =>
 				initializeHook({
-					className: params.className,
-					context: params.context,
+					className,
+					context,
 					newData,
 				}),
 			),
 		)
 
 		const arrayOfComputedData = await Promise.all(
-			hooks.map((hook) =>
-				hook.run({ operationType: OperationType.BeforeCreate }),
+			hooks.map(
+				async (hook) =>
+					(
+						await hook.runOnMultipleObjects({
+							operationType: OperationType.BeforeCreate,
+						})
+					).newData[0],
 			),
 		)
 
-		const res = await this.adapter.createObjects({
-			...params,
+		const objects = await this.adapter.createObjects({
+			className,
+			fields,
+			context,
 			data: arrayOfComputedData,
+			limit,
+			offset,
 		})
 
-		const arrayOfId = res.map((result) => result.id)
+		const objectsId = objects.map((object) => object.id)
+
+		for (const id of objectsId) {
+			const keyCache = this._buildCacheKey(
+				className,
+				id,
+				fields as string[],
+			)
+
+			this.inMemoryCache.set(keyCache, undefined)
+		}
 
 		await Promise.all(
 			hooks.map((hook) =>
-				hook.run({
+				hook.runOnMultipleObjects({
 					operationType: OperationType.AfterCreate,
-					where: {
-						id: { in: arrayOfId },
-					},
+					objects,
 				}),
 			),
 		)
 
-		return res
+		const objectsToReturn = await this.getObjects({
+			className,
+			context,
+			fields,
+			where: { id: { in: objectsId } },
+			skipHooks: true,
+			limit,
+			offset,
+		})
+
+		return objectsToReturn
 	}
 
 	async updateObject<
 		U extends keyof T['types'],
 		K extends keyof T['types'][U],
 		W extends keyof T['types'][U],
-	>(params: UpdateObjectOptions<U, K, W>) {
-		const hook = await initializeHook({
-			className: params.className,
-			context: params.context,
-			newData: params.data,
+	>({ id, className, context, data, fields }: UpdateObjectOptions<U, K, W>) {
+		const hook = initializeHook({
+			className,
+			context,
+			newData: data,
 		})
 
-		const arrayOfComputedData = await hook.run({
+		const { newData } = await hook.runOnSingleObject({
 			operationType: OperationType.BeforeUpdate,
-			id: params.id,
+			id,
 		})
 
 		const whereWithACLCondition = this._buildWhereWithACL(
 			{},
-			params.context,
+			context,
 			'write',
 		)
 
-		// @ts-expect-error
-		const res = await this.adapter.updateObject({
-			...params,
-			data: arrayOfComputedData,
+		const object = await this.adapter.updateObject({
+			className,
+			fields,
+			id,
+			context,
+			data: newData,
 			where: whereWithACLCondition,
 		})
 
-		await hook.run({
+		const keyCache = this._buildCacheKey(
+			className,
+			object.id,
+			fields as string[],
+		)
+
+		this.inMemoryCache.set(keyCache, undefined)
+
+		await hook.runOnSingleObject({
 			operationType: OperationType.AfterUpdate,
-			id: params.id,
+			object,
 		})
 
-		return res
+		const objectToReturn = await this.getObject({
+			className,
+			context,
+			fields,
+			id: object.id,
+			skipHooks: true,
+		})
+
+		return objectToReturn
 	}
 
 	async updateObjects<
 		U extends keyof T['types'],
 		K extends keyof T['types'][U],
 		W extends keyof T['types'][U],
-	>(params: UpdateObjectsOptions<U, K, W>) {
+	>({
+		className,
+		where,
+		context,
+		fields,
+		data,
+		limit,
+		offset,
+	}: UpdateObjectsOptions<U, K, W>) {
 		const whereObject = await this._getWhereObjectWithPointerOrRelation(
-			params.className,
-			params.where || {},
-			params.context,
+			className,
+			where || {},
+			context,
 		)
 
-		const hook = await initializeHook({
-			className: params.className,
-			context: params.context,
-			newData: params.data,
-		})
-
-		const arrayOfComputedData = await hook.run({
-			operationType: OperationType.BeforeUpdate,
-			where: params.where,
+		const hook = initializeHook({
+			className,
+			context,
+			newData: data,
 		})
 
 		const whereWithACLCondition = this._buildWhereWithACL(
 			whereObject,
-			params.context,
+			context,
 			'write',
 		)
 
-		const res = await this.adapter.updateObjects({
-			...params,
-			data: arrayOfComputedData,
+		const { newData } = await hook.runOnMultipleObjects({
+			operationType: OperationType.BeforeUpdate,
 			where: whereWithACLCondition,
 		})
 
-		await hook.run({
-			operationType: OperationType.AfterUpdate,
-			where: params.where,
+		const objects = await this.adapter.updateObjects({
+			className,
+			context,
+			fields,
+			data: newData[0],
+			where: whereWithACLCondition,
+			limit,
+			offset,
 		})
 
-		return res
+		const objectsId = objects.map((object) => object.id)
+
+		for (const id of objectsId) {
+			const keyCache = this._buildCacheKey(
+				className,
+				id,
+				fields as string[],
+			)
+
+			this.inMemoryCache.set(keyCache, undefined)
+		}
+
+		await hook.runOnMultipleObjects({
+			operationType: OperationType.AfterUpdate,
+			objects,
+		})
+
+		const objectsToReturn = await this.getObjects({
+			className,
+			context,
+			fields,
+			where: { id: { in: objectsId } },
+			skipHooks: true,
+			limit,
+			offset,
+		})
+
+		return objectsToReturn
 	}
 
 	async deleteObject<
 		U extends keyof T['types'],
 		K extends keyof T['types'][U],
-	>(params: DeleteObjectOptions<U, K>) {
-		const objectBeforeDelete = await this.getObject(params)
-
-		if (!objectBeforeDelete) return null
-
-		const hook = await initializeHook({
-			className: params.className,
-			context: params.context,
-			newData: null,
-		})
-
-		await hook.run({
-			operationType: OperationType.BeforeDelete,
-			id: params.id,
+		W extends keyof T['types'][U],
+	>({ context, className, id, fields }: DeleteObjectOptions<U, K, W>) {
+		const hook = initializeHook({
+			className,
+			context,
 		})
 
 		const whereWithACLCondition = this._buildWhereWithACL(
 			{},
-			params.context,
+			context,
 			'write',
 		)
 
-		// @ts-expect-error
+		const objectBeforeDelete = await this.getObject({
+			className,
+			fields,
+			id,
+			context,
+		})
+
+		const { object } = await hook.runOnSingleObject({
+			operationType: OperationType.BeforeDelete,
+			id,
+		})
+
 		await this.adapter.deleteObject({
-			...params,
+			className,
+			context,
+			fields,
+			id,
 			where: whereWithACLCondition,
 		})
 
-		await hook.run({
+		await hook.runOnSingleObject({
 			operationType: OperationType.AfterDelete,
-			id: params.id,
+			object,
 		})
 
 		return objectBeforeDelete
@@ -665,42 +859,60 @@ export class DatabaseController<T extends WibeAppTypes> {
 	async deleteObjects<
 		U extends keyof T['types'],
 		K extends keyof T['types'][U],
-	>(params: DeleteObjectsOptions<U, K>) {
+		W extends keyof T['types'][U],
+	>({
+		className,
+		context,
+		fields,
+		where,
+		limit,
+		offset,
+	}: DeleteObjectsOptions<U, K, W>) {
 		const whereObject = await this._getWhereObjectWithPointerOrRelation(
-			params.className,
-			params.where || {},
-			params.context,
+			className,
+			where || {},
+			context,
 		)
 
-		const objectsBeforeDelete = await this.getObjects(params)
-
-		const hook = await initializeHook({
-			className: params.className,
-			context: params.context,
-			newData: null,
-		})
-
-		await hook.run({
-			operationType: OperationType.BeforeDelete,
-			where: params.where,
+		const hook = initializeHook({
+			className,
+			context,
 		})
 
 		const whereWithACLCondition = this._buildWhereWithACL(
 			whereObject,
-			params.context,
+			context,
 			'write',
 		)
 
-		await this.adapter.deleteObjects({
-			...params,
+		const objectBeforeDelete = await this.getObjects({
+			className,
+			where,
+			fields,
+			context,
+			limit,
+			offset,
+		})
+
+		const { objects } = await hook.runOnMultipleObjects({
+			operationType: OperationType.BeforeDelete,
 			where: whereWithACLCondition,
 		})
 
-		await hook.run({
-			operationType: OperationType.AfterDelete,
-			where: params.where,
+		await this.adapter.deleteObjects({
+			className,
+			context,
+			fields,
+			limit,
+			offset,
+			where: whereWithACLCondition,
 		})
 
-		return objectsBeforeDelete
+		await hook.runOnMultipleObjects({
+			operationType: OperationType.AfterDelete,
+			objects,
+		})
+
+		return objectBeforeDelete
 	}
 }

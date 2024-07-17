@@ -150,6 +150,7 @@ describe('_Session', () => {
 				refreshTokenExpiresAt: expect.any(Date),
 				user: 'userId',
 			},
+			fields: ['id'],
 		})
 	})
 
@@ -168,6 +169,7 @@ describe('_Session', () => {
 			className: '_Session',
 			context: { sessionId: 'sessionId', wibe: { databaseController } },
 			id: 'sessionId',
+			fields: [],
 		})
 	})
 
@@ -218,6 +220,7 @@ describe('_Session', () => {
 				refreshToken: expect.any(String),
 				refreshTokenExpiresAt: expect.any(Date),
 			},
+			fields: [],
 		})
 
 		const accessTokenExpiresAt = mockUpdateObject.mock.calls[0][0].data

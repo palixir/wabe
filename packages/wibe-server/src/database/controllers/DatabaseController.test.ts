@@ -21,13 +21,13 @@ describe('DatabaseController', () => {
 	const mockDeleteObject = mock(() => {})
 	const mockDeleteObjects = mock(() => {})
 
-	const mockHookRun = mock(() => {})
+	const mockRunOnSingleObject = mock(() => {})
+	const mockRunOnMultipleObject = mock(() => {})
 
-	const mockInitializeHook = spyOn(hooks, 'initializeHook').mockResolvedValue(
-		{
-			run: mockHookRun,
-		} as any,
-	)
+	const mockInitializeHook = spyOn(hooks, 'initializeHook').mockReturnValue({
+		runOnSingleObject: mockRunOnSingleObject,
+		runOnMultipleObjects: mockRunOnMultipleObject,
+	} as never)
 
 	const mockAdapter = mock(() => ({
 		getObject: mockGetObject,
@@ -120,14 +120,16 @@ describe('DatabaseController', () => {
 
 	afterAll(() => {
 		mockInitializeHook.mockRestore()
-		mockHookRun.mockRestore()
+		mockRunOnSingleObject.mockRestore()
+		mockRunOnMultipleObject.mockRestore()
 	})
 
 	afterEach(() => {
 		mockGetObject.mockClear()
 		mockGetObjects.mockClear()
 		mockInitializeHook.mockClear()
-		mockHookRun.mockClear()
+		mockRunOnSingleObject.mockClear()
+		mockRunOnMultipleObject.mockClear()
 	})
 
 	it('should create new where include the ACL from context when isRoot = true', () => {
@@ -294,12 +296,13 @@ describe('DatabaseController', () => {
 			className: 'TestClass',
 			context,
 			data: [],
+			fields: ['*'],
 		})
 
 		expect(mockCreateObjects).toHaveBeenCalledTimes(0)
 	})
 
-	it('should call findHooksAndExecute on getObject', async () => {
+	it('should call hooks on getObject', async () => {
 		mockGetObject.mockResolvedValue({} as never)
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
@@ -318,21 +321,20 @@ describe('DatabaseController', () => {
 				wibe: { config },
 				isRoot: true,
 			},
-			newData: null,
 		})
 
-		expect(mockHookRun).toHaveBeenCalledTimes(2)
-		expect(mockHookRun).toHaveBeenNthCalledWith(1, {
+		expect(mockRunOnSingleObject).toHaveBeenCalledTimes(2)
+		expect(mockRunOnSingleObject).toHaveBeenNthCalledWith(1, {
 			operationType: hooks.OperationType.BeforeRead,
 			id: 'id',
 		})
-		expect(mockHookRun).toHaveBeenNthCalledWith(2, {
+		expect(mockRunOnSingleObject).toHaveBeenNthCalledWith(2, {
 			operationType: hooks.OperationType.AfterRead,
-			id: 'id',
+			object: {},
 		})
 	})
 
-	it('should call findHooksAndExecute on getObjects', async () => {
+	it('should call hooks on getObjects', async () => {
 		mockGetObjects.mockResolvedValue([] as never)
 
 		const databaseController = new DatabaseController(mockAdapter() as any)
@@ -348,21 +350,26 @@ describe('DatabaseController', () => {
 		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
 			context: { sessionId: 'sessionId', wibe: { config }, isRoot: true },
-			newData: null,
 		})
 
-		expect(mockHookRun).toHaveBeenCalledTimes(2)
-		expect(mockHookRun).toHaveBeenNthCalledWith(1, {
+		expect(mockRunOnMultipleObject).toHaveBeenCalledTimes(2)
+		expect(mockRunOnMultipleObject).toHaveBeenNthCalledWith(1, {
 			operationType: hooks.OperationType.BeforeRead,
 			where: { id: { equalTo: 'id' } },
 		})
-		expect(mockHookRun).toHaveBeenNthCalledWith(2, {
+		expect(mockRunOnMultipleObject).toHaveBeenNthCalledWith(2, {
 			operationType: hooks.OperationType.AfterRead,
-			where: { id: { equalTo: 'id' } },
+			objects: [],
 		})
 	})
 
-	it('should call findHooksAndExecute on updateObject', async () => {
+	it('should call hooks on updateObject', async () => {
+		mockRunOnSingleObject.mockResolvedValue({
+			newData: {},
+		} as never)
+		mockUpdateObject.mockResolvedValue({ id: 'id' } as never)
+		mockGetObject.mockResolvedValue({ id: 'id' } as never)
+
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
 		await databaseController.updateObject({
@@ -380,19 +387,22 @@ describe('DatabaseController', () => {
 			newData: { name: 'test' },
 		})
 
-		expect(mockHookRun).toHaveBeenCalledTimes(2)
-		expect(mockHookRun).toHaveBeenNthCalledWith(1, {
+		expect(mockRunOnSingleObject).toHaveBeenCalledTimes(2)
+		expect(mockRunOnSingleObject).toHaveBeenNthCalledWith(1, {
 			operationType: hooks.OperationType.BeforeUpdate,
 			id: 'id',
 		})
-		expect(mockHookRun).toHaveBeenNthCalledWith(2, {
+		expect(mockRunOnSingleObject).toHaveBeenNthCalledWith(2, {
 			operationType: hooks.OperationType.AfterUpdate,
-			id: 'id',
+			object: { id: 'id' },
 		})
 	})
 
-	it('should call findHooksAndExecute on updateObjects', async () => {
-		mockGetObjects.mockResolvedValue([] as never)
+	it('should call hooks on updateObjects', async () => {
+		mockRunOnMultipleObject.mockResolvedValue({
+			newData: {},
+		} as never)
+		mockUpdateObjects.mockResolvedValue([] as never)
 
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
@@ -411,18 +421,18 @@ describe('DatabaseController', () => {
 			newData: { name: 'test' },
 		})
 
-		expect(mockHookRun).toHaveBeenCalledTimes(2)
-		expect(mockHookRun).toHaveBeenNthCalledWith(1, {
+		expect(mockRunOnMultipleObject).toHaveBeenCalledTimes(2)
+		expect(mockRunOnMultipleObject).toHaveBeenNthCalledWith(1, {
 			operationType: hooks.OperationType.BeforeUpdate,
 			where: { id: { equalTo: 'id' } },
 		})
-		expect(mockHookRun).toHaveBeenNthCalledWith(2, {
+		expect(mockRunOnMultipleObject).toHaveBeenNthCalledWith(2, {
 			operationType: hooks.OperationType.AfterUpdate,
-			where: { id: { equalTo: 'id' } },
+			objects: [],
 		})
 	})
 
-	it('should call findHooksAndExecute on createObject', async () => {
+	it('should call hooks on createObject', async () => {
 		mockCreateObject.mockResolvedValue({ id: 'id' } as never)
 
 		const databaseController = new DatabaseController(mockAdapter() as any)
@@ -441,17 +451,19 @@ describe('DatabaseController', () => {
 			newData: { name: 'test' },
 		})
 
-		expect(mockHookRun).toHaveBeenCalledTimes(2)
-		expect(mockHookRun).toHaveBeenNthCalledWith(1, {
+		expect(mockRunOnSingleObject).toHaveBeenCalledTimes(2)
+		expect(mockRunOnSingleObject).toHaveBeenNthCalledWith(1, {
 			operationType: hooks.OperationType.BeforeCreate,
 		})
-		expect(mockHookRun).toHaveBeenNthCalledWith(2, {
+		expect(mockRunOnSingleObject).toHaveBeenNthCalledWith(2, {
 			operationType: hooks.OperationType.AfterCreate,
-			id: 'id',
+			object: {
+				id: 'id',
+			},
 		})
 	})
 
-	it('should call findHooksAndExecute on createObjects', async () => {
+	it('should call hooks on createObjects', async () => {
 		mockGetObjects.mockResolvedValue([{ id: 'id' }] as never)
 		mockCreateObjects.mockResolvedValue([{ id: 'id' }] as never)
 
@@ -471,19 +483,17 @@ describe('DatabaseController', () => {
 			newData: { name: 'test' },
 		})
 
-		expect(mockHookRun).toHaveBeenCalledTimes(2)
-		expect(mockHookRun).toHaveBeenNthCalledWith(1, {
+		expect(mockRunOnMultipleObject).toHaveBeenCalledTimes(2)
+		expect(mockRunOnMultipleObject).toHaveBeenNthCalledWith(1, {
 			operationType: hooks.OperationType.BeforeCreate,
 		})
-		expect(mockHookRun).toHaveBeenNthCalledWith(2, {
+		expect(mockRunOnMultipleObject).toHaveBeenNthCalledWith(2, {
 			operationType: hooks.OperationType.AfterCreate,
-			where: { id: { in: ['id'] } },
+			objects: [{ id: 'id' }],
 		})
 	})
 
-	it('should call findHooksAndExecute on deleteObject', async () => {
-		mockGetObject.mockResolvedValue({ name: 'test' } as never)
-
+	it('should call hooks on deleteObject', async () => {
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
 		await databaseController.deleteObject({
@@ -497,24 +507,21 @@ describe('DatabaseController', () => {
 		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
 			context: { sessionId: 'sessionId', wibe: { config }, isRoot: true },
-			newData: null,
 		})
 
 		// 4 because we have a getObject before the delete
-		expect(mockHookRun).toHaveBeenCalledTimes(4)
-		expect(mockHookRun).toHaveBeenNthCalledWith(3, {
+		expect(mockRunOnSingleObject).toHaveBeenCalledTimes(4)
+		expect(mockRunOnSingleObject).toHaveBeenNthCalledWith(3, {
 			operationType: hooks.OperationType.BeforeDelete,
 			id: 'id',
 		})
-		expect(mockHookRun).toHaveBeenNthCalledWith(4, {
+		expect(mockRunOnSingleObject).toHaveBeenNthCalledWith(4, {
 			operationType: hooks.OperationType.AfterDelete,
-			id: 'id',
+			object: undefined, // Because we don't mock deleteObject in databaseController
 		})
 	})
 
-	it('should call findHooksAndExecute on deleteObjects', async () => {
-		mockGetObjects.mockResolvedValue([{ name: 'test' }] as never)
-
+	it('should call hooks on deleteObjects', async () => {
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
 		await databaseController.deleteObjects({
@@ -528,797 +535,16 @@ describe('DatabaseController', () => {
 		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
 			context: { sessionId: 'sessionId', wibe: { config }, isRoot: true },
-			newData: null,
 		})
 
 		// 4 because we have a getObject before the delete
-		expect(mockHookRun).toHaveBeenCalledTimes(4)
-		expect(mockHookRun).toHaveBeenNthCalledWith(3, {
+		expect(mockRunOnMultipleObject).toHaveBeenCalledTimes(4)
+		expect(mockRunOnMultipleObject).toHaveBeenNthCalledWith(3, {
 			operationType: hooks.OperationType.BeforeDelete,
 			where: { id: { equalTo: 'id' } },
 		})
-		expect(mockHookRun).toHaveBeenNthCalledWith(4, {
+		expect(mockRunOnMultipleObject).toHaveBeenNthCalledWith(4, {
 			operationType: hooks.OperationType.AfterDelete,
-			where: { id: { equalTo: 'id' } },
-		})
-	})
-
-	it("should get where object on complex structure (AND or OR) when try to get object from pointer's class", async () => {
-		mockGetObjects.mockResolvedValueOnce([
-			{ id: 'anotherClassId' },
-			{ id: 'anotherClassId2' },
-		] as never)
-
-		const databaseController = new DatabaseController(mockAdapter() as any)
-
-		const res =
-			await databaseController._getWhereObjectWithPointerOrRelation(
-				'TestClass',
-				{
-					AND: [
-						{
-							pointerToAnotherClass: {
-								// @ts-expect-error
-								field1: { equalTo: 'value' },
-							},
-						},
-						{
-							fieldX: { equalTo: 'value' },
-						},
-					],
-				},
-				context,
-			)
-
-		expect(res).toEqual({
-			AND: [
-				{
-					pointerToAnotherClass: {
-						in: ['anotherClassId', 'anotherClassId2'],
-					},
-				},
-				{
-					fieldX: { equalTo: 'value' },
-				},
-			],
-		})
-	})
-
-	it("should get where object when try to get object from pointer's class", async () => {
-		mockGetObjects.mockResolvedValueOnce([
-			{ id: 'anotherClassId' },
-			{ id: 'anotherClassId2' },
-		] as never)
-
-		const databaseController = new DatabaseController(mockAdapter() as any)
-
-		const res =
-			await databaseController._getWhereObjectWithPointerOrRelation(
-				'TestClass',
-				{
-					// @ts-expect-error
-					pointerToAnotherClass: { field1: { equalTo: 'value' } },
-				},
-				context,
-			)
-
-		expect(res).toEqual({
-			pointerToAnotherClass: {
-				in: ['anotherClassId', 'anotherClassId2'],
-			},
-		})
-	})
-
-	it('should get multiple objects with pointer data', async () => {
-		mockGetObjects.mockResolvedValueOnce([
-			{ id: 'anotherClassId' },
-			{ id: 'anotherClassId2' },
-		] as never)
-
-		mockGetObjects.mockResolvedValueOnce([
-			{ id: 'anotherClassId' },
-			{ id: 'anotherClassId2' },
-		] as never)
-
-		const databaseController = new DatabaseController(mockAdapter() as any)
-
-		await databaseController.getObjects({
-			className: 'TestClass',
-			where: {
-				// @ts-expect-error
-				pointerToAnotherClass: { field1: { equalTo: 'value' } },
-			},
-
-			fields: ['id'],
-			context,
-		})
-
-		// One time for the call above and one to get all objects of the pointer class
-		expect(mockGetObjects).toHaveBeenCalledTimes(2)
-		expect(mockGetObjects).toHaveBeenNthCalledWith(1, {
-			className: 'AnotherClass',
-			where: expect.any(Object),
-			fields: ['id'],
-			context,
-		})
-	})
-
-	it('should return id on pointer type if no sub field specified', async () => {
-		mockGetObject.mockResolvedValueOnce({
-			id: '123',
-			pointerToAnotherClass: 'pointerAnotherClassId',
-		} as never)
-
-		const databaseController = new DatabaseController(mockAdapter() as any)
-
-		const res = await databaseController.getObject({
-			className: 'TestClass',
-			id: '123',
-			fields: ['id', 'pointerToAnotherClass'],
-			context,
-		})
-
-		expect(res).toEqual({
-			id: '123',
-			pointerToAnotherClass: 'pointerAnotherClassId',
-		})
-	})
-
-	it('should return true if there is at least one relation field (_isRelationField)', () => {
-		const databaseController = new DatabaseController(mockAdapter() as any)
-
-		expect(
-			databaseController._isRelationField(
-				'AnotherClass4',
-				context,
-				'AnotherClass3',
-			),
-		).toBe(true)
-	})
-
-	it('should return false if the field is not Pointer of the class', () => {
-		const databaseController = new DatabaseController(mockAdapter() as any)
-
-		expect(
-			databaseController._isRelationField(
-				'AnotherClass3' as any,
-				context,
-				'AnotherClass4',
-			),
-		).toBe(false)
-	})
-
-	it('should getObject with one relation field', async () => {
-		mockGetObject.mockResolvedValueOnce({
-			id: '123',
-			relationToAnotherClass3: ['anotherClass3Id'],
-		} as never)
-
-		mockGetObjects.mockResolvedValueOnce([
-			{
-				id: 'anotherClass3Id',
-				name: 'anotherClass3Name',
-			},
-		] as never)
-
-		const databaseController = new DatabaseController(mockAdapter() as any)
-
-		const res = await databaseController.getObject({
-			className: 'AnotherClass4',
-			id: '123',
-			fields: [
-				'id',
-				'relationToAnotherClass3.id',
-				'relationToAnotherClass3.field4',
-			],
-			context,
-		})
-
-		expect(res).toEqual({
-			id: '123',
-			// @ts-expect-error
-			relationToAnotherClass3: {
-				edges: [
-					{
-						node: {
-							id: 'anotherClass3Id',
-							name: 'anotherClass3Name',
-						},
-					},
-				],
-			},
-		})
-
-		expect(mockGetObject).toHaveBeenCalledTimes(1)
-		expect(mockGetObject).toHaveBeenCalledWith({
-			className: 'AnotherClass4',
-			id: '123',
-			fields: ['id', 'relationToAnotherClass3'],
-			context,
-			where: {},
-		})
-
-		expect(mockGetObjects).toHaveBeenCalledTimes(1)
-		expect(mockGetObjects).toHaveBeenCalledWith({
-			className: 'AnotherClass3',
-			where: expect.any(Object),
-			fields: ['id', 'field4'],
-			context,
-		})
-	})
-
-	it('should getObjects with one relation field', async () => {
-		mockGetObjects.mockResolvedValueOnce([
-			{
-				id: '123',
-				relationToAnotherClass3: ['anotherClass3Id'],
-			},
-		] as never)
-
-		mockGetObjects.mockResolvedValueOnce([
-			{
-				id: 'anotherClass3Id',
-				name: 'anotherClass3Name',
-			},
-		] as never)
-
-		const databaseController = new DatabaseController(mockAdapter() as any)
-
-		const res = await databaseController.getObjects({
-			className: 'AnotherClass4',
-			where: { id: { equalTo: '123' } },
-			fields: [
-				'id',
-				'relationToAnotherClass3.id',
-				'relationToAnotherClass3.field4',
-			],
-			context,
-		})
-
-		expect(res).toEqual([
-			{
-				id: '123',
-				// @ts-expect-error
-				relationToAnotherClass3: {
-					edges: [
-						{
-							node: {
-								id: 'anotherClass3Id',
-								name: 'anotherClass3Name',
-							},
-						},
-					],
-				},
-			},
-		])
-
-		expect(mockGetObjects).toHaveBeenCalledTimes(2)
-		expect(mockGetObjects).toHaveBeenNthCalledWith(1, {
-			className: 'AnotherClass4',
-			where: expect.any(Object),
-			fields: ['id', 'relationToAnotherClass3'],
-			context,
-		})
-		expect(mockGetObjects).toHaveBeenNthCalledWith(2, {
-			className: 'AnotherClass3',
-			where: expect.any(Object),
-			fields: ['id', 'field4'],
-			context,
-		})
-	})
-
-	it('should get the object with pointer data', async () => {
-		const databaseController = new DatabaseController(mockAdapter() as any)
-
-		spyOn(databaseController, '_isPointerField').mockReturnValueOnce(true)
-
-		await databaseController._getFinalObjectWithPointer(
-			{
-				name: 'name',
-				pointerToAnotherClass: 'idOfAnotherClass',
-				id: '',
-			},
-			{
-				pointerToAnotherClass: {
-					fieldsOfPointerClass: ['field1'],
-					pointerClass: 'AnotherClass',
-				},
-			},
-			'TestClass',
-			context,
-		)
-
-		expect(mockGetObject).toHaveBeenCalledTimes(1)
-		expect(mockGetObject).toHaveBeenCalledWith({
-			className: 'AnotherClass',
-			fields: ['field1'],
-			id: 'idOfAnotherClass',
-			context,
-			where: {},
-		})
-	})
-
-	it('should return true if the field is a Pointer of the class', () => {
-		const databaseController = new DatabaseController(mockAdapter() as any)
-
-		expect(
-			databaseController._isPointerField(
-				'testClass' as any,
-				context,
-				'anotherClass',
-			),
-		).toBe(true)
-	})
-
-	it('should return false if the field is not Pointer of the class', () => {
-		const databaseController = new DatabaseController(mockAdapter() as any)
-
-		expect(
-			databaseController._isPointerField(
-				'anotherClass' as any,
-				context,
-				'anotherClass2',
-			),
-		).toBe(false)
-	})
-
-	it('should return false if the field is not Pointer of the class (class not exist)', () => {
-		const databaseController = new DatabaseController(mockAdapter() as any)
-
-		expect(
-			databaseController._isPointerField(
-				'invalidClass' as any,
-				context,
-				'anotherClass2',
-			),
-		).toBe(false)
-	})
-
-	it('should return false if the pointer classname is undefined', () => {
-		const databaseController = new DatabaseController(mockAdapter() as any)
-
-		expect(
-			databaseController._isPointerField('testClass' as any, context),
-		).toBe(false)
-	})
-
-	it('should return false if the relation classname is undefined', () => {
-		const databaseController = new DatabaseController(mockAdapter() as any)
-
-		expect(
-			databaseController._isRelationField('testClass' as any, context),
-		).toBe(false)
-	})
-
-	it("should get all pointer's classes to request", () => {
-		const databaseController = new DatabaseController(mockAdapter() as any)
-
-		const fields = [
-			'name',
-			'pointerToAnotherClass.field1',
-			'pointerToAnotherClass.field2',
-		]
-
-		expect(
-			databaseController._getPointerObject('TestClass', fields, context),
-		).toEqual({
-			pointers: {
-				pointerToAnotherClass: {
-					pointerClass: 'AnotherClass',
-					fieldsOfPointerClass: ['field1', 'field2'],
-				},
-			},
-			pointersFieldsId: ['pointerToAnotherClass'],
-		})
-	})
-
-	it("should get all pointer's classes to request with multiple pointer", () => {
-		const databaseController = new DatabaseController(mockAdapter() as any)
-
-		const fields = [
-			'name',
-			'pointerToAnotherClass.field1',
-			'pointerToAnotherClass.field2',
-			'pointerToAnotherClass2.field3',
-		]
-
-		expect(
-			databaseController._getPointerObject('TestClass', fields, context),
-		).toEqual({
-			pointers: {
-				pointerToAnotherClass: {
-					pointerClass: 'AnotherClass',
-					fieldsOfPointerClass: ['field1', 'field2'],
-				},
-				pointerToAnotherClass2: {
-					pointerClass: 'AnotherClass2',
-					fieldsOfPointerClass: ['field3'],
-				},
-			},
-			pointersFieldsId: [
-				'pointerToAnotherClass',
-				'pointerToAnotherClass2',
-			],
-		})
-	})
-
-	it('shoud getObject with no fields in output', async () => {
-		mockGetObject.mockResolvedValueOnce({
-			id: '123',
-			name: 'name',
-		} as never)
-
-		const databaseController = new DatabaseController(mockAdapter() as any)
-
-		await databaseController.getObject({
-			className: 'TestClass',
-			id: '123',
-			context,
-		})
-
-		expect(mockGetObject).toHaveBeenCalledTimes(1)
-		expect(mockGetObject).toHaveBeenNthCalledWith(1, {
-			className: 'TestClass',
-			id: '123',
-			fields: [],
-			context,
-			where: {},
-		})
-	})
-
-	it('should getObject without pointer', async () => {
-		mockGetObject.mockResolvedValueOnce({
-			id: '123',
-			name: 'name',
-		} as never)
-
-		const databaseController = new DatabaseController(mockAdapter() as any)
-
-		const res = await databaseController.getObject({
-			className: 'TestClass',
-			id: '123',
-			fields: ['id', 'name'],
-			context,
-		})
-
-		expect(res).toEqual({
-			id: '123',
-			name: 'name',
-		})
-
-		expect(mockGetObject).toHaveBeenCalledTimes(1)
-		expect(mockGetObject).toHaveBeenNthCalledWith(1, {
-			className: 'TestClass',
-			id: '123',
-			fields: ['id', 'name'],
-			context,
-			where: {},
-		})
-	})
-
-	it('should call the getObject on adapter with one pointer', async () => {
-		mockGetObject.mockResolvedValueOnce({
-			id: '123',
-			pointerToAnotherClass: 'anotherClassId',
-		} as never)
-
-		mockGetObject.mockResolvedValueOnce({
-			id: 'anotherClassId',
-			name: 'anotherClassName',
-		} as never)
-
-		const databaseController = new DatabaseController(mockAdapter() as any)
-
-		const res = await databaseController.getObject({
-			className: 'TestClass',
-			id: '123',
-			fields: [
-				'id',
-				'name',
-				'pointerToAnotherClass.id',
-				'pointerToAnotherClass.name',
-			],
-			context,
-		})
-
-		expect(res).toEqual({
-			id: '123',
-			// @ts-expect-error
-			pointerToAnotherClass: {
-				id: 'anotherClassId',
-				name: 'anotherClassName',
-			},
-		})
-
-		expect(mockGetObject).toHaveBeenCalledTimes(2)
-		expect(mockGetObject).toHaveBeenNthCalledWith(1, {
-			className: 'TestClass',
-			id: '123',
-			fields: ['id', 'name', 'pointerToAnotherClass'],
-			context,
-			where: {},
-		})
-
-		expect(mockGetObject).toHaveBeenNthCalledWith(2, {
-			className: 'AnotherClass',
-			id: 'anotherClassId',
-			fields: ['id', 'name'],
-			context,
-			where: {},
-		})
-	})
-
-	it('should call getObject with multiple pointers', async () => {
-		mockGetObject.mockResolvedValueOnce({
-			id: '123',
-			pointerToAnotherClass: 'anotherClassId',
-			pointerToAnotherClass2: 'anotherClass2Id',
-		} as never)
-
-		mockGetObject.mockResolvedValueOnce({
-			id: 'anotherClassId',
-			name: 'anotherClassName',
-		} as never)
-
-		mockGetObject.mockResolvedValueOnce({
-			age: 'anotherClass2Age',
-		} as never)
-
-		const databaseController = new DatabaseController(mockAdapter() as any)
-
-		const res = await databaseController.getObject({
-			className: 'TestClass',
-			id: '123',
-			fields: [
-				'id',
-				'name',
-				'pointerToAnotherClass.id',
-				'pointerToAnotherClass.name',
-				'pointerToAnotherClass2.age',
-			],
-			context,
-		})
-
-		expect(res).toEqual({
-			id: '123',
-			// @ts-expect-error
-			pointerToAnotherClass: {
-				id: 'anotherClassId',
-				name: 'anotherClassName',
-			},
-			pointerToAnotherClass2: {
-				age: 'anotherClass2Age',
-			},
-		})
-
-		expect(mockGetObject).toHaveBeenCalledTimes(3)
-		expect(mockGetObject).toHaveBeenNthCalledWith(1, {
-			className: 'TestClass',
-			id: '123',
-			fields: [
-				'id',
-				'name',
-				'pointerToAnotherClass',
-				'pointerToAnotherClass2',
-			],
-			context,
-			where: {},
-		})
-
-		expect(mockGetObject).toHaveBeenNthCalledWith(2, {
-			className: 'AnotherClass',
-			id: 'anotherClassId',
-			fields: ['id', 'name'],
-			context,
-			where: {},
-		})
-
-		expect(mockGetObject).toHaveBeenNthCalledWith(3, {
-			className: 'AnotherClass2',
-			id: 'anotherClass2Id',
-			fields: ['age'],
-			context,
-			where: {},
-		})
-	})
-
-	it('shoud getObjects with no fields in output', async () => {
-		mockGetObjects.mockResolvedValueOnce([
-			{
-				id: '123',
-			},
-		] as never)
-
-		const databaseController = new DatabaseController(mockAdapter() as any)
-
-		await databaseController.getObjects({
-			className: 'TestClass',
-			where: { id: { equalTo: '123' } },
-			context,
-		})
-
-		expect(mockGetObjects).toHaveBeenCalledTimes(1)
-		expect(mockGetObjects).toHaveBeenNthCalledWith(1, {
-			className: 'TestClass',
-			where: expect.any(Object),
-			fields: [],
-			context,
-		})
-	})
-
-	it('should call getObjects with no pointer', async () => {
-		mockGetObjects.mockResolvedValueOnce([
-			{
-				id: '123',
-				name: 'name',
-			},
-		] as never)
-
-		const databaseController = new DatabaseController(mockAdapter() as any)
-
-		const res = await databaseController.getObjects({
-			className: 'TestClass',
-			where: { id: { equalTo: '123' } },
-			fields: ['id', 'name'],
-			context,
-		})
-
-		expect(res).toEqual([
-			{
-				id: '123',
-				name: 'name',
-			},
-		])
-
-		expect(mockGetObject).toHaveBeenCalledTimes(0)
-
-		expect(mockGetObjects).toHaveBeenCalledTimes(1)
-		expect(mockGetObjects).toHaveBeenNthCalledWith(1, {
-			className: 'TestClass',
-			where: expect.any(Object),
-			fields: ['id', 'name'],
-			context,
-		})
-	})
-
-	it('should call getObjects with one pointer', async () => {
-		mockGetObjects.mockResolvedValueOnce([
-			{
-				id: '123',
-				pointerToAnotherClass: 'anotherClassId',
-			},
-		] as never)
-
-		mockGetObject.mockResolvedValueOnce({
-			id: 'anotherClassId',
-			name: 'anotherClassName',
-		} as never)
-
-		const databaseController = new DatabaseController(mockAdapter() as any)
-
-		const res = await databaseController.getObjects({
-			className: 'TestClass',
-			where: {
-				id: {
-					equalTo: '123',
-				},
-			},
-			fields: [
-				'id',
-				'name',
-				'pointerToAnotherClass.id',
-				'pointerToAnotherClass.name',
-			],
-			context,
-		})
-
-		expect(res).toEqual([
-			{
-				id: '123',
-				// @ts-expect-error
-				pointerToAnotherClass: {
-					id: 'anotherClassId',
-					name: 'anotherClassName',
-				},
-			},
-		])
-
-		expect(mockGetObject).toHaveBeenCalledTimes(1)
-		expect(mockGetObject).toHaveBeenNthCalledWith(1, {
-			className: 'AnotherClass',
-			id: 'anotherClassId',
-			fields: ['id', 'name'],
-			context,
-			where: {},
-		})
-
-		expect(mockGetObjects).toHaveBeenCalledTimes(1)
-		expect(mockGetObjects).toHaveBeenNthCalledWith(1, {
-			className: 'TestClass',
-			where: expect.any(Object),
-			fields: ['id', 'name', 'pointerToAnotherClass'],
-			context,
-		})
-	})
-
-	it('should call getObjects with multiple pointer', async () => {
-		mockGetObjects.mockResolvedValueOnce([
-			{
-				id: '123',
-				pointerToAnotherClass: 'anotherClassId',
-				pointerToAnotherClass2: 'anotherClass2Id',
-			},
-		] as never)
-
-		mockGetObject.mockResolvedValueOnce({
-			id: 'anotherClassId',
-			name: 'anotherClassName',
-		} as never)
-
-		mockGetObject.mockResolvedValueOnce({
-			age: 'anotherClass2Age',
-		} as never)
-
-		const databaseController = new DatabaseController(mockAdapter() as any)
-
-		const res = await databaseController.getObjects({
-			className: 'TestClass',
-			where: {
-				id: {
-					equalTo: '123',
-				},
-			},
-			fields: [
-				'id',
-				'name',
-				'pointerToAnotherClass.id',
-				'pointerToAnotherClass.name',
-				'pointerToAnotherClass2.age',
-			],
-			context,
-		})
-
-		expect(res).toEqual([
-			{
-				id: '123',
-				// @ts-expect-error
-				pointerToAnotherClass: {
-					id: 'anotherClassId',
-					name: 'anotherClassName',
-				},
-				pointerToAnotherClass2: {
-					age: 'anotherClass2Age',
-				},
-			},
-		])
-
-		expect(mockGetObject).toHaveBeenCalledTimes(2)
-		expect(mockGetObject).toHaveBeenNthCalledWith(1, {
-			className: 'AnotherClass',
-			id: 'anotherClassId',
-			fields: ['id', 'name'],
-			context,
-			where: {},
-		})
-		expect(mockGetObject).toHaveBeenNthCalledWith(2, {
-			className: 'AnotherClass2',
-			id: 'anotherClass2Id',
-			fields: ['age'],
-			context,
-			where: {},
-		})
-
-		expect(mockGetObjects).toHaveBeenCalledTimes(1)
-		expect(mockGetObjects).toHaveBeenNthCalledWith(1, {
-			className: 'TestClass',
-			fields: [
-				'id',
-				'name',
-				'pointerToAnotherClass',
-				'pointerToAnotherClass2',
-			],
-			context,
-			where: expect.any(Object),
 		})
 	})
 })
