@@ -9,8 +9,6 @@ import { HookObject } from './HookObject'
 import {
 	defaultCallAuthenticationProviderOnBeforeCreateUser,
 	defaultCallAuthenticationProviderOnBeforeUpdateUser,
-	defaultCreateSessionOnAfterCreateUser,
-	defaultCreateSessionOnAfterUpdateUser,
 } from './authentication'
 import {
 	defaultBeforeCreateForCreatedAt,
@@ -149,6 +147,10 @@ export const initializeHook = <T extends keyof WibeAppTypes['types']>({
 		return res
 	}
 
+	const hooksOrderByPriorities = _getHooksOrderByPriorities(
+		context.wibe.config,
+	)
+
 	return {
 		runOnSingleObject: async ({
 			operationType,
@@ -159,10 +161,6 @@ export const initializeHook = <T extends keyof WibeAppTypes['types']>({
 			id?: string
 			object?: OutputType<any, any>
 		}) => {
-			const hooksOrderByPriorities = _getHooksOrderByPriorities(
-				context.wibe.config,
-			)
-
 			const object = await computeObject({
 				id,
 				operationType,
@@ -205,10 +203,6 @@ export const initializeHook = <T extends keyof WibeAppTypes['types']>({
 			where?: WhereType<any, any>
 			objects?: OutputType<any, any>[]
 		}) => {
-			const hooksOrderByPriorities = _getHooksOrderByPriorities(
-				context.wibe.config,
-			)
-
 			const objects = await computeObjects({
 				where,
 				operationType,
@@ -302,23 +296,15 @@ export const getDefaultHooks = (): Hook<any>[] => [
 		callback: defaultBeforeUpdateUpload,
 	},
 	{
+		className: 'User',
 		operationType: OperationType.BeforeCreate,
 		priority: 1,
 		callback: defaultCallAuthenticationProviderOnBeforeCreateUser,
 	},
 	{
+		className: 'User',
 		operationType: OperationType.BeforeUpdate,
 		priority: 1,
 		callback: defaultCallAuthenticationProviderOnBeforeUpdateUser,
-	},
-	{
-		operationType: OperationType.AfterCreate,
-		priority: 1,
-		callback: defaultCreateSessionOnAfterCreateUser,
-	},
-	{
-		operationType: OperationType.AfterUpdate,
-		priority: 1,
-		callback: defaultCreateSessionOnAfterUpdateUser,
 	},
 ]

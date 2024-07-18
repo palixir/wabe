@@ -5,9 +5,11 @@ import { OperationType } from './index'
 describe('Hooks', () => {
 	const mockGetObject = mock(() => {})
 	const mockGetObjects = mock(() => {})
-	const mockCallBack1 = mock(() => {})
+	const mockCallback1 = mock(() => {})
 	const mockCallback2 = mock(() => {})
 	const mockCallback3 = mock(() => {})
+	const mockCallback4 = mock(() => {})
+	const mockCallback5 = mock(() => {})
 
 	const databaseController = {
 		getObject: mockGetObject,
@@ -17,7 +19,7 @@ describe('Hooks', () => {
 	const config = {
 		hooks: [
 			{
-				callback: mockCallBack1,
+				callback: mockCallback1,
 				operationType: OperationType.BeforeRead,
 				priority: 1,
 			},
@@ -31,14 +33,48 @@ describe('Hooks', () => {
 				operationType: OperationType.BeforeCreate,
 				priority: 1,
 			},
+			{
+				callback: mockCallback4,
+				operationType: OperationType.BeforeRead,
+				priority: 1,
+				className: 'ClassTest',
+			},
+			{
+				callback: mockCallback5,
+				operationType: OperationType.BeforeRead,
+				priority: 1,
+				className: 'AnotherClass',
+			},
 		],
 	} as any
 
 	afterEach(() => {
 		mockGetObjects.mockClear()
-		mockCallBack1.mockClear()
+		mockGetObject.mockClear()
+		mockCallback1.mockClear()
 		mockCallback2.mockClear()
 		mockCallback3.mockClear()
+		mockCallback4.mockClear()
+		mockCallback5.mockClear()
+	})
+
+	it('should only run hook on specified className', async () => {
+		const hooks = index.initializeHook({
+			className: 'ClassTest',
+			context: {
+				isRoot: true,
+				wibe: { databaseController, config } as any,
+			},
+			newData: { name: 'test' },
+		})
+
+		await hooks.runOnSingleObject({
+			operationType: OperationType.BeforeRead,
+			id: 'id',
+		})
+
+		expect(mockCallback4).toHaveBeenCalledTimes(1)
+		expect(mockCallback5).toHaveBeenCalledTimes(0)
 	})
 
 	it('should run hook on BeforeRead with one object impacted', async () => {
@@ -67,10 +103,10 @@ describe('Hooks', () => {
 			fields: ['*'],
 		})
 
-		expect(mockCallBack1).toHaveBeenCalledTimes(1)
+		expect(mockCallback1).toHaveBeenCalledTimes(1)
 
 		// @ts-expect-error
-		const hookObject = mockCallBack1.mock.calls[0][0] as any
+		const hookObject = mockCallback1.mock.calls[0][0] as any
 
 		expect(hookObject.object).toEqual({
 			id: 'id',

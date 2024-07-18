@@ -91,7 +91,7 @@ describe('Database', () => {
 		mockAfterUpdate.mockClear()
 	})
 
-	it('should call getObject adapter only 4 times (lower is better) for one read query (performance test) without mutation in hooks', async () => {
+	it('should call getObject adapter only 2 times (lower is better) for one read query (performance test) without mutation in hooks', async () => {
 		const spyGetObjectAdapter = spyOn(
 			wibe.databaseController.adapter,
 			'getObject',
