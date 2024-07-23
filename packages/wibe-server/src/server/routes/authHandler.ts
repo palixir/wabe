@@ -17,6 +17,7 @@ import { generateRandomValues } from '../../authentication/oauth/utils'
 - Validate and sign in with google provider (back)
 */
 
+// https://www.rfc-editor.org/rfc/rfc7636#section-4.4 not precise the storage of codeVerifier
 export const oauthHandlerCallback = async (
 	context: Context,
 	wibeContext: WibeContext<any>,
@@ -117,41 +118,4 @@ export const authHandler = async (
 		default:
 			break
 	}
-
-	// const code = context.query.code
-	// // TODO : Check maybe it's better to store it in http cookie.
-	// // https://www.rfc-editor.org/rfc/rfc7636#section-4.4 not precise the storage of codeVerifier
-	// const codeVerifier = context.query.code_verifier
-
-	// if (!code || !codeVerifier) throw new Error('Authentication failed')
-
-	// const { authentication } = context.wibe.config
-
-	// if (!authentication) throw new Error('Authentication config not found')
-
-	// try {
-	// 	// Here we can't use the classic graphql client because provider is dynamic
-	// await getGraphqlClient(context.wibe.config.port).request<any>(gql`
-	// 	mutation signInWith(
-	// 		$authorizationCode: String!
-	// 		$codeVerifier: String!
-	// 	) {
-	// 		signInWith(
-	// 			input: {
-	// 				authentication: {
-	// 					${provider}: {
-	// 						authorizationCode: $authorizationCode
-	// 						codeVerifier: $codeVerifier
-	// 					}
-	// 				}
-	// 			}
-	// 		)
-	// 	}
-	// `)
-
-	// 	context.set.redirect = authentication.successRedirectPath
-	// } catch (e) {
-	//   console.error(e)
-	//   context.set.redirect = authentication.failureRedirectPath
-	// }
 }

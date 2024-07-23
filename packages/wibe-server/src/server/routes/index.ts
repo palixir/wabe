@@ -1,21 +1,15 @@
-import { authHandler, oauthHandlerCallback } from './authHandler'
+import type { Context, WobeHandler } from 'wobe'
 import type { ProviderEnum } from '../../authentication/interface'
-import type { Context } from 'wobe'
+import type { WibeContext } from '../interface'
+import { authHandler, oauthHandlerCallback } from './authHandler'
 
 export interface WibeRoute {
 	method: 'GET' | 'POST' | 'PUT' | 'DELETE'
 	path: string
-	handler: (context: Context) => Promise<void>
+	handler: WobeHandler<{ wibe: WibeContext<any> }>
 }
 
 export const defaultRoutes = (): WibeRoute[] => [
-	{
-		method: 'GET',
-		path: '/toto',
-		handler: async (context: Context) => {
-			context.redirect('http://localhost:5173')
-		},
-	},
 	{
 		method: 'GET',
 		path: '/auth/oauth',

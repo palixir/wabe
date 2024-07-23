@@ -42,7 +42,7 @@ export type WibeAppTypes = {
 }
 
 export class WibeApp<T extends WibeAppTypes> {
-	public server: Wobe
+	public server: Wobe<{ wibe: WibeContext<T> }>
 
 	public config: WibeConfig<T>
 	public databaseController: DatabaseController<T>
@@ -74,10 +74,13 @@ export class WibeApp<T extends WibeAppTypes> {
 			},
 		}
 
-		this.server = new Wobe().get('/health', (context) => {
-			context.res.status = 200
-			context.res.send('OK')
-		})
+		this.server = new Wobe<{ wibe: WibeContext<T> }>().get(
+			'/health',
+			(context) => {
+				context.res.status = 200
+				context.res.send('OK')
+			},
+		)
 
 		const databaseAdapter = new MongoAdapter({
 			databaseName: database.name,
@@ -172,58 +175,67 @@ export class WibeApp<T extends WibeAppTypes> {
 				graphqlSchema: schema,
 			})
 
+		// Set the wibe context
+		this.server.beforeHandler(async (ctx) => {
+			const headers = ctx.request.headers
+
+			if (headers.get('Wibe-Root-Key') === this.config.rootKey) {
+				ctx.wibe = {
+					isRoot: true,
+					wibe: this,
+				}
+				return
+			}
+
+			const getAccessToken = () => {
+				const isCookieSession =
+					!!this.config.authentication?.session?.cookieSession
+
+				if (isCookieSession)
+					return getCookieInRequestHeaders(
+						'accessToken',
+						ctx.request.headers,
+					)
+
+				return headers.get('Wibe-Access-Token')
+			}
+
+			const accessToken = getAccessToken()
+
+			if (!accessToken) {
+				ctx.wibe = {
+					isRoot: false,
+					wibe: this,
+				}
+				return
+			}
+
+			const session = new Session()
+
+			const { user, sessionId } = await session.meFromAccessToken(
+				accessToken,
+				{
+					isRoot: true,
+					wibe: this,
+				},
+			)
+
+			ctx.wibe = {
+				isRoot: false,
+				sessionId,
+				user,
+				wibe: this,
+			}
+		})
+
 		this.server.usePlugin(
 			WobeGraphqlYogaPlugin({
 				schema,
 				maskedErrors: false,
 				// TODO: Maybe add cors here + the wobe cors for csrf on upload
 				graphqlEndpoint: '/graphql',
-				context: async ({ request }): Promise<WibeContext<T>> => {
-					const headers = request.headers
-
-					if (headers.get('Wibe-Root-Key') === this.config.rootKey)
-						return {
-							isRoot: true,
-							wibe: this,
-						}
-
-					const getAccessToken = () => {
-						const isCookieSession =
-							!!this.config.authentication?.session?.cookieSession
-
-						if (isCookieSession)
-							return getCookieInRequestHeaders(
-								'accessToken',
-								request.headers,
-							)
-
-						return headers.get('Wibe-Access-Token')
-					}
-
-					const accessToken = getAccessToken()
-
-					if (!accessToken)
-						return {
-							isRoot: false,
-							wibe: this,
-						}
-
-					const session = new Session()
-
-					const { user, sessionId } = await session.meFromAccessToken(
-						accessToken,
-						{
-							isRoot: true,
-							wibe: this,
-						},
-					)
-
-					return {
-						isRoot: false,
-						sessionId,
-						user,
-						wibe: this,
-					}
+				context: async (ctx): Promise<WibeContext<T>> => {
+					return ctx.wibe
 				},
 				graphqlMiddleware: async (resolve, res) => {
 					const response = await resolve()
