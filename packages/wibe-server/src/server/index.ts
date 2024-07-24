@@ -41,8 +41,12 @@ export type WibeAppTypes = {
 	enums: string
 }
 
+export type WobeCustomContext<T extends WibeAppTypes> = {
+	wibe: WibeContext<T>
+}
+
 export class WibeApp<T extends WibeAppTypes> {
-	public server: Wobe<{ wibe: WibeContext<T> }>
+	public server: Wobe<WobeCustomContext<T>>
 
 	public config: WibeConfig<T>
 	public databaseController: DatabaseController<T>
@@ -74,7 +78,7 @@ export class WibeApp<T extends WibeAppTypes> {
 			},
 		}
 
-		this.server = new Wobe<{ wibe: WibeContext<T> }>().get(
+		this.server = new Wobe<WobeCustomContext<T>>().get(
 			'/health',
 			(context) => {
 				context.res.status = 200

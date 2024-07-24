@@ -26,12 +26,12 @@ export const oauthHandlerCallback = async (
 		const state = context.query.state
 		const code = context.query.code
 
-		const stateInCookie = context.res.getCookie('state')
+		const stateInCookie = context.getCookie('state')
 
 		if (state !== stateInCookie) throw new Error('Authentication failed')
 
-		const codeVerifier = context.res.getCookie('code_verifier')
-		const provider = context.res.getCookie('provider')
+		const codeVerifier = context.getCookie('code_verifier')
+		const provider = context.getCookie('provider')
 
 		await getGraphqlClient(wibeContext.wibeApp.config.port).request<any>(
 			gql`
@@ -57,16 +57,16 @@ export const oauthHandlerCallback = async (
 			},
 		)
 
-		context.redirect(
-			wibeContext.wibeApp.config.authentication?.successRedirectPath ||
-				'/',
-		)
+		// context.redirect(
+		// 	wibeContext.wibeApp.config.authentication?.successRedirectPath ||
+		// 		'/',
+		// )
 	} catch (error) {
 		console.error(error)
-		context.redirect(
-			wibeContext.wibeApp.config.authentication?.failureRedirectPath ||
-				'/',
-		)
+		// context.redirect(
+		// 	wibeContext.wibeApp.config.authentication?.failureRedirectPath ||
+		// 		'/',
+		// )
 	}
 }
 
@@ -90,6 +90,8 @@ export const authHandler = async (
 
 			const state = generateRandomValues()
 			const codeVerifier = generateRandomValues()
+
+			console.log({ state })
 
 			context.res.setCookie('code_verifier', codeVerifier, {
 				httpOnly: true,

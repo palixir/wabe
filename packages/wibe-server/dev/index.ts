@@ -26,8 +26,10 @@ const run = async () => {
 				cookieSession: true,
 			},
 			roles: ['Admin', 'Client'],
-			successRedirectPath: 'http://localhost:5173',
-			failureRedirectPath: 'http://localhost:5173',
+			successRedirectPath:
+				'http://localhost:3000/auth/oauth?provider=google',
+			failureRedirectPath:
+				'http://localhost:3000/auth/oauth?provider=google',
 			providers: {
 				x: {
 					clientId: 'SVFhTWpONVM4S09TWVB6dF9CZjc6MTpjaQ',
