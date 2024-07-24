@@ -48,7 +48,9 @@ export const oauthHandlerCallback = async (
 								}
 							}
 						}
-					)
+					){
+						accessToken
+					}
 				}
 			`,
 			{

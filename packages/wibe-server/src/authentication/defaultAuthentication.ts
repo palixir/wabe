@@ -1,4 +1,4 @@
-import type { WibeAppTypes } from '..'
+import { Google, type WibeAppTypes } from '..'
 import type { CustomAuthenticationMethods } from './interface'
 import { EmailPassword } from './providers/EmailPassword'
 
@@ -19,18 +19,18 @@ export const defaultAuthenticationMethods = <
 		},
 		provider: new EmailPassword(),
 	},
-	// {
-	// 	name: 'google',
-	// 	input: {
-	// 		authorizationCode: {
-	// 			type: 'String',
-	// 			required: true,
-	// 		},
-	// 		codeVerifier: {
-	// 			type: 'String',
-	// 			required: true,
-	// 		},
-	// 	},
-	// 	provider: new Google(),
-	// },
+	{
+		name: 'google',
+		input: {
+			authorizationCode: {
+				type: 'String',
+				required: true,
+			},
+			codeVerifier: {
+				type: 'String',
+				required: true,
+			},
+		},
+		provider: new Google(),
+	},
 ]
