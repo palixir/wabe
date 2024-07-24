@@ -56,14 +56,14 @@ export const signInWithResolver = async (
 
 	const { refreshToken, accessToken } = await session.create(userId, context)
 
-	if (context.wibe.config.authentication?.session?.cookieSession) {
+	if (context.wibeApp.config.authentication?.session?.cookieSession) {
 		context.response?.setCookie('refreshToken', refreshToken, {
 			httpOnly: true,
 			path: '/',
 			secure: process.env.NODE_ENV === 'production',
 			expires: new Date(
 				Date.now() +
-					session.getRefreshTokenExpireIn(context.wibe.config),
+					session.getRefreshTokenExpireIn(context.wibeApp.config),
 			),
 		})
 
@@ -73,7 +73,7 @@ export const signInWithResolver = async (
 			secure: process.env.NODE_ENV === 'production',
 			expires: new Date(
 				Date.now() +
-					session.getAccessTokenExpireIn(context.wibe.config),
+					session.getAccessTokenExpireIn(context.wibeApp.config),
 			),
 		})
 	}

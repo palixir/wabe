@@ -1,4 +1,4 @@
-import type { MutationData, OutputType, WhereType } from '../database'
+import type { OutputType, WhereType } from '../database'
 import {
 	defaultBeforeCreateUpload,
 	defaultBeforeUpdateUpload,
@@ -103,7 +103,7 @@ export const initializeHook = <T extends keyof WibeAppTypes['types']>({
 
 		if (!id) throw new Error('Object not found')
 
-		return context.wibe.databaseController.getObject({
+		return context.wibeApp.databaseController.getObject({
 			// @ts-expect-error
 			className,
 			context: {
@@ -130,7 +130,7 @@ export const initializeHook = <T extends keyof WibeAppTypes['types']>({
 		// @ts-expect-error
 		if (operationType === OperationType.BeforeCreate) return [newData]
 
-		const res = await context.wibe.databaseController.getObjects({
+		const res = await context.wibeApp.databaseController.getObjects({
 			className,
 			context: {
 				...context,
@@ -148,7 +148,7 @@ export const initializeHook = <T extends keyof WibeAppTypes['types']>({
 	}
 
 	const hooksOrderByPriorities = _getHooksOrderByPriorities(
-		context.wibe.config,
+		context.wibeApp.config,
 	)
 
 	return {
@@ -183,7 +183,7 @@ export const initializeHook = <T extends keyof WibeAppTypes['types']>({
 					className,
 					operationType,
 					priority,
-					config: context.wibe.config,
+					config: context.wibeApp.config,
 				})
 
 				await Promise.all(
@@ -228,7 +228,7 @@ export const initializeHook = <T extends keyof WibeAppTypes['types']>({
 								className,
 								operationType,
 								priority,
-								config: context.wibe.config,
+								config: context.wibeApp.config,
 							})
 
 							await Promise.all(

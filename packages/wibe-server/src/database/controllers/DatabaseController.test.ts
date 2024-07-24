@@ -114,7 +114,7 @@ describe('DatabaseController', () => {
 
 	const context = {
 		isRoot: true,
-		wibe: { config },
+		wibeApp: { config },
 		sessionId: 'sessionId',
 	} as any
 
@@ -141,7 +141,7 @@ describe('DatabaseController', () => {
 
 		const context: WibeContext<any> = {
 			isRoot: true,
-			wibe: {} as any,
+			wibeApp: {} as any,
 			user: {
 				id: 'userId',
 				role: {
@@ -168,7 +168,7 @@ describe('DatabaseController', () => {
 
 		const context: WibeContext<any> = {
 			isRoot: false,
-			wibe: {} as any,
+			wibeApp: {} as any,
 			user: {
 				id: 'userId',
 				role: {
@@ -232,7 +232,7 @@ describe('DatabaseController', () => {
 
 		const context: WibeContext<any> = {
 			isRoot: false,
-			wibe: {} as any,
+			wibeApp: {} as any,
 			user: {
 				id: 'userId',
 			} as any,
@@ -274,7 +274,7 @@ describe('DatabaseController', () => {
 
 		const context: WibeContext<any> = {
 			isRoot: false,
-			wibe: {} as any,
+			wibeApp: {} as any,
 			user: {} as any,
 		}
 
@@ -318,7 +318,7 @@ describe('DatabaseController', () => {
 			className: 'TestClass',
 			context: {
 				sessionId: 'sessionId',
-				wibe: { config },
+				wibeApp: { config },
 				isRoot: true,
 			},
 		})
@@ -349,7 +349,11 @@ describe('DatabaseController', () => {
 		expect(mockInitializeHook).toHaveBeenCalledTimes(1)
 		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
-			context: { sessionId: 'sessionId', wibe: { config }, isRoot: true },
+			context: {
+				sessionId: 'sessionId',
+				wibeApp: { config },
+				isRoot: true,
+			},
 		})
 
 		expect(mockRunOnMultipleObject).toHaveBeenCalledTimes(2)
@@ -383,7 +387,11 @@ describe('DatabaseController', () => {
 		expect(mockInitializeHook).toHaveBeenCalledTimes(1)
 		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
-			context: { sessionId: 'sessionId', wibe: { config }, isRoot: true },
+			context: {
+				sessionId: 'sessionId',
+				wibeApp: { config },
+				isRoot: true,
+			},
 			newData: { name: 'test' },
 		})
 
@@ -417,7 +425,11 @@ describe('DatabaseController', () => {
 		expect(mockInitializeHook).toHaveBeenCalledTimes(1)
 		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
-			context: { sessionId: 'sessionId', wibe: { config }, isRoot: true },
+			context: {
+				sessionId: 'sessionId',
+				wibeApp: { config },
+				isRoot: true,
+			},
 			newData: { name: 'test' },
 		})
 
@@ -447,7 +459,11 @@ describe('DatabaseController', () => {
 		expect(mockInitializeHook).toHaveBeenCalledTimes(1)
 		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
-			context: { sessionId: 'sessionId', wibe: { config }, isRoot: true },
+			context: {
+				sessionId: 'sessionId',
+				wibeApp: { config },
+				isRoot: true,
+			},
 			newData: { name: 'test' },
 		})
 
@@ -479,7 +495,11 @@ describe('DatabaseController', () => {
 		expect(mockInitializeHook).toHaveBeenCalledTimes(1)
 		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
-			context: { sessionId: 'sessionId', wibe: { config }, isRoot: true },
+			context: {
+				sessionId: 'sessionId',
+				wibeApp: { config },
+				isRoot: true,
+			},
 			newData: { name: 'test' },
 		})
 
@@ -506,7 +526,11 @@ describe('DatabaseController', () => {
 		expect(mockInitializeHook).toHaveBeenCalledTimes(2)
 		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
-			context: { sessionId: 'sessionId', wibe: { config }, isRoot: true },
+			context: {
+				sessionId: 'sessionId',
+				wibeApp: { config },
+				isRoot: true,
+			},
 		})
 
 		// 4 because we have a getObject before the delete
@@ -534,7 +558,11 @@ describe('DatabaseController', () => {
 		expect(mockInitializeHook).toHaveBeenCalledTimes(2)
 		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
-			context: { sessionId: 'sessionId', wibe: { config }, isRoot: true },
+			context: {
+				sessionId: 'sessionId',
+				wibeApp: { config },
+				isRoot: true,
+			},
 		})
 
 		// 4 because we have a getObject before the delete

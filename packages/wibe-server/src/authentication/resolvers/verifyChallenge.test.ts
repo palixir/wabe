@@ -11,7 +11,7 @@ describe('verifyChallenge', () => {
 		user: {
 			id: 'userId',
 		} as any,
-		wibe: {
+		wibeApp: {
 			config: {
 				authentication: {
 					customAuthenticationMethods: [

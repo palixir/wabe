@@ -24,7 +24,7 @@ describe('SignInWith', () => {
 	const mockOnVerifyChallenge = mock(() => Promise.resolve(true))
 
 	const context = {
-		wibe: {
+		wibeApp: {
 			config: {
 				authentication: {
 					session: {
@@ -117,7 +117,7 @@ describe('SignInWith', () => {
 						},
 					},
 				},
-				{ wibe: { config: { authentication: undefined } } } as any,
+				{ wibeApp: { config: { authentication: undefined } } } as any,
 			),
 		).rejects.toThrow('No custom authentication methods found')
 	})
@@ -137,7 +137,7 @@ describe('SignInWith', () => {
 					},
 				},
 				{
-					wibe: {
+					wibeApp: {
 						config: {
 							authentication: {
 								customAuthenticationMethods: [

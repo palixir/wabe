@@ -51,7 +51,7 @@ describe('Resolver', () => {
 	}
 
 	const context = {
-		wibe: {
+		wibeApp: {
 			databaseController,
 			config,
 		},

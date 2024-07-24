@@ -1,7 +1,7 @@
 import { describe, expect, it, mock } from 'bun:test'
 import { getAuthenticationMethod } from './utils'
 
-describe('getAuthenticationMethod', () => {
+describe('Authentication utils', () => {
 	const mockOnSignIn = mock(() => Promise.resolve({}))
 	const mockOnSignUp = mock(() => Promise.resolve({}))
 
@@ -52,28 +52,28 @@ describe('getAuthenticationMethod', () => {
 		expect(() =>
 			getAuthenticationMethod(
 				['emailPassword', 'otherAuthenticationMethod'],
-				{ wibe: { config } } as any,
+				{ wibeApp: { config } } as any,
 			),
 		).toThrow('One authentication method is required at the time')
 	})
 
 	it('should throw an error if no authentication methods is provided', () => {
 		expect(() =>
-			getAuthenticationMethod([], { wibe: { config } } as any),
+			getAuthenticationMethod([], { wibeApp: { config } } as any),
 		).toThrow('One authentication method is required at the time')
 	})
 
 	it('should throw an error if no one authentication method is found', () => {
 		expect(() =>
 			getAuthenticationMethod(['otherAuthenticationMethod'], {
-				wibe: { config },
+				wibeApp: { config },
 			} as any),
 		).toThrow('No available custom authentication methods found')
 	})
 
 	it('should find a secondary factor method', () => {
 		expect(
-			getAuthenticationMethod(['otp'], { wibe: { config } } as any),
+			getAuthenticationMethod(['otp'], { wibeApp: { config } } as any),
 		).toEqual({
 			name: 'otp',
 			input: expect.any(Object),
@@ -85,7 +85,7 @@ describe('getAuthenticationMethod', () => {
 	it('should return the valid authentication method', () => {
 		expect(
 			getAuthenticationMethod(['emailPassword'], {
-				wibe: { config },
+				wibeApp: { config },
 			} as any),
 		).toEqual({
 			name: 'emailPassword',

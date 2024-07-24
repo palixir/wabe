@@ -56,7 +56,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 		fields: string[],
 		context: WibeContext<T>,
 	): PointerFields {
-		const realClass = context.wibe.config.schema.classes.find(
+		const realClass = context.wibeApp.config.schema.classes.find(
 			// @ts-expect-error
 			(c) => c.name.toLowerCase() === className.toLowerCase(),
 		)
@@ -106,7 +106,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 	) {
 		if (!pointerClassName) return false
 
-		return context.wibe.config.schema.classes.some(
+		return context.wibeApp.config.schema.classes.some(
 			(c) =>
 				// @ts-expect-error
 				c.name.toLowerCase() === originClassName.toLowerCase() &&
@@ -127,7 +127,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 	) {
 		if (!pointerClassName) return false
 
-		return context.wibe.config.schema.classes.some(
+		return context.wibeApp.config.schema.classes.some(
 			(c) =>
 				// @ts-expect-error
 				c.name.toLowerCase() === originClassName.toLowerCase() &&
@@ -217,7 +217,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 	>(className: U, where: WhereType<U, K>, context: WibeContext<T>) {
 		const whereKeys = Object.keys(where) as Array<keyof WhereType<U, K>>
 
-		const realClass = context.wibe.config.schema.classes.find(
+		const realClass = context.wibeApp.config.schema.classes.find(
 			// @ts-expect-error
 			(c) => c.name.toLowerCase() === className.toLowerCase(),
 		)

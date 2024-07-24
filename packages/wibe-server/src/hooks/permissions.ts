@@ -3,11 +3,6 @@ import type { WibeContext } from '../server/interface'
 import type { HookObject } from './HookObject'
 import { OperationType } from './index'
 
-type ACL = {
-	roles: Array<{ roleId: string; read: boolean; write: boolean }>
-	users: Array<{ userId: string; read: boolean; write: boolean }>
-}
-
 const convertOperationTypeToPermission = (operationType: OperationType) => {
 	const template: Record<OperationType, PermissionsOperations> = {
 		[OperationType.BeforeCreate]: 'create',
@@ -32,7 +27,7 @@ export const _getPermissionPropertiesOfAClass = async ({
 	operation: PermissionsOperations
 	context: WibeContext<any>
 }) => {
-	const wibeClass = context.wibe.config.schema.classes.find(
+	const wibeClass = context.wibeApp.config.schema.classes.find(
 		(c) => c.name === className,
 	)
 
@@ -70,7 +65,7 @@ export const _checkCLP = async (
 			`Permission denied to ${permissionOperation} class ${object.className}`,
 		)
 
-	const res = await object.context.wibe.databaseController.getObject({
+	const res = await object.context.wibeApp.databaseController.getObject({
 		className: '_Session',
 		id: sessionId,
 		fields: ['id', 'user.id'],

@@ -42,7 +42,7 @@ describe('Permissions', () => {
 			},
 		} as any
 
-		const context = { wibe: { config } } as any
+		const context = { wibeApp: { config } } as any
 
 		it('should get the permission for a given className', async () => {
 			const permission = await _getPermissionPropertiesOfAClass({
@@ -71,7 +71,7 @@ describe('Permissions', () => {
 				// @ts-expect-error
 				user: {},
 				isRoot: false,
-				wibe: { databaseController, config } as any,
+				wibeApp: { databaseController, config } as any,
 			}
 
 			const obj = new HookObject({
@@ -102,7 +102,7 @@ describe('Permissions', () => {
 					} as any,
 				} as any,
 				isRoot: false,
-				wibe: {
+				wibeApp: {
 					databaseController,
 					config,
 				} as any,
@@ -136,7 +136,7 @@ describe('Permissions', () => {
 					} as any,
 				} as any,
 				isRoot: false,
-				wibe: {
+				wibeApp: {
 					databaseController,
 					config,
 				} as any,
@@ -159,7 +159,7 @@ describe('Permissions', () => {
 					id: '',
 				} as any,
 				isRoot: true,
-				wibe: { databaseController, config } as any,
+				wibeApp: { databaseController, config } as any,
 			}
 
 			const obj = new HookObject({

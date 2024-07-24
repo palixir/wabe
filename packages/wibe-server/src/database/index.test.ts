@@ -18,7 +18,7 @@ describe('Database', () => {
 	let context: WibeContext<any>
 
 	const mockUpdateObject = mock(async () => {
-		await context.wibe.databaseController.updateObjects({
+		await context.wibeApp.databaseController.updateObjects({
 			className: 'User',
 			where: {
 				name: { equalTo: 'Lucas' },
@@ -30,7 +30,7 @@ describe('Database', () => {
 	})
 
 	const mockAfterUpdate = mock(async () => {
-		await context.wibe.databaseController.createObjects({
+		await context.wibeApp.databaseController.createObjects({
 			className: 'Test2',
 			data: [{ name: 'test' }],
 			context,
@@ -44,7 +44,7 @@ describe('Database', () => {
 
 		context = {
 			isRoot: true,
-			wibe: {
+			wibeApp: {
 				databaseController: wibe.databaseController,
 				config: wibe.config,
 			},
@@ -117,7 +117,7 @@ describe('Database', () => {
 	})
 
 	it('should get the good value in output of createObject after mutation on after hook', async () => {
-		const res = await context.wibe.databaseController.createObject({
+		const res = await context.wibeApp.databaseController.createObject({
 			className: 'User',
 			data: { name: 'Lucas', age: 20 },
 			context,
@@ -130,7 +130,7 @@ describe('Database', () => {
 	})
 
 	it('should get the good value in output of createObjects after mutation on after hook', async () => {
-		const res = await context.wibe.databaseController.createObjects({
+		const res = await context.wibeApp.databaseController.createObjects({
 			className: 'User',
 			data: [{ name: 'Lucas', age: 20 }],
 			context,
@@ -143,14 +143,14 @@ describe('Database', () => {
 	})
 
 	it('should get the good value in output of updateObjects after mutation on after hook', async () => {
-		await context.wibe.databaseController.createObjects({
+		await context.wibeApp.databaseController.createObjects({
 			className: 'Test2',
 			data: [{ name: 'test', age: 20 }],
 			context,
 			fields: [],
 		})
 
-		const res = await context.wibe.databaseController.updateObjects({
+		const res = await context.wibeApp.databaseController.updateObjects({
 			className: 'Test2',
 			context,
 			fields: ['name'],
@@ -164,14 +164,14 @@ describe('Database', () => {
 	})
 
 	it('should get the good value in output of updateObject after mutation on after hook', async () => {
-		const res = await context.wibe.databaseController.createObjects({
+		const res = await context.wibeApp.databaseController.createObjects({
 			className: 'Test2',
 			data: [{ name: 'test', age: 20 }],
 			context,
 			fields: ['id'],
 		})
 
-		const res2 = await context.wibe.databaseController.updateObject({
+		const res2 = await context.wibeApp.databaseController.updateObject({
 			className: 'Test2',
 			context,
 			fields: ['name'],

@@ -32,7 +32,7 @@ describe('Mongo adapter', () => {
 
 		context = {
 			isRoot: true,
-			wibe: {
+			wibeApp: {
 				databaseController: wibe.databaseController,
 				config: wibe.config,
 			},
@@ -717,6 +717,7 @@ describe('Mongo adapter', () => {
 			role: undefined,
 			updatedAt: undefined,
 			__typename: undefined,
+			sessions: undefined,
 		})
 	})
 

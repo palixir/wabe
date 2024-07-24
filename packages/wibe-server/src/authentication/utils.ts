@@ -14,7 +14,7 @@ export const getAuthenticationMethod = <
 	context: WibeContext<any>,
 ): CustomAuthenticationMethods<T, U> => {
 	const customAuthenticationConfig =
-		context.wibe.config?.authentication?.customAuthenticationMethods
+		context.wibeApp.config?.authentication?.customAuthenticationMethods
 
 	if (!customAuthenticationConfig)
 		throw new Error('No custom authentication methods found')

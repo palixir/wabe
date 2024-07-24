@@ -105,7 +105,7 @@ describe('Default fields', () => {
 			},
 		} as any
 
-		const context = { wibe: { config } } as any
+		const context = { wibeApp: { config } } as any
 
 		it('should add the value if a default value is defined in schema but not specified', async () => {
 			const hookObject = new HookObject<DevWibeAppTypes>({

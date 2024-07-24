@@ -33,7 +33,7 @@ export const oauthHandlerCallback = async (
 		const codeVerifier = context.res.getCookie('code_verifier')
 		const provider = context.res.getCookie('provider')
 
-		await getGraphqlClient(wibeContext.wibe.config.port).request<any>(
+		await getGraphqlClient(wibeContext.wibeApp.config.port).request<any>(
 			gql`
 				mutation signInWith(
 					$authorizationCode: String!
@@ -58,12 +58,14 @@ export const oauthHandlerCallback = async (
 		)
 
 		context.redirect(
-			wibeContext.wibe.config.authentication?.successRedirectPath || '/',
+			wibeContext.wibeApp.config.authentication?.successRedirectPath ||
+				'/',
 		)
 	} catch (error) {
 		console.error(error)
 		context.redirect(
-			wibeContext.wibe.config.authentication?.failureRedirectPath || '/',
+			wibeContext.wibeApp.config.authentication?.failureRedirectPath ||
+				'/',
 		)
 	}
 }
@@ -73,7 +75,7 @@ export const authHandler = async (
 	wibeContext: WibeContext<any>,
 	provider: ProviderEnum,
 ) => {
-	if (!wibeContext.wibe.config) throw new Error('Wibe config not found')
+	if (!wibeContext.wibeApp.config) throw new Error('Wibe config not found')
 
 	context.res.setCookie('provider', provider, {
 		httpOnly: true,
@@ -84,7 +86,7 @@ export const authHandler = async (
 
 	switch (provider) {
 		case ProviderEnum.google: {
-			const googleOauth = new Google(wibeContext.wibe.config)
+			const googleOauth = new Google(wibeContext.wibeApp.config)
 
 			const state = generateRandomValues()
 			const codeVerifier = generateRandomValues()

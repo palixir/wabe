@@ -20,7 +20,7 @@ export const defaultBeforeCreateForDefaultValue = async (
 ) => {
 	const schemaClass = getClassFromClassName<DevWibeAppTypes>(
 		object.className,
-		object.context.wibe.config,
+		object.context.wibeApp.config,
 	)
 
 	const allFields = Object.keys(schemaClass.fields)

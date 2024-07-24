@@ -7,5 +7,5 @@ export interface WibeContext<T extends WibeAppTypes> {
 	user?: User | null
 	sessionId?: string
 	isRoot: boolean
-	wibe: WibeApp<T>
+	wibeApp: WibeApp<T>
 }

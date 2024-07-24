@@ -182,7 +182,7 @@ export class WibeApp<T extends WibeAppTypes> {
 			if (headers.get('Wibe-Root-Key') === this.config.rootKey) {
 				ctx.wibe = {
 					isRoot: true,
-					wibe: this,
+					wibeApp: this,
 				}
 				return
 			}
@@ -205,7 +205,7 @@ export class WibeApp<T extends WibeAppTypes> {
 			if (!accessToken) {
 				ctx.wibe = {
 					isRoot: false,
-					wibe: this,
+					wibeApp: this,
 				}
 				return
 			}
@@ -216,7 +216,7 @@ export class WibeApp<T extends WibeAppTypes> {
 				accessToken,
 				{
 					isRoot: true,
-					wibe: this,
+					wibeApp: this,
 				},
 			)
 
@@ -224,7 +224,7 @@ export class WibeApp<T extends WibeAppTypes> {
 				isRoot: false,
 				sessionId,
 				user,
-				wibe: this,
+				wibeApp: this,
 			}
 		})
 
@@ -234,9 +234,7 @@ export class WibeApp<T extends WibeAppTypes> {
 				maskedErrors: false,
 				// TODO: Maybe add cors here + the wobe cors for csrf on upload
 				graphqlEndpoint: '/graphql',
-				context: async (ctx): Promise<WibeContext<T>> => {
-					return ctx.wibe
-				},
+				context: async (ctx): Promise<WibeContext<T>> => ctx.wibe,
 				graphqlMiddleware: async (resolve, res) => {
 					const response = await resolve()
 
