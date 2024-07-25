@@ -47,6 +47,7 @@ scalar Date
 
 type UserAuthentication {
   emailPassword: UserAuthenticationEmailPassword
+  google: UserAuthenticationGoogle
   otp: UserAuthenticationOtp
 }
 
@@ -57,6 +58,11 @@ type UserAuthenticationEmailPassword {
 
 """Email scalar type"""
 scalar Email
+
+type UserAuthenticationGoogle {
+  authorizationCode: String!
+  codeVerifier: String!
+}
 
 type UserAuthenticationOtp {
   code: String
@@ -104,12 +110,18 @@ input UserACLObjectRolesACLInput {
 
 input UserAuthenticationInput {
   emailPassword: UserAuthenticationEmailPasswordInput
+  google: UserAuthenticationGoogleInput
   otp: UserAuthenticationOtpInput
 }
 
 input UserAuthenticationEmailPasswordInput {
   email: Email!
   password: String!
+}
+
+input UserAuthenticationGoogleInput {
+  authorizationCode: String!
+  codeVerifier: String!
 }
 
 input UserAuthenticationOtpInput {
@@ -156,12 +168,18 @@ input UserACLObjectRolesACLCreateFieldsInput {
 
 input UserAuthenticationCreateFieldsInput {
   emailPassword: UserAuthenticationEmailPasswordCreateFieldsInput
+  google: UserAuthenticationGoogleCreateFieldsInput
   otp: UserAuthenticationOtpCreateFieldsInput
 }
 
 input UserAuthenticationEmailPasswordCreateFieldsInput {
   email: Email
   password: String
+}
+
+input UserAuthenticationGoogleCreateFieldsInput {
+  authorizationCode: String
+  codeVerifier: String
 }
 
 input UserAuthenticationOtpCreateFieldsInput {
@@ -565,6 +583,7 @@ input DateWhereInput {
 
 input UserAuthenticationWhereInput {
   emailPassword: UserAuthenticationEmailPasswordWhereInput
+  google: UserAuthenticationGoogleWhereInput
   otp: UserAuthenticationOtpWhereInput
   OR: [UserAuthenticationWhereInput]
   AND: [UserAuthenticationWhereInput]
@@ -582,6 +601,13 @@ input EmailWhereInput {
   notEqualTo: Email
   in: [Email]
   notIn: [Email]
+}
+
+input UserAuthenticationGoogleWhereInput {
+  authorizationCode: StringWhereInput
+  codeVerifier: StringWhereInput
+  OR: [UserAuthenticationGoogleWhereInput]
+  AND: [UserAuthenticationGoogleWhereInput]
 }
 
 input UserAuthenticationOtpWhereInput {
@@ -833,12 +859,18 @@ input UserACLObjectRolesACLUpdateFieldsInput {
 
 input UserAuthenticationUpdateFieldsInput {
   emailPassword: UserAuthenticationEmailPasswordUpdateFieldsInput
+  google: UserAuthenticationGoogleUpdateFieldsInput
   otp: UserAuthenticationOtpUpdateFieldsInput
 }
 
 input UserAuthenticationEmailPasswordUpdateFieldsInput {
   email: Email
   password: String
+}
+
+input UserAuthenticationGoogleUpdateFieldsInput {
+  authorizationCode: String
+  codeVerifier: String
 }
 
 input UserAuthenticationOtpUpdateFieldsInput {
@@ -895,6 +927,7 @@ input SignInWithInput {
 
 input SignInWithAuthenticationInput {
   emailPassword: SignInWithAuthenticationEmailPasswordInput
+  google: SignInWithAuthenticationGoogleInput
   otp: SignInWithAuthenticationOtpInput
   secondaryFactor: SecondaryFactor
 }
@@ -902,6 +935,11 @@ input SignInWithAuthenticationInput {
 input SignInWithAuthenticationEmailPasswordInput {
   email: Email!
   password: String!
+}
+
+input SignInWithAuthenticationGoogleInput {
+  authorizationCode: String!
+  codeVerifier: String!
 }
 
 input SignInWithAuthenticationOtpInput {
@@ -920,6 +958,7 @@ input SignUpWithInput {
 
 input SignUpWithAuthenticationInput {
   emailPassword: SignUpWithAuthenticationEmailPasswordInput
+  google: SignUpWithAuthenticationGoogleInput
   otp: SignUpWithAuthenticationOtpInput
   secondaryFactor: SecondaryFactor
 }
@@ -927,6 +966,11 @@ input SignUpWithAuthenticationInput {
 input SignUpWithAuthenticationEmailPasswordInput {
   email: Email!
   password: String!
+}
+
+input SignUpWithAuthenticationGoogleInput {
+  authorizationCode: String!
+  codeVerifier: String!
 }
 
 input SignUpWithAuthenticationOtpInput {

@@ -1,5 +1,6 @@
-import { Google, type WibeAppTypes } from '..'
+import type { WibeAppTypes } from '..'
 import type { CustomAuthenticationMethods } from './interface'
+import { Google } from './providers'
 import { EmailPassword } from './providers/EmailPassword'
 
 export const defaultAuthenticationMethods = <

@@ -17,7 +17,7 @@ export class Google implements ProviderInterface<GoogleInterface> {
 	}: AuthenticationEventsOptions<GoogleInterface>) {
 		const { authorizationCode, codeVerifier } = input
 
-		const googleOauth = new GoogleOauth()
+		const googleOauth = new GoogleOauth(context.wibeApp.config)
 
 		const { accessToken, refreshToken, accessTokenExpiresAt, idToken } =
 			await googleOauth.validateAuthorizationCode(
@@ -47,8 +47,6 @@ export class Google implements ProviderInterface<GoogleInterface> {
 		})
 
 		const authenticationDataToSave = {
-			accessToken,
-			refreshToken,
 			expireAt: accessTokenExpiresAt,
 			email,
 			verifiedEmail,
@@ -66,6 +64,7 @@ export class Google implements ProviderInterface<GoogleInterface> {
 					},
 				},
 				context,
+				fields: ['*'],
 			})
 
 			return {
@@ -85,6 +84,9 @@ export class Google implements ProviderInterface<GoogleInterface> {
 	}
 
 	async onSignUp(options: AuthenticationEventsOptions<GoogleInterface>) {
-		return { authenticationDataToSave: this._googleAuthentication(options) }
+		const { authenticationDataToSave } =
+			await this._googleAuthentication(options)
+
+		return { authenticationDataToSave }
 	}
 }
