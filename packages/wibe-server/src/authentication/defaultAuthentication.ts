@@ -18,6 +18,16 @@ export const defaultAuthenticationMethods = <
 				required: true,
 			},
 		},
+		dataToStore: {
+			email: {
+				type: 'Email',
+				required: true,
+			},
+			password: {
+				type: 'String',
+				required: true,
+			},
+		},
 		provider: new EmailPassword(),
 	},
 	{
@@ -28,6 +38,20 @@ export const defaultAuthenticationMethods = <
 				required: true,
 			},
 			codeVerifier: {
+				type: 'String',
+				required: true,
+			},
+		},
+		dataToStore: {
+			email: {
+				type: 'Email',
+				required: true,
+			},
+			verifiedEmail: {
+				type: 'Boolean',
+				required: true,
+			},
+			idToken: {
 				type: 'String',
 				required: true,
 			},

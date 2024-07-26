@@ -1,6 +1,7 @@
-import type {
-	AuthenticationEventsOptions,
-	ProviderInterface,
+import {
+	ProviderEnum,
+	type AuthenticationEventsOptions,
+	type ProviderInterface,
 } from '../interface'
 import { Google as GoogleOauth } from '../oauth/Google'
 
@@ -44,6 +45,8 @@ export class Google implements ProviderInterface<GoogleInterface> {
 					},
 				},
 			},
+			context,
+			fields: ['*'],
 		})
 
 		const authenticationDataToSave = {
@@ -57,11 +60,7 @@ export class Google implements ProviderInterface<GoogleInterface> {
 			const user = await context.wibeApp.databaseController.createObject({
 				className: 'User',
 				data: {
-					authentication: {
-						google: {
-							...authenticationDataToSave,
-						},
-					},
+					provider: ProviderEnum.google,
 				},
 				context,
 				fields: ['*'],

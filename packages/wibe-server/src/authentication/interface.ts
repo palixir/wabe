@@ -1,6 +1,6 @@
 import type { User } from '../../generated/wibe'
 import type { WibeContext } from '../server/interface'
-import type { TypeField } from '../schema'
+import type { SchemaFields, TypeField } from '../schema'
 import type { WibeAppTypes } from '../server'
 
 export enum ProviderEnum {
@@ -35,10 +35,12 @@ export type SecondaryProviderInterface<T = any> = {
 export type CustomAuthenticationMethods<
 	T extends WibeAppTypes,
 	U = ProviderInterface | SecondaryProviderInterface,
-	K = Record<string, TypeField<T>>,
+	K = SchemaFields<T>,
+	W = SchemaFields<T>,
 > = {
 	name: string
 	input: K
+	dataToStore: W
 	provider: U
 	isSecondaryFactor?: boolean
 }

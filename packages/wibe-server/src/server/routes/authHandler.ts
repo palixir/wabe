@@ -59,10 +59,10 @@ export const oauthHandlerCallback = async (
 			},
 		)
 
-		// context.redirect(
-		// 	wibeContext.wibeApp.config.authentication?.successRedirectPath ||
-		// 		'/',
-		// )
+		context.redirect(
+			wibeContext.wibeApp.config.authentication?.successRedirectPath ||
+				'/',
+		)
 	} catch (error) {
 		console.error(error)
 		// context.redirect(

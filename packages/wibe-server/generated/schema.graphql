@@ -48,7 +48,6 @@ scalar Date
 type UserAuthentication {
   emailPassword: UserAuthenticationEmailPassword
   google: UserAuthenticationGoogle
-  otp: UserAuthenticationOtp
 }
 
 type UserAuthenticationEmailPassword {
@@ -60,12 +59,9 @@ type UserAuthenticationEmailPassword {
 scalar Email
 
 type UserAuthenticationGoogle {
-  authorizationCode: String!
-  codeVerifier: String!
-}
-
-type UserAuthenticationOtp {
-  code: String
+  email: Email!
+  verifiedEmail: Boolean!
+  idToken: String!
 }
 
 type _SessionConnection {
@@ -111,7 +107,6 @@ input UserACLObjectRolesACLInput {
 input UserAuthenticationInput {
   emailPassword: UserAuthenticationEmailPasswordInput
   google: UserAuthenticationGoogleInput
-  otp: UserAuthenticationOtpInput
 }
 
 input UserAuthenticationEmailPasswordInput {
@@ -120,12 +115,9 @@ input UserAuthenticationEmailPasswordInput {
 }
 
 input UserAuthenticationGoogleInput {
-  authorizationCode: String!
-  codeVerifier: String!
-}
-
-input UserAuthenticationOtpInput {
-  code: String
+  email: Email!
+  verifiedEmail: Boolean!
+  idToken: String!
 }
 
 """Input to link an object to a pointer User"""
@@ -169,7 +161,6 @@ input UserACLObjectRolesACLCreateFieldsInput {
 input UserAuthenticationCreateFieldsInput {
   emailPassword: UserAuthenticationEmailPasswordCreateFieldsInput
   google: UserAuthenticationGoogleCreateFieldsInput
-  otp: UserAuthenticationOtpCreateFieldsInput
 }
 
 input UserAuthenticationEmailPasswordCreateFieldsInput {
@@ -178,12 +169,9 @@ input UserAuthenticationEmailPasswordCreateFieldsInput {
 }
 
 input UserAuthenticationGoogleCreateFieldsInput {
-  authorizationCode: String
-  codeVerifier: String
-}
-
-input UserAuthenticationOtpCreateFieldsInput {
-  code: String
+  email: Email
+  verifiedEmail: Boolean
+  idToken: String
 }
 
 """Input to add a relation to the class User"""
@@ -584,7 +572,6 @@ input DateWhereInput {
 input UserAuthenticationWhereInput {
   emailPassword: UserAuthenticationEmailPasswordWhereInput
   google: UserAuthenticationGoogleWhereInput
-  otp: UserAuthenticationOtpWhereInput
   OR: [UserAuthenticationWhereInput]
   AND: [UserAuthenticationWhereInput]
 }
@@ -604,16 +591,11 @@ input EmailWhereInput {
 }
 
 input UserAuthenticationGoogleWhereInput {
-  authorizationCode: StringWhereInput
-  codeVerifier: StringWhereInput
+  email: EmailWhereInput
+  verifiedEmail: BooleanWhereInput
+  idToken: StringWhereInput
   OR: [UserAuthenticationGoogleWhereInput]
   AND: [UserAuthenticationGoogleWhereInput]
-}
-
-input UserAuthenticationOtpWhereInput {
-  code: StringWhereInput
-  OR: [UserAuthenticationOtpWhereInput]
-  AND: [UserAuthenticationOtpWhereInput]
 }
 
 input AnyWhereInput {
@@ -779,7 +761,6 @@ type Mutation {
   signUpWith(input: SignUpWithInput): SignUpWithOutput
   signOut: Boolean
   refresh(input: RefreshInput): RefreshSessionOutput
-  verifyChallenge(input: VerifyChallengeInput): Boolean
   createPost(input: CreatePostInput): CreatePostPayload
   createPosts(input: CreatePostsInput): PostConnection!
   updatePost(input: UpdatePostInput): UpdatePostPayload
@@ -860,7 +841,6 @@ input UserACLObjectRolesACLUpdateFieldsInput {
 input UserAuthenticationUpdateFieldsInput {
   emailPassword: UserAuthenticationEmailPasswordUpdateFieldsInput
   google: UserAuthenticationGoogleUpdateFieldsInput
-  otp: UserAuthenticationOtpUpdateFieldsInput
 }
 
 input UserAuthenticationEmailPasswordUpdateFieldsInput {
@@ -869,12 +849,9 @@ input UserAuthenticationEmailPasswordUpdateFieldsInput {
 }
 
 input UserAuthenticationGoogleUpdateFieldsInput {
-  authorizationCode: String
-  codeVerifier: String
-}
-
-input UserAuthenticationOtpUpdateFieldsInput {
-  code: String
+  email: Email
+  verifiedEmail: Boolean
+  idToken: String
 }
 
 input UpdateUsersInput {
@@ -928,7 +905,6 @@ input SignInWithInput {
 input SignInWithAuthenticationInput {
   emailPassword: SignInWithAuthenticationEmailPasswordInput
   google: SignInWithAuthenticationGoogleInput
-  otp: SignInWithAuthenticationOtpInput
   secondaryFactor: SecondaryFactor
 }
 
@@ -940,10 +916,6 @@ input SignInWithAuthenticationEmailPasswordInput {
 input SignInWithAuthenticationGoogleInput {
   authorizationCode: String!
   codeVerifier: String!
-}
-
-input SignInWithAuthenticationOtpInput {
-  code: String
 }
 
 type SignUpWithOutput {
@@ -959,7 +931,6 @@ input SignUpWithInput {
 input SignUpWithAuthenticationInput {
   emailPassword: SignUpWithAuthenticationEmailPasswordInput
   google: SignUpWithAuthenticationGoogleInput
-  otp: SignUpWithAuthenticationOtpInput
   secondaryFactor: SecondaryFactor
 }
 
@@ -973,10 +944,6 @@ input SignUpWithAuthenticationGoogleInput {
   codeVerifier: String!
 }
 
-input SignUpWithAuthenticationOtpInput {
-  code: String
-}
-
 type RefreshSessionOutput {
   accessToken: String!
   refreshToken: String!
@@ -985,18 +952,6 @@ type RefreshSessionOutput {
 input RefreshInput {
   accessToken: String!
   refreshToken: String!
-}
-
-input VerifyChallengeInput {
-  factor: VerifyChallengeFactorInput
-}
-
-input VerifyChallengeFactorInput {
-  otp: VerifyChallengeFactorOtpInput
-}
-
-input VerifyChallengeFactorOtpInput {
-  code: String
 }
 
 type CreatePostPayload {

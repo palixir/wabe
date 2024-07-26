@@ -110,9 +110,7 @@ export type SchemaFields<T extends WibeAppTypes> = Record<string, TypeField<T>>
 export type QueryResolver<T extends WibeAppTypes> = {
 	required?: boolean
 	description?: string
-	args?: {
-		[key: string]: TypeField<T>
-	}
+	args?: SchemaFields<T>
 	resolve: (...args: any) => any
 } & (
 	| { type: WibePrimaryTypes }
@@ -124,9 +122,7 @@ export type MutationResolver<T extends WibeAppTypes> = {
 	required?: boolean
 	description?: string
 	args?: {
-		input: {
-			[key: string]: TypeField<T>
-		}
+		input: SchemaFields<T>
 	}
 	resolve: (...args: any) => any
 } & (
@@ -266,22 +262,21 @@ export class Schema<T extends WibeAppTypes> {
 		const customAuthenticationConfig =
 			this.config.authentication?.customAuthenticationMethods || []
 
-		const allAuthenticationMethods = customAuthenticationConfig.reduce(
-			(acc, authenticationMethod) => {
-				acc[authenticationMethod.name] = {
-					type: 'Object',
-					object: {
-						name: authenticationMethod.name,
-						fields: {
-							...authenticationMethod.input,
+		const allAuthenticationDataToStoreObject =
+			customAuthenticationConfig.reduce(
+				(acc, authenticationMethod) => {
+					acc[authenticationMethod.name] = {
+						type: 'Object',
+						object: {
+							name: authenticationMethod.name,
+							fields: authenticationMethod.dataToStore,
 						},
-					},
-				}
+					}
 
-				return acc
-			},
-			{} as SchemaFields<T>,
-		)
+					return acc
+				},
+				{} as SchemaFields<T>,
+			)
 
 		const allSecondaryFactorAuthenticationMethods =
 			customAuthenticationConfig.reduce(
@@ -292,9 +287,7 @@ export class Schema<T extends WibeAppTypes> {
 						type: 'Object',
 						object: {
 							name: authenticationMethod.name,
-							fields: {
-								...authenticationMethod.input,
-							},
+							fields: authenticationMethod.input,
 						},
 					}
 
@@ -307,32 +300,30 @@ export class Schema<T extends WibeAppTypes> {
 			type: 'Object',
 			object: {
 				name: 'Authentication',
-				fields: {
-					...allAuthenticationMethods,
-				},
+				fields: allAuthenticationDataToStoreObject,
 			},
 		}
 
-		const fields: SchemaFields<T> = {
-			...(customAuthenticationConfig.length > 0
-				? { authentication: authenticationObject }
-				: {}),
-			provider: {
-				type: 'AuthenticationProvider',
+		const allAuthenticationMethodsInput = customAuthenticationConfig.reduce(
+			(acc, authenticationMethod) => {
+				acc[authenticationMethod.name] = {
+					type: 'Object',
+					object: {
+						name: authenticationMethod.name,
+						fields: authenticationMethod.input,
+					},
+				}
+
+				return acc
 			},
-			email: {
-				type: 'Email',
-			},
-			verifiedEmail: {
-				type: 'Boolean',
-			},
-			role: {
-				type: 'Pointer',
-				class: 'Role',
-			},
-			sessions: {
-				type: 'Relation',
-				class: '_Session',
+			{} as SchemaFields<T>,
+		)
+
+		const authenticationInputObject: TypeFieldObject<T> = {
+			type: 'Object',
+			object: {
+				name: 'Authentication',
+				fields: allAuthenticationMethodsInput,
 			},
 		}
 
@@ -342,7 +333,7 @@ export class Schema<T extends WibeAppTypes> {
 				name: 'Authentication',
 				fields: {
 					// All authentication providers
-					...authenticationObject.object.fields,
+					...authenticationInputObject.object.fields,
 					// Secondary factor
 					secondaryFactor: {
 						type: 'SecondaryFactor',
@@ -356,9 +347,7 @@ export class Schema<T extends WibeAppTypes> {
 			type: 'Object',
 			object: {
 				name: 'Factor',
-				fields: {
-					...allSecondaryFactorAuthenticationMethods,
-				},
+				fields: allSecondaryFactorAuthenticationMethods,
 			},
 		}
 
@@ -459,6 +448,29 @@ export class Schema<T extends WibeAppTypes> {
 								: {}),
 						}
 					: {}),
+			},
+		}
+
+		const fields: SchemaFields<T> = {
+			...(customAuthenticationConfig.length > 0
+				? { authentication: authenticationObject }
+				: {}),
+			provider: {
+				type: 'AuthenticationProvider',
+			},
+			email: {
+				type: 'Email',
+			},
+			verifiedEmail: {
+				type: 'Boolean',
+			},
+			role: {
+				type: 'Pointer',
+				class: 'Role',
+			},
+			sessions: {
+				type: 'Relation',
+				class: '_Session',
 			},
 		}
 
