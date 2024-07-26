@@ -30,6 +30,8 @@ export const signInWithResolver = async (
 		// @ts-expect-error
 		input.authentication[name]
 
+	console.log(context, 'context')
+
 	// 1 - We call the onSignIn method of the provider
 	const { user } = await provider.onSignIn({
 		input: inputOfTheGoodAuthenticationMethod,

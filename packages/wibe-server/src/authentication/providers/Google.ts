@@ -83,10 +83,7 @@ export class Google implements ProviderInterface<GoogleInterface> {
 		return this._googleAuthentication(options)
 	}
 
-	async onSignUp(options: AuthenticationEventsOptions<GoogleInterface>) {
-		const { authenticationDataToSave } =
-			await this._googleAuthentication(options)
-
-		return { authenticationDataToSave }
+	async onSignUp() {
+		return { authenticationDataToSave: {} }
 	}
 }

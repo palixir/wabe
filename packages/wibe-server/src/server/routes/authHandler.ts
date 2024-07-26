@@ -93,8 +93,6 @@ export const authHandler = async (
 			const state = generateRandomValues()
 			const codeVerifier = generateRandomValues()
 
-			console.log({ state })
-
 			context.res.setCookie('code_verifier', codeVerifier, {
 				httpOnly: true,
 				path: '/',

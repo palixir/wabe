@@ -24,7 +24,7 @@ export type ProviderInterface<T = any> = {
 	) => Promise<{ user: Partial<User> }>
 	onSignUp: (
 		options: AuthenticationEventsOptions<T>,
-	) => Promise<{ authenticationDataToSave: T }>
+	) => Promise<{ authenticationDataToSave: any }>
 }
 
 export type SecondaryProviderInterface<T = any> = {
