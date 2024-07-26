@@ -86,14 +86,14 @@ export const signInWithResolver = async (
 			httpOnly: true,
 			path: '/',
 			secure: process.env.NODE_ENV === 'production',
-			expires: accessTokenExpiresAt,
+			expires: refreshTokenExpiresAt,
 		})
 
 		context.response?.setCookie('accessToken', accessToken, {
 			httpOnly: true,
 			path: '/',
 			secure: process.env.NODE_ENV === 'production',
-			expires: refreshTokenExpiresAt,
+			expires: accessTokenExpiresAt,
 		})
 	}
 

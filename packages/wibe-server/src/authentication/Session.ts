@@ -61,9 +61,9 @@ export class Session {
 			{
 				userId,
 				iat: Date.now(),
-				exp:
-					Date.now() +
-					this.getAccessTokenExpireIn(context.wibeApp.config),
+				exp: this.getAccessTokenExpireAt(
+					context.wibeApp.config,
+				).getTime(),
 			},
 			import.meta.env.JWT_SECRET || 'dev',
 		)
@@ -72,9 +72,9 @@ export class Session {
 			{
 				userId,
 				iat: Date.now(),
-				exp:
-					Date.now() +
-					this.getRefreshTokenExpireIn(context.wibeApp.config),
+				exp: this.getRefreshTokenExpireAt(
+					context.wibeApp.config,
+				).getTime(),
 			},
 			import.meta.env.JWT_SECRET || 'dev',
 		)
@@ -84,14 +84,13 @@ export class Session {
 			context,
 			data: {
 				accessToken: this.accessToken,
-				accessTokenExpiresAt: new Date(
-					Date.now() +
-						this.getAccessTokenExpireIn(context.wibeApp.config),
+				accessTokenExpiresAt: this.getAccessTokenExpireAt(
+					context.wibeApp.config,
 				),
+
 				refreshToken: this.refreshToken,
-				refreshTokenExpiresAt: new Date(
-					Date.now() +
-						this.getRefreshTokenExpireIn(context.wibeApp.config),
+				refreshTokenExpiresAt: this.getRefreshTokenExpireAt(
+					context.wibeApp.config,
 				),
 				user: userId,
 			},
@@ -145,14 +144,14 @@ export class Session {
 		if (refreshTokenExpiresAt < new Date(Date.now()))
 			throw new Error('Refresh token expired')
 
-		const refreshTokenExpireIn = this.getRefreshTokenExpireIn(
+		const refreshTokenExpireIn = this.getRefreshTokenExpireAt(
 			context.wibeApp.config,
-		)
+		).getTime()
 
 		// We refresh only if the refresh token is about to expire (75% of the time)
 		if (
 			refreshTokenExpiresAt.getTime() - Date.now() <
-			0.75 * refreshTokenExpireIn
+			0.75 * (refreshTokenExpireIn - Date.now())
 		)
 			return {
 				accessToken,
@@ -166,7 +165,9 @@ export class Session {
 			{
 				userId: user?.id,
 				iat: Date.now(),
-				exp: this.getAccessTokenExpireIn(context.wibeApp.config),
+				exp: this.getAccessTokenExpireAt(
+					context.wibeApp.config,
+				).getTime(),
 			},
 			import.meta.env.JWT_SECRET || 'dev',
 		)
@@ -175,7 +176,9 @@ export class Session {
 			{
 				userId: user?.id,
 				iat: Date.now(),
-				exp: this.getRefreshTokenExpireIn(context.wibeApp.config),
+				exp: this.getRefreshTokenExpireAt(
+					context.wibeApp.config,
+				).getTime(),
 			},
 			import.meta.env.JWT_SECRET || 'dev',
 		)
@@ -189,14 +192,13 @@ export class Session {
 			id,
 			data: {
 				accessToken: newAccessToken,
-				accessTokenExpiresAt: new Date(
-					Date.now() +
-						this.getAccessTokenExpireIn(context.wibeApp.config),
+				accessTokenExpiresAt: this.getAccessTokenExpireAt(
+					context.wibeApp.config,
 				),
+
 				refreshToken: newRefreshToken,
-				refreshTokenExpiresAt: new Date(
-					Date.now() +
-						this.getRefreshTokenExpireIn(context.wibeApp.config),
+				refreshTokenExpiresAt: this.getRefreshTokenExpireAt(
+					context.wibeApp.config,
 				),
 			},
 			fields: [],

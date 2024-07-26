@@ -717,6 +717,7 @@ describe('Mongo adapter', () => {
 			role: undefined,
 			updatedAt: undefined,
 			__typename: undefined,
+			isOauth: undefined,
 			sessions: undefined,
 		})
 	})

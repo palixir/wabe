@@ -270,11 +270,8 @@ export class WibeApp<T extends WibeAppTypes> {
 								res.setCookie('accessToken', newAccessToken, {
 									httpOnly: true,
 									path: '/',
-									expires: new Date(
-										Date.now() +
-											session.getAccessTokenExpireIn(
-												this.config,
-											),
+									expires: session.getAccessTokenExpireAt(
+										this.config,
 									),
 									secure:
 										process.env.NODE_ENV === 'production',
@@ -284,11 +281,8 @@ export class WibeApp<T extends WibeAppTypes> {
 								res.setCookie('refreshToken', newRefreshToken, {
 									httpOnly: true,
 									path: '/',
-									expires: new Date(
-										Date.now() +
-											session.getRefreshTokenExpireIn(
-												this.config,
-											),
+									expires: session.getRefreshTokenExpireAt(
+										this.config,
 									),
 									secure:
 										process.env.NODE_ENV === 'production',

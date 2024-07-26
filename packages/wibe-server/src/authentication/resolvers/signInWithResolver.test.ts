@@ -246,11 +246,11 @@ describe('SignInWith', () => {
 
 		// - 1000 to avoid flaky
 		expect(
-			new Date(refreshTokenExpiresIn).getTime(),
-		).toBeGreaterThanOrEqual(Date.now() + 1000 * 30 * 24 * 60 * 60 - 1000)
-		expect(new Date(accessTokenExpiresIn).getTime()).toBeGreaterThanOrEqual(
-			Date.now() + 1000 * 15 * 60 - 1000,
-		)
+			refreshTokenExpiresIn.getTime() - Date.now(),
+		).toBeGreaterThanOrEqual(1000 * 30 * 24 * 60 * 60 - 1000)
+		expect(
+			accessTokenExpiresIn.getTime() - Date.now(),
+		).toBeGreaterThanOrEqual(1000 * 15 * 60 - 1000)
 
 		expect(mockCreateSession).toHaveBeenCalledTimes(1)
 		expect(mockCreateSession).toHaveBeenCalledWith('id', expect.anything())

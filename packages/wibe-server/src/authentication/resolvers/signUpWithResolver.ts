@@ -41,20 +41,14 @@ export const signUpWithResolver = async (
 			httpOnly: true,
 			path: '/',
 			secure: process.env.NODE_ENV === 'production',
-			expires: new Date(
-				Date.now() +
-					session.getRefreshTokenExpireIn(context.wibeApp.config),
-			),
+			expires: session.getRefreshTokenExpireAt(context.wibeApp.config),
 		})
 
 		context.response?.setCookie('accessToken', accessToken, {
 			httpOnly: true,
 			path: '/',
 			secure: process.env.NODE_ENV === 'production',
-			expires: new Date(
-				Date.now() +
-					session.getAccessTokenExpireIn(context.wibeApp.config),
-			),
+			expires: session.getAccessTokenExpireAt(context.wibeApp.config),
 		})
 	}
 
