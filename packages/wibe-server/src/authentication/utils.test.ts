@@ -25,6 +25,7 @@ describe('Authentication utils', () => {
 						onVerifyChallenge: mockOnVerifyChallenge as any,
 					},
 					isSecondaryFactor: true,
+					dataToStore: {},
 				},
 				{
 					name: 'emailPassword',
@@ -43,6 +44,7 @@ describe('Authentication utils', () => {
 						onSignUp: mockOnSignIn as any,
 						onSignIn: mockOnSignUp as any,
 					},
+					dataToStore: {},
 				},
 			],
 		},
@@ -79,6 +81,7 @@ describe('Authentication utils', () => {
 			input: expect.any(Object),
 			provider: expect.any(Object),
 			isSecondaryFactor: true,
+			dataToStore: {},
 		})
 	})
 
@@ -91,6 +94,7 @@ describe('Authentication utils', () => {
 			name: 'emailPassword',
 			input: expect.any(Object),
 			provider: expect.any(Object),
+			dataToStore: {},
 		})
 	})
 })

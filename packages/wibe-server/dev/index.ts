@@ -42,6 +42,19 @@ const run = async () => {
 					clientSecret: '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',
 				},
 			},
+			customAuthenticationMethods: [
+				{
+					name: 'otp',
+					input: {
+						code: {
+							type: 'String',
+						},
+					},
+					provider: {} as any,
+					isSecondaryFactor: true,
+					dataToStore: {},
+				},
+			],
 		},
 		database: {
 			type: DatabaseEnum.Mongo,
