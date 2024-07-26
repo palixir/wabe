@@ -458,6 +458,9 @@ export class Schema<T extends WibeAppTypes> {
 			provider: {
 				type: 'AuthenticationProvider',
 			},
+			isOauth: {
+				type: 'Boolean',
+			},
 			email: {
 				type: 'Email',
 			},

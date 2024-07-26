@@ -1,3 +1,4 @@
+import type { UserAuthenticationGoogle } from '../../../generated/wibe'
 import {
 	ProviderEnum,
 	type AuthenticationEventsOptions,
@@ -20,11 +21,16 @@ export class Google implements ProviderInterface<GoogleInterface> {
 
 		const googleOauth = new GoogleOauth(context.wibeApp.config)
 
-		const { accessToken, refreshToken, accessTokenExpiresAt, idToken } =
-			await googleOauth.validateAuthorizationCode(
-				authorizationCode,
-				codeVerifier,
-			)
+		const {
+			accessToken,
+			refreshToken,
+			idToken,
+			accessTokenExpiresAt,
+			refreshTokenExpiresAt,
+		} = await googleOauth.validateAuthorizationCode(
+			authorizationCode,
+			codeVerifier,
+		)
 
 		if (!refreshToken) throw new Error('Access_type must be offline')
 
@@ -46,35 +52,49 @@ export class Google implements ProviderInterface<GoogleInterface> {
 				},
 			},
 			context,
-			fields: ['*'],
+			fields: ['id'],
 		})
 
-		const authenticationDataToSave = {
-			expireAt: accessTokenExpiresAt,
+		const authenticationDataToSave: UserAuthenticationGoogle = {
 			email,
 			verifiedEmail,
 			idToken,
 		}
 
 		if (user.length === 0) {
-			const user = await context.wibeApp.databaseController.createObject({
-				className: 'User',
-				data: {
-					provider: ProviderEnum.google,
-				},
-				context,
-				fields: ['*'],
-			})
+			const createdUser =
+				await context.wibeApp.databaseController.createObject({
+					className: 'User',
+					data: {
+						provider: ProviderEnum.google,
+						isOauth: true,
+						authentication: {
+							google: authenticationDataToSave,
+						},
+					},
+					context,
+					fields: ['*'],
+				})
 
 			return {
-				user,
-				authenticationDataToSave,
+				user: createdUser,
+				oauth: {
+					refreshToken,
+					accessToken,
+					accessTokenExpiresAt: accessTokenExpiresAt || new Date(),
+					refreshTokenExpiresAt: refreshTokenExpiresAt || new Date(),
+				},
 			}
 		}
 
 		return {
 			user: user[0],
-			authenticationDataToSave,
+			oauth: {
+				refreshToken,
+				accessToken,
+				accessTokenExpiresAt: accessTokenExpiresAt || new Date(),
+				refreshTokenExpiresAt: refreshTokenExpiresAt || new Date(),
+			},
 		}
 	}
 

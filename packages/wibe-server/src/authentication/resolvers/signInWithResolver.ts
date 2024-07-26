@@ -31,7 +31,7 @@ export const signInWithResolver = async (
 		input.authentication[name]
 
 	// 1 - We call the onSignIn method of the provider
-	const { user } = await provider.onSignIn({
+	const { user, oauth } = await provider.onSignIn({
 		input: inputOfTheGoodAuthenticationMethod,
 		context,
 	})
@@ -52,29 +52,48 @@ export const signInWithResolver = async (
 		return { accessToken: null, refreshToken: null, id: userId }
 	}
 
-	const session = new Session()
+	const getRefreshAndAccessToken = async () => {
+		if (user.isOauth && oauth) return oauth
 
-	const { refreshToken, accessToken } = await session.create(userId, context)
+		const session = new Session()
+
+		const { refreshToken, accessToken } = await session.create(
+			userId,
+			context,
+		)
+
+		return {
+			refreshToken,
+			accessToken,
+			accessTokenExpiresAt: session.getAccessTokenExpireAt(
+				context.wibeApp.config,
+			),
+			refreshTokenExpiresAt: session.getRefreshTokenExpireAt(
+				context.wibeApp.config,
+			),
+		}
+	}
+
+	const {
+		accessToken,
+		refreshToken,
+		accessTokenExpiresAt,
+		refreshTokenExpiresAt,
+	} = await getRefreshAndAccessToken()
 
 	if (context.wibeApp.config.authentication?.session?.cookieSession) {
 		context.response?.setCookie('refreshToken', refreshToken, {
 			httpOnly: true,
 			path: '/',
 			secure: process.env.NODE_ENV === 'production',
-			expires: new Date(
-				Date.now() +
-					session.getRefreshTokenExpireIn(context.wibeApp.config),
-			),
+			expires: accessTokenExpiresAt,
 		})
 
 		context.response?.setCookie('accessToken', accessToken, {
 			httpOnly: true,
 			path: '/',
 			secure: process.env.NODE_ENV === 'production',
-			expires: new Date(
-				Date.now() +
-					session.getAccessTokenExpireIn(context.wibeApp.config),
-			),
+			expires: refreshTokenExpiresAt,
 		})
 	}
 

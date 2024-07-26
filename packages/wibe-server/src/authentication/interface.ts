@@ -1,6 +1,6 @@
 import type { User } from '../../generated/wibe'
 import type { WibeContext } from '../server/interface'
-import type { SchemaFields, TypeField } from '../schema'
+import type { SchemaFields } from '../schema'
 import type { WibeAppTypes } from '../server'
 
 export enum ProviderEnum {
@@ -19,9 +19,15 @@ export type AuthenticationEventsOptions<T> = {
 }
 
 export type ProviderInterface<T = any> = {
-	onSignIn: (
-		options: AuthenticationEventsOptions<T>,
-	) => Promise<{ user: Partial<User> }>
+	onSignIn: (options: AuthenticationEventsOptions<T>) => Promise<{
+		user: Partial<User>
+		oauth?: {
+			refreshToken: string
+			accessToken: string
+			accessTokenExpiresAt: Date
+			refreshTokenExpiresAt: Date
+		}
+	}>
 	onSignUp: (
 		options: AuthenticationEventsOptions<T>,
 	) => Promise<{ authenticationDataToSave: any }>

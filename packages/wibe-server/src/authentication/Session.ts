@@ -7,22 +7,23 @@ export class Session {
 	private accessToken: string | undefined = undefined
 	private refreshToken: string | undefined = undefined
 
-	getAccessTokenExpireIn(config: WibeConfig<any>) {
+	getAccessTokenExpireAt(config: WibeConfig<any>) {
 		const customExpiresIn =
 			config?.authentication?.session?.accessTokenExpiresIn
 
-		if (!customExpiresIn) return 1000 * 60 * 15 // 15 minutes in ms
+		if (!customExpiresIn) return new Date(Date.now() + 1000 * 60 * 15) // 15 minutes in ms
 
-		return customExpiresIn
+		return new Date(Date.now() + customExpiresIn)
 	}
 
-	getRefreshTokenExpireIn(config: WibeConfig<any>) {
+	getRefreshTokenExpireAt(config: WibeConfig<any>) {
 		const customExpiresIn =
 			config?.authentication?.session?.refreshTokenExpiresIn
 
-		if (!customExpiresIn) return 1000 * 60 * 60 * 24 * 30 // 30 days in ms
+		if (!customExpiresIn)
+			return new Date(Date.now() + 1000 * 60 * 60 * 24 * 30) // 30 days in ms
 
-		return customExpiresIn
+		return new Date(Date.now() + customExpiresIn)
 	}
 
 	async meFromAccessToken(

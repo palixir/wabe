@@ -19,6 +19,7 @@ type User {
   updatedAt: Date!
   authentication: UserAuthentication
   provider: AuthenticationProvider
+  isOauth: Boolean
   email: Email
   verifiedEmail: Boolean
   role: Role
@@ -84,6 +85,7 @@ input UserInput {
   updatedAt: Date!
   authentication: UserAuthenticationInput
   provider: AuthenticationProvider
+  isOauth: Boolean
   email: Email
   verifiedEmail: Boolean
   role: RolePointerInput
@@ -141,6 +143,7 @@ input UserCreateFieldsInput {
   updatedAt: Date
   authentication: UserAuthenticationCreateFieldsInput
   provider: AuthenticationProvider
+  isOauth: Boolean
   email: Email
   verifiedEmail: Boolean
   role: RolePointerInput
@@ -504,6 +507,7 @@ input UserWhereInput {
   updatedAt: DateWhereInput
   authentication: UserAuthenticationWhereInput
   provider: AnyWhereInput
+  isOauth: BooleanWhereInput
   email: EmailWhereInput
   verifiedEmail: BooleanWhereInput
   role: RoleWhereInput
@@ -831,6 +835,7 @@ input UserUpdateFieldsInput {
   updatedAt: Date
   authentication: UserAuthenticationUpdateFieldsInput
   provider: AuthenticationProvider
+  isOauth: Boolean
   email: Email
   verifiedEmail: Boolean
   role: RolePointerInput
