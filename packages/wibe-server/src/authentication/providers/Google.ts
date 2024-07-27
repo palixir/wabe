@@ -68,9 +68,7 @@ export class Google implements ProviderInterface<GoogleInterface> {
 				await context.wibeApp.databaseController.createObject({
 					className: 'User',
 					data: {
-						// For the moment a bug in bun is blocking import from generated don't know why
-						// provider: AuthenticationProvider.Google,
-						provider: 'Google',
+						provider: AuthenticationProvider.Google,
 						isOauth: true,
 						authentication: {
 							google: authenticationDataToSave,
