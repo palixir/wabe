@@ -11,7 +11,7 @@ import {
 import type { WibeApp } from '../server'
 import { type DevWibeAppTypes, setupTests, closeTests } from '../utils/helper'
 import type { WibeContext } from '../server/interface'
-import { OperationType } from '../hooks'
+import { OperationType, getDefaultHooks } from '../hooks'
 
 describe('Database', () => {
 	let wibe: WibeApp<DevWibeAppTypes>
@@ -49,21 +49,6 @@ describe('Database', () => {
 				config: wibe.config,
 			},
 		} as WibeContext<any>
-
-		wibe.config.hooks = [
-			{
-				className: 'User',
-				operationType: OperationType.AfterCreate,
-				callback: mockUpdateObject,
-				priority: 1,
-			},
-			{
-				className: 'Test2',
-				operationType: OperationType.AfterUpdate,
-				callback: mockAfterUpdate,
-				priority: 1,
-			},
-		]
 	})
 
 	afterAll(async () => {
@@ -87,11 +72,52 @@ describe('Database', () => {
 			fields: [],
 		})
 
+		wibe.config.hooks = getDefaultHooks()
+
 		mockUpdateObject.mockClear()
 		mockAfterUpdate.mockClear()
 	})
 
+	it('should create object with subobject (hooks default call authentication before create user)', async () => {
+		const res = await wibe.databaseController.createObject({
+			className: 'User',
+			context,
+			fields: ['*'],
+			data: {
+				provider: 'Google',
+				isOauth: true,
+				authentication: {
+					google: {
+						email: 'email@test.fr',
+						verifiedEmail: true,
+						idToken: 'idToken',
+					},
+				},
+			},
+		})
+
+		expect(res.authentication.google).toEqual({
+			email: 'email@test.fr',
+			verifiedEmail: true,
+			idToken: 'idToken',
+		})
+	})
+
 	it('should call getObject adapter only 2 times (lower is better) for one read query (performance test) without mutation in hooks', async () => {
+		wibe.config.hooks = [
+			{
+				className: 'User',
+				operationType: OperationType.AfterCreate,
+				callback: mockUpdateObject,
+				priority: 1,
+			},
+			{
+				className: 'Test2',
+				operationType: OperationType.AfterUpdate,
+				callback: mockAfterUpdate,
+				priority: 1,
+			},
+		]
 		const spyGetObjectAdapter = spyOn(
 			wibe.databaseController.adapter,
 			'getObject',
@@ -117,6 +143,20 @@ describe('Database', () => {
 	})
 
 	it('should get the good value in output of createObject after mutation on after hook', async () => {
+		wibe.config.hooks = [
+			{
+				className: 'User',
+				operationType: OperationType.AfterCreate,
+				callback: mockUpdateObject,
+				priority: 1,
+			},
+			{
+				className: 'Test2',
+				operationType: OperationType.AfterUpdate,
+				callback: mockAfterUpdate,
+				priority: 1,
+			},
+		]
 		const res = await context.wibeApp.databaseController.createObject({
 			className: 'User',
 			data: { name: 'Lucas', age: 20 },
@@ -130,6 +170,20 @@ describe('Database', () => {
 	})
 
 	it('should get the good value in output of createObjects after mutation on after hook', async () => {
+		wibe.config.hooks = [
+			{
+				className: 'User',
+				operationType: OperationType.AfterCreate,
+				callback: mockUpdateObject,
+				priority: 1,
+			},
+			{
+				className: 'Test2',
+				operationType: OperationType.AfterUpdate,
+				callback: mockAfterUpdate,
+				priority: 1,
+			},
+		]
 		const res = await context.wibeApp.databaseController.createObjects({
 			className: 'User',
 			data: [{ name: 'Lucas', age: 20 }],
@@ -143,6 +197,20 @@ describe('Database', () => {
 	})
 
 	it('should get the good value in output of updateObjects after mutation on after hook', async () => {
+		wibe.config.hooks = [
+			{
+				className: 'User',
+				operationType: OperationType.AfterCreate,
+				callback: mockUpdateObject,
+				priority: 1,
+			},
+			{
+				className: 'Test2',
+				operationType: OperationType.AfterUpdate,
+				callback: mockAfterUpdate,
+				priority: 1,
+			},
+		]
 		await context.wibeApp.databaseController.createObjects({
 			className: 'Test2',
 			data: [{ name: 'test', age: 20 }],
@@ -164,6 +232,20 @@ describe('Database', () => {
 	})
 
 	it('should get the good value in output of updateObject after mutation on after hook', async () => {
+		wibe.config.hooks = [
+			{
+				className: 'User',
+				operationType: OperationType.AfterCreate,
+				callback: mockUpdateObject,
+				priority: 1,
+			},
+			{
+				className: 'Test2',
+				operationType: OperationType.AfterUpdate,
+				callback: mockAfterUpdate,
+				priority: 1,
+			},
+		]
 		const res = await context.wibeApp.databaseController.createObjects({
 			className: 'Test2',
 			data: [{ name: 'test', age: 20 }],

@@ -265,13 +265,14 @@ export class Schema<T extends WibeAppTypes> {
 		const allAuthenticationDataToStoreObject =
 			customAuthenticationConfig.reduce(
 				(acc, authenticationMethod) => {
-					acc[authenticationMethod.name] = {
-						type: 'Object',
-						object: {
-							name: authenticationMethod.name,
-							fields: authenticationMethod.dataToStore,
-						},
-					}
+					if (authenticationMethod.dataToStore)
+						acc[authenticationMethod.name] = {
+							type: 'Object',
+							object: {
+								name: authenticationMethod.name,
+								fields: authenticationMethod.dataToStore,
+							},
+						}
 
 					return acc
 				},

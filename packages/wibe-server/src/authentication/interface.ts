@@ -46,7 +46,7 @@ export type CustomAuthenticationMethods<
 > = {
 	name: string
 	input: K
-	dataToStore: W
+	dataToStore?: W
 	provider: U
 	isSecondaryFactor?: boolean
 }

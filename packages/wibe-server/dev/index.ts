@@ -52,7 +52,6 @@ const run = async () => {
 					},
 					provider: {} as any,
 					isSecondaryFactor: true,
-					dataToStore: {},
 				},
 			],
 		},

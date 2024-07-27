@@ -49,7 +49,6 @@ scalar Date
 type UserAuthentication {
   emailPassword: UserAuthenticationEmailPassword
   google: UserAuthenticationGoogle
-  otp: UserAuthenticationOtp
 }
 
 type UserAuthenticationEmailPassword {
@@ -65,8 +64,6 @@ type UserAuthenticationGoogle {
   verifiedEmail: Boolean!
   idToken: String!
 }
-
-type UserAuthenticationOtp
 
 type _SessionConnection {
   edges: [_SessionEdge]
@@ -112,7 +109,6 @@ input UserACLObjectRolesACLInput {
 input UserAuthenticationInput {
   emailPassword: UserAuthenticationEmailPasswordInput
   google: UserAuthenticationGoogleInput
-  otp: UserAuthenticationOtpInput
 }
 
 input UserAuthenticationEmailPasswordInput {
@@ -125,8 +121,6 @@ input UserAuthenticationGoogleInput {
   verifiedEmail: Boolean!
   idToken: String!
 }
-
-input UserAuthenticationOtpInput
 
 """Input to link an object to a pointer User"""
 input UserPointerInput {
@@ -170,7 +164,6 @@ input UserACLObjectRolesACLCreateFieldsInput {
 input UserAuthenticationCreateFieldsInput {
   emailPassword: UserAuthenticationEmailPasswordCreateFieldsInput
   google: UserAuthenticationGoogleCreateFieldsInput
-  otp: UserAuthenticationOtpCreateFieldsInput
 }
 
 input UserAuthenticationEmailPasswordCreateFieldsInput {
@@ -183,8 +176,6 @@ input UserAuthenticationGoogleCreateFieldsInput {
   verifiedEmail: Boolean
   idToken: String
 }
-
-input UserAuthenticationOtpCreateFieldsInput
 
 """Input to add a relation to the class User"""
 input UserRelationInput {
@@ -585,7 +576,6 @@ input DateWhereInput {
 input UserAuthenticationWhereInput {
   emailPassword: UserAuthenticationEmailPasswordWhereInput
   google: UserAuthenticationGoogleWhereInput
-  otp: UserAuthenticationOtpWhereInput
   OR: [UserAuthenticationWhereInput]
   AND: [UserAuthenticationWhereInput]
 }
@@ -610,11 +600,6 @@ input UserAuthenticationGoogleWhereInput {
   idToken: StringWhereInput
   OR: [UserAuthenticationGoogleWhereInput]
   AND: [UserAuthenticationGoogleWhereInput]
-}
-
-input UserAuthenticationOtpWhereInput {
-  OR: [UserAuthenticationOtpWhereInput]
-  AND: [UserAuthenticationOtpWhereInput]
 }
 
 input AnyWhereInput {
@@ -862,7 +847,6 @@ input UserACLObjectRolesACLUpdateFieldsInput {
 input UserAuthenticationUpdateFieldsInput {
   emailPassword: UserAuthenticationEmailPasswordUpdateFieldsInput
   google: UserAuthenticationGoogleUpdateFieldsInput
-  otp: UserAuthenticationOtpUpdateFieldsInput
 }
 
 input UserAuthenticationEmailPasswordUpdateFieldsInput {
@@ -875,8 +859,6 @@ input UserAuthenticationGoogleUpdateFieldsInput {
   verifiedEmail: Boolean
   idToken: String
 }
-
-input UserAuthenticationOtpUpdateFieldsInput
 
 input UpdateUsersInput {
   fields: UserUpdateFieldsInput

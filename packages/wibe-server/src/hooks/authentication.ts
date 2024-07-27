@@ -5,7 +5,11 @@ import type { HookObject } from './HookObject'
 export const callAuthenticationProvider = async (
 	hookObject: HookObject<any>,
 ) => {
-	if (!hookObject.isFieldUpdate('authentication')) return
+	if (
+		!hookObject.isFieldUpdate('authentication') ||
+		hookObject.getNewData().isOauth
+	)
+		return
 
 	const context = hookObject.context
 

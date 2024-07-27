@@ -1,8 +1,10 @@
-import type { UserAuthenticationGoogle } from '../../../generated/wibe'
 import {
-	ProviderEnum,
-	type AuthenticationEventsOptions,
-	type ProviderInterface,
+	AuthenticationProvider,
+	type UserAuthenticationGoogle,
+} from '../../../generated/wibe'
+import type {
+	AuthenticationEventsOptions,
+	ProviderInterface,
 } from '../interface'
 import { Google as GoogleOauth } from '../oauth/Google'
 
@@ -66,7 +68,9 @@ export class Google implements ProviderInterface<GoogleInterface> {
 				await context.wibeApp.databaseController.createObject({
 					className: 'User',
 					data: {
-						provider: ProviderEnum.google,
+						// For the moment a bug in bun is blocking import from generated don't know why
+						// provider: AuthenticationProvider.Google,
+						provider: 'Google',
 						isOauth: true,
 						authentication: {
 							google: authenticationDataToSave,
