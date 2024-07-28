@@ -21,7 +21,7 @@
     "@graphql-tools/load": "8.0.2",
     "jsonwebtoken": "9.0.2",
     "mongodb": "6.3.0",
-    "wobe": "link:wobe",
+    "wobe": "1.1.7",
     "wobe-graphql-yoga": "1.2.5"
   },
   "devDependencies": {
