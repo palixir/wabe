@@ -9,7 +9,7 @@ import { type WibeRoute, defaultRoutes } from './routes'
 import { type Hook, getDefaultHooks } from '../hooks'
 import { generateCodegen } from './generateCodegen'
 import { defaultAuthenticationMethods } from '../authentication/defaultAuthentication'
-import { Wobe } from 'wobe'
+import { Wobe, cors } from 'wobe'
 import { WobeGraphqlYogaPlugin } from 'wobe-graphql-yoga'
 import { Session } from '../authentication/Session'
 import { getCookieInRequestHeaders } from '../utils'
@@ -179,6 +179,18 @@ export class WibeApp<T extends WibeAppTypes> {
 				graphqlSchema: schema,
 			})
 
+		this.server.options(
+			'*',
+			(ctx) => {
+				return ctx.res.send('OK')
+			},
+			cors({
+				origin: 'http://localhost:3000',
+				allowHeaders: ['content-type'],
+				credentials: true,
+			}),
+		)
+
 		// Set the wibe context
 		this.server.beforeHandler(async (ctx) => {
 			const headers = ctx.request.headers
@@ -236,7 +248,10 @@ export class WibeApp<T extends WibeAppTypes> {
 			WobeGraphqlYogaPlugin({
 				schema,
 				maskedErrors: false,
-				// TODO: Maybe add cors here + the wobe cors for csrf on upload
+				cors: {
+					origin: 'http://localhost:3000',
+					credentials: true,
+				},
 				graphqlEndpoint: '/graphql',
 				context: async (ctx): Promise<WibeContext<T>> => ctx.wibe,
 				graphqlMiddleware: async (resolve, res) => {
