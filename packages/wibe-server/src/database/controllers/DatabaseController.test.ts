@@ -10,6 +10,7 @@ import {
 import { DatabaseController, type WhereType } from '..'
 import * as hooks from '../../hooks/index'
 import type { WibeContext } from '../../server/interface'
+import { MongoCryptCreateDataKeyError } from 'mongodb'
 
 describe('DatabaseController', () => {
 	const mockGetObject = mock(() => {})
@@ -20,6 +21,7 @@ describe('DatabaseController', () => {
 	const mockUpdateObjects = mock(() => {})
 	const mockDeleteObject = mock(() => {})
 	const mockDeleteObjects = mock(() => {})
+	const mockClearDatabase = mock(() => {})
 
 	const mockRunOnSingleObject = mock(() => {})
 	const mockRunOnMultipleObject = mock(() => {})
@@ -38,6 +40,7 @@ describe('DatabaseController', () => {
 		updateObjects: mockUpdateObjects,
 		deleteObject: mockDeleteObject,
 		deleteObjects: mockDeleteObjects,
+		clearDatabase: mockClearDatabase,
 	}))
 
 	const config = {
@@ -130,6 +133,15 @@ describe('DatabaseController', () => {
 		mockInitializeHook.mockClear()
 		mockRunOnSingleObject.mockClear()
 		mockRunOnMultipleObject.mockClear()
+		mockClearDatabase.mockClear()
+	})
+
+	it('should call adapter clearDatabase', async () => {
+		const databaseController = new DatabaseController(mockAdapter() as any)
+
+		await databaseController.clearDatabase()
+
+		expect(mockClearDatabase).toHaveBeenCalledTimes(1)
 	})
 
 	it('should create new where include the ACL from context when isRoot = true', () => {

@@ -52,6 +52,57 @@ describe('Mongo adapter', () => {
 			)
 	})
 
+	it('should clear all database', async () => {
+		await mongoAdapter.createObjects({
+			className: 'User',
+			data: [
+				{
+					name: 'Lucas',
+					age: 20,
+				},
+				{
+					name: 'LucasBis',
+					age: 18,
+				},
+			],
+			fields: [],
+			context,
+		})
+
+		await mongoAdapter.createObjects({
+			className: '_Session',
+			data: [
+				{
+					name: 'Lucas',
+					age: 20,
+				},
+				{
+					name: 'LucasBis',
+					age: 18,
+				},
+			],
+			fields: [],
+			context,
+		})
+
+		await mongoAdapter.clearDatabase()
+
+		const res = await mongoAdapter.getObjects({
+			className: 'User',
+			fields: [],
+			context,
+		})
+
+		const res2 = await mongoAdapter.getObjects({
+			className: '_Session',
+			fields: [],
+			context,
+		})
+
+		expect(res.length).toEqual(0)
+		expect(res2.length).toEqual(0)
+	})
+
 	it('should support where on getObject for additional check (acl for example)', async () => {
 		const insertedObjects = await mongoAdapter.createObjects({
 			className: 'User',

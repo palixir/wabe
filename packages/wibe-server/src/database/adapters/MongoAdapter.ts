@@ -133,6 +133,19 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 		return this.client.close()
 	}
 
+	async clearDatabase() {
+		if (!this.database)
+			throw new Error('Connection to database is not established')
+
+		const collections = await this.database?.listCollections().toArray()
+
+		await Promise.all(
+			collections.map(({ name }) =>
+				this.database?.collection(name).deleteMany({}),
+			),
+		)
+	}
+
 	async createClassIfNotExist(className: keyof T['types']) {
 		if (!this.database)
 			throw new Error('Connection to database is not established')

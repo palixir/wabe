@@ -370,6 +370,10 @@ export class DatabaseController<T extends WibeAppTypes> {
 		return `${String(className)}-${id}-${fields.join(',')}`
 	}
 
+	async clearDatabase() {
+		this.adapter.clearDatabase()
+	}
+
 	async getObject<U extends keyof T['types'], K extends keyof T['types'][U]>({
 		fields,
 		className,
