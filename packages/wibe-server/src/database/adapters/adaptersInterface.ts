@@ -156,7 +156,7 @@ export interface DatabaseAdapter {
 
 	createClassIfNotExist(className: string): Promise<any>
 
-	clearDatabase(): void
+	clearDatabase(): Promise<void>
 
 	getObject<
 		T extends keyof WibeAppTypes['types'],

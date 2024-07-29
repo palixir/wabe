@@ -371,7 +371,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 	}
 
 	async clearDatabase() {
-		this.adapter.clearDatabase()
+		await this.adapter.clearDatabase()
 	}
 
 	async getObject<U extends keyof T['types'], K extends keyof T['types'][U]>({
