@@ -96,16 +96,7 @@ export class GraphQLSchema {
 					object,
 					connectionObject,
 				})
-				const customQueries = this.createCustomQueries({
-					resolvers: current.resolvers?.queries || {},
-					graphqlParser,
-				})
 
-				// Mutations
-				const customMutations = this.createCustomMutations({
-					resolvers: current.resolvers?.mutations || {},
-					graphqlParser,
-				})
 				const defaultMutations = this.createDefaultMutations({
 					className,
 					whereInputType: whereInputObject,
@@ -116,9 +107,7 @@ export class GraphQLSchema {
 				})
 
 				const defaultQueriesKeys = Object.keys(defaultQueries)
-				const customQueriesKeys = Object.keys(customQueries)
 				const defaultMutationsKeys = Object.keys(defaultMutations)
-				const customMutationsKeys = Object.keys(customMutations)
 
 				// Loop to avoid O(n)² complexity of spread on accumulator
 				for (const key in defaultQueriesKeys) {
@@ -126,19 +115,9 @@ export class GraphQLSchema {
 						defaultQueries[defaultQueriesKeys[key]]
 				}
 
-				for (const key in customQueriesKeys) {
-					acc.queries[customQueriesKeys[key]] =
-						customQueries[customQueriesKeys[key]]
-				}
-
 				for (const key in defaultMutationsKeys) {
 					acc.mutations[defaultMutationsKeys[key]] =
 						defaultMutations[defaultMutationsKeys[key]]
-				}
-
-				for (const key in customMutationsKeys) {
-					acc.mutations[customMutationsKeys[key]] =
-						customMutations[customMutationsKeys[key]]
 				}
 
 				acc.objects.push(object)
@@ -154,6 +133,29 @@ export class GraphQLSchema {
 				objects: Array<GraphQLObjectType | GraphQLInputObjectType>
 			},
 		)
+
+		const customQueries = this.createCustomQueries({
+			resolvers: this.schemas.schema.resolvers?.queries || {},
+			graphqlParser,
+		})
+		const customQueriesKeys = Object.keys(customQueries)
+
+		for (const key in customQueriesKeys) {
+			queriesMutationAndObjects.queries[customQueriesKeys[key]] =
+				customQueries[customQueriesKeys[key]]
+		}
+
+		// Mutations
+		const customMutations = this.createCustomMutations({
+			resolvers: this.schemas.schema.resolvers?.mutations || {},
+			graphqlParser,
+		})
+		const customMutationsKeys = Object.keys(customMutations)
+
+		for (const key in customMutationsKeys) {
+			queriesMutationAndObjects.mutations[customMutationsKeys[key]] =
+				customMutations[customMutationsKeys[key]]
+		}
 
 		return {
 			queries: queriesMutationAndObjects.queries,

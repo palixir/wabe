@@ -73,20 +73,6 @@ describe('GraphqlSchema', () => {
 					{
 						name: 'TestClass',
 						fields: { field1: { type: 'String' } },
-						resolvers: {
-							mutations: {
-								customMutation: {
-									type: 'Boolean',
-									resolve: () => true,
-								},
-							},
-							queries: {
-								customQuery: {
-									type: 'Boolean',
-									resolve: () => true,
-								},
-							},
-						},
 					},
 					{
 						name: 'SecondClass',
@@ -166,6 +152,20 @@ describe('GraphqlSchema', () => {
 						},
 					},
 				],
+				resolvers: {
+					mutations: {
+						customMutation: {
+							type: 'Boolean',
+							resolve: () => true,
+						},
+					},
+					queries: {
+						customQuery: {
+							type: 'Boolean',
+							resolve: () => true,
+						},
+					},
+				},
 			},
 		} as any)
 
@@ -344,19 +344,19 @@ describe('GraphqlSchema', () => {
 							type: 'String',
 						},
 					},
-					resolvers: {
-						queries: {
-							testQuery: {
-								resolve: () => {
-									return ['test']
-								},
-								type: 'Array',
-								typeValue: 'String',
-							},
-						},
-					},
 				},
 			],
+			resolvers: {
+				queries: {
+					testQuery: {
+						resolve: () => {
+							return ['test']
+						},
+						type: 'Array',
+						typeValue: 'String',
+					},
+				},
+			},
 		})
 
 		const res = await client.request<any>(gql`
@@ -381,26 +381,26 @@ describe('GraphqlSchema', () => {
 							type: 'String',
 						},
 					},
-					resolvers: {
-						queries: {
-							testQuery: {
-								resolve: () => {
-									return { test: 'test' }
-								},
-								type: 'Object',
-								outputObject: {
-									name: 'TestQueryOutput',
-									fields: {
-										test: {
-											type: 'String',
-										},
-									},
+				},
+			],
+			resolvers: {
+				queries: {
+					testQuery: {
+						resolve: () => {
+							return { test: 'test' }
+						},
+						type: 'Object',
+						outputObject: {
+							name: 'TestQueryOutput',
+							fields: {
+								test: {
+									type: 'String',
 								},
 							},
 						},
 					},
 				},
-			],
+			},
 		})
 
 		const res = await client.request<any>(gql`
@@ -426,19 +426,19 @@ describe('GraphqlSchema', () => {
 							type: 'String',
 						},
 					},
-					resolvers: {
-						mutations: {
-							testMutation: {
-								resolve: () => {
-									return ['test']
-								},
-								type: 'Array',
-								typeValue: 'String',
-							},
-						},
-					},
 				},
 			],
+			resolvers: {
+				mutations: {
+					testMutation: {
+						resolve: () => {
+							return ['test']
+						},
+						type: 'Array',
+						typeValue: 'String',
+					},
+				},
+			},
 		})
 
 		const res = await client.request<any>(gql`
@@ -463,26 +463,26 @@ describe('GraphqlSchema', () => {
 							type: 'String',
 						},
 					},
-					resolvers: {
-						mutations: {
-							testMutation: {
-								resolve: () => {
-									return { test: 'test' }
-								},
-								type: 'Object',
-								outputObject: {
-									name: 'TestMutationOutput',
-									fields: {
-										test: {
-											type: 'String',
-										},
-									},
+				},
+			],
+			resolvers: {
+				mutations: {
+					testMutation: {
+						resolve: () => {
+							return { test: 'test' }
+						},
+						type: 'Object',
+						outputObject: {
+							name: 'TestMutationOutput',
+							fields: {
+								test: {
+									type: 'String',
 								},
 							},
 						},
 					},
 				},
-			],
+			},
 		})
 
 		const res = await client.request<any>(gql`
@@ -879,37 +879,37 @@ describe('GraphqlSchema', () => {
 				{
 					name: 'TestClass',
 					fields: { field1: { type: 'String' } },
-					resolvers: {
-						mutations: {
-							customMutation: {
-								type: 'Int',
-								args: {
-									input: {
-										sum: {
-											type: 'Object',
-											object: {
-												name: 'Sum',
-												fields: {
-													a: {
-														type: 'Int',
-														required: true,
-													},
-													b: {
-														type: 'Int',
-														required: true,
-													},
-												},
+				},
+			],
+			resolvers: {
+				mutations: {
+					customMutation: {
+						type: 'Int',
+						args: {
+							input: {
+								sum: {
+									type: 'Object',
+									object: {
+										name: 'Sum',
+										fields: {
+											a: {
+												type: 'Int',
+												required: true,
+											},
+											b: {
+												type: 'Int',
+												required: true,
 											},
 										},
 									},
 								},
-								resolve: (_: any, args: any) =>
-									args.input.sum.a + args.input.sum.b,
 							},
 						},
+						resolve: (_: any, args: any) =>
+							args.input.sum.a + args.input.sum.b,
 					},
 				},
-			],
+			},
 		})
 
 		const request = await client.request<any>(
@@ -932,31 +932,31 @@ describe('GraphqlSchema', () => {
 				{
 					name: 'TestClass',
 					fields: { field1: { type: 'String' } },
-					resolvers: {
-						mutations: {
-							customMutation: {
-								type: 'Int',
-								args: {
-									input: {
-										subObject: {
-											type: 'Object',
-											object: {
-												name: 'SubObject',
-												fields: {
-													sum: {
-														type: 'Object',
-														object: {
-															name: 'Sum',
-															fields: {
-																a: {
-																	type: 'Int',
-																	required: true,
-																},
-																b: {
-																	type: 'Int',
-																	required: true,
-																},
-															},
+				},
+			],
+			resolvers: {
+				mutations: {
+					customMutation: {
+						type: 'Int',
+						args: {
+							input: {
+								subObject: {
+									type: 'Object',
+									object: {
+										name: 'SubObject',
+										fields: {
+											sum: {
+												type: 'Object',
+												object: {
+													name: 'Sum',
+													fields: {
+														a: {
+															type: 'Int',
+															required: true,
+														},
+														b: {
+															type: 'Int',
+															required: true,
 														},
 													},
 												},
@@ -964,14 +964,14 @@ describe('GraphqlSchema', () => {
 										},
 									},
 								},
-								resolve: (_: any, args: any) =>
-									args.input.subObject.sum.a +
-									args.input.subObject.sum.b,
 							},
 						},
+						resolve: (_: any, args: any) =>
+							args.input.subObject.sum.a +
+							args.input.subObject.sum.b,
 					},
 				},
-			],
+			},
 		})
 
 		const request = await client.request<any>(
@@ -996,37 +996,37 @@ describe('GraphqlSchema', () => {
 				{
 					name: 'TestClass',
 					fields: { field1: { type: 'String' } },
-					resolvers: {
-						mutations: {
-							customMutation: {
-								type: 'Int',
-								args: {
-									input: {
-										sum: {
-											type: 'Object',
-											object: {
-												name: 'Sum',
-												fields: {
-													a: {
-														type: 'Int',
-														required: true,
-													},
-													b: {
-														type: 'Int',
-														required: true,
-													},
-												},
+				},
+			],
+			resolvers: {
+				mutations: {
+					customMutation: {
+						type: 'Int',
+						args: {
+							input: {
+								sum: {
+									type: 'Object',
+									object: {
+										name: 'Sum',
+										fields: {
+											a: {
+												type: 'Int',
+												required: true,
+											},
+											b: {
+												type: 'Int',
+												required: true,
 											},
 										},
 									},
 								},
-								resolve: (_: any, args: any) =>
-									args.input.sum.a + args.input.sum.b,
 							},
 						},
+						resolve: (_: any, args: any) =>
+							args.input.sum.a + args.input.sum.b,
 					},
 				},
-			],
+			},
 		})
 
 		const request = await client.request<any>(

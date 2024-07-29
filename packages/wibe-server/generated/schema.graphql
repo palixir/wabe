@@ -477,15 +477,15 @@ type Query {
 
   """User class"""
   users(where: UserWhereInput, offset: Int, limit: Int): UserConnection!
-
-  """Hello world description"""
-  helloWorld(name: String!): String
   post(id: ID): Post
   posts(where: PostWhereInput, offset: Int, limit: Int): PostConnection!
   _session(id: ID): _Session
   _sessions(where: _SessionWhereInput, offset: Int, limit: Int): _SessionConnection!
   role(id: ID): Role
   roles(where: RoleWhereInput, offset: Int, limit: Int): RoleConnection!
+
+  """Hello world description"""
+  helloWorld(name: String!): String
 }
 
 """User class"""
@@ -758,14 +758,6 @@ type Mutation {
 
   """User class"""
   deleteUsers(input: DeleteUsersInput): UserConnection!
-  createMutation(input: CreateMutationInput): Boolean!
-  customMutation(input: CustomMutationInput): Int
-  secondCustomMutation(input: SecondCustomMutationInput): Int
-  signInWith(input: SignInWithInput): SignInWithOutput
-  signUpWith(input: SignUpWithInput): SignUpWithOutput
-  signOut: Boolean
-  refresh(input: RefreshInput): RefreshSessionOutput
-  verifyChallenge(input: VerifyChallengeInput): Boolean
   createPost(input: CreatePostInput): CreatePostPayload
   createPosts(input: CreatePostsInput): PostConnection!
   updatePost(input: UpdatePostInput): UpdatePostPayload
@@ -784,6 +776,14 @@ type Mutation {
   updateRoles(input: UpdateRolesInput): RoleConnection!
   deleteRole(input: DeleteRoleInput): DeleteRolePayload
   deleteRoles(input: DeleteRolesInput): RoleConnection!
+  createMutation(input: CreateMutationInput): Boolean!
+  customMutation(input: CustomMutationInput): Int
+  secondCustomMutation(input: SecondCustomMutationInput): Int
+  signInWith(input: SignInWithInput): SignInWithOutput
+  signUpWith(input: SignUpWithInput): SignUpWithOutput
+  signOut: Boolean
+  refresh(input: RefreshInput): RefreshSessionOutput
+  verifyChallenge(input: VerifyChallengeInput): Boolean
 }
 
 type CreateUserPayload {
@@ -878,108 +878,6 @@ input DeleteUserInput {
 
 input DeleteUsersInput {
   where: UserWhereInput
-}
-
-input CreateMutationInput {
-  name: Int!
-}
-
-input CustomMutationInput {
-  a: Int!
-  b: Int!
-}
-
-input SecondCustomMutationInput {
-  sum: SecondCustomMutationSumInput
-}
-
-input SecondCustomMutationSumInput {
-  a: Int!
-  b: Int!
-}
-
-type SignInWithOutput {
-  id: String
-  accessToken: String
-  refreshToken: String
-}
-
-input SignInWithInput {
-  authentication: SignInWithAuthenticationInput
-}
-
-input SignInWithAuthenticationInput {
-  emailPassword: SignInWithAuthenticationEmailPasswordInput
-  google: SignInWithAuthenticationGoogleInput
-  otp: SignInWithAuthenticationOtpInput
-  secondaryFactor: SecondaryFactor
-}
-
-input SignInWithAuthenticationEmailPasswordInput {
-  email: Email!
-  password: String!
-}
-
-input SignInWithAuthenticationGoogleInput {
-  authorizationCode: String!
-  codeVerifier: String!
-}
-
-input SignInWithAuthenticationOtpInput {
-  code: String
-}
-
-type SignUpWithOutput {
-  id: String
-  accessToken: String!
-  refreshToken: String!
-}
-
-input SignUpWithInput {
-  authentication: SignUpWithAuthenticationInput
-}
-
-input SignUpWithAuthenticationInput {
-  emailPassword: SignUpWithAuthenticationEmailPasswordInput
-  google: SignUpWithAuthenticationGoogleInput
-  otp: SignUpWithAuthenticationOtpInput
-  secondaryFactor: SecondaryFactor
-}
-
-input SignUpWithAuthenticationEmailPasswordInput {
-  email: Email!
-  password: String!
-}
-
-input SignUpWithAuthenticationGoogleInput {
-  authorizationCode: String!
-  codeVerifier: String!
-}
-
-input SignUpWithAuthenticationOtpInput {
-  code: String
-}
-
-type RefreshSessionOutput {
-  accessToken: String!
-  refreshToken: String!
-}
-
-input RefreshInput {
-  accessToken: String!
-  refreshToken: String!
-}
-
-input VerifyChallengeInput {
-  factor: VerifyChallengeFactorInput
-}
-
-input VerifyChallengeFactorInput {
-  otp: VerifyChallengeFactorOtpInput
-}
-
-input VerifyChallengeFactorOtpInput {
-  code: String
 }
 
 type CreatePostPayload {
@@ -1193,4 +1091,106 @@ input DeleteRoleInput {
 
 input DeleteRolesInput {
   where: RoleWhereInput
+}
+
+input CreateMutationInput {
+  name: Int!
+}
+
+input CustomMutationInput {
+  a: Int!
+  b: Int!
+}
+
+input SecondCustomMutationInput {
+  sum: SecondCustomMutationSumInput
+}
+
+input SecondCustomMutationSumInput {
+  a: Int!
+  b: Int!
+}
+
+type SignInWithOutput {
+  id: String
+  accessToken: String
+  refreshToken: String
+}
+
+input SignInWithInput {
+  authentication: SignInWithAuthenticationInput
+}
+
+input SignInWithAuthenticationInput {
+  emailPassword: SignInWithAuthenticationEmailPasswordInput
+  google: SignInWithAuthenticationGoogleInput
+  otp: SignInWithAuthenticationOtpInput
+  secondaryFactor: SecondaryFactor
+}
+
+input SignInWithAuthenticationEmailPasswordInput {
+  email: Email!
+  password: String!
+}
+
+input SignInWithAuthenticationGoogleInput {
+  authorizationCode: String!
+  codeVerifier: String!
+}
+
+input SignInWithAuthenticationOtpInput {
+  code: String
+}
+
+type SignUpWithOutput {
+  id: String
+  accessToken: String!
+  refreshToken: String!
+}
+
+input SignUpWithInput {
+  authentication: SignUpWithAuthenticationInput
+}
+
+input SignUpWithAuthenticationInput {
+  emailPassword: SignUpWithAuthenticationEmailPasswordInput
+  google: SignUpWithAuthenticationGoogleInput
+  otp: SignUpWithAuthenticationOtpInput
+  secondaryFactor: SecondaryFactor
+}
+
+input SignUpWithAuthenticationEmailPasswordInput {
+  email: Email!
+  password: String!
+}
+
+input SignUpWithAuthenticationGoogleInput {
+  authorizationCode: String!
+  codeVerifier: String!
+}
+
+input SignUpWithAuthenticationOtpInput {
+  code: String
+}
+
+type RefreshSessionOutput {
+  accessToken: String!
+  refreshToken: String!
+}
+
+input RefreshInput {
+  accessToken: String!
+  refreshToken: String!
+}
+
+input VerifyChallengeInput {
+  factor: VerifyChallengeFactorInput
+}
+
+input VerifyChallengeFactorInput {
+  otp: VerifyChallengeFactorOtpInput
+}
+
+input VerifyChallengeFactorOtpInput {
+  code: String
 }

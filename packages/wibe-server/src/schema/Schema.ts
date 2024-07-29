@@ -159,7 +159,6 @@ export interface ClassInterface<T extends WibeAppTypes> {
 	name: string
 	fields: SchemaFields<T>
 	description?: string
-	resolvers?: TypeResolver<T>
 	permissions?: ClassPermissions
 }
 
@@ -181,6 +180,7 @@ export interface SchemaInterface<T extends WibeAppTypes> {
 	classes: ClassInterface<T>[]
 	scalars?: ScalarInterface[]
 	enums?: EnumInterface[]
+	resolvers?: TypeResolver<T>
 }
 
 export class Schema<T extends WibeAppTypes> {
@@ -194,6 +194,7 @@ export class Schema<T extends WibeAppTypes> {
 			...config.schema,
 			classes: this.defaultClass(config.schema),
 			enums: [...(config.schema.enums || []), ...this.defaultEnum()],
+			resolvers: this.mergeResolvers(this.defaultResolvers()),
 		}
 	}
 
@@ -214,70 +215,22 @@ export class Schema<T extends WibeAppTypes> {
 		]
 	}
 
-	sessionClass(): ClassInterface<T> {
+	mergeResolvers(defaultResolvers: TypeResolver<T>): TypeResolver<T> {
 		return {
-			name: '_Session',
-			fields: {
-				user: {
-					type: 'Pointer',
-					required: true,
-					class: 'User',
-				},
-				accessToken: {
-					type: 'String',
-					required: true,
-				},
-				accessTokenExpiresAt: {
-					type: 'Date',
-					required: true,
-				},
-				refreshToken: {
-					type: 'String',
-				},
-				refreshTokenExpiresAt: {
-					type: 'Date',
-					required: true,
-				},
+			mutations: {
+				...(this.config.schema.resolvers?.mutations || {}),
+				...defaultResolvers.mutations,
+			},
+			queries: {
+				...(this.config.schema.resolvers?.queries || {}),
+				...defaultResolvers.queries,
 			},
 		}
 	}
 
-	roleClass(): ClassInterface<T> {
-		return {
-			name: 'Role',
-			fields: {
-				name: {
-					type: 'String',
-					required: true,
-				},
-				users: {
-					type: 'Relation',
-					class: 'User',
-				},
-			},
-		}
-	}
-
-	userClass(): ClassInterface<T> {
+	defaultResolvers(): TypeResolver<T> {
 		const customAuthenticationConfig =
 			this.config.authentication?.customAuthenticationMethods || []
-
-		const allAuthenticationDataToStoreObject =
-			customAuthenticationConfig.reduce(
-				(acc, authenticationMethod) => {
-					if (authenticationMethod.dataToStore)
-						acc[authenticationMethod.name] = {
-							type: 'Object',
-							object: {
-								name: authenticationMethod.name,
-								fields: authenticationMethod.dataToStore,
-							},
-						}
-
-					return acc
-				},
-				{} as SchemaFields<T>,
-			)
 
 		const allSecondaryFactorAuthenticationMethods =
 			customAuthenticationConfig.reduce(
@@ -296,14 +249,6 @@ export class Schema<T extends WibeAppTypes> {
 				},
 				{} as SchemaFields<T>,
 			)
-
-		const authenticationObject: TypeFieldObject<T> = {
-			type: 'Object',
-			object: {
-				name: 'Authentication',
-				fields: allAuthenticationDataToStoreObject,
-			},
-		}
 
 		const allAuthenticationMethodsInput = customAuthenticationConfig.reduce(
 			(acc, authenticationMethod) => {
@@ -352,7 +297,7 @@ export class Schema<T extends WibeAppTypes> {
 			},
 		}
 
-		const resolvers: TypeResolver<T> = {
+		return {
 			mutations: {
 				...(customAuthenticationConfig.length > 0
 					? {
@@ -451,6 +396,80 @@ export class Schema<T extends WibeAppTypes> {
 					: {}),
 			},
 		}
+	}
+
+	sessionClass(): ClassInterface<T> {
+		return {
+			name: '_Session',
+			fields: {
+				user: {
+					type: 'Pointer',
+					required: true,
+					class: 'User',
+				},
+				accessToken: {
+					type: 'String',
+					required: true,
+				},
+				accessTokenExpiresAt: {
+					type: 'Date',
+					required: true,
+				},
+				refreshToken: {
+					type: 'String',
+				},
+				refreshTokenExpiresAt: {
+					type: 'Date',
+					required: true,
+				},
+			},
+		}
+	}
+
+	roleClass(): ClassInterface<T> {
+		return {
+			name: 'Role',
+			fields: {
+				name: {
+					type: 'String',
+					required: true,
+				},
+				users: {
+					type: 'Relation',
+					class: 'User',
+				},
+			},
+		}
+	}
+
+	userClass(): ClassInterface<T> {
+		const customAuthenticationConfig =
+			this.config.authentication?.customAuthenticationMethods || []
+
+		const allAuthenticationDataToStoreObject =
+			customAuthenticationConfig.reduce(
+				(acc, authenticationMethod) => {
+					if (authenticationMethod.dataToStore)
+						acc[authenticationMethod.name] = {
+							type: 'Object',
+							object: {
+								name: authenticationMethod.name,
+								fields: authenticationMethod.dataToStore,
+							},
+						}
+
+					return acc
+				},
+				{} as SchemaFields<T>,
+			)
+
+		const authenticationObject: TypeFieldObject<T> = {
+			type: 'Object',
+			object: {
+				name: 'Authentication',
+				fields: allAuthenticationDataToStoreObject,
+			},
+		}
 
 		const fields: SchemaFields<T> = {
 			...(customAuthenticationConfig.length > 0
@@ -481,7 +500,6 @@ export class Schema<T extends WibeAppTypes> {
 		return {
 			name: 'User',
 			fields,
-			resolvers,
 			permissions: {
 				delete: {
 					authorizedRoles: [],
@@ -578,22 +596,6 @@ export class Schema<T extends WibeAppTypes> {
 
 			return allClassWithSameName.reduce(
 				(acc, classItem) => {
-					const resolvers: TypeResolver<T> = {
-						mutations: {
-							...acc.resolvers?.mutations,
-							...classItem.resolvers?.mutations,
-						},
-						queries: {
-							...acc.resolvers?.queries,
-							...classItem.resolvers?.queries,
-						},
-					}
-
-					const isMutationsEmpty =
-						Object.keys(resolvers.mutations || {}).length > 0
-					const isQueriesEmpty =
-						Object.keys(resolvers.queries || {}).length > 0
-
 					return {
 						...acc,
 						...classItem,
@@ -603,17 +605,6 @@ export class Schema<T extends WibeAppTypes> {
 							...classItem.fields,
 							...this.defaultFields(),
 						},
-						resolvers:
-							isQueriesEmpty || isMutationsEmpty
-								? {
-										mutations: isMutationsEmpty
-											? resolvers.mutations
-											: undefined,
-										queries: isQueriesEmpty
-											? resolvers.queries
-											: undefined,
-									}
-								: undefined,
 					}
 				},
 				allClassWithSameName[0] as ClassInterface<T>,

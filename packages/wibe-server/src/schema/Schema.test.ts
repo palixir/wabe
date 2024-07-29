@@ -100,14 +100,6 @@ describe('Schema', () => {
 								type: 'Int',
 							},
 						},
-						resolvers: {
-							queries: {
-								getClass1: {
-									type: 'String',
-									resolve: () => 'Class1',
-								},
-							},
-						},
 					},
 					{
 						name: 'Class2',
@@ -128,16 +120,20 @@ describe('Schema', () => {
 								defaultValue: 1,
 							},
 						},
-						resolvers: {
-							queries: {
-								getClass2: {
-									type: 'String',
-									resolve: () => 'Class1',
-								},
-							},
-						},
 					},
 				],
+				resolvers: {
+					queries: {
+						getClass1: {
+							type: 'String',
+							resolve: () => 'Class1',
+						},
+						getClass2: {
+							type: 'String',
+							resolve: () => 'Class1',
+						},
+					},
+				},
 			},
 		} as any)
 
@@ -160,18 +156,6 @@ describe('Schema', () => {
 					required: true,
 				},
 				acl: expect.any(Object),
-			},
-			resolvers: {
-				queries: {
-					getClass1: {
-						type: 'String',
-						resolve: expect.any(Function),
-					},
-					getClass2: {
-						type: 'String',
-						resolve: expect.any(Function),
-					},
-				},
 			},
 		})
 
