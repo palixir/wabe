@@ -6,33 +6,6 @@ import { DatabaseEnum } from '../database'
 import { Schema } from '../schema'
 
 describe('Server', () => {
-	it('should provide a root key with a length >= 64 characters', async () => {
-		const databaseId = uuid()
-
-		const port = await getPort()
-		const wibe = new WibeApp({
-			rootKey: 'test',
-			database: {
-				type: DatabaseEnum.Mongo,
-				url: 'mongodb://127.0.0.1:27045',
-				name: databaseId,
-			},
-			port,
-			schema: {
-				classes: [
-					{
-						name: 'Collection1',
-						fields: { name: { type: 'String' } },
-					},
-				],
-			},
-		})
-
-		expect(wibe.start()).rejects.toThrow(
-			'Root key need to be greater or equal than 64 characters',
-		)
-	})
-
 	it('should run server', async () => {
 		const databaseId = uuid()
 

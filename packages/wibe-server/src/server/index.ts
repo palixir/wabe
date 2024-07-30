@@ -139,11 +139,6 @@ export class WibeApp<T extends WibeAppTypes> {
 	}
 
 	async start() {
-		if (this.config.rootKey.length < 64)
-			throw new Error(
-				'Root key need to be greater or equal than 64 characters',
-			)
-
 		await this.databaseController.connect()
 
 		const wibeSchema = new Schema(this.config)
@@ -185,7 +180,7 @@ export class WibeApp<T extends WibeAppTypes> {
 				return ctx.res.send('OK')
 			},
 			cors({
-				origin: 'http://localhost:3000',
+				origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
 				allowHeaders: ['content-type'],
 				credentials: true,
 			}),
@@ -249,8 +244,9 @@ export class WibeApp<T extends WibeAppTypes> {
 				schema,
 				maskedErrors: false,
 				cors: {
-					origin: 'http://localhost:3000',
+					origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
 					credentials: true,
+					allowedHeaders: ['content-type'],
 				},
 				graphqlEndpoint: '/graphql',
 				context: async (ctx): Promise<WibeContext<T>> => ctx.wibe,
