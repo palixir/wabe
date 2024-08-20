@@ -6,11 +6,7 @@ export const meResolver = async (
 	__: any,
 	context: WibeContext<DevWibeAppTypes>,
 ) => {
-	const userId = context.user?.id
-	const roleName = context.user?.role?.name
-
 	return {
-		userId,
-		roleName,
+		user: context.user,
 	}
 }

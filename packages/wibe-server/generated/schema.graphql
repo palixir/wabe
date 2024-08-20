@@ -742,8 +742,7 @@ type RoleEdge {
 }
 
 type MeOutput {
-  userId: String
-  roleName: String
+  user: User
 }
 
 type Mutation {

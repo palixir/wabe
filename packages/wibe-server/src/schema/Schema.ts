@@ -305,11 +305,9 @@ export class Schema<T extends WibeAppTypes> {
 					outputObject: {
 						name: 'MeOutput',
 						fields: {
-							userId: {
-								type: 'String',
-							},
-							roleName: {
-								type: 'String',
+							user: {
+								type: 'Pointer',
+								class: 'User',
 							},
 						},
 					},

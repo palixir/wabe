@@ -15,8 +15,13 @@ describe('me', () => {
 				},
 			} as any),
 		).toEqual({
-			userId: 'userId',
-			roleName: 'Admin',
+			user: {
+				id: 'userId',
+				role: {
+					id: 'id',
+					name: 'Admin',
+				},
+			},
 		})
 	})
 })
