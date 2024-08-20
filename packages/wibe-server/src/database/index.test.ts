@@ -7,6 +7,7 @@ import {
 	mock,
 	spyOn,
 	beforeEach,
+	type Mock,
 } from 'bun:test'
 import type { WibeApp } from '../server'
 import { type DevWibeAppTypes, setupTests, closeTests } from '../utils/helper'
@@ -38,6 +39,9 @@ describe('Database', () => {
 		})
 	})
 
+	let spyGetObjects: Mock<any>
+	let spyGetObject: Mock<any>
+
 	beforeAll(async () => {
 		const setup = await setupTests()
 		wibe = setup.wibe
@@ -49,6 +53,9 @@ describe('Database', () => {
 				config: wibe.config,
 			},
 		} as WibeContext<any>
+
+		spyGetObjects = spyOn(wibe.databaseController, 'getObjects')
+		spyGetObject = spyOn(wibe.databaseController, 'getObject')
 	})
 
 	afterAll(async () => {
@@ -76,6 +83,8 @@ describe('Database', () => {
 
 		mockUpdateObject.mockClear()
 		mockAfterUpdate.mockClear()
+		spyGetObject.mockClear()
+		spyGetObjects.mockClear()
 	})
 
 	it('should create object with subobject (hooks default call authentication before create user)', async () => {
@@ -101,6 +110,123 @@ describe('Database', () => {
 			verifiedEmail: true,
 			idToken: 'idToken',
 		})
+	})
+
+	it('should not computeObject in runOnSingleObject if there is no hooks to execute on createObject', async () => {
+		wibe.config.hooks = []
+
+		await wibe.databaseController.createObject({
+			className: 'User',
+			context,
+			data: { name: 'Lucas' },
+			fields: ['id'],
+		})
+
+		expect(spyGetObject).toHaveBeenCalledTimes(1)
+	})
+
+	it('should not computeObjects in runOnMultipleObjects if there is no hooks to execute on createObjects', async () => {
+		wibe.config.hooks = []
+
+		await wibe.databaseController.createObjects({
+			className: 'User',
+			context,
+			data: [{ name: 'Lucas' }],
+			fields: ['id'],
+		})
+
+		expect(spyGetObjects).toHaveBeenCalledTimes(1)
+	})
+
+	it('should not computeObject in runOnSingleObject if there is no hooks to execute on updateObject', async () => {
+		wibe.config.hooks = []
+
+		const { id } = await wibe.databaseController.createObject({
+			className: 'User',
+			context,
+			data: { name: 'Lucas' },
+			fields: ['id'],
+		})
+
+		spyGetObject.mockClear()
+
+		await wibe.databaseController.updateObject({
+			className: 'User',
+			context,
+			data: [{ name: 'Lucas' }],
+			fields: ['id'],
+			id,
+		})
+
+		expect(spyGetObject).toHaveBeenCalledTimes(1)
+	})
+
+	it('should not computeObject in runOnMultipleObject if there is no hooks to execute on updateObjects', async () => {
+		wibe.config.hooks = []
+
+		const { id } = await wibe.databaseController.createObject({
+			className: 'User',
+			context,
+			data: { name: 'Lucas' },
+			fields: ['id'],
+		})
+
+		spyGetObjects.mockClear()
+
+		await wibe.databaseController.updateObjects({
+			className: 'User',
+			context,
+			data: { name: 'Lucas' },
+			fields: ['id'],
+			where: { id: { equalTo: id } },
+		})
+
+		// Mongo adapter call 2 times getObjects in updateObjects
+		expect(spyGetObjects).toHaveBeenCalledTimes(2)
+	})
+
+	it('should not computeObject in runOnSingleObject if there is no hooks to execute on updateObject', async () => {
+		wibe.config.hooks = []
+
+		const { id } = await wibe.databaseController.createObject({
+			className: 'User',
+			context,
+			data: { name: 'Lucas' },
+			fields: ['id'],
+		})
+
+		spyGetObject.mockClear()
+
+		await wibe.databaseController.deleteObject({
+			className: 'User',
+			context,
+			fields: ['id'],
+			id,
+		})
+
+		expect(spyGetObject).toHaveBeenCalledTimes(1)
+	})
+
+	it('should not computeObject in runOnMultipleObject if there is no hooks to execute on updateObjects', async () => {
+		wibe.config.hooks = []
+
+		const { id } = await wibe.databaseController.createObject({
+			className: 'User',
+			context,
+			data: { name: 'Lucas' },
+			fields: ['id'],
+		})
+
+		spyGetObjects.mockClear()
+
+		await wibe.databaseController.deleteObjects({
+			className: 'User',
+			context,
+			fields: ['id'],
+			where: { id: { equalTo: id } },
+		})
+
+		expect(spyGetObjects).toHaveBeenCalledTimes(1)
 	})
 
 	it('should call getObject adapter only 2 times (lower is better) for one read query (performance test) without mutation in hooks', async () => {

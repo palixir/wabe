@@ -10,7 +10,6 @@ import {
 import { DatabaseController, type WhereType } from '..'
 import * as hooks from '../../hooks/index'
 import type { WibeContext } from '../../server/interface'
-import { MongoCryptCreateDataKeyError } from 'mongodb'
 
 describe('DatabaseController', () => {
 	const mockGetObject = mock(() => {})
@@ -381,7 +380,7 @@ describe('DatabaseController', () => {
 
 	it('should call hooks on updateObject', async () => {
 		mockRunOnSingleObject.mockResolvedValue({
-			newData: {},
+			object: undefined,
 		} as never)
 		mockUpdateObject.mockResolvedValue({ id: 'id' } as never)
 		mockGetObject.mockResolvedValue({ id: 'id' } as never)
@@ -421,6 +420,7 @@ describe('DatabaseController', () => {
 	it('should call hooks on updateObjects', async () => {
 		mockRunOnMultipleObject.mockResolvedValue({
 			newData: {},
+			objects: [],
 		} as never)
 		mockUpdateObjects.mockResolvedValue([] as never)
 
@@ -494,6 +494,10 @@ describe('DatabaseController', () => {
 	it('should call hooks on createObjects', async () => {
 		mockGetObjects.mockResolvedValue([{ id: 'id' }] as never)
 		mockCreateObjects.mockResolvedValue([{ id: 'id' }] as never)
+		mockRunOnMultipleObject.mockResolvedValue({
+			objects: [],
+			newData: [{ name: 'test' }],
+		} as never)
 
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
@@ -523,6 +527,8 @@ describe('DatabaseController', () => {
 			operationType: hooks.OperationType.AfterCreate,
 			objects: [{ id: 'id' }],
 		})
+
+		mockRunOnMultipleObject.mockClear()
 	})
 
 	it('should call hooks on deleteObject', async () => {
@@ -558,6 +564,9 @@ describe('DatabaseController', () => {
 	})
 
 	it('should call hooks on deleteObjects', async () => {
+		mockGetObjects.mockResolvedValue([{ id: 'id' }] as never)
+		mockRunOnMultipleObject.mockResolvedValue({} as never)
+
 		const databaseController = new DatabaseController(mockAdapter() as any)
 
 		await databaseController.deleteObjects({
@@ -586,5 +595,7 @@ describe('DatabaseController', () => {
 		expect(mockRunOnMultipleObject).toHaveBeenNthCalledWith(4, {
 			operationType: hooks.OperationType.AfterDelete,
 		})
+
+		mockRunOnMultipleObject.mockClear()
 	})
 })

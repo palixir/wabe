@@ -161,6 +161,9 @@ export const initializeHook = <T extends keyof WibeAppTypes['types']>({
 			id?: string
 			object?: OutputType<any, any>
 		}) => {
+			if (hooksOrderByPriorities.length === 0)
+				return { object: undefined, newData: {} }
+
 			const object = await computeObject({
 				id,
 				operationType,
@@ -203,6 +206,9 @@ export const initializeHook = <T extends keyof WibeAppTypes['types']>({
 			where?: WhereType<any, any>
 			objects?: OutputType<any, any>[]
 		}) => {
+			if (hooksOrderByPriorities.length === 0)
+				return { objects: [], newData: [newData || {}] }
+
 			const objects = await computeObjects({
 				where,
 				operationType,

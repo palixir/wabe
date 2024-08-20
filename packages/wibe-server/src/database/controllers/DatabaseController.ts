@@ -579,7 +579,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 		const object = await this.adapter.createObject({
 			className,
 			context,
-			fields: ['*'],
+			fields,
 			data: newData,
 		})
 
@@ -591,10 +591,13 @@ export class DatabaseController<T extends WibeAppTypes> {
 
 		this.inMemoryCache.set(keyCache, undefined)
 
-		await hook.runOnSingleObject({
+		const res = await hook.runOnSingleObject({
 			operationType: OperationType.AfterCreate,
 			object,
 		})
+
+		// If there is no hook to run it returns undefined object
+		if (!res.object) return object
 
 		const objectToReturn = await this.getObject({
 			className,
@@ -638,7 +641,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 						await hook.runOnMultipleObjects({
 							operationType: OperationType.BeforeCreate,
 						})
-					).newData[0],
+					)?.newData[0],
 			),
 		)
 
@@ -663,7 +666,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 			this.inMemoryCache.set(keyCache, undefined)
 		}
 
-		await Promise.all(
+		const res = await Promise.all(
 			hooks.map((hook) =>
 				hook.runOnMultipleObjects({
 					operationType: OperationType.AfterCreate,
@@ -671,6 +674,10 @@ export class DatabaseController<T extends WibeAppTypes> {
 				}),
 			),
 		)
+
+		// If there is no hook to run it returns undefined object
+		if (res.filter((hook) => hook.objects.length > 0).length === 0)
+			return objects
 
 		const objectsToReturn = await this.getObjects({
 			className,
@@ -724,10 +731,12 @@ export class DatabaseController<T extends WibeAppTypes> {
 
 		this.inMemoryCache.set(keyCache, undefined)
 
-		await hook.runOnSingleObject({
+		const res = await hook.runOnSingleObject({
 			operationType: OperationType.AfterUpdate,
 			object,
 		})
+
+		if (!res.object) return object
 
 		const objectToReturn = await this.getObject({
 			className,
@@ -798,10 +807,13 @@ export class DatabaseController<T extends WibeAppTypes> {
 			this.inMemoryCache.set(keyCache, undefined)
 		}
 
-		await hook.runOnMultipleObjects({
+		const res = await hook.runOnMultipleObjects({
 			operationType: OperationType.AfterUpdate,
 			objects,
 		})
+
+		// If there is no hook to run it returns undefined object
+		if (res.objects.length === 0) return objects
 
 		const objectsToReturn = await this.getObjects({
 			className,
