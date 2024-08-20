@@ -15,8 +15,8 @@ type User {
   name: String
   age: Int
   acl: UserACLObject
-  createdAt: Date!
-  updatedAt: Date!
+  createdAt: Date
+  updatedAt: Date
   authentication: UserAuthentication
   provider: AuthenticationProvider
   isOauth: Boolean
@@ -78,8 +78,8 @@ input UserInput {
   name: String
   age: Int
   acl: UserACLObjectInput
-  createdAt: Date!
-  updatedAt: Date!
+  createdAt: Date
+  updatedAt: Date
   authentication: UserAuthenticationInput
   provider: AuthenticationProvider
   isOauth: Boolean
@@ -189,8 +189,8 @@ type Post {
   name: String!
   test: File
   acl: PostACLObject
-  createdAt: Date!
-  updatedAt: Date!
+  createdAt: Date
+  updatedAt: Date
 }
 
 """File scalar type"""
@@ -217,8 +217,8 @@ input PostInput {
   name: String!
   test: File
   acl: PostACLObjectInput
-  createdAt: Date!
-  updatedAt: Date!
+  createdAt: Date
+  updatedAt: Date
 }
 
 input PostACLObjectInput {
@@ -284,8 +284,8 @@ type _Session {
   refreshToken: String
   refreshTokenExpiresAt: Date!
   acl: _SessionACLObject
-  createdAt: Date!
-  updatedAt: Date!
+  createdAt: Date
+  updatedAt: Date
 }
 
 type _SessionACLObject {
@@ -312,8 +312,8 @@ input _SessionInput {
   refreshToken: String
   refreshTokenExpiresAt: Date!
   acl: _SessionACLObjectInput
-  createdAt: Date!
-  updatedAt: Date!
+  createdAt: Date
+  updatedAt: Date
 }
 
 input _SessionACLObjectInput {
@@ -379,8 +379,8 @@ type Role {
   name: String!
   users: UserConnection
   acl: RoleACLObject
-  createdAt: Date!
-  updatedAt: Date!
+  createdAt: Date
+  updatedAt: Date
 }
 
 type UserConnection {
@@ -412,8 +412,8 @@ input RoleInput {
   name: String!
   users: UserRelationInput
   acl: RoleACLObjectInput
-  createdAt: Date!
-  updatedAt: Date!
+  createdAt: Date
+  updatedAt: Date
 }
 
 input RoleACLObjectInput {
@@ -486,6 +486,7 @@ type Query {
 
   """Hello world description"""
   helloWorld(name: String!): String
+  me: MeOutput
 }
 
 """User class"""
@@ -738,6 +739,11 @@ type RoleConnection {
 
 type RoleEdge {
   node: Role!
+}
+
+type MeOutput {
+  userId: String
+  roleName: String
 }
 
 type Mutation {

@@ -3,6 +3,7 @@ import { refreshResolver } from '../authentication/resolvers/refreshResolver'
 import { signOutResolver } from '../authentication/resolvers/signOutResolver'
 import { verifyChallengeResolver } from '../authentication/resolvers/verifyChallenge'
 import type { WibeConfig, WibeAppTypes } from '../server'
+import { meResolver } from './resolvers/meResolver'
 
 export type WibePrimaryTypes =
 	| 'String'
@@ -298,6 +299,23 @@ export class Schema<T extends WibeAppTypes> {
 		}
 
 		return {
+			queries: {
+				me: {
+					type: 'Object',
+					outputObject: {
+						name: 'MeOutput',
+						fields: {
+							userId: {
+								type: 'String',
+							},
+							roleName: {
+								type: 'String',
+							},
+						},
+					},
+					resolve: meResolver,
+				},
+			},
 			mutations: {
 				...(customAuthenticationConfig.length > 0
 					? {
@@ -575,11 +593,9 @@ export class Schema<T extends WibeAppTypes> {
 			},
 			createdAt: {
 				type: 'Date',
-				required: true,
 			},
 			updatedAt: {
 				type: 'Date',
-				required: true,
 			},
 		}
 	}

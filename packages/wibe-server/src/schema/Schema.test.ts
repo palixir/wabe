@@ -54,11 +54,9 @@ describe('Schema', () => {
 				},
 				createdAt: {
 					type: 'Date',
-					required: true,
 				},
 				updatedAt: {
 					type: 'Date',
-					required: true,
 				},
 				acl: expect.any(Object),
 			},
@@ -75,11 +73,9 @@ describe('Schema', () => {
 				},
 				createdAt: {
 					type: 'Date',
-					required: true,
 				},
 				updatedAt: {
 					type: 'Date',
-					required: true,
 				},
 				acl: expect.any(Object),
 			},
@@ -149,11 +145,9 @@ describe('Schema', () => {
 				},
 				createdAt: {
 					type: 'Date',
-					required: true,
 				},
 				updatedAt: {
 					type: 'Date',
-					required: true,
 				},
 				acl: expect.any(Object),
 			},
@@ -170,11 +164,9 @@ describe('Schema', () => {
 				},
 				createdAt: {
 					type: 'Date',
-					required: true,
 				},
 				updatedAt: {
 					type: 'Date',
-					required: true,
 				},
 				acl: expect.any(Object),
 			},
@@ -232,11 +224,9 @@ describe('Schema', () => {
 				},
 				createdAt: {
 					type: 'Date',
-					required: true,
 				},
 				updatedAt: {
 					type: 'Date',
-					required: true,
 				},
 				acl: expect.any(Object),
 			},
@@ -253,11 +243,9 @@ describe('Schema', () => {
 				},
 				createdAt: {
 					type: 'Date',
-					required: true,
 				},
 				updatedAt: {
 					type: 'Date',
-					required: true,
 				},
 				acl: expect.any(Object),
 			},
@@ -318,11 +306,9 @@ describe('Schema', () => {
 				},
 				createdAt: {
 					type: 'Date',
-					required: true,
 				},
 				updatedAt: {
 					type: 'Date',
-					required: true,
 				},
 				acl: expect.any(Object),
 			},
@@ -339,11 +325,9 @@ describe('Schema', () => {
 				},
 				createdAt: {
 					type: 'Date',
-					required: true,
 				},
 				updatedAt: {
 					type: 'Date',
-					required: true,
 				},
 				acl: expect.any(Object),
 			},
