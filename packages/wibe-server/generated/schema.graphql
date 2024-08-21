@@ -476,13 +476,13 @@ type Query {
   user(id: ID): User
 
   """User class"""
-  users(where: UserWhereInput, offset: Int, limit: Int): UserConnection!
+  users(where: UserWhereInput, offset: Int, first: Int): UserConnection!
   post(id: ID): Post
-  posts(where: PostWhereInput, offset: Int, limit: Int): PostConnection!
+  posts(where: PostWhereInput, offset: Int, first: Int): PostConnection!
   _session(id: ID): _Session
-  _sessions(where: _SessionWhereInput, offset: Int, limit: Int): _SessionConnection!
+  _sessions(where: _SessionWhereInput, offset: Int, first: Int): _SessionConnection!
   role(id: ID): Role
-  roles(where: RoleWhereInput, offset: Int, limit: Int): RoleConnection!
+  roles(where: RoleWhereInput, offset: Int, first: Int): RoleConnection!
 
   """Hello world description"""
   helloWorld(name: String!): String
@@ -803,7 +803,7 @@ input CreateUserInput {
 input CreateUsersInput {
   fields: [UserCreateFieldsInput]!
   offset: Int
-  limit: Int
+  first: Int
 }
 
 type UpdateUserPayload {
@@ -869,7 +869,7 @@ input UpdateUsersInput {
   fields: UserUpdateFieldsInput
   where: UserWhereInput
   offset: Int
-  limit: Int
+  first: Int
 }
 
 type DeleteUserPayload {
@@ -897,7 +897,7 @@ input CreatePostInput {
 input CreatePostsInput {
   fields: [PostCreateFieldsInput]!
   offset: Int
-  limit: Int
+  first: Int
 }
 
 type UpdatePostPayload {
@@ -939,7 +939,7 @@ input UpdatePostsInput {
   fields: PostUpdateFieldsInput
   where: PostWhereInput
   offset: Int
-  limit: Int
+  first: Int
 }
 
 type DeletePostPayload {
@@ -967,7 +967,7 @@ input Create_SessionInput {
 input Create_SessionsInput {
   fields: [_SessionCreateFieldsInput]!
   offset: Int
-  limit: Int
+  first: Int
 }
 
 type Update_SessionPayload {
@@ -1012,7 +1012,7 @@ input Update_SessionsInput {
   fields: _SessionUpdateFieldsInput
   where: _SessionWhereInput
   offset: Int
-  limit: Int
+  first: Int
 }
 
 type Delete_SessionPayload {
@@ -1040,7 +1040,7 @@ input CreateRoleInput {
 input CreateRolesInput {
   fields: [RoleCreateFieldsInput]!
   offset: Int
-  limit: Int
+  first: Int
 }
 
 type UpdateRolePayload {
@@ -1082,7 +1082,7 @@ input UpdateRolesInput {
   fields: RoleUpdateFieldsInput
   where: RoleWhereInput
   offset: Int
-  limit: Int
+  first: Int
 }
 
 type DeleteRolePayload {

@@ -149,7 +149,7 @@ export const queryForOneObject = (
 
 export const queryForMultipleObject = async (
 	_: any,
-	{ where, offset, limit }: any,
+	{ where, offset, first }: any,
 	context: WibeContext<any>,
 	info: GraphQLResolveInfo,
 	className: keyof WibeAppTypes['types'],
@@ -161,7 +161,7 @@ export const queryForMultipleObject = async (
 		where,
 		fields,
 		offset,
-		limit,
+		first,
 		context,
 	})
 
@@ -223,7 +223,7 @@ export const mutationToCreateMultipleObjects = async (
 		data: updatedFieldsToCreate,
 		fields,
 		offset: args.input?.offset,
-		limit: args.input?.limit,
+		first: args.input?.first,
 		context,
 	})
 
@@ -284,7 +284,7 @@ export const mutationToUpdateMultipleObjects = async (
 		data: updatedFields,
 		fields,
 		offset: args.input?.offset,
-		limit: args.input?.limit,
+		first: args.input?.first,
 		context,
 	})
 
@@ -327,7 +327,7 @@ export const mutationToDeleteMultipleObjects = async (
 		where: args.input?.where,
 		fields,
 		offset: args.input?.offset,
-		limit: args.input?.limit,
+		first: args.input?.first,
 		context,
 	})
 

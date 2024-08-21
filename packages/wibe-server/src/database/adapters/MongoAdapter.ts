@@ -204,7 +204,7 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 
-		const { className, fields, where, offset, limit } = params
+		const { className, fields, where, offset, first } = params
 
 		const whereBuilded = buildMongoWhereQuery(where)
 
@@ -229,7 +229,7 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 							}
 						: {},
 			})
-			.limit(limit || 0)
+			.limit(first || 0)
 			.skip(offset || 0)
 			.toArray()
 
@@ -275,7 +275,7 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 
-		const { className, data, fields, offset, limit, context } = params
+		const { className, data, fields, offset, first, context } = params
 
 		const collection = await this.createClassIfNotExist(className)
 
@@ -292,7 +292,7 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 			where: { OR: orStatement } as WhereType<T, K>,
 			fields,
 			offset,
-			limit,
+			first,
 			context,
 		})
 
@@ -343,7 +343,7 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 
-		const { className, where, data, fields, offset, limit, context } =
+		const { className, where, data, fields, offset, first, context } =
 			params
 
 		const whereBuilded = buildMongoWhereQuery<T, W>(where)
@@ -356,7 +356,7 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 				where,
 				fields: ['id'],
 				offset,
-				limit,
+				first,
 				context,
 			})
 
@@ -378,7 +378,7 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 			} as WhereType<T, K>,
 			fields,
 			offset,
-			limit,
+			first,
 			context,
 		})
 

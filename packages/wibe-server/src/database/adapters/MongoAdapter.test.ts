@@ -494,7 +494,7 @@ describe('Mongo adapter', () => {
 		const res = await mongoAdapter.getObjects({
 			className: 'User',
 			fields: ['name'],
-			limit: 2,
+			first: 2,
 			offset: 2,
 			context,
 		})
@@ -530,7 +530,7 @@ describe('Mongo adapter', () => {
 				},
 			],
 			fields: ['name', 'id'],
-			limit: 2,
+			first: 2,
 			context,
 		})
 
@@ -565,7 +565,7 @@ describe('Mongo adapter', () => {
 				},
 			],
 			fields: ['name', 'id'],
-			limit: -2,
+			first: -2,
 			context,
 		})
 
@@ -670,7 +670,7 @@ describe('Mongo adapter', () => {
 				},
 			],
 			fields: ['name', 'id'],
-			limit: 2,
+			first: 2,
 			offset: 2,
 			context,
 		})
@@ -689,7 +689,7 @@ describe('Mongo adapter', () => {
 				],
 			},
 			fields: ['name'],
-			limit: 2,
+			first: 2,
 			offset: 1,
 			context,
 		})

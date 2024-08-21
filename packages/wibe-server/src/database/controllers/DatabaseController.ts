@@ -470,7 +470,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 		context,
 		where,
 		skipHooks,
-		limit,
+		first,
 		offset,
 	}: GetObjectsOptions<U, K, W>): Promise<OutputType<U, K>[]> {
 		const typedFields = fields as string[]
@@ -518,7 +518,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 		const objects = await this.adapter.getObjects({
 			className,
 			context,
-			limit,
+			first,
 			offset,
 			where: whereWithACLCondition,
 			fields: fieldsWithPointerFields,
@@ -543,7 +543,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 		const objectsToReturn = await this.adapter.getObjects({
 			className,
 			context,
-			limit,
+			first,
 			offset,
 			where: whereWithACLCondition,
 			fields: fieldsWithPointerFields,
@@ -619,7 +619,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 		fields,
 		className,
 		context,
-		limit,
+		first,
 		offset,
 	}: CreateObjectsOptions<U, K, W>) {
 		if (data.length === 0) return []
@@ -650,7 +650,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 			fields,
 			context,
 			data: arrayOfComputedData,
-			limit,
+			first,
 			offset,
 		})
 
@@ -685,7 +685,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 			fields,
 			where: { id: { in: objectsId } },
 			skipHooks: true,
-			limit,
+			first,
 			offset,
 		})
 
@@ -759,7 +759,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 		context,
 		fields,
 		data,
-		limit,
+		first,
 		offset,
 	}: UpdateObjectsOptions<U, K, W>) {
 		const whereObject = await this._getWhereObjectWithPointerOrRelation(
@@ -791,7 +791,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 			fields,
 			data: newData[0],
 			where: whereWithACLCondition,
-			limit,
+			first,
 			offset,
 		})
 
@@ -821,7 +821,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 			fields,
 			where: { id: { in: objectsId } },
 			skipHooks: true,
-			limit,
+			first,
 			offset,
 		})
 
@@ -881,7 +881,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 		context,
 		fields,
 		where,
-		limit,
+		first,
 		offset,
 	}: DeleteObjectsOptions<U, K, W>) {
 		const whereObject = await this._getWhereObjectWithPointerOrRelation(
@@ -906,7 +906,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 			where,
 			fields,
 			context,
-			limit,
+			first,
 			offset,
 		})
 
@@ -919,7 +919,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 			className,
 			context,
 			fields,
-			limit,
+			first,
 			offset,
 			where: whereWithACLCondition,
 		})

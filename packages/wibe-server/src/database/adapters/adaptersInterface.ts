@@ -65,7 +65,7 @@ export interface GetObjectsOptions<
 	where?: WhereType<T, W>
 	fields: Array<K | '*'>
 	offset?: number
-	limit?: number
+	first?: number
 	context: WibeContext<any>
 	skipHooks?: boolean
 }
@@ -89,7 +89,7 @@ export interface CreateObjectsOptions<
 	data: Array<MutationData<W>>
 	fields: Array<K | '*'>
 	offset?: number
-	limit?: number
+	first?: number
 	context: WibeContext<any>
 }
 
@@ -116,7 +116,7 @@ export interface UpdateObjectsOptions<
 	data: MutationData<W>
 	fields: Array<K | '*'>
 	offset?: number
-	limit?: number
+	first?: number
 	context: WibeContext<any>
 }
 
@@ -141,7 +141,7 @@ export interface DeleteObjectsOptions<
 	where: WhereType<T, W>
 	fields: Array<K | '*'>
 	offset?: number
-	limit?: number
+	first?: number
 	context: WibeContext<any>
 }
 

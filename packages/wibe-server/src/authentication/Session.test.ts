@@ -47,7 +47,7 @@ describe('_Session', () => {
 			where: {
 				accessToken: { equalTo: 'accessToken' },
 			},
-			limit: 1,
+			first: 1,
 			fields: [
 				'id',
 				'user.id',
@@ -89,7 +89,7 @@ describe('_Session', () => {
 			where: {
 				accessToken: { equalTo: 'accessToken' },
 			},
-			limit: 1,
+			first: 1,
 			fields: [
 				'id',
 				'user.id',

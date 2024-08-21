@@ -644,7 +644,7 @@ export class GraphQLSchema {
 				args: {
 					where: { type: whereInputType },
 					offset: { type: GraphQLInt },
-					limit: { type: GraphQLInt },
+					first: { type: GraphQLInt },
 				},
 				resolve: (root, args, ctx, info) =>
 					queryForMultipleObject(
@@ -702,7 +702,7 @@ export class GraphQLSchema {
 					),
 				},
 				offset: { type: GraphQLInt },
-				limit: { type: GraphQLInt },
+				first: { type: GraphQLInt },
 			}),
 		})
 
@@ -728,7 +728,7 @@ export class GraphQLSchema {
 				fields: { type: defaultUpdateInputType },
 				where: { type: whereInputType },
 				offset: { type: GraphQLInt },
-				limit: { type: GraphQLInt },
+				first: { type: GraphQLInt },
 			}),
 		})
 

@@ -761,7 +761,7 @@ describe('GraphqlSchema', () => {
 			}),
 		).toEqual({
 			input: {
-				limit: 'Int',
+				first: 'Int',
 				offset: 'Int',
 				where: 'TestClassWhereInput',
 			},

@@ -59,7 +59,7 @@ describe('GraphQL : E2E', () => {
 	})
 
 	describe('Default requests', () => {
-		it("should use pagination with 'offset' and 'limit' arguments", async () => {
+		it("should use pagination with 'offset' and 'first' arguments", async () => {
 			await cleanUsers(client)
 
 			const res = await client.request<any>(graphql.createUsers, {
@@ -79,7 +79,7 @@ describe('GraphQL : E2E', () => {
 						{ name: 'Toto10' },
 					],
 					offset: 0,
-					limit: 5,
+					first: 5,
 				},
 			})
 
@@ -87,7 +87,7 @@ describe('GraphQL : E2E', () => {
 
 			const { users } = await client.request<any>(graphql.users, {
 				offset: 5,
-				limit: 2,
+				first: 2,
 			})
 
 			expect(users.edges.length).toEqual(2)
@@ -511,8 +511,8 @@ const graphql = {
 		}
 	`,
 	users: gql`
-		query users($where: UserWhereInput, $offset: Int, $limit: Int) {
-			users(where: $where, offset: $offset, limit: $limit) {
+		query users($where: UserWhereInput, $offset: Int, $first: Int) {
+			users(where: $where, offset: $offset, first: $first) {
 				edges {
 					node {
 						id
