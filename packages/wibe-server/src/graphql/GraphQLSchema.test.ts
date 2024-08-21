@@ -186,6 +186,83 @@ describe('GraphqlSchema', () => {
 		})
 	})
 
+	it('should use the searchUsers to search all testClasses for corresponding term', async () => {
+		const { client, wibeApp } = await createWibeApp({
+			classes: [
+				{
+					name: 'TestClass',
+					fields: {
+						name: {
+							type: 'String',
+						},
+					},
+					searchableFields: ['name'],
+				},
+			],
+		})
+
+		await client.request<any>(
+			gql`
+				mutation createTestClass {
+					createTestClass(
+						input: {
+							fields: { name: "test"}
+						}
+					) {
+						testClass {
+							name
+						}
+					}
+				}
+			`,
+			{},
+		)
+
+		const res = await client.request<any>(
+			gql`
+				query searchTestClasses{
+					searchTestClasses(
+						searchTerm: "t"
+					){
+						count
+					}
+				}
+			`,
+		)
+
+		expect(res.searchTestClasses.count).toEqual(1)
+
+		const res2 = await client.request<any>(
+			gql`
+				query searchTestClasses{
+					searchTestClasses(
+						searchTerm: "invalid"
+					){
+						count
+					}
+				}
+			`,
+		)
+
+		expect(res2.searchTestClasses.count).toEqual(0)
+
+		const res3 = await client.request<any>(
+			gql`
+				query searchTestClasses{
+					searchTestClasses(
+						searchTerm: "test"
+					){
+						count
+					}
+				}
+			`,
+		)
+
+		expect(res3.searchTestClasses.count).toEqual(1)
+
+		await wibeApp.close()
+	})
+
 	it('should contain count elements in query multiple objects', async () => {
 		expect(
 			getTypeFromGraphQLSchema({
@@ -646,6 +723,7 @@ describe('GraphqlSchema', () => {
 			acl: 'TestClassACLObjectWhereInput',
 			createdAt: 'DateWhereInput',
 			updatedAt: 'DateWhereInput',
+			search: 'ArrayWhereInput',
 		})
 	})
 

@@ -32,7 +32,7 @@ export const buildMongoWhereQuery = <
 
 			const keyToWrite = key === 'id' ? '_id' : key
 
-			if (value?.contains) acc[keyToWrite] = value.contains
+			if (value?.contains) acc[keyToWrite] = { $all: value.contains }
 			if (value?.notContains) acc[keyToWrite] = { $ne: value.notContains }
 			if (value?.equalTo)
 				acc[keyToWrite] =

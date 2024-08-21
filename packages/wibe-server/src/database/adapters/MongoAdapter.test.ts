@@ -788,29 +788,20 @@ describe('Mongo adapter', () => {
 
 		expect(id).toBeDefined()
 
-		const field = await mongoAdapter.getObject({
+		const res = await mongoAdapter.getObject({
 			className: 'User',
 			id: id.toString(),
 			fields: ['*'],
 			context,
 		})
 
-		expect(field).toEqual({
-			name: 'John',
-			age: 20,
-			id: expect.any(String),
-			acl: undefined,
-			authentication: undefined,
-			createdAt: undefined,
-			email: undefined,
-			verifiedEmail: undefined,
-			provider: undefined,
-			role: undefined,
-			updatedAt: undefined,
-			__typename: undefined,
-			isOauth: undefined,
-			sessions: undefined,
-		})
+		expect(res).toEqual(
+			expect.objectContaining({
+				name: 'John',
+				age: 20,
+				id: expect.any(String),
+			}),
+		)
 	})
 
 	it('should get one object with specific field and * fields', async () => {

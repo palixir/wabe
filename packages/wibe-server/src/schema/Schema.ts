@@ -156,11 +156,14 @@ export type ClassPermissions = Partial<
 	Record<PermissionsOperations, PermissionProperties>
 >
 
+export type SearchableFields = Array<string>
+
 export interface ClassInterface<T extends WibeAppTypes> {
 	name: string
 	fields: SchemaFields<T>
 	description?: string
 	permissions?: ClassPermissions
+	searchableFields?: SearchableFields
 }
 
 export interface ScalarInterface {
@@ -594,6 +597,10 @@ export class Schema<T extends WibeAppTypes> {
 			},
 			updatedAt: {
 				type: 'Date',
+			},
+			search: {
+				type: 'Array',
+				typeValue: 'String',
 			},
 		}
 	}

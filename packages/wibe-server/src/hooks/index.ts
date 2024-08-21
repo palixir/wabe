@@ -21,6 +21,10 @@ import {
 	defaultCheckPermissionOnRead,
 	defaultCheckPermissionOnUpdate,
 } from './permissions'
+import {
+	defaultSearchableFieldsBeforeCreate,
+	defaultSearchableFieldsBeforeUpdate,
+} from './searchableFields'
 
 export enum OperationType {
 	AfterCreate = 'AfterCreate',
@@ -312,5 +316,15 @@ export const getDefaultHooks = (): Hook<any>[] => [
 		operationType: OperationType.BeforeUpdate,
 		priority: 1,
 		callback: defaultCallAuthenticationProviderOnBeforeUpdateUser,
+	},
+	{
+		operationType: OperationType.BeforeCreate,
+		priority: 1,
+		callback: defaultSearchableFieldsBeforeCreate,
+	},
+	{
+		operationType: OperationType.BeforeUpdate,
+		priority: 1,
+		callback: defaultSearchableFieldsBeforeUpdate,
 	},
 ]

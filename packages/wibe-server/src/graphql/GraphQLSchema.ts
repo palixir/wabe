@@ -19,7 +19,7 @@ import type {
 	QueryResolver,
 	Schema,
 } from '../schema'
-import { firstLetterInLowerCase } from '../utils'
+import { firstLetterInLowerCase, firstLetterInUpperCase } from '../utils'
 import type { DevWibeAppTypes } from '../utils/helper'
 import { GraphqlParser, type GraphqlParserFactory } from './parser'
 import {
@@ -31,6 +31,7 @@ import {
 	mutationToUpdateObject,
 	queryForMultipleObject,
 	queryForOneObject,
+	queryForSearchMultipleObject,
 } from './resolvers'
 import { IdWhereInput } from './types'
 
@@ -626,18 +627,29 @@ export class GraphQLSchema {
 			firstLetterInLowerCase(className)
 
 		return {
+			[`search${pluralize(firstLetterInUpperCase(className))}`]: {
+				type: new GraphQLNonNull(connectionObject),
+				description: object.description,
+				args: {
+					offset: { type: GraphQLInt },
+					first: { type: GraphQLInt },
+					searchTerm: { type: GraphQLString },
+				},
+				resolve: (root, args, ctx, info) =>
+					queryForSearchMultipleObject(
+						root,
+						args,
+						ctx,
+						info,
+						className,
+					),
+			},
 			[classNameWithFirstLetterLowerCase]: {
 				type: object,
 				description: object.description,
 				args: { id: { type: GraphQLID } },
 				resolve: (root, args, ctx, info) =>
-					queryForOneObject(
-						root,
-						args,
-						ctx,
-						info,
-						className as keyof WibeAppTypes['types'],
-					),
+					queryForOneObject(root, args, ctx, info, className),
 			},
 			[pluralize(classNameWithFirstLetterLowerCase)]: {
 				type: new GraphQLNonNull(connectionObject),
@@ -648,13 +660,7 @@ export class GraphQLSchema {
 					first: { type: GraphQLInt },
 				},
 				resolve: (root, args, ctx, info) =>
-					queryForMultipleObject(
-						root,
-						args,
-						ctx,
-						info,
-						className as keyof WibeAppTypes['types'],
-					),
+					queryForMultipleObject(root, args, ctx, info, className),
 			},
 		} as Record<string, GraphQLFieldConfig<any, any, any>>
 	}

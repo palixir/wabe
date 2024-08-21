@@ -17,6 +17,7 @@ type User {
   acl: UserACLObject
   createdAt: Date
   updatedAt: Date
+  search: [String]
   authentication: UserAuthentication
   provider: AuthenticationProvider
   isOauth: Boolean
@@ -66,6 +67,7 @@ type UserAuthenticationGoogle {
 }
 
 type _SessionConnection {
+  count: Int
   edges: [_SessionEdge]
 }
 
@@ -80,6 +82,7 @@ input UserInput {
   acl: UserACLObjectInput
   createdAt: Date
   updatedAt: Date
+  search: [String]
   authentication: UserAuthenticationInput
   provider: AuthenticationProvider
   isOauth: Boolean
@@ -135,6 +138,7 @@ input UserCreateFieldsInput {
   acl: UserACLObjectCreateFieldsInput
   createdAt: Date
   updatedAt: Date
+  search: [String]
   authentication: UserAuthenticationCreateFieldsInput
   provider: AuthenticationProvider
   isOauth: Boolean
@@ -191,6 +195,7 @@ type Post {
   acl: PostACLObject
   createdAt: Date
   updatedAt: Date
+  search: [String]
 }
 
 """File scalar type"""
@@ -219,6 +224,7 @@ input PostInput {
   acl: PostACLObjectInput
   createdAt: Date
   updatedAt: Date
+  search: [String]
 }
 
 input PostACLObjectInput {
@@ -250,6 +256,7 @@ input PostCreateFieldsInput {
   acl: PostACLObjectCreateFieldsInput
   createdAt: Date
   updatedAt: Date
+  search: [String]
 }
 
 input PostACLObjectCreateFieldsInput {
@@ -286,6 +293,7 @@ type _Session {
   acl: _SessionACLObject
   createdAt: Date
   updatedAt: Date
+  search: [String]
 }
 
 type _SessionACLObject {
@@ -314,6 +322,7 @@ input _SessionInput {
   acl: _SessionACLObjectInput
   createdAt: Date
   updatedAt: Date
+  search: [String]
 }
 
 input _SessionACLObjectInput {
@@ -348,6 +357,7 @@ input _SessionCreateFieldsInput {
   acl: _SessionACLObjectCreateFieldsInput
   createdAt: Date
   updatedAt: Date
+  search: [String]
 }
 
 input _SessionACLObjectCreateFieldsInput {
@@ -381,9 +391,11 @@ type Role {
   acl: RoleACLObject
   createdAt: Date
   updatedAt: Date
+  search: [String]
 }
 
 type UserConnection {
+  count: Int
   edges: [UserEdge]
 }
 
@@ -414,6 +426,7 @@ input RoleInput {
   acl: RoleACLObjectInput
   createdAt: Date
   updatedAt: Date
+  search: [String]
 }
 
 input RoleACLObjectInput {
@@ -445,6 +458,7 @@ input RoleCreateFieldsInput {
   acl: RoleACLObjectCreateFieldsInput
   createdAt: Date
   updatedAt: Date
+  search: [String]
 }
 
 input RoleACLObjectCreateFieldsInput {
@@ -473,14 +487,20 @@ input RoleRelationInput {
 
 type Query {
   """User class"""
+  searchUsers(offset: Int, first: Int, searchTerm: String): UserConnection!
+
+  """User class"""
   user(id: ID): User
 
   """User class"""
   users(where: UserWhereInput, offset: Int, first: Int): UserConnection!
+  searchPosts(offset: Int, first: Int, searchTerm: String): PostConnection!
   post(id: ID): Post
   posts(where: PostWhereInput, offset: Int, first: Int): PostConnection!
+  search_Sessions(offset: Int, first: Int, searchTerm: String): _SessionConnection!
   _session(id: ID): _Session
   _sessions(where: _SessionWhereInput, offset: Int, first: Int): _SessionConnection!
+  searchRoles(offset: Int, first: Int, searchTerm: String): RoleConnection!
   role(id: ID): Role
   roles(where: RoleWhereInput, offset: Int, first: Int): RoleConnection!
 
@@ -497,6 +517,7 @@ input UserWhereInput {
   acl: UserACLObjectWhereInput
   createdAt: DateWhereInput
   updatedAt: DateWhereInput
+  search: ArrayWhereInput
   authentication: UserAuthenticationWhereInput
   provider: AnyWhereInput
   isOauth: BooleanWhereInput
@@ -574,6 +595,18 @@ input DateWhereInput {
   greaterThanOrEqualTo: Date
 }
 
+input ArrayWhereInput {
+  equalTo: Any
+  notEqualTo: Any
+  contains: Any
+  notContains: Any
+}
+
+"""
+The Any scalar type is used in operations and types that involve any type of value.
+"""
+scalar Any
+
 input UserAuthenticationWhereInput {
   emailPassword: UserAuthenticationEmailPasswordWhereInput
   google: UserAuthenticationGoogleWhereInput
@@ -608,11 +641,6 @@ input AnyWhereInput {
   notEqualTo: Any
 }
 
-"""
-The Any scalar type is used in operations and types that involve any type of value.
-"""
-scalar Any
-
 input RoleWhereInput {
   id: IdWhereInput
   name: StringWhereInput
@@ -620,6 +648,7 @@ input RoleWhereInput {
   acl: RoleACLObjectWhereInput
   createdAt: DateWhereInput
   updatedAt: DateWhereInput
+  search: ArrayWhereInput
   OR: [RoleWhereInput]
   AND: [RoleWhereInput]
 }
@@ -657,6 +686,7 @@ input _SessionWhereInput {
   acl: _SessionACLObjectWhereInput
   createdAt: DateWhereInput
   updatedAt: DateWhereInput
+  search: ArrayWhereInput
   OR: [_SessionWhereInput]
   AND: [_SessionWhereInput]
 }
@@ -685,6 +715,7 @@ input _SessionACLObjectRolesACLWhereInput {
 }
 
 type PostConnection {
+  count: Int
   edges: [PostEdge]
 }
 
@@ -699,6 +730,7 @@ input PostWhereInput {
   acl: PostACLObjectWhereInput
   createdAt: DateWhereInput
   updatedAt: DateWhereInput
+  search: ArrayWhereInput
   OR: [PostWhereInput]
   AND: [PostWhereInput]
 }
@@ -734,6 +766,7 @@ input PostACLObjectRolesACLWhereInput {
 }
 
 type RoleConnection {
+  count: Int
   edges: [RoleEdge]
 }
 
@@ -823,6 +856,7 @@ input UserUpdateFieldsInput {
   acl: UserACLObjectUpdateFieldsInput
   createdAt: Date
   updatedAt: Date
+  search: [String]
   authentication: UserAuthenticationUpdateFieldsInput
   provider: AuthenticationProvider
   isOauth: Boolean
@@ -916,6 +950,7 @@ input PostUpdateFieldsInput {
   acl: PostACLObjectUpdateFieldsInput
   createdAt: Date
   updatedAt: Date
+  search: [String]
 }
 
 input PostACLObjectUpdateFieldsInput {
@@ -989,6 +1024,7 @@ input _SessionUpdateFieldsInput {
   acl: _SessionACLObjectUpdateFieldsInput
   createdAt: Date
   updatedAt: Date
+  search: [String]
 }
 
 input _SessionACLObjectUpdateFieldsInput {
@@ -1059,6 +1095,7 @@ input RoleUpdateFieldsInput {
   acl: RoleACLObjectUpdateFieldsInput
   createdAt: Date
   updatedAt: Date
+  search: [String]
 }
 
 input RoleACLObjectUpdateFieldsInput {

@@ -59,6 +59,10 @@ describe('Schema', () => {
 					type: 'Date',
 				},
 				acl: expect.any(Object),
+				search: {
+					type: 'Array',
+					typeValue: 'String',
+				},
 			},
 		})
 
@@ -78,6 +82,10 @@ describe('Schema', () => {
 					type: 'Date',
 				},
 				acl: expect.any(Object),
+				search: {
+					type: 'Array',
+					typeValue: 'String',
+				},
 			},
 		})
 	})
@@ -135,7 +143,7 @@ describe('Schema', () => {
 
 		expect(schema.schema.classes[0]).toEqual({
 			name: 'Class1',
-			fields: {
+			fields: expect.objectContaining({
 				field1: {
 					type: 'Int',
 					defaultValue: 1,
@@ -150,12 +158,12 @@ describe('Schema', () => {
 					type: 'Date',
 				},
 				acl: expect.any(Object),
-			},
+			}),
 		})
 
 		expect(schema.schema.classes[1]).toEqual({
 			name: 'Class2',
-			fields: {
+			fields: expect.objectContaining({
 				field3: {
 					type: 'String',
 				},
@@ -169,7 +177,7 @@ describe('Schema', () => {
 					type: 'Date',
 				},
 				acl: expect.any(Object),
-			},
+			}),
 		})
 	})
 
@@ -214,7 +222,7 @@ describe('Schema', () => {
 
 		expect(schema.schema.classes[0]).toEqual({
 			name: 'Class1',
-			fields: {
+			fields: expect.objectContaining({
 				field1: {
 					type: 'Int',
 					defaultValue: 1,
@@ -229,12 +237,12 @@ describe('Schema', () => {
 					type: 'Date',
 				},
 				acl: expect.any(Object),
-			},
+			}),
 		})
 
 		expect(schema.schema.classes[1]).toEqual({
 			name: 'Class2',
-			fields: {
+			fields: expect.objectContaining({
 				field3: {
 					type: 'String',
 				},
@@ -248,7 +256,7 @@ describe('Schema', () => {
 					type: 'Date',
 				},
 				acl: expect.any(Object),
-			},
+			}),
 		})
 	})
 
@@ -296,7 +304,7 @@ describe('Schema', () => {
 		expect(schema.schema.classes[0]).toEqual({
 			name: 'Class1',
 			description: 'new Class1 description',
-			fields: {
+			fields: expect.objectContaining({
 				field1: {
 					type: 'Int',
 					defaultValue: 1,
@@ -311,12 +319,12 @@ describe('Schema', () => {
 					type: 'Date',
 				},
 				acl: expect.any(Object),
-			},
+			}),
 		})
 
 		expect(schema.schema.classes[1]).toEqual({
 			name: 'Class2',
-			fields: {
+			fields: expect.objectContaining({
 				field3: {
 					type: 'String',
 				},
@@ -330,7 +338,7 @@ describe('Schema', () => {
 					type: 'Date',
 				},
 				acl: expect.any(Object),
-			},
+			}),
 		})
 	})
 

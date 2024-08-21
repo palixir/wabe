@@ -1,7 +1,7 @@
 import type { GraphQLResolveInfo, SelectionSetNode } from 'graphql'
 import type { WibeAppTypes } from '..'
 import type { WibeContext } from '../server/interface'
-import { firstLetterInLowerCase } from '../utils'
+import { firstLetterInLowerCase, tokenize } from '../utils'
 import {
 	type InputFields,
 	type TypeOfExecution,
@@ -145,6 +145,26 @@ export const queryForOneObject = (
 		fields,
 		context,
 	})
+}
+
+export const queryForSearchMultipleObject = async (
+	_: any,
+	{ searchTerm, offset, first }: any,
+	context: WibeContext<any>,
+	info: GraphQLResolveInfo,
+	className: keyof WibeAppTypes['types'],
+) => {
+	const where = {
+		search: { contains: tokenize(searchTerm).split(' ') },
+	}
+
+	return queryForMultipleObject(
+		undefined,
+		{ where, offset, first },
+		context,
+		info,
+		className,
+	)
 }
 
 export const queryForMultipleObject = async (

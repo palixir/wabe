@@ -88,7 +88,7 @@ describe('GraphQL : aggregation', () => {
 		expect(
 			await client.request<any>(graphql.users, {
 				where: {
-					arrayValue: { contains: 'a' },
+					arrayValue: { contains: ['a'] },
 				},
 			}),
 		).toEqual({
@@ -186,7 +186,7 @@ describe('GraphQL : aggregation', () => {
 		expect(
 			await client.request<any>(graphql.users, {
 				where: {
-					arrayValue: { contains: 'z' },
+					arrayValue: { contains: ['z'] },
 				},
 			}),
 		).toEqual({
