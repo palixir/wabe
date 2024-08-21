@@ -52,6 +52,46 @@ describe('Mongo adapter', () => {
 			)
 	})
 
+	it('should count all elements corresponds to where condition in collection', async () => {
+		const res = await mongoAdapter.count({
+			className: 'User',
+			context,
+		})
+
+		expect(res).toEqual(0)
+
+		await mongoAdapter.createObjects({
+			className: 'User',
+			data: [
+				{
+					name: 'Lucas',
+					age: 20,
+				},
+				{
+					name: 'LucasBis',
+					age: 18,
+				},
+			],
+			fields: [],
+			context,
+		})
+
+		const res2 = await mongoAdapter.count({
+			className: 'User',
+			context,
+		})
+
+		expect(res2).toEqual(2)
+
+		const res3 = await mongoAdapter.count({
+			className: 'User',
+			context,
+			where: { age: { equalTo: 20 } },
+		})
+
+		expect(res3).toEqual(1)
+	})
+
 	it('should clear all database', async () => {
 		await mongoAdapter.createObjects({
 			className: 'User',

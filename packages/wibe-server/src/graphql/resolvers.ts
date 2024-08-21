@@ -166,6 +166,13 @@ export const queryForMultipleObject = async (
 	})
 
 	return {
+		count: fields.includes('count')
+			? await context.wibeApp.databaseController.count({
+					className,
+					where,
+					context,
+				})
+			: undefined,
 		edges: objects.map((object: any) => ({
 			node: object,
 		})),

@@ -21,6 +21,7 @@ describe('DatabaseController', () => {
 	const mockDeleteObject = mock(() => {})
 	const mockDeleteObjects = mock(() => {})
 	const mockClearDatabase = mock(() => {})
+	const mockCount = mock(() => {})
 
 	const mockRunOnSingleObject = mock(() => {})
 	const mockRunOnMultipleObject = mock(() => {})
@@ -40,6 +41,7 @@ describe('DatabaseController', () => {
 		deleteObject: mockDeleteObject,
 		deleteObjects: mockDeleteObjects,
 		clearDatabase: mockClearDatabase,
+		count: mockCount,
 	}))
 
 	const config = {
@@ -133,6 +135,24 @@ describe('DatabaseController', () => {
 		mockRunOnSingleObject.mockClear()
 		mockRunOnMultipleObject.mockClear()
 		mockClearDatabase.mockClear()
+		mockCount.mockClear()
+	})
+
+	it('should call adapter count', async () => {
+		const databaseController = new DatabaseController(mockAdapter() as any)
+
+		await databaseController.count({
+			className: 'User',
+			context,
+			where: { age: { equalTo: 20 } },
+		})
+
+		expect(mockCount).toHaveBeenCalledTimes(1)
+		expect(mockCount).toHaveBeenCalledWith({
+			className: 'User',
+			context,
+			where: { age: { equalTo: 20 } },
+		})
 	})
 
 	it('should call adapter clearDatabase', async () => {

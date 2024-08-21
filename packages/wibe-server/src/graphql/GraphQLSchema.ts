@@ -409,6 +409,7 @@ export class GraphQLSchema {
 		const connectionObject = new GraphQLObjectType({
 			name: `${wibeClass.name}Connection`,
 			fields: () => ({
+				count: { type: GraphQLInt },
 				edges: { type: new GraphQLList(edgeObject) },
 			}),
 		})

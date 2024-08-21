@@ -43,6 +43,15 @@ export type MutationData<T extends keyof WibeAppTypes['types']> = Record<
 	any
 >
 
+export interface CountOptions<
+	T extends keyof WibeAppTypes['types'],
+	K extends keyof WibeAppTypes['types'][T],
+> {
+	className: T
+	where?: WhereType<T, K>
+	context: WibeContext<any>
+}
+
 // TODO: It could be cool if fields type supports something like user.id, user.email
 export interface GetObjectOptions<
 	T extends keyof WibeAppTypes['types'],
@@ -157,6 +166,11 @@ export interface DatabaseAdapter {
 	createClassIfNotExist(className: string): Promise<any>
 
 	clearDatabase(): Promise<void>
+
+	count<
+		T extends keyof WibeAppTypes['types'],
+		K extends keyof WibeAppTypes['types'][T],
+	>(params: CountOptions<T, K>): Promise<number>
 
 	getObject<
 		T extends keyof WibeAppTypes['types'],

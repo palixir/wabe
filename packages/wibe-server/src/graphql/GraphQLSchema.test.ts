@@ -186,6 +186,71 @@ describe('GraphqlSchema', () => {
 		})
 	})
 
+	it('should contain count elements in query multiple objects', async () => {
+		expect(
+			getTypeFromGraphQLSchema({
+				schema,
+				type: 'Type',
+				name: 'TestClassConnection',
+			}).input.count,
+		).toEqual('Int')
+	})
+
+	it('should count all elements corresponding to where object', async () => {
+		const { client, wibeApp } = await createWibeApp({
+			classes: [
+				{
+					name: 'TestClass',
+					fields: {
+						field1: {
+							type: 'Object',
+							object: {
+								name: 'SubOject',
+								fields: {
+									field2: { type: 'String' },
+									field3: { type: 'Int' },
+								},
+							},
+						},
+					},
+				},
+			],
+		})
+
+		await client.request<any>(
+			gql`
+				mutation createTestClass {
+					createTestClass(
+						input: {
+							fields: { field1: { field2: "test", field3: 1 } }
+						}
+					) {
+						testClass {
+							field1 {
+								field2
+							}
+						}
+					}
+				}
+			`,
+			{},
+		)
+
+		const res = await client.request<any>(
+			gql`
+				query testClasses{
+					testClasses{
+						count
+					}
+				}
+			`,
+		)
+
+		expect(res.testClasses.count).toEqual(1)
+
+		await wibeApp.close()
+	})
+
 	it('should request an object with pointer in same class (issue #5)', async () => {
 		const { client, wibeApp } = await createWibeApp({
 			classes: [],

@@ -4,6 +4,7 @@ import { OperationType, initializeHook } from '../../hooks'
 import type { WibeContext } from '../../server/interface'
 import { notEmpty } from '../../utils/helper'
 import type {
+	CountOptions,
 	CreateObjectOptions,
 	CreateObjectsOptions,
 	DatabaseAdapter,
@@ -368,6 +369,12 @@ export class DatabaseController<T extends WibeAppTypes> {
 		fields: Array<string>,
 	) {
 		return `${String(className)}-${id}-${fields.join(',')}`
+	}
+
+	async count<U extends keyof T['types'], K extends keyof T['types'][U]>(
+		params: CountOptions<U, K>,
+	) {
+		return this.adapter.count(params)
 	}
 
 	async clearDatabase() {

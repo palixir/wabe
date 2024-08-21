@@ -12,6 +12,7 @@ import type {
 	WhereType,
 	DeleteObjectOptions,
 	OutputType,
+	CountOptions,
 } from './adaptersInterface'
 import type { WibeAppTypes } from '../../server'
 
@@ -133,6 +134,18 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 		return this.client.close()
 	}
 
+	async count<U extends keyof T['types'], K extends keyof T['types'][U]>(
+		params: CountOptions<U, K>,
+	) {
+		const { className, where } = params
+
+		const collection = await this.createClassIfNotExist(className)
+
+		const whereBuilded = buildMongoWhereQuery<T, K>(where)
+
+		return collection.countDocuments(whereBuilded)
+	}
+
 	async clearDatabase() {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
@@ -160,9 +173,9 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 
-		const { className, id, fields } = params
+		const { className, id, fields, where } = params
 
-		const whereBuilded = buildMongoWhereQuery<T, K>(params.where)
+		const whereBuilded = buildMongoWhereQuery<T, K>(where)
 
 		const objectOfFieldsToGet = fields?.reduce(
 			(acc, prev) => {
