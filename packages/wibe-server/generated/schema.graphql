@@ -487,22 +487,16 @@ input RoleRelationInput {
 
 type Query {
   """User class"""
-  searchUsers(offset: Int, first: Int, searchTerm: String): UserConnection!
-
-  """User class"""
   user(id: ID): User
 
   """User class"""
-  users(where: UserWhereInput, offset: Int, first: Int): UserConnection!
-  searchPosts(offset: Int, first: Int, searchTerm: String): PostConnection!
+  users(where: UserWhereInput, offset: Int, first: Int, searchTerm: String): UserConnection!
   post(id: ID): Post
-  posts(where: PostWhereInput, offset: Int, first: Int): PostConnection!
-  search_Sessions(offset: Int, first: Int, searchTerm: String): _SessionConnection!
+  posts(where: PostWhereInput, offset: Int, first: Int, searchTerm: String): PostConnection!
   _session(id: ID): _Session
-  _sessions(where: _SessionWhereInput, offset: Int, first: Int): _SessionConnection!
-  searchRoles(offset: Int, first: Int, searchTerm: String): RoleConnection!
+  _sessions(where: _SessionWhereInput, offset: Int, first: Int, searchTerm: String): _SessionConnection!
   role(id: ID): Role
-  roles(where: RoleWhereInput, offset: Int, first: Int): RoleConnection!
+  roles(where: RoleWhereInput, offset: Int, first: Int, searchTerm: String): RoleConnection!
 
   """Hello world description"""
   helloWorld(name: String!): String

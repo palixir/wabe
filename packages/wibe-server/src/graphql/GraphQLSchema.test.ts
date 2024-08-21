@@ -220,8 +220,8 @@ describe('GraphqlSchema', () => {
 
 		const res = await client.request<any>(
 			gql`
-				query searchTestClasses{
-					searchTestClasses(
+				query testClasses{
+					testClasses(
 						searchTerm: "t"
 					){
 						count
@@ -230,12 +230,12 @@ describe('GraphqlSchema', () => {
 			`,
 		)
 
-		expect(res.searchTestClasses.count).toEqual(1)
+		expect(res.testClasses.count).toEqual(1)
 
 		const res2 = await client.request<any>(
 			gql`
-				query searchTestClasses{
-					searchTestClasses(
+				query testClasses{
+					testClasses(
 						searchTerm: "invalid"
 					){
 						count
@@ -244,12 +244,12 @@ describe('GraphqlSchema', () => {
 			`,
 		)
 
-		expect(res2.searchTestClasses.count).toEqual(0)
+		expect(res2.testClasses.count).toEqual(0)
 
 		const res3 = await client.request<any>(
 			gql`
-				query searchTestClasses{
-					searchTestClasses(
+				query testClasses{
+					testClasses(
 						searchTerm: "test"
 					){
 						count
@@ -258,7 +258,7 @@ describe('GraphqlSchema', () => {
 			`,
 		)
 
-		expect(res3.searchTestClasses.count).toEqual(1)
+		expect(res3.testClasses.count).toEqual(1)
 
 		await wibeApp.close()
 	})
@@ -907,6 +907,7 @@ describe('GraphqlSchema', () => {
 				first: 'Int',
 				offset: 'Int',
 				where: 'TestClassWhereInput',
+				searchTerm: 'String',
 			},
 			output: 'TestClassConnection!',
 		})

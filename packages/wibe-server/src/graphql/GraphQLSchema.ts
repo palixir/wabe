@@ -627,23 +627,6 @@ export class GraphQLSchema {
 			firstLetterInLowerCase(className)
 
 		return {
-			[`search${pluralize(firstLetterInUpperCase(className))}`]: {
-				type: new GraphQLNonNull(connectionObject),
-				description: object.description,
-				args: {
-					offset: { type: GraphQLInt },
-					first: { type: GraphQLInt },
-					searchTerm: { type: GraphQLString },
-				},
-				resolve: (root, args, ctx, info) =>
-					queryForSearchMultipleObject(
-						root,
-						args,
-						ctx,
-						info,
-						className,
-					),
-			},
 			[classNameWithFirstLetterLowerCase]: {
 				type: object,
 				description: object.description,
@@ -658,6 +641,7 @@ export class GraphQLSchema {
 					where: { type: whereInputType },
 					offset: { type: GraphQLInt },
 					first: { type: GraphQLInt },
+					searchTerm: { type: GraphQLString },
 				},
 				resolve: (root, args, ctx, info) =>
 					queryForMultipleObject(root, args, ctx, info, className),
