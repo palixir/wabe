@@ -156,12 +156,14 @@ export const queryForMultipleObject = async (
 ) => {
 	const fields = getFieldsFromInfo(info, className)
 
-	const whereWithSearchTerm = {
-		...where,
-		...(searchTerm
-			? { search: { contains: tokenize(searchTerm).split(' ') } }
-			: {}),
-	}
+	const whereWithSearchTerm = searchTerm
+		? {
+				AND: [
+					where || {},
+					{ search: { contains: tokenize(searchTerm).split(' ') } },
+				],
+			}
+		: where
 
 	const objects = await context.wibeApp.databaseController.getObjects({
 		className,

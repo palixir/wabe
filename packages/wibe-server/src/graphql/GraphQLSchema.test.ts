@@ -195,6 +195,9 @@ describe('GraphqlSchema', () => {
 						name: {
 							type: 'String',
 						},
+						age: {
+							type: 'Int',
+						},
 					},
 					searchableFields: ['name'],
 				},
@@ -206,7 +209,7 @@ describe('GraphqlSchema', () => {
 				mutation createTestClass {
 					createTestClass(
 						input: {
-							fields: { name: "test"}
+							fields: { name: "test", age: 30 }
 						}
 					) {
 						testClass {
@@ -223,6 +226,7 @@ describe('GraphqlSchema', () => {
 				query testClasses{
 					testClasses(
 						searchTerm: "t"
+						where: {age: {equalTo: 30}}
 					){
 						count
 					}
@@ -259,6 +263,21 @@ describe('GraphqlSchema', () => {
 		)
 
 		expect(res3.testClasses.count).toEqual(1)
+
+		const res4 = await client.request<any>(
+			gql`
+				query testClasses{
+					testClasses(
+						searchTerm: "test"
+						where: {age: {equalTo: 1111}}
+					){
+						count
+					}
+				}
+			`,
+		)
+
+		expect(res4.testClasses.count).toEqual(0)
 
 		await wibeApp.close()
 	})

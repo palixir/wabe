@@ -19,7 +19,7 @@ import type {
 	QueryResolver,
 	Schema,
 } from '../schema'
-import { firstLetterInLowerCase, firstLetterInUpperCase } from '../utils'
+import { firstLetterInLowerCase } from '../utils'
 import type { DevWibeAppTypes } from '../utils/helper'
 import { GraphqlParser, type GraphqlParserFactory } from './parser'
 import {
@@ -31,7 +31,6 @@ import {
 	mutationToUpdateObject,
 	queryForMultipleObject,
 	queryForOneObject,
-	queryForSearchMultipleObject,
 } from './resolvers'
 import { IdWhereInput } from './types'
 
