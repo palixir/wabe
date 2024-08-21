@@ -163,7 +163,10 @@ export interface DatabaseAdapter {
 	connect(): Promise<any>
 	close(): Promise<any>
 
-	createClassIfNotExist(className: string): Promise<any>
+	createClassIfNotExist(
+		className: string,
+		context: WibeContext<any>,
+	): Promise<any>
 
 	clearDatabase(): Promise<void>
 

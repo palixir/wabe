@@ -393,7 +393,7 @@ describe('Mongo adapter', () => {
 			'collection',
 		).mockReturnValue({} as any)
 
-		await mongoAdapter.createClassIfNotExist('User')
+		await mongoAdapter.createClassIfNotExist('User', context)
 
 		expect(spyCollection).toHaveBeenCalledTimes(1)
 		expect(spyCollection).toHaveBeenCalledWith('User')

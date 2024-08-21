@@ -158,12 +158,19 @@ export type ClassPermissions = Partial<
 
 export type SearchableFields = Array<string>
 
+export type ClassIndexes = Array<{
+	field: string
+	order: 'ASC' | 'DESC'
+	unique?: boolean
+}>
+
 export interface ClassInterface<T extends WibeAppTypes> {
 	name: string
 	fields: SchemaFields<T>
 	description?: string
 	permissions?: ClassPermissions
 	searchableFields?: SearchableFields
+	indexes?: ClassIndexes
 }
 
 export interface ScalarInterface {

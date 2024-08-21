@@ -15,6 +15,7 @@ import type {
 	CountOptions,
 } from './adaptersInterface'
 import type { WibeAppTypes } from '../../server'
+import type { WibeContext } from '../../server/interface'
 
 export const buildMongoWhereQuery = <
 	T extends keyof WibeAppTypes['types'],
@@ -134,12 +135,43 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 		return this.client.close()
 	}
 
+	async createClassIfNotExist(
+		className: keyof T['types'],
+		context: WibeContext<T>,
+	) {
+		if (!this.database)
+			throw new Error('Connection to database is not established')
+
+		const schemaClass = context.wibeApp.config.schema.classes.find(
+			(currentClass) => currentClass.name === className,
+		)
+
+		if (!schemaClass)
+			throw new Error(`${className as string} is not defined in schema`)
+
+		// @ts-expect-error
+		const collection = this.database.collection(className)
+
+		const indexes = schemaClass.indexes || []
+
+		indexes.map((index) =>
+			collection.createIndex(
+				{
+					[index.field]: index.order === 'ASC' ? 1 : -1,
+				},
+				{ unique: !!index.unique },
+			),
+		)
+
+		return collection
+	}
+
 	async count<U extends keyof T['types'], K extends keyof T['types'][U]>(
 		params: CountOptions<U, K>,
 	) {
-		const { className, where } = params
+		const { className, where, context } = params
 
-		const collection = await this.createClassIfNotExist(className)
+		const collection = await this.createClassIfNotExist(className, context)
 
 		const whereBuilded = buildMongoWhereQuery<T, K>(where)
 
@@ -157,23 +189,13 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 		)
 	}
 
-	async createClassIfNotExist(className: keyof T['types']) {
-		if (!this.database)
-			throw new Error('Connection to database is not established')
-
-		// @ts-expect-error
-		const collection = this.database.collection(className)
-
-		return collection
-	}
-
 	async getObject<U extends keyof T['types'], K extends keyof T['types'][U]>(
 		params: GetObjectOptions<U, K>,
 	): Promise<OutputType<U, K>> {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 
-		const { className, id, fields, where } = params
+		const { className, id, fields, where, context } = params
 
 		const whereBuilded = buildMongoWhereQuery<T, K>(where)
 
@@ -185,7 +207,7 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 			{} as Record<any, number>,
 		)
 
-		const collection = await this.createClassIfNotExist(className)
+		const collection = await this.createClassIfNotExist(className, context)
 
 		const res = await collection.findOne(
 			{ _id: new ObjectId(id), ...whereBuilded } as Filter<any>,
@@ -217,7 +239,7 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 
-		const { className, fields, where, offset, first } = params
+		const { className, fields, where, offset, first, context } = params
 
 		const whereBuilded = buildMongoWhereQuery(where)
 
@@ -230,7 +252,7 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 			{} as Record<any, number>,
 		)
 
-		const collection = await this.createClassIfNotExist(className)
+		const collection = await this.createClassIfNotExist(className, context)
 
 		const res = await collection
 			.find(whereBuilded, {
@@ -266,7 +288,7 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 
 		const { className, data, fields, context } = params
 
-		const collection = await this.createClassIfNotExist(className)
+		const collection = await this.createClassIfNotExist(className, context)
 
 		const res = await collection.insertOne(data, {})
 
@@ -290,7 +312,7 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 
 		const { className, data, fields, offset, first, context } = params
 
-		const collection = await this.createClassIfNotExist(className)
+		const collection = await this.createClassIfNotExist(className, context)
 
 		const res = await collection.insertMany(data, {})
 
@@ -324,7 +346,7 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 
 		const whereBuilded = where ? buildMongoWhereQuery<T, W>(where) : {}
 
-		const collection = await this.createClassIfNotExist(className)
+		const collection = await this.createClassIfNotExist(className, context)
 
 		const res = await collection.updateOne(
 			{
@@ -361,7 +383,7 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 
 		const whereBuilded = buildMongoWhereQuery<T, W>(where)
 
-		const collection = await this.createClassIfNotExist(className)
+		const collection = await this.createClassIfNotExist(className, context)
 
 		const objectsBeforeUpdate =
 			await context.wibeApp.databaseController.getObjects({
@@ -406,11 +428,11 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 
-		const { className, id } = params
+		const { className, id, context } = params
 
 		const whereBuilded = buildMongoWhereQuery(params.where)
 
-		const collection = await this.createClassIfNotExist(className)
+		const collection = await this.createClassIfNotExist(className, context)
 
 		const res = await collection.deleteOne({
 			_id: new ObjectId(id),
@@ -428,11 +450,11 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 
-		const { className, where } = params
+		const { className, where, context } = params
 
 		const whereBuilded = buildMongoWhereQuery(where)
 
-		const collection = await this.createClassIfNotExist(className)
+		const collection = await this.createClassIfNotExist(className, context)
 
 		await collection.deleteMany(whereBuilded)
 	}
