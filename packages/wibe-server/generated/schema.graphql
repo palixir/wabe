@@ -490,13 +490,13 @@ type Query {
   user(id: ID): User
 
   """User class"""
-  users(where: UserWhereInput, offset: Int, first: Int, searchTerm: String): UserConnection!
+  users(where: UserWhereInput, offset: Int, first: Int): UserConnection!
   post(id: ID): Post
-  posts(where: PostWhereInput, offset: Int, first: Int, searchTerm: String): PostConnection!
+  posts(where: PostWhereInput, offset: Int, first: Int): PostConnection!
   _session(id: ID): _Session
-  _sessions(where: _SessionWhereInput, offset: Int, first: Int, searchTerm: String): _SessionConnection!
+  _sessions(where: _SessionWhereInput, offset: Int, first: Int): _SessionConnection!
   role(id: ID): Role
-  roles(where: RoleWhereInput, offset: Int, first: Int, searchTerm: String): RoleConnection!
+  roles(where: RoleWhereInput, offset: Int, first: Int): RoleConnection!
 
   """Hello world description"""
   helloWorld(name: String!): String
@@ -511,7 +511,7 @@ input UserWhereInput {
   acl: UserACLObjectWhereInput
   createdAt: DateWhereInput
   updatedAt: DateWhereInput
-  search: ArrayWhereInput
+  search: SearchWhereInput
   authentication: UserAuthenticationWhereInput
   provider: AnyWhereInput
   isOauth: BooleanWhereInput
@@ -524,10 +524,10 @@ input UserWhereInput {
 }
 
 input IdWhereInput {
-  equalTo: String
-  notEqualTo: String
-  in: [String]
-  notIn: [String]
+  equalTo: ID
+  notEqualTo: ID
+  in: [ID]
+  notIn: [ID]
 }
 
 input StringWhereInput {
@@ -589,17 +589,12 @@ input DateWhereInput {
   greaterThanOrEqualTo: Date
 }
 
-input ArrayWhereInput {
-  equalTo: Any
-  notEqualTo: Any
-  contains: Any
-  notContains: Any
+input SearchWhereInput {
+  contains: Search
 }
 
-"""
-The Any scalar type is used in operations and types that involve any type of value.
-"""
-scalar Any
+"""Search scalar to tokenize and search for all searchable fields"""
+scalar Search
 
 input UserAuthenticationWhereInput {
   emailPassword: UserAuthenticationEmailPasswordWhereInput
@@ -635,6 +630,11 @@ input AnyWhereInput {
   notEqualTo: Any
 }
 
+"""
+The Any scalar type is used in operations and types that involve any type of value.
+"""
+scalar Any
+
 input RoleWhereInput {
   id: IdWhereInput
   name: StringWhereInput
@@ -642,7 +642,7 @@ input RoleWhereInput {
   acl: RoleACLObjectWhereInput
   createdAt: DateWhereInput
   updatedAt: DateWhereInput
-  search: ArrayWhereInput
+  search: SearchWhereInput
   OR: [RoleWhereInput]
   AND: [RoleWhereInput]
 }
@@ -680,7 +680,7 @@ input _SessionWhereInput {
   acl: _SessionACLObjectWhereInput
   createdAt: DateWhereInput
   updatedAt: DateWhereInput
-  search: ArrayWhereInput
+  search: SearchWhereInput
   OR: [_SessionWhereInput]
   AND: [_SessionWhereInput]
 }
@@ -724,7 +724,7 @@ input PostWhereInput {
   acl: PostACLObjectWhereInput
   createdAt: DateWhereInput
   updatedAt: DateWhereInput
-  search: ArrayWhereInput
+  search: SearchWhereInput
   OR: [PostWhereInput]
   AND: [PostWhereInput]
 }

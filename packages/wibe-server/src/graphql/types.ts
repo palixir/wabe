@@ -1,5 +1,4 @@
 import {
-	Kind,
 	GraphQLBoolean,
 	GraphQLFloat,
 	GraphQLInputObjectType,
@@ -7,6 +6,7 @@ import {
 	GraphQLList,
 	GraphQLScalarType,
 	GraphQLString,
+	GraphQLID,
 } from 'graphql'
 import { tokenize } from '../utils'
 
@@ -139,10 +139,10 @@ export const EmailWhereInput = new GraphQLInputObjectType({
 export const IdWhereInput = new GraphQLInputObjectType({
 	name: 'IdWhereInput',
 	fields: {
-		equalTo: { type: GraphQLString },
-		notEqualTo: { type: GraphQLString },
-		in: { type: new GraphQLList(GraphQLString) },
-		notIn: { type: new GraphQLList(GraphQLString) },
+		equalTo: { type: GraphQLID },
+		notEqualTo: { type: GraphQLID },
+		in: { type: new GraphQLList(GraphQLID) },
+		notIn: { type: new GraphQLList(GraphQLID) },
 	},
 })
 
