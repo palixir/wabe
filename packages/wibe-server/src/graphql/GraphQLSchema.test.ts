@@ -225,8 +225,7 @@ describe('GraphqlSchema', () => {
 			gql`
 				query testClasses{
 					testClasses(
-						searchTerm: "t"
-						where: {age: {equalTo: 30}}
+						where: {AND:[{age: {equalTo: 30}}, {search: {contains: "t"}}]}
 					){
 						count
 					}
@@ -240,7 +239,7 @@ describe('GraphqlSchema', () => {
 			gql`
 				query testClasses{
 					testClasses(
-						searchTerm: "invalid"
+						where: {search: {contains: "invalid"}}
 					){
 						count
 					}
@@ -254,7 +253,7 @@ describe('GraphqlSchema', () => {
 			gql`
 				query testClasses{
 					testClasses(
-						searchTerm: "test"
+						where: {search: {contains: "test"}}
 					){
 						count
 					}
@@ -268,8 +267,7 @@ describe('GraphqlSchema', () => {
 			gql`
 				query testClasses{
 					testClasses(
-						searchTerm: "test"
-						where: {age: {equalTo: 1111}}
+						where: {AND:[{age: {equalTo: 1111}}, {search: {contains: "test"}}]}
 					){
 						count
 					}
@@ -283,8 +281,7 @@ describe('GraphqlSchema', () => {
 			gql`
 				query testClasses{
 					testClasses(
-						searchTerm: ""
-						where: {age: {equalTo: 30}}
+						where: {AND: [{age: {equalTo: 30}}, {search: {contains: ""}}]}
 					){
 						count
 					}
@@ -757,7 +754,7 @@ describe('GraphqlSchema', () => {
 			acl: 'TestClassACLObjectWhereInput',
 			createdAt: 'DateWhereInput',
 			updatedAt: 'DateWhereInput',
-			search: 'ArrayWhereInput',
+			search: 'SearchWhereInput',
 		})
 	})
 
@@ -941,7 +938,6 @@ describe('GraphqlSchema', () => {
 				first: 'Int',
 				offset: 'Int',
 				where: 'TestClassWhereInput',
-				searchTerm: 'String',
 			},
 			output: 'TestClassConnection!',
 		})

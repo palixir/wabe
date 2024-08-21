@@ -32,7 +32,7 @@ import {
 	queryForMultipleObject,
 	queryForOneObject,
 } from './resolvers'
-import { IdWhereInput } from './types'
+import { IdWhereInput, SearchWhereInput } from './types'
 
 type AllPossibleObject =
 	| 'object'
@@ -386,6 +386,7 @@ export class GraphQLSchema {
 						type: new GraphQLList(inputObject),
 					},
 				},
+				search: { type: SearchWhereInput },
 			}),
 		})
 
@@ -640,7 +641,6 @@ export class GraphQLSchema {
 					where: { type: whereInputType },
 					offset: { type: GraphQLInt },
 					first: { type: GraphQLInt },
-					searchTerm: { type: GraphQLString },
 				},
 				resolve: (root, args, ctx, info) =>
 					queryForMultipleObject(root, args, ctx, info, className),

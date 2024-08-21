@@ -149,29 +149,16 @@ export const queryForOneObject = (
 
 export const queryForMultipleObject = async (
 	_: any,
-	{ where, offset, first, searchTerm }: any,
+	{ where, offset, first }: any,
 	context: WibeContext<any>,
 	info: GraphQLResolveInfo,
 	className: keyof WibeAppTypes['types'],
 ) => {
 	const fields = getFieldsFromInfo(info, className)
 
-	const whereWithSearchTerm = searchTerm
-		? {
-				AND: [
-					where || {},
-					{
-						search: {
-							contains: tokenize(searchTerm).split(' '),
-						},
-					},
-				],
-			}
-		: where
-
 	const objects = await context.wibeApp.databaseController.getObjects({
 		className,
-		where: whereWithSearchTerm,
+		where,
 		fields,
 		offset,
 		first,
@@ -182,7 +169,7 @@ export const queryForMultipleObject = async (
 		count: fields.includes('count')
 			? await context.wibeApp.databaseController.count({
 					className,
-					where: whereWithSearchTerm,
+					where,
 					context,
 				})
 			: undefined,

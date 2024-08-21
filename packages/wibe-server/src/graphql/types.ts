@@ -8,6 +8,7 @@ import {
 	GraphQLScalarType,
 	GraphQLString,
 } from 'graphql'
+import { tokenize } from '../utils'
 
 export const AnyScalarType = new GraphQLScalarType({
 	name: 'Any',
@@ -58,8 +59,28 @@ export const FileScalarType = new GraphQLScalarType({
 	serialize: (value: any) => {
 		return value
 	},
-	parseLiteral: (ast: any) => {
+	parseLiteral: () => {
 		throw new Error('Invalid file')
+	},
+})
+
+export const SearchScalarType = new GraphQLScalarType({
+	name: 'Search',
+	description:
+		'Search scalar to tokenize and search for all searchable fields',
+	parseValue: (value: any) => {
+		if (typeof value !== 'string') throw new Error('Invalid search term')
+
+		if (value === '') return ''
+
+		return tokenize(value).split(' ')
+	},
+})
+
+export const SearchWhereInput = new GraphQLInputObjectType({
+	name: 'SearchWhereInput',
+	fields: {
+		contains: { type: SearchScalarType },
 	},
 })
 
