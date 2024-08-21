@@ -48,8 +48,8 @@ export class DatabaseController<T extends WibeAppTypes> {
 		return this.adapter.close()
 	}
 
-	async createClassIfNotExist(className: string) {
-		return this.adapter.createClassIfNotExist(className)
+	async createClassIfNotExist(className: string, context: WibeContext<T>) {
+		return this.adapter.createClassIfNotExist(className, context)
 	}
 
 	_getPointerObject(
