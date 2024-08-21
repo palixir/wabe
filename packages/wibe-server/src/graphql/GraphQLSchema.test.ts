@@ -279,6 +279,21 @@ describe('GraphqlSchema', () => {
 
 		expect(res4.testClasses.count).toEqual(0)
 
+		const res5 = await client.request<any>(
+			gql`
+				query testClasses{
+					testClasses(
+						searchTerm: ""
+						where: {age: {equalTo: 30}}
+					){
+						count
+					}
+				}
+			`,
+		)
+
+		expect(res5.testClasses.count).toEqual(1)
+
 		await wibeApp.close()
 	})
 

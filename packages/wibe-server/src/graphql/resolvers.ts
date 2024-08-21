@@ -160,7 +160,11 @@ export const queryForMultipleObject = async (
 		? {
 				AND: [
 					where || {},
-					{ search: { contains: tokenize(searchTerm).split(' ') } },
+					{
+						search: {
+							contains: tokenize(searchTerm).split(' '),
+						},
+					},
 				],
 			}
 		: where
