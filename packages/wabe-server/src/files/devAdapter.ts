@@ -1,3 +1,3 @@
-import type { WibeFileAdapter } from '.'
+import type { WabeFileAdapter } from '.'
 
-export const fileDevAdapter: WibeFileAdapter = async (file: File) => file.name
+export const fileDevAdapter: WabeFileAdapter = async (file: File) => file.name

@@ -1,19 +1,19 @@
-import { runDatabase } from 'wibe-mongodb-launcher'
-import { WibeApp } from '../src'
+import { runDatabase } from 'wabe-mongodb-launcher'
+import { WabeApp } from '../src'
 import { DatabaseEnum } from '../src/database'
 import type {
-	WibeSchemaEnums,
-	WibeSchemaScalars,
-	WibeSchemaTypes,
-} from '../generated/wibe'
+	WabeSchemaEnums,
+	WabeSchemaScalars,
+	WabeSchemaTypes,
+} from '../generated/wabe'
 
 const run = async () => {
 	await runDatabase()
 
-	const wibe = new WibeApp<{
-		types: WibeSchemaTypes
-		scalars: WibeSchemaScalars
-		enums: WibeSchemaEnums
+	const wabe = new WabeApp<{
+		types: WabeSchemaTypes
+		scalars: WabeSchemaScalars
+		enums: WabeSchemaEnums
 	}>({
 		codegen: {
 			enabled: true,
@@ -58,7 +58,7 @@ const run = async () => {
 		database: {
 			type: DatabaseEnum.Mongo,
 			url: 'mongodb://127.0.0.1:27045',
-			name: 'Wibe',
+			name: 'Wabe',
 		},
 		port: 3000,
 		schema: {
@@ -170,7 +170,7 @@ const run = async () => {
 		},
 	})
 
-	await wibe.start()
+	await wabe.start()
 }
 
 run().catch((err) => {

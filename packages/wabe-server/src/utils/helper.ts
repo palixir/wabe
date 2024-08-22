@@ -2,12 +2,12 @@ import getPort from 'get-port'
 import { GraphQLClient } from 'graphql-request'
 import { v4 as uuid } from 'uuid'
 import type {
-	WibeSchemaEnums,
-	WibeSchemaScalars,
-	WibeSchemaTypes,
-} from '../../generated/wibe'
+	WabeSchemaEnums,
+	WabeSchemaScalars,
+	WabeSchemaTypes,
+} from '../../generated/wabe'
 import { DatabaseEnum } from '../database'
-import { WibeApp } from '../server'
+import { WabeApp } from '../server'
 
 type NotNill<T> = T extends null | undefined ? never : T
 
@@ -23,10 +23,10 @@ export type DeepRequired<T> = T extends Primitive
 					: DeepRequired<T[P]>
 		}
 
-export type DevWibeAppTypes = {
-	types: WibeSchemaTypes
-	scalars: WibeSchemaScalars
-	enums: WibeSchemaEnums
+export type DevWabeAppTypes = {
+	types: WabeSchemaTypes
+	scalars: WabeSchemaScalars
+	enums: WabeSchemaEnums
 }
 
 export const notEmpty = <T>(value: T | null | undefined): value is T =>
@@ -35,7 +35,7 @@ export const notEmpty = <T>(value: T | null | undefined): value is T =>
 export const getGraphqlClient = (port: number): GraphQLClient => {
 	const client = new GraphQLClient(`http://127.0.0.1:${port}/graphql`, {
 		headers: {
-			'Wibe-Root-Key':
+			'Wabe-Root-Key':
 				'0uwFvUxM$ceFuF1aEtTtZMa7DUN2NZudqgY5ve5W*QCyb58cwMj9JeoaV@d#%29v&aJzswuudVU1%nAT+rxS0Bh&OkgBYc0PH18*',
 		},
 	})
@@ -55,7 +55,7 @@ export const getUserClient = (
 ): GraphQLClient => {
 	const client = new GraphQLClient(`http://127.0.0.1:${port}/graphql`, {
 		headers: {
-			'Wibe-Access-Token': accessToken,
+			'Wabe-Access-Token': accessToken,
 		},
 	})
 
@@ -67,7 +67,7 @@ export const setupTests = async () => {
 
 	const port = await getPort()
 
-	const wibe = new WibeApp<DevWibeAppTypes>({
+	const wabe = new WabeApp<DevWabeAppTypes>({
 		rootKey:
 			'0uwFvUxM$ceFuF1aEtTtZMa7DUN2NZudqgY5ve5W*QCyb58cwMj9JeoaV@d#%29v&aJzswuudVU1%nAT+rxS0Bh&OkgBYc0PH18*',
 		database: {
@@ -160,12 +160,12 @@ export const setupTests = async () => {
 		},
 	})
 
-	await wibe.start()
+	await wabe.start()
 
-	return { wibe, port }
+	return { wabe, port }
 }
 
-export const closeTests = async (wibe: WibeApp<DevWibeAppTypes>) => {
-	await wibe.databaseController.adapter?.close()
-	await wibe.close()
+export const closeTests = async (wabe: WabeApp<DevWabeAppTypes>) => {
+	await wabe.databaseController.adapter?.close()
+	await wabe.close()
 }

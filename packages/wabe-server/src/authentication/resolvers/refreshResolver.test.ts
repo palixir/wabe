@@ -1,13 +1,13 @@
 import { describe, expect, it, spyOn } from 'bun:test'
 import { refreshResolver } from './refreshResolver'
-import type { WibeContext } from '../../server/interface'
+import type { WabeContext } from '../../server/interface'
 import { Session } from '../Session'
 
-const context: WibeContext<any> = {
+const context: WabeContext<any> = {
 	sessionId: 'sessionId',
 	user: {} as any,
 	isRoot: false,
-} as WibeContext<any>
+} as WabeContext<any>
 
 describe('refreshResolver', () => {
 	it('should refresh the session', async () => {

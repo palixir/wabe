@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'bun:test'
 import { HookObject } from './HookObject'
 import { OperationType } from '.'
-import type { DevWibeAppTypes } from '../utils/helper'
+import type { DevWabeAppTypes } from '../utils/helper'
 
 describe('HookObject', () => {
 	it('should return correctly value depends on the update state of the field', () => {
 		const userData = { name: 'John Doe' }
 
-		const hookObject = new HookObject<DevWibeAppTypes>({
+		const hookObject = new HookObject<DevWabeAppTypes>({
 			className: 'User',
 			newData: userData,
 			context: {} as any,

@@ -7,9 +7,9 @@ import {
 	expect,
 	it,
 } from 'bun:test'
-import type { WibeApp } from '../../server'
+import type { WabeApp } from '../../server'
 import {
-	type DevWibeAppTypes,
+	type DevWabeAppTypes,
 	closeTests,
 	getGraphqlClient,
 	setupTests,
@@ -28,19 +28,19 @@ const cleanUsers = async (client: GraphQLClient) => {
 }
 
 describe('GraphQL : E2E', () => {
-	let wibe: WibeApp<DevWibeAppTypes>
+	let wabe: WabeApp<DevWabeAppTypes>
 	let port: number
 	let client: GraphQLClient
 
 	beforeAll(async () => {
 		const setup = await setupTests()
-		wibe = setup.wibe
+		wabe = setup.wabe
 		port = setup.port
 		client = getGraphqlClient(port)
 	})
 
 	afterAll(async () => {
-		await closeTests(wibe)
+		await closeTests(wabe)
 	})
 
 	beforeEach(async () => {

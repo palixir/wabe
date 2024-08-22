@@ -14,12 +14,12 @@ import type {
 	OutputType,
 	CountOptions,
 } from './adaptersInterface'
-import type { WibeAppTypes } from '../../server'
-import type { WibeContext } from '../../server/interface'
+import type { WabeAppTypes } from '../../server'
+import type { WabeContext } from '../../server/interface'
 
 export const buildMongoWhereQuery = <
-	T extends keyof WibeAppTypes['types'],
-	K extends keyof WibeAppTypes['types'][T],
+	T extends keyof WabeAppTypes['types'],
+	K extends keyof WabeAppTypes['types'][T],
 >(
 	where?: WhereType<T, K>,
 ): Record<string, any> => {
@@ -115,7 +115,7 @@ export const buildMongoWhereQuery = <
 	)
 }
 
-export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
+export class MongoAdapter<T extends WabeAppTypes> implements DatabaseAdapter {
 	public options: AdapterOptions
 	public database?: Db
 	private client: MongoClient
@@ -137,12 +137,12 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 
 	async createClassIfNotExist(
 		className: keyof T['types'],
-		context: WibeContext<T>,
+		context: WabeContext<T>,
 	) {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 
-		const schemaClass = context.wibeApp.config.schema.classes.find(
+		const schemaClass = context.wabeApp.config.schema.classes.find(
 			(currentClass) => currentClass.name === className,
 		)
 
@@ -292,7 +292,7 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 
 		const res = await collection.insertOne(data, {})
 
-		const object = await context.wibeApp.databaseController.getObject({
+		const object = await context.wabeApp.databaseController.getObject({
 			className,
 			id: res.insertedId.toString(),
 			context,
@@ -322,7 +322,7 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 			}),
 		)
 
-		const allObjects = await context.wibeApp.databaseController.getObjects({
+		const allObjects = await context.wabeApp.databaseController.getObjects({
 			className,
 			where: { OR: orStatement } as WhereType<T, K>,
 			fields,
@@ -360,7 +360,7 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 
 		if (res.matchedCount === 0) throw new Error('Object not found')
 
-		const object = await context.wibeApp.databaseController.getObject({
+		const object = await context.wabeApp.databaseController.getObject({
 			className,
 			context,
 			fields,
@@ -386,7 +386,7 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 		const collection = await this.createClassIfNotExist(className, context)
 
 		const objectsBeforeUpdate =
-			await context.wibeApp.databaseController.getObjects({
+			await context.wabeApp.databaseController.getObjects({
 				className,
 				where,
 				fields: ['id'],
@@ -406,7 +406,7 @@ export class MongoAdapter<T extends WibeAppTypes> implements DatabaseAdapter {
 			id: { equalTo: ObjectId.createFromHexString(object.id) },
 		}))
 
-		const objects = await context.wibeApp.databaseController.getObjects({
+		const objects = await context.wabeApp.databaseController.getObjects({
 			className,
 			where: {
 				OR: orStatement,

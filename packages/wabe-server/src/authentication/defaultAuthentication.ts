@@ -1,10 +1,10 @@
-import type { WibeAppTypes } from '..'
+import type { WabeAppTypes } from '..'
 import type { CustomAuthenticationMethods } from './interface'
 import { Google } from './providers'
 import { EmailPassword } from './providers/EmailPassword'
 
 export const defaultAuthenticationMethods = <
-	T extends WibeAppTypes,
+	T extends WabeAppTypes,
 >(): CustomAuthenticationMethods<T>[] => [
 	{
 		name: 'emailPassword',

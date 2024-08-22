@@ -1,8 +1,8 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'bun:test'
 import { type GraphQLClient, gql } from 'graphql-request'
-import type { WibeApp } from '..'
+import type { WabeApp } from '..'
 import {
-	type DevWibeAppTypes,
+	type DevWabeAppTypes,
 	closeTests,
 	getAnonymousClient,
 	getGraphqlClient,
@@ -68,21 +68,21 @@ const createUserAndUpdateRole = async ({
 }
 
 describe('Authentication', () => {
-	let wibe: WibeApp<DevWibeAppTypes>
+	let wabe: WabeApp<DevWabeAppTypes>
 	let port: number
 	let client: GraphQLClient
 	let rootClient: GraphQLClient
 
 	beforeAll(async () => {
 		const setup = await setupTests()
-		wibe = setup.wibe
+		wabe = setup.wabe
 		port = setup.port
 		client = getAnonymousClient(port)
 		rootClient = getGraphqlClient(port)
 	})
 
 	afterAll(async () => {
-		await closeTests(wibe)
+		await closeTests(wabe)
 	})
 
 	afterEach(async () => {

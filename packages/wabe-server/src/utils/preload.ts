@@ -1,4 +1,4 @@
-import { runDatabase } from 'wibe-mongodb-launcher'
+import { runDatabase } from 'wabe-mongodb-launcher'
 
 const setupEnvironment = () => {
 	process.env.JWT_SECRET = 'dev'

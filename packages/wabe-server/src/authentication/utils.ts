@@ -1,5 +1,5 @@
-import type { WibeAppTypes } from '../server'
-import type { WibeContext } from '../server/interface'
+import type { WabeAppTypes } from '../server'
+import type { WabeContext } from '../server/interface'
 import type {
 	CustomAuthenticationMethods,
 	ProviderInterface,
@@ -7,14 +7,14 @@ import type {
 } from './interface'
 
 export const getAuthenticationMethod = <
-	T extends WibeAppTypes,
+	T extends WabeAppTypes,
 	U extends ProviderInterface | SecondaryProviderInterface,
 >(
 	listOfMethods: string[],
-	context: WibeContext<any>,
+	context: WabeContext<any>,
 ): CustomAuthenticationMethods<T, U> => {
 	const customAuthenticationConfig =
-		context.wibeApp.config?.authentication?.customAuthenticationMethods
+		context.wabeApp.config?.authentication?.customAuthenticationMethods
 
 	if (!customAuthenticationConfig)
 		throw new Error('No custom authentication methods found')

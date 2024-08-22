@@ -26,9 +26,9 @@ import {
 	IntWhereInput,
 	StringWhereInput,
 } from '../graphql'
-import type { ClassInterface, SchemaFields, WibePrimaryTypes } from '../schema'
-import type { WibeAppTypes } from '../server'
-import type { DevWibeAppTypes } from '../utils/helper'
+import type { ClassInterface, SchemaFields, WabePrimaryTypes } from '../schema'
+import type { WabeAppTypes } from '../server'
+import type { DevWabeAppTypes } from '../utils/helper'
 
 type GraphqlObjectType =
 	| 'Object'
@@ -46,7 +46,7 @@ type ParseObjectOptions = {
 
 type ParseObjectCallback = (options: ParseObjectOptions) => any
 
-export const templateScalarType: Record<WibePrimaryTypes, GraphQLScalarType> = {
+export const templateScalarType: Record<WabePrimaryTypes, GraphQLScalarType> = {
 	String: GraphQLString,
 	Int: GraphQLInt,
 	Float: GraphQLFloat,
@@ -57,7 +57,7 @@ export const templateScalarType: Record<WibePrimaryTypes, GraphQLScalarType> = {
 }
 
 export const templateWhereInput: Record<
-	WibePrimaryTypes | 'Array',
+	WabePrimaryTypes | 'Array',
 	GraphQLInputObjectType
 > = {
 	String: StringWhereInput,
@@ -73,7 +73,7 @@ export const templateWhereInput: Record<
 interface GraphqlParserFactoryOptions {
 	graphqlObjectType: GraphqlObjectType
 	allObjects: AllObjects
-	schemaFields: SchemaFields<DevWibeAppTypes>
+	schemaFields: SchemaFields<DevWabeAppTypes>
 }
 
 interface GraphqlParserConstructorOptions {
@@ -82,13 +82,13 @@ interface GraphqlParserConstructorOptions {
 }
 
 export type GraphqlParserFactory = (options: GraphqlParserFactoryOptions) => {
-	_parseWibeObject(options: ParseObjectOptions): any
-	_parseWibeWhereInputObject(options: ParseObjectOptions): any
-	_parseWibeInputObject(options: ParseObjectOptions): any
-	_parseWibeUpdateInputObject(options: ParseObjectOptions): any
+	_parseWabeObject(options: ParseObjectOptions): any
+	_parseWabeWhereInputObject(options: ParseObjectOptions): any
+	_parseWabeInputObject(options: ParseObjectOptions): any
+	_parseWabeUpdateInputObject(options: ParseObjectOptions): any
 	getGraphqlType(options: {
-		type: WibePrimaryTypes | 'Array'
-		typeValue?: WibePrimaryTypes
+		type: WabePrimaryTypes | 'Array'
+		typeValue?: WabePrimaryTypes
 		isWhereType?: boolean
 	}): any
 	getGraphqlFields(nameOfTheObject: string): any
@@ -105,7 +105,7 @@ export const GraphqlParser: GraphqlParserConstructor =
 		schemaFields,
 		allObjects,
 	}: GraphqlParserFactoryOptions) => {
-		// Get graphql fields from a wibe object
+		// Get graphql fields from a wabe object
 		const _getGraphqlFieldsFromAnObject = ({
 			objectToParse,
 			callBackForObjectType,
@@ -113,7 +113,7 @@ export const GraphqlParser: GraphqlParserConstructor =
 			isWhereType = false,
 			nameOfTheObject,
 		}: {
-			objectToParse: ClassInterface<DevWibeAppTypes>
+			objectToParse: ClassInterface<DevWabeAppTypes>
 			forceRequiredToFalse?: boolean
 			isWhereType?: boolean
 			callBackForObjectType: ParseObjectCallback
@@ -166,7 +166,7 @@ export const GraphqlParser: GraphqlParserConstructor =
 					const graphqlType = getGraphqlType({
 						...currentField,
 						// We never come here, complicated to good type this
-						type: currentField.type as WibePrimaryTypes,
+						type: currentField.type as WabePrimaryTypes,
 						isWhereType,
 					})
 
@@ -188,7 +188,7 @@ export const GraphqlParser: GraphqlParserConstructor =
 		// ------------------ Parsers ------------------
 
 		// Parse simple object
-		const _parseWibeObject = ({
+		const _parseWabeObject = ({
 			required,
 			description,
 			objectToParse,
@@ -196,7 +196,7 @@ export const GraphqlParser: GraphqlParserConstructor =
 		}: ParseObjectOptions) => {
 			const graphqlFields = _getGraphqlFieldsFromAnObject({
 				objectToParse,
-				callBackForObjectType: _parseWibeObject,
+				callBackForObjectType: _parseWabeObject,
 				nameOfTheObject,
 			})
 
@@ -210,7 +210,7 @@ export const GraphqlParser: GraphqlParserConstructor =
 		}
 
 		// Parse input object
-		const _parseWibeInputObject = ({
+		const _parseWabeInputObject = ({
 			required,
 			description,
 			objectToParse,
@@ -218,7 +218,7 @@ export const GraphqlParser: GraphqlParserConstructor =
 		}: ParseObjectOptions) => {
 			const graphqlFields = _getGraphqlFieldsFromAnObject({
 				objectToParse,
-				callBackForObjectType: _parseWibeInputObject,
+				callBackForObjectType: _parseWabeInputObject,
 				nameOfTheObject,
 			})
 
@@ -232,7 +232,7 @@ export const GraphqlParser: GraphqlParserConstructor =
 		}
 
 		// Parse create input object
-		const _parseWibeCreateInputObject = ({
+		const _parseWabeCreateInputObject = ({
 			required,
 			description,
 			objectToParse,
@@ -240,7 +240,7 @@ export const GraphqlParser: GraphqlParserConstructor =
 		}: ParseObjectOptions) => {
 			const graphqlFields = _getGraphqlFieldsFromAnObject({
 				objectToParse,
-				callBackForObjectType: _parseWibeCreateInputObject,
+				callBackForObjectType: _parseWabeCreateInputObject,
 				forceRequiredToFalse: true,
 				nameOfTheObject,
 			})
@@ -255,7 +255,7 @@ export const GraphqlParser: GraphqlParserConstructor =
 		}
 
 		// Parse update input object
-		const _parseWibeUpdateInputObject = ({
+		const _parseWabeUpdateInputObject = ({
 			required,
 			description,
 			objectToParse,
@@ -263,7 +263,7 @@ export const GraphqlParser: GraphqlParserConstructor =
 		}: ParseObjectOptions) => {
 			const graphqlFields = _getGraphqlFieldsFromAnObject({
 				objectToParse,
-				callBackForObjectType: _parseWibeUpdateInputObject,
+				callBackForObjectType: _parseWabeUpdateInputObject,
 				forceRequiredToFalse: true,
 				nameOfTheObject,
 			})
@@ -278,7 +278,7 @@ export const GraphqlParser: GraphqlParserConstructor =
 		}
 
 		// Parse where input object
-		const _parseWibeWhereInputObject = ({
+		const _parseWabeWhereInputObject = ({
 			required,
 			description,
 			objectToParse,
@@ -286,7 +286,7 @@ export const GraphqlParser: GraphqlParserConstructor =
 		}: ParseObjectOptions) => {
 			const graphqlFields = _getGraphqlFieldsFromAnObject({
 				objectToParse,
-				callBackForObjectType: _parseWibeWhereInputObject,
+				callBackForObjectType: _parseWabeWhereInputObject,
 				forceRequiredToFalse: true,
 				isWhereType: true,
 				nameOfTheObject,
@@ -321,27 +321,27 @@ export const GraphqlParser: GraphqlParserConstructor =
 			}
 		> = {
 			Object: {
-				callback: _parseWibeObject,
+				callback: _parseWabeObject,
 				isWhereType: false,
 				forceRequiredToFalse: false,
 			},
 			InputObject: {
-				callback: _parseWibeInputObject,
+				callback: _parseWabeInputObject,
 				isWhereType: false,
 				forceRequiredToFalse: false,
 			},
 			CreateFieldsInput: {
-				callback: _parseWibeCreateInputObject,
+				callback: _parseWabeCreateInputObject,
 				isWhereType: false,
 				forceRequiredToFalse: true,
 			},
 			UpdateFieldsInput: {
-				callback: _parseWibeUpdateInputObject,
+				callback: _parseWabeUpdateInputObject,
 				isWhereType: false,
 				forceRequiredToFalse: true,
 			},
 			WhereInputObject: {
-				callback: _parseWibeWhereInputObject,
+				callback: _parseWabeWhereInputObject,
 				isWhereType: true,
 				forceRequiredToFalse: true,
 			},
@@ -355,11 +355,11 @@ export const GraphqlParser: GraphqlParserConstructor =
 			isWhereType = false,
 		}: {
 			type:
-				| WibePrimaryTypes
+				| WabePrimaryTypes
 				| 'Array'
-				| WibeAppTypes['enums']
-				| WibeAppTypes['scalars']
-			typeValue?: WibePrimaryTypes
+				| WabeAppTypes['enums']
+				| WabeAppTypes['scalars']
+			typeValue?: WabePrimaryTypes
 			requiredValue?: boolean
 			isWhereType?: boolean
 		}) => {
@@ -371,7 +371,7 @@ export const GraphqlParser: GraphqlParserConstructor =
 				if (!Object.keys(templateWhereInput).includes(type))
 					return AnyWhereInput
 
-				return templateWhereInput[type as WibePrimaryTypes]
+				return templateWhereInput[type as WabePrimaryTypes]
 			}
 
 			if (scalarExist) return scalarExist
@@ -394,7 +394,7 @@ export const GraphqlParser: GraphqlParserConstructor =
 			return graphqlType
 		}
 
-		// Get Graphql object from a schema fields passed in WibeGraphqlParser
+		// Get Graphql object from a schema fields passed in WabeGraphqlParser
 		const getGraphqlFields = (nameOfTheObject: string) => {
 			const { callback, forceRequiredToFalse, isWhereType } =
 				_graphqlObjectFactory[graphqlObjectType]
@@ -510,9 +510,9 @@ export const GraphqlParser: GraphqlParserConstructor =
 		return {
 			getGraphqlType,
 			getGraphqlFields,
-			_parseWibeObject,
-			_parseWibeInputObject,
-			_parseWibeUpdateInputObject,
-			_parseWibeWhereInputObject,
+			_parseWabeObject,
+			_parseWabeInputObject,
+			_parseWabeUpdateInputObject,
+			_parseWabeWhereInputObject,
 		}
 	}

@@ -2,7 +2,7 @@ import { describe, expect, it, beforeEach, mock, spyOn } from 'bun:test'
 import { _getPermissionPropertiesOfAClass, _checkCLP } from './permissions'
 import { HookObject } from './HookObject'
 import { OperationType } from '.'
-import type { WibeContext } from '../server/interface'
+import type { WabeContext } from '../server/interface'
 import * as permissions from './permissions'
 
 describe('Permissions', () => {
@@ -42,7 +42,7 @@ describe('Permissions', () => {
 			},
 		} as any
 
-		const context = { wibeApp: { config } } as any
+		const context = { wabeApp: { config } } as any
 
 		it('should get the permission for a given className', async () => {
 			const permission = await _getPermissionPropertiesOfAClass({
@@ -66,12 +66,12 @@ describe('Permissions', () => {
 		})
 
 		it('should throw permission denied if no session id is provided but class require authentication', async () => {
-			const context: WibeContext<any> = {
+			const context: WabeContext<any> = {
 				sessionId: '',
 				// @ts-expect-error
 				user: {},
 				isRoot: false,
-				wibeApp: { databaseController, config } as any,
+				wabeApp: { databaseController, config } as any,
 			}
 
 			const obj = new HookObject({
@@ -92,7 +92,7 @@ describe('Permissions', () => {
 				user: { id: 'userId' },
 			} as never)
 
-			const context: WibeContext<any> = {
+			const context: WabeContext<any> = {
 				sessionId: 'sessionId',
 				user: {
 					id: 'userId',
@@ -102,7 +102,7 @@ describe('Permissions', () => {
 					} as any,
 				} as any,
 				isRoot: false,
-				wibeApp: {
+				wabeApp: {
 					databaseController,
 					config,
 				} as any,
@@ -126,7 +126,7 @@ describe('Permissions', () => {
 				user: { id: 'userId' },
 			} as never)
 
-			const context: WibeContext<any> = {
+			const context: WabeContext<any> = {
 				sessionId: 'sessionId',
 				user: {
 					id: 'userId',
@@ -136,7 +136,7 @@ describe('Permissions', () => {
 					} as any,
 				} as any,
 				isRoot: false,
-				wibeApp: {
+				wabeApp: {
 					databaseController,
 					config,
 				} as any,
@@ -153,13 +153,13 @@ describe('Permissions', () => {
 		})
 
 		it('should not throw permission denied if client is root', async () => {
-			const context: WibeContext<any> = {
+			const context: WabeContext<any> = {
 				sessionId: '',
 				user: {
 					id: '',
 				} as any,
 				isRoot: true,
-				wibeApp: { databaseController, config } as any,
+				wabeApp: { databaseController, config } as any,
 			}
 
 			const obj = new HookObject({

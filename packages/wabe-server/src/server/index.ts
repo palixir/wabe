@@ -3,9 +3,9 @@ import { DatabaseController } from '../database/controllers/DatabaseController'
 import { MongoAdapter } from '../database/adapters/MongoAdapter'
 import { Schema, type SchemaInterface } from '../schema/Schema'
 import { GraphQLObjectType, GraphQLSchema } from 'graphql'
-import { GraphQLSchema as WibeGraphQLSchema } from '../graphql'
+import { GraphQLSchema as WabeGraphQLSchema } from '../graphql'
 import type { AuthenticationConfig } from '../authentication/interface'
-import { type WibeRoute, defaultRoutes } from './routes'
+import { type WabeRoute, defaultRoutes } from './routes'
 import { type Hook, getDefaultHooks } from '../hooks'
 import { generateCodegen } from './generateCodegen'
 import { defaultAuthenticationMethods } from '../authentication/defaultAuthentication'
@@ -13,12 +13,12 @@ import { Wobe, cors } from 'wobe'
 import { WobeGraphqlYogaPlugin } from 'wobe-graphql-yoga'
 import { Session } from '../authentication/Session'
 import { getCookieInRequestHeaders } from '../utils'
-import type { WibeContext } from './interface'
+import type { WabeContext } from './interface'
 import { initializeRoles } from '../authentication/roles'
 import type { FileConfig } from '../files'
 import { fileDevAdapter } from '../files/devAdapter'
 
-export interface WibeConfig<T extends WibeAppTypes> {
+export interface WabeConfig<T extends WabeAppTypes> {
 	port: number
 	schema: SchemaInterface<T>
 	database: DatabaseConfig
@@ -29,26 +29,26 @@ export interface WibeConfig<T extends WibeAppTypes> {
 		  }
 		| { enabled?: false }
 	authentication?: AuthenticationConfig<T>
-	routes?: WibeRoute[]
+	routes?: WabeRoute[]
 	rootKey: string
 	hooks?: Hook<any>[]
 	file?: FileConfig
 }
 
-export type WibeAppTypes = {
+export type WabeAppTypes = {
 	types: Record<any, any>
 	scalars: string
 	enums: string
 }
 
-export type WobeCustomContext<T extends WibeAppTypes> = {
-	wibe: WibeContext<T>
+export type WobeCustomContext<T extends WabeAppTypes> = {
+	wabe: WabeContext<T>
 }
 
-export class WibeApp<T extends WibeAppTypes> {
+export class WabeApp<T extends WabeAppTypes> {
 	public server: Wobe<WobeCustomContext<T>>
 
-	public config: WibeConfig<T>
+	public config: WabeConfig<T>
 	public databaseController: DatabaseController<T>
 
 	constructor({
@@ -60,7 +60,7 @@ export class WibeApp<T extends WibeAppTypes> {
 		codegen,
 		hooks,
 		file,
-	}: WibeConfig<T>) {
+	}: WabeConfig<T>) {
 		this.config = {
 			port,
 			schema,
@@ -114,9 +114,9 @@ export class WibeApp<T extends WibeAppTypes> {
 	}
 
 	loadDefaultRoutes() {
-		const wibeRoutes = defaultRoutes()
+		const wabeRoutes = defaultRoutes()
 
-		wibeRoutes.map((route) => {
+		wabeRoutes.map((route) => {
 			const { method } = route
 
 			switch (method) {
@@ -141,11 +141,11 @@ export class WibeApp<T extends WibeAppTypes> {
 	async start() {
 		await this.databaseController.connect()
 
-		const wibeSchema = new Schema(this.config)
+		const wabeSchema = new Schema(this.config)
 
-		this.config.schema = wibeSchema.schema
+		this.config.schema = wabeSchema.schema
 
-		const graphqlSchema = new WibeGraphQLSchema(wibeSchema)
+		const graphqlSchema = new WabeGraphQLSchema(wabeSchema)
 
 		const types = graphqlSchema.createSchema()
 
@@ -170,7 +170,7 @@ export class WibeApp<T extends WibeAppTypes> {
 		)
 			generateCodegen({
 				path: this.config.codegen.path,
-				schema: wibeSchema.schema,
+				schema: wabeSchema.schema,
 				graphqlSchema: schema,
 			})
 
@@ -186,14 +186,14 @@ export class WibeApp<T extends WibeAppTypes> {
 			}),
 		)
 
-		// Set the wibe context
+		// Set the wabe context
 		this.server.beforeHandler(async (ctx) => {
 			const headers = ctx.request.headers
 
-			if (headers.get('Wibe-Root-Key') === this.config.rootKey) {
-				ctx.wibe = {
+			if (headers.get('Wabe-Root-Key') === this.config.rootKey) {
+				ctx.wabe = {
 					isRoot: true,
-					wibeApp: this,
+					wabeApp: this,
 				}
 				return
 			}
@@ -208,15 +208,15 @@ export class WibeApp<T extends WibeAppTypes> {
 						ctx.request.headers,
 					)
 
-				return headers.get('Wibe-Access-Token')
+				return headers.get('Wabe-Access-Token')
 			}
 
 			const accessToken = getAccessToken()
 
 			if (!accessToken) {
-				ctx.wibe = {
+				ctx.wabe = {
 					isRoot: false,
-					wibeApp: this,
+					wabeApp: this,
 				}
 				return
 			}
@@ -227,15 +227,15 @@ export class WibeApp<T extends WibeAppTypes> {
 				accessToken,
 				{
 					isRoot: true,
-					wibeApp: this,
+					wabeApp: this,
 				},
 			)
 
-			ctx.wibe = {
+			ctx.wabe = {
 				isRoot: false,
 				sessionId,
 				user,
-				wibeApp: this,
+				wabeApp: this,
 			}
 		})
 
@@ -249,7 +249,7 @@ export class WibeApp<T extends WibeAppTypes> {
 					allowedHeaders: ['content-type'],
 				},
 				graphqlEndpoint: '/graphql',
-				context: async (ctx): Promise<WibeContext<T>> => ctx.wibe,
+				context: async (ctx): Promise<WabeContext<T>> => ctx.wabe,
 				graphqlMiddleware: async (resolve, res) => {
 					const response = await resolve()
 

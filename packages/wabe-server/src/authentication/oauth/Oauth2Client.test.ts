@@ -177,7 +177,7 @@ describe('Oauth2Client', () => {
 		expect(receivedRequest.headers.get('accept')).toEqual(
 			'application/json',
 		)
-		expect(receivedRequest.headers.get('user-agent')).toEqual('wibe')
+		expect(receivedRequest.headers.get('user-agent')).toEqual('wabe')
 		expect(receivedRequest.headers.get('authorization')).toEqual(
 			`Basic ${encodeCredentials}`,
 		)

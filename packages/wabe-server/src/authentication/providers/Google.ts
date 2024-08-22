@@ -1,10 +1,8 @@
+import type { UserAuthenticationGoogle } from '../../../generated/wabe'
 import {
 	AuthenticationProvider,
-	type UserAuthenticationGoogle,
-} from '../../../generated/wibe'
-import type {
-	AuthenticationEventsOptions,
-	ProviderInterface,
+	type AuthenticationEventsOptions,
+	type ProviderInterface,
 } from '../interface'
 import { Google as GoogleOauth } from '../oauth/Google'
 
@@ -21,7 +19,7 @@ export class Google implements ProviderInterface<GoogleInterface> {
 	}: AuthenticationEventsOptions<GoogleInterface>) {
 		const { authorizationCode, codeVerifier } = input
 
-		const googleOauth = new GoogleOauth(context.wibeApp.config)
+		const googleOauth = new GoogleOauth(context.wabeApp.config)
 
 		const {
 			accessToken,
@@ -43,7 +41,7 @@ export class Google implements ProviderInterface<GoogleInterface> {
 			idToken,
 		)
 
-		const user = await context.wibeApp.databaseController.getObjects({
+		const user = await context.wabeApp.databaseController.getObjects({
 			className: 'User',
 			where: {
 				authentication: {
@@ -65,7 +63,7 @@ export class Google implements ProviderInterface<GoogleInterface> {
 
 		if (user.length === 0) {
 			const createdUser =
-				await context.wibeApp.databaseController.createObject({
+				await context.wabeApp.databaseController.createObject({
 					className: 'User',
 					data: {
 						provider: AuthenticationProvider.Google,

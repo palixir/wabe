@@ -1,8 +1,8 @@
 import { beforeAll, afterAll, describe, it, expect } from 'bun:test'
 import { type GraphQLClient, gql } from 'graphql-request'
-import type { WibeApp } from '../../server'
+import type { WabeApp } from '../../server'
 import {
-	type DevWibeAppTypes,
+	type DevWabeAppTypes,
 	closeTests,
 	getGraphqlClient,
 	setupTests,
@@ -42,7 +42,7 @@ const graphql = {
 }
 
 describe('GraphQL : aggregation', () => {
-	let wibe: WibeApp<DevWibeAppTypes>
+	let wabe: WabeApp<DevWabeAppTypes>
 	let port: number
 	let client: GraphQLClient
 
@@ -50,7 +50,7 @@ describe('GraphQL : aggregation', () => {
 
 	beforeAll(async () => {
 		const setup = await setupTests()
-		wibe = setup.wibe
+		wabe = setup.wabe
 		port = setup.port
 		client = getGraphqlClient(port)
 
@@ -81,7 +81,7 @@ describe('GraphQL : aggregation', () => {
 	})
 
 	afterAll(async () => {
-		await closeTests(wibe)
+		await closeTests(wabe)
 	})
 
 	it("should support Array's aggregation", async () => {

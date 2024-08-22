@@ -1,17 +1,17 @@
 import { describe, expect, it, beforeEach, mock, spyOn } from 'bun:test'
 import { verifyChallengeResolver } from './verifyChallenge'
-import type { WibeContext } from '../../server/interface'
+import type { WabeContext } from '../../server/interface'
 import { Session } from '../Session'
 
 describe('verifyChallenge', () => {
 	const mockOnVerifyChallenge = mock(() => Promise.resolve(true))
 
-	const context: WibeContext<any> = {
+	const context: WabeContext<any> = {
 		sessionId: 'sessionId',
 		user: {
 			id: 'userId',
 		} as any,
-		wibeApp: {
+		wabeApp: {
 			config: {
 				authentication: {
 					customAuthenticationMethods: [

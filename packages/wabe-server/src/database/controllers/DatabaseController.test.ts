@@ -9,7 +9,7 @@ import {
 } from 'bun:test'
 import { DatabaseController, type WhereType } from '..'
 import * as hooks from '../../hooks/index'
-import type { WibeContext } from '../../server/interface'
+import type { WabeContext } from '../../server/interface'
 
 describe('DatabaseController', () => {
 	const mockGetObject = mock(() => {})
@@ -118,7 +118,7 @@ describe('DatabaseController', () => {
 
 	const context = {
 		isRoot: true,
-		wibeApp: { config },
+		wabeApp: { config },
 		sessionId: 'sessionId',
 	} as any
 
@@ -170,9 +170,9 @@ describe('DatabaseController', () => {
 			id: { equalTo: 'id' },
 		}
 
-		const context: WibeContext<any> = {
+		const context: WabeContext<any> = {
 			isRoot: true,
-			wibeApp: {} as any,
+			wabeApp: {} as any,
 			user: {
 				id: 'userId',
 				role: {
@@ -197,9 +197,9 @@ describe('DatabaseController', () => {
 			id: { equalTo: 'id' },
 		}
 
-		const context: WibeContext<any> = {
+		const context: WabeContext<any> = {
 			isRoot: false,
-			wibeApp: {} as any,
+			wabeApp: {} as any,
 			user: {
 				id: 'userId',
 				role: {
@@ -261,9 +261,9 @@ describe('DatabaseController', () => {
 			id: { equalTo: 'id' },
 		}
 
-		const context: WibeContext<any> = {
+		const context: WabeContext<any> = {
 			isRoot: false,
-			wibeApp: {} as any,
+			wabeApp: {} as any,
 			user: {
 				id: 'userId',
 			} as any,
@@ -303,9 +303,9 @@ describe('DatabaseController', () => {
 			id: { equalTo: 'id' },
 		}
 
-		const context: WibeContext<any> = {
+		const context: WabeContext<any> = {
 			isRoot: false,
-			wibeApp: {} as any,
+			wabeApp: {} as any,
 			user: {} as any,
 		}
 
@@ -349,7 +349,7 @@ describe('DatabaseController', () => {
 			className: 'TestClass',
 			context: {
 				sessionId: 'sessionId',
-				wibeApp: { config },
+				wabeApp: { config },
 				isRoot: true,
 			},
 		})
@@ -382,7 +382,7 @@ describe('DatabaseController', () => {
 			className: 'TestClass',
 			context: {
 				sessionId: 'sessionId',
-				wibeApp: { config },
+				wabeApp: { config },
 				isRoot: true,
 			},
 		})
@@ -420,7 +420,7 @@ describe('DatabaseController', () => {
 			className: 'TestClass',
 			context: {
 				sessionId: 'sessionId',
-				wibeApp: { config },
+				wabeApp: { config },
 				isRoot: true,
 			},
 			newData: { name: 'test' },
@@ -459,7 +459,7 @@ describe('DatabaseController', () => {
 			className: 'TestClass',
 			context: {
 				sessionId: 'sessionId',
-				wibeApp: { config },
+				wabeApp: { config },
 				isRoot: true,
 			},
 			newData: { name: 'test' },
@@ -493,7 +493,7 @@ describe('DatabaseController', () => {
 			className: 'TestClass',
 			context: {
 				sessionId: 'sessionId',
-				wibeApp: { config },
+				wabeApp: { config },
 				isRoot: true,
 			},
 			newData: { name: 'test' },
@@ -533,7 +533,7 @@ describe('DatabaseController', () => {
 			className: 'TestClass',
 			context: {
 				sessionId: 'sessionId',
-				wibeApp: { config },
+				wabeApp: { config },
 				isRoot: true,
 			},
 			newData: { name: 'test' },
@@ -566,7 +566,7 @@ describe('DatabaseController', () => {
 			className: 'TestClass',
 			context: {
 				sessionId: 'sessionId',
-				wibeApp: { config },
+				wabeApp: { config },
 				isRoot: true,
 			},
 		})
@@ -601,7 +601,7 @@ describe('DatabaseController', () => {
 			className: 'TestClass',
 			context: {
 				sessionId: 'sessionId',
-				wibeApp: { config },
+				wabeApp: { config },
 				isRoot: true,
 			},
 		})

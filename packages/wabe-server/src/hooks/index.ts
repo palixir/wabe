@@ -3,8 +3,8 @@ import {
 	defaultBeforeCreateUpload,
 	defaultBeforeUpdateUpload,
 } from '../files/hookUploadFile'
-import type { WibeAppTypes, WibeConfig } from '../server'
-import type { WibeContext } from '../server/interface'
+import type { WabeAppTypes, WabeConfig } from '../server'
+import type { WabeContext } from '../server/interface'
 import { HookObject } from './HookObject'
 import {
 	defaultCallAuthenticationProviderOnBeforeCreateUser,
@@ -37,7 +37,7 @@ export enum OperationType {
 	BeforeRead = 'beforeRead',
 }
 
-export type Hook<T extends WibeAppTypes> = {
+export type Hook<T extends WabeAppTypes> = {
 	operationType: OperationType
 	// If the className is undefined the hook is called on each class
 	className?: T
@@ -48,13 +48,13 @@ export type Hook<T extends WibeAppTypes> = {
 	callback: (hookObject: HookObject<T>) => Promise<void> | void
 }
 
-export type TypedNewData<T extends keyof WibeAppTypes['types']> = Record<
-	keyof WibeAppTypes['types'][T],
+export type TypedNewData<T extends keyof WabeAppTypes['types']> = Record<
+	keyof WabeAppTypes['types'][T],
 	any
 >
 
 export const _findHooksByPriority = async <
-	T extends keyof WibeAppTypes['types'],
+	T extends keyof WabeAppTypes['types'],
 >({
 	className,
 	operationType,
@@ -64,7 +64,7 @@ export const _findHooksByPriority = async <
 	operationType: OperationType
 	className: T
 	priority: number
-	config: WibeConfig<any>
+	config: WabeConfig<any>
 }) =>
 	config.hooks?.filter(
 		(hook) =>
@@ -73,7 +73,7 @@ export const _findHooksByPriority = async <
 			(className === hook.className || !hook.className),
 	) || []
 
-const _getHooksOrderByPriorities = (config: WibeConfig<any>) =>
+const _getHooksOrderByPriorities = (config: WabeConfig<any>) =>
 	config.hooks
 		?.reduce((acc, hook) => {
 			if (!acc.includes(hook.priority)) acc.push(hook.priority)
@@ -82,14 +82,14 @@ const _getHooksOrderByPriorities = (config: WibeConfig<any>) =>
 		}, [] as number[])
 		.sort((a, b) => a - b) || []
 
-export const initializeHook = <T extends keyof WibeAppTypes['types']>({
+export const initializeHook = <T extends keyof WabeAppTypes['types']>({
 	className,
 	newData,
 	context,
 }: {
 	className: T
 	newData?: TypedNewData<any>
-	context: WibeContext<any>
+	context: WabeContext<any>
 }) => {
 	const computeObject = async ({
 		id,
@@ -107,7 +107,7 @@ export const initializeHook = <T extends keyof WibeAppTypes['types']>({
 
 		if (!id) throw new Error('Object not found')
 
-		return context.wibeApp.databaseController.getObject({
+		return context.wabeApp.databaseController.getObject({
 			// @ts-expect-error
 			className,
 			context: {
@@ -134,7 +134,7 @@ export const initializeHook = <T extends keyof WibeAppTypes['types']>({
 		// @ts-expect-error
 		if (operationType === OperationType.BeforeCreate) return [newData]
 
-		const res = await context.wibeApp.databaseController.getObjects({
+		const res = await context.wabeApp.databaseController.getObjects({
 			className,
 			context: {
 				...context,
@@ -152,7 +152,7 @@ export const initializeHook = <T extends keyof WibeAppTypes['types']>({
 	}
 
 	const hooksOrderByPriorities = _getHooksOrderByPriorities(
-		context.wibeApp.config,
+		context.wabeApp.config,
 	)
 
 	return {
@@ -190,7 +190,7 @@ export const initializeHook = <T extends keyof WibeAppTypes['types']>({
 					className,
 					operationType,
 					priority,
-					config: context.wibeApp.config,
+					config: context.wabeApp.config,
 				})
 
 				await Promise.all(
@@ -238,7 +238,7 @@ export const initializeHook = <T extends keyof WibeAppTypes['types']>({
 								className,
 								operationType,
 								priority,
-								config: context.wibeApp.config,
+								config: context.wabeApp.config,
 							})
 
 							await Promise.all(

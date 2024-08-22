@@ -1,7 +1,7 @@
-import type { WibeAppTypes } from '../..'
+import type { WabeAppTypes } from '../..'
 import { InMemoryCache } from '../../cache/InMemoryCache'
 import { OperationType, initializeHook } from '../../hooks'
-import type { WibeContext } from '../../server/interface'
+import type { WabeContext } from '../../server/interface'
 import { notEmpty } from '../../utils/helper'
 import type {
 	CountOptions,
@@ -31,7 +31,7 @@ interface PointerFields {
 	pointers: PointerObject
 }
 
-export class DatabaseController<T extends WibeAppTypes> {
+export class DatabaseController<T extends WabeAppTypes> {
 	public adapter: DatabaseAdapter
 	public inMemoryCache: InMemoryCache<OutputType<any, any> | undefined>
 
@@ -48,16 +48,16 @@ export class DatabaseController<T extends WibeAppTypes> {
 		return this.adapter.close()
 	}
 
-	async createClassIfNotExist(className: string, context: WibeContext<T>) {
+	async createClassIfNotExist(className: string, context: WabeContext<T>) {
 		return this.adapter.createClassIfNotExist(className, context)
 	}
 
 	_getPointerObject(
 		className: keyof T['types'],
 		fields: string[],
-		context: WibeContext<T>,
+		context: WabeContext<T>,
 	): PointerFields {
-		const realClass = context.wibeApp.config.schema.classes.find(
+		const realClass = context.wabeApp.config.schema.classes.find(
 			// @ts-expect-error
 			(c) => c.name.toLowerCase() === className.toLowerCase(),
 		)
@@ -102,12 +102,12 @@ export class DatabaseController<T extends WibeAppTypes> {
 
 	_isRelationField<U extends keyof T['types']>(
 		originClassName: U,
-		context: WibeContext<T>,
+		context: WabeContext<T>,
 		pointerClassName?: string,
 	) {
 		if (!pointerClassName) return false
 
-		return context.wibeApp.config.schema.classes.some(
+		return context.wabeApp.config.schema.classes.some(
 			(c) =>
 				// @ts-expect-error
 				c.name.toLowerCase() === originClassName.toLowerCase() &&
@@ -123,12 +123,12 @@ export class DatabaseController<T extends WibeAppTypes> {
 
 	_isPointerField<U extends keyof T['types']>(
 		originClassName: U,
-		context: WibeContext<T>,
+		context: WabeContext<T>,
 		pointerClassName?: string,
 	) {
 		if (!pointerClassName) return false
 
-		return context.wibeApp.config.schema.classes.some(
+		return context.wabeApp.config.schema.classes.some(
 			(c) =>
 				// @ts-expect-error
 				c.name.toLowerCase() === originClassName.toLowerCase() &&
@@ -149,7 +149,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 		objectData: OutputType<U, K> | null,
 		pointersObject: PointerObject,
 		originClassName: U,
-		context: WibeContext<T>,
+		context: WabeContext<T>,
 	): Promise<Record<any, any>> {
 		return Object.entries(pointersObject).reduce(
 			async (
@@ -215,10 +215,10 @@ export class DatabaseController<T extends WibeAppTypes> {
 	async _getWhereObjectWithPointerOrRelation<
 		U extends keyof T['types'],
 		K extends keyof T['types'][U],
-	>(className: U, where: WhereType<U, K>, context: WibeContext<T>) {
+	>(className: U, where: WhereType<U, K>, context: WabeContext<T>) {
 		const whereKeys = Object.keys(where) as Array<keyof WhereType<U, K>>
 
-		const realClass = context.wibeApp.config.schema.classes.find(
+		const realClass = context.wabeApp.config.schema.classes.find(
 			// @ts-expect-error
 			(c) => c.name.toLowerCase() === className.toLowerCase(),
 		)
@@ -280,7 +280,7 @@ export class DatabaseController<T extends WibeAppTypes> {
 		K extends keyof T['types'][U],
 	>(
 		where: WhereType<U, K>,
-		context: WibeContext<T>,
+		context: WabeContext<T>,
 		operation: 'write' | 'read',
 	): WhereType<U, K> {
 		if (context.isRoot) return where

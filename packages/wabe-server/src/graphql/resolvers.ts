@@ -1,6 +1,6 @@
 import type { GraphQLResolveInfo, SelectionSetNode } from 'graphql'
-import type { WibeAppTypes } from '..'
-import type { WibeContext } from '../server/interface'
+import type { WabeAppTypes } from '..'
+import type { WabeContext } from '../server/interface'
 import { firstLetterInLowerCase, tokenize } from '../utils'
 import {
 	type InputFields,
@@ -69,7 +69,7 @@ export const executeRelationOnFields = async ({
 }: {
 	className: string
 	fields: InputFields
-	context: WibeContext<any>
+	context: WabeContext<any>
 	id?: string
 	where?: any
 	typeOfExecution?: TypeOfExecution
@@ -133,13 +133,13 @@ export const executeRelationOnFields = async ({
 export const queryForOneObject = (
 	_: any,
 	{ id }: any,
-	context: WibeContext<any>,
+	context: WabeContext<any>,
 	info: GraphQLResolveInfo,
-	className: keyof WibeAppTypes['types'],
+	className: keyof WabeAppTypes['types'],
 ) => {
 	const fields = getFieldsFromInfo(info, className)
 
-	return context.wibeApp.databaseController.getObject({
+	return context.wabeApp.databaseController.getObject({
 		className,
 		id,
 		fields,
@@ -150,13 +150,13 @@ export const queryForOneObject = (
 export const queryForMultipleObject = async (
 	_: any,
 	{ where, offset, first }: any,
-	context: WibeContext<any>,
+	context: WabeContext<any>,
 	info: GraphQLResolveInfo,
-	className: keyof WibeAppTypes['types'],
+	className: keyof WabeAppTypes['types'],
 ) => {
 	const fields = getFieldsFromInfo(info, className)
 
-	const objects = await context.wibeApp.databaseController.getObjects({
+	const objects = await context.wabeApp.databaseController.getObjects({
 		className,
 		where,
 		fields,
@@ -167,7 +167,7 @@ export const queryForMultipleObject = async (
 
 	return {
 		count: fields.includes('count')
-			? await context.wibeApp.databaseController.count({
+			? await context.wabeApp.databaseController.count({
 					className,
 					where,
 					context,
@@ -182,9 +182,9 @@ export const queryForMultipleObject = async (
 export const mutationToCreateObject = async (
 	_: any,
 	args: any,
-	context: WibeContext<any>,
+	context: WabeContext<any>,
 	info: GraphQLResolveInfo,
-	className: keyof WibeAppTypes['types'],
+	className: keyof WabeAppTypes['types'],
 ) => {
 	const fields = getFieldsFromInfo(info, className)
 
@@ -196,7 +196,7 @@ export const mutationToCreateObject = async (
 
 	return {
 		[firstLetterInLowerCase(className)]:
-			await context.wibeApp.databaseController.createObject({
+			await context.wabeApp.databaseController.createObject({
 				className,
 				data: updatedFieldsToCreate,
 				fields,
@@ -208,9 +208,9 @@ export const mutationToCreateObject = async (
 export const mutationToCreateMultipleObjects = async (
 	_: any,
 	args: any,
-	context: WibeContext<any>,
+	context: WabeContext<any>,
 	info: GraphQLResolveInfo,
-	className: keyof WibeAppTypes['types'],
+	className: keyof WabeAppTypes['types'],
 ) => {
 	const fields = getFieldsFromInfo(info, className)
 	const inputFields = args.input?.fields as Array<any>
@@ -225,7 +225,7 @@ export const mutationToCreateMultipleObjects = async (
 		),
 	)
 
-	const objects = await context.wibeApp.databaseController.createObjects({
+	const objects = await context.wabeApp.databaseController.createObjects({
 		className,
 		data: updatedFieldsToCreate,
 		fields,
@@ -242,9 +242,9 @@ export const mutationToCreateMultipleObjects = async (
 export const mutationToUpdateObject = async (
 	_: any,
 	args: any,
-	context: WibeContext<any>,
+	context: WabeContext<any>,
 	info: GraphQLResolveInfo,
-	className: keyof WibeAppTypes['types'],
+	className: keyof WabeAppTypes['types'],
 ) => {
 	const fields = getFieldsFromInfo(info, className)
 
@@ -258,7 +258,7 @@ export const mutationToUpdateObject = async (
 
 	return {
 		[firstLetterInLowerCase(className)]:
-			await context.wibeApp.databaseController.updateObject({
+			await context.wabeApp.databaseController.updateObject({
 				className,
 				id: args.input?.id,
 				data: updatedFields,
@@ -271,9 +271,9 @@ export const mutationToUpdateObject = async (
 export const mutationToUpdateMultipleObjects = async (
 	_: any,
 	args: any,
-	context: WibeContext<any>,
+	context: WabeContext<any>,
 	info: GraphQLResolveInfo,
-	className: keyof WibeAppTypes['types'],
+	className: keyof WabeAppTypes['types'],
 ) => {
 	const fields = getFieldsFromInfo(info, className)
 
@@ -285,7 +285,7 @@ export const mutationToUpdateMultipleObjects = async (
 		where: args.input?.where,
 	})
 
-	const objects = await context.wibeApp.databaseController.updateObjects({
+	const objects = await context.wabeApp.databaseController.updateObjects({
 		className,
 		where: args.input?.where,
 		data: updatedFields,
@@ -303,15 +303,15 @@ export const mutationToUpdateMultipleObjects = async (
 export const mutationToDeleteObject = async (
 	_: any,
 	args: any,
-	context: WibeContext<any>,
+	context: WabeContext<any>,
 	info: GraphQLResolveInfo,
-	className: keyof WibeAppTypes['types'],
+	className: keyof WabeAppTypes['types'],
 ) => {
 	const fields = getFieldsFromInfo(info, className)
 
 	return {
 		[firstLetterInLowerCase(className)]:
-			await context.wibeApp.databaseController.deleteObject({
+			await context.wabeApp.databaseController.deleteObject({
 				className,
 				id: args.input?.id,
 				fields,
@@ -323,13 +323,13 @@ export const mutationToDeleteObject = async (
 export const mutationToDeleteMultipleObjects = async (
 	_: any,
 	args: any,
-	context: WibeContext<any>,
+	context: WabeContext<any>,
 	info: GraphQLResolveInfo,
-	className: keyof WibeAppTypes['types'],
+	className: keyof WabeAppTypes['types'],
 ) => {
 	const fields = getFieldsFromInfo(info, className)
 
-	const objects = await context.wibeApp.databaseController.deleteObjects({
+	const objects = await context.wabeApp.databaseController.deleteObjects({
 		className,
 		where: args.input?.where,
 		fields,

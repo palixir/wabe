@@ -5,17 +5,17 @@ import { gql } from 'graphql-request'
 import { v4 as uuid } from 'uuid'
 import { DatabaseEnum } from '../database'
 import { Schema, type SchemaInterface } from '../schema'
-import { WibeApp } from '../server'
-import { type DevWibeAppTypes, getGraphqlClient } from '../utils/helper'
-import { GraphQLSchema as WibeGraphQLSchema } from './GraphQLSchema'
+import { WabeApp } from '../server'
+import { type DevWabeAppTypes, getGraphqlClient } from '../utils/helper'
+import { GraphQLSchema as WabeGraphQLSchema } from './GraphQLSchema'
 import { getTypeFromGraphQLSchema } from './parseGraphqlSchema'
 
-const createWibeApp = async (schema: SchemaInterface<DevWibeAppTypes>) => {
+const createWabeApp = async (schema: SchemaInterface<DevWabeAppTypes>) => {
 	const databaseId = uuid()
 
 	const port = await getPort()
 
-	const wibeApp = new WibeApp({
+	const wabeApp = new WabeApp({
 		port,
 		schema,
 		rootKey:
@@ -27,18 +27,18 @@ const createWibeApp = async (schema: SchemaInterface<DevWibeAppTypes>) => {
 		},
 	})
 
-	await wibeApp.start()
+	await wabeApp.start()
 
 	const client = getGraphqlClient(port)
 
-	return { client, wibeApp, port }
+	return { client, wabeApp, port }
 }
 
 describe('GraphqlSchema', () => {
 	let schema: GraphQLSchema
 
 	beforeAll(() => {
-		const wibeSchema = new Schema({
+		const wabeSchema = new Schema({
 			schema: {
 				classes: [
 					{
@@ -169,7 +169,7 @@ describe('GraphqlSchema', () => {
 			},
 		} as any)
 
-		const graphqlSchema = new WibeGraphQLSchema(wibeSchema)
+		const graphqlSchema = new WabeGraphQLSchema(wabeSchema)
 
 		const types = graphqlSchema.createSchema()
 
@@ -187,7 +187,7 @@ describe('GraphqlSchema', () => {
 	})
 
 	it('should use the searchUsers to search all testClasses for corresponding term', async () => {
-		const { client, wibeApp } = await createWibeApp({
+		const { client, wabeApp } = await createWabeApp({
 			classes: [
 				{
 					name: 'TestClass',
@@ -291,7 +291,7 @@ describe('GraphqlSchema', () => {
 
 		expect(res5.testClasses.count).toEqual(1)
 
-		await wibeApp.close()
+		await wabeApp.close()
 	})
 
 	it('should contain count elements in query multiple objects', async () => {
@@ -305,7 +305,7 @@ describe('GraphqlSchema', () => {
 	})
 
 	it('should count all elements corresponding to where object', async () => {
-		const { client, wibeApp } = await createWibeApp({
+		const { client, wabeApp } = await createWabeApp({
 			classes: [
 				{
 					name: 'TestClass',
@@ -356,11 +356,11 @@ describe('GraphqlSchema', () => {
 
 		expect(res.testClasses.count).toEqual(1)
 
-		await wibeApp.close()
+		await wabeApp.close()
 	})
 
 	it('should request an object with pointer in same class (issue #5)', async () => {
-		const { client, wibeApp } = await createWibeApp({
+		const { client, wabeApp } = await createWabeApp({
 			classes: [],
 		})
 
@@ -398,7 +398,7 @@ describe('GraphqlSchema', () => {
 			password: expect.any(String),
 		})
 
-		await wibeApp.close()
+		await wabeApp.close()
 	})
 
 	it('should support file type', async () => {
@@ -464,7 +464,7 @@ describe('GraphqlSchema', () => {
 	})
 
 	it('should support an array of object in graphql schema', async () => {
-		const { client, wibeApp } = await createWibeApp({
+		const { client, wabeApp } = await createWabeApp({
 			classes: [
 				{
 					name: 'TestClass',
@@ -504,11 +504,11 @@ describe('GraphqlSchema', () => {
 			{ name: 'test2' },
 		])
 
-		await wibeApp.close()
+		await wabeApp.close()
 	})
 
 	it('should return an array in a query', async () => {
-		const { client, wibeApp } = await createWibeApp({
+		const { client, wabeApp } = await createWabeApp({
 			classes: [
 				{
 					name: 'TestClass',
@@ -541,11 +541,11 @@ describe('GraphqlSchema', () => {
 
 		expect(res.testQuery).toEqual(['test'])
 
-		await wibeApp.close()
+		await wabeApp.close()
 	})
 
 	it('should return an object in a query', async () => {
-		const { client, wibeApp } = await createWibeApp({
+		const { client, wabeApp } = await createWabeApp({
 			classes: [
 				{
 					name: 'TestClass',
@@ -586,11 +586,11 @@ describe('GraphqlSchema', () => {
 
 		expect(res.testQuery.test).toEqual('test')
 
-		await wibeApp.close()
+		await wabeApp.close()
 	})
 
 	it('should return an array in a mutation', async () => {
-		const { client, wibeApp } = await createWibeApp({
+		const { client, wabeApp } = await createWabeApp({
 			classes: [
 				{
 					name: 'TestClass',
@@ -623,11 +623,11 @@ describe('GraphqlSchema', () => {
 
 		expect(res.testMutation).toEqual(['test'])
 
-		await wibeApp.close()
+		await wabeApp.close()
 	})
 
 	it('should return an object in a mutation', async () => {
-		const { client, wibeApp } = await createWibeApp({
+		const { client, wabeApp } = await createWabeApp({
 			classes: [
 				{
 					name: 'TestClass',
@@ -668,11 +668,11 @@ describe('GraphqlSchema', () => {
 
 		expect(res.testMutation.test).toEqual('test')
 
-		await wibeApp.close()
+		await wabeApp.close()
 	})
 
 	it('should have a custom enum as value in type', async () => {
-		const { client, wibeApp } = await createWibeApp({
+		const { client, wabeApp } = await createWabeApp({
 			classes: [
 				{
 					name: 'TestClass',
@@ -736,7 +736,7 @@ describe('GraphqlSchema', () => {
 
 		expect(resNotEqual.testClasses.edges.length).toBe(0)
 
-		await wibeApp.close()
+		await wabeApp.close()
 	})
 
 	it('should have correct WhereInput object', () => {
@@ -1048,7 +1048,7 @@ describe('GraphqlSchema', () => {
 	})
 
 	it('should create mutation with sub input', async () => {
-		const { client, wibeApp } = await createWibeApp({
+		const { client, wabeApp } = await createWabeApp({
 			classes: [
 				{
 					name: 'TestClass',
@@ -1097,11 +1097,11 @@ describe('GraphqlSchema', () => {
 
 		expect(request.customMutation).toBe(3)
 
-		await wibeApp.close()
+		await wabeApp.close()
 	})
 
 	it('should create mutation with sub sub input', async () => {
-		const { client, wibeApp } = await createWibeApp({
+		const { client, wabeApp } = await createWabeApp({
 			classes: [
 				{
 					name: 'TestClass',
@@ -1161,11 +1161,11 @@ describe('GraphqlSchema', () => {
 
 		expect(request.customMutation).toBe(3)
 
-		await wibeApp.close()
+		await wabeApp.close()
 	})
 
 	it('should create custom mutation with sub object and correct input name', async () => {
-		const { client, wibeApp } = await createWibeApp({
+		const { client, wabeApp } = await createWabeApp({
 			classes: [
 				{
 					name: 'TestClass',
@@ -1237,11 +1237,11 @@ describe('GraphqlSchema', () => {
 
 		expect(request2.customMutation).toBe(3)
 
-		await wibeApp.close()
+		await wabeApp.close()
 	})
 
 	it('should create a sub object with the good type', async () => {
-		const { client, wibeApp } = await createWibeApp({
+		const { client, wabeApp } = await createWabeApp({
 			classes: [
 				{
 					name: 'TestClass',
@@ -1307,11 +1307,11 @@ describe('GraphqlSchema', () => {
 		expect(request.testClasses.edges[0].node.field1.field2).toBe('test')
 		expect(request.testClasses.edges[0].node.field1.field3).toBe(1)
 
-		await wibeApp.close()
+		await wabeApp.close()
 	})
 
 	it('should create an object with a pointer (createAndLink)', async () => {
-		const { client, wibeApp } = await createWibeApp({
+		const { client, wabeApp } = await createWabeApp({
 			classes: [
 				{
 					name: 'TestClass',
@@ -1363,11 +1363,11 @@ describe('GraphqlSchema', () => {
 		expect(res.createTestClass2.testClass2.name).toBe('name')
 		expect(res.createTestClass2.testClass2.field2.field1).toBe('field1')
 
-		await wibeApp.close()
+		await wabeApp.close()
 	})
 
 	it('should link an object to a pointer', async () => {
-		const { client, wibeApp } = await createWibeApp({
+		const { client, wabeApp } = await createWabeApp({
 			classes: [
 				{
 					name: 'TestClass',
@@ -1438,11 +1438,11 @@ describe('GraphqlSchema', () => {
 		expect(res.createTestClass2.testClass2.name).toBe('name')
 		expect(res.createTestClass2.testClass2.field2.field1).toBe('field1')
 
-		await wibeApp.close()
+		await wabeApp.close()
 	})
 
 	it('should link a pointer on create multiple object', async () => {
-		const { client, wibeApp } = await createWibeApp({
+		const { client, wabeApp } = await createWabeApp({
 			classes: [
 				{
 					name: 'TestClass',
@@ -1500,11 +1500,11 @@ describe('GraphqlSchema', () => {
 		expect(res.createTestClass2s.edges[0].node.name).toBe('name')
 		expect(res.createTestClass2s.edges[0].node.field2.field1).toBe('field1')
 
-		await wibeApp.close()
+		await wabeApp.close()
 	})
 
 	it('should filter an object (on query) with pointer field', async () => {
-		const { client, wibeApp } = await createWibeApp({
+		const { client, wabeApp } = await createWabeApp({
 			classes: [
 				{
 					name: 'TestClass',
@@ -1573,11 +1573,11 @@ describe('GraphqlSchema', () => {
 		expect(queryRes.testClass2s.edges.length).toBe(1)
 		expect(queryRes.testClass2s.edges[0].node.name).toBe('name')
 
-		await wibeApp.close()
+		await wabeApp.close()
 	})
 
 	it('should filter an object (on updates) with pointer field', async () => {
-		const { client, wibeApp } = await createWibeApp({
+		const { client, wabeApp } = await createWabeApp({
 			classes: [
 				{
 					name: 'TestClass',
@@ -1649,11 +1649,11 @@ describe('GraphqlSchema', () => {
 		expect(updateRes.updateTestClass2s.edges.length).toBe(1)
 		expect(updateRes.updateTestClass2s.edges[0].node.name).toBe('name2')
 
-		await wibeApp.close()
+		await wabeApp.close()
 	})
 
 	it('should filter an object (on deletes) with pointer field', async () => {
-		const { client, wibeApp } = await createWibeApp({
+		const { client, wabeApp } = await createWabeApp({
 			classes: [
 				{
 					name: 'TestClass',
@@ -1724,11 +1724,11 @@ describe('GraphqlSchema', () => {
 		expect(deleteRes.deleteTestClass2s.edges.length).toBe(1)
 		expect(deleteRes.deleteTestClass2s.edges[0].node.name).toBe('name')
 
-		await wibeApp.close()
+		await wabeApp.close()
 	})
 
 	it('should create and link a pointer on update', async () => {
-		const { client, wibeApp } = await createWibeApp({
+		const { client, wabeApp } = await createWabeApp({
 			classes: [
 				{
 					name: 'TestClass',
@@ -1808,11 +1808,11 @@ describe('GraphqlSchema', () => {
 			'field1AfterUpdate',
 		)
 
-		await wibeApp.close()
+		await wabeApp.close()
 	})
 
 	it('should link a pointer on update', async () => {
-		const { client, wibeApp } = await createWibeApp({
+		const { client, wabeApp } = await createWabeApp({
 			classes: [
 				{
 					name: 'TestClass',
@@ -1895,11 +1895,11 @@ describe('GraphqlSchema', () => {
 			'field1',
 		)
 
-		await wibeApp.close()
+		await wabeApp.close()
 	})
 
 	it('should link a pointer on update multiple object', async () => {
-		const { client, wibeApp } = await createWibeApp({
+		const { client, wabeApp } = await createWabeApp({
 			classes: [
 				{
 					name: 'TestClass',
@@ -1976,11 +1976,11 @@ describe('GraphqlSchema', () => {
 			resAfterUpdate.updateTestClass2s.edges[0].node.field2.field1,
 		).toBe('field1UpdateMultiple')
 
-		await wibeApp.close()
+		await wabeApp.close()
 	})
 
 	it('should return pointer data on delete an element', async () => {
-		const { client, wibeApp } = await createWibeApp({
+		const { client, wabeApp } = await createWabeApp({
 			classes: [
 				{
 					name: 'TestClass',
@@ -2051,11 +2051,11 @@ describe('GraphqlSchema', () => {
 			'field1',
 		)
 
-		await wibeApp.close()
+		await wabeApp.close()
 	})
 
 	it('should createAndAdd an object on a relation field (on create)', async () => {
-		const { client, wibeApp } = await createWibeApp({
+		const { client, wabeApp } = await createWabeApp({
 			classes: [
 				{
 					name: 'TestClass',
@@ -2110,11 +2110,11 @@ describe('GraphqlSchema', () => {
 			res.createTestClass2.testClass2.field2.edges[0].node.field1,
 		).toBe('field1')
 
-		await wibeApp.close()
+		await wabeApp.close()
 	})
 
 	it('should add an object on a relation field (on create)', async () => {
-		const { client, wibeApp } = await createWibeApp({
+		const { client, wabeApp } = await createWabeApp({
 			classes: [
 				{
 					name: 'TestClass',
@@ -2179,11 +2179,11 @@ describe('GraphqlSchema', () => {
 			resAfterAdd.createTestClass2.testClass2.field2.edges[0].node.field1,
 		).toBe('field1')
 
-		await wibeApp.close()
+		await wabeApp.close()
 	})
 
 	it('should createAndAdd an object on a relation field (on createMany)', async () => {
-		const { client, wibeApp } = await createWibeApp({
+		const { client, wabeApp } = await createWabeApp({
 			classes: [
 				{
 					name: 'TestClass',
@@ -2242,11 +2242,11 @@ describe('GraphqlSchema', () => {
 			res.createTestClass2s.edges[0].node.field2.edges[0].node.field1,
 		).toBe('field1')
 
-		await wibeApp.close()
+		await wabeApp.close()
 	})
 
 	it('should add an object on a relation field (on createMany)', async () => {
-		const { client, wibeApp } = await createWibeApp({
+		const { client, wabeApp } = await createWabeApp({
 			classes: [
 				{
 					name: 'TestClass',
@@ -2316,11 +2316,11 @@ describe('GraphqlSchema', () => {
 				.field1,
 		).toBe('field1')
 
-		await wibeApp.close()
+		await wabeApp.close()
 	})
 
 	it('should createAndAdd an object on a relation field (on update)', async () => {
-		const { client, wibeApp } = await createWibeApp({
+		const { client, wabeApp } = await createWabeApp({
 			classes: [
 				{
 					name: 'TestClass',
@@ -2388,11 +2388,11 @@ describe('GraphqlSchema', () => {
 				.field1,
 		).toBe('field1')
 
-		await wibeApp.close()
+		await wabeApp.close()
 	})
 
 	it('should add an object on a relation field (on update)', async () => {
-		const { client, wibeApp } = await createWibeApp({
+		const { client, wabeApp } = await createWabeApp({
 			classes: [
 				{
 					name: 'TestClass',
@@ -2470,11 +2470,11 @@ describe('GraphqlSchema', () => {
 				.field1,
 		).toBe('field1')
 
-		await wibeApp.close()
+		await wabeApp.close()
 	})
 
 	it('should remove an object on a relation field (on update)', async () => {
-		const { client, wibeApp } = await createWibeApp({
+		const { client, wabeApp } = await createWabeApp({
 			classes: [
 				{
 					name: 'TestClass',
@@ -2556,11 +2556,11 @@ describe('GraphqlSchema', () => {
 			resAfterUpdate.updateTestClass2.testClass2.field2.edges.length,
 		).toEqual(0)
 
-		await wibeApp.close()
+		await wabeApp.close()
 	})
 
 	it('should createAndAdd an object on a relation field (on updateMany)', async () => {
-		const { client, wibeApp } = await createWibeApp({
+		const { client, wabeApp } = await createWabeApp({
 			classes: [
 				{
 					name: 'TestClass',
@@ -2630,11 +2630,11 @@ describe('GraphqlSchema', () => {
 				.field1,
 		).toBe('field1')
 
-		await wibeApp.close()
+		await wabeApp.close()
 	})
 
 	it('should add an object on a relation field (on updateMany)', async () => {
-		const { client, wibeApp } = await createWibeApp({
+		const { client, wabeApp } = await createWabeApp({
 			classes: [
 				{
 					name: 'TestClass',
@@ -2714,11 +2714,11 @@ describe('GraphqlSchema', () => {
 				.field1,
 		).toBe('field1')
 
-		await wibeApp.close()
+		await wabeApp.close()
 	})
 
 	it('should remove an object on a relation field (on updateMany)', async () => {
-		const { client, wibeApp } = await createWibeApp({
+		const { client, wabeApp } = await createWabeApp({
 			classes: [
 				{
 					name: 'TestClass',
@@ -2802,11 +2802,11 @@ describe('GraphqlSchema', () => {
 			resAfterUpdate.updateTestClass2s.edges[0].node.field2.edges.length,
 		).toBe(0)
 
-		await wibeApp.close()
+		await wabeApp.close()
 	})
 
 	it('should remove an object on a relation field (on updateMany)', async () => {
-		const { client, wibeApp } = await createWibeApp({
+		const { client, wabeApp } = await createWabeApp({
 			classes: [
 				{
 					name: 'TestClass',
@@ -2890,6 +2890,6 @@ describe('GraphqlSchema', () => {
 			resAfterUpdate.updateTestClass2s.edges[0].node.field2.edges.length,
 		).toBe(0)
 
-		await wibeApp.close()
+		await wabeApp.close()
 	})
 })

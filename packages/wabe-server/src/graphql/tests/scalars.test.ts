@@ -1,15 +1,15 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test'
-import type { WibeApp } from '../../server'
+import type { WabeApp } from '../../server'
 import { type GraphQLClient, gql } from 'graphql-request'
 import {
-	type DevWibeAppTypes,
+	type DevWabeAppTypes,
 	closeTests,
 	getGraphqlClient,
 	setupTests,
 } from '../../utils/helper'
 
 describe('GraphQL : Scalars', () => {
-	let wibe: WibeApp<DevWibeAppTypes>
+	let wabe: WabeApp<DevWabeAppTypes>
 	let port: number
 	let client: GraphQLClient
 
@@ -17,13 +17,13 @@ describe('GraphQL : Scalars', () => {
 
 	beforeAll(async () => {
 		const setup = await setupTests()
-		wibe = setup.wibe
+		wabe = setup.wabe
 		port = setup.port
 		client = getGraphqlClient(port)
 	})
 
 	afterAll(async () => {
-		await closeTests(wibe)
+		await closeTests(wabe)
 	})
 
 	describe('Date', () => {

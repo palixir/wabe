@@ -1,11 +1,11 @@
-import type { WibeContext } from '../../server/interface'
-import type { DevWibeAppTypes } from '../../utils/helper'
+import type { WabeContext } from '../../server/interface'
+import type { DevWabeAppTypes } from '../../utils/helper'
 import { Session } from '../Session'
 
 export const signOutResolver = async (
 	_: any,
 	__: any,
-	context: WibeContext<DevWibeAppTypes>,
+	context: WabeContext<DevWabeAppTypes>,
 ) => {
 	const session = new Session()
 

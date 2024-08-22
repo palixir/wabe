@@ -9,17 +9,17 @@ import {
 	beforeEach,
 	type Mock,
 } from 'bun:test'
-import type { WibeApp } from '../server'
-import { type DevWibeAppTypes, setupTests, closeTests } from '../utils/helper'
-import type { WibeContext } from '../server/interface'
+import type { WabeApp } from '../server'
+import { type DevWabeAppTypes, setupTests, closeTests } from '../utils/helper'
+import type { WabeContext } from '../server/interface'
 import { OperationType, getDefaultHooks } from '../hooks'
 
 describe('Database', () => {
-	let wibe: WibeApp<DevWibeAppTypes>
-	let context: WibeContext<any>
+	let wabe: WabeApp<DevWabeAppTypes>
+	let context: WabeContext<any>
 
 	const mockUpdateObject = mock(async () => {
-		await context.wibeApp.databaseController.updateObjects({
+		await context.wabeApp.databaseController.updateObjects({
 			className: 'User',
 			where: {
 				name: { equalTo: 'Lucas' },
@@ -31,7 +31,7 @@ describe('Database', () => {
 	})
 
 	const mockAfterUpdate = mock(async () => {
-		await context.wibeApp.databaseController.createObjects({
+		await context.wabeApp.databaseController.createObjects({
 			className: 'Test2',
 			data: [{ name: 'test' }],
 			context,
@@ -44,33 +44,33 @@ describe('Database', () => {
 
 	beforeAll(async () => {
 		const setup = await setupTests()
-		wibe = setup.wibe
+		wabe = setup.wabe
 
 		context = {
 			isRoot: true,
-			wibeApp: {
-				databaseController: wibe.databaseController,
-				config: wibe.config,
+			wabeApp: {
+				databaseController: wabe.databaseController,
+				config: wabe.config,
 			},
-		} as WibeContext<any>
+		} as WabeContext<any>
 
-		spyGetObjects = spyOn(wibe.databaseController, 'getObjects')
-		spyGetObject = spyOn(wibe.databaseController, 'getObject')
+		spyGetObjects = spyOn(wabe.databaseController, 'getObjects')
+		spyGetObject = spyOn(wabe.databaseController, 'getObject')
 	})
 
 	afterAll(async () => {
-		await closeTests(wibe)
+		await closeTests(wabe)
 	})
 
 	beforeEach(async () => {
-		await wibe.databaseController.deleteObjects({
+		await wabe.databaseController.deleteObjects({
 			className: 'User',
 			where: { name: { equalTo: 'Lucas' } },
 			context,
 			fields: [],
 		})
 
-		await wibe.databaseController.deleteObjects({
+		await wabe.databaseController.deleteObjects({
 			// @ts-expect-error
 			className: 'Test2',
 			// @ts-expect-error
@@ -79,7 +79,7 @@ describe('Database', () => {
 			fields: [],
 		})
 
-		wibe.config.hooks = getDefaultHooks()
+		wabe.config.hooks = getDefaultHooks()
 
 		mockUpdateObject.mockClear()
 		mockAfterUpdate.mockClear()
@@ -88,7 +88,7 @@ describe('Database', () => {
 	})
 
 	it('should create object with subobject (hooks default call authentication before create user)', async () => {
-		const res = await wibe.databaseController.createObject({
+		const res = await wabe.databaseController.createObject({
 			className: 'User',
 			context,
 			fields: ['*'],
@@ -113,9 +113,9 @@ describe('Database', () => {
 	})
 
 	it('should not computeObject in runOnSingleObject if there is no hooks to execute on createObject', async () => {
-		wibe.config.hooks = []
+		wabe.config.hooks = []
 
-		await wibe.databaseController.createObject({
+		await wabe.databaseController.createObject({
 			className: 'User',
 			context,
 			data: { name: 'Lucas' },
@@ -126,9 +126,9 @@ describe('Database', () => {
 	})
 
 	it('should not computeObjects in runOnMultipleObjects if there is no hooks to execute on createObjects', async () => {
-		wibe.config.hooks = []
+		wabe.config.hooks = []
 
-		await wibe.databaseController.createObjects({
+		await wabe.databaseController.createObjects({
 			className: 'User',
 			context,
 			data: [{ name: 'Lucas' }],
@@ -139,9 +139,9 @@ describe('Database', () => {
 	})
 
 	it('should not computeObject in runOnSingleObject if there is no hooks to execute on updateObject', async () => {
-		wibe.config.hooks = []
+		wabe.config.hooks = []
 
-		const { id } = await wibe.databaseController.createObject({
+		const { id } = await wabe.databaseController.createObject({
 			className: 'User',
 			context,
 			data: { name: 'Lucas' },
@@ -150,7 +150,7 @@ describe('Database', () => {
 
 		spyGetObject.mockClear()
 
-		await wibe.databaseController.updateObject({
+		await wabe.databaseController.updateObject({
 			className: 'User',
 			context,
 			data: [{ name: 'Lucas' }],
@@ -162,9 +162,9 @@ describe('Database', () => {
 	})
 
 	it('should not computeObject in runOnMultipleObject if there is no hooks to execute on updateObjects', async () => {
-		wibe.config.hooks = []
+		wabe.config.hooks = []
 
-		const { id } = await wibe.databaseController.createObject({
+		const { id } = await wabe.databaseController.createObject({
 			className: 'User',
 			context,
 			data: { name: 'Lucas' },
@@ -173,7 +173,7 @@ describe('Database', () => {
 
 		spyGetObjects.mockClear()
 
-		await wibe.databaseController.updateObjects({
+		await wabe.databaseController.updateObjects({
 			className: 'User',
 			context,
 			data: { name: 'Lucas' },
@@ -186,9 +186,9 @@ describe('Database', () => {
 	})
 
 	it('should not computeObject in runOnSingleObject if there is no hooks to execute on updateObject', async () => {
-		wibe.config.hooks = []
+		wabe.config.hooks = []
 
-		const { id } = await wibe.databaseController.createObject({
+		const { id } = await wabe.databaseController.createObject({
 			className: 'User',
 			context,
 			data: { name: 'Lucas' },
@@ -197,7 +197,7 @@ describe('Database', () => {
 
 		spyGetObject.mockClear()
 
-		await wibe.databaseController.deleteObject({
+		await wabe.databaseController.deleteObject({
 			className: 'User',
 			context,
 			fields: ['id'],
@@ -208,9 +208,9 @@ describe('Database', () => {
 	})
 
 	it('should not computeObject in runOnMultipleObject if there is no hooks to execute on updateObjects', async () => {
-		wibe.config.hooks = []
+		wabe.config.hooks = []
 
-		const { id } = await wibe.databaseController.createObject({
+		const { id } = await wabe.databaseController.createObject({
 			className: 'User',
 			context,
 			data: { name: 'Lucas' },
@@ -219,7 +219,7 @@ describe('Database', () => {
 
 		spyGetObjects.mockClear()
 
-		await wibe.databaseController.deleteObjects({
+		await wabe.databaseController.deleteObjects({
 			className: 'User',
 			context,
 			fields: ['id'],
@@ -230,7 +230,7 @@ describe('Database', () => {
 	})
 
 	it('should call getObject adapter only 2 times (lower is better) for one read query (performance test) without mutation in hooks', async () => {
-		wibe.config.hooks = [
+		wabe.config.hooks = [
 			{
 				className: 'User',
 				operationType: OperationType.AfterCreate,
@@ -245,11 +245,11 @@ describe('Database', () => {
 			},
 		]
 		const spyGetObjectAdapter = spyOn(
-			wibe.databaseController.adapter,
+			wabe.databaseController.adapter,
 			'getObject',
 		)
 
-		const res = await wibe.databaseController.createObject({
+		const res = await wabe.databaseController.createObject({
 			className: 'User',
 			context,
 			data: { name: 'Lucas' },
@@ -258,7 +258,7 @@ describe('Database', () => {
 
 		spyGetObjectAdapter.mockClear()
 
-		await wibe.databaseController.getObject({
+		await wabe.databaseController.getObject({
 			className: 'User',
 			context,
 			fields: ['id'],
@@ -269,7 +269,7 @@ describe('Database', () => {
 	})
 
 	it('should get the good value in output of createObject after mutation on after hook', async () => {
-		wibe.config.hooks = [
+		wabe.config.hooks = [
 			{
 				className: 'User',
 				operationType: OperationType.AfterCreate,
@@ -283,7 +283,7 @@ describe('Database', () => {
 				priority: 1,
 			},
 		]
-		const res = await context.wibeApp.databaseController.createObject({
+		const res = await context.wabeApp.databaseController.createObject({
 			className: 'User',
 			data: { name: 'Lucas', age: 20 },
 			context,
@@ -296,7 +296,7 @@ describe('Database', () => {
 	})
 
 	it('should get the good value in output of createObjects after mutation on after hook', async () => {
-		wibe.config.hooks = [
+		wabe.config.hooks = [
 			{
 				className: 'User',
 				operationType: OperationType.AfterCreate,
@@ -310,7 +310,7 @@ describe('Database', () => {
 				priority: 1,
 			},
 		]
-		const res = await context.wibeApp.databaseController.createObjects({
+		const res = await context.wabeApp.databaseController.createObjects({
 			className: 'User',
 			data: [{ name: 'Lucas', age: 20 }],
 			context,
@@ -323,7 +323,7 @@ describe('Database', () => {
 	})
 
 	it('should get the good value in output of updateObjects after mutation on after hook', async () => {
-		wibe.config.hooks = [
+		wabe.config.hooks = [
 			{
 				className: 'User',
 				operationType: OperationType.AfterCreate,
@@ -337,14 +337,14 @@ describe('Database', () => {
 				priority: 1,
 			},
 		]
-		await context.wibeApp.databaseController.createObjects({
+		await context.wabeApp.databaseController.createObjects({
 			className: 'Test2',
 			data: [{ name: 'test', age: 20 }],
 			context,
 			fields: [],
 		})
 
-		const res = await context.wibeApp.databaseController.updateObjects({
+		const res = await context.wabeApp.databaseController.updateObjects({
 			className: 'Test2',
 			context,
 			fields: ['name'],
@@ -358,7 +358,7 @@ describe('Database', () => {
 	})
 
 	it('should get the good value in output of updateObject after mutation on after hook', async () => {
-		wibe.config.hooks = [
+		wabe.config.hooks = [
 			{
 				className: 'User',
 				operationType: OperationType.AfterCreate,
@@ -372,14 +372,14 @@ describe('Database', () => {
 				priority: 1,
 			},
 		]
-		const res = await context.wibeApp.databaseController.createObjects({
+		const res = await context.wabeApp.databaseController.createObjects({
 			className: 'Test2',
 			data: [{ name: 'test', age: 20 }],
 			context,
 			fields: ['id'],
 		})
 
-		const res2 = await context.wibeApp.databaseController.updateObject({
+		const res2 = await context.wabeApp.databaseController.updateObject({
 			className: 'Test2',
 			context,
 			fields: ['name'],

@@ -1,6 +1,6 @@
 import { describe, expect, it, spyOn } from 'bun:test'
 import { signOutResolver } from './signOutResolver'
-import type { WibeContext } from '../../server/interface'
+import type { WabeContext } from '../../server/interface'
 import { Session } from '../Session'
 
 describe('signOut', () => {
@@ -12,7 +12,7 @@ describe('signOut', () => {
 
 		await signOutResolver(undefined, {}, {
 			sessionId: 'sessionId',
-		} as WibeContext<any>)
+		} as WabeContext<any>)
 
 		expect(spyDeleteSession).toHaveBeenCalledTimes(1)
 		expect(spyDeleteSession).toHaveBeenCalledWith({

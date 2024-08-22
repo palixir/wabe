@@ -1,5 +1,5 @@
 import type { PermissionsOperations } from '../schema'
-import type { WibeContext } from '../server/interface'
+import type { WabeContext } from '../server/interface'
 import type { HookObject } from './HookObject'
 import { OperationType } from './index'
 
@@ -25,15 +25,15 @@ export const _getPermissionPropertiesOfAClass = async ({
 }: {
 	className: string
 	operation: PermissionsOperations
-	context: WibeContext<any>
+	context: WabeContext<any>
 }) => {
-	const wibeClass = context.wibeApp.config.schema.classes.find(
+	const wabeClass = context.wabeApp.config.schema.classes.find(
 		(c) => c.name === className,
 	)
 
-	if (!wibeClass) throw new Error(`Class ${className} not found in schema`)
+	if (!wabeClass) throw new Error(`Class ${className} not found in schema`)
 
-	const permission = wibeClass.permissions?.[operation]
+	const permission = wabeClass.permissions?.[operation]
 
 	return permission
 }
@@ -65,7 +65,7 @@ export const _checkCLP = async (
 			`Permission denied to ${permissionOperation} class ${object.className}`,
 		)
 
-	const res = await object.context.wibeApp.databaseController.getObject({
+	const res = await object.context.wabeApp.databaseController.getObject({
 		className: '_Session',
 		id: sessionId,
 		fields: ['id', 'user.id'],

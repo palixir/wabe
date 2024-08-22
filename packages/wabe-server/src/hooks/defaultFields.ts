@@ -1,5 +1,5 @@
 import { getClassFromClassName } from '../utils'
-import type { DevWibeAppTypes } from '../utils/helper'
+import type { DevWabeAppTypes } from '../utils/helper'
 import type { HookObject } from './HookObject'
 
 export const defaultBeforeCreateForCreatedAt = async (
@@ -18,9 +18,9 @@ export const defaultBeforeUpdateForUpdatedAt = async (
 export const defaultBeforeCreateForDefaultValue = async (
 	object: HookObject<any>,
 ) => {
-	const schemaClass = getClassFromClassName<DevWibeAppTypes>(
+	const schemaClass = getClassFromClassName<DevWabeAppTypes>(
 		object.className,
-		object.context.wibeApp.config,
+		object.context.wabeApp.config,
 	)
 
 	const allFields = Object.keys(schemaClass.fields)

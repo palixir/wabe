@@ -1,7 +1,7 @@
 {
-  "name": "wibe-server",
+  "name": "wabe-server",
   "version": "0.0.1",
-  "description": "wibe-server",
+  "description": "wabe-server",
   "main": "dist/index.js",
   "scripts": {
     "build": "bun build --outdir dist $(pwd)/src/index.ts --target=bun && bun generate:types",
@@ -10,7 +10,7 @@
     "lint": "biome lint . --no-errors-on-unmatched --config-path=../../",
     "ci": "bun check && bun lint $(pwd) && bun test src",
     "format": "biome format --write .",
-    "dev": " bun run --watch dev/index.ts"
+    "dev": "touch generated/wabe.ts && bun run --watch dev/index.ts"
   },
   "dependencies": {
     "@graphql-codegen/core": "4.0.2",
@@ -34,7 +34,7 @@
     "graphql-request": "6.1.0",
     "uuid": "9.0.1",
     "wait-on": "7.2.0",
-    "wibe-mongodb-launcher": "workspace:*",
-    "wibe-pluralize": "workspace:*"
+    "wabe-mongodb-launcher": "workspace:*",
+    "wabe-pluralize": "workspace:*"
   }
 }

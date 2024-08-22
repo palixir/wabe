@@ -1,5 +1,5 @@
-import type { SignUpWithInput } from '../../../generated/wibe'
-import type { WibeContext } from '../../server/interface'
+import type { SignUpWithInput } from '../../../generated/wabe'
+import type { WabeContext } from '../../server/interface'
 import { Session } from '../Session'
 
 // 0 - Get the authentication method
@@ -13,11 +13,11 @@ export const signUpWithResolver = async (
 	}: {
 		input: SignUpWithInput
 	},
-	context: WibeContext<any>,
+	context: WabeContext<any>,
 ) => {
 	// Create object call the provider signUp
 	const { id: userId } =
-		await context.wibeApp.databaseController.createObject({
+		await context.wabeApp.databaseController.createObject({
 			className: 'User',
 			data: {
 				authentication: input.authentication,
@@ -36,19 +36,19 @@ export const signUpWithResolver = async (
 		isRoot: true,
 	})
 
-	if (context.wibeApp.config.authentication?.session?.cookieSession) {
+	if (context.wabeApp.config.authentication?.session?.cookieSession) {
 		context.response?.setCookie('refreshToken', refreshToken, {
 			httpOnly: true,
 			path: '/',
 			secure: process.env.NODE_ENV === 'production',
-			expires: session.getRefreshTokenExpireAt(context.wibeApp.config),
+			expires: session.getRefreshTokenExpireAt(context.wabeApp.config),
 		})
 
 		context.response?.setCookie('accessToken', accessToken, {
 			httpOnly: true,
 			path: '/',
 			secure: process.env.NODE_ENV === 'production',
-			expires: session.getAccessTokenExpireAt(context.wibeApp.config),
+			expires: session.getAccessTokenExpireAt(context.wabeApp.config),
 		})
 	}
 

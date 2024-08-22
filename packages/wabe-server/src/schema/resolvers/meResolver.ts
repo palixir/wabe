@@ -1,10 +1,10 @@
-import type { WibeContext } from '../../server/interface'
-import type { DevWibeAppTypes } from '../../utils/helper'
+import type { WabeContext } from '../../server/interface'
+import type { DevWabeAppTypes } from '../../utils/helper'
 
 export const meResolver = async (
 	_: any,
 	__: any,
-	context: WibeContext<DevWibeAppTypes>,
+	context: WabeContext<DevWabeAppTypes>,
 ) => {
 	return {
 		user: context.user,

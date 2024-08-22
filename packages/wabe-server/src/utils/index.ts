@@ -1,12 +1,12 @@
-import * as wibeFile from '../../generated/wibe'
+import * as wabeFile from '../../generated/wabe'
 import type { ClassInterface } from '../schema'
-import type { WibeAppTypes, WibeConfig } from '../server'
+import type { WabeAppTypes, WabeConfig } from '../server'
 import { getGraphqlClient } from './helper'
 
-export const getClient = (config: WibeConfig<WibeAppTypes>) => {
-	// We do this to avoid failing import when wibe.ts is not already generated
+export const getClient = (config: WabeConfig<WabeAppTypes>) => {
+	// We do this to avoid failing import when wabe.ts is not already generated
 	// @ts-ignore
-	const getSdk = wibeFile.getSdk
+	const getSdk = wabeFile.getSdk
 
 	if (!getSdk) return
 
@@ -37,9 +37,9 @@ export const firstLetterInLowerCase = (str: string) => {
 	)
 }
 
-export const getClassFromClassName = <T extends WibeAppTypes>(
+export const getClassFromClassName = <T extends WabeAppTypes>(
 	className: string,
-	config: WibeConfig<any>,
+	config: WabeConfig<any>,
 ): ClassInterface<T> => {
 	const classInSchema = config.schema.classes.find(
 		(schemaClass) => schemaClass.name === className,

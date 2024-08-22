@@ -1,11 +1,15 @@
-import { signInWithResolver, signUpWithResolver } from '../authentication'
+import {
+	AuthenticationProvider,
+	signInWithResolver,
+	signUpWithResolver,
+} from '../authentication'
 import { refreshResolver } from '../authentication/resolvers/refreshResolver'
 import { signOutResolver } from '../authentication/resolvers/signOutResolver'
 import { verifyChallengeResolver } from '../authentication/resolvers/verifyChallenge'
-import type { WibeConfig, WibeAppTypes } from '../server'
+import type { WabeConfig, WabeAppTypes } from '../server'
 import { meResolver } from './resolvers/meResolver'
 
-export type WibePrimaryTypes =
+export type WabePrimaryTypes =
 	| 'String'
 	| 'Int'
 	| 'Float'
@@ -14,27 +18,27 @@ export type WibePrimaryTypes =
 	| 'Date'
 	| 'File'
 
-export type WibeCustomTypes = 'Array' | 'Object'
+export type WabeCustomTypes = 'Array' | 'Object'
 
-export type WibeRelationTypes = 'Pointer' | 'Relation'
+export type WabeRelationTypes = 'Pointer' | 'Relation'
 
-export type WibeTypes = WibeCustomTypes | WibePrimaryTypes | WibeRelationTypes
+export type WabeTypes = WabeCustomTypes | WabePrimaryTypes | WabeRelationTypes
 
-type WibeObject<T extends WibeAppTypes> = {
+type WabeObject<T extends WabeAppTypes> = {
 	name: string
 	fields: SchemaFields<T>
 	description?: string
 	required?: boolean
 }
 
-type TypeFieldBase<U, K extends WibeTypes> = {
+type TypeFieldBase<U, K extends WabeTypes> = {
 	type: K
 	required?: boolean
 	description?: string
 	defaultValue?: U
 }
 
-type TypeFieldArray<T extends WibeAppTypes> = {
+type TypeFieldArray<T extends WabeAppTypes> = {
 	type: 'Array'
 	required?: boolean
 	requiredValue?: boolean
@@ -44,27 +48,27 @@ type TypeFieldArray<T extends WibeAppTypes> = {
 	| {
 			// For the moment we only keep object and not array because we don't
 			// support array of array
-			typeValue: WibePrimaryTypes
+			typeValue: WabePrimaryTypes
 	  }
-	| { typeValue: 'Object'; object: WibeObject<T> }
+	| { typeValue: 'Object'; object: WabeObject<T> }
 )
 
-type TypeFieldObject<T extends WibeAppTypes> = {
+type TypeFieldObject<T extends WabeAppTypes> = {
 	type: 'Object'
 	required?: boolean
 	description?: string
-	object: WibeObject<T>
+	object: WabeObject<T>
 	defaultValue?: any
 }
 
-type TypeFieldPointer<T extends WibeAppTypes> = {
+type TypeFieldPointer<T extends WabeAppTypes> = {
 	type: 'Pointer'
 	required?: boolean
 	description?: string
 	class: keyof T['types']
 }
 
-type TypeFieldRelation<T extends WibeAppTypes> = {
+type TypeFieldRelation<T extends WabeAppTypes> = {
 	type: 'Relation'
 	required?: boolean
 	description?: string
@@ -77,21 +81,21 @@ type TypeFieldFile = {
 	description?: string
 }
 
-type TypeFieldCustomScalars<T extends WibeAppTypes> = {
+type TypeFieldCustomScalars<T extends WabeAppTypes> = {
 	type: T['scalars']
 	required?: boolean
 	description?: string
 	defaultValue?: any
 }
 
-type TypeFieldCustomEnums<T extends WibeAppTypes> = {
+type TypeFieldCustomEnums<T extends WabeAppTypes> = {
 	type: T['enums']
 	required?: boolean
 	description?: string
 	defaultValue?: any
 }
 
-export type TypeField<T extends WibeAppTypes> =
+export type TypeField<T extends WabeAppTypes> =
 	| TypeFieldBase<string, 'String'>
 	| TypeFieldBase<number, 'Int'>
 	| TypeFieldBase<number, 'Float'>
@@ -106,20 +110,20 @@ export type TypeField<T extends WibeAppTypes> =
 	| TypeFieldCustomScalars<T>
 	| TypeFieldCustomEnums<T>
 
-export type SchemaFields<T extends WibeAppTypes> = Record<string, TypeField<T>>
+export type SchemaFields<T extends WabeAppTypes> = Record<string, TypeField<T>>
 
-export type QueryResolver<T extends WibeAppTypes> = {
+export type QueryResolver<T extends WabeAppTypes> = {
 	required?: boolean
 	description?: string
 	args?: SchemaFields<T>
 	resolve: (...args: any) => any
 } & (
-	| { type: WibePrimaryTypes }
+	| { type: WabePrimaryTypes }
 	| { type: 'Object'; outputObject: ClassInterface<T> }
-	| { type: 'Array'; typeValue: WibePrimaryTypes }
+	| { type: 'Array'; typeValue: WabePrimaryTypes }
 )
 
-export type MutationResolver<T extends WibeAppTypes> = {
+export type MutationResolver<T extends WabeAppTypes> = {
 	required?: boolean
 	description?: string
 	args?: {
@@ -127,12 +131,12 @@ export type MutationResolver<T extends WibeAppTypes> = {
 	}
 	resolve: (...args: any) => any
 } & (
-	| { type: WibePrimaryTypes }
+	| { type: WabePrimaryTypes }
 	| { type: 'Object'; outputObject: ClassInterface<T> }
-	| { type: 'Array'; typeValue: WibePrimaryTypes }
+	| { type: 'Array'; typeValue: WabePrimaryTypes }
 )
 
-export type TypeResolver<T extends WibeAppTypes> = {
+export type TypeResolver<T extends WabeAppTypes> = {
 	queries?: {
 		[key: string]: QueryResolver<T>
 	}
@@ -164,7 +168,7 @@ export type ClassIndexes = Array<{
 	unique?: boolean
 }>
 
-export interface ClassInterface<T extends WibeAppTypes> {
+export interface ClassInterface<T extends WabeAppTypes> {
 	name: string
 	fields: SchemaFields<T>
 	description?: string
@@ -187,18 +191,18 @@ export interface EnumInterface {
 	description?: string
 }
 
-export interface SchemaInterface<T extends WibeAppTypes> {
+export interface SchemaInterface<T extends WabeAppTypes> {
 	classes: ClassInterface<T>[]
 	scalars?: ScalarInterface[]
 	enums?: EnumInterface[]
 	resolvers?: TypeResolver<T>
 }
 
-export class Schema<T extends WibeAppTypes> {
+export class Schema<T extends WabeAppTypes> {
 	public schema: SchemaInterface<T>
-	private config: WibeConfig<T>
+	private config: WabeConfig<T>
 
-	constructor(config: WibeConfig<T>) {
+	constructor(config: WabeConfig<T>) {
 		this.config = config
 		// TODO : Add default scalars here
 		this.schema = {
@@ -213,9 +217,12 @@ export class Schema<T extends WibeAppTypes> {
 		return [
 			{
 				name: 'AuthenticationProvider',
-				values: {
-					Google: 'Google',
-				},
+				values: Object.fromEntries(
+					Object.values(AuthenticationProvider).map((key) => [
+						key,
+						key,
+					]),
+				),
 			},
 			{
 				name: 'SecondaryFactor',

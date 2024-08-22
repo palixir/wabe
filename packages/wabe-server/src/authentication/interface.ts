@@ -1,7 +1,7 @@
-import type { User } from '../../generated/wibe'
-import type { WibeContext } from '../server/interface'
+import type { User } from '../../generated/wabe'
+import type { WabeContext } from '../server/interface'
 import type { SchemaFields } from '../schema'
-import type { WibeAppTypes } from '../server'
+import type { WabeAppTypes } from '../server'
 
 export enum ProviderEnum {
 	google = 'google',
@@ -15,7 +15,7 @@ export interface ProviderConfig {
 
 export type AuthenticationEventsOptions<T> = {
 	input: T
-	context: WibeContext<any>
+	context: WabeContext<any>
 }
 
 export type ProviderInterface<T = any> = {
@@ -39,7 +39,7 @@ export type SecondaryProviderInterface<T = any> = {
 }
 
 export type CustomAuthenticationMethods<
-	T extends WibeAppTypes,
+	T extends WabeAppTypes,
 	U = ProviderInterface | SecondaryProviderInterface,
 	K = SchemaFields<T>,
 	W = SchemaFields<T>,
@@ -68,7 +68,7 @@ export interface SessionConfig {
 	cookieSession?: boolean
 }
 
-export interface AuthenticationConfig<T extends WibeAppTypes> {
+export interface AuthenticationConfig<T extends WabeAppTypes> {
 	session?: SessionConfig
 	roles?: RoleConfig
 	successRedirectPath?: string
@@ -92,4 +92,8 @@ export interface Provider {
 		options: CreateTokenFromAuthorizationCodeOptions,
 	): Promise<void>
 	refreshToken(options: refreshTokenOptions): Promise<void>
+}
+
+export enum AuthenticationProvider {
+	Google = 'Google',
 }

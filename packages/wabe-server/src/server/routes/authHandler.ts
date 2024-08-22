@@ -1,5 +1,5 @@
 import type { Context } from 'wobe'
-import type { WibeContext } from '../interface'
+import type { WabeContext } from '../interface'
 import { ProviderEnum } from '../../authentication/interface'
 import { getGraphqlClient } from '../../utils/helper'
 import { gql } from 'graphql-request'
@@ -20,7 +20,7 @@ import { generateRandomValues } from '../../authentication/oauth/utils'
 // https://www.rfc-editor.org/rfc/rfc7636#section-4.4 not precise the storage of codeVerifier
 export const oauthHandlerCallback = async (
 	context: Context,
-	wibeContext: WibeContext<any>,
+	wabeContext: WabeContext<any>,
 ) => {
 	try {
 		const state = context.query.state
@@ -33,7 +33,7 @@ export const oauthHandlerCallback = async (
 		const codeVerifier = context.getCookie('code_verifier')
 		const provider = context.getCookie('provider')
 
-		await getGraphqlClient(wibeContext.wibeApp.config.port).request<any>(
+		await getGraphqlClient(wabeContext.wabeApp.config.port).request<any>(
 			gql`
 				mutation signInWith(
 					$authorizationCode: String!
@@ -60,13 +60,13 @@ export const oauthHandlerCallback = async (
 		)
 
 		context.redirect(
-			wibeContext.wibeApp.config.authentication?.successRedirectPath ||
+			wabeContext.wabeApp.config.authentication?.successRedirectPath ||
 				'/',
 		)
 	} catch (error) {
 		console.error(error)
 		// context.redirect(
-		// 	wibeContext.wibeApp.config.authentication?.failureRedirectPath ||
+		// 	wabeContext.wabeApp.config.authentication?.failureRedirectPath ||
 		// 		'/',
 		// )
 	}
@@ -74,10 +74,10 @@ export const oauthHandlerCallback = async (
 
 export const authHandler = async (
 	context: Context,
-	wibeContext: WibeContext<any>,
+	wabeContext: WabeContext<any>,
 	provider: ProviderEnum,
 ) => {
-	if (!wibeContext.wibeApp.config) throw new Error('Wibe config not found')
+	if (!wabeContext.wabeApp.config) throw new Error('Wabe config not found')
 
 	context.res.setCookie('provider', provider, {
 		httpOnly: true,
@@ -88,7 +88,7 @@ export const authHandler = async (
 
 	switch (provider) {
 		case ProviderEnum.google: {
-			const googleOauth = new Google(wibeContext.wibeApp.config)
+			const googleOauth = new Google(wabeContext.wabeApp.config)
 
 			const state = generateRandomValues()
 			const codeVerifier = generateRandomValues()

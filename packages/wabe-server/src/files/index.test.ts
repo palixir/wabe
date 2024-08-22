@@ -7,20 +7,20 @@ import {
 	it,
 	spyOn,
 } from 'bun:test'
-import type { WibeApp } from '..'
-import { type DevWibeAppTypes, closeTests, setupTests } from '../utils/helper'
+import type { WabeApp } from '..'
+import { type DevWabeAppTypes, closeTests, setupTests } from '../utils/helper'
 
 describe('File upload', () => {
-	let wibe: WibeApp<DevWibeAppTypes>
+	let wabe: WabeApp<DevWabeAppTypes>
 	let port: number
 	let spyFileDevAdapter: any
 
 	beforeAll(async () => {
 		const setup = await setupTests()
-		wibe = setup.wibe
+		wabe = setup.wabe
 		port = setup.port
 
-		const fileAdapter = wibe.config.file
+		const fileAdapter = wabe.config.file
 
 		if (!fileAdapter)
 			throw new Error('File adapter is not correctly setup in setupTests')
@@ -29,7 +29,7 @@ describe('File upload', () => {
 	})
 
 	afterAll(async () => {
-		await closeTests(wibe)
+		await closeTests(wabe)
 	})
 
 	beforeEach(() => {

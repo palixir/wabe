@@ -5,7 +5,7 @@ import {
 	stringExtraction,
 } from './searchableFields'
 import { HookObject } from './HookObject'
-import type { DevWibeAppTypes } from '../utils/helper'
+import type { DevWabeAppTypes } from '../utils/helper'
 import { OperationType } from '.'
 
 describe('searchablesFields', () => {
@@ -30,7 +30,7 @@ describe('searchablesFields', () => {
 	})
 
 	it('should complete the search fields of each object on insert', async () => {
-		const hookObject = new HookObject<DevWibeAppTypes>({
+		const hookObject = new HookObject<DevWabeAppTypes>({
 			className: 'User',
 			operationType: OperationType.BeforeCreate,
 			newData: {
@@ -39,7 +39,7 @@ describe('searchablesFields', () => {
 				age: 20,
 			} as any,
 			context: {
-				wibeApp: {
+				wabeApp: {
 					config: {
 						schema: {
 							classes: [
@@ -68,7 +68,7 @@ describe('searchablesFields', () => {
 	})
 
 	it('should complete the search fields of each object on update', async () => {
-		const hookObject = new HookObject<DevWibeAppTypes>({
+		const hookObject = new HookObject<DevWabeAppTypes>({
 			className: 'User',
 			operationType: OperationType.BeforeUpdate,
 			newData: {
@@ -77,7 +77,7 @@ describe('searchablesFields', () => {
 				age: 20,
 			} as any,
 			context: {
-				wibeApp: {
+				wabeApp: {
 					config: {
 						schema: {
 							classes: [

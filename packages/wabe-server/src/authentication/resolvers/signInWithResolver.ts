@@ -1,6 +1,6 @@
-import type { SignInWithInput } from '../../../generated/wibe'
-import type { WibeContext } from '../../server/interface'
-import type { DevWibeAppTypes } from '../../utils/helper'
+import type { SignInWithInput } from '../../../generated/wabe'
+import type { WabeContext } from '../../server/interface'
+import type { DevWabeAppTypes } from '../../utils/helper'
 import { Session } from '../Session'
 import type {
 	ProviderInterface,
@@ -19,10 +19,10 @@ export const signInWithResolver = async (
 	}: {
 		input: SignInWithInput
 	},
-	context: WibeContext<DevWibeAppTypes>,
+	context: WabeContext<DevWabeAppTypes>,
 ) => {
 	const { provider, name } = getAuthenticationMethod<
-		DevWibeAppTypes,
+		DevWabeAppTypes,
 		ProviderInterface
 	>(Object.keys(input.authentication || {}), context)
 
@@ -43,7 +43,7 @@ export const signInWithResolver = async (
 	// 2 - We call the onSendChallenge method of the provider
 	if (input.authentication?.secondaryFactor) {
 		const secondaryProvider = getAuthenticationMethod<
-			DevWibeAppTypes,
+			DevWabeAppTypes,
 			SecondaryProviderInterface
 		>([input.authentication.secondaryFactor], context)
 
@@ -66,10 +66,10 @@ export const signInWithResolver = async (
 			refreshToken,
 			accessToken,
 			accessTokenExpiresAt: session.getAccessTokenExpireAt(
-				context.wibeApp.config,
+				context.wabeApp.config,
 			),
 			refreshTokenExpiresAt: session.getRefreshTokenExpireAt(
-				context.wibeApp.config,
+				context.wabeApp.config,
 			),
 		}
 	}
@@ -81,7 +81,7 @@ export const signInWithResolver = async (
 		refreshTokenExpiresAt,
 	} = await getRefreshAndAccessToken()
 
-	if (context.wibeApp.config.authentication?.session?.cookieSession) {
+	if (context.wabeApp.config.authentication?.session?.cookieSession) {
 		context.response?.setCookie('refreshToken', refreshToken, {
 			httpOnly: true,
 			path: '/',

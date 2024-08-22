@@ -2,8 +2,6 @@ import { codegen } from '@graphql-codegen/core'
 import * as typescriptPlugin from '@graphql-codegen/typescript'
 import * as graphqlRequestPlugin from '@graphql-codegen/typescript-graphql-request'
 import * as graphqlOperationsPlugin from '@graphql-codegen/typescript-operations'
-import { loadSchema } from '@graphql-tools/load'
-import { GraphQLFileLoader } from '@graphql-tools/graphql-file-loader'
 import { type GraphQLSchema, parse, printSchema } from 'graphql'
 import type {
 	ClassInterface,
@@ -11,32 +9,32 @@ import type {
 	ScalarInterface,
 	SchemaInterface,
 } from '../schema'
-import type { DevWibeAppTypes } from '../utils/helper'
+import type { DevWabeAppTypes } from '../utils/helper'
 
-export const generateWibeFile = ({
+export const generateWabeFile = ({
 	scalars,
 	enums,
 	classes,
 }: {
 	enums?: EnumInterface[]
 	scalars?: ScalarInterface[]
-	classes: ClassInterface<DevWibeAppTypes>[]
+	classes: ClassInterface<DevWabeAppTypes>[]
 }) => {
 	// Scalars
 	const listOfScalars = scalars?.map((scalar) => `"${scalar.name}"`) || []
 
-	const wibeScalarType =
+	const wabeScalarType =
 		listOfScalars.length > 0
-			? `export type WibeSchemaScalars = ${listOfScalars.join(' | ')}`
+			? `export type WabeSchemaScalars = ${listOfScalars.join(' | ')}`
 			: ''
 
 	// Enums
-	const wibeEnumsGlobalTypes =
-		enums?.map((wibeEnum) => `"${wibeEnum.name}"`) || []
+	const wabeEnumsGlobalTypes =
+		enums?.map((wabeEnum) => `"${wabeEnum.name}"`) || []
 
-	const wibeEnumsGlobalTypesString =
-		wibeEnumsGlobalTypes.length > 0
-			? `export type WibeSchemaEnums = ${wibeEnumsGlobalTypes.join(
+	const wabeEnumsGlobalTypesString =
+		wabeEnumsGlobalTypes.length > 0
+			? `export type WabeSchemaEnums = ${wabeEnumsGlobalTypes.join(
 					' | ',
 				)}`
 			: ''
@@ -46,11 +44,11 @@ export const generateWibeFile = ({
 		.map((schema) => `${schema.name}: ${schema.name}`)
 		.filter((schema) => schema)
 
-	const globalWibeTypeString = `export type WibeSchemaTypes = {\n\t${allNames.join(
+	const globalWabeTypeString = `export type WabeSchemaTypes = {\n\t${allNames.join(
 		',\n\t',
 	)}\n}`
 
-	return `${wibeScalarType}\n\n${wibeEnumsGlobalTypesString}\n\n${globalWibeTypeString}`
+	return `${wabeScalarType}\n\n${wabeEnumsGlobalTypesString}\n\n${globalWabeTypeString}`
 }
 
 export const generateGraphqlTypes = async ({
@@ -60,7 +58,7 @@ export const generateGraphqlTypes = async ({
 	const config = {
 		documents: [],
 		config: {},
-		filename: `${path}/wibe.ts`,
+		filename: `${path}/wabe.ts`,
 		schema: parse(graphqlSchemaContent),
 		plugins: [
 			{ typescript: {} },
@@ -95,22 +93,22 @@ export const generateCodegen = async ({
 		path,
 	})
 
-	const wibeOutput = generateWibeFile({
+	const wabeOutput = generateWabeFile({
 		scalars: schema.scalars,
 		enums: schema.enums,
 		classes: schema.classes,
 	})
 
-	const content = `${graphqlOutput}\n\n${wibeOutput}`
+	const content = `${graphqlOutput}\n\n${wabeOutput}`
 
 	try {
-		const contentOfActualWibeFile = await Bun.file(`${path}/wibe.ts`).text()
+		const contentOfActualWabeFile = await Bun.file(`${path}/wabe.ts`).text()
 
 		// We will need to find a better way to avoid infinite loop of loading
 		// Better solution will be that bun implements watch ignores
-		if (content === contentOfActualWibeFile) return
+		if (content === contentOfActualWabeFile) return
 	} catch {}
 
-	Bun.write(`${path}/wibe.ts`, `${graphqlOutput}\n\n${wibeOutput}`)
+	Bun.write(`${path}/wabe.ts`, `${graphqlOutput}\n\n${wabeOutput}`)
 	Bun.write(`${path}/schema.graphql`, graphqlSchemaContent)
 }

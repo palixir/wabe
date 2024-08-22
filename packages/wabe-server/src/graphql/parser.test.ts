@@ -64,8 +64,8 @@ const deepCompareGraphQLObjects = (
 	return true
 }
 
-describe('WibeGraphqlParser', () => {
-	it('should parse a wibe object', () => {
+describe('WabeGraphqlParser', () => {
+	it('should parse a wabe object', () => {
 		const graphqlParser = GraphqlParser({
 			enums: [],
 			scalars: [],
@@ -74,7 +74,7 @@ describe('WibeGraphqlParser', () => {
 			graphqlObjectType: {} as any,
 			schemaFields: {} as any,
 			allObjects: {} as any,
-		})._parseWibeObject({
+		})._parseWabeObject({
 			description: 'A simple object',
 			required: true,
 			objectToParse: {
@@ -103,7 +103,7 @@ describe('WibeGraphqlParser', () => {
 		)
 	})
 
-	it('should parse a recursive wibe object', () => {
+	it('should parse a recursive wabe object', () => {
 		const graphqlParser = GraphqlParser({
 			enums: [],
 			scalars: [],
@@ -113,7 +113,7 @@ describe('WibeGraphqlParser', () => {
 			graphqlObjectType: {} as any,
 			schemaFields: {} as any,
 			allObjects: {} as any,
-		})._parseWibeObject({
+		})._parseWabeObject({
 			description: 'A recursive object',
 			required: true,
 			objectToParse: {

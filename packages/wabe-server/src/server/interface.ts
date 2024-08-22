@@ -1,11 +1,11 @@
 import type { WobeResponse } from 'wobe'
-import type { WibeApp, WibeAppTypes } from '.'
-import type { User } from '../../generated/wibe'
+import type { WabeApp, WabeAppTypes } from '.'
+import type { User } from '../../generated/wabe'
 
-export interface WibeContext<T extends WibeAppTypes> {
+export interface WabeContext<T extends WabeAppTypes> {
 	response?: WobeResponse
 	user?: User | null
 	sessionId?: string
 	isRoot: boolean
-	wibeApp: WibeApp<T>
+	wabeApp: WabeApp<T>
 }

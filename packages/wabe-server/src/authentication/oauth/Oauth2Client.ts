@@ -111,7 +111,7 @@ export class OAuth2Client {
 		const headers = new Headers()
 		headers.set('Content-Type', 'application/x-www-form-urlencoded')
 		headers.set('Accept', 'application/json')
-		headers.set('User-Agent', 'wibe')
+		headers.set('User-Agent', 'wabe')
 
 		if (options?.credentials !== undefined) {
 			const authenticateWith =

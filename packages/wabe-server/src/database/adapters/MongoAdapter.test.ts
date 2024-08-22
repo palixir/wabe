@@ -9,38 +9,38 @@ import {
 } from 'bun:test'
 import { fail } from 'node:assert'
 import { ObjectId } from 'mongodb'
-import type { WibeApp } from '../..'
+import type { WabeApp } from '../..'
 import {
-	type DevWibeAppTypes,
+	type DevWabeAppTypes,
 	closeTests,
 	setupTests,
 } from '../../utils/helper'
 import { type MongoAdapter, buildMongoWhereQuery } from './MongoAdapter'
-import type { WibeContext } from '../../server/interface'
+import type { WabeContext } from '../../server/interface'
 
 describe('Mongo adapter', () => {
-	let mongoAdapter: MongoAdapter<DevWibeAppTypes>
-	let wibe: WibeApp<DevWibeAppTypes>
-	let context: WibeContext<any>
+	let mongoAdapter: MongoAdapter<DevWabeAppTypes>
+	let wabe: WabeApp<DevWabeAppTypes>
+	let context: WabeContext<any>
 
 	beforeAll(async () => {
 		const setup = await setupTests()
-		wibe = setup.wibe
+		wabe = setup.wabe
 
 		// @ts-expect-error
-		mongoAdapter = wibe.databaseController.adapter
+		mongoAdapter = wabe.databaseController.adapter
 
 		context = {
 			isRoot: true,
-			wibeApp: {
-				databaseController: wibe.databaseController,
-				config: wibe.config,
+			wabeApp: {
+				databaseController: wabe.databaseController,
+				config: wabe.config,
 			},
-		} as WibeContext<any>
+		} as WabeContext<any>
 	})
 
 	afterAll(async () => {
-		await closeTests(wibe)
+		await closeTests(wabe)
 	})
 
 	beforeEach(async () => {

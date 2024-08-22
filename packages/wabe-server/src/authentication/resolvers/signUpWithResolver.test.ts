@@ -47,7 +47,7 @@ describe('SignUpWith', () => {
 	}
 
 	const context = {
-		wibeApp: { config, databaseController: mockDatabaseController },
+		wabeApp: { config, databaseController: mockDatabaseController },
 	} as any
 
 	beforeEach(() => {

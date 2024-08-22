@@ -1,5 +1,5 @@
 import { OAuth2Client } from '.'
-import type { WibeConfig } from '../../server'
+import type { WabeConfig } from '../../server'
 import type { OAuth2ProviderWithPKCE, Tokens } from './utils'
 
 const authorizeEndpoint = 'https://accounts.google.com/o/oauth2/v2/auth'
@@ -21,7 +21,7 @@ export class Google implements OAuth2ProviderWithPKCE {
 	private client: OAuth2Client
 	private clientSecret: string
 
-	constructor(config: WibeConfig<any>) {
+	constructor(config: WabeConfig<any>) {
 		const googleConfig = config.authentication?.providers?.google
 
 		if (!googleConfig) throw new Error('Google config not found')
