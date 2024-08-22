@@ -8,7 +8,13 @@ module.exports = {
 	],
 	darkMode: 'class',
 	theme: {
-		extend: {},
+		extend: {
+			colors: {
+				'background-primary': '#081525',
+				'background-secondary': '#0D3348',
+				primary: '#49C78B',
+				secondary: '#8BB7C4',
+			},
+		},
 	},
-	plugins: [require('daisyui')],
 }
