@@ -1,0 +1,20 @@
+{
+  "name": "wabe-documentation",
+  "type": "module",
+  "scripts": {
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
+  },
+  "devDependencies": {
+    "vitepress": "1.3.3",
+    "vue": "3.4.38"
+  },
+  "dependencies": {
+    "autoprefixer": "10.4.20",
+    "daisyui": "4.12.10",
+    "postcss": "8.4.41",
+    "postcss-nesting": "^13.0.0",
+    "tailwindcss": "3.4.10"
+  }
+}

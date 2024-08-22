@@ -24,4 +24,6 @@ package-lock.json
 
 
 **/generated/schema.ts
-**/generated/wibe.ts
+**/generated/wabe.ts
+
+cache
