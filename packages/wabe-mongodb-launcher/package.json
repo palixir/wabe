@@ -1,5 +1,5 @@
 {
-    "name": "wibe-mongodb-launcher",
+    "name": "wabe-mongodb-launcher",
     "version": "0.0.1",
     "license": "MIT",
     "main": "src/index.ts",
