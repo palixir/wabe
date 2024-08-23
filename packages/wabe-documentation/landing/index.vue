@@ -2,6 +2,7 @@
 import './tailwind.css'
 
 import Card from './Card.vue'
+import Package from './Package.vue'
 </script>
 
 <template>
@@ -10,9 +11,14 @@ import Card from './Card.vue'
     <!-- Hero Section with Classic Dark Background -->
     <header class="py-20 flex items-center ">    
         <div class="max-w-5xl mx-auto text-center">
-            <h1 class="text-5xl font-extrabold text-gray-100">Wabe</h1>
+
+            <div class="flex flex-col gap-4">
+                <h1 class="text-5xl font-extrabold text-gray-100">Wabe</h1>
             
-            <p class="mt-4 text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Create your Backend in minutes not days.</p>
+                <p class="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Create your Backend in minutes not days.</p>
+
+                <p class="text-lg font-semibold max-w-4xl">Wabe simplifies backend development. It offers essential features like Authentication, Permissions, Database Management, Hooks, and so much more, providing everything you need to build and scale secure applications effortlessly.</p>
+            </div>
             
             <div class="mt-8 flex justify-center space-x-4">
                 <a href="#docs" class="bg-primary text-white px-8 py-3 rounded-lg font-medium hover:bg-secondary transition duration-150">Get Started</a>
@@ -90,6 +96,9 @@ import Card from './Card.vue'
             <p class="mt-4 text-lg text-gray-300">You can start using Wabe in minutes by running:</p>
 
             <div class="flex flex-col gap-2 justify-center">
+                <div>
+                    <Package />
+                </div>
                 <div class="mt-8">
                     <code class="bg-gray-700 text-gray-100 px-6 py-3 rounded-lg text-lg">bun add wabe</code>
                 </div>
@@ -102,9 +111,15 @@ import Card from './Card.vue'
     </section>
  
     <!-- Footer -->
-    <footer class="py-8 text-center">
-        <p class="text-gray-400 text-sm">Created with ❤ by coratgerl</p>
-    </footer>
-  </div>
+    <footer class="text-gray-400">
+      <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8">
+        <div class="flex justify-center items-center">
+            <div class="text-center text-gray-500 text-sm">
+                <p>&copy; 2024 Wabe. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+  </footer>
+</div>
 
 </template>
