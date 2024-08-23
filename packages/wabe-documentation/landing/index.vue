@@ -91,18 +91,17 @@ import Package from './Package.vue'
 
    <!-- Getting Started Section with Classic Dark Background -->
     <section id="getting-started" class="py-20">
-        <div class="max-w-5xl mx-auto text-center">
-            <h2 class="text-3xl font-extrabold text-gray-100">Fully Open Source - Get Started in Minutes</h2>
-            <p class="mt-4 text-lg text-gray-300">You can start using Wabe in minutes by running:</p>
-
+        <div class="mx-auto text-center flex flex-col justify-center gap-2">
+            <div>
+                <h2 class="text-3xl font-extrabold text-gray-100">Fully Open Source - Get Started in Minutes</h2>
+                <p class="mt-4 text-lg text-gray-300">You can start using Wabe in minutes by running:</p>
+            </div>
+                
             <div class="flex flex-col gap-2 justify-center">
-                <div>
+                <div class="flex justify-center">
                     <Package />
                 </div>
-                <div class="mt-8">
-                    <code class="bg-gray-700 text-gray-100 px-6 py-3 rounded-lg text-lg">bun add wabe</code>
-                </div>
-            
+                          
                 <div class="mt-8">
                     <a href="https://github.com/your-repo" class="bg-blue-500 text-white px-8 py-3 rounded-lg font-medium hover:bg-blue-600 transition duration-150">View on GitHub</a>
                 </div>
