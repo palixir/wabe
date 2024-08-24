@@ -91,10 +91,10 @@ import Package from './Package.vue'
 
    <!-- Getting Started Section with Classic Dark Background -->
     <section id="getting-started" class="py-20">
-        <div class="mx-auto text-center flex flex-col justify-center gap-2">
+        <div class="text-center flex flex-col justify-center gap-4">
             <div>
                 <h2 class="text-3xl font-extrabold text-gray-100">Fully Open Source - Get Started in Minutes</h2>
-                <p class="mt-4 text-lg text-gray-300">You can start using Wabe in minutes by running:</p>
+                <p class="mt-4 text-lg text-gray-300 font-medium">You can start using Wabe in minutes by running:</p>
             </div>
                 
             <div class="flex flex-col gap-2 justify-center">
