@@ -103,7 +103,7 @@ import Package from './Package.vue'
                 </div>
                           
                 <div class="mt-8">
-                    <a href="https://github.com/your-repo" class="bg-blue-500 text-white px-8 py-3 rounded-lg font-medium hover:bg-blue-600 transition duration-150">View on GitHub</a>
+                    <a href="https://github.com/coratgerl/wabe" class="bg-primary text-white px-8 py-3 rounded-lg font-medium hover:bg-blue-600 transition duration-150">View on GitHub</a>
                 </div>
             </div>
         </div>
@@ -111,13 +111,11 @@ import Package from './Package.vue'
  
     <!-- Footer -->
     <footer class="text-gray-400">
-      <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8">
-        <div class="flex justify-center items-center">
+        <div class="flex justify-center items-center p-8">
             <div class="text-center text-gray-500 text-sm">
                 <p>&copy; 2024 Wabe. All rights reserved.</p>
             </div>
         </div>
-    </div>
   </footer>
 </div>
 

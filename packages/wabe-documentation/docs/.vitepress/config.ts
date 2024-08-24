@@ -2,6 +2,7 @@ import { defineConfig } from 'vitepress'
 
 export default defineConfig({
 	title: 'Wabe',
+	appearance: 'force-dark',
 	themeConfig: {
 		nav: [
 			{ text: 'Home', link: '/' },
