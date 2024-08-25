@@ -1,7 +1,7 @@
 {
-  "name": "wabe-server",
-  "version": "0.0.1",
-  "description": "wabe-server",
+  "name": "wabe",
+  "version": "0.5.0",
+  "description": "wabe",
   "main": "dist/index.js",
   "scripts": {
     "build": "bun build --outdir dist $(pwd)/src/index.ts --target=bun && bun generate:types",
