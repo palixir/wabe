@@ -18,7 +18,7 @@ import { initializeRoles } from '../authentication/roles'
 import type { FileConfig } from '../files'
 import { fileDevAdapter } from '../files/devAdapter'
 
-export interface WabeConfig<T extends WabeAppTypes> {
+export interface WabeConfig<T extends WabeTypes> {
 	port: number
 	schema: SchemaInterface<T>
 	database: DatabaseConfig
@@ -35,17 +35,17 @@ export interface WabeConfig<T extends WabeAppTypes> {
 	file?: FileConfig
 }
 
-export type WabeAppTypes = {
+export type WabeTypes = {
 	types: Record<any, any>
 	scalars: string
 	enums: string
 }
 
-export type WobeCustomContext<T extends WabeAppTypes> = {
+export type WobeCustomContext<T extends WabeTypes> = {
 	wabe: WabeContext<T>
 }
 
-export class WabeApp<T extends WabeAppTypes> {
+export class Wabe<T extends WabeTypes> {
 	public server: Wobe<WobeCustomContext<T>>
 
 	public config: WabeConfig<T>

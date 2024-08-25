@@ -1,14 +1,14 @@
 import type { OperationType } from '.'
 import type { MutationData } from '../database'
-import type { WabeAppTypes } from '../server'
+import type { WabeTypes } from '../server'
 import type { WabeContext } from '../server/interface'
 
-export class HookObject<T extends WabeAppTypes, K = keyof T['types']> {
+export class HookObject<T extends WabeTypes, K = keyof T['types']> {
 	public className: string
 	private newData: MutationData<T> | undefined
 	private operationType: OperationType
 	public context: WabeContext<T>
-	public object: Record<keyof WabeAppTypes['types'][T], any>
+	public object: Record<keyof WabeTypes['types'][T], any>
 
 	constructor({
 		newData,
@@ -21,7 +21,7 @@ export class HookObject<T extends WabeAppTypes, K = keyof T['types']> {
 		newData?: MutationData<T>
 		operationType: OperationType
 		context: WabeContext<T>
-		object: Record<keyof WabeAppTypes['types'][T], any>
+		object: Record<keyof WabeTypes['types'][T], any>
 	}) {
 		this.newData = newData
 		// We need to cast the className to use it in comparaison
@@ -36,11 +36,11 @@ export class HookObject<T extends WabeAppTypes, K = keyof T['types']> {
 		return this.context.user
 	}
 
-	isFieldUpdate(field: keyof WabeAppTypes['types'][T]) {
+	isFieldUpdate(field: keyof WabeTypes['types'][T]) {
 		return this.newData && !!this.newData[field]
 	}
 
-	upsertNewData(field: keyof WabeAppTypes['types'][T], value: any) {
+	upsertNewData(field: keyof WabeTypes['types'][T], value: any) {
 		if (!this.newData) return
 
 		if (!this.operationType.includes('before'))

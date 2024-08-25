@@ -1,7 +1,7 @@
 import type { User } from '../../generated/wabe'
 import type { WabeContext } from '../server/interface'
 import type { SchemaFields } from '../schema'
-import type { WabeAppTypes } from '../server'
+import type { WabeTypes } from '../server'
 
 export enum ProviderEnum {
 	google = 'google',
@@ -39,7 +39,7 @@ export type SecondaryProviderInterface<T = any> = {
 }
 
 export type CustomAuthenticationMethods<
-	T extends WabeAppTypes,
+	T extends WabeTypes,
 	U = ProviderInterface | SecondaryProviderInterface,
 	K = SchemaFields<T>,
 	W = SchemaFields<T>,
@@ -68,7 +68,7 @@ export interface SessionConfig {
 	cookieSession?: boolean
 }
 
-export interface AuthenticationConfig<T extends WabeAppTypes> {
+export interface AuthenticationConfig<T extends WabeTypes> {
 	session?: SessionConfig
 	roles?: RoleConfig
 	successRedirectPath?: string

@@ -3,7 +3,7 @@ import {
 	defaultBeforeCreateUpload,
 	defaultBeforeUpdateUpload,
 } from '../files/hookUploadFile'
-import type { WabeAppTypes, WabeConfig } from '../server'
+import type { WabeTypes, WabeConfig } from '../server'
 import type { WabeContext } from '../server/interface'
 import { HookObject } from './HookObject'
 import {
@@ -37,7 +37,7 @@ export enum OperationType {
 	BeforeRead = 'beforeRead',
 }
 
-export type Hook<T extends WabeAppTypes> = {
+export type Hook<T extends WabeTypes> = {
 	operationType: OperationType
 	// If the className is undefined the hook is called on each class
 	className?: T
@@ -48,14 +48,12 @@ export type Hook<T extends WabeAppTypes> = {
 	callback: (hookObject: HookObject<T>) => Promise<void> | void
 }
 
-export type TypedNewData<T extends keyof WabeAppTypes['types']> = Record<
-	keyof WabeAppTypes['types'][T],
+export type TypedNewData<T extends keyof WabeTypes['types']> = Record<
+	keyof WabeTypes['types'][T],
 	any
 >
 
-export const _findHooksByPriority = async <
-	T extends keyof WabeAppTypes['types'],
->({
+export const _findHooksByPriority = async <T extends keyof WabeTypes['types']>({
 	className,
 	operationType,
 	priority,
@@ -82,7 +80,7 @@ const _getHooksOrderByPriorities = (config: WabeConfig<any>) =>
 		}, [] as number[])
 		.sort((a, b) => a - b) || []
 
-export const initializeHook = <T extends keyof WabeAppTypes['types']>({
+export const initializeHook = <T extends keyof WabeTypes['types']>({
 	className,
 	newData,
 	context,

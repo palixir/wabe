@@ -5,17 +5,17 @@ import { gql } from 'graphql-request'
 import { v4 as uuid } from 'uuid'
 import { DatabaseEnum } from '../database'
 import { Schema, type SchemaInterface } from '../schema'
-import { WabeApp } from '../server'
-import { type DevWabeAppTypes, getGraphqlClient } from '../utils/helper'
+import { Wabe } from '../server'
+import { type DevWabeTypes, getGraphqlClient } from '../utils/helper'
 import { GraphQLSchema as WabeGraphQLSchema } from './GraphQLSchema'
 import { getTypeFromGraphQLSchema } from './parseGraphqlSchema'
 
-const createWabeApp = async (schema: SchemaInterface<DevWabeAppTypes>) => {
+const createWabe = async (schema: SchemaInterface<DevWabeTypes>) => {
 	const databaseId = uuid()
 
 	const port = await getPort()
 
-	const wabeApp = new WabeApp({
+	const wabeApp = new Wabe({
 		port,
 		schema,
 		rootKey:
@@ -187,7 +187,7 @@ describe('GraphqlSchema', () => {
 	})
 
 	it('should use the searchUsers to search all testClasses for corresponding term', async () => {
-		const { client, wabeApp } = await createWabeApp({
+		const { client, wabeApp } = await createWabe({
 			classes: [
 				{
 					name: 'TestClass',
@@ -305,7 +305,7 @@ describe('GraphqlSchema', () => {
 	})
 
 	it('should count all elements corresponding to where object', async () => {
-		const { client, wabeApp } = await createWabeApp({
+		const { client, wabeApp } = await createWabe({
 			classes: [
 				{
 					name: 'TestClass',
@@ -360,7 +360,7 @@ describe('GraphqlSchema', () => {
 	})
 
 	it('should request an object with pointer in same class (issue #5)', async () => {
-		const { client, wabeApp } = await createWabeApp({
+		const { client, wabeApp } = await createWabe({
 			classes: [],
 		})
 
@@ -464,7 +464,7 @@ describe('GraphqlSchema', () => {
 	})
 
 	it('should support an array of object in graphql schema', async () => {
-		const { client, wabeApp } = await createWabeApp({
+		const { client, wabeApp } = await createWabe({
 			classes: [
 				{
 					name: 'TestClass',
@@ -508,7 +508,7 @@ describe('GraphqlSchema', () => {
 	})
 
 	it('should return an array in a query', async () => {
-		const { client, wabeApp } = await createWabeApp({
+		const { client, wabeApp } = await createWabe({
 			classes: [
 				{
 					name: 'TestClass',
@@ -545,7 +545,7 @@ describe('GraphqlSchema', () => {
 	})
 
 	it('should return an object in a query', async () => {
-		const { client, wabeApp } = await createWabeApp({
+		const { client, wabeApp } = await createWabe({
 			classes: [
 				{
 					name: 'TestClass',
@@ -590,7 +590,7 @@ describe('GraphqlSchema', () => {
 	})
 
 	it('should return an array in a mutation', async () => {
-		const { client, wabeApp } = await createWabeApp({
+		const { client, wabeApp } = await createWabe({
 			classes: [
 				{
 					name: 'TestClass',
@@ -627,7 +627,7 @@ describe('GraphqlSchema', () => {
 	})
 
 	it('should return an object in a mutation', async () => {
-		const { client, wabeApp } = await createWabeApp({
+		const { client, wabeApp } = await createWabe({
 			classes: [
 				{
 					name: 'TestClass',
@@ -672,7 +672,7 @@ describe('GraphqlSchema', () => {
 	})
 
 	it('should have a custom enum as value in type', async () => {
-		const { client, wabeApp } = await createWabeApp({
+		const { client, wabeApp } = await createWabe({
 			classes: [
 				{
 					name: 'TestClass',
@@ -1048,7 +1048,7 @@ describe('GraphqlSchema', () => {
 	})
 
 	it('should create mutation with sub input', async () => {
-		const { client, wabeApp } = await createWabeApp({
+		const { client, wabeApp } = await createWabe({
 			classes: [
 				{
 					name: 'TestClass',
@@ -1101,7 +1101,7 @@ describe('GraphqlSchema', () => {
 	})
 
 	it('should create mutation with sub sub input', async () => {
-		const { client, wabeApp } = await createWabeApp({
+		const { client, wabeApp } = await createWabe({
 			classes: [
 				{
 					name: 'TestClass',
@@ -1165,7 +1165,7 @@ describe('GraphqlSchema', () => {
 	})
 
 	it('should create custom mutation with sub object and correct input name', async () => {
-		const { client, wabeApp } = await createWabeApp({
+		const { client, wabeApp } = await createWabe({
 			classes: [
 				{
 					name: 'TestClass',
@@ -1241,7 +1241,7 @@ describe('GraphqlSchema', () => {
 	})
 
 	it('should create a sub object with the good type', async () => {
-		const { client, wabeApp } = await createWabeApp({
+		const { client, wabeApp } = await createWabe({
 			classes: [
 				{
 					name: 'TestClass',
@@ -1311,7 +1311,7 @@ describe('GraphqlSchema', () => {
 	})
 
 	it('should create an object with a pointer (createAndLink)', async () => {
-		const { client, wabeApp } = await createWabeApp({
+		const { client, wabeApp } = await createWabe({
 			classes: [
 				{
 					name: 'TestClass',
@@ -1367,7 +1367,7 @@ describe('GraphqlSchema', () => {
 	})
 
 	it('should link an object to a pointer', async () => {
-		const { client, wabeApp } = await createWabeApp({
+		const { client, wabeApp } = await createWabe({
 			classes: [
 				{
 					name: 'TestClass',
@@ -1442,7 +1442,7 @@ describe('GraphqlSchema', () => {
 	})
 
 	it('should link a pointer on create multiple object', async () => {
-		const { client, wabeApp } = await createWabeApp({
+		const { client, wabeApp } = await createWabe({
 			classes: [
 				{
 					name: 'TestClass',
@@ -1504,7 +1504,7 @@ describe('GraphqlSchema', () => {
 	})
 
 	it('should filter an object (on query) with pointer field', async () => {
-		const { client, wabeApp } = await createWabeApp({
+		const { client, wabeApp } = await createWabe({
 			classes: [
 				{
 					name: 'TestClass',
@@ -1577,7 +1577,7 @@ describe('GraphqlSchema', () => {
 	})
 
 	it('should filter an object (on updates) with pointer field', async () => {
-		const { client, wabeApp } = await createWabeApp({
+		const { client, wabeApp } = await createWabe({
 			classes: [
 				{
 					name: 'TestClass',
@@ -1653,7 +1653,7 @@ describe('GraphqlSchema', () => {
 	})
 
 	it('should filter an object (on deletes) with pointer field', async () => {
-		const { client, wabeApp } = await createWabeApp({
+		const { client, wabeApp } = await createWabe({
 			classes: [
 				{
 					name: 'TestClass',
@@ -1728,7 +1728,7 @@ describe('GraphqlSchema', () => {
 	})
 
 	it('should create and link a pointer on update', async () => {
-		const { client, wabeApp } = await createWabeApp({
+		const { client, wabeApp } = await createWabe({
 			classes: [
 				{
 					name: 'TestClass',
@@ -1812,7 +1812,7 @@ describe('GraphqlSchema', () => {
 	})
 
 	it('should link a pointer on update', async () => {
-		const { client, wabeApp } = await createWabeApp({
+		const { client, wabeApp } = await createWabe({
 			classes: [
 				{
 					name: 'TestClass',
@@ -1899,7 +1899,7 @@ describe('GraphqlSchema', () => {
 	})
 
 	it('should link a pointer on update multiple object', async () => {
-		const { client, wabeApp } = await createWabeApp({
+		const { client, wabeApp } = await createWabe({
 			classes: [
 				{
 					name: 'TestClass',
@@ -1980,7 +1980,7 @@ describe('GraphqlSchema', () => {
 	})
 
 	it('should return pointer data on delete an element', async () => {
-		const { client, wabeApp } = await createWabeApp({
+		const { client, wabeApp } = await createWabe({
 			classes: [
 				{
 					name: 'TestClass',
@@ -2055,7 +2055,7 @@ describe('GraphqlSchema', () => {
 	})
 
 	it('should createAndAdd an object on a relation field (on create)', async () => {
-		const { client, wabeApp } = await createWabeApp({
+		const { client, wabeApp } = await createWabe({
 			classes: [
 				{
 					name: 'TestClass',
@@ -2114,7 +2114,7 @@ describe('GraphqlSchema', () => {
 	})
 
 	it('should add an object on a relation field (on create)', async () => {
-		const { client, wabeApp } = await createWabeApp({
+		const { client, wabeApp } = await createWabe({
 			classes: [
 				{
 					name: 'TestClass',
@@ -2183,7 +2183,7 @@ describe('GraphqlSchema', () => {
 	})
 
 	it('should createAndAdd an object on a relation field (on createMany)', async () => {
-		const { client, wabeApp } = await createWabeApp({
+		const { client, wabeApp } = await createWabe({
 			classes: [
 				{
 					name: 'TestClass',
@@ -2246,7 +2246,7 @@ describe('GraphqlSchema', () => {
 	})
 
 	it('should add an object on a relation field (on createMany)', async () => {
-		const { client, wabeApp } = await createWabeApp({
+		const { client, wabeApp } = await createWabe({
 			classes: [
 				{
 					name: 'TestClass',
@@ -2320,7 +2320,7 @@ describe('GraphqlSchema', () => {
 	})
 
 	it('should createAndAdd an object on a relation field (on update)', async () => {
-		const { client, wabeApp } = await createWabeApp({
+		const { client, wabeApp } = await createWabe({
 			classes: [
 				{
 					name: 'TestClass',
@@ -2392,7 +2392,7 @@ describe('GraphqlSchema', () => {
 	})
 
 	it('should add an object on a relation field (on update)', async () => {
-		const { client, wabeApp } = await createWabeApp({
+		const { client, wabeApp } = await createWabe({
 			classes: [
 				{
 					name: 'TestClass',
@@ -2474,7 +2474,7 @@ describe('GraphqlSchema', () => {
 	})
 
 	it('should remove an object on a relation field (on update)', async () => {
-		const { client, wabeApp } = await createWabeApp({
+		const { client, wabeApp } = await createWabe({
 			classes: [
 				{
 					name: 'TestClass',
@@ -2560,7 +2560,7 @@ describe('GraphqlSchema', () => {
 	})
 
 	it('should createAndAdd an object on a relation field (on updateMany)', async () => {
-		const { client, wabeApp } = await createWabeApp({
+		const { client, wabeApp } = await createWabe({
 			classes: [
 				{
 					name: 'TestClass',
@@ -2634,7 +2634,7 @@ describe('GraphqlSchema', () => {
 	})
 
 	it('should add an object on a relation field (on updateMany)', async () => {
-		const { client, wabeApp } = await createWabeApp({
+		const { client, wabeApp } = await createWabe({
 			classes: [
 				{
 					name: 'TestClass',
@@ -2718,7 +2718,7 @@ describe('GraphqlSchema', () => {
 	})
 
 	it('should remove an object on a relation field (on updateMany)', async () => {
-		const { client, wabeApp } = await createWabeApp({
+		const { client, wabeApp } = await createWabe({
 			classes: [
 				{
 					name: 'TestClass',
@@ -2806,7 +2806,7 @@ describe('GraphqlSchema', () => {
 	})
 
 	it('should remove an object on a relation field (on updateMany)', async () => {
-		const { client, wabeApp } = await createWabeApp({
+		const { client, wabeApp } = await createWabe({
 			classes: [
 				{
 					name: 'TestClass',

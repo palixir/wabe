@@ -27,8 +27,8 @@ import {
 	StringWhereInput,
 } from '../graphql'
 import type { ClassInterface, SchemaFields, WabePrimaryTypes } from '../schema'
-import type { WabeAppTypes } from '../server'
-import type { DevWabeAppTypes } from '../utils/helper'
+import type { WabeTypes } from '../server'
+import type { DevWabeTypes } from '../utils/helper'
 
 type GraphqlObjectType =
 	| 'Object'
@@ -73,7 +73,7 @@ export const templateWhereInput: Record<
 interface GraphqlParserFactoryOptions {
 	graphqlObjectType: GraphqlObjectType
 	allObjects: AllObjects
-	schemaFields: SchemaFields<DevWabeAppTypes>
+	schemaFields: SchemaFields<DevWabeTypes>
 }
 
 interface GraphqlParserConstructorOptions {
@@ -113,7 +113,7 @@ export const GraphqlParser: GraphqlParserConstructor =
 			isWhereType = false,
 			nameOfTheObject,
 		}: {
-			objectToParse: ClassInterface<DevWabeAppTypes>
+			objectToParse: ClassInterface<DevWabeTypes>
 			forceRequiredToFalse?: boolean
 			isWhereType?: boolean
 			callBackForObjectType: ParseObjectCallback
@@ -357,8 +357,8 @@ export const GraphqlParser: GraphqlParserConstructor =
 			type:
 				| WabePrimaryTypes
 				| 'Array'
-				| WabeAppTypes['enums']
-				| WabeAppTypes['scalars']
+				| WabeTypes['enums']
+				| WabeTypes['scalars']
 			typeValue?: WabePrimaryTypes
 			requiredValue?: boolean
 			isWhereType?: boolean

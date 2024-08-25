@@ -1,11 +1,11 @@
 import type { WabeContext } from '../../server/interface'
-import type { DevWabeAppTypes } from '../../utils/helper'
+import type { DevWabeTypes } from '../../utils/helper'
 import { Session } from '../Session'
 
 export const refreshResolver = async (
 	_: any,
 	args: any,
-	context: WabeContext<DevWabeAppTypes>,
+	context: WabeContext<DevWabeTypes>,
 ) => {
 	const {
 		input: { refreshToken, accessToken },

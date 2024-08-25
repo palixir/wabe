@@ -1,5 +1,5 @@
 import { runDatabase } from 'wabe-mongodb-launcher'
-import { WabeApp } from '../src'
+import { Wabe } from '../src'
 import { DatabaseEnum } from '../src/database'
 import type {
 	WabeSchemaEnums,
@@ -10,7 +10,7 @@ import type {
 const run = async () => {
 	await runDatabase()
 
-	const wabe = new WabeApp<{
+	const wabe = new Wabe<{
 		types: WabeSchemaTypes
 		scalars: WabeSchemaScalars
 		enums: WabeSchemaEnums

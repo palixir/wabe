@@ -6,7 +6,7 @@ import {
 import { refreshResolver } from '../authentication/resolvers/refreshResolver'
 import { signOutResolver } from '../authentication/resolvers/signOutResolver'
 import { verifyChallengeResolver } from '../authentication/resolvers/verifyChallenge'
-import type { WabeConfig, WabeAppTypes } from '../server'
+import type { WabeConfig, WabeTypes } from '../server'
 import { meResolver } from './resolvers/meResolver'
 
 export type WabePrimaryTypes =
@@ -22,23 +22,26 @@ export type WabeCustomTypes = 'Array' | 'Object'
 
 export type WabeRelationTypes = 'Pointer' | 'Relation'
 
-export type WabeTypes = WabeCustomTypes | WabePrimaryTypes | WabeRelationTypes
+export type WabeSchemaTypes =
+	| WabeCustomTypes
+	| WabePrimaryTypes
+	| WabeRelationTypes
 
-type WabeObject<T extends WabeAppTypes> = {
+type WabeObject<T extends WabeTypes> = {
 	name: string
 	fields: SchemaFields<T>
 	description?: string
 	required?: boolean
 }
 
-type TypeFieldBase<U, K extends WabeTypes> = {
+type TypeFieldBase<U, K extends WabeSchemaTypes> = {
 	type: K
 	required?: boolean
 	description?: string
 	defaultValue?: U
 }
 
-type TypeFieldArray<T extends WabeAppTypes> = {
+type TypeFieldArray<T extends WabeTypes> = {
 	type: 'Array'
 	required?: boolean
 	requiredValue?: boolean
@@ -53,7 +56,7 @@ type TypeFieldArray<T extends WabeAppTypes> = {
 	| { typeValue: 'Object'; object: WabeObject<T> }
 )
 
-type TypeFieldObject<T extends WabeAppTypes> = {
+type TypeFieldObject<T extends WabeTypes> = {
 	type: 'Object'
 	required?: boolean
 	description?: string
@@ -61,14 +64,14 @@ type TypeFieldObject<T extends WabeAppTypes> = {
 	defaultValue?: any
 }
 
-type TypeFieldPointer<T extends WabeAppTypes> = {
+type TypeFieldPointer<T extends WabeTypes> = {
 	type: 'Pointer'
 	required?: boolean
 	description?: string
 	class: keyof T['types']
 }
 
-type TypeFieldRelation<T extends WabeAppTypes> = {
+type TypeFieldRelation<T extends WabeTypes> = {
 	type: 'Relation'
 	required?: boolean
 	description?: string
@@ -81,21 +84,21 @@ type TypeFieldFile = {
 	description?: string
 }
 
-type TypeFieldCustomScalars<T extends WabeAppTypes> = {
+type TypeFieldCustomScalars<T extends WabeTypes> = {
 	type: T['scalars']
 	required?: boolean
 	description?: string
 	defaultValue?: any
 }
 
-type TypeFieldCustomEnums<T extends WabeAppTypes> = {
+type TypeFieldCustomEnums<T extends WabeTypes> = {
 	type: T['enums']
 	required?: boolean
 	description?: string
 	defaultValue?: any
 }
 
-export type TypeField<T extends WabeAppTypes> =
+export type TypeField<T extends WabeTypes> =
 	| TypeFieldBase<string, 'String'>
 	| TypeFieldBase<number, 'Int'>
 	| TypeFieldBase<number, 'Float'>
@@ -110,9 +113,9 @@ export type TypeField<T extends WabeAppTypes> =
 	| TypeFieldCustomScalars<T>
 	| TypeFieldCustomEnums<T>
 
-export type SchemaFields<T extends WabeAppTypes> = Record<string, TypeField<T>>
+export type SchemaFields<T extends WabeTypes> = Record<string, TypeField<T>>
 
-export type QueryResolver<T extends WabeAppTypes> = {
+export type QueryResolver<T extends WabeTypes> = {
 	required?: boolean
 	description?: string
 	args?: SchemaFields<T>
@@ -123,7 +126,7 @@ export type QueryResolver<T extends WabeAppTypes> = {
 	| { type: 'Array'; typeValue: WabePrimaryTypes }
 )
 
-export type MutationResolver<T extends WabeAppTypes> = {
+export type MutationResolver<T extends WabeTypes> = {
 	required?: boolean
 	description?: string
 	args?: {
@@ -136,7 +139,7 @@ export type MutationResolver<T extends WabeAppTypes> = {
 	| { type: 'Array'; typeValue: WabePrimaryTypes }
 )
 
-export type TypeResolver<T extends WabeAppTypes> = {
+export type TypeResolver<T extends WabeTypes> = {
 	queries?: {
 		[key: string]: QueryResolver<T>
 	}
@@ -168,7 +171,7 @@ export type ClassIndexes = Array<{
 	unique?: boolean
 }>
 
-export interface ClassInterface<T extends WabeAppTypes> {
+export interface ClassInterface<T extends WabeTypes> {
 	name: string
 	fields: SchemaFields<T>
 	description?: string
@@ -191,14 +194,14 @@ export interface EnumInterface {
 	description?: string
 }
 
-export interface SchemaInterface<T extends WabeAppTypes> {
+export interface SchemaInterface<T extends WabeTypes> {
 	classes: ClassInterface<T>[]
 	scalars?: ScalarInterface[]
 	enums?: EnumInterface[]
 	resolvers?: TypeResolver<T>
 }
 
-export class Schema<T extends WabeAppTypes> {
+export class Schema<T extends WabeTypes> {
 	public schema: SchemaInterface<T>
 	private config: WabeConfig<T>
 

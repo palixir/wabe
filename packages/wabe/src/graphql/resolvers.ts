@@ -1,5 +1,5 @@
 import type { GraphQLResolveInfo, SelectionSetNode } from 'graphql'
-import type { WabeAppTypes } from '..'
+import type { WabeTypes } from '..'
 import type { WabeContext } from '../server/interface'
 import { firstLetterInLowerCase, tokenize } from '../utils'
 import {
@@ -135,7 +135,7 @@ export const queryForOneObject = (
 	{ id }: any,
 	context: WabeContext<any>,
 	info: GraphQLResolveInfo,
-	className: keyof WabeAppTypes['types'],
+	className: keyof WabeTypes['types'],
 ) => {
 	const fields = getFieldsFromInfo(info, className)
 
@@ -152,7 +152,7 @@ export const queryForMultipleObject = async (
 	{ where, offset, first }: any,
 	context: WabeContext<any>,
 	info: GraphQLResolveInfo,
-	className: keyof WabeAppTypes['types'],
+	className: keyof WabeTypes['types'],
 ) => {
 	const fields = getFieldsFromInfo(info, className)
 
@@ -184,7 +184,7 @@ export const mutationToCreateObject = async (
 	args: any,
 	context: WabeContext<any>,
 	info: GraphQLResolveInfo,
-	className: keyof WabeAppTypes['types'],
+	className: keyof WabeTypes['types'],
 ) => {
 	const fields = getFieldsFromInfo(info, className)
 
@@ -210,7 +210,7 @@ export const mutationToCreateMultipleObjects = async (
 	args: any,
 	context: WabeContext<any>,
 	info: GraphQLResolveInfo,
-	className: keyof WabeAppTypes['types'],
+	className: keyof WabeTypes['types'],
 ) => {
 	const fields = getFieldsFromInfo(info, className)
 	const inputFields = args.input?.fields as Array<any>
@@ -244,7 +244,7 @@ export const mutationToUpdateObject = async (
 	args: any,
 	context: WabeContext<any>,
 	info: GraphQLResolveInfo,
-	className: keyof WabeAppTypes['types'],
+	className: keyof WabeTypes['types'],
 ) => {
 	const fields = getFieldsFromInfo(info, className)
 
@@ -273,7 +273,7 @@ export const mutationToUpdateMultipleObjects = async (
 	args: any,
 	context: WabeContext<any>,
 	info: GraphQLResolveInfo,
-	className: keyof WabeAppTypes['types'],
+	className: keyof WabeTypes['types'],
 ) => {
 	const fields = getFieldsFromInfo(info, className)
 
@@ -305,7 +305,7 @@ export const mutationToDeleteObject = async (
 	args: any,
 	context: WabeContext<any>,
 	info: GraphQLResolveInfo,
-	className: keyof WabeAppTypes['types'],
+	className: keyof WabeTypes['types'],
 ) => {
 	const fields = getFieldsFromInfo(info, className)
 
@@ -325,7 +325,7 @@ export const mutationToDeleteMultipleObjects = async (
 	args: any,
 	context: WabeContext<any>,
 	info: GraphQLResolveInfo,
-	className: keyof WabeAppTypes['types'],
+	className: keyof WabeTypes['types'],
 ) => {
 	const fields = getFieldsFromInfo(info, className)
 

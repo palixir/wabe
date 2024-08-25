@@ -9,7 +9,7 @@ import type {
 	ScalarInterface,
 	SchemaInterface,
 } from '../schema'
-import type { DevWabeAppTypes } from '../utils/helper'
+import type { DevWabeTypes } from '../utils/helper'
 
 export const generateWabeFile = ({
 	scalars,
@@ -18,7 +18,7 @@ export const generateWabeFile = ({
 }: {
 	enums?: EnumInterface[]
 	scalars?: ScalarInterface[]
-	classes: ClassInterface<DevWabeAppTypes>[]
+	classes: ClassInterface<DevWabeTypes>[]
 }) => {
 	// Scalars
 	const listOfScalars = scalars?.map((scalar) => `"${scalar.name}"`) || []

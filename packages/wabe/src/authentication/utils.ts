@@ -1,4 +1,4 @@
-import type { WabeAppTypes } from '../server'
+import type { WabeTypes } from '../server'
 import type { WabeContext } from '../server/interface'
 import type {
 	CustomAuthenticationMethods,
@@ -7,7 +7,7 @@ import type {
 } from './interface'
 
 export const getAuthenticationMethod = <
-	T extends WabeAppTypes,
+	T extends WabeTypes,
 	U extends ProviderInterface | SecondaryProviderInterface,
 >(
 	listOfMethods: string[],

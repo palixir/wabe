@@ -14,12 +14,12 @@ import type {
 	OutputType,
 	CountOptions,
 } from './adaptersInterface'
-import type { WabeAppTypes } from '../../server'
+import type { WabeTypes } from '../../server'
 import type { WabeContext } from '../../server/interface'
 
 export const buildMongoWhereQuery = <
-	T extends keyof WabeAppTypes['types'],
-	K extends keyof WabeAppTypes['types'][T],
+	T extends keyof WabeTypes['types'],
+	K extends keyof WabeTypes['types'][T],
 >(
 	where?: WhereType<T, K>,
 ): Record<string, any> => {
@@ -115,7 +115,7 @@ export const buildMongoWhereQuery = <
 	)
 }
 
-export class MongoAdapter<T extends WabeAppTypes> implements DatabaseAdapter {
+export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter {
 	public options: AdapterOptions
 	public database?: Db
 	private client: MongoClient

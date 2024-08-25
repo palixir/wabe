@@ -9,13 +9,13 @@ import {
 	beforeEach,
 	type Mock,
 } from 'bun:test'
-import type { WabeApp } from '../server'
-import { type DevWabeAppTypes, setupTests, closeTests } from '../utils/helper'
+import type { Wabe } from '../server'
+import { type DevWabeTypes, setupTests, closeTests } from '../utils/helper'
 import type { WabeContext } from '../server/interface'
 import { OperationType, getDefaultHooks } from '../hooks'
 
 describe('Database', () => {
-	let wabe: WabeApp<DevWabeAppTypes>
+	let wabe: Wabe<DevWabeTypes>
 	let context: WabeContext<any>
 
 	const mockUpdateObject = mock(async () => {

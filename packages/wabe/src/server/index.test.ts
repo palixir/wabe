@@ -1,7 +1,7 @@
 import { describe, expect, it, spyOn } from 'bun:test'
 import { v4 as uuid } from 'uuid'
 import getPort from 'get-port'
-import { WabeApp } from '.'
+import { Wabe } from '.'
 import { DatabaseEnum } from '../database'
 import { Schema } from '../schema'
 
@@ -10,7 +10,7 @@ describe('Server', () => {
 		const databaseId = uuid()
 
 		const port = await getPort()
-		const wabe = new WabeApp({
+		const wabe = new Wabe({
 			rootKey:
 				'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
 			database: {
@@ -37,7 +37,7 @@ describe('Server', () => {
 		await wabe.close()
 	})
 
-	it('should update the schema to static WabeApp after the Schema initialization', async () => {
+	it('should update the schema to static Wabe after the Schema initialization', async () => {
 		const spySchemaDefaultClass = spyOn(Schema.prototype, 'defaultClass')
 		const spySchemaDefaultEnum = spyOn(Schema.prototype, 'defaultEnum')
 
@@ -45,7 +45,7 @@ describe('Server', () => {
 
 		const port = await getPort()
 
-		const wabe = new WabeApp({
+		const wabe = new Wabe({
 			rootKey:
 				'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
 			database: {

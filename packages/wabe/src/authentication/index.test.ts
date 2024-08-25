@@ -1,8 +1,8 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'bun:test'
 import { type GraphQLClient, gql } from 'graphql-request'
-import type { WabeApp } from '..'
+import type { Wabe } from '..'
 import {
-	type DevWabeAppTypes,
+	type DevWabeTypes,
 	closeTests,
 	getAnonymousClient,
 	getGraphqlClient,
@@ -68,7 +68,7 @@ const createUserAndUpdateRole = async ({
 }
 
 describe('Authentication', () => {
-	let wabe: WabeApp<DevWabeAppTypes>
+	let wabe: Wabe<DevWabeTypes>
 	let port: number
 	let client: GraphQLClient
 	let rootClient: GraphQLClient

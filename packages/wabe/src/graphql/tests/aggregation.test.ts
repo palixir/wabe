@@ -1,8 +1,8 @@
 import { beforeAll, afterAll, describe, it, expect } from 'bun:test'
 import { type GraphQLClient, gql } from 'graphql-request'
-import type { WabeApp } from '../../server'
+import type { Wabe } from '../../server'
 import {
-	type DevWabeAppTypes,
+	type DevWabeTypes,
 	closeTests,
 	getGraphqlClient,
 	setupTests,
@@ -42,7 +42,7 @@ const graphql = {
 }
 
 describe('GraphQL : aggregation', () => {
-	let wabe: WabeApp<DevWabeAppTypes>
+	let wabe: Wabe<DevWabeTypes>
 	let port: number
 	let client: GraphQLClient
 

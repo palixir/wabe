@@ -5,7 +5,7 @@ import {
 	stringExtraction,
 } from './searchableFields'
 import { HookObject } from './HookObject'
-import type { DevWabeAppTypes } from '../utils/helper'
+import type { DevWabeTypes } from '../utils/helper'
 import { OperationType } from '.'
 
 describe('searchablesFields', () => {
@@ -30,7 +30,7 @@ describe('searchablesFields', () => {
 	})
 
 	it('should complete the search fields of each object on insert', async () => {
-		const hookObject = new HookObject<DevWabeAppTypes>({
+		const hookObject = new HookObject<DevWabeTypes>({
 			className: 'User',
 			operationType: OperationType.BeforeCreate,
 			newData: {
@@ -68,7 +68,7 @@ describe('searchablesFields', () => {
 	})
 
 	it('should complete the search fields of each object on update', async () => {
-		const hookObject = new HookObject<DevWabeAppTypes>({
+		const hookObject = new HookObject<DevWabeTypes>({
 			className: 'User',
 			operationType: OperationType.BeforeUpdate,
 			newData: {

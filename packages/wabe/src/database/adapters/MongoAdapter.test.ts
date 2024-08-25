@@ -9,18 +9,14 @@ import {
 } from 'bun:test'
 import { fail } from 'node:assert'
 import { ObjectId } from 'mongodb'
-import type { WabeApp } from '../..'
-import {
-	type DevWabeAppTypes,
-	closeTests,
-	setupTests,
-} from '../../utils/helper'
+import type { Wabe } from '../..'
+import { type DevWabeTypes, closeTests, setupTests } from '../../utils/helper'
 import { type MongoAdapter, buildMongoWhereQuery } from './MongoAdapter'
 import type { WabeContext } from '../../server/interface'
 
 describe('Mongo adapter', () => {
-	let mongoAdapter: MongoAdapter<DevWabeAppTypes>
-	let wabe: WabeApp<DevWabeAppTypes>
+	let mongoAdapter: MongoAdapter<DevWabeTypes>
+	let wabe: Wabe<DevWabeTypes>
 	let context: WabeContext<any>
 
 	beforeAll(async () => {

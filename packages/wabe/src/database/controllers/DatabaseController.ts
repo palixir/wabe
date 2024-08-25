@@ -1,4 +1,4 @@
-import type { WabeAppTypes } from '../..'
+import type { WabeTypes } from '../..'
 import { InMemoryCache } from '../../cache/InMemoryCache'
 import { OperationType, initializeHook } from '../../hooks'
 import type { WabeContext } from '../../server/interface'
@@ -31,7 +31,7 @@ interface PointerFields {
 	pointers: PointerObject
 }
 
-export class DatabaseController<T extends WabeAppTypes> {
+export class DatabaseController<T extends WabeTypes> {
 	public adapter: DatabaseAdapter
 	public inMemoryCache: InMemoryCache<OutputType<any, any> | undefined>
 

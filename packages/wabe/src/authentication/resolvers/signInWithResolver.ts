@@ -1,6 +1,6 @@
 import type { SignInWithInput } from '../../../generated/wabe'
 import type { WabeContext } from '../../server/interface'
-import type { DevWabeAppTypes } from '../../utils/helper'
+import type { DevWabeTypes } from '../../utils/helper'
 import { Session } from '../Session'
 import type {
 	ProviderInterface,
@@ -19,10 +19,10 @@ export const signInWithResolver = async (
 	}: {
 		input: SignInWithInput
 	},
-	context: WabeContext<DevWabeAppTypes>,
+	context: WabeContext<DevWabeTypes>,
 ) => {
 	const { provider, name } = getAuthenticationMethod<
-		DevWabeAppTypes,
+		DevWabeTypes,
 		ProviderInterface
 	>(Object.keys(input.authentication || {}), context)
 
@@ -43,7 +43,7 @@ export const signInWithResolver = async (
 	// 2 - We call the onSendChallenge method of the provider
 	if (input.authentication?.secondaryFactor) {
 		const secondaryProvider = getAuthenticationMethod<
-			DevWabeAppTypes,
+			DevWabeTypes,
 			SecondaryProviderInterface
 		>([input.authentication.secondaryFactor], context)
 

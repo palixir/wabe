@@ -12,7 +12,7 @@ import {
 	GraphQLString,
 } from 'graphql'
 import { pluralize } from 'wabe-pluralize'
-import type { WabeAppTypes } from '..'
+import type { WabeTypes } from '..'
 import type {
 	ClassInterface,
 	MutationResolver,
@@ -20,7 +20,7 @@ import type {
 	Schema,
 } from '../schema'
 import { firstLetterInLowerCase } from '../utils'
-import type { DevWabeAppTypes } from '../utils/helper'
+import type { DevWabeTypes } from '../utils/helper'
 import { GraphqlParser, type GraphqlParserFactory } from './parser'
 import {
 	mutationToCreateMultipleObjects,
@@ -47,7 +47,7 @@ type AllPossibleObject =
 export type AllObjects = Record<string, Record<AllPossibleObject, any>>
 
 export class GraphQLSchema {
-	private schemas: Schema<DevWabeAppTypes>
+	private schemas: Schema<DevWabeTypes>
 
 	private allObjects: AllObjects
 
@@ -203,7 +203,7 @@ export class GraphQLSchema {
 		wabeClass,
 		graphqlParser,
 	}: {
-		wabeClass: ClassInterface<DevWabeAppTypes>
+		wabeClass: ClassInterface<DevWabeTypes>
 		graphqlParser: GraphqlParserFactory
 	}) {
 		const { name, fields, description } = wabeClass
@@ -231,7 +231,7 @@ export class GraphQLSchema {
 		wabeClass,
 		inputCreateFields,
 	}: {
-		wabeClass: ClassInterface<DevWabeAppTypes>
+		wabeClass: ClassInterface<DevWabeTypes>
 		inputCreateFields: GraphQLInputObjectType
 	}) {
 		const { name } = wabeClass
@@ -252,7 +252,7 @@ export class GraphQLSchema {
 		wabeClass,
 		inputCreateFields,
 	}: {
-		wabeClass: ClassInterface<DevWabeAppTypes>
+		wabeClass: ClassInterface<DevWabeTypes>
 		inputCreateFields: GraphQLInputObjectType
 	}) {
 		const { name } = wabeClass
@@ -280,7 +280,7 @@ export class GraphQLSchema {
 		wabeClass,
 		graphqlParser,
 	}: {
-		wabeClass: ClassInterface<DevWabeAppTypes>
+		wabeClass: ClassInterface<DevWabeTypes>
 		graphqlParser: GraphqlParserFactory
 	}) {
 		const { name, fields, description } = wabeClass
@@ -306,7 +306,7 @@ export class GraphQLSchema {
 		wabeClass,
 		graphqlParser,
 	}: {
-		wabeClass: ClassInterface<DevWabeAppTypes>
+		wabeClass: ClassInterface<DevWabeTypes>
 		graphqlParser: GraphqlParserFactory
 	}) {
 		const { name, fields, description } = wabeClass
@@ -332,7 +332,7 @@ export class GraphQLSchema {
 		wabeClass,
 		graphqlParser,
 	}: {
-		wabeClass: ClassInterface<DevWabeAppTypes>
+		wabeClass: ClassInterface<DevWabeTypes>
 		graphqlParser: GraphqlParserFactory
 	}) {
 		const { name, fields, description } = wabeClass
@@ -358,7 +358,7 @@ export class GraphQLSchema {
 		wabeClass,
 		graphqlParser,
 	}: {
-		wabeClass: ClassInterface<DevWabeAppTypes>
+		wabeClass: ClassInterface<DevWabeTypes>
 		graphqlParser: GraphqlParserFactory
 	}) {
 		const { name, fields, description } = wabeClass
@@ -398,7 +398,7 @@ export class GraphQLSchema {
 		wabeClass,
 	}: {
 		object: GraphQLObjectType
-		wabeClass: ClassInterface<DevWabeAppTypes>
+		wabeClass: ClassInterface<DevWabeTypes>
 	}) {
 		const edgeObject = new GraphQLObjectType({
 			name: `${wabeClass.name}Edge`,
@@ -420,7 +420,7 @@ export class GraphQLSchema {
 
 	createCompleteObject(
 		graphqlParser: GraphqlParserFactory,
-		wabeClass: ClassInterface<DevWabeAppTypes>,
+		wabeClass: ClassInterface<DevWabeTypes>,
 	) {
 		const object = this.createObject({ graphqlParser, wabeClass })
 
@@ -475,7 +475,7 @@ export class GraphQLSchema {
 		resolvers,
 		graphqlParser,
 	}: {
-		resolvers: Record<string, MutationResolver<DevWabeAppTypes>>
+		resolvers: Record<string, MutationResolver<DevWabeTypes>>
 		graphqlParser: GraphqlParserFactory
 	}) {
 		return Object.keys(resolvers).reduce(
@@ -552,7 +552,7 @@ export class GraphQLSchema {
 		resolvers,
 		graphqlParser,
 	}: {
-		resolvers: Record<string, QueryResolver<DevWabeAppTypes>>
+		resolvers: Record<string, QueryResolver<DevWabeTypes>>
 		graphqlParser: GraphqlParserFactory
 	}) {
 		return Object.keys(resolvers).reduce(
@@ -755,7 +755,7 @@ export class GraphQLSchema {
 						args,
 						ctx,
 						info,
-						className as keyof WabeAppTypes['types'],
+						className as keyof WabeTypes['types'],
 					),
 			},
 			[`create${pluralize(className)}`]: {
@@ -768,7 +768,7 @@ export class GraphQLSchema {
 						args,
 						ctx,
 						info,
-						className as keyof WabeAppTypes['types'],
+						className as keyof WabeTypes['types'],
 					),
 			},
 			[`update${className}`]: {
@@ -781,7 +781,7 @@ export class GraphQLSchema {
 						args,
 						ctx,
 						info,
-						className as keyof WabeAppTypes['types'],
+						className as keyof WabeTypes['types'],
 					),
 			},
 			[`update${pluralize(className)}`]: {
@@ -794,7 +794,7 @@ export class GraphQLSchema {
 						args,
 						ctx,
 						info,
-						className as keyof WabeAppTypes['types'],
+						className as keyof WabeTypes['types'],
 					),
 			},
 			[`delete${className}`]: {
@@ -811,7 +811,7 @@ export class GraphQLSchema {
 						args,
 						ctx,
 						info,
-						className as keyof WabeAppTypes['types'],
+						className as keyof WabeTypes['types'],
 					),
 			},
 			[`delete${pluralize(className)}`]: {
@@ -824,7 +824,7 @@ export class GraphQLSchema {
 						args,
 						ctx,
 						info,
-						className as keyof WabeAppTypes['types'],
+						className as keyof WabeTypes['types'],
 					),
 			},
 		} as Record<string, GraphQLFieldConfig<any, any, any>>

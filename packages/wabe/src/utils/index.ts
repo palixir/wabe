@@ -1,9 +1,9 @@
 import * as wabeFile from '../../generated/wabe'
 import type { ClassInterface } from '../schema'
-import type { WabeAppTypes, WabeConfig } from '../server'
+import type { WabeTypes, WabeConfig } from '../server'
 import { getGraphqlClient } from './helper'
 
-export const getClient = (config: WabeConfig<WabeAppTypes>) => {
+export const getClient = (config: WabeConfig<WabeTypes>) => {
 	// We do this to avoid failing import when wabe.ts is not already generated
 	// @ts-ignore
 	const getSdk = wabeFile.getSdk
@@ -37,7 +37,7 @@ export const firstLetterInLowerCase = (str: string) => {
 	)
 }
 
-export const getClassFromClassName = <T extends WabeAppTypes>(
+export const getClassFromClassName = <T extends WabeTypes>(
 	className: string,
 	config: WabeConfig<any>,
 ): ClassInterface<T> => {

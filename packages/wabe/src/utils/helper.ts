@@ -7,7 +7,7 @@ import type {
 	WabeSchemaTypes,
 } from '../../generated/wabe'
 import { DatabaseEnum } from '../database'
-import { WabeApp } from '../server'
+import { Wabe } from '../server'
 
 type NotNill<T> = T extends null | undefined ? never : T
 
@@ -23,7 +23,7 @@ export type DeepRequired<T> = T extends Primitive
 					: DeepRequired<T[P]>
 		}
 
-export type DevWabeAppTypes = {
+export type DevWabeTypes = {
 	types: WabeSchemaTypes
 	scalars: WabeSchemaScalars
 	enums: WabeSchemaEnums
@@ -67,7 +67,7 @@ export const setupTests = async () => {
 
 	const port = await getPort()
 
-	const wabe = new WabeApp<DevWabeAppTypes>({
+	const wabe = new Wabe<DevWabeTypes>({
 		rootKey:
 			'0uwFvUxM$ceFuF1aEtTtZMa7DUN2NZudqgY5ve5W*QCyb58cwMj9JeoaV@d#%29v&aJzswuudVU1%nAT+rxS0Bh&OkgBYc0PH18*',
 		database: {
@@ -165,7 +165,7 @@ export const setupTests = async () => {
 	return { wabe, port }
 }
 
-export const closeTests = async (wabe: WabeApp<DevWabeAppTypes>) => {
+export const closeTests = async (wabe: Wabe<DevWabeTypes>) => {
 	await wabe.databaseController.adapter?.close()
 	await wabe.close()
 }

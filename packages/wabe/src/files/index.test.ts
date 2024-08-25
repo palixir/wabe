@@ -7,11 +7,11 @@ import {
 	it,
 	spyOn,
 } from 'bun:test'
-import type { WabeApp } from '..'
-import { type DevWabeAppTypes, closeTests, setupTests } from '../utils/helper'
+import type { Wabe } from '..'
+import { type DevWabeTypes, closeTests, setupTests } from '../utils/helper'
 
 describe('File upload', () => {
-	let wabe: WabeApp<DevWabeAppTypes>
+	let wabe: Wabe<DevWabeTypes>
 	let port: number
 	let spyFileDevAdapter: any
 

@@ -1,9 +1,9 @@
 import type { WabeContext } from '../../server/interface'
-import type { WabeAppTypes } from '../../server'
+import type { WabeTypes } from '../../server'
 
 type WhereAggregation<
-	T extends keyof WabeAppTypes['types'],
-	K extends keyof WabeAppTypes['types'][T],
+	T extends keyof WabeTypes['types'],
+	K extends keyof WabeTypes['types'][T],
 > = Record<
 	K | 'id',
 	{
@@ -21,16 +21,16 @@ type WhereAggregation<
 >
 
 type WhereConditional<
-	T extends keyof WabeAppTypes['types'],
-	K extends keyof WabeAppTypes['types'][T],
+	T extends keyof WabeTypes['types'],
+	K extends keyof WabeTypes['types'][T],
 > = {
 	OR?: Array<WhereType<T, K>>
 	AND?: Array<WhereType<T, K>>
 }
 
 export type WhereType<
-	T extends keyof WabeAppTypes['types'],
-	K extends keyof WabeAppTypes['types'][T],
+	T extends keyof WabeTypes['types'],
+	K extends keyof WabeTypes['types'][T],
 > = Partial<WhereAggregation<T, K>> & WhereConditional<T, K>
 
 export interface AdapterOptions {
@@ -38,14 +38,14 @@ export interface AdapterOptions {
 	databaseName: string
 }
 
-export type MutationData<T extends keyof WabeAppTypes['types']> = Record<
-	keyof WabeAppTypes['types'][T],
+export type MutationData<T extends keyof WabeTypes['types']> = Record<
+	keyof WabeTypes['types'][T],
 	any
 >
 
 export interface CountOptions<
-	T extends keyof WabeAppTypes['types'],
-	K extends keyof WabeAppTypes['types'][T],
+	T extends keyof WabeTypes['types'],
+	K extends keyof WabeTypes['types'][T],
 > {
 	className: T
 	where?: WhereType<T, K>
@@ -54,8 +54,8 @@ export interface CountOptions<
 
 // TODO: It could be cool if fields type supports something like user.id, user.email
 export interface GetObjectOptions<
-	T extends keyof WabeAppTypes['types'],
-	K extends keyof WabeAppTypes['types'][T],
+	T extends keyof WabeTypes['types'],
+	K extends keyof WabeTypes['types'][T],
 > {
 	className: T
 	id: string
@@ -66,9 +66,9 @@ export interface GetObjectOptions<
 }
 
 export interface GetObjectsOptions<
-	T extends keyof WabeAppTypes['types'],
-	K extends keyof WabeAppTypes['types'][T],
-	W extends keyof WabeAppTypes['types'][T],
+	T extends keyof WabeTypes['types'],
+	K extends keyof WabeTypes['types'][T],
+	W extends keyof WabeTypes['types'][T],
 > {
 	className: T
 	where?: WhereType<T, W>
@@ -80,9 +80,9 @@ export interface GetObjectsOptions<
 }
 
 export interface CreateObjectOptions<
-	T extends keyof WabeAppTypes['types'],
-	K extends keyof WabeAppTypes['types'][T],
-	W extends keyof WabeAppTypes['types'][T],
+	T extends keyof WabeTypes['types'],
+	K extends keyof WabeTypes['types'][T],
+	W extends keyof WabeTypes['types'][T],
 > {
 	className: T
 	data: MutationData<W>
@@ -90,9 +90,9 @@ export interface CreateObjectOptions<
 	context: WabeContext<any>
 }
 export interface CreateObjectsOptions<
-	T extends keyof WabeAppTypes['types'],
-	K extends keyof WabeAppTypes['types'][T],
-	W extends keyof WabeAppTypes['types'][T],
+	T extends keyof WabeTypes['types'],
+	K extends keyof WabeTypes['types'][T],
+	W extends keyof WabeTypes['types'][T],
 > {
 	className: T
 	data: Array<MutationData<W>>
@@ -103,9 +103,9 @@ export interface CreateObjectsOptions<
 }
 
 export interface UpdateObjectOptions<
-	T extends keyof WabeAppTypes['types'],
-	K extends keyof WabeAppTypes['types'][T],
-	W extends keyof WabeAppTypes['types'][T],
+	T extends keyof WabeTypes['types'],
+	K extends keyof WabeTypes['types'][T],
+	W extends keyof WabeTypes['types'][T],
 > {
 	className: T
 	id: string
@@ -116,9 +116,9 @@ export interface UpdateObjectOptions<
 }
 
 export interface UpdateObjectsOptions<
-	T extends keyof WabeAppTypes['types'],
-	K extends keyof WabeAppTypes['types'][T],
-	W extends keyof WabeAppTypes['types'][T],
+	T extends keyof WabeTypes['types'],
+	K extends keyof WabeTypes['types'][T],
+	W extends keyof WabeTypes['types'][T],
 > {
 	className: T
 	where: WhereType<T, W>
@@ -130,9 +130,9 @@ export interface UpdateObjectsOptions<
 }
 
 export interface DeleteObjectOptions<
-	T extends keyof WabeAppTypes['types'],
-	K extends keyof WabeAppTypes['types'][T],
-	W extends keyof WabeAppTypes['types'][T],
+	T extends keyof WabeTypes['types'],
+	K extends keyof WabeTypes['types'][T],
+	W extends keyof WabeTypes['types'][T],
 > {
 	className: T
 	id: string
@@ -142,9 +142,9 @@ export interface DeleteObjectOptions<
 }
 
 export interface DeleteObjectsOptions<
-	T extends keyof WabeAppTypes['types'],
-	K extends keyof WabeAppTypes['types'][T],
-	W extends keyof WabeAppTypes['types'][T],
+	T extends keyof WabeTypes['types'],
+	K extends keyof WabeTypes['types'][T],
+	W extends keyof WabeTypes['types'][T],
 > {
 	className: T
 	where: WhereType<T, W>
@@ -155,9 +155,9 @@ export interface DeleteObjectsOptions<
 }
 
 export type OutputType<
-	T extends keyof WabeAppTypes['types'],
-	K extends keyof WabeAppTypes['types'][T],
-> = Pick<WabeAppTypes['types'][T], K> & { id: string }
+	T extends keyof WabeTypes['types'],
+	K extends keyof WabeTypes['types'][T],
+> = Pick<WabeTypes['types'][T], K> & { id: string }
 
 export interface DatabaseAdapter {
 	connect(): Promise<any>
@@ -171,50 +171,50 @@ export interface DatabaseAdapter {
 	clearDatabase(): Promise<void>
 
 	count<
-		T extends keyof WabeAppTypes['types'],
-		K extends keyof WabeAppTypes['types'][T],
+		T extends keyof WabeTypes['types'],
+		K extends keyof WabeTypes['types'][T],
 	>(params: CountOptions<T, K>): Promise<number>
 
 	getObject<
-		T extends keyof WabeAppTypes['types'],
-		K extends keyof WabeAppTypes['types'][T],
+		T extends keyof WabeTypes['types'],
+		K extends keyof WabeTypes['types'][T],
 	>(params: GetObjectOptions<T, K>): Promise<OutputType<T, K>>
 	getObjects<
-		T extends keyof WabeAppTypes['types'],
-		K extends keyof WabeAppTypes['types'][T],
-		W extends keyof WabeAppTypes['types'][T],
+		T extends keyof WabeTypes['types'],
+		K extends keyof WabeTypes['types'][T],
+		W extends keyof WabeTypes['types'][T],
 	>(params: GetObjectsOptions<T, K, W>): Promise<OutputType<T, K>[]>
 
 	createObject<
-		T extends keyof WabeAppTypes['types'],
-		K extends keyof WabeAppTypes['types'][T],
-		W extends keyof WabeAppTypes['types'][T],
+		T extends keyof WabeTypes['types'],
+		K extends keyof WabeTypes['types'][T],
+		W extends keyof WabeTypes['types'][T],
 	>(params: CreateObjectOptions<T, K, W>): Promise<OutputType<T, K>>
 	createObjects<
-		T extends keyof WabeAppTypes['types'],
-		K extends keyof WabeAppTypes['types'][T],
-		W extends keyof WabeAppTypes['types'][T],
+		T extends keyof WabeTypes['types'],
+		K extends keyof WabeTypes['types'][T],
+		W extends keyof WabeTypes['types'][T],
 	>(params: CreateObjectsOptions<T, K, W>): Promise<OutputType<T, K>[]>
 
 	updateObject<
-		T extends keyof WabeAppTypes['types'],
-		K extends keyof WabeAppTypes['types'][T],
-		W extends keyof WabeAppTypes['types'][T],
+		T extends keyof WabeTypes['types'],
+		K extends keyof WabeTypes['types'][T],
+		W extends keyof WabeTypes['types'][T],
 	>(params: UpdateObjectOptions<T, K, W>): Promise<OutputType<T, K>>
 	updateObjects<
-		T extends keyof WabeAppTypes['types'],
-		K extends keyof WabeAppTypes['types'][T],
-		W extends keyof WabeAppTypes['types'][T],
+		T extends keyof WabeTypes['types'],
+		K extends keyof WabeTypes['types'][T],
+		W extends keyof WabeTypes['types'][T],
 	>(params: UpdateObjectsOptions<T, K, W>): Promise<OutputType<T, K>[]>
 
 	deleteObject<
-		T extends keyof WabeAppTypes['types'],
-		K extends keyof WabeAppTypes['types'][T],
-		W extends keyof WabeAppTypes['types'][T],
+		T extends keyof WabeTypes['types'],
+		K extends keyof WabeTypes['types'][T],
+		W extends keyof WabeTypes['types'][T],
 	>(params: DeleteObjectOptions<T, K, W>): Promise<void>
 	deleteObjects<
-		T extends keyof WabeAppTypes['types'],
-		K extends keyof WabeAppTypes['types'][T],
-		W extends keyof WabeAppTypes['types'][T],
+		T extends keyof WabeTypes['types'],
+		K extends keyof WabeTypes['types'][T],
+		W extends keyof WabeTypes['types'][T],
 	>(params: DeleteObjectsOptions<T, K, W>): Promise<void>
 }
