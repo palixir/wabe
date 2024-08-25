@@ -18,7 +18,6 @@ type User {
   createdAt: Date
   updatedAt: Date
   search: [String]
-  authentication: UserAuthentication
   provider: AuthenticationProvider
   isOauth: Boolean
   email: Email
@@ -47,24 +46,8 @@ type UserACLObjectRolesACL {
 """Date scalar type"""
 scalar Date
 
-type UserAuthentication {
-  emailPassword: UserAuthenticationEmailPassword
-  google: UserAuthenticationGoogle
-}
-
-type UserAuthenticationEmailPassword {
-  email: Email!
-  password: String!
-}
-
 """Email scalar type"""
 scalar Email
-
-type UserAuthenticationGoogle {
-  email: Email!
-  verifiedEmail: Boolean!
-  idToken: String!
-}
 
 type _SessionConnection {
   count: Int
@@ -83,7 +66,6 @@ input UserInput {
   createdAt: Date
   updatedAt: Date
   search: [String]
-  authentication: UserAuthenticationInput
   provider: AuthenticationProvider
   isOauth: Boolean
   email: Email
@@ -109,22 +91,6 @@ input UserACLObjectRolesACLInput {
   write: Boolean!
 }
 
-input UserAuthenticationInput {
-  emailPassword: UserAuthenticationEmailPasswordInput
-  google: UserAuthenticationGoogleInput
-}
-
-input UserAuthenticationEmailPasswordInput {
-  email: Email!
-  password: String!
-}
-
-input UserAuthenticationGoogleInput {
-  email: Email!
-  verifiedEmail: Boolean!
-  idToken: String!
-}
-
 """Input to link an object to a pointer User"""
 input UserPointerInput {
   link: ID
@@ -139,7 +105,6 @@ input UserCreateFieldsInput {
   createdAt: Date
   updatedAt: Date
   search: [String]
-  authentication: UserAuthenticationCreateFieldsInput
   provider: AuthenticationProvider
   isOauth: Boolean
   email: Email
@@ -163,22 +128,6 @@ input UserACLObjectRolesACLCreateFieldsInput {
   roleId: String
   read: Boolean
   write: Boolean
-}
-
-input UserAuthenticationCreateFieldsInput {
-  emailPassword: UserAuthenticationEmailPasswordCreateFieldsInput
-  google: UserAuthenticationGoogleCreateFieldsInput
-}
-
-input UserAuthenticationEmailPasswordCreateFieldsInput {
-  email: Email
-  password: String
-}
-
-input UserAuthenticationGoogleCreateFieldsInput {
-  email: Email
-  verifiedEmail: Boolean
-  idToken: String
 }
 
 """Input to add a relation to the class User"""
@@ -512,7 +461,6 @@ input UserWhereInput {
   createdAt: DateWhereInput
   updatedAt: DateWhereInput
   search: SearchWhereInput
-  authentication: UserAuthenticationWhereInput
   provider: AnyWhereInput
   isOauth: BooleanWhereInput
   email: EmailWhereInput
@@ -596,35 +544,6 @@ input SearchWhereInput {
 """Search scalar to tokenize and search for all searchable fields"""
 scalar Search
 
-input UserAuthenticationWhereInput {
-  emailPassword: UserAuthenticationEmailPasswordWhereInput
-  google: UserAuthenticationGoogleWhereInput
-  OR: [UserAuthenticationWhereInput]
-  AND: [UserAuthenticationWhereInput]
-}
-
-input UserAuthenticationEmailPasswordWhereInput {
-  email: EmailWhereInput
-  password: StringWhereInput
-  OR: [UserAuthenticationEmailPasswordWhereInput]
-  AND: [UserAuthenticationEmailPasswordWhereInput]
-}
-
-input EmailWhereInput {
-  equalTo: Email
-  notEqualTo: Email
-  in: [Email]
-  notIn: [Email]
-}
-
-input UserAuthenticationGoogleWhereInput {
-  email: EmailWhereInput
-  verifiedEmail: BooleanWhereInput
-  idToken: StringWhereInput
-  OR: [UserAuthenticationGoogleWhereInput]
-  AND: [UserAuthenticationGoogleWhereInput]
-}
-
 input AnyWhereInput {
   equalTo: Any
   notEqualTo: Any
@@ -634,6 +553,13 @@ input AnyWhereInput {
 The Any scalar type is used in operations and types that involve any type of value.
 """
 scalar Any
+
+input EmailWhereInput {
+  equalTo: Email
+  notEqualTo: Email
+  in: [Email]
+  notIn: [Email]
+}
 
 input RoleWhereInput {
   id: IdWhereInput
@@ -811,11 +737,6 @@ type Mutation {
   createMutation(input: CreateMutationInput): Boolean!
   customMutation(input: CustomMutationInput): Int
   secondCustomMutation(input: SecondCustomMutationInput): Int
-  signInWith(input: SignInWithInput): SignInWithOutput
-  signUpWith(input: SignUpWithInput): SignUpWithOutput
-  signOut: Boolean
-  refresh(input: RefreshInput): RefreshSessionOutput
-  verifyChallenge(input: VerifyChallengeInput): Boolean
 }
 
 type CreateUserPayload {
@@ -851,7 +772,6 @@ input UserUpdateFieldsInput {
   createdAt: Date
   updatedAt: Date
   search: [String]
-  authentication: UserAuthenticationUpdateFieldsInput
   provider: AuthenticationProvider
   isOauth: Boolean
   email: Email
@@ -875,22 +795,6 @@ input UserACLObjectRolesACLUpdateFieldsInput {
   roleId: String
   read: Boolean
   write: Boolean
-}
-
-input UserAuthenticationUpdateFieldsInput {
-  emailPassword: UserAuthenticationEmailPasswordUpdateFieldsInput
-  google: UserAuthenticationGoogleUpdateFieldsInput
-}
-
-input UserAuthenticationEmailPasswordUpdateFieldsInput {
-  email: Email
-  password: String
-}
-
-input UserAuthenticationGoogleUpdateFieldsInput {
-  email: Email
-  verifiedEmail: Boolean
-  idToken: String
 }
 
 input UpdateUsersInput {
@@ -1145,88 +1049,4 @@ input SecondCustomMutationInput {
 input SecondCustomMutationSumInput {
   a: Int!
   b: Int!
-}
-
-type SignInWithOutput {
-  id: String
-  accessToken: String
-  refreshToken: String
-}
-
-input SignInWithInput {
-  authentication: SignInWithAuthenticationInput
-}
-
-input SignInWithAuthenticationInput {
-  emailPassword: SignInWithAuthenticationEmailPasswordInput
-  google: SignInWithAuthenticationGoogleInput
-  otp: SignInWithAuthenticationOtpInput
-  secondaryFactor: SecondaryFactor
-}
-
-input SignInWithAuthenticationEmailPasswordInput {
-  email: Email!
-  password: String!
-}
-
-input SignInWithAuthenticationGoogleInput {
-  authorizationCode: String!
-  codeVerifier: String!
-}
-
-input SignInWithAuthenticationOtpInput {
-  code: String
-}
-
-type SignUpWithOutput {
-  id: String
-  accessToken: String!
-  refreshToken: String!
-}
-
-input SignUpWithInput {
-  authentication: SignUpWithAuthenticationInput
-}
-
-input SignUpWithAuthenticationInput {
-  emailPassword: SignUpWithAuthenticationEmailPasswordInput
-  google: SignUpWithAuthenticationGoogleInput
-  otp: SignUpWithAuthenticationOtpInput
-  secondaryFactor: SecondaryFactor
-}
-
-input SignUpWithAuthenticationEmailPasswordInput {
-  email: Email!
-  password: String!
-}
-
-input SignUpWithAuthenticationGoogleInput {
-  authorizationCode: String!
-  codeVerifier: String!
-}
-
-input SignUpWithAuthenticationOtpInput {
-  code: String
-}
-
-type RefreshSessionOutput {
-  accessToken: String!
-  refreshToken: String!
-}
-
-input RefreshInput {
-  accessToken: String!
-  refreshToken: String!
-}
-
-input VerifyChallengeInput {
-  factor: VerifyChallengeFactorInput
-}
-
-input VerifyChallengeFactorInput {
-  otp: VerifyChallengeFactorOtpInput
-}
-
-input VerifyChallengeFactorOtpInput {
-  code: String
 }
