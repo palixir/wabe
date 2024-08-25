@@ -1,0 +1,40 @@
+{
+  "name": "wabe",
+  "version": "0.5.0",
+  "description": "wabe",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "bun build --outdir dist $(pwd)/src/index.ts --target=bun && bun generate:types",
+    "generate:types": "dts-bundle-generator -o dist/index.d.ts src/index.ts --no-check --external-imports=wobe",
+    "check": "tsc --project $(pwd)/tsconfig.json",
+    "lint": "biome lint . --no-errors-on-unmatched --config-path=../../",
+    "ci": "touch generated/wabe.ts && CODEGEN=true bun dev/index.ts && bun check && bun lint $(pwd) && bun test src",
+    "format": "biome format --write .",
+    "dev": "touch generated/wabe.ts && bun run --watch dev/index.ts"
+  },
+  "dependencies": {
+    "@graphql-codegen/core": "4.0.2",
+    "@graphql-codegen/typescript": "4.0.1",
+    "@graphql-codegen/typescript-graphql-request": "6.2.0",
+    "@graphql-codegen/typescript-operations": "4.0.1",
+    "@graphql-tools/graphql-file-loader": "8.0.1",
+    "@graphql-tools/load": "8.0.2",
+    "jsonwebtoken": "9.0.2",
+    "mongodb": "6.3.0",
+    "wobe": "1.1.7",
+    "wobe-graphql-yoga": "1.2.5"
+  },
+  "devDependencies": {
+    "@parcel/watcher": "2.3.0",
+    "@types/bun": "1.1.5",
+    "@types/jsonwebtoken": "9.0.6",
+    "@types/uuid": "9.0.6",
+    "dts-bundle-generator": "9.5.1",
+    "get-port": "7.0.0",
+    "graphql-request": "6.1.0",
+    "uuid": "9.0.1",
+    "wait-on": "7.2.0",
+    "wabe-mongodb-launcher": "workspace:*",
+    "wabe-pluralize": "workspace:*"
+  }
+}
