@@ -10,22 +10,23 @@ export default defineConfig({
 		},
 		nav: [
 			{ text: 'Home', link: '/' },
-			{ text: 'Documentation', link: '/markdown-examples' },
+			{ text: 'Documentation', link: '/wabe/motivations' },
 		],
 		sidebar: [
-			{ text: 'Motivations', link: '/docs/wabe/motivations' },
+			{ text: 'Motivations', link: '/wabe/motivations' },
+			{ text: 'Quick start', link: '/wabe/start' },
 			{
 				text: 'Schema',
 				items: [
-					{ text: 'Classes', link: '/docs/schema/classes' },
+					{ text: 'Classes', link: '/schema/classes' },
 					{
 						text: 'Custom resolvers',
-						link: '/docs/schema/customResolvers',
+						link: '/schema/customResolvers',
 					},
-					{ text: 'Custom enums', link: '/docs/schema/customEnums' },
+					{ text: 'Custom enums', link: '/schema/customEnums' },
 					{
 						text: 'Custom scalars',
-						link: '/docs/schema/customScalars',
+						link: '/schema/customScalars',
 					},
 				],
 			},
@@ -34,11 +35,11 @@ export default defineConfig({
 				items: [
 					{
 						text: 'GraphQL API',
-						link: '/docs/graphql/api',
+						link: '/graphql/api',
 					},
 					{
 						text: 'GraphQL file upload',
-						link: '/docs/graphql/fileUpload',
+						link: '/graphql/fileUpload',
 					},
 				],
 			},
@@ -47,11 +48,11 @@ export default defineConfig({
 				items: [
 					{
 						text: 'Database Controller',
-						link: '/docs/database/controller',
+						link: '/database/controller',
 					},
 					{
 						text: 'Mongo',
-						link: '/docs/database/mongo',
+						link: '/database/mongo',
 					},
 				],
 			},
@@ -60,19 +61,19 @@ export default defineConfig({
 				items: [
 					{
 						text: 'Classes permissions',
-						link: '/docs/permissions/classes',
+						link: '/permissions/classes',
 					},
 					{
 						text: 'Objects permissions',
-						link: '/docs/permissions/objects',
+						link: '/permissions/objects',
 					},
 				],
 			},
 			{
 				text: 'Hooks',
 				items: [
-					{ text: 'Why a hook system ?', link: '/docs/hooks/why' },
-					{ text: 'How it works ?', link: '/docs/hooks/howItWorks' },
+					{ text: 'Why a hook system ?', link: '/hooks/why' },
+					{ text: 'How it works ?', link: '/hooks/howItWorks' },
 				],
 			},
 			{
@@ -80,21 +81,21 @@ export default defineConfig({
 				items: [
 					{
 						text: 'Email password',
-						link: '/docs/authentication/emailPassword',
+						link: '/authentication/emailPassword',
 					},
 					{
 						text: 'Oauth',
-						link: '/docs/authentication/oauth',
+						link: '/authentication/oauth',
 						items: [
 							{
 								text: 'Google',
-								link: '/docs/authentication/oauth/google',
+								link: '/authentication/oauth/google',
 							},
 						],
 					},
 					{
 						text: 'Custom authentication methods',
-						link: '/docs/authentication/customMethods',
+						link: '/authentication/customMethods',
 					},
 				],
 			},
