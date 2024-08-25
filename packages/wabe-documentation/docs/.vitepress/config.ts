@@ -16,8 +16,8 @@ export default defineConfig({
 			{ text: 'Motivations', link: '/wabe/motivations' },
 			{ text: 'Quick start', link: '/wabe/start' },
 			{
-				text: 'Wabe notions',
-				link: '/wabe/notions',
+				text: 'Wabe concepts',
+				link: '/wabe/concepts',
 			},
 			{
 				text: 'Schema',
