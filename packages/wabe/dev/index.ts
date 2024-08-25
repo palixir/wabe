@@ -19,36 +19,47 @@ const run2 = async () => {
 		},
 		port: 3000,
 		schema: {
-			classes: [
-				{
-					name: 'Company',
-					fields: {
-						name: {
-							type: 'String',
-							required: true,
-						},
-						logo: {
-							type: 'File',
-						},
-						exampleObject: {
-							type: 'Object',
-							object: {
-								name: 'ExampleObject',
-								fields: {
-									title: {
-										type: 'String',
-									},
+			classes: [],
+			resolvers: {
+				mutations: {
+					sumAndUpdateResult: {
+						type: 'Int',
+						args: {
+							input: {
+								a: {
+									type: 'Int',
+								},
+								b: {
+									type: 'Int',
 								},
 							},
 						},
+						resolve: (root, args) => {
+							const sum = args.input.a + args.input.b
+
+							// Suppose we update sum in database
+
+							return sum
+						},
 					},
 				},
-			],
-			scalars: [],
-			enums: [],
-			resolvers: {
-				mutations: {},
-				queries: {},
+				queries: {
+					helloWorld: {
+						// Output type
+						type: 'String',
+						// Description of the query
+						description: 'Hello world description',
+						// Arguments of the query
+						args: {
+							name: {
+								type: 'String',
+								required: true,
+							},
+						},
+						// The resolver to call when we call the query
+						resolve: () => 'Hello World',
+					},
+				},
 			},
 		},
 	})

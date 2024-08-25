@@ -16,17 +16,21 @@ export default defineConfig({
 			{ text: 'Motivations', link: '/wabe/motivations' },
 			{ text: 'Quick start', link: '/wabe/start' },
 			{
+				text: 'Wabe notions',
+				link: '/wabe/notions',
+			},
+			{
 				text: 'Schema',
 				items: [
 					{ text: 'Classes', link: '/schema/classes' },
 					{
-						text: 'Custom resolvers',
-						link: '/schema/customResolvers',
+						text: 'Resolvers',
+						link: '/schema/resolvers',
 					},
-					{ text: 'Custom enums', link: '/schema/customEnums' },
+					{ text: 'Enums', link: '/schema/enums' },
 					{
-						text: 'Custom scalars',
-						link: '/schema/customScalars',
+						text: 'Scalars',
+						link: '/schema/scalars',
 					},
 				],
 			},
