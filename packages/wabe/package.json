@@ -8,7 +8,7 @@
     "generate:types": "dts-bundle-generator -o dist/index.d.ts src/index.ts --no-check --external-imports=wobe",
     "check": "tsc --project $(pwd)/tsconfig.json",
     "lint": "biome lint . --no-errors-on-unmatched --config-path=../../",
-    "ci": "touch generate/wabe.ts && bun dev/codegen.ts && bun check && bun lint $(pwd) && bun test src",
+    "ci": "touch generated/wabe.ts && CODEGEN=true bun dev/index.ts && bun check && bun lint $(pwd) && bun test src",
     "format": "biome format --write .",
     "dev": "touch generated/wabe.ts && bun run --watch dev/index.ts"
   },

@@ -167,12 +167,17 @@ export class Wabe<T extends WabeTypes> {
 			this.config.codegen &&
 			this.config.codegen.enabled &&
 			this.config.codegen.path
-		)
-			generateCodegen({
+		) {
+			await generateCodegen({
 				path: this.config.codegen.path,
 				schema: wabeSchema.schema,
 				graphqlSchema: schema,
 			})
+
+			// If we just want codegen we exit before server created.
+			// Not the best solution but usefull to avoid multiple source of truth
+			if (process.env.CODEGEN) process.exit(0)
+		}
 
 		this.server.options(
 			'*',
