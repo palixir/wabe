@@ -64,7 +64,7 @@ import Package from './Package.vue'
                 
                 <Card title="Database" description="A powerful, scalable databaes to store and manage you data." variant="feature" iconName="database.png"/>
 
-                <Card title="GraphQL API" description="A flexible and powerful GraphQL API to interact with your data." variant="feature" iconName="graphql.png"/>
+                <Card title="GraphQL API" description="A flexible and powerful GraphQL API (following GraphQL Relay standard)to interact with your data." variant="feature" iconName="graphql.png"/>
 
                 <Card title="Hooks" description="Powerful hooks system to execute custom actions before or after database requests." iconName="hooks.png"/>
 

@@ -17,6 +17,7 @@ export default defineConfig({
 			{ text: 'Quick start', link: '/wabe/start' },
 			{
 				text: 'Schema',
+				link: '/schema/index',
 				items: [
 					{ text: 'Classes', link: '/schema/classes' },
 					{
