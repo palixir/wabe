@@ -33,7 +33,7 @@ export const oauthHandlerCallback = async (
 		const codeVerifier = context.getCookie('code_verifier')
 		const provider = context.getCookie('provider')
 
-		await getGraphqlClient(wabeContext.wabeApp.config.port).request<any>(
+		await getGraphqlClient(wabeContext.wabe.config.port).request<any>(
 			gql`
 				mutation signInWith(
 					$authorizationCode: String!
@@ -60,13 +60,12 @@ export const oauthHandlerCallback = async (
 		)
 
 		context.redirect(
-			wabeContext.wabeApp.config.authentication?.successRedirectPath ||
-				'/',
+			wabeContext.wabe.config.authentication?.successRedirectPath || '/',
 		)
 	} catch (error) {
 		console.error(error)
 		// context.redirect(
-		// 	wabeContext.wabeApp.config.authentication?.failureRedirectPath ||
+		// 	wabeContext.wabe.config.authentication?.failureRedirectPath ||
 		// 		'/',
 		// )
 	}
@@ -77,7 +76,7 @@ export const authHandler = async (
 	wabeContext: WabeContext<any>,
 	provider: ProviderEnum,
 ) => {
-	if (!wabeContext.wabeApp.config) throw new Error('Wabe config not found')
+	if (!wabeContext.wabe.config) throw new Error('Wabe config not found')
 
 	context.res.setCookie('provider', provider, {
 		httpOnly: true,
@@ -88,7 +87,7 @@ export const authHandler = async (
 
 	switch (provider) {
 		case ProviderEnum.google: {
-			const googleOauth = new Google(wabeContext.wabeApp.config)
+			const googleOauth = new Google(wabeContext.wabe.config)
 
 			const state = generateRandomValues()
 			const codeVerifier = generateRandomValues()

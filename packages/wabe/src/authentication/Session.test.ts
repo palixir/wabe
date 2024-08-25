@@ -37,7 +37,7 @@ describe('_Session', () => {
 
 		const res = await session.meFromAccessToken('accessToken', {
 			isRoot: true,
-			wabeApp: { controllers },
+			wabe: { controllers },
 		} as any)
 
 		expect(res.user).toBeNull()
@@ -59,7 +59,7 @@ describe('_Session', () => {
 				'refreshToken',
 				'refreshTokenExpiresAt',
 			],
-			context: { isRoot: true, wabeApp: { controllers } },
+			context: { isRoot: true, wabe: { controllers } },
 		})
 	})
 
@@ -82,7 +82,7 @@ describe('_Session', () => {
 
 		const { sessionId, user } = await session.meFromAccessToken(
 			'accessToken',
-			{ isRoot: true, wabeApp: { controllers } } as any,
+			{ isRoot: true, wabe: { controllers } } as any,
 		)
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
@@ -116,7 +116,7 @@ describe('_Session', () => {
 		const thirtyDays = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
 
 		const { accessToken, refreshToken } = await session.create('userId', {
-			wabeApp: { controllers },
+			wabe: { controllers },
 		} as any)
 
 		expect(accessToken).not.toBeUndefined()
@@ -161,7 +161,7 @@ describe('_Session', () => {
 
 		await session.delete({
 			sessionId: 'sessionId',
-			wabeApp: {
+			wabe: {
 				controllers,
 			},
 		} as any)
@@ -171,7 +171,7 @@ describe('_Session', () => {
 			className: '_Session',
 			context: {
 				sessionId: 'sessionId',
-				wabeApp: { controllers },
+				wabe: { controllers },
 			},
 			id: 'sessionId',
 			fields: [],
@@ -198,7 +198,7 @@ describe('_Session', () => {
 		const { accessToken, refreshToken } = await session.refresh(
 			'accessToken',
 			'refreshToken',
-			{ wabeApp: { controllers } } as any,
+			{ wabe: { controllers } } as any,
 		)
 
 		expect(accessToken).not.toBeUndefined()
@@ -265,7 +265,7 @@ describe('_Session', () => {
 		const { accessToken, refreshToken } = await session.refresh(
 			'accessToken',
 			'refreshToken',
-			{ wabeApp: { controllers } } as any,
+			{ wabe: { controllers } } as any,
 		)
 
 		expect(accessToken).toBe('accessToken')
@@ -291,7 +291,7 @@ describe('_Session', () => {
 
 		expect(
 			session.refresh('accessToken', 'refreshToken', {
-				wabeApp: { controllers },
+				wabe: { controllers },
 			} as any),
 		).rejects.toThrow('Session not found')
 
@@ -323,7 +323,7 @@ describe('_Session', () => {
 
 		expect(
 			session.refresh('accessToken', 'refreshToken', {
-				wabeApp: { controllers },
+				wabe: { controllers },
 			} as any),
 		).rejects.toThrow('Refresh token expired')
 	})
@@ -347,7 +347,7 @@ describe('_Session', () => {
 
 		expect(
 			session.refresh('accessToken', 'wrongRefreshToken', {
-				wabeApp: { controllers },
+				wabe: { controllers },
 			} as any),
 		).rejects.toThrow('Invalid refresh token')
 	})

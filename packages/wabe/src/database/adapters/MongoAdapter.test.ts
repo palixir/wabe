@@ -28,7 +28,7 @@ describe('Mongo adapter', () => {
 
 		context = {
 			isRoot: true,
-			wabeApp: {
+			wabe: {
 				controllers: { database: wabe.controllers.database },
 				config: wabe.config,
 			},

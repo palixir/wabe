@@ -3,7 +3,7 @@ import type { HookObject } from '../hooks/HookObject'
 const handleFile = async (hookObject: HookObject<any>) => {
 	const newData = hookObject.getNewData()
 
-	const schema = hookObject.context.wabeApp.config.schema.classes.find(
+	const schema = hookObject.context.wabe.config.schema.classes.find(
 		(currentClass) => currentClass.name === hookObject.className,
 	)
 
@@ -13,10 +13,10 @@ const handleFile = async (hookObject: HookObject<any>) => {
 		Object.keys(newData).map(async (keyName) => {
 			if (schema.fields[keyName].type !== 'File') return
 
-			if (hookObject.context.wabeApp.config.file?.adapter !== undefined)
+			if (hookObject.context.wabe.config.file?.adapter !== undefined)
 				hookObject.upsertNewData(
 					keyName,
-					await hookObject.context.wabeApp.config.file.adapter(
+					await hookObject.context.wabe.config.file.adapter(
 						newData[keyName],
 					),
 				)

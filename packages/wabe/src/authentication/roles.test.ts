@@ -27,7 +27,7 @@ describe('Roles', () => {
 		expect(mockCreateObjects).toHaveBeenCalledTimes(1)
 		expect(mockCreateObjects).toHaveBeenCalledWith({
 			className: 'Role',
-			context: { isRoot: true, wabeApp: wabe },
+			context: { isRoot: true, wabe: wabe },
 			data: [{ name: 'Role1' }, { name: 'Role2' }],
 			fields: [],
 		})

@@ -16,7 +16,7 @@ export class EmailPassword
 		context,
 	}: AuthenticationEventsOptions<EmailPasswordInterface>) {
 		// TODO : Use first here but need to refactor in graphql and mongoadapter to have first and not limit
-		const users = await context.wabeApp.controllers.database.getObjects({
+		const users = await context.wabe.controllers.database.getObjects({
 			className: 'User',
 			where: {
 				authentication: {
@@ -65,7 +65,7 @@ export class EmailPassword
 		input,
 		context,
 	}: AuthenticationEventsOptions<EmailPasswordInterface>) {
-		const users = await context.wabeApp.controllers.database.getObjects({
+		const users = await context.wabe.controllers.database.getObjects({
 			className: 'User',
 			where: {
 				authentication: {

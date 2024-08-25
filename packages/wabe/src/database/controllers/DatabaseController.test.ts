@@ -118,7 +118,7 @@ describe('DatabaseController', () => {
 
 	const context = {
 		isRoot: true,
-		wabeApp: { config },
+		wabe: { config },
 		sessionId: 'sessionId',
 	} as any
 
@@ -172,7 +172,7 @@ describe('DatabaseController', () => {
 
 		const context: WabeContext<any> = {
 			isRoot: true,
-			wabeApp: {} as any,
+			wabe: {} as any,
 			user: {
 				id: 'userId',
 				role: {
@@ -199,7 +199,7 @@ describe('DatabaseController', () => {
 
 		const context: WabeContext<any> = {
 			isRoot: false,
-			wabeApp: {} as any,
+			wabe: {} as any,
 			user: {
 				id: 'userId',
 				role: {
@@ -263,7 +263,7 @@ describe('DatabaseController', () => {
 
 		const context: WabeContext<any> = {
 			isRoot: false,
-			wabeApp: {} as any,
+			wabe: {} as any,
 			user: {
 				id: 'userId',
 			} as any,
@@ -305,7 +305,7 @@ describe('DatabaseController', () => {
 
 		const context: WabeContext<any> = {
 			isRoot: false,
-			wabeApp: {} as any,
+			wabe: {} as any,
 			user: {} as any,
 		}
 
@@ -349,7 +349,7 @@ describe('DatabaseController', () => {
 			className: 'TestClass',
 			context: {
 				sessionId: 'sessionId',
-				wabeApp: { config },
+				wabe: { config },
 				isRoot: true,
 			},
 		})
@@ -382,7 +382,7 @@ describe('DatabaseController', () => {
 			className: 'TestClass',
 			context: {
 				sessionId: 'sessionId',
-				wabeApp: { config },
+				wabe: { config },
 				isRoot: true,
 			},
 		})
@@ -420,7 +420,7 @@ describe('DatabaseController', () => {
 			className: 'TestClass',
 			context: {
 				sessionId: 'sessionId',
-				wabeApp: { config },
+				wabe: { config },
 				isRoot: true,
 			},
 			newData: { name: 'test' },
@@ -459,7 +459,7 @@ describe('DatabaseController', () => {
 			className: 'TestClass',
 			context: {
 				sessionId: 'sessionId',
-				wabeApp: { config },
+				wabe: { config },
 				isRoot: true,
 			},
 			newData: { name: 'test' },
@@ -493,7 +493,7 @@ describe('DatabaseController', () => {
 			className: 'TestClass',
 			context: {
 				sessionId: 'sessionId',
-				wabeApp: { config },
+				wabe: { config },
 				isRoot: true,
 			},
 			newData: { name: 'test' },
@@ -533,7 +533,7 @@ describe('DatabaseController', () => {
 			className: 'TestClass',
 			context: {
 				sessionId: 'sessionId',
-				wabeApp: { config },
+				wabe: { config },
 				isRoot: true,
 			},
 			newData: { name: 'test' },
@@ -566,7 +566,7 @@ describe('DatabaseController', () => {
 			className: 'TestClass',
 			context: {
 				sessionId: 'sessionId',
-				wabeApp: { config },
+				wabe: { config },
 				isRoot: true,
 			},
 		})
@@ -601,7 +601,7 @@ describe('DatabaseController', () => {
 			className: 'TestClass',
 			context: {
 				sessionId: 'sessionId',
-				wabeApp: { config },
+				wabe: { config },
 				isRoot: true,
 			},
 		})

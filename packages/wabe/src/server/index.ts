@@ -202,7 +202,7 @@ export class Wabe<T extends WabeTypes> {
 			if (headers.get('Wabe-Root-Key') === this.config.rootKey) {
 				ctx.wabe = {
 					isRoot: true,
-					wabeApp: this,
+					wabe: this,
 				}
 				return
 			}
@@ -225,7 +225,7 @@ export class Wabe<T extends WabeTypes> {
 			if (!accessToken) {
 				ctx.wabe = {
 					isRoot: false,
-					wabeApp: this,
+					wabe: this,
 				}
 				return
 			}
@@ -236,7 +236,7 @@ export class Wabe<T extends WabeTypes> {
 				accessToken,
 				{
 					isRoot: true,
-					wabeApp: this,
+					wabe: this,
 				},
 			)
 
@@ -244,7 +244,7 @@ export class Wabe<T extends WabeTypes> {
 				isRoot: false,
 				sessionId,
 				user,
-				wabeApp: this,
+				wabe: this,
 			}
 		})
 

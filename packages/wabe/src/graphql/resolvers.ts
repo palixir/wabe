@@ -139,7 +139,7 @@ export const queryForOneObject = (
 ) => {
 	const fields = getFieldsFromInfo(info, className)
 
-	return context.wabeApp.controllers.database.getObject({
+	return context.wabe.controllers.database.getObject({
 		className,
 		id,
 		fields,
@@ -156,7 +156,7 @@ export const queryForMultipleObject = async (
 ) => {
 	const fields = getFieldsFromInfo(info, className)
 
-	const objects = await context.wabeApp.controllers.database.getObjects({
+	const objects = await context.wabe.controllers.database.getObjects({
 		className,
 		where,
 		fields,
@@ -167,7 +167,7 @@ export const queryForMultipleObject = async (
 
 	return {
 		count: fields.includes('count')
-			? await context.wabeApp.controllers.database.count({
+			? await context.wabe.controllers.database.count({
 					className,
 					where,
 					context,
@@ -196,7 +196,7 @@ export const mutationToCreateObject = async (
 
 	return {
 		[firstLetterInLowerCase(className)]:
-			await context.wabeApp.controllers.database.createObject({
+			await context.wabe.controllers.database.createObject({
 				className,
 				data: updatedFieldsToCreate,
 				fields,
@@ -225,7 +225,7 @@ export const mutationToCreateMultipleObjects = async (
 		),
 	)
 
-	const objects = await context.wabeApp.controllers.database.createObjects({
+	const objects = await context.wabe.controllers.database.createObjects({
 		className,
 		data: updatedFieldsToCreate,
 		fields,
@@ -258,7 +258,7 @@ export const mutationToUpdateObject = async (
 
 	return {
 		[firstLetterInLowerCase(className)]:
-			await context.wabeApp.controllers.database.updateObject({
+			await context.wabe.controllers.database.updateObject({
 				className,
 				id: args.input?.id,
 				data: updatedFields,
@@ -285,7 +285,7 @@ export const mutationToUpdateMultipleObjects = async (
 		where: args.input?.where,
 	})
 
-	const objects = await context.wabeApp.controllers.database.updateObjects({
+	const objects = await context.wabe.controllers.database.updateObjects({
 		className,
 		where: args.input?.where,
 		data: updatedFields,
@@ -311,7 +311,7 @@ export const mutationToDeleteObject = async (
 
 	return {
 		[firstLetterInLowerCase(className)]:
-			await context.wabeApp.controllers.database.deleteObject({
+			await context.wabe.controllers.database.deleteObject({
 				className,
 				id: args.input?.id,
 				fields,
@@ -329,7 +329,7 @@ export const mutationToDeleteMultipleObjects = async (
 ) => {
 	const fields = getFieldsFromInfo(info, className)
 
-	const objects = await context.wabeApp.controllers.database.deleteObjects({
+	const objects = await context.wabe.controllers.database.deleteObjects({
 		className,
 		where: args.input?.where,
 		fields,

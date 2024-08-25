@@ -7,5 +7,5 @@ export interface WabeContext<T extends WabeTypes> {
 	user?: User | null
 	sessionId?: string
 	isRoot: boolean
-	wabeApp: Wabe<T>
+	wabe: Wabe<T>
 }

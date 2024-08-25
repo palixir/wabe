@@ -19,7 +19,7 @@ export class Google implements ProviderInterface<GoogleInterface> {
 	}: AuthenticationEventsOptions<GoogleInterface>) {
 		const { authorizationCode, codeVerifier } = input
 
-		const googleOauth = new GoogleOauth(context.wabeApp.config)
+		const googleOauth = new GoogleOauth(context.wabe.config)
 
 		const {
 			accessToken,
@@ -41,7 +41,7 @@ export class Google implements ProviderInterface<GoogleInterface> {
 			idToken,
 		)
 
-		const user = await context.wabeApp.controllers.database.getObjects({
+		const user = await context.wabe.controllers.database.getObjects({
 			className: 'User',
 			where: {
 				authentication: {
@@ -63,7 +63,7 @@ export class Google implements ProviderInterface<GoogleInterface> {
 
 		if (user.length === 0) {
 			const createdUser =
-				await context.wabeApp.controllers.database.createObject({
+				await context.wabe.controllers.database.createObject({
 					className: 'User',
 					data: {
 						provider: AuthenticationProvider.Google,

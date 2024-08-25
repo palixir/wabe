@@ -30,7 +30,7 @@ export class Session {
 		accessToken: string,
 		context: WabeContext<any>,
 	): Promise<{ sessionId: string; user: User | null }> {
-		const sessions = await context.wabeApp.controllers.database.getObjects({
+		const sessions = await context.wabe.controllers.database.getObjects({
 			className: '_Session',
 			where: {
 				accessToken: { equalTo: accessToken },
@@ -61,9 +61,7 @@ export class Session {
 			{
 				userId,
 				iat: Date.now(),
-				exp: this.getAccessTokenExpireAt(
-					context.wabeApp.config,
-				).getTime(),
+				exp: this.getAccessTokenExpireAt(context.wabe.config).getTime(),
 			},
 			import.meta.env.JWT_SECRET || 'dev',
 		)
@@ -73,24 +71,24 @@ export class Session {
 				userId,
 				iat: Date.now(),
 				exp: this.getRefreshTokenExpireAt(
-					context.wabeApp.config,
+					context.wabe.config,
 				).getTime(),
 			},
 			import.meta.env.JWT_SECRET || 'dev',
 		)
 
-		const { id } = await context.wabeApp.controllers.database.createObject({
+		const { id } = await context.wabe.controllers.database.createObject({
 			className: '_Session',
 			context,
 			data: {
 				accessToken: this.accessToken,
 				accessTokenExpiresAt: this.getAccessTokenExpireAt(
-					context.wabeApp.config,
+					context.wabe.config,
 				),
 
 				refreshToken: this.refreshToken,
 				refreshTokenExpiresAt: this.getRefreshTokenExpireAt(
-					context.wabeApp.config,
+					context.wabe.config,
 				),
 				user: userId,
 			},
@@ -107,7 +105,7 @@ export class Session {
 	async delete(context: WabeContext<any>) {
 		if (!context.sessionId) return
 
-		await context.wabeApp.controllers.database.deleteObject({
+		await context.wabe.controllers.database.deleteObject({
 			className: '_Session',
 			context,
 			id: context.sessionId,
@@ -120,7 +118,7 @@ export class Session {
 		refreshToken: string,
 		context: WabeContext<any>,
 	) {
-		const session = await context.wabeApp.controllers.database.getObjects({
+		const session = await context.wabe.controllers.database.getObjects({
 			className: '_Session',
 			where: {
 				accessToken: { equalTo: accessToken },
@@ -145,7 +143,7 @@ export class Session {
 			throw new Error('Refresh token expired')
 
 		const refreshTokenExpireIn = this.getRefreshTokenExpireAt(
-			context.wabeApp.config,
+			context.wabe.config,
 		).getTime()
 
 		// We refresh only if the refresh token is about to expire (75% of the time)
@@ -165,9 +163,7 @@ export class Session {
 			{
 				userId: user?.id,
 				iat: Date.now(),
-				exp: this.getAccessTokenExpireAt(
-					context.wabeApp.config,
-				).getTime(),
+				exp: this.getAccessTokenExpireAt(context.wabe.config).getTime(),
 			},
 			import.meta.env.JWT_SECRET || 'dev',
 		)
@@ -177,13 +173,13 @@ export class Session {
 				userId: user?.id,
 				iat: Date.now(),
 				exp: this.getRefreshTokenExpireAt(
-					context.wabeApp.config,
+					context.wabe.config,
 				).getTime(),
 			},
 			import.meta.env.JWT_SECRET || 'dev',
 		)
 
-		await context.wabeApp.controllers.database.updateObject({
+		await context.wabe.controllers.database.updateObject({
 			className: '_Session',
 			context: {
 				...context,
@@ -193,12 +189,12 @@ export class Session {
 			data: {
 				accessToken: newAccessToken,
 				accessTokenExpiresAt: this.getAccessTokenExpireAt(
-					context.wabeApp.config,
+					context.wabe.config,
 				),
 
 				refreshToken: newRefreshToken,
 				refreshTokenExpiresAt: this.getRefreshTokenExpireAt(
-					context.wabeApp.config,
+					context.wabe.config,
 				),
 			},
 			fields: [],

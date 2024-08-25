@@ -66,10 +66,10 @@ export const signInWithResolver = async (
 			refreshToken,
 			accessToken,
 			accessTokenExpiresAt: session.getAccessTokenExpireAt(
-				context.wabeApp.config,
+				context.wabe.config,
 			),
 			refreshTokenExpiresAt: session.getRefreshTokenExpireAt(
-				context.wabeApp.config,
+				context.wabe.config,
 			),
 		}
 	}
@@ -81,7 +81,7 @@ export const signInWithResolver = async (
 		refreshTokenExpiresAt,
 	} = await getRefreshAndAccessToken()
 
-	if (context.wabeApp.config.authentication?.session?.cookieSession) {
+	if (context.wabe.config.authentication?.session?.cookieSession) {
 		context.response?.setCookie('refreshToken', refreshToken, {
 			httpOnly: true,
 			path: '/',

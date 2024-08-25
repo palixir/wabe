@@ -24,7 +24,7 @@ describe('SignInWith', () => {
 	const mockOnVerifyChallenge = mock(() => Promise.resolve(true))
 
 	const context = {
-		wabeApp: {
+		wabe: {
 			config: {
 				authentication: {
 					session: {
@@ -117,7 +117,7 @@ describe('SignInWith', () => {
 						},
 					},
 				},
-				{ wabeApp: { config: { authentication: undefined } } } as any,
+				{ wabe: { config: { authentication: undefined } } } as any,
 			),
 		).rejects.toThrow('No custom authentication methods found')
 	})
@@ -137,7 +137,7 @@ describe('SignInWith', () => {
 					},
 				},
 				{
-					wabeApp: {
+					wabe: {
 						config: {
 							authentication: {
 								customAuthenticationMethods: [

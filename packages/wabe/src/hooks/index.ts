@@ -105,7 +105,7 @@ export const initializeHook = <T extends keyof WabeTypes['types']>({
 
 		if (!id) throw new Error('Object not found')
 
-		return context.wabeApp.controllers.database.getObject({
+		return context.wabe.controllers.database.getObject({
 			// @ts-expect-error
 			className,
 			context: {
@@ -132,7 +132,7 @@ export const initializeHook = <T extends keyof WabeTypes['types']>({
 		// @ts-expect-error
 		if (operationType === OperationType.BeforeCreate) return [newData]
 
-		const res = await context.wabeApp.controllers.database.getObjects({
+		const res = await context.wabe.controllers.database.getObjects({
 			className,
 			context: {
 				...context,
@@ -150,7 +150,7 @@ export const initializeHook = <T extends keyof WabeTypes['types']>({
 	}
 
 	const hooksOrderByPriorities = _getHooksOrderByPriorities(
-		context.wabeApp.config,
+		context.wabe.config,
 	)
 
 	return {
@@ -188,7 +188,7 @@ export const initializeHook = <T extends keyof WabeTypes['types']>({
 					className,
 					operationType,
 					priority,
-					config: context.wabeApp.config,
+					config: context.wabe.config,
 				})
 
 				await Promise.all(
@@ -236,7 +236,7 @@ export const initializeHook = <T extends keyof WabeTypes['types']>({
 								className,
 								operationType,
 								priority,
-								config: context.wabeApp.config,
+								config: context.wabe.config,
 							})
 
 							await Promise.all(

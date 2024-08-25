@@ -39,7 +39,7 @@ describe('searchablesFields', () => {
 				age: 20,
 			} as any,
 			context: {
-				wabeApp: {
+				wabe: {
 					config: {
 						schema: {
 							classes: [
@@ -77,7 +77,7 @@ describe('searchablesFields', () => {
 				age: 20,
 			} as any,
 			context: {
-				wabeApp: {
+				wabe: {
 					config: {
 						schema: {
 							classes: [

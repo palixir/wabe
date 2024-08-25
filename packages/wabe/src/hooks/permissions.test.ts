@@ -44,7 +44,7 @@ describe('Permissions', () => {
 			},
 		} as any
 
-		const context = { wabeApp: { config } } as any
+		const context = { wabe: { config } } as any
 
 		it('should get the permission for a given className', async () => {
 			const permission = await _getPermissionPropertiesOfAClass({
@@ -73,7 +73,7 @@ describe('Permissions', () => {
 				// @ts-expect-error
 				user: {},
 				isRoot: false,
-				wabeApp: { controllers, config } as any,
+				wabe: { controllers, config } as any,
 			}
 
 			const obj = new HookObject({
@@ -104,7 +104,7 @@ describe('Permissions', () => {
 					} as any,
 				} as any,
 				isRoot: false,
-				wabeApp: {
+				wabe: {
 					controllers,
 					config,
 				} as any,
@@ -138,7 +138,7 @@ describe('Permissions', () => {
 					} as any,
 				} as any,
 				isRoot: false,
-				wabeApp: {
+				wabe: {
 					controllers,
 					config,
 				} as any,
@@ -161,7 +161,7 @@ describe('Permissions', () => {
 					id: '',
 				} as any,
 				isRoot: true,
-				wabeApp: { controllers, config } as any,
+				wabe: { controllers, config } as any,
 			}
 
 			const obj = new HookObject({

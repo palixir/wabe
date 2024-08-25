@@ -16,8 +16,8 @@ export const signUpWithResolver = async (
 	context: WabeContext<any>,
 ) => {
 	// Create object call the provider signUp
-	const { id: userId } =
-		await context.wabeApp.controllers.database.createObject({
+	const { id: userId } = await context.wabe.controllers.database.createObject(
+		{
 			className: 'User',
 			data: {
 				authentication: input.authentication,
@@ -27,7 +27,8 @@ export const signUpWithResolver = async (
 				isRoot: true,
 			},
 			fields: ['id'],
-		})
+		},
+	)
 
 	const session = new Session()
 
@@ -36,19 +37,19 @@ export const signUpWithResolver = async (
 		isRoot: true,
 	})
 
-	if (context.wabeApp.config.authentication?.session?.cookieSession) {
+	if (context.wabe.config.authentication?.session?.cookieSession) {
 		context.response?.setCookie('refreshToken', refreshToken, {
 			httpOnly: true,
 			path: '/',
 			secure: process.env.NODE_ENV === 'production',
-			expires: session.getRefreshTokenExpireAt(context.wabeApp.config),
+			expires: session.getRefreshTokenExpireAt(context.wabe.config),
 		})
 
 		context.response?.setCookie('accessToken', accessToken, {
 			httpOnly: true,
 			path: '/',
 			secure: process.env.NODE_ENV === 'production',
-			expires: session.getAccessTokenExpireAt(context.wabeApp.config),
+			expires: session.getAccessTokenExpireAt(context.wabe.config),
 		})
 	}
 

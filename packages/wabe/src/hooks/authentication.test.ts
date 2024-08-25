@@ -34,7 +34,7 @@ describe('Hooks authentication', () => {
 			className: 'User',
 			context: {
 				isRoot: true,
-				wabeApp: {
+				wabe: {
 					config: {
 						authentication: {
 							customAuthenticationMethods,
@@ -72,7 +72,7 @@ describe('Hooks authentication', () => {
 			className: 'User',
 			context: {
 				isRoot: true,
-				wabeApp: {
+				wabe: {
 					config: {
 						authentication: {
 							customAuthenticationMethods,

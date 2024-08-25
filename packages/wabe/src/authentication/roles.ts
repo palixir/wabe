@@ -1,7 +1,7 @@
 import type { Wabe } from '..'
 
-export const initializeRoles = async (wabeApp: Wabe<any>) => {
-	const roles = wabeApp.config?.authentication?.roles || []
+export const initializeRoles = async (wabe: Wabe<any>) => {
+	const roles = wabe.config?.authentication?.roles || []
 
 	if (roles.length === 0) return
 
@@ -9,11 +9,11 @@ export const initializeRoles = async (wabeApp: Wabe<any>) => {
 		name: role,
 	}))
 
-	await wabeApp.controllers.database.createObjects({
+	await wabe.controllers.database.createObjects({
 		className: 'Role',
 		context: {
 			isRoot: true,
-			wabeApp,
+			wabe,
 		},
 		data: objectsToCreate,
 		fields: [],

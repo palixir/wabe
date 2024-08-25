@@ -19,7 +19,7 @@ describe('Database', () => {
 	let context: WabeContext<any>
 
 	const mockUpdateObject = mock(async () => {
-		await context.wabeApp.controllers.database.updateObjects({
+		await context.wabe.controllers.database.updateObjects({
 			className: 'User',
 			where: {
 				name: { equalTo: 'Lucas' },
@@ -31,7 +31,7 @@ describe('Database', () => {
 	})
 
 	const mockAfterUpdate = mock(async () => {
-		await context.wabeApp.controllers.database.createObjects({
+		await context.wabe.controllers.database.createObjects({
 			className: 'Test2',
 			data: [{ name: 'test' }],
 			context,
@@ -48,7 +48,7 @@ describe('Database', () => {
 
 		context = {
 			isRoot: true,
-			wabeApp: {
+			wabe: {
 				controllers: { database: wabe.controllers.database },
 				config: wabe.config,
 			},
@@ -283,7 +283,7 @@ describe('Database', () => {
 				priority: 1,
 			},
 		]
-		const res = await context.wabeApp.controllers.database.createObject({
+		const res = await context.wabe.controllers.database.createObject({
 			className: 'User',
 			data: { name: 'Lucas', age: 20 },
 			context,
@@ -310,7 +310,7 @@ describe('Database', () => {
 				priority: 1,
 			},
 		]
-		const res = await context.wabeApp.controllers.database.createObjects({
+		const res = await context.wabe.controllers.database.createObjects({
 			className: 'User',
 			data: [{ name: 'Lucas', age: 20 }],
 			context,
@@ -337,14 +337,14 @@ describe('Database', () => {
 				priority: 1,
 			},
 		]
-		await context.wabeApp.controllers.database.createObjects({
+		await context.wabe.controllers.database.createObjects({
 			className: 'Test2',
 			data: [{ name: 'test', age: 20 }],
 			context,
 			fields: [],
 		})
 
-		const res = await context.wabeApp.controllers.database.updateObjects({
+		const res = await context.wabe.controllers.database.updateObjects({
 			className: 'Test2',
 			context,
 			fields: ['name'],
@@ -372,14 +372,14 @@ describe('Database', () => {
 				priority: 1,
 			},
 		]
-		const res = await context.wabeApp.controllers.database.createObjects({
+		const res = await context.wabe.controllers.database.createObjects({
 			className: 'Test2',
 			data: [{ name: 'test', age: 20 }],
 			context,
 			fields: ['id'],
 		})
 
-		const res2 = await context.wabeApp.controllers.database.updateObject({
+		const res2 = await context.wabe.controllers.database.updateObject({
 			className: 'Test2',
 			context,
 			fields: ['name'],

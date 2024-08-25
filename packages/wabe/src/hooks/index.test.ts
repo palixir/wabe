@@ -65,7 +65,7 @@ describe('Hooks', () => {
 			className: 'ClassTest',
 			context: {
 				isRoot: true,
-				wabeApp: { controllers, config } as any,
+				wabe: { controllers, config } as any,
 			},
 			newData: { name: 'test' },
 		})
@@ -86,7 +86,7 @@ describe('Hooks', () => {
 			className: 'ClassName',
 			context: {
 				isRoot: true,
-				wabeApp: { controllers, config } as any,
+				wabe: { controllers, config } as any,
 			},
 			newData: { name: 'test' },
 		})
@@ -99,7 +99,7 @@ describe('Hooks', () => {
 		expect(mockGetObject).toHaveBeenCalledTimes(1)
 		expect(mockGetObject).toHaveBeenCalledWith({
 			className: 'ClassName',
-			context: { isRoot: true, wabeApp: { controllers, config } },
+			context: { isRoot: true, wabe: { controllers, config } },
 			id: 'id',
 			skipHooks: true,
 			fields: ['*'],
@@ -117,7 +117,7 @@ describe('Hooks', () => {
 
 		expect(hookObject.context).toEqual({
 			isRoot: true,
-			wabeApp: {
+			wabe: {
 				controllers: expect.any(Object),
 				config,
 			},
@@ -129,7 +129,7 @@ describe('Hooks', () => {
 			className: 'ClassName',
 			context: {
 				isRoot: true,
-				wabeApp: { controllers, config } as any,
+				wabe: { controllers, config } as any,
 			},
 			newData: { name: 'test' },
 		})
@@ -147,7 +147,7 @@ describe('Hooks', () => {
 
 		expect(hookObject.context).toEqual({
 			isRoot: true,
-			wabeApp: { controllers: expect.any(Object), config },
+			wabe: { controllers: expect.any(Object), config },
 		})
 	})
 
@@ -162,7 +162,7 @@ describe('Hooks', () => {
 			className: 'ClassName',
 			context: {
 				isRoot: true,
-				wabeApp: { controllers, config } as any,
+				wabe: { controllers, config } as any,
 			},
 			newData: { name: 'test' },
 		})
@@ -185,7 +185,7 @@ describe('Hooks', () => {
 			className: 'ClassName',
 			context: {
 				isRoot: true,
-				wabeApp: { controllers, config } as any,
+				wabe: { controllers, config } as any,
 			},
 			newData: { name: 'test' },
 		})

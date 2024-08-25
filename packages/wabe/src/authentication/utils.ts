@@ -14,7 +14,7 @@ export const getAuthenticationMethod = <
 	context: WabeContext<any>,
 ): CustomAuthenticationMethods<T, U> => {
 	const customAuthenticationConfig =
-		context.wabeApp.config?.authentication?.customAuthenticationMethods
+		context.wabe.config?.authentication?.customAuthenticationMethods
 
 	if (!customAuthenticationConfig)
 		throw new Error('No custom authentication methods found')

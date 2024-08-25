@@ -53,7 +53,7 @@ describe('Resolver', () => {
 	}
 
 	const context = {
-		wabeApp: {
+		wabe: {
 			controllers,
 			config,
 		},

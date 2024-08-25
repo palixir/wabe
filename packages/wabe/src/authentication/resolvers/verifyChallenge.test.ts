@@ -11,7 +11,7 @@ describe('verifyChallenge', () => {
 		user: {
 			id: 'userId',
 		} as any,
-		wabeApp: {
+		wabe: {
 			config: {
 				authentication: {
 					customAuthenticationMethods: [
