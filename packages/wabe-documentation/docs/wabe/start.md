@@ -2,7 +2,7 @@
 
 ## Create backend project
 
-For a quick start, we’ll assume you are beginning a new backend project. For simplicity (and also because Wabe was built with it), we will create the project using Bun. However, it's important to note that Wabe is also **compatible** with Node.
+For a quick start, we’ll assume you are beginning a new backend project. For simplicity (and also because Wabe was built with it), we will create the project using `Bun`. However, it's important to note that Wabe is also **compatible** with `Node`.
 
 ### Install bun
 
@@ -29,40 +29,39 @@ Now you should have a basic project with an `index.ts` file.
 Open the `index.ts` file and past the following code.
 
 ```ts
-import { Wabe, DatabaseEnum } from 'wabe'
+import { DatabaseEnum, Wabe } from "wabe";
 
 const run = async () => {
   // Insure your database is running before run the file
-  
-	const wabe = new Wabe({
+
+  const wabe = new Wabe({
     // Root key example (must be long minimal 64 characters, you can generate it online)
-		rootKey:
-			'0uwFvUxM$ceFuF1aEtTtZMa7DUN2NZudqgY5ve5W*QCyb58cwMj9JeoaV@d#%29v&aJzswuudVU1%nAT+rxS0Bh&OkgBYc0PH18*',
-		database: {
-			type: DatabaseEnum.Mongo,
-			url: 'mongodb://127.0.0.1:27045',
-			name: 'WabeApp',
-		},
-		port: 3000,
-		schema: {
-			classes: [],
-      scalars:[],
-			enums:[],
-			resolvers:{
-				mutations: {},
-				queries:{}
-			}
-		},
-	})
+    rootKey:
+      "0uwFvUxM$ceFuF1aEtTtZMa7DUN2NZudqgY5ve5W*QCyb58cwMj9JeoaV@d#%29v&aJzswuudVU1%nAT+rxS0Bh&OkgBYc0PH18*",
+    database: {
+      type: DatabaseEnum.Mongo,
+      url: "mongodb://127.0.0.1:27045",
+      name: "WabeApp",
+    },
+    port: 3000,
+    schema: {
+      classes: [],
+      scalars: [],
+      enums: [],
+      resolvers: {
+        mutations: {},
+        queries: {},
+      },
+    },
+  });
 
-	await wabe.start()
-}
+  await wabe.start();
+};
 
-await run()
-
+await run();
 ```
 
-Let’s take a look at what’s happening in this small example. We’re creating a wabe object with minimal configuration. 
+Let’s take a look at what’s happening in this small example. We’re creating a wabe object with minimal configuration.
 
 - The first element is the `rootKey`, a string that should be as long and varied as possible, which can be included in all requests made to the API by passing it in the `Wabe-Root-Key` header. It grants root access to all requests. It must remain completely secret and should only be used by the backend itself; under no circumstances should it be shared with the frontend. The root key override all security checks.
 

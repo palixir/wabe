@@ -19,7 +19,31 @@ const run2 = async () => {
 		},
 		port: 3000,
 		schema: {
-			classes: [],
+			classes: [
+				{
+					name: 'Company',
+					fields: {
+						name: {
+							type: 'String',
+							required: true,
+						},
+						logo: {
+							type: 'File',
+						},
+						exampleObject: {
+							type: 'Object',
+							object: {
+								name: 'ExampleObject',
+								fields: {
+									title: {
+										type: 'String',
+									},
+								},
+							},
+						},
+					},
+				},
+			],
 			scalars: [],
 			enums: [],
 			resolvers: {
