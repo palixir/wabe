@@ -12,12 +12,14 @@ describe('_Session', () => {
 	const mockDeleteObject = mock(() => Promise.resolve()) as any
 	const mockUpdateObject = mock(() => Promise.resolve()) as any
 
-	const databaseController = {
-		getObject: mockGetObject,
-		getObjects: mockGetObjects,
-		createObject: mockCreateObject,
-		deleteObject: mockDeleteObject,
-		updateObject: mockUpdateObject,
+	const controllers = {
+		database: {
+			getObject: mockGetObject,
+			getObjects: mockGetObjects,
+			createObject: mockCreateObject,
+			deleteObject: mockDeleteObject,
+			updateObject: mockUpdateObject,
+		},
 	}
 
 	beforeEach(() => {
@@ -35,7 +37,7 @@ describe('_Session', () => {
 
 		const res = await session.meFromAccessToken('accessToken', {
 			isRoot: true,
-			wabeApp: { databaseController },
+			wabeApp: { controllers },
 		} as any)
 
 		expect(res.user).toBeNull()
@@ -57,7 +59,7 @@ describe('_Session', () => {
 				'refreshToken',
 				'refreshTokenExpiresAt',
 			],
-			context: { isRoot: true, wabeApp: { databaseController } },
+			context: { isRoot: true, wabeApp: { controllers } },
 		})
 	})
 
@@ -80,7 +82,7 @@ describe('_Session', () => {
 
 		const { sessionId, user } = await session.meFromAccessToken(
 			'accessToken',
-			{ isRoot: true, wabeApp: { databaseController } } as any,
+			{ isRoot: true, wabeApp: { controllers } } as any,
 		)
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
@@ -114,7 +116,7 @@ describe('_Session', () => {
 		const thirtyDays = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
 
 		const { accessToken, refreshToken } = await session.create('userId', {
-			wabeApp: { databaseController },
+			wabeApp: { controllers },
 		} as any)
 
 		expect(accessToken).not.toBeUndefined()
@@ -160,7 +162,7 @@ describe('_Session', () => {
 		await session.delete({
 			sessionId: 'sessionId',
 			wabeApp: {
-				databaseController,
+				controllers,
 			},
 		} as any)
 
@@ -169,7 +171,7 @@ describe('_Session', () => {
 			className: '_Session',
 			context: {
 				sessionId: 'sessionId',
-				wabeApp: { databaseController },
+				wabeApp: { controllers },
 			},
 			id: 'sessionId',
 			fields: [],
@@ -196,7 +198,7 @@ describe('_Session', () => {
 		const { accessToken, refreshToken } = await session.refresh(
 			'accessToken',
 			'refreshToken',
-			{ wabeApp: { databaseController } } as any,
+			{ wabeApp: { controllers } } as any,
 		)
 
 		expect(accessToken).not.toBeUndefined()
@@ -263,7 +265,7 @@ describe('_Session', () => {
 		const { accessToken, refreshToken } = await session.refresh(
 			'accessToken',
 			'refreshToken',
-			{ wabeApp: { databaseController } } as any,
+			{ wabeApp: { controllers } } as any,
 		)
 
 		expect(accessToken).toBe('accessToken')
@@ -289,7 +291,7 @@ describe('_Session', () => {
 
 		expect(
 			session.refresh('accessToken', 'refreshToken', {
-				wabeApp: { databaseController },
+				wabeApp: { controllers },
 			} as any),
 		).rejects.toThrow('Session not found')
 
@@ -321,7 +323,7 @@ describe('_Session', () => {
 
 		expect(
 			session.refresh('accessToken', 'refreshToken', {
-				wabeApp: { databaseController },
+				wabeApp: { controllers },
 			} as any),
 		).rejects.toThrow('Refresh token expired')
 	})
@@ -345,7 +347,7 @@ describe('_Session', () => {
 
 		expect(
 			session.refresh('accessToken', 'wrongRefreshToken', {
-				wabeApp: { databaseController },
+				wabeApp: { controllers },
 			} as any),
 		).rejects.toThrow('Invalid refresh token')
 	})

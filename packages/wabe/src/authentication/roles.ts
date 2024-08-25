@@ -1,10 +1,7 @@
-import type { DatabaseController, WabeConfig } from '..'
+import type { Wabe } from '..'
 
-export const initializeRoles = async (
-	databaseController: DatabaseController<any>,
-	config: WabeConfig<any>,
-) => {
-	const roles = config?.authentication?.roles || []
+export const initializeRoles = async (wabeApp: Wabe<any>) => {
+	const roles = wabeApp.config?.authentication?.roles || []
 
 	if (roles.length === 0) return
 
@@ -12,11 +9,11 @@ export const initializeRoles = async (
 		name: role,
 	}))
 
-	await databaseController.createObjects({
+	await wabeApp.controllers.database.createObjects({
 		className: 'Role',
 		context: {
 			isRoot: true,
-			wabeApp: { databaseController, config } as any,
+			wabeApp,
 		},
 		data: objectsToCreate,
 		fields: [],

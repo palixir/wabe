@@ -9,9 +9,13 @@ describe('Email password', () => {
 
 	const spyBunPasswordVerify = spyOn(Bun.password, 'verify')
 
-	const databaseController = {
-		getObjects: mockGetObjects,
-		createObject: mockCreateObject,
+	const controllers = {
+		controllers: {
+			database: {
+				getObjects: mockGetObjects,
+				createObject: mockCreateObject,
+			},
+		},
 	} as any
 
 	beforeEach(() => {
@@ -31,7 +35,7 @@ describe('Email password', () => {
 		const {
 			authenticationDataToSave: { email, password },
 		} = await emailPassword.onSignUp({
-			context: { wabeApp: { databaseController } } as any,
+			context: { wabeApp: controllers } as any,
 			input: { email: 'email@test.fr', password: 'password' },
 		})
 
@@ -60,7 +64,7 @@ describe('Email password', () => {
 		spyBunPasswordVerify.mockResolvedValue(true)
 
 		const { user } = await emailPassword.onSignIn({
-			context: { wabeApp: { databaseController } } as any,
+			context: { wabeApp: controllers } as any,
 			input: { email: 'email@test.fr', password: 'password' },
 		})
 
@@ -87,7 +91,7 @@ describe('Email password', () => {
 
 		expect(
 			emailPassword.onSignIn({
-				context: { wabeApp: { databaseController } } as any,
+				context: { wabeApp: controllers } as any,
 				// @ts-expect-error
 				input: { email: 'email@test.fr' },
 			}),
@@ -99,7 +103,7 @@ describe('Email password', () => {
 
 		expect(
 			emailPassword.onSignIn({
-				context: { wabeApp: { databaseController } } as any,
+				context: { wabeApp: controllers } as any,
 				input: {
 					email: 'invalidEmail@test.fr',
 					password: 'password',
@@ -125,7 +129,7 @@ describe('Email password', () => {
 
 		expect(
 			emailPassword.onSignIn({
-				context: { wabeApp: { databaseController } } as any,
+				context: { wabeApp: controllers } as any,
 				input: {
 					email: 'invalidEmail@test.fr',
 					password: 'password',

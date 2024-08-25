@@ -65,7 +65,7 @@ export const _checkCLP = async (
 			`Permission denied to ${permissionOperation} class ${object.className}`,
 		)
 
-	const res = await object.context.wabeApp.databaseController.getObject({
+	const res = await object.context.wabeApp.controllers.database.getObject({
 		className: '_Session',
 		id: sessionId,
 		fields: ['id', 'user.id'],

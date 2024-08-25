@@ -9,8 +9,10 @@ describe('Permissions', () => {
 	describe('Class Level Permissions', () => {
 		const mockGetObject = mock(() => {})
 
-		const databaseController = {
-			getObject: mockGetObject,
+		const controllers = {
+			database: {
+				getObject: mockGetObject,
+			},
 		} as any
 
 		beforeEach(() => {
@@ -71,7 +73,7 @@ describe('Permissions', () => {
 				// @ts-expect-error
 				user: {},
 				isRoot: false,
-				wabeApp: { databaseController, config } as any,
+				wabeApp: { controllers, config } as any,
 			}
 
 			const obj = new HookObject({
@@ -103,7 +105,7 @@ describe('Permissions', () => {
 				} as any,
 				isRoot: false,
 				wabeApp: {
-					databaseController,
+					controllers,
 					config,
 				} as any,
 			}
@@ -137,7 +139,7 @@ describe('Permissions', () => {
 				} as any,
 				isRoot: false,
 				wabeApp: {
-					databaseController,
+					controllers,
 					config,
 				} as any,
 			}
@@ -159,7 +161,7 @@ describe('Permissions', () => {
 					id: '',
 				} as any,
 				isRoot: true,
-				wabeApp: { databaseController, config } as any,
+				wabeApp: { controllers, config } as any,
 			}
 
 			const obj = new HookObject({

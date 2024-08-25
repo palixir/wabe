@@ -17,7 +17,7 @@ export const signUpWithResolver = async (
 ) => {
 	// Create object call the provider signUp
 	const { id: userId } =
-		await context.wabeApp.databaseController.createObject({
+		await context.wabeApp.controllers.database.createObject({
 			className: 'User',
 			data: {
 				authentication: input.authentication,

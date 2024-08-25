@@ -9,12 +9,14 @@ describe('Resolver', () => {
 	const mockCreateObject = mock(() => {})
 	const mockCreateObjects = mock(() => {})
 
-	const databaseController = {
-		updateObject: mockUpdateObject,
-		getObject: mockGetObject,
-		getObjects: mockGetObjects,
-		createObject: mockCreateObject,
-		createObjects: mockCreateObjects,
+	const controllers = {
+		database: {
+			updateObject: mockUpdateObject,
+			getObject: mockGetObject,
+			getObjects: mockGetObjects,
+			createObject: mockCreateObject,
+			createObjects: mockCreateObjects,
+		},
 	} as any
 
 	const config = {
@@ -52,7 +54,7 @@ describe('Resolver', () => {
 
 	const context = {
 		wabeApp: {
-			databaseController,
+			controllers,
 			config,
 		},
 	}

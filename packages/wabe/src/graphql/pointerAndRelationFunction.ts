@@ -37,7 +37,7 @@ export const createAndLink = async ({
 		context.wabeApp.config,
 	)
 
-	const { id } = await context.wabeApp.databaseController.createObject({
+	const { id } = await context.wabeApp.controllers.database.createObject({
 		// @ts-expect-error
 		className: classInSchema.fields[fieldName].class,
 		data: createAndLink,
@@ -64,7 +64,7 @@ export const createAndAdd = async ({
 		context.wabeApp.config,
 	)
 
-	const result = await context.wabeApp.databaseController.createObjects({
+	const result = await context.wabeApp.controllers.database.createObjects({
 		// @ts-expect-error
 		className: classInSchema.fields[fieldName].class,
 		data: createAndAdd,
@@ -102,7 +102,7 @@ export const add = async ({
 	const fieldInClass = classInSchema.fields[fieldName]
 
 	if (typeOfExecution === 'update' && id) {
-		const currentValue = await context.wabeApp.databaseController.getObject(
+		const currentValue = await context.wabeApp.controllers.database.getObject(
 			{
 				className,
 				id,
@@ -118,7 +118,7 @@ export const add = async ({
 	// So we doesn't update the field for updateMany
 	if (typeOfExecution === 'updateMany' && where) {
 		const allObjectsMatchedWithWhere =
-			await context.wabeApp.databaseController.getObjects({
+			await context.wabeApp.controllers.database.getObjects({
 				// @ts-expect-error
 				className: fieldInClass.class,
 				where,
@@ -130,7 +130,7 @@ export const add = async ({
 			allObjectsMatchedWithWhere.map(async (object: any) => {
 				const currentValue = object[fieldName]
 
-				return context.wabeApp.databaseController.updateObject({
+				return context.wabeApp.controllers.database.updateObject({
 					// @ts-expect-error
 					className: classInSchema.fields[fieldName].class,
 					id: object.id,
@@ -165,7 +165,7 @@ export const remove = async ({
 	if (typeOfExecution === 'create') return []
 
 	if (typeOfExecution === 'update' && id) {
-		const currentValue = await context.wabeApp.databaseController.getObject(
+		const currentValue = await context.wabeApp.controllers.database.getObject(
 			{
 				className,
 				id,
@@ -183,7 +183,7 @@ export const remove = async ({
 
 	if (typeOfExecution === 'updateMany' && where) {
 		const allObjectsMatchedWithWhere =
-			await context.wabeApp.databaseController.getObjects({
+			await context.wabeApp.controllers.database.getObjects({
 				className,
 				where,
 				fields: ['id'],
@@ -194,7 +194,7 @@ export const remove = async ({
 			allObjectsMatchedWithWhere.map(async (object: any) => {
 				const olderValues = object[fieldName]?.[fieldName] || []
 
-				return context.wabeApp.databaseController.updateObject({
+				return context.wabeApp.controllers.database.updateObject({
 					className,
 					id: object.id,
 					data: {

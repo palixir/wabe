@@ -24,12 +24,12 @@ describe('Mongo adapter', () => {
 		wabe = setup.wabe
 
 		// @ts-expect-error
-		mongoAdapter = wabe.databaseController.adapter
+		mongoAdapter = wabe.controllers.database.adapter
 
 		context = {
 			isRoot: true,
 			wabeApp: {
-				databaseController: wabe.databaseController,
+				controllers: { database: wabe.controllers.database },
 				config: wabe.config,
 			},
 		} as WabeContext<any>

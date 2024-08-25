@@ -11,9 +11,11 @@ describe('Hooks', () => {
 	const mockCallback4 = mock(() => {})
 	const mockCallback5 = mock(() => {})
 
-	const databaseController = {
-		getObject: mockGetObject,
-		getObjects: mockGetObjects,
+	const controllers = {
+		database: {
+			getObject: mockGetObject,
+			getObjects: mockGetObjects,
+		},
 	} as any
 
 	const config = {
@@ -63,7 +65,7 @@ describe('Hooks', () => {
 			className: 'ClassTest',
 			context: {
 				isRoot: true,
-				wabeApp: { databaseController, config } as any,
+				wabeApp: { controllers, config } as any,
 			},
 			newData: { name: 'test' },
 		})
@@ -84,7 +86,7 @@ describe('Hooks', () => {
 			className: 'ClassName',
 			context: {
 				isRoot: true,
-				wabeApp: { databaseController, config } as any,
+				wabeApp: { controllers, config } as any,
 			},
 			newData: { name: 'test' },
 		})
@@ -97,7 +99,7 @@ describe('Hooks', () => {
 		expect(mockGetObject).toHaveBeenCalledTimes(1)
 		expect(mockGetObject).toHaveBeenCalledWith({
 			className: 'ClassName',
-			context: { isRoot: true, wabeApp: { databaseController, config } },
+			context: { isRoot: true, wabeApp: { controllers, config } },
 			id: 'id',
 			skipHooks: true,
 			fields: ['*'],
@@ -116,7 +118,7 @@ describe('Hooks', () => {
 		expect(hookObject.context).toEqual({
 			isRoot: true,
 			wabeApp: {
-				databaseController: expect.any(Object),
+				controllers: expect.any(Object),
 				config,
 			},
 		})
@@ -127,7 +129,7 @@ describe('Hooks', () => {
 			className: 'ClassName',
 			context: {
 				isRoot: true,
-				wabeApp: { databaseController, config } as any,
+				wabeApp: { controllers, config } as any,
 			},
 			newData: { name: 'test' },
 		})
@@ -145,7 +147,7 @@ describe('Hooks', () => {
 
 		expect(hookObject.context).toEqual({
 			isRoot: true,
-			wabeApp: { databaseController: expect.any(Object), config },
+			wabeApp: { controllers: expect.any(Object), config },
 		})
 	})
 
@@ -160,7 +162,7 @@ describe('Hooks', () => {
 			className: 'ClassName',
 			context: {
 				isRoot: true,
-				wabeApp: { databaseController, config } as any,
+				wabeApp: { controllers, config } as any,
 			},
 			newData: { name: 'test' },
 		})
@@ -183,7 +185,7 @@ describe('Hooks', () => {
 			className: 'ClassName',
 			context: {
 				isRoot: true,
-				wabeApp: { databaseController, config } as any,
+				wabeApp: { controllers, config } as any,
 			},
 			newData: { name: 'test' },
 		})

@@ -105,7 +105,7 @@ export const initializeHook = <T extends keyof WabeTypes['types']>({
 
 		if (!id) throw new Error('Object not found')
 
-		return context.wabeApp.databaseController.getObject({
+		return context.wabeApp.controllers.database.getObject({
 			// @ts-expect-error
 			className,
 			context: {
@@ -132,7 +132,7 @@ export const initializeHook = <T extends keyof WabeTypes['types']>({
 		// @ts-expect-error
 		if (operationType === OperationType.BeforeCreate) return [newData]
 
-		const res = await context.wabeApp.databaseController.getObjects({
+		const res = await context.wabeApp.controllers.database.getObjects({
 			className,
 			context: {
 				...context,

@@ -292,7 +292,7 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter {
 
 		const res = await collection.insertOne(data, {})
 
-		const object = await context.wabeApp.databaseController.getObject({
+		const object = await context.wabeApp.controllers.database.getObject({
 			className,
 			id: res.insertedId.toString(),
 			context,
@@ -322,14 +322,15 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter {
 			}),
 		)
 
-		const allObjects = await context.wabeApp.databaseController.getObjects({
-			className,
-			where: { OR: orStatement } as WhereType<T, K>,
-			fields,
-			offset,
-			first,
-			context,
-		})
+		const allObjects =
+			await context.wabeApp.controllers.database.getObjects({
+				className,
+				where: { OR: orStatement } as WhereType<T, K>,
+				fields,
+				offset,
+				first,
+				context,
+			})
 
 		return allObjects as OutputType<U, K>[]
 	}
@@ -360,7 +361,7 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter {
 
 		if (res.matchedCount === 0) throw new Error('Object not found')
 
-		const object = await context.wabeApp.databaseController.getObject({
+		const object = await context.wabeApp.controllers.database.getObject({
 			className,
 			context,
 			fields,
@@ -386,7 +387,7 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter {
 		const collection = await this.createClassIfNotExist(className, context)
 
 		const objectsBeforeUpdate =
-			await context.wabeApp.databaseController.getObjects({
+			await context.wabeApp.controllers.database.getObjects({
 				className,
 				where,
 				fields: ['id'],
@@ -406,7 +407,7 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter {
 			id: { equalTo: ObjectId.createFromHexString(object.id) },
 		}))
 
-		const objects = await context.wabeApp.databaseController.getObjects({
+		const objects = await context.wabeApp.controllers.database.getObjects({
 			className,
 			where: {
 				OR: orStatement,

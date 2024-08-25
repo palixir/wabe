@@ -30,7 +30,7 @@ export class Session {
 		accessToken: string,
 		context: WabeContext<any>,
 	): Promise<{ sessionId: string; user: User | null }> {
-		const sessions = await context.wabeApp.databaseController.getObjects({
+		const sessions = await context.wabeApp.controllers.database.getObjects({
 			className: '_Session',
 			where: {
 				accessToken: { equalTo: accessToken },
@@ -79,7 +79,7 @@ export class Session {
 			import.meta.env.JWT_SECRET || 'dev',
 		)
 
-		const { id } = await context.wabeApp.databaseController.createObject({
+		const { id } = await context.wabeApp.controllers.database.createObject({
 			className: '_Session',
 			context,
 			data: {
@@ -107,7 +107,7 @@ export class Session {
 	async delete(context: WabeContext<any>) {
 		if (!context.sessionId) return
 
-		await context.wabeApp.databaseController.deleteObject({
+		await context.wabeApp.controllers.database.deleteObject({
 			className: '_Session',
 			context,
 			id: context.sessionId,
@@ -120,7 +120,7 @@ export class Session {
 		refreshToken: string,
 		context: WabeContext<any>,
 	) {
-		const session = await context.wabeApp.databaseController.getObjects({
+		const session = await context.wabeApp.controllers.database.getObjects({
 			className: '_Session',
 			where: {
 				accessToken: { equalTo: accessToken },
@@ -183,7 +183,7 @@ export class Session {
 			import.meta.env.JWT_SECRET || 'dev',
 		)
 
-		await context.wabeApp.databaseController.updateObject({
+		await context.wabeApp.controllers.database.updateObject({
 			className: '_Session',
 			context: {
 				...context,

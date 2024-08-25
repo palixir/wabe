@@ -49,7 +49,9 @@ export class Wabe<T extends WabeTypes> {
 	public server: Wobe<WobeCustomContext<T>>
 
 	public config: WabeConfig<T>
-	public databaseController: DatabaseController<T>
+	public controllers: {
+		database: DatabaseController<T>
+	}
 
 	constructor({
 		port,
@@ -91,7 +93,9 @@ export class Wabe<T extends WabeTypes> {
 			databaseUrl: database.url,
 		})
 
-		this.databaseController = new DatabaseController<T>(databaseAdapter)
+		this.controllers = {
+			database: new DatabaseController<T>(databaseAdapter),
+		}
 
 		this.loadDefaultRoutes()
 		this.loadHooks()
@@ -139,7 +143,7 @@ export class Wabe<T extends WabeTypes> {
 	}
 
 	async start() {
-		await this.databaseController.connect()
+		await this.controllers.database.connect()
 
 		const wabeSchema = new Schema(this.config)
 
@@ -311,7 +315,7 @@ export class Wabe<T extends WabeTypes> {
 			}),
 		)
 
-		await initializeRoles(this.databaseController, this.config)
+		await initializeRoles(this)
 
 		this.server.listen(this.config.port, ({ port }) => {
 			if (!process.env.TEST)
@@ -320,7 +324,7 @@ export class Wabe<T extends WabeTypes> {
 	}
 
 	async close() {
-		await this.databaseController.close()
+		await this.controllers.database.close()
 		this.server.stop()
 	}
 }
