@@ -1,12 +1,11 @@
 import { GraphQLSchema, GraphQLObjectType } from 'graphql'
-import { devSchema } from './schema'
+import { devConfig } from './config'
 import { GraphQLSchema as WabeGraphQLSchema } from '../src/graphql'
 import { generateCodegen } from '../src/server/generateCodegen'
 import { Schema } from '../src/schema/Schema'
 
 const run = async () => {
-	// @ts-expect-error
-	const wabeSchema = new Schema({ schema: devSchema })
+	const wabeSchema = new Schema(devConfig)
 
 	const graphqlSchema = new WabeGraphQLSchema(wabeSchema)
 
@@ -26,9 +25,11 @@ const run = async () => {
 
 	generateCodegen({
 		path: `${import.meta.dirname}/../generated`,
-		schema: devSchema,
+		schema: devConfig.schema,
 		graphqlSchema: schema,
 	})
+
+	process.exit(0)
 }
 
-await run()
+run().catch((error) => console.error(error))
