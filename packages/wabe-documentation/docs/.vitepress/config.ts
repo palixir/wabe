@@ -8,6 +8,9 @@ export default defineConfig({
 		search: {
 			provider: 'local',
 		},
+		outline: {
+			level: 'deep',
+		},
 		nav: [
 			{ text: 'Home', link: '/' },
 			{ text: 'Documentation', link: '/wabe/motivations' },

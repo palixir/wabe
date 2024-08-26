@@ -156,7 +156,7 @@ export interface PermissionProperties {
 	/**
 	 * An empty array means that none role is authorized (except root client)
 	 */
-	authorizedRoles: Array<string>
+	authorizedRoles?: Array<string>
 }
 
 export type ClassPermissions = Partial<

@@ -18,49 +18,24 @@ const run2 = async () => {
 			name: 'Wabe',
 		},
 		port: 3000,
+		authentication: {
+			roles: ['Admin'],
+		},
 		schema: {
-			classes: [],
-			resolvers: {
-				mutations: {
-					sumAndUpdateResult: {
-						type: 'Int',
-						args: {
-							input: {
-								a: {
-									type: 'Int',
-								},
-								b: {
-									type: 'Int',
-								},
-							},
+			classes: [
+				{
+					name: 'Company',
+					fields: {
+						name: {
+							type: 'String',
 						},
-						resolve: (root, args) => {
-							const sum = args.input.a + args.input.b
-
-							// Suppose we update sum in database
-
-							return sum
+						contactEmail: {
+							type: 'Email',
 						},
 					},
+					searchableFields: ['name'],
 				},
-				queries: {
-					helloWorld: {
-						// Output type
-						type: 'String',
-						// Description of the query
-						description: 'Hello world description',
-						// Arguments of the query
-						args: {
-							name: {
-								type: 'String',
-								required: true,
-							},
-						},
-						// The resolver to call when we call the query
-						resolve: () => 'Hello World',
-					},
-				},
-			},
+			],
 		},
 	})
 
@@ -233,6 +208,6 @@ const run = async () => {
 	await wabe.start()
 }
 
-run2().catch((err) => {
+run().catch((err) => {
 	console.error(err)
 })
