@@ -29,11 +29,29 @@ const run2 = async () => {
 						name: {
 							type: 'String',
 						},
-						contactEmail: {
-							type: 'Email',
+						contactPhone: {
+							type: 'Phone',
 						},
 					},
-					searchableFields: ['name'],
+				},
+			],
+			scalars: [
+				{
+					name: 'Phone',
+					description: 'Phone scalar',
+					parseValue(value: any) {
+						if (typeof value !== 'string')
+							throw new Error('Invalid phone')
+
+						if (
+							!value.match(
+								/^(?:(?:\+33|0033)[\s.-]?)?[1-9](?:[\s.-]?\d{2}){4}$/,
+							)
+						)
+							throw new Error('Invalid phone')
+
+						return value
+					},
 				},
 			],
 		},
