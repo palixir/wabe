@@ -10,6 +10,7 @@ import {
 	type GraphQLOutputType,
 	GraphQLScalarType,
 	GraphQLString,
+	GraphQLBoolean,
 } from 'graphql'
 import { pluralize } from 'wabe-pluralize'
 import type { WabeTypes } from '..'
@@ -242,6 +243,7 @@ export class GraphQLSchema {
 			name: `${nameWithoutSpace}PointerInput`,
 			description: `Input to link an object to a pointer ${nameWithoutSpace}`,
 			fields: () => ({
+				unlink: { type: GraphQLBoolean },
 				link: { type: GraphQLID },
 				createAndLink: { type: inputCreateFields },
 			}),

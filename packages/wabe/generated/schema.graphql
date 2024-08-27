@@ -127,6 +127,7 @@ input UserAuthenticationGoogleInput {
 
 """Input to link an object to a pointer User"""
 input UserPointerInput {
+  unlink: Boolean
   link: ID
   createAndLink: UserCreateFieldsInput
 }
@@ -246,6 +247,7 @@ input PostACLObjectRolesACLInput {
 
 """Input to link an object to a pointer Post"""
 input PostPointerInput {
+  unlink: Boolean
   link: ID
   createAndLink: PostCreateFieldsInput
 }
@@ -344,6 +346,7 @@ input _SessionACLObjectRolesACLInput {
 
 """Input to link an object to a pointer _Session"""
 input _SessionPointerInput {
+  unlink: Boolean
   link: ID
   createAndLink: _SessionCreateFieldsInput
 }
@@ -448,6 +451,7 @@ input RoleACLObjectRolesACLInput {
 
 """Input to link an object to a pointer Role"""
 input RolePointerInput {
+  unlink: Boolean
   link: ID
   createAndLink: RoleCreateFieldsInput
 }

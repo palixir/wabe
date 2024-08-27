@@ -1898,6 +1898,90 @@ describe('GraphqlSchema', () => {
 		await wabe.close()
 	})
 
+	it('should unlink a pointer on update', async () => {
+		const { client, wabe } = await createWabe({
+			classes: [
+				{
+					name: 'TestClass',
+					fields: {
+						field1: {
+							type: 'String',
+						},
+					},
+				},
+				{
+					name: 'TestClass2',
+					fields: {
+						name: {
+							type: 'String',
+						},
+						field2: {
+							type: 'Pointer',
+							// @ts-expect-error
+							class: 'TestClass',
+						},
+					},
+				},
+			],
+		})
+
+		const {
+			createTestClass: {
+				testClass: { id: idOfTestClass },
+			},
+		} = await client.request<any>(
+			gql`
+				mutation createTestClass {
+					createTestClass(input: { fields: { field1: "field1" } }) {
+						testClass {
+							id
+						}
+					}
+				}
+			`,
+			{},
+		)
+
+		const res = await client.request<any>(
+			gql`
+				mutation createTestClass {
+					createTestClass2(input: { fields: { name: "name", field2: { link : "${idOfTestClass}"} }}) {
+						testClass2 {
+							id
+							name
+						}
+					}
+				}
+			`,
+			{},
+		)
+
+		expect(
+			client.request<any>(
+				gql`
+				mutation updateTestClass {
+					updateTestClass2(input: {
+  					id: "${res.createTestClass2.testClass2.id}"
+  					fields: {
+   				     field2: { unlink: true }
+  					}
+					}){
+					  testClass2 {
+							name
+							field2{
+							 field1
+							}
+						}
+					}
+				}
+			`,
+				{},
+			),
+		).rejects.toThrow('Object not found')
+
+		await wabe.close()
+	})
+
 	it('should link a pointer on update multiple object', async () => {
 		const { client, wabe } = await createWabe({
 			classes: [

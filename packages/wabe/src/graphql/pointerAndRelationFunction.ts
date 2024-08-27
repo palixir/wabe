@@ -3,6 +3,7 @@ import type { WabeContext } from '../server/interface'
 
 type CreateAndLink = any
 type Link = string
+type Unlink = boolean
 type Add = Array<string>
 type Remove = Array<string>
 type CreateAndAdd = Array<any>
@@ -14,6 +15,7 @@ export type InputFields = Record<
 	| {
 			createAndLink?: CreateAndLink
 			link?: Link
+			unlink?: Unlink
 			add?: Add
 			remove?: Remove
 			createAndAdd?: CreateAndAdd

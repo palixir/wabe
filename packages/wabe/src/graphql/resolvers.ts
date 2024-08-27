@@ -89,6 +89,8 @@ export const executeRelationOnFields = async ({
 				})
 			} else if (typeof value === 'object' && value?.link) {
 				newAcc[fieldName] = value.link
+			} else if (typeof value === 'object' && value.unlink) {
+				newAcc[fieldName] = null
 			} else if (typeof value === 'object' && value?.createAndAdd) {
 				newAcc[fieldName] = await createAndAdd({
 					createAndAdd: value.createAndAdd,
