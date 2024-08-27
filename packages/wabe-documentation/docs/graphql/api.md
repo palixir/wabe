@@ -26,11 +26,11 @@ deleteCompanies(input: DeleteCompaniesInput): CompanyConnection!
 
 ## Connections
 
-Queries and mutations that return multiple objects will return a `Connection` object (a standard GraphQL type see the doc [here](https://graphql.org/learn/pagination/#complete-connection-model)). In this object, you will find a `count` field that returns the total number of items matching your query (this can be used in a pagination system to return the total number of results in the database that match your query). You will also find the `edges` object, with `nodes` containing all the fields of the retrieved object.
+Queries and mutations that return multiple objects will return a `Connection` object (a standard GraphQL type see the doc [here](https://graphql.org/learn/pagination/#complete-connection-model)). In this object, you will find a `totalCount` field that returns the total number of items matching your query (this can be used in a pagination system to return the total number of results in the database that match your query). You will also find the `edges` object, with `nodes` containing all the fields of the retrieved object.
 
 ```graphql
 type CompanyConnection {
-  count: Int
+  totalCount: Int
   edges: [CompanyEdge]
 }
 
@@ -83,7 +83,7 @@ input IntWhereInput {
 
 As you may have noticed in the query that retrieves multiple objects, you have the option to define an `offset`, which corresponds to the number of results from which you want to start retrieving. You can also specify a `first` number of items to retrieve. The `offset` and `first` fields are **GraphQL Relay** compliant.
 
-For a good pagination, it's recommend to use `totalCount` to get the total number of elements instead of getting the length of the `edges` object. Count represents the total number of results that are corresponding to your request. Edges only correspond to the number returns with `offset` and `first` consideration.
+For a good pagination, it's recommend to use `totalCount` to get the total number of elements instead of getting the length of the `edges` object. `totalCount` represents the total number of results that are corresponding to your request. Edges only corresponds to the objects returns with `offset` and `first` consideration.
 
 For example, in a query with a `where` clause that retrieves a total of 100 results, if you set an `offset` of 20 and a `first` of 10, you will retrieve items from the twentieth to the thirtieth.
 
