@@ -23,45 +23,54 @@ export default defineConfig({
 				link: '/wabe/concepts',
 			},
 			{
-				text: 'Schema',
+				text: 'Configuration',
 				items: [
-					{ text: 'Classes', link: '/schema/classes' },
 					{
-						text: 'Resolvers',
-						link: '/schema/resolvers',
+						text: 'Schema',
+						items: [
+							{ text: 'Classes', link: '/config/schema/classes' },
+							{
+								text: 'Resolvers',
+								link: '/config/schema/resolvers',
+							},
+							{ text: 'Enums', link: '/config/schema/enums' },
+							{
+								text: 'Scalars',
+								link: '/config/schema/scalars',
+							},
+						],
 					},
-					{ text: 'Enums', link: '/schema/enums' },
+					{ text: 'Files', link: '/config/files' },
 					{
-						text: 'Scalars',
-						link: '/schema/scalars',
+						text: 'Authentication',
+						items: [
+							{
+								text: 'Sessions',
+								link: '/config/authentication/sessions',
+							},
+							{
+								text: 'Roles',
+								link: '/config/authentication/roles',
+							},
+							{
+								text: 'OAuth',
+								link: '/config/authentication/oauth',
+							},
+							{
+								text: 'Custom methods',
+								link: '/config/authentication/customMethods',
+							},
+						],
 					},
 				],
 			},
 			{
 				text: 'GraphQL',
-				items: [
-					{
-						text: 'GraphQL API',
-						link: '/graphql/api',
-					},
-					{
-						text: 'GraphQL file upload',
-						link: '/graphql/fileUpload',
-					},
-				],
+				link: '/graphql/api',
 			},
 			{
 				text: 'Database',
-				items: [
-					{
-						text: 'Database Controller',
-						link: '/database/controller',
-					},
-					{
-						text: 'Mongo',
-						link: '/database/mongo',
-					},
-				],
+				link: '/database/index',
 			},
 			{
 				text: 'Permissions',

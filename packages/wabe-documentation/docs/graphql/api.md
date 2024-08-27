@@ -1,4 +1,4 @@
-# GraphQL API
+# GraphQL
 
 One of the most important features of Wabe is its auto-generated GraphQL API. It allows you to interact with your database data very easily from either the frontend or backend, and in a fully typed manner (see [here](https://graphql.org/) to have more information about GraphQL advantage). Wabe GraphQL API follows **[GraphQL Relay](https://relay.dev/)** specifications.
 
@@ -277,4 +277,54 @@ mutation updateCompany {
     }
   }
 }
+```
+
+## File upload
+
+Wabe's GraphQL API offers a way to `upload` files into the database. It uses the specifications written by Jayden Seric (link [here](https://github.com/jaydenseric/graphql-multipart-request-spec)) in the absence of an official specification. These specifications are supported by GraphQL Yoga, among others. As detailed in the schema section, you have the ability to define your own file adapter, which is invoked when a mutation that receives a file as a parameter is used. A common procedure inside this adapter is to upload the file to a bucket and return the URL of that file. Note that the element returned by the adapter function corresponds to the value that will be stored in the database.
+
+This uses a multipart form; an example of its usage is provided below.
+
+```ts
+const formData = new FormData();
+
+formData.append(
+  "operations",
+  JSON.stringify({
+    query: `mutation ($logo: File!) {
+        updateCompany(input: {id: \"companyId\", fields: {logo: $logo}}) {
+          company {
+            id
+            logo
+          }
+        }
+      }`,
+    variables: { logo: null },
+  }),
+);
+
+formData.append("map", JSON.stringify({ 0: ["variables.logo"] }));
+
+formData.append("0", new File(["a"], "a.text", { type: "text/plain" }));
+
+const res = await fetch("http://127.0.0.1:3000/graphql", {
+  method: "POST",
+  body: formData,
+});
+```
+
+Example of adapter implementation in schema :
+
+```ts
+new Wabe({
+  // ... others config fields
+  file: {
+    adapter: async (file) => {
+      // ... Upload the file on a bucket
+
+      // return the url of the file for example (this url will be store in the database)
+      return "http://bucket.storage/123456/logo.png";
+    },
+  },
+});
 ```

@@ -1,5 +1,6 @@
 import type { Wabe } from '..'
 
+// TODO: Before create check if role not already exists
 export const initializeRoles = async (wabe: Wabe<any>) => {
 	const roles = wabe.config?.authentication?.roles || []
 

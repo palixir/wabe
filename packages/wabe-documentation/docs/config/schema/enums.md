@@ -3,7 +3,7 @@
 With Wabe, you can create your own `enums` (a TypeScript enum will also be generated if you have codegen enabled). After **restarting** your server (to trigger the codegen), you can easily use it as a field type, as shown in the example below.
 
 ```ts
-import { DatabaseEnum, Wabe } from "wabe";
+import { Wabe } from "wabe";
 
 const run = async () => {
   const wabe = new Wabe({

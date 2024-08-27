@@ -21,7 +21,7 @@ The schema object in your Wabe app configuration allows you to define the schema
 The `classes` array allow you to create new classe in your project with some fields. In the example below, a company class had a required name and a logo.
 
 ```ts
-import { DatabaseEnum, Wabe } from "wabe";
+import { Wabe } from "wabe";
 
 const run = async () => {
   const wabe = new Wabe({
@@ -55,7 +55,7 @@ await run();
 You can also create more complex structure, like `object` structure. This allows for nested objects.
 
 ```ts
-import { DatabaseEnum, Wabe } from "wabe";
+import { Wabe } from "wabe";
 
 const run = async () => {
   const wabe = new Wabe({
@@ -104,7 +104,7 @@ await run();
 You can also create a field of type Array, which can, for example, contain an array of dates.
 
 ```ts
-import { DatabaseEnum, Wabe } from "wabe";
+import { Wabe } from "wabe";
 
 const run = async () => {
   const wabe = new Wabe({
@@ -139,7 +139,7 @@ In many cases, we need to associate classes with each other, which in a relation
 A pointer allows you to associate an object with a unique object from another class. For example, we might say that a company has one primary user. In this case, we would have a Pointer to a user (we’ll see in the GraphQL API section how, with Wabe, you can easily query a pointer field).
 
 ```ts
-import { DatabaseEnum, Wabe } from "wabe";
+import { Wabe } from "wabe";
 
 const run = async () => {
   const wabe = new Wabe({
@@ -170,7 +170,7 @@ await run();
 In contrast to pointers, a relation allows you to associate an object with multiple other objects (essentially an array of objects) from another class. For example, we might say that a company has multiple users. To create this link, we can use a relation.
 
 ```ts
-import { DatabaseEnum, Wabe } from "wabe";
+import { Wabe } from "wabe";
 
 const run = async () => {
   const wabe = new Wabe({
@@ -201,7 +201,7 @@ await run();
 When configuring your class, you have the option to specify which fields you want to `index`. To do this, simply define the field name and the order (ASC for ascending order and DESC for descending order). The `order` parameter only impacts the performance of your query, not the order in which you receive the results.
 
 ```ts
-import { DatabaseEnum, Wabe } from "wabe";
+import { Wabe } from "wabe";
 
 const run = async () => {
   const wabe = new Wabe({
@@ -239,7 +239,7 @@ await run();
 When configuring your class, you have the option to set specific access `permissions` for that class. These permissions allow you to specify rights for `creating`, `updating`, `deleting`, and `reading` the class data. For each of the four CRUD operations, you can define whether authentication is required to perform the operation and which roles are authorized to execute it for more granular control.
 
 ```ts
-import { DatabaseEnum, Wabe } from "wabe";
+import { Wabe } from "wabe";
 
 const run = async () => {
   const wabe = new Wabe({
@@ -297,7 +297,7 @@ For example, the word "test" would generate ["t", "te", "tes", "test"] in a defa
 We will explain in more detail in the GraphQL API section how to easily interact with the search field through the GraphQL API.
 
 ```ts
-import { DatabaseEnum, Wabe } from "wabe";
+import { Wabe } from "wabe";
 
 const run = async () => {
   const wabe = new Wabe({

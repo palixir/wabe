@@ -19,7 +19,37 @@ const run2 = async () => {
 		},
 		port: 3000,
 		authentication: {
-			roles: ['Admin'],
+			customAuthenticationMethods: [
+				{
+					name: 'PhonePassword',
+					input: {
+						phone: {
+							type: 'Phone',
+						},
+						password: {
+							type: 'String',
+						},
+					},
+					// Provider that follow our ProviderInterface type
+					provider: new PhonePassword(),
+					dataToStore: {
+						phone: {
+							type: 'Phone',
+						},
+						password: {
+							type: 'String',
+						},
+					},
+				},
+			],
+		},
+		file: {
+			adapter: async (file) => {
+				// ... Upload the file on a bucket
+				// return the url of the file for example
+
+				return 'http://bucket.storage/123456/logo.png'
+			},
 		},
 		schema: {
 			classes: [

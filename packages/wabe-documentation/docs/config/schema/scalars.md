@@ -5,7 +5,7 @@ With Wabe, you can create your own `scalars` (a TypeScript type will also be gen
 To define them, you can specify the same fields as for a GraphQL scalar (parseValue, parseLiteral, serialize, see [here](https://www.apollographql.com/docs/apollo-server/schema/custom-scalars/#serialize) for more information).
 
 ```ts
-import { DatabaseEnum, Wabe } from "wabe";
+import { Wabe } from "wabe";
 
 const run = async () => {
   const wabe = new Wabe({
