@@ -168,7 +168,7 @@ export const queryForMultipleObject = async (
 	})
 
 	return {
-		count: fields.includes('count')
+		totalCount: fields.includes('totalCount')
 			? await context.wabe.controllers.database.count({
 					className,
 					where,

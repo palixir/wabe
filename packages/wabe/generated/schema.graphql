@@ -67,7 +67,7 @@ type UserAuthenticationGoogle {
 }
 
 type _SessionConnection {
-  count: Int
+  totalCount: Int
   edges: [_SessionEdge]
 }
 
@@ -398,7 +398,7 @@ type Role {
 }
 
 type UserConnection {
-  count: Int
+  totalCount: Int
   edges: [UserEdge]
 }
 
@@ -713,7 +713,7 @@ input _SessionACLObjectRolesACLWhereInput {
 }
 
 type PostConnection {
-  count: Int
+  totalCount: Int
   edges: [PostEdge]
 }
 
@@ -764,7 +764,7 @@ input PostACLObjectRolesACLWhereInput {
 }
 
 type RoleConnection {
-  count: Int
+  totalCount: Int
   edges: [RoleEdge]
 }
 
