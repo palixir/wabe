@@ -83,6 +83,8 @@ input IntWhereInput {
 
 As you may have noticed in the query that retrieves multiple objects, you have the option to define an `offset`, which corresponds to the number of results from which you want to start retrieving. You can also specify a `first` number of items to retrieve. The `offset` and `first` fields are **GraphQL Relay** compliant.
 
+For a good pagination, it's recommend to use `totalCount` to get the total number of elements instead of getting the length of the `edges` object. Count represents the total number of results that are corresponding to your request. Edges only correspond to the number returns with `offset` and `first` consideration.
+
 For example, in a query with a `where` clause that retrieves a total of 100 results, if you set an `offset` of 20 and a `first` of 10, you will retrieve items from the twentieth to the thirtieth.
 
 ```graphql
@@ -163,6 +165,30 @@ mutation createCompany {
 }
 ```
 
+Case where you want to unlink an object from the `Pointer`:
+
+**Note :** When you `unlink` a pointer if you request the field in the query, it will **throw** an error `Object not found` because no object is link anymore to the object.
+
+```graphql
+mutation updateCompany {
+  updateCompany(
+    id: "companyIdToUpdate"
+    # Here we want to unlink the mainUser from the Pointer
+    input: {fields: {mainUser: {unlink : true}}}
+  ) {
+    company {
+      id
+      # Notice this request will throw an error Object not found since the mainUser
+      # object doesn't link anymore to this company
+      mainUser {
+        lastName
+        firstName
+      }
+    }
+  }
+}
+```
+
 ## Relation
 
 Like for the `Pointer` you can add one or multiple object on `Relation` (with add / createAndAdd). You can also `remove` one or multiple objects from the `Relation`.
@@ -229,7 +255,7 @@ mutation createCompany {
 }
 ```
 
-Case where you want to remove on object from the `Relation`:
+Case where you want to remove an object from the `Relation`:
 
 ```graphql
 mutation updateCompany {
