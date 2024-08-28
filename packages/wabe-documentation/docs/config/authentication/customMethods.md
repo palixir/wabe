@@ -1,5 +1,7 @@
 # Custom authentication methods
 
+## Create your own method
+
 Wabe offers `default` authentication methods such as Google sign-in or email and password authentication. However, you also have the option to create your `own authentication methods` by developing a class that implements the functions of the `ProviderInterface`.
 
 You also need to define various configuration fields: the `name` of the authentication method, the `input` parameters for the authentication method (which will be passed in the signInWith mutation input), as well as the `data to store` in the database, which can be used to compare with the parameters provided by the user in the provider.
@@ -60,4 +62,104 @@ type ProviderInterface<T = any> = {
     options: AuthenticationEventsOptions<T>,
   ) => Promise<{ authenticationDataToSave: any }>;
 };
+```
+
+## Example of EmailPassword method
+
+Here is an example of the `EmailPassword` provider that you can use to develop your own provider.
+
+```ts
+import type {
+  AuthenticationEventsOptions,
+  ProviderInterface,
+} from "../interface";
+
+type EmailPasswordInterface = {
+  password: string;
+  email: string;
+};
+
+export class EmailPassword
+  implements ProviderInterface<EmailPasswordInterface>
+{
+  async onSignIn({
+    input,
+    context,
+  }: AuthenticationEventsOptions<EmailPasswordInterface>) {
+    // TODO : Use first here but need to refactor in graphql and mongoadapter to have first and not limit
+    const users = await context.wabe.controllers.database.getObjects({
+      className: "User",
+      where: {
+        authentication: {
+          // @ts-expect-error
+          emailPassword: {
+            email: { equalTo: input.email },
+          },
+        },
+      },
+      context: {
+        ...context,
+        isRoot: true,
+      },
+      fields: ["authentication"],
+    });
+
+    if (users.length === 0) {
+      throw new Error("Invalid authentication credentials");
+    }
+
+    const user = users[0];
+
+    const userDatabasePassword = user.authentication?.emailPassword?.password;
+
+    if (!userDatabasePassword) {
+      throw new Error("Invalid authentication credentials");
+    }
+
+    const isPasswordEquals = await Bun.password.verify(
+      input.password,
+      userDatabasePassword,
+      "argon2id",
+    );
+
+    if (
+      !isPasswordEquals
+      || input.email !== user.authentication?.emailPassword?.email
+    ) {
+      throw new Error("Invalid authentication credentials");
+    }
+
+    return {
+      user,
+    };
+  }
+
+  async onSignUp({
+    input,
+    context,
+  }: AuthenticationEventsOptions<EmailPasswordInterface>) {
+    const users = await context.wabe.controllers.database.getObjects({
+      className: "User",
+      where: {
+        authentication: {
+          // @ts-expect-error
+          emailPassword: {
+            email: { equalTo: input.email },
+          },
+        },
+      },
+      context,
+      fields: [],
+    });
+
+    if (users.length > 0) throw new Error("User already exists");
+
+    return {
+      authenticationDataToSave: {
+        email: input.email,
+        password: await Bun.password.hash(input.password, "argon2id"),
+      },
+    };
+  }
+}
 ```

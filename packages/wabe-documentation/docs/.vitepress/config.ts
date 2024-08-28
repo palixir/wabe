@@ -65,23 +65,24 @@ export default defineConfig({
 				],
 			},
 			{
-				text: 'GraphQL',
-				link: '/graphql/api',
-			},
-			{
-				text: 'Database',
-				link: '/database/index',
-			},
-			{
-				text: 'Permissions',
+				text: 'Interact with database',
 				items: [
 					{
-						text: 'Classes permissions',
-						link: '/permissions/classes',
+						text: 'GraphQL',
+						link: '/graphql/api',
 					},
 					{
-						text: 'Objects permissions',
-						link: '/permissions/objects',
+						text: 'Database',
+						link: '/database/index',
+					},
+				],
+			},
+			{
+				text: 'Security',
+				items: [
+					{
+						text: 'Permissions',
+						link: '/security/index.md',
 					},
 				],
 			},
@@ -90,29 +91,6 @@ export default defineConfig({
 				items: [
 					{ text: 'Why a hook system ?', link: '/hooks/why' },
 					{ text: 'How it works ?', link: '/hooks/howItWorks' },
-				],
-			},
-			{
-				text: 'Authentication',
-				items: [
-					{
-						text: 'Email password',
-						link: '/authentication/emailPassword',
-					},
-					{
-						text: 'Oauth',
-						link: '/authentication/oauth',
-						items: [
-							{
-								text: 'Google',
-								link: '/authentication/oauth/google',
-							},
-						],
-					},
-					{
-						text: 'Custom authentication methods',
-						link: '/authentication/customMethods',
-					},
 				],
 			},
 		],

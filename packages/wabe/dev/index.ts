@@ -19,29 +19,8 @@ const run2 = async () => {
 		},
 		port: 3000,
 		authentication: {
-			customAuthenticationMethods: [
-				{
-					name: 'PhonePassword',
-					input: {
-						phone: {
-							type: 'Phone',
-						},
-						password: {
-							type: 'String',
-						},
-					},
-					// Provider that follow our ProviderInterface type
-					provider: new PhonePassword(),
-					dataToStore: {
-						phone: {
-							type: 'Phone',
-						},
-						password: {
-							type: 'String',
-						},
-					},
-				},
-			],
+			successRedirectPath: 'https://myapp.com/dashboard',
+			failureRedirectPath: 'https://myapp.com/login',
 		},
 		file: {
 			adapter: async (file) => {

@@ -12,13 +12,6 @@ export interface WabeRoute {
 export const defaultRoutes = (): WabeRoute[] => [
 	{
 		method: 'GET',
-		path: '/tata/tutu',
-		handler: (ctx) => {
-			ctx.res.send('OK')
-		},
-	},
-	{
-		method: 'GET',
 		path: '/auth/oauth',
 		handler: async (context) => {
 			const provider = context.query.provider

@@ -2,7 +2,7 @@
 
 The schema object in your Wabe app configuration allows you to define the schema for the various classes your application requires. For example, you might have a "Company" class with a name field if your application needs to store client companies and their names.
 
-## Simple class
+## Create a simple class
 
 `Wabe` allows you to create classes with some typed fields inside. For the moment `Wabe` supports natively following types (but you can create your own with `Scalars`) :
 
