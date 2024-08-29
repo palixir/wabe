@@ -62,6 +62,10 @@ export default defineConfig({
 							},
 						],
 					},
+					{
+						text: 'Root key',
+						link: '/config/rootKey',
+					},
 				],
 			},
 			{
