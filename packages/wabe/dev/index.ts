@@ -22,6 +22,15 @@ const run2 = async () => {
 			successRedirectPath: 'https://myapp.com/dashboard',
 			failureRedirectPath: 'https://myapp.com/login',
 		},
+		routes: [
+			{
+				path: '/hello',
+				method: 'GET',
+				handler: (ctx) => {
+					return ctx.res.send('OK')
+				},
+			},
+		],
 		file: {
 			adapter: async (file) => {
 				// ... Upload the file on a bucket

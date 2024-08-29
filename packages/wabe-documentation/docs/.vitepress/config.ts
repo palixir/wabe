@@ -63,6 +63,8 @@ export default defineConfig({
 						],
 					},
 					{ text: 'Hooks', link: '/config/hooks' },
+					{ text: 'Routes', link: '/config/routes' },
+					{ text: 'Codegen', link: '/config/codegen' },
 					{
 						text: 'Root key',
 						link: '/config/rootKey',
