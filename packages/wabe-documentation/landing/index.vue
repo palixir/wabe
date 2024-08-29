@@ -5,6 +5,7 @@ import Card from './Card.vue'
 import Package from './Package.vue'
 </script>
 
+
 <template>
 
 <div class="bg-gradient-to-r from-background-primary via-background-secondary to-background-primary">
@@ -58,15 +59,15 @@ import Package from './Package.vue'
             <p class="mt-4 text-lg text-gray-300">Wabe offers a comprehensive set of features to power your backend.</p>
 
             <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
-                <Card title="Authentication" description="Secure and scalable authentication for your applications." variant="feature" iconName="auth.png"/>
+                <Card href="/config/authentication/sessions" title="Authentication" description="Secure and scalable authentication for your applications." variant="feature" iconName="auth.png"/>
                 
-                <Card title="Permissions" description="Granual permissions control to secure your resources." variant="feature" iconName="permissions.png"/>
+                <Card href="/security/index" title="Permissions" description="Granual permissions control to secure your resources." variant="feature" iconName="permissions.png"/>
                 
-                <Card title="Database" description="A powerful, scalable databaes to store and manage you data." variant="feature" iconName="database.png"/>
+                <Card href="/database/index" title="Database" description="A powerful, scalable databaes to store and manage you data." variant="feature" iconName="database.png"/>
 
-                <Card title="GraphQL API" description="A flexible and powerful GraphQL API (following GraphQL Relay standard)to interact with your data." variant="feature" iconName="graphql.png"/>
+                <Card href="/graphql/api" title="GraphQL API" description="A flexible and powerful GraphQL API (following GraphQL Relay standard)to interact with your data." variant="feature" iconName="graphql.png"/>
 
-                <Card title="Hooks" description="Powerful hooks system to execute custom actions before or after database requests." iconName="hooks.png"/>
+                <Card href="/config/hooks" title="Hooks" description="Powerful hooks system to execute custom actions before or after database requests." iconName="hooks.png"/>
 
             </div>
         </div>
