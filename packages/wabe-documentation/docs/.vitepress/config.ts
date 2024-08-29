@@ -62,6 +62,7 @@ export default defineConfig({
 							},
 						],
 					},
+					{ text: 'Hooks', link: '/config/hooks' },
 					{
 						text: 'Root key',
 						link: '/config/rootKey',
@@ -86,15 +87,8 @@ export default defineConfig({
 				items: [
 					{
 						text: 'Permissions',
-						link: '/security/index.md',
+						link: '/security/index',
 					},
-				],
-			},
-			{
-				text: 'Hooks',
-				items: [
-					{ text: 'Why a hook system ?', link: '/hooks/why' },
-					{ text: 'How it works ?', link: '/hooks/howItWorks' },
 				],
 			},
 		],

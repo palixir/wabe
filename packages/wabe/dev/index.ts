@@ -1,5 +1,5 @@
 import { runDatabase } from 'wabe-mongodb-launcher'
-import { DatabaseEnum, Wabe } from '../src'
+import { DatabaseEnum, OperationType, Wabe } from '../src'
 import type {
 	WabeSchemaEnums,
 	WabeSchemaScalars,
@@ -64,6 +64,20 @@ const run2 = async () => {
 				},
 			],
 		},
+		hooks: [
+			{
+				className: 'User',
+				priority: 1,
+				operationType: OperationType.BeforeCreate,
+				callback: (hookObject) => {
+					const isRoot = hookObject.context.isRoot
+
+					if (!isRoot) throw new Error('Permission denied')
+
+					hookObject.upsertNewData('newField', 'valueOfNewField')
+				},
+			},
+		],
 	})
 
 	await wabe.start()
