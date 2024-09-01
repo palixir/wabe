@@ -15,13 +15,14 @@
   },
   "main": "dist/index.js",
   "scripts": {
-    "build": "bun build --outdir dist $(pwd)/src/index.ts --target=node && bun generate:types",
+    "build": "bun generate:codegen && bun build --outdir dist $(pwd)/src/index.ts --target=node && bun generate:types",
     "generate:types": "dts-bundle-generator -o dist/index.d.ts src/index.ts --no-check --external-imports=wobe",
     "check": "tsc --project $(pwd)/tsconfig.json",
     "lint": "biome lint . --no-errors-on-unmatched --config-path=../../",
-    "ci": "touch generated/wabe.ts && CODEGEN=true bun dev/index.ts && bun check && bun lint $(pwd) && bun test src",
+    "ci": "bun generate:codegen && bun check && bun lint $(pwd) && bun test src",
     "format": "biome format --write .",
-    "dev": "touch generated/wabe.ts && bun run --watch dev/index.ts"
+    "dev": "bun generate:codegen && bun run --watch dev/index.ts",
+    "generate:codegen":"touch generated/wabe.ts && CODEGEN=true bun dev/index.ts"
   },
   "dependencies": {
     "@graphql-codegen/core": "4.0.2",
