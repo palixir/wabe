@@ -4,6 +4,7 @@ import getPort from 'get-port'
 import { Wabe } from '.'
 import { DatabaseEnum } from '../database'
 import { Schema } from '../schema'
+import { OperationType } from '../hooks'
 
 describe('Server', () => {
 	it('should run server', async () => {
@@ -35,6 +36,68 @@ describe('Server', () => {
 
 		expect(res.status).toEqual(200)
 		await wabe.close()
+	})
+
+	it('should throw an error if hook has negative value', async () => {
+		const databaseId = uuid()
+
+		const port = await getPort()
+		expect(
+			() =>
+				new Wabe({
+					rootKey:
+						'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+					database: {
+						type: DatabaseEnum.Mongo,
+						url: 'mongodb://127.0.0.1:27045',
+						name: databaseId,
+					},
+					port,
+					hooks: [
+						{
+							operationType: OperationType.BeforeCreate,
+							callback: () => {},
+							priority: -1,
+						},
+					],
+				}),
+		).toThrow('Hook priority <= 0 is reserved for internal uses')
+
+		expect(
+			() =>
+				new Wabe({
+					rootKey:
+						'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+					database: {
+						type: DatabaseEnum.Mongo,
+						url: 'mongodb://127.0.0.1:27045',
+						name: databaseId,
+					},
+					port,
+					hooks: [],
+				}),
+		).not.toThrow()
+
+		expect(
+			() =>
+				new Wabe({
+					rootKey:
+						'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+					database: {
+						type: DatabaseEnum.Mongo,
+						url: 'mongodb://127.0.0.1:27045',
+						name: databaseId,
+					},
+					port,
+					hooks: [
+						{
+							operationType: OperationType.BeforeCreate,
+							callback: () => {},
+							priority: 1,
+						},
+					],
+				}),
+		).not.toThrow()
 	})
 
 	it('should run server without schema object', async () => {
