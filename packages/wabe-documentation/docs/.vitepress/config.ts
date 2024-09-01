@@ -3,7 +3,10 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
 	title: 'Wabe',
 	appearance: 'force-dark',
-	head: [['link', { rel: 'icon', href: 'favicon.ico' }]],
+	head: [
+		['link', { rel: 'icon', href: 'favicon.ico' }],
+		['script', { src: '/_vercel/insights/script.js', defer: 'true' }],
+	],
 	themeConfig: {
 		search: {
 			provider: 'local',
