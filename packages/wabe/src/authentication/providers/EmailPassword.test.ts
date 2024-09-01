@@ -1,4 +1,5 @@
 import { describe, expect, it, mock, spyOn, beforeEach } from 'bun:test'
+import argon2 from 'argon2'
 import { EmailPassword } from './EmailPassword'
 
 describe('Email password', () => {
@@ -7,7 +8,7 @@ describe('Email password', () => {
 		Promise.resolve({ id: 'userId' }),
 	) as any
 
-	const spyBunPasswordVerify = spyOn(Bun.password, 'verify')
+	const spyArgonPasswordVerify = spyOn(argon2, 'verify')
 
 	const controllers = {
 		controllers: {
@@ -21,16 +22,15 @@ describe('Email password', () => {
 	beforeEach(() => {
 		mockGetObjects.mockClear()
 		mockCreateObject.mockClear()
-		spyBunPasswordVerify.mockClear()
+		spyArgonPasswordVerify.mockClear()
 	})
 
 	const emailPassword = new EmailPassword()
 
 	it('should signUp with email password', async () => {
-		const spyBunPasswordHash = spyOn(
-			Bun.password,
-			'hash',
-		).mockResolvedValue('$argon2id$hashedPassword')
+		const spyBunPasswordHash = spyOn(argon2, 'hash').mockResolvedValue(
+			'$argon2id$hashedPassword',
+		)
 
 		const {
 			authenticationDataToSave: { email, password },
@@ -43,7 +43,7 @@ describe('Email password', () => {
 		expect(password).toBe('$argon2id$hashedPassword')
 
 		expect(spyBunPasswordHash).toHaveBeenCalledTimes(1)
-		expect(spyBunPasswordHash).toHaveBeenCalledWith('password', 'argon2id')
+		expect(spyBunPasswordHash).toHaveBeenCalledWith('password')
 
 		spyBunPasswordHash.mockRestore()
 	})
@@ -61,7 +61,7 @@ describe('Email password', () => {
 			} as never,
 		])
 
-		spyBunPasswordVerify.mockResolvedValue(true)
+		spyArgonPasswordVerify.mockResolvedValue(true)
 
 		const { user } = await emailPassword.onSignIn({
 			context: { wabe: controllers } as any,
@@ -78,16 +78,15 @@ describe('Email password', () => {
 			},
 		})
 
-		expect(spyBunPasswordVerify).toHaveBeenCalledTimes(1)
-		expect(spyBunPasswordVerify).toHaveBeenCalledWith(
-			'password',
+		expect(spyArgonPasswordVerify).toHaveBeenCalledTimes(1)
+		expect(spyArgonPasswordVerify).toHaveBeenCalledWith(
 			'hashedPassword',
-			'argon2id',
+			'password',
 		)
 	})
 
 	it('should not signIn with email password if password is undefined', async () => {
-		spyBunPasswordVerify.mockResolvedValue(false)
+		spyArgonPasswordVerify.mockResolvedValue(false)
 
 		expect(
 			emailPassword.onSignIn({
@@ -111,7 +110,7 @@ describe('Email password', () => {
 			}),
 		).rejects.toThrow('Invalid authentication credentials')
 
-		expect(spyBunPasswordVerify).toHaveBeenCalledTimes(0)
+		expect(spyArgonPasswordVerify).toHaveBeenCalledTimes(0)
 	})
 
 	it('should not signIn with email password if there is email is invalid', async () => {
@@ -125,7 +124,7 @@ describe('Email password', () => {
 			} as never,
 		])
 
-		spyBunPasswordVerify.mockResolvedValue(true)
+		spyArgonPasswordVerify.mockResolvedValue(true)
 
 		expect(
 			emailPassword.onSignIn({
@@ -137,6 +136,6 @@ describe('Email password', () => {
 			}),
 		).rejects.toThrow('Invalid authentication credentials')
 
-		expect(spyBunPasswordVerify).toHaveBeenCalledTimes(1)
+		expect(spyArgonPasswordVerify).toHaveBeenCalledTimes(1)
 	})
 })

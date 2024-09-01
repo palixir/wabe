@@ -22,10 +22,7 @@ export type WabeCustomTypes = 'Array' | 'Object'
 
 export type WabeRelationTypes = 'Pointer' | 'Relation'
 
-export type WabeSchemaTypes =
-	| WabeCustomTypes
-	| WabePrimaryTypes
-	| WabeRelationTypes
+type WabeFieldTypes = WabeCustomTypes | WabePrimaryTypes | WabeRelationTypes
 
 type WabeObject<T extends WabeTypes> = {
 	name: string
@@ -34,7 +31,7 @@ type WabeObject<T extends WabeTypes> = {
 	required?: boolean
 }
 
-type TypeFieldBase<U, K extends WabeSchemaTypes> = {
+type TypeFieldBase<U, K extends WabeFieldTypes> = {
 	type: K
 	required?: boolean
 	description?: string
