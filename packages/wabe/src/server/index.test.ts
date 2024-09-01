@@ -37,6 +37,29 @@ describe('Server', () => {
 		await wabe.close()
 	})
 
+	it('should run server without schema object', async () => {
+		const databaseId = uuid()
+
+		const port = await getPort()
+		const wabe = new Wabe({
+			rootKey:
+				'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+			database: {
+				type: DatabaseEnum.Mongo,
+				url: 'mongodb://127.0.0.1:27045',
+				name: databaseId,
+			},
+			port,
+		})
+
+		await wabe.start()
+
+		const res = await fetch(`http://127.0.0.1:${port}/health`)
+
+		expect(res.status).toEqual(200)
+		await wabe.close()
+	})
+
 	it('should update the schema to static Wabe after the Schema initialization', async () => {
 		const spySchemaDefaultClass = spyOn(Schema.prototype, 'defaultClass')
 		const spySchemaDefaultEnum = spyOn(Schema.prototype, 'defaultEnum')

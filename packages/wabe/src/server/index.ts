@@ -20,7 +20,7 @@ import { fileDevAdapter } from '../files/devAdapter'
 
 export interface WabeConfig<T extends WabeTypes> {
 	port: number
-	schema: SchemaInterface<T>
+	schema?: SchemaInterface<T>
 	database: DatabaseConfig
 	codegen?:
 		| {

@@ -195,7 +195,7 @@ export interface EnumInterface {
 }
 
 export interface SchemaInterface<T extends WabeTypes> {
-	classes: ClassInterface<T>[]
+	classes?: ClassInterface<T>[]
 	scalars?: ScalarInterface[]
 	enums?: EnumInterface[]
 	resolvers?: TypeResolver<T>
@@ -211,7 +211,7 @@ export class Schema<T extends WabeTypes> {
 		this.schema = {
 			...config.schema,
 			classes: this.defaultClass(config.schema),
-			enums: [...(config.schema.enums || []), ...this.defaultEnum()],
+			enums: [...(config.schema?.enums || []), ...this.defaultEnum()],
 			resolvers: this.mergeResolvers(this.defaultResolvers()),
 		}
 	}
@@ -239,11 +239,11 @@ export class Schema<T extends WabeTypes> {
 	mergeResolvers(defaultResolvers: TypeResolver<T>): TypeResolver<T> {
 		return {
 			mutations: {
-				...(this.config.schema.resolvers?.mutations || {}),
+				...(this.config.schema?.resolvers?.mutations || {}),
 				...defaultResolvers.mutations,
 			},
 			queries: {
-				...(this.config.schema.resolvers?.queries || {}),
+				...(this.config.schema?.resolvers?.queries || {}),
 				...defaultResolvers.queries,
 			},
 		}
@@ -650,9 +650,9 @@ export class Schema<T extends WabeTypes> {
 		})
 	}
 
-	defaultClass(schema: SchemaInterface<T>): ClassInterface<T>[] {
+	defaultClass(schema?: SchemaInterface<T>): ClassInterface<T>[] {
 		return this.mergeClass([
-			...schema.classes,
+			...(schema?.classes || []),
 			this.userClass(),
 			this.sessionClass(),
 			this.roleClass(),
