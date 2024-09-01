@@ -63,8 +63,8 @@ Of course, you can also use Wabe for your backend; that is the better contributi
 
 If you like the project don't forget to share it.
 
-More informations on the [Contribution guide](https://github.com/palixir/wabe/blob/main/CONTRIBUTING)
+More informations on the [Contribution guide](https://github.com/palixir/wabe/blob/main/CONTRIBUTING.md)
 
 ## License
 
-Distributed under the Apache License 2.0 [License](https://github.com/palixir/wabe/blob/main/LICENSE).
+Distributed under the Apache License 2.0 [License](https://github.com/palixir/wabe/blob/main/LICENSE.md).
