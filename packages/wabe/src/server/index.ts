@@ -114,6 +114,9 @@ export class Wabe<T extends WabeTypes> {
 	}
 
 	loadHooks() {
+		if (this.config.hooks?.find((hook) => hook.priority <= 0))
+			throw new Error('Hook priority <= 0 is reserved for internal uses')
+
 		this.config.hooks = [...getDefaultHooks(), ...(this.config.hooks || [])]
 	}
 
