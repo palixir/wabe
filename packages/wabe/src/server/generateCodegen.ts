@@ -116,7 +116,7 @@ export const generateCodegen = async ({
 		if (content === contentOfActualWabeFile) return
 	} catch {}
 
-	new Promise((resolve, reject) =>
+	await new Promise((resolve, reject) =>
 		writeFile(
 			`${path}/wabe.ts`,
 			`${graphqlOutput}\n\n${wabeOutput}`,
@@ -128,7 +128,7 @@ export const generateCodegen = async ({
 		),
 	)
 
-	new Promise((resolve, reject) =>
+	await new Promise((resolve, reject) =>
 		writeFile(`${path}/schema.graphql`, graphqlSchemaContent, (err) => {
 			if (err) reject(err)
 
