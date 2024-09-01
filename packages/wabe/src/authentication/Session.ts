@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken'
 import type { WabeContext } from '../server/interface'
-import type { _Session, User } from '../../generated/wabe'
+import type { User } from '../../generated/wabe'
 import type { WabeConfig } from '../server'
 
 export class Session {

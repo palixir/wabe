@@ -1,27 +1,10 @@
 import { runDatabase } from 'wabe-mongodb-launcher'
-import { DatabaseEnum, OperationType, Wabe } from '../src'
+import { DatabaseEnum, Wabe } from '../src'
 import type {
 	WabeSchemaEnums,
 	WabeSchemaScalars,
 	WabeSchemaTypes,
 } from '../generated/wabe'
-
-const run2 = async () => {
-	await runDatabase()
-
-	const wabe = new Wabe({
-		rootKey:
-			'0uwFvUxM$ceFuF1aEtTtZMa7DUN2NZudqgY5ve5W*QCyb58cwMj9JeoaV@d#%29v&aJzswuudVU1%nAT+rxS0Bh&OkgBYc0PH18*',
-		database: {
-			type: DatabaseEnum.Mongo,
-			url: 'mongodb://127.0.0.1:27045',
-			name: 'Wabe',
-		},
-		port: 3000,
-	})
-
-	await wabe.start()
-}
 
 const run = async () => {
 	await runDatabase()
