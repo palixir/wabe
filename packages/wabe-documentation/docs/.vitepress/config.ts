@@ -45,6 +45,10 @@ export default defineConfig({
 						text: 'Authentication',
 						items: [
 							{
+								text: 'Sign In / Up',
+								link: '/config/authentication/interact',
+							},
+							{
 								text: 'Sessions',
 								link: '/config/authentication/sessions',
 							},
