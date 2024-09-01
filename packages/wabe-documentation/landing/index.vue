@@ -10,7 +10,7 @@ import Package from './Package.vue'
 
 <div class="bg-gradient-to-r from-background-primary via-background-secondary to-background-primary">
     <!-- Hero Section with Classic Dark Background -->
-    <header class="py-20 flex items-center ">    
+    <header class="py-20 flex items-center">    
         <div class="max-w-5xl mx-auto text-center">
 
             <div class="flex flex-col gap-4">
@@ -18,7 +18,7 @@ import Package from './Package.vue'
             
                 <p class="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Create your Backend in minutes not days.</p>
 
-                <p class="text-lg font-semibold max-w-4xl">Wabe simplifies backend development. It offers essential features like Authentication, Permissions, Database Management, Hooks, and so much more, providing everything you need to build and scale secure applications effortlessly.</p>
+                <p class="text-lg font-semibold max-w-4xl text-white">Wabe simplifies backend development. It offers essential features like Authentication, Permissions, Database Management, Hooks, and so much more, providing everything you need to build and scale secure applications effortlessly.</p>
             </div>
             
             <div class="mt-8 flex justify-center space-x-4">

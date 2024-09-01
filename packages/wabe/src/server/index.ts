@@ -36,7 +36,7 @@ export interface WabeConfig<T extends WabeTypes> {
 }
 
 export type WabeTypes = {
-	types: Record<any, any>
+  types: Record<any, any>
 	scalars: string
 	enums: string
 }
