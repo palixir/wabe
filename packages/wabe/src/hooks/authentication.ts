@@ -2,25 +2,6 @@ import type { ProviderInterface } from '../authentication'
 import { getAuthenticationMethod } from '../authentication/utils'
 import type { HookObject } from './HookObject'
 
-const setAclOnUser = async (hookObject: HookObject<any>) => {
-	hookObject.upsertNewData('acl', {
-		users: [
-			{
-				userId: 'userId',
-				read: false,
-				write: true,
-			},
-		],
-		roles: [
-			{
-				roleId: 'roleId',
-				read: true,
-				write: true,
-			},
-		],
-	})
-}
-
 export const callAuthenticationProvider = async (
 	hookObject: HookObject<any>,
 ) => {

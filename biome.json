@@ -26,6 +26,10 @@
 			},
 			"performance": {
 				"noAccumulatingSpread": "off"
+			},
+			"correctness": {
+				"noUnusedImports": "error",
+				"noUnusedVariables": "error"
 			}
 		}
 	},
