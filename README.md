@@ -1,10 +1,10 @@
 <p align="center">
-  <a href="https://wobe.dev"><img src="https://www.wabe.dev/logo.png" alt="Wabe logo" height=170></a>
+  <a href="https://wabe.dev"><img src="https://www.wabe.dev/logo.png" alt="Wabe logo" height=170></a>
 </p>
 <h1 align="center">Wabe</h1>
 
 <div align="center">
-  <a href="https://wobe.dev">Documentation</a>
+  <a href="https://wabe.dev">Documentation</a>
 </div>
 
 ## What is Wabe?
