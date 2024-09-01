@@ -67,4 +67,4 @@ More informations on the [Contribution guide](https://github.com/palixir/wabe/bl
 
 ## License
 
-Distributed under the Apache License 2.0 [License](https://github.com/palixir/wabe/blob/main/LICENSE.md).
+Distributed under the Apache License 2.0 [License](https://github.com/palixir/wabe/blob/main/LICENSE).
