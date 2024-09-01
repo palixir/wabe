@@ -41,7 +41,7 @@ export const getClassFromClassName = <T extends WabeTypes>(
 	className: string,
 	config: WabeConfig<any>,
 ): ClassInterface<T> => {
-	const classInSchema = config.schema.classes.find(
+	const classInSchema = config.schema?.classes?.find(
 		(schemaClass) => schemaClass.name === className,
 	)
 

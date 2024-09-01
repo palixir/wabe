@@ -3,7 +3,7 @@ import type { HookObject } from '../hooks/HookObject'
 const handleFile = async (hookObject: HookObject<any>) => {
 	const newData = hookObject.getNewData()
 
-	const schema = hookObject.context.wabe.config.schema.classes.find(
+	const schema = hookObject.context.wabe.config.schema?.classes?.find(
 		(currentClass) => currentClass.name === hookObject.className,
 	)
 

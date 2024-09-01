@@ -142,7 +142,7 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 
-		const schemaClass = context.wabe.config.schema.classes.find(
+		const schemaClass = context.wabe.config.schema?.classes?.find(
 			(currentClass) => currentClass.name === className,
 		)
 

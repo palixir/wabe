@@ -90,7 +90,7 @@ describe('Server', () => {
 		await wabe.start()
 
 		// _Session class is a default class so if it's present the schema is updated
-		const isSessionClassExist = wabe.config.schema.classes.find(
+		const isSessionClassExist = wabe.config.schema?.classes?.find(
 			(schemaClass) => schemaClass.name === '_Session',
 		)
 

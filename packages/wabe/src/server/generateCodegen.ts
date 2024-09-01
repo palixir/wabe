@@ -96,7 +96,7 @@ export const generateCodegen = async ({
 	const wabeOutput = generateWabeFile({
 		scalars: schema.scalars,
 		enums: schema.enums,
-		classes: schema.classes,
+		classes: schema.classes || [],
 	})
 
 	const content = `${graphqlOutput}\n\n${wabeOutput}`
