@@ -8,8 +8,7 @@ on:
                 required: true
                 type: choice
                 options:
-                    - 'wobe'
-                    - 'wibe'
+                    - 'wabe'
 
 jobs:
     release:
