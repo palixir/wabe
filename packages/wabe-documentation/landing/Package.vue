@@ -22,7 +22,7 @@
 		 	<button @click="copyToClipboard" class="px-3 py-1 text-primary rounded">
 				<div class="flex items-center gap-4 p-2">
 					<span :class="[isCopied ? '': 'opacity-0']">Copied !</span>
-					<img src="copy.png" alt="Copy to clipboard" class="h-6">
+					<img src="/copy.png" alt="Copy to clipboard" class="h-6">
 				</div>
 			</button>
 		</div>

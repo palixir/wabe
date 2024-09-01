@@ -61,11 +61,11 @@ import Package from './Package.vue'
             <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
                 <Card href="/config/authentication/sessions" title="Authentication" description="Secure and scalable authentication for your applications." variant="feature" iconName="auth.png"/>
                 
-                <Card href="/security/index" title="Permissions" description="Granual permissions control to secure your resources." variant="feature" iconName="permissions.png"/>
+                <Card href="/security/index" title="Permissions" description="Granular permissions control to secure your resources." variant="feature" iconName="permissions.png"/>
                 
-                <Card href="/database/index" title="Database" description="A powerful, scalable databaes to store and manage you data." variant="feature" iconName="database.png"/>
+                <Card href="/database/index" title="Database" description="A powerful, scalable database to store and manage you data." variant="feature" iconName="database.png"/>
 
-                <Card href="/graphql/api" title="GraphQL API" description="A flexible and powerful GraphQL API (following GraphQL Relay standard)to interact with your data." variant="feature" iconName="graphql.png"/>
+                <Card href="/graphql/api" title="GraphQL API" description="A flexible and powerful GraphQL API (following GraphQL Relay standard) to interact with your data." variant="feature" iconName="graphql.png"/>
 
                 <Card href="/config/hooks" title="Hooks" description="Powerful hooks system to execute custom actions before or after database requests." iconName="hooks.png"/>
 
@@ -81,7 +81,7 @@ import Package from './Package.vue'
             <p class="mt-4 text-lg text-gray-300">We're working hard to build the ultimate tool, and exciting about the future of Wabe 🤩</p>
             
             <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
-                <Card title="Fully featured Dashboard" description="Visualize and manage your data with a powerfull new dashboard." variant="feature" isComingSoon/>
+                <Card title="Fully featured Dashboard" description="Visualize and manage your data with a powerful new dashboard." variant="feature" isComingSoon/>
 
                 <Card title="Stripe and Mailgun" description="Seamlessly connect with Stripe for payments and Mailgun for emails." variant="feature" isComingSoon/>
 
@@ -94,7 +94,7 @@ import Package from './Package.vue'
     <section id="getting-started" class="py-20">
         <div class="text-center flex flex-col justify-center gap-4">
             <div>
-                <h2 class="text-3xl font-extrabold text-gray-100">Fully Open Source - Get Started in Minutes</h2>
+                <h2 class="text-3xl font-extrabold text-gray-100">Fully Open Source - Get started in minutes</h2>
                 <p class="mt-4 text-lg text-gray-300 font-medium">You can start using Wabe in minutes by running:</p>
             </div>
                 
