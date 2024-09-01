@@ -1,10 +1,10 @@
 <p align="center">
-  <a href="https://wobe.dev"><img src="https://www.wabe.dev/logo.png" alt="Wabe logo" height=170></a>
+  <a href="https://wabe.dev"><img src="https://www.wabe.dev/logo.png" alt="Wabe logo" height=170></a>
 </p>
 <h1 align="center">Wabe</h1>
 
 <div align="center">
-  <a href="https://wobe.dev">Documentation</a>
+  <a href="https://wabe.dev">Documentation</a>
 </div>
 
 ## What is Wabe?
@@ -63,7 +63,7 @@ Of course, you can also use Wabe for your backend; that is the better contributi
 
 If you like the project don't forget to share it.
 
-More informations on the [Contribution guide](https://github.com/palixir/wabe/blob/main/CONTRIBUTING)
+More informations on the [Contribution guide](https://github.com/palixir/wabe/blob/main/CONTRIBUTING.md)
 
 ## License
 
