@@ -2,17 +2,17 @@
   "name": "wabe",
   "version": "0.5.0",
   "description": "Your backend in minutes not days",
-  "homepage":"https://wabe.dev",
+  "homepage": "https://wabe.dev",
   "author": {
     "name": "coratgerl",
-    "url":"https://github.com/coratgerl"
+    "url": "https://github.com/coratgerl"
   },
   "license": "Apache-2.0",
   "keywords": ["backend", "wabe", "graphql", "baas"],
   "repository": {
-		"type": "git",
-		"url": "https://github.com/palixir/wabe"
-	},
+    "type": "git",
+    "url": "https://github.com/palixir/wabe"
+  },
   "main": "dist/index.js",
   "scripts": {
     "build": "bun build --outdir dist $(pwd)/src/index.ts --target=node && bun generate:types",
@@ -30,6 +30,7 @@
     "@graphql-codegen/typescript-operations": "4.0.1",
     "@graphql-tools/graphql-file-loader": "8.0.1",
     "@graphql-tools/load": "8.0.2",
+    "argon2": "^0.41.1",
     "jsonwebtoken": "9.0.2",
     "mongodb": "6.3.0",
     "wobe": "1.1.7",

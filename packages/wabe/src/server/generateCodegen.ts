@@ -3,6 +3,7 @@ import * as typescriptPlugin from '@graphql-codegen/typescript'
 import * as graphqlRequestPlugin from '@graphql-codegen/typescript-graphql-request'
 import * as graphqlOperationsPlugin from '@graphql-codegen/typescript-operations'
 import { type GraphQLSchema, parse, printSchema } from 'graphql'
+import { writeFile, readFile } from 'node:fs'
 import type {
 	ClassInterface,
 	EnumInterface,
@@ -102,13 +103,36 @@ export const generateCodegen = async ({
 	const content = `${graphqlOutput}\n\n${wabeOutput}`
 
 	try {
-		const contentOfActualWabeFile = await Bun.file(`${path}/wabe.ts`).text()
+		const contentOfActualWabeFile = await new Promise((resolve, reject) =>
+			readFile(`${path}/wabe.ts`, (err, data) => {
+				if (err) reject(err)
+
+				resolve(data)
+			}),
+		)
 
 		// We will need to find a better way to avoid infinite loop of loading
 		// Better solution will be that bun implements watch ignores
 		if (content === contentOfActualWabeFile) return
 	} catch {}
 
-	Bun.write(`${path}/wabe.ts`, `${graphqlOutput}\n\n${wabeOutput}`)
-	Bun.write(`${path}/schema.graphql`, graphqlSchemaContent)
+	new Promise((resolve, reject) =>
+		writeFile(
+			`${path}/wabe.ts`,
+			`${graphqlOutput}\n\n${wabeOutput}`,
+			(err) => {
+				if (err) reject(err)
+
+				resolve('ok')
+			},
+		),
+	)
+
+	new Promise((resolve, reject) =>
+		writeFile(`${path}/schema.graphql`, graphqlSchemaContent, (err) => {
+			if (err) reject(err)
+
+			resolve('OK')
+		}),
+	)
 }
