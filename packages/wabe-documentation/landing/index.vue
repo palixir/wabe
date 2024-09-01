@@ -22,9 +22,9 @@ import Package from './Package.vue'
             </div>
             
             <div class="mt-8 flex justify-center space-x-4">
-                <a href="#docs" class="bg-primary text-white px-8 py-3 rounded-lg font-medium hover:bg-secondary transition duration-150">Get Started</a>
+                <a href="/wabe/motivations" class="bg-primary text-white px-8 py-3 rounded-lg font-medium hover:bg-secondary transition duration-150">Get Started</a>
 
-                <a href="https://github.com/coratgerl/wabe" class="bg-background-primary text-white px-8 py-3 rounded-lg font-medium hover:bg-gray-800 transition duration-150">
+                <a href="https://github.com/palixir/wabe" class="bg-background-primary text-white px-8 py-3 rounded-lg font-medium hover:bg-gray-800 transition duration-150">
                     GitHub
                 </a>
             </div>
@@ -81,11 +81,11 @@ import Package from './Package.vue'
             <p class="mt-4 text-lg text-gray-300">We're working hard to build the ultimate tool, and exciting about the future of Wabe 🤩</p>
             
             <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
-                <Card title="Fully featured Dashboard" description="Visualize and manage your data with a powerfull new dashboard." variant="feature"/>
+                <Card title="Fully featured Dashboard" description="Visualize and manage your data with a powerfull new dashboard." variant="feature" isComingSoon/>
 
-                <Card title="Stripe and Mailgun" description="Seamlessly connect with Stripe for payments and Mailgun for emails." variant="feature"/>
+                <Card title="Stripe and Mailgun" description="Seamlessly connect with Stripe for payments and Mailgun for emails." variant="feature" isComingSoon/>
 
-                <Card title="Fully generated REST API" description="Automate your API generation with a fully generated REST API." variant="feature"/>
+                <Card title="Fully generated REST API" description="Automate your API generation with a fully generated REST API." variant="feature" isComingSoon/>
             </div>
         </div>
     </section>
@@ -104,7 +104,7 @@ import Package from './Package.vue'
                 </div>
                           
                 <div class="mt-8">
-                    <a href="https://github.com/coratgerl/wabe" class="bg-primary text-white px-8 py-3 rounded-lg font-medium hover:bg-blue-600 transition duration-150">View on GitHub</a>
+                    <a href="https://github.com/palixir/wabe" class="bg-primary text-white px-8 py-3 rounded-lg font-medium hover:bg-blue-600 transition duration-150">View on GitHub</a>
                 </div>
             </div>
         </div>

@@ -99,7 +99,7 @@ export default defineConfig({
 			},
 		],
 		socialLinks: [
-			{ icon: 'github', link: 'https://github.com/coratgerl/wabe' },
+			{ icon: 'github', link: 'https://github.com/palixir/wabe' },
 		],
 	},
 })
