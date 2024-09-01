@@ -40,7 +40,7 @@ describe('Schema', () => {
 			},
 		} as any)
 
-		expect(schema.schema.classes[0]).toEqual({
+		expect(schema.schema?.classes?.[0]).toEqual({
 			name: 'Class1',
 			fields: {
 				field1: {
@@ -66,7 +66,7 @@ describe('Schema', () => {
 			},
 		})
 
-		expect(schema.schema.classes[1]).toEqual({
+		expect(schema.schema?.classes?.[1]).toEqual({
 			name: 'Class2',
 			fields: {
 				field3: {
@@ -141,7 +141,7 @@ describe('Schema', () => {
 			},
 		} as any)
 
-		expect(schema.schema.classes[0]).toEqual({
+		expect(schema.schema?.classes?.[0]).toEqual({
 			name: 'Class1',
 			fields: expect.objectContaining({
 				field1: {
@@ -161,7 +161,7 @@ describe('Schema', () => {
 			}),
 		})
 
-		expect(schema.schema.classes[1]).toEqual({
+		expect(schema.schema?.classes?.[1]).toEqual({
 			name: 'Class2',
 			fields: expect.objectContaining({
 				field3: {
@@ -220,7 +220,7 @@ describe('Schema', () => {
 			},
 		} as any)
 
-		expect(schema.schema.classes[0]).toEqual({
+		expect(schema.schema?.classes?.[0]).toEqual({
 			name: 'Class1',
 			fields: expect.objectContaining({
 				field1: {
@@ -240,7 +240,7 @@ describe('Schema', () => {
 			}),
 		})
 
-		expect(schema.schema.classes[1]).toEqual({
+		expect(schema.schema?.classes?.[1]).toEqual({
 			name: 'Class2',
 			fields: expect.objectContaining({
 				field3: {
@@ -301,7 +301,7 @@ describe('Schema', () => {
 			},
 		} as any)
 
-		expect(schema.schema.classes[0]).toEqual({
+		expect(schema.schema?.classes?.[0]).toEqual({
 			name: 'Class1',
 			description: 'new Class1 description',
 			fields: expect.objectContaining({
@@ -322,7 +322,7 @@ describe('Schema', () => {
 			}),
 		})
 
-		expect(schema.schema.classes[1]).toEqual({
+		expect(schema.schema?.classes?.[1]).toEqual({
 			name: 'Class2',
 			fields: expect.objectContaining({
 				field3: {
@@ -345,10 +345,10 @@ describe('Schema', () => {
 	it('should add default class', () => {
 		const schema = new Schema({ schema: { classes: [] } } as any)
 
-		expect(schema.schema.classes.length).toBe(3)
-		expect(schema.schema.classes[0].name).toEqual('User')
-		expect(schema.schema.classes[1].name).toEqual('_Session')
-		expect(schema.schema.classes[2].name).toEqual('Role')
+		expect(schema.schema?.classes?.length).toBe(3)
+		expect(schema.schema?.classes?.[0].name).toEqual('User')
+		expect(schema.schema?.classes?.[1].name).toEqual('_Session')
+		expect(schema.schema?.classes?.[2].name).toEqual('Role')
 	})
 
 	it('should add default enums', () => {

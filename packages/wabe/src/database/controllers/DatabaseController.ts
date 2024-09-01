@@ -57,7 +57,7 @@ export class DatabaseController<T extends WabeTypes> {
 		fields: string[],
 		context: WabeContext<T>,
 	): PointerFields {
-		const realClass = context.wabe.config.schema.classes.find(
+		const realClass = context.wabe.config.schema?.classes?.find(
 			// @ts-expect-error
 			(c) => c.name.toLowerCase() === className.toLowerCase(),
 		)
@@ -107,7 +107,7 @@ export class DatabaseController<T extends WabeTypes> {
 	) {
 		if (!pointerClassName) return false
 
-		return context.wabe.config.schema.classes.some(
+		return context.wabe.config.schema?.classes?.some(
 			(c) =>
 				// @ts-expect-error
 				c.name.toLowerCase() === originClassName.toLowerCase() &&
@@ -128,7 +128,7 @@ export class DatabaseController<T extends WabeTypes> {
 	) {
 		if (!pointerClassName) return false
 
-		return context.wabe.config.schema.classes.some(
+		return context.wabe.config.schema?.classes?.some(
 			(c) =>
 				// @ts-expect-error
 				c.name.toLowerCase() === originClassName.toLowerCase() &&
@@ -218,7 +218,7 @@ export class DatabaseController<T extends WabeTypes> {
 	>(className: U, where: WhereType<U, K>, context: WabeContext<T>) {
 		const whereKeys = Object.keys(where) as Array<keyof WhereType<U, K>>
 
-		const realClass = context.wabe.config.schema.classes.find(
+		const realClass = context.wabe.config.schema?.classes?.find(
 			// @ts-expect-error
 			(c) => c.name.toLowerCase() === className.toLowerCase(),
 		)

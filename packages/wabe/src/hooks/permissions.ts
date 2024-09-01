@@ -27,7 +27,7 @@ export const _getPermissionPropertiesOfAClass = async ({
 	operation: PermissionsOperations
 	context: WabeContext<any>
 }) => {
-	const wabeClass = context.wabe.config.schema.classes.find(
+	const wabeClass = context.wabe.config.schema?.classes?.find(
 		(c) => c.name === className,
 	)
 
@@ -94,7 +94,7 @@ export const _checkCLP = async (
 			`Permission denied to ${permissionOperation} class ${object.className}`,
 		)
 
-	if (!permissionProperties.authorizedRoles.includes(roleName))
+	if (!permissionProperties.authorizedRoles?.includes(roleName))
 		throw new Error(
 			`Permission denied to ${permissionOperation} class ${object.className}`,
 		)
