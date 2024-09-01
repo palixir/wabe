@@ -82,7 +82,7 @@ export const authHandler = async (
 		httpOnly: true,
 		path: '/',
 		maxAge: 60 * 10, // 10 minutes
-		secure: Bun.env.NODE_ENV === 'production',
+		secure: process.env.NODE_ENV === 'production',
 	})
 
 	switch (provider) {
@@ -96,14 +96,14 @@ export const authHandler = async (
 				httpOnly: true,
 				path: '/',
 				maxAge: 60 * 10, // 10 minutes
-				secure: Bun.env.NODE_ENV === 'production',
+				secure: process.env.NODE_ENV === 'production',
 			})
 
 			context.res.setCookie('state', state, {
 				httpOnly: true,
 				path: '/',
 				maxAge: 60 * 10, // 10 minutes
-				secure: Bun.env.NODE_ENV === 'production',
+				secure: process.env.NODE_ENV === 'production',
 			})
 
 			const authorizationURL = await googleOauth.createAuthorizationURL(

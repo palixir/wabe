@@ -5,6 +5,7 @@ describe('Oauth utils', () => {
 	it('should encode url with base64', () => {
 		const content = 'test'
 
+		// Keep Bun. here to be sure the compatibility between node and Bun implem
 		const hasher = new Bun.CryptoHasher('sha256')
 		hasher.update(new TextEncoder().encode(content))
 		const resultWithPadding = hasher.digest('base64')

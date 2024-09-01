@@ -1,3 +1,4 @@
+import argon2 from 'argon2'
 import type {
 	AuthenticationEventsOptions,
 	ProviderInterface,
@@ -44,11 +45,16 @@ export class EmailPassword
 		if (!userDatabasePassword)
 			throw new Error('Invalid authentication credentials')
 
-		const isPasswordEquals = await Bun.password.verify(
-			input.password,
+		const isPasswordEquals = await argon2.verify(
 			userDatabasePassword,
-			'argon2id',
+			input.password,
 		)
+
+		// const isPasswordEquals = await Bun.password.verify(
+		// 	input.password,
+		// 	userDatabasePassword,
+		// 	'argon2id',
+		// )
 
 		if (
 			!isPasswordEquals ||
@@ -84,7 +90,7 @@ export class EmailPassword
 		return {
 			authenticationDataToSave: {
 				email: input.email,
-				password: await Bun.password.hash(input.password, 'argon2id'),
+				password: await argon2.hash(input.password),
 			},
 		}
 	}
