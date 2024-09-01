@@ -11,7 +11,7 @@
   "keywords": ["backend", "wabe", "graphql", "baas"],
   "repository": {
     "type": "git",
-    "url": "https://github.com/palixir/wabe"
+    "url": "git+https://github.com/palixir/wabe.git"
   },
   "main": "dist/index.js",
   "scripts": {

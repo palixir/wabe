@@ -12,11 +12,13 @@ on:
 
 jobs:
     release:
+        runs-on: ubuntu-latest
         name: 'Release ${{inputs.package}}'
+
         permissions:
             contents: write
             pull-requests: read
-        runs-on: ubuntu-latest
+
         steps:
             - uses: actions/checkout@v4
               with:

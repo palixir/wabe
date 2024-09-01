@@ -6,6 +6,41 @@ export default defineConfig({
 	head: [
 		['link', { rel: 'icon', href: 'favicon.ico' }],
 		['script', { src: '/_vercel/insights/script.js', defer: 'true' }],
+		[
+			'meta',
+			{
+				property: 'twitter:card',
+				content: 'summary_large_image',
+			},
+		],
+		[
+			'meta',
+			{
+				property: 'twitter:title',
+				content: 'Wabe',
+			},
+		],
+		[
+			'meta',
+			{
+				property: 'twitter:description',
+				content: 'Your backend in minutes not days.',
+			},
+		],
+		[
+			'meta',
+			{
+				property: 'twitter:image',
+				content: 'https://wabe.dev/cover.png',
+			},
+		],
+		[
+			'meta',
+			{
+				property: 'twitter:site',
+				content: '@coratgerl',
+			},
+		],
 	],
 	themeConfig: {
 		search: {
