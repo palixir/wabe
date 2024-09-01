@@ -7,5 +7,12 @@
 		"typescript": "5.4.2"
 	},
 	"private": true,
-	"workspaces": ["packages/*"]
+	"workspaces": ["packages/*"],
+	"scripts": {
+		"build:wabe": "bun --filter './packages/wabe' build",
+		"ci": "bun build:wabe && bun --filter './packages/*' ci",
+		"format": "bun --filter './packages/*' format && biome format --write ./*.json",
+		"lint": "bun --filter './packages/*' lint",
+		"squash": "base_branch=${1:-main} && git fetch origin $base_branch && branch=$(git branch --show-current) && git checkout $branch && git reset $(git merge-base origin/$base_branch $branch) && git add -A"
+	}
 }

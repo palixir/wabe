@@ -23,7 +23,6 @@ package-lock.json
 .zed
 
 
-**/generated/schema.ts
 **/generated/wabe.ts
 
 cache
