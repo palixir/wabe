@@ -25,7 +25,7 @@ yarn add wabe # On yarn
 import { DatabaseEnum, Wabe } from "wabe";
 
 const run = async () => {
-  // Insure your database is running before run the file
+  // Ensure your database is running before run the file
 
   const wabe = new Wabe({
     // Root key example (must be long minimal 64 characters, you can generate it online)
