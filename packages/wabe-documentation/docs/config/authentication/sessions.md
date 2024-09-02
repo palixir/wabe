@@ -15,9 +15,9 @@ const run = async () => {
     authentication: {
       session: {
         // 15 minutes in ms
-        accessTokenExpiresIn: 1000 * 60 * 15,
+        accessTokenExpiresInMs: 1000 * 60 * 15,
         // 1 day in ms
-        refreshTokenExpiresIn: 1000 * 60 * 60 * 24,
+        refreshTokenExpiresInMs: 1000 * 60 * 60 * 24,
         cookieSession: true,
       },
     },

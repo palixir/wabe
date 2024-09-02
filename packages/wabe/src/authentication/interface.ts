@@ -57,11 +57,11 @@ export interface SessionConfig {
 	/**
 	 * The time in milliseconds that the access token will expire
 	 */
-	accessTokenExpiresIn?: number
+	accessTokenExpiresInMs?: number
 	/**
 	 * The time in milliseconds that the refresh token will expire
 	 */
-	refreshTokenExpiresIn?: number
+	refreshTokenExpiresInMs?: number
 	/**
 	 * Set to true to automatically store the session tokens in cookies
 	 */

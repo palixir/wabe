@@ -8,22 +8,22 @@ export class Session {
 	private refreshToken: string | undefined = undefined
 
 	getAccessTokenExpireAt(config: WabeConfig<any>) {
-		const customExpiresIn =
-			config?.authentication?.session?.accessTokenExpiresIn
+		const customExpiresInMs =
+			config?.authentication?.session?.accessTokenExpiresInMs
 
-		if (!customExpiresIn) return new Date(Date.now() + 1000 * 60 * 15) // 15 minutes in ms
+		if (!customExpiresInMs) return new Date(Date.now() + 1000 * 60 * 15) // 15 minutes in ms
 
-		return new Date(Date.now() + customExpiresIn)
+		return new Date(Date.now() + customExpiresInMs)
 	}
 
 	getRefreshTokenExpireAt(config: WabeConfig<any>) {
-		const customExpiresIn =
-			config?.authentication?.session?.refreshTokenExpiresIn
+		const customExpiresInMs =
+			config?.authentication?.session?.refreshTokenExpiresInMs
 
-		if (!customExpiresIn)
+		if (!customExpiresInMs)
 			return new Date(Date.now() + 1000 * 60 * 60 * 24 * 30) // 30 days in ms
 
-		return new Date(Date.now() + customExpiresIn)
+		return new Date(Date.now() + customExpiresInMs)
 	}
 
 	async meFromAccessToken(
