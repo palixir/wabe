@@ -25,7 +25,10 @@ defineProps<{
 
       
       <div class="flex mt-2">
-        <Chip v-if="isComingSoon" color="red">Coming Soon 🚀</Chip>
+        <Chip v-if="isComingSoon">
+          <span>Coming soon</span>
+          <span>🚀</span>
+        </Chip>
       </div>
     </div>
   </a>
