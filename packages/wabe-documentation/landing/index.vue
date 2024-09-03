@@ -24,7 +24,7 @@ import Package from './Package.vue'
             <div class="mt-8 flex justify-center space-x-4">
                 <a href="/wabe/motivations" class="bg-primary text-white px-8 py-3 rounded-lg font-medium hover:bg-secondary transition duration-150">Get Started</a>
 
-                <a href="https://github.com/palixir/wabe" class="bg-background-primary text-white px-8 py-3 rounded-lg font-medium hover:bg-gray-800 transition duration-150">
+                <a href="https://github.com/palixir/wabe" class="bg-background-primary text-white px-8 py-3 rounded-lg font-medium hover:bg-gray-800 transition duration-150" target="_blank">
                     GitHub
                 </a>
             </div>
@@ -104,7 +104,7 @@ import Package from './Package.vue'
                 </div>
                           
                 <div class="mt-8">
-                    <a href="https://github.com/palixir/wabe" class="bg-primary text-white px-8 py-3 rounded-lg font-medium hover:bg-blue-600 transition duration-150">View on GitHub</a>
+                    <a href="https://github.com/palixir/wabe" class="bg-primary text-white px-8 py-3 rounded-lg font-medium hover:bg-blue-600 transition duration-150" target="_blank">View on GitHub</a>
                 </div>
             </div>
         </div>
