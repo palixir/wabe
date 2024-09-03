@@ -28,83 +28,65 @@ describe('GraphQL : Scalars', () => {
 
 	describe('Date', () => {
 		it('should create a date with JavaScript Date', async () => {
-			const { createUsers } = await client.request<any>(
-				graphql.createUsers,
-				{
-					input: {
-						fields: [
-							{
-								name: 'Jean',
-								birthDate: now,
-								email: 'email@test.fr',
-							},
-						],
-					},
+			const { createUsers } = await client.request<any>(graphql.createUsers, {
+				input: {
+					fields: [
+						{
+							name: 'Jean',
+							birthDate: now,
+							email: 'email@test.fr',
+						},
+					],
 				},
-			)
+			})
 
-			expect(createUsers.edges[0].node.birthDate).toEqual(
-				now.toISOString(),
-			)
+			expect(createUsers.edges[0].node.birthDate).toEqual(now.toISOString())
 		})
 
 		it('should create a date with timestamp in number', async () => {
-			const { createUsers } = await client.request<any>(
-				graphql.createUsers,
-				{
-					input: {
-						fields: [
-							{
-								name: 'Jean2',
-								birthDate: now.getTime(),
-								email: 'email@test.fr',
-							},
-						],
-					},
+			const { createUsers } = await client.request<any>(graphql.createUsers, {
+				input: {
+					fields: [
+						{
+							name: 'Jean2',
+							birthDate: now.getTime(),
+							email: 'email@test.fr',
+						},
+					],
 				},
-			)
+			})
 
-			expect(createUsers.edges[0].node.birthDate).toEqual(
-				now.toISOString(),
-			)
+			expect(createUsers.edges[0].node.birthDate).toEqual(now.toISOString())
 		})
 
 		it('should create a date with iso string', async () => {
-			const { createUsers } = await client.request<any>(
-				graphql.createUsers,
-				{
-					input: {
-						fields: [
-							{
-								name: 'Jean3',
-								birthDate: now.toISOString(),
-								email: 'email@test.fr',
-							},
-						],
-					},
+			const { createUsers } = await client.request<any>(graphql.createUsers, {
+				input: {
+					fields: [
+						{
+							name: 'Jean3',
+							birthDate: now.toISOString(),
+							email: 'email@test.fr',
+						},
+					],
 				},
-			)
+			})
 
-			expect(createUsers.edges[0].node.birthDate).toEqual(
-				now.toISOString(),
-			)
+			expect(createUsers.edges[0].node.birthDate).toEqual(now.toISOString())
 		})
 
 		it('should create a date with partial date', async () => {
-			const { createUsers } = await client.request<any>(
-				graphql.createUsers,
-				{
-					input: {
-						fields: [
-							{
-								name: 'Jean4',
-								birthDate: '2023-12-20',
-								email: 'email@test.fr',
-							},
-						],
-					},
+			const { createUsers } = await client.request<any>(graphql.createUsers, {
+				input: {
+					fields: [
+						{
+							name: 'Jean4',
+							birthDate: '2023-12-20',
+							email: 'email@test.fr',
+						},
+					],
 				},
-			)
+			})
 
 			const birthDate = new Date(createUsers.edges[0].node.birthDate)
 			const date = new Date('2023-12-20')
@@ -145,23 +127,18 @@ describe('GraphQL : Scalars', () => {
 
 	describe('Email', () => {
 		it('should create an email', async () => {
-			const { createUsers } = await client.request<any>(
-				graphql.createUsers,
-				{
-					input: {
-						fields: [
-							{
-								name: 'Jean',
-								email: 'jean.doe@gmail.com',
-							},
-						],
-					},
+			const { createUsers } = await client.request<any>(graphql.createUsers, {
+				input: {
+					fields: [
+						{
+							name: 'Jean',
+							email: 'jean.doe@gmail.com',
+						},
+					],
 				},
-			)
+			})
 
-			expect(createUsers.edges[0].node.email).toEqual(
-				'jean.doe@gmail.com',
-			)
+			expect(createUsers.edges[0].node.email).toEqual('jean.doe@gmail.com')
 
 			expect(
 				client.request(graphql.createUsers, {

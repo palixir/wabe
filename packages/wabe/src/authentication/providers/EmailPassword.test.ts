@@ -4,9 +4,7 @@ import { EmailPassword } from './EmailPassword'
 
 describe('Email password', () => {
 	const mockGetObjects = mock(() => Promise.resolve([]))
-	const mockCreateObject = mock(() =>
-		Promise.resolve({ id: 'userId' }),
-	) as any
+	const mockCreateObject = mock(() => Promise.resolve({ id: 'userId' })) as any
 
 	const spyArgonPasswordVerify = spyOn(argon2, 'verify')
 

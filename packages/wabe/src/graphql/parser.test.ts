@@ -15,8 +15,7 @@ const deepCompareGraphQLObjects = (
 	if (
 		(!(obj1 instanceof GraphQLObjectType) &&
 			!(obj1 instanceof GraphQLNonNull)) ||
-		(!(obj2 instanceof GraphQLObjectType) &&
-			!(obj2 instanceof GraphQLNonNull))
+		(!(obj2 instanceof GraphQLObjectType) && !(obj2 instanceof GraphQLNonNull))
 	)
 		return false
 
@@ -42,8 +41,7 @@ const deepCompareGraphQLObjects = (
 	const fields1 = (obj1 as GraphQLObjectType).getFields()
 	const fields2 = (obj2 as GraphQLObjectType).getFields()
 
-	if (Object.keys(fields1).length !== Object.keys(fields2).length)
-		return false
+	if (Object.keys(fields1).length !== Object.keys(fields2).length) return false
 
 	for (const fieldName in fields1) {
 		if (!fields2[fieldName]) return false
@@ -152,9 +150,9 @@ describe('WabeGraphqlParser', () => {
 			}),
 		)
 
-		expect(
-			deepCompareGraphQLObjects(recursiveObject, expectedObject),
-		).toEqual(true)
+		expect(deepCompareGraphQLObjects(recursiveObject, expectedObject)).toEqual(
+			true,
+		)
 	})
 
 	it('should create an graphql object from simple object', () => {

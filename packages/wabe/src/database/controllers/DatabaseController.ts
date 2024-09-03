@@ -83,15 +83,12 @@ export class DatabaseController<T extends WabeTypes> {
 							...(acc.pointers?.[pointerField] || []),
 							pointerClass,
 							fieldsOfPointerClass: [
-								...(acc.pointers?.[pointerField]
-									?.fieldsOfPointerClass || []),
+								...(acc.pointers?.[pointerField]?.fieldsOfPointerClass || []),
 								pointerFields,
 							],
 						},
 					},
-					pointersFieldsId: acc.pointersFieldsId?.includes(
-						pointerField,
-					)
+					pointersFieldsId: acc.pointersFieldsId?.includes(pointerField)
 						? acc.pointersFieldsId
 						: [...(acc.pointersFieldsId || []), pointerField],
 				}
@@ -115,8 +112,7 @@ export class DatabaseController<T extends WabeTypes> {
 					(field) =>
 						field.type === 'Relation' &&
 						// @ts-expect-error
-						field.class.toLowerCase() ===
-							pointerClassName.toLowerCase(),
+						field.class.toLowerCase() === pointerClassName.toLowerCase(),
 				),
 		)
 	}
@@ -136,8 +132,7 @@ export class DatabaseController<T extends WabeTypes> {
 					(field) =>
 						field.type === 'Pointer' &&
 						// @ts-expect-error
-						field.class.toLowerCase() ===
-							pointerClassName.toLowerCase(),
+						field.class.toLowerCase() === pointerClassName.toLowerCase(),
 				),
 		)
 	}
@@ -247,8 +242,7 @@ export class DatabaseController<T extends WabeTypes> {
 				}
 			}
 
-			if (field?.type !== 'Pointer' && field?.type !== 'Relation')
-				return acc
+			if (field?.type !== 'Pointer' && field?.type !== 'Relation') return acc
 
 			// @ts-expect-error
 			const fieldTargetClass = field.class
@@ -275,10 +269,7 @@ export class DatabaseController<T extends WabeTypes> {
 		}
 	}
 
-	_buildWhereWithACL<
-		U extends keyof T['types'],
-		K extends keyof T['types'][U],
-	>(
+	_buildWhereWithACL<U extends keyof T['types'], K extends keyof T['types'][U]>(
 		where: WhereType<U, K>,
 		context: WabeContext<T>,
 		operation: 'write' | 'read',
@@ -492,12 +483,11 @@ export class DatabaseController<T extends WabeTypes> {
 			(field) => !field.includes('.'),
 		)
 
-		const whereWithPointer =
-			await this._getWhereObjectWithPointerOrRelation(
-				className,
-				where || {},
-				context,
-			)
+		const whereWithPointer = await this._getWhereObjectWithPointerOrRelation(
+			className,
+			where || {},
+			context,
+		)
 
 		const whereWithACLCondition = this._buildWhereWithACL(
 			whereWithPointer,
@@ -533,11 +523,7 @@ export class DatabaseController<T extends WabeTypes> {
 
 		objects.map((object) =>
 			this.inMemoryCache.set(
-				this._buildCacheKey(
-					className,
-					object.id,
-					fieldsWithPointerFields,
-				),
+				this._buildCacheKey(className, object.id, fieldsWithPointerFields),
 				object,
 			),
 		)
@@ -558,12 +544,7 @@ export class DatabaseController<T extends WabeTypes> {
 
 		return Promise.all(
 			objectsToReturn.map((object) =>
-				this._getFinalObjectWithPointer(
-					object,
-					pointers,
-					className,
-					context,
-				),
+				this._getFinalObjectWithPointer(object, pointers, className, context),
 			),
 		) as Promise<OutputType<U, K>[]>
 	}
@@ -664,11 +645,7 @@ export class DatabaseController<T extends WabeTypes> {
 		const objectsId = objects.map((object) => object.id)
 
 		for (const id of objectsId) {
-			const keyCache = this._buildCacheKey(
-				className,
-				id,
-				fields as string[],
-			)
+			const keyCache = this._buildCacheKey(className, id, fields as string[])
 
 			this.inMemoryCache.set(keyCache, undefined)
 		}
@@ -715,11 +692,7 @@ export class DatabaseController<T extends WabeTypes> {
 			id,
 		})
 
-		const whereWithACLCondition = this._buildWhereWithACL(
-			{},
-			context,
-			'write',
-		)
+		const whereWithACLCondition = this._buildWhereWithACL({}, context, 'write')
 
 		const object = await this.adapter.updateObject({
 			className,
@@ -805,11 +778,7 @@ export class DatabaseController<T extends WabeTypes> {
 		const objectsId = objects.map((object) => object.id)
 
 		for (const id of objectsId) {
-			const keyCache = this._buildCacheKey(
-				className,
-				id,
-				fields as string[],
-			)
+			const keyCache = this._buildCacheKey(className, id, fields as string[])
 
 			this.inMemoryCache.set(keyCache, undefined)
 		}
@@ -845,11 +814,7 @@ export class DatabaseController<T extends WabeTypes> {
 			context,
 		})
 
-		const whereWithACLCondition = this._buildWhereWithACL(
-			{},
-			context,
-			'write',
-		)
+		const whereWithACLCondition = this._buildWhereWithACL({}, context, 'write')
 
 		const objectBeforeDelete = await this.getObject({
 			className,

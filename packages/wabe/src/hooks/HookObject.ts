@@ -44,9 +44,7 @@ export class HookObject<T extends WabeTypes, K = keyof T['types']> {
 		if (!this.newData) return
 
 		if (!this.operationType.includes('before'))
-			throw new Error(
-				'Cannot set data in a hook that is not a before hook',
-			)
+			throw new Error('Cannot set data in a hook that is not a before hook')
 
 		this.newData[field] = value
 	}

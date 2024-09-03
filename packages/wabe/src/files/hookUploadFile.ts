@@ -16,9 +16,7 @@ const handleFile = async (hookObject: HookObject<any>) => {
 			if (hookObject.context.wabe.config.file?.adapter !== undefined)
 				hookObject.upsertNewData(
 					keyName,
-					await hookObject.context.wabe.config.file.adapter(
-						newData[keyName],
-					),
+					await hookObject.context.wabe.config.file.adapter(newData[keyName]),
 				)
 		}),
 	)

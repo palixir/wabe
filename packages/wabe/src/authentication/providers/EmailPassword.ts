@@ -39,8 +39,7 @@ export class EmailPassword
 
 		const user = users[0]
 
-		const userDatabasePassword =
-			user.authentication?.emailPassword?.password
+		const userDatabasePassword = user.authentication?.emailPassword?.password
 
 		if (!userDatabasePassword)
 			throw new Error('Invalid authentication credentials')

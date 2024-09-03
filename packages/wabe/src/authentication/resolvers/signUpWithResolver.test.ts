@@ -112,10 +112,7 @@ describe('SignUpWith', () => {
 		})
 
 		expect(mockCreateSession).toHaveBeenCalledTimes(1)
-		expect(mockCreateSession).toHaveBeenCalledWith(
-			'userId',
-			expect.any(Object),
-		)
+		expect(mockCreateSession).toHaveBeenCalledWith('userId', expect.any(Object))
 
 		expect(mockSetCookie).toHaveBeenCalledTimes(2)
 		expect(mockSetCookie).toHaveBeenNthCalledWith(
@@ -147,9 +144,9 @@ describe('SignUpWith', () => {
 		const accessTokenExpiresIn = mockSetCookie.mock.calls[1][2].expires
 
 		// - 1000 to avoid flaky
-		expect(
-			new Date(refreshTokenExpiresIn).getTime(),
-		).toBeGreaterThanOrEqual(Date.now() + 1000 * 30 * 24 * 60 * 60 - 1000)
+		expect(new Date(refreshTokenExpiresIn).getTime()).toBeGreaterThanOrEqual(
+			Date.now() + 1000 * 30 * 24 * 60 * 60 - 1000,
+		)
 		expect(new Date(accessTokenExpiresIn).getTime()).toBeGreaterThanOrEqual(
 			Date.now() + 1000 * 15 * 60 - 1000,
 		)

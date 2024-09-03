@@ -62,19 +62,18 @@ export class Google implements ProviderInterface<GoogleInterface> {
 		}
 
 		if (user.length === 0) {
-			const createdUser =
-				await context.wabe.controllers.database.createObject({
-					className: 'User',
-					data: {
-						provider: AuthenticationProvider.Google,
-						isOauth: true,
-						authentication: {
-							google: authenticationDataToSave,
-						},
+			const createdUser = await context.wabe.controllers.database.createObject({
+				className: 'User',
+				data: {
+					provider: AuthenticationProvider.Google,
+					isOauth: true,
+					authentication: {
+						google: authenticationDataToSave,
 					},
-					context,
-					fields: ['*'],
-				})
+				},
+				context,
+				fields: ['*'],
+			})
 
 			return {
 				user: createdUser,

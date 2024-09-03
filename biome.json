@@ -33,14 +33,8 @@
 			}
 		}
 	},
-	"json": {
-		"formatter": {
-			"indentWidth": 4
-		}
-	},
 	"formatter": {
 		"enabled": true,
-		"indentWidth": 4,
 		"indentStyle": "tab",
 		"formatWithErrors": false
 	},

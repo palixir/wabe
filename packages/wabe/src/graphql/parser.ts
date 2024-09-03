@@ -381,9 +381,7 @@ export const GraphqlParser: GraphqlParserConstructor =
 				type === 'Array' && typeValue
 					? new GraphQLList(
 							requiredValue
-								? new GraphQLNonNull(
-										templateScalarType[typeValue],
-									)
+								? new GraphQLNonNull(templateScalarType[typeValue])
 								: templateScalarType[typeValue],
 						)
 					: // @ts-expect-error
@@ -434,8 +432,7 @@ export const GraphqlParser: GraphqlParserConstructor =
 							}
 							case 'WhereInputObject': {
 								acc[key] = {
-									type: allObjects[currentField.class]
-										.whereInputObject,
+									type: allObjects[currentField.class].whereInputObject,
 								}
 
 								break

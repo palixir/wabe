@@ -43,9 +43,7 @@ describe('Mongo adapter', () => {
 		const collections = await mongoAdapter.database?.collections()
 
 		if (collections)
-			await Promise.all(
-				collections?.map((collection) => collection.drop()),
-			)
+			await Promise.all(collections?.map((collection) => collection.drop()))
 	})
 
 	it('should count all elements corresponds to where condition in collection', async () => {
@@ -486,9 +484,7 @@ describe('Mongo adapter', () => {
 			className: 'User',
 			where: {
 				id: {
-					equalTo: ObjectId.createFromHexString(
-						insertedObjects[0].id,
-					),
+					equalTo: ObjectId.createFromHexString(insertedObjects[0].id),
 				},
 			},
 			context,
@@ -636,9 +632,7 @@ describe('Mongo adapter', () => {
 				offset: -2,
 				context,
 			}),
-		).rejects.toThrow(
-			"BSON field 'skip' value must be >= 0, actual value '-2'",
-		)
+		).rejects.toThrow("BSON field 'skip' value must be >= 0, actual value '-2'")
 	})
 
 	it('should get all the objects without limit and without offset', async () => {
@@ -1542,12 +1536,8 @@ describe('Mongo adapter', () => {
 		})
 
 		expect(res.length).toEqual(1)
-		expect(res[0].authentication?.emailPassword?.email).toEqual(
-			'email@test.fr',
-		)
-		expect(res[0].authentication?.emailPassword?.password).toEqual(
-			'password',
-		)
+		expect(res[0].authentication?.emailPassword?.email).toEqual('email@test.fr')
+		expect(res[0].authentication?.emailPassword?.password).toEqual('password')
 	})
 
 	it('should request sub object in object with selection fields', async () => {
@@ -1581,9 +1571,7 @@ describe('Mongo adapter', () => {
 		})
 
 		expect(res.length).toEqual(1)
-		expect(res[0].authentication?.emailPassword?.email).toEqual(
-			'email@test.fr',
-		)
+		expect(res[0].authentication?.emailPassword?.email).toEqual('email@test.fr')
 		expect(res[0].authentication?.emailPassword?.password).toBeUndefined()
 	})
 })

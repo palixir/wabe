@@ -25,15 +25,12 @@ const run = async () => {
 				cookieSession: true,
 			},
 			roles: ['Admin', 'Client'],
-			successRedirectPath:
-				'http://localhost:3000/auth/oauth?provider=google',
-			failureRedirectPath:
-				'http://localhost:3000/auth/oauth?provider=google',
+			successRedirectPath: 'http://localhost:3000/auth/oauth?provider=google',
+			failureRedirectPath: 'http://localhost:3000/auth/oauth?provider=google',
 			providers: {
 				x: {
 					clientId: 'SVFhTWpONVM4S09TWVB6dF9CZjc6MTpjaQ',
-					clientSecret:
-						'V95bDcUgQgYNqweVRO8RFrqWJxr_yckd_b5Npp-MmEBxMr6KuR',
+					clientSecret: 'V95bDcUgQgYNqweVRO8RFrqWJxr_yckd_b5Npp-MmEBxMr6KuR',
 				},
 				google: {
 					clientId:
@@ -136,8 +133,7 @@ const run = async () => {
 								},
 							},
 						},
-						resolve: (_: any, args: any) =>
-							args.input.a + args.input.b,
+						resolve: (_: any, args: any) => args.input.a + args.input.b,
 					},
 					secondCustomMutation: {
 						type: 'Int',
@@ -161,8 +157,7 @@ const run = async () => {
 								},
 							},
 						},
-						resolve: (_: any, args: any) =>
-							args.input.sum.a + args.input.sum.b,
+						resolve: (_: any, args: any) => args.input.sum.a + args.input.sum.b,
 					},
 				},
 			},

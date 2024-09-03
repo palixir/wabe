@@ -113,9 +113,7 @@ describe('Resolver', () => {
 			}
 
 			// @ts-expect-error
-			const fields = extractFieldsFromSetNode(
-				info.fieldNodes[0].selectionSet,
-			)
+			const fields = extractFieldsFromSetNode(info.fieldNodes[0].selectionSet)
 			expect(fields).toEqual(['name', 'age'])
 		})
 
@@ -150,9 +148,7 @@ describe('Resolver', () => {
 			}
 
 			// @ts-expect-error
-			const fields = extractFieldsFromSetNode(
-				info.fieldNodes[0].selectionSet,
-			)
+			const fields = extractFieldsFromSetNode(info.fieldNodes[0].selectionSet)
 
 			expect(fields).toEqual(['name', 'age', 'field2'])
 		})
@@ -198,9 +194,7 @@ describe('Resolver', () => {
 			}
 
 			// @ts-expect-error
-			const fields = extractFieldsFromSetNode(
-				info.fieldNodes[0].selectionSet,
-			)
+			const fields = extractFieldsFromSetNode(info.fieldNodes[0].selectionSet)
 
 			expect(fields).toEqual(['name', 'age', 'field1.field2'])
 		})

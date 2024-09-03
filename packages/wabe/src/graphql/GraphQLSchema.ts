@@ -270,9 +270,7 @@ export class GraphQLSchema {
 					type: new GraphQLList(new GraphQLNonNull(GraphQLID)),
 				},
 				createAndAdd: {
-					type: new GraphQLList(
-						new GraphQLNonNull(inputCreateFields),
-					),
+					type: new GraphQLList(new GraphQLNonNull(inputCreateFields)),
 				},
 			}),
 		})
@@ -497,9 +495,7 @@ export class GraphQLSchema {
 					allObjects: this.allObjects,
 				})
 
-				const getGraphqlOutputType = ():
-					| GraphQLOutputType
-					| undefined => {
+				const getGraphqlOutputType = (): GraphQLOutputType | undefined => {
 					if (currentMutation.type !== 'Object')
 						return graphqlParserWithInput.getGraphqlType({
 							...currentMutation,
@@ -533,9 +529,7 @@ export class GraphQLSchema {
 				})
 
 				acc[currentKey] = {
-					type: required
-						? new GraphQLNonNull(outputType)
-						: outputType,
+					type: required ? new GraphQLNonNull(outputType) : outputType,
 					args:
 						numberOfFieldsInInput > 0
 							? { input: { type: graphqlInput } }
@@ -569,9 +563,7 @@ export class GraphQLSchema {
 					allObjects: this.allObjects,
 				})
 
-				const getGraphqlOutputType = ():
-					| GraphQLOutputType
-					| undefined => {
+				const getGraphqlOutputType = (): GraphQLOutputType | undefined => {
 					if (currentQuery.type !== 'Object')
 						return graphqlParserWithInput.getGraphqlType({
 							...currentQuery,
@@ -600,9 +592,7 @@ export class GraphQLSchema {
 				if (!outputType) throw new Error('Invalid mutation output type')
 
 				acc[currentKey] = {
-					type: required
-						? new GraphQLNonNull(outputType)
-						: outputType,
+					type: required ? new GraphQLNonNull(outputType) : outputType,
 					args: graphqlParserWithInput.getGraphqlFields(currentKey),
 					description: currentQuery.description,
 					resolve: currentQuery.resolve,
@@ -625,8 +615,7 @@ export class GraphQLSchema {
 		object: GraphQLObjectType
 		connectionObject: GraphQLObjectType
 	}) {
-		const classNameWithFirstLetterLowerCase =
-			firstLetterInLowerCase(className)
+		const classNameWithFirstLetterLowerCase = firstLetterInLowerCase(className)
 
 		return {
 			[classNameWithFirstLetterLowerCase]: {
@@ -665,8 +654,7 @@ export class GraphQLSchema {
 		object: GraphQLObjectType
 		connectionObject: GraphQLObjectType
 	}) {
-		const classNameWithFirstLetterLowerCase =
-			firstLetterInLowerCase(className)
+		const classNameWithFirstLetterLowerCase = firstLetterInLowerCase(className)
 
 		const pluralClassName = pluralize(className)
 
@@ -689,9 +677,7 @@ export class GraphQLSchema {
 			name: `Create${pluralClassName}Input`,
 			fields: () => ({
 				fields: {
-					type: new GraphQLNonNull(
-						new GraphQLList(defaultCreateInputType),
-					),
+					type: new GraphQLNonNull(new GraphQLList(defaultCreateInputType)),
 				},
 				offset: { type: GraphQLInt },
 				first: { type: GraphQLInt },
