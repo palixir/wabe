@@ -16,19 +16,17 @@ export const signUpWithResolver = async (
 	context: WabeContext<any>,
 ) => {
 	// Create object call the provider signUp
-	const { id: userId } = await context.wabe.controllers.database.createObject(
-		{
-			className: 'User',
-			data: {
-				authentication: input.authentication,
-			},
-			context: {
-				...context,
-				isRoot: true,
-			},
-			fields: ['id'],
+	const { id: userId } = await context.wabe.controllers.database.createObject({
+		className: 'User',
+		data: {
+			authentication: input.authentication,
 		},
-	)
+		context: {
+			...context,
+			isRoot: true,
+		},
+		fields: ['id'],
+	})
 
 	const session = new Session()
 

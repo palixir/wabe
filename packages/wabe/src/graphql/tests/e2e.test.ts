@@ -342,10 +342,7 @@ describe('GraphQL : E2E', () => {
 				age: userToDelete.age,
 			})
 
-			const { users: users2 } = await client.request<any>(
-				graphql.users,
-				{},
-			)
+			const { users: users2 } = await client.request<any>(graphql.users, {})
 
 			expect(users2.edges.length).toEqual(1)
 		})
@@ -384,19 +381,16 @@ describe('GraphQL : E2E', () => {
 
 	describe('Authentication mutations', () => {
 		it('should signIn with emailPassword if the password is correct', async () => {
-			const { signUpWith } = await client.request<any>(
-				graphql.signUpWith,
-				{
-					input: {
-						authentication: {
-							emailPassword: {
-								email: 'email@test.fr',
-								password: 'password',
-							},
+			const { signUpWith } = await client.request<any>(graphql.signUpWith, {
+				input: {
+					authentication: {
+						emailPassword: {
+							email: 'email@test.fr',
+							password: 'password',
 						},
 					},
 				},
-			)
+			})
 
 			expect(signUpWith).toEqual({
 				accessToken: expect.any(String),

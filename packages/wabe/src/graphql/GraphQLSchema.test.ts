@@ -216,7 +216,7 @@ describe('GraphqlSchema', () => {
 					}
 				}
 			`,
-			{}
+			{},
 		)
 
 		const res = await client.request<any>(
@@ -233,7 +233,7 @@ describe('GraphqlSchema', () => {
 						totalCount
 					}
 				}
-			`
+			`,
 		)
 
 		expect(res.testClasses.totalCount).toEqual(1)
@@ -245,7 +245,7 @@ describe('GraphqlSchema', () => {
 						totalCount
 					}
 				}
-			`
+			`,
 		)
 
 		expect(res2.testClasses.totalCount).toEqual(0)
@@ -257,7 +257,7 @@ describe('GraphqlSchema', () => {
 						totalCount
 					}
 				}
-			`
+			`,
 		)
 
 		expect(res3.testClasses.totalCount).toEqual(1)
@@ -276,7 +276,7 @@ describe('GraphqlSchema', () => {
 						totalCount
 					}
 				}
-			`
+			`,
 		)
 
 		expect(res4.testClasses.totalCount).toEqual(0)
@@ -295,7 +295,7 @@ describe('GraphqlSchema', () => {
 						totalCount
 					}
 				}
-			`
+			`,
 		)
 
 		expect(res5.testClasses.totalCount).toEqual(1)
@@ -309,7 +309,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'TestClassConnection',
-			}).input.totalCount
+			}).input.totalCount,
 		).toEqual('Int')
 	})
 
@@ -350,7 +350,7 @@ describe('GraphqlSchema', () => {
 					}
 				}
 			`,
-			{}
+			{},
 		)
 
 		const res = await client.request<any>(
@@ -360,7 +360,7 @@ describe('GraphqlSchema', () => {
 						totalCount
 					}
 				}
-			`
+			`,
 		)
 
 		expect(res.testClasses.totalCount).toEqual(1)
@@ -425,7 +425,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'TestClassFile',
-			}).input.file
+			}).input.file,
 		).toEqual('File!')
 	})
 
@@ -435,7 +435,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'TestClassRequired',
-			}).input.field7
+			}).input.field7,
 		).toEqual('String!')
 
 		expect(
@@ -443,7 +443,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'TestClassRequired',
-			}).input.field8
+			}).input.field8,
 		).toEqual('[Int!]!')
 
 		expect(
@@ -451,7 +451,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'TestClassRequired',
-			}).input.field9
+			}).input.field9,
 		).toEqual('[TestClassRequiredTestObjectArray]!')
 	})
 
@@ -461,7 +461,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'TestClass2',
-			}).input.field1
+			}).input.field1,
 		).toEqual('TestClass2TestObject!')
 
 		expect(
@@ -469,7 +469,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'TestClass2TestObject',
-			}).input.testSubObject
+			}).input.testSubObject,
 		).toEqual('[TestClass2TestObjectFieldsObject!]!')
 
 		expect(
@@ -477,7 +477,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'TestClass2TestObjectFieldsObject',
-			}).input
+			}).input,
 		).toEqual({ name: 'String!' })
 	})
 
@@ -767,7 +767,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'TestClassWhereInput',
-			}).input
+			}).input,
 		).toEqual({
 			id: 'IdWhereInput',
 			AND: '[TestClassWhereInput]',
@@ -786,7 +786,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'FifthClass',
-			}).input.relation
+			}).input.relation,
 		).toEqual('SixthClassConnection')
 	})
 
@@ -796,7 +796,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'TestClassRelationInput',
-			}).input.createAndAdd
+			}).input.createAndAdd,
 		).toEqual('[TestClassCreateFieldsInput!]')
 	})
 
@@ -806,7 +806,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'FifthClassInput',
-			}).input.relation
+			}).input.relation,
 		).toEqual('SixthClassRelationInput')
 	})
 
@@ -816,7 +816,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'ThirdClass',
-			}).input.pointer
+			}).input.pointer,
 		).toEqual('FourthClass')
 
 		expect(
@@ -824,7 +824,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'FourthClass',
-			}).input.pointer
+			}).input.pointer,
 		).toEqual('ThirdClass')
 
 		expect(
@@ -832,7 +832,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'ThirdClassInput',
-			}).input.pointer
+			}).input.pointer,
 		).toEqual('FourthClassPointerInput')
 
 		expect(
@@ -840,7 +840,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'FourthClassInput',
-			}).input.pointer
+			}).input.pointer,
 		).toEqual('ThirdClassPointerInput')
 
 		expect(
@@ -848,7 +848,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'ThirdClassPointerInput',
-			}).input.createAndLink
+			}).input.createAndLink,
 		).toEqual('ThirdClassCreateFieldsInput')
 
 		expect(
@@ -856,7 +856,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'FourthClassPointerInput',
-			}).input.createAndLink
+			}).input.createAndLink,
 		).toEqual('FourthClassCreateFieldsInput')
 	})
 
@@ -866,7 +866,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'TestClassPointerInput',
-			}).input.createAndLink
+			}).input.createAndLink,
 		).toEqual('TestClassCreateFieldsInput')
 	})
 
@@ -876,7 +876,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'SecondClass',
-			}).input.pointer
+			}).input.pointer,
 		).toEqual('TestClass')
 	})
 
@@ -886,7 +886,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'SecondClassCreateFieldsInput',
-			}).input.pointer
+			}).input.pointer,
 		).toEqual('TestClassPointerInput')
 	})
 
@@ -896,7 +896,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'SecondClassUpdateFieldsInput',
-			}).input.pointer
+			}).input.pointer,
 		).toEqual('TestClassPointerInput')
 	})
 
@@ -906,7 +906,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'TestClassCreateFieldsInput',
-			}).input.field1
+			}).input.field1,
 		).toEqual('String')
 	})
 
@@ -916,7 +916,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'TestClassUpdateFieldsInput',
-			}).input.field1
+			}).input.field1,
 		).toEqual('String')
 	})
 
@@ -926,7 +926,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Type',
 				name: 'CreateTestClassPayload',
-			}).input
+			}).input,
 		).toEqual({
 			clientMutationId: 'String',
 			testClass: 'TestClass',
@@ -939,7 +939,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Query',
 				name: 'testClass',
-			})
+			}),
 		).toEqual({
 			input: {
 				id: 'ID',
@@ -954,7 +954,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Query',
 				name: 'testClasses',
-			})
+			}),
 		).toEqual({
 			input: {
 				first: 'Int',
@@ -971,7 +971,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Mutation',
 				name: 'createTestClass',
-			})
+			}),
 		).toEqual({
 			input: { input: 'CreateTestClassInput' },
 			output: 'CreateTestClassPayload',
@@ -984,7 +984,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Mutation',
 				name: 'createTestClasses',
-			})
+			}),
 		).toEqual({
 			input: { input: 'CreateTestClassesInput' },
 			output: 'TestClassConnection!',
@@ -997,7 +997,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Mutation',
 				name: 'updateTestClass',
-			})
+			}),
 		).toEqual({
 			input: { input: 'UpdateTestClassInput' },
 			output: 'UpdateTestClassPayload',
@@ -1010,7 +1010,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Mutation',
 				name: 'updateTestClasses',
-			})
+			}),
 		).toEqual({
 			input: { input: 'UpdateTestClassesInput' },
 			output: 'TestClassConnection!',
@@ -1023,7 +1023,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Mutation',
 				name: 'deleteTestClass',
-			})
+			}),
 		).toEqual({
 			input: { input: 'DeleteTestClassInput' },
 			output: 'DeleteTestClassPayload',
@@ -1036,7 +1036,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Mutation',
 				name: 'deleteTestClasses',
-			})
+			}),
 		).toEqual({
 			input: { input: 'DeleteTestClassesInput' },
 			output: 'TestClassConnection!',
@@ -1049,7 +1049,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Mutation',
 				name: 'customMutation',
-			})
+			}),
 		).toEqual({
 			input: {},
 			output: 'Boolean',
@@ -1062,7 +1062,7 @@ describe('GraphqlSchema', () => {
 				schema,
 				type: 'Query',
 				name: 'customQuery',
-			})
+			}),
 		).toEqual({
 			input: {},
 			output: 'Boolean',
@@ -1101,8 +1101,7 @@ describe('GraphqlSchema', () => {
 								},
 							},
 						},
-						resolve: (_: any, args: any) =>
-							args.input.sum.a + args.input.sum.b,
+						resolve: (_: any, args: any) => args.input.sum.a + args.input.sum.b,
 					},
 				},
 			},
@@ -1114,7 +1113,7 @@ describe('GraphqlSchema', () => {
 					customMutation(input: { sum: { a: 1, b: 2 } })
 				}
 			`,
-			{}
+			{},
 		)
 
 		expect(request.customMutation).toBe(3)
@@ -1163,8 +1162,7 @@ describe('GraphqlSchema', () => {
 							},
 						},
 						resolve: (_: any, args: any) =>
-							args.input.subObject.sum.a +
-							args.input.subObject.sum.b,
+							args.input.subObject.sum.a + args.input.subObject.sum.b,
 					},
 				},
 			},
@@ -1178,7 +1176,7 @@ describe('GraphqlSchema', () => {
 					)
 				}
 			`,
-			{}
+			{},
 		)
 
 		expect(request.customMutation).toBe(3)
@@ -1218,8 +1216,7 @@ describe('GraphqlSchema', () => {
 								},
 							},
 						},
-						resolve: (_: any, args: any) =>
-							args.input.sum.a + args.input.sum.b,
+						resolve: (_: any, args: any) => args.input.sum.a + args.input.sum.b,
 					},
 				},
 			},
@@ -1236,7 +1233,7 @@ describe('GraphqlSchema', () => {
 					a: 1,
 					b: 2,
 				},
-			}
+			},
 		)
 
 		expect(request.customMutation).toBe(3)
@@ -1254,7 +1251,7 @@ describe('GraphqlSchema', () => {
 						b: 2,
 					},
 				},
-			}
+			},
 		)
 
 		expect(request2.customMutation).toBe(3)
@@ -1299,7 +1296,7 @@ describe('GraphqlSchema', () => {
 					}
 				}
 			`,
-			{}
+			{},
 		)
 
 		const request = await client.request<any>(
@@ -1323,7 +1320,7 @@ describe('GraphqlSchema', () => {
 				field1WhereInput: {
 					field2: { equalTo: 'test' },
 				},
-			}
+			},
 		)
 
 		expect(request.testClasses.edges[0].node.field1.field2).toBe('test')
@@ -1379,7 +1376,7 @@ describe('GraphqlSchema', () => {
 					}
 				}
 			`,
-			{}
+			{},
 		)
 
 		expect(res.createTestClass2.testClass2.name).toBe('name')
@@ -1429,7 +1426,7 @@ describe('GraphqlSchema', () => {
 					}
 				}
 			`,
-			{}
+			{},
 		)
 
 		const res = await client.request<any>(
@@ -1454,7 +1451,7 @@ describe('GraphqlSchema', () => {
 						}
 					}
 				`,
-			{}
+			{},
 		)
 
 		expect(res.createTestClass2.testClass2.name).toBe('name')
@@ -1516,7 +1513,7 @@ describe('GraphqlSchema', () => {
 					}
 				}
 			`,
-			{}
+			{},
 		)
 
 		expect(res.createTestClass2s.edges[0].node.name).toBe('name')
@@ -1572,7 +1569,7 @@ describe('GraphqlSchema', () => {
 					}
 				}
 			`,
-			{}
+			{},
 		)
 
 		expect(res.createTestClass2.testClass2.name).toBe('name')
@@ -1645,7 +1642,7 @@ describe('GraphqlSchema', () => {
 					}
 				}
 			`,
-			{}
+			{},
 		)
 
 		expect(res.createTestClass2.testClass2.name).toBe('name')
@@ -1721,7 +1718,7 @@ describe('GraphqlSchema', () => {
 					}
 				}
 			`,
-			{}
+			{},
 		)
 
 		expect(res.createTestClass2.testClass2.name).toBe('name')
@@ -1797,7 +1794,7 @@ describe('GraphqlSchema', () => {
 					}
 				}
 			`,
-			{}
+			{},
 		)
 
 		expect(res.createTestClass2.testClass2.name).toBe('name')
@@ -1827,7 +1824,7 @@ describe('GraphqlSchema', () => {
 
 		expect(resAfterUpdate.updateTestClass2.testClass2.name).toBe('name')
 		expect(resAfterUpdate.updateTestClass2.testClass2.field2.field1).toBe(
-			'field1AfterUpdate'
+			'field1AfterUpdate',
 		)
 
 		await wabe.close()
@@ -1874,7 +1871,7 @@ describe('GraphqlSchema', () => {
 					}
 				}
 			`,
-			{}
+			{},
 		)
 
 		const res = await client.request<any>(
@@ -1888,7 +1885,7 @@ describe('GraphqlSchema', () => {
 					}
 				}
 			`,
-			{}
+			{},
 		)
 
 		const resAfterUpdate = await client.request<any>(
@@ -1909,12 +1906,12 @@ describe('GraphqlSchema', () => {
 					}
 				}
 			`,
-			{}
+			{},
 		)
 
 		expect(resAfterUpdate.updateTestClass2.testClass2.name).toBe('name')
 		expect(resAfterUpdate.updateTestClass2.testClass2.field2.field1).toBe(
-			'field1'
+			'field1',
 		)
 
 		await wabe.close()
@@ -1961,7 +1958,7 @@ describe('GraphqlSchema', () => {
 					}
 				}
 			`,
-			{}
+			{},
 		)
 
 		const res = await client.request<any>(
@@ -1975,7 +1972,7 @@ describe('GraphqlSchema', () => {
 					}
 				}
 			`,
-			{}
+			{},
 		)
 
 		expect(
@@ -1997,8 +1994,8 @@ describe('GraphqlSchema', () => {
 					}
 				}
 			`,
-				{}
-			)
+				{},
+			),
 		).rejects.toThrow('Object not found')
 
 		await wabe.close()
@@ -2045,7 +2042,7 @@ describe('GraphqlSchema', () => {
 					}
 				}
 			`,
-			{}
+			{},
 		)
 
 		const resAfterUpdate = await client.request<any>(
@@ -2074,13 +2071,13 @@ describe('GraphqlSchema', () => {
 					}
 				}
 			`,
-			{}
+			{},
 		)
 
 		expect(resAfterUpdate.updateTestClass2s.edges[0].node.name).toBe('name')
-		expect(
-			resAfterUpdate.updateTestClass2s.edges[0].node.field2.field1
-		).toBe('field1UpdateMultiple')
+		expect(resAfterUpdate.updateTestClass2s.edges[0].node.field2.field1).toBe(
+			'field1UpdateMultiple',
+		)
 
 		await wabe.close()
 	})
@@ -2133,7 +2130,7 @@ describe('GraphqlSchema', () => {
 					}
 				}
 			`,
-			{}
+			{},
 		)
 
 		expect(res.createTestClass2.testClass2.name).toBe('name')
@@ -2154,7 +2151,7 @@ describe('GraphqlSchema', () => {
 
 		expect(resAfterDelete.deleteTestClass2.testClass2.name).toBe('name')
 		expect(resAfterDelete.deleteTestClass2.testClass2.field2.field1).toBe(
-			'field1'
+			'field1',
 		)
 
 		await wabe.close()
@@ -2212,9 +2209,9 @@ describe('GraphqlSchema', () => {
 		`)
 
 		expect(res.createTestClass2.testClass2.name).toBe('name')
-		expect(
-			res.createTestClass2.testClass2.field2.edges[0].node.field1
-		).toBe('field1')
+		expect(res.createTestClass2.testClass2.field2.edges[0].node.field1).toBe(
+			'field1',
+		)
 
 		await wabe.close()
 	})
@@ -2282,7 +2279,7 @@ describe('GraphqlSchema', () => {
 
 		expect(resAfterAdd.createTestClass2.testClass2.name).toBe('name')
 		expect(
-			resAfterAdd.createTestClass2.testClass2.field2.edges[0].node.field1
+			resAfterAdd.createTestClass2.testClass2.field2.edges[0].node.field1,
 		).toBe('field1')
 
 		await wabe.close()
@@ -2345,7 +2342,7 @@ describe('GraphqlSchema', () => {
 
 		expect(res.createTestClass2s.edges[0].node.name).toBe('name')
 		expect(
-			res.createTestClass2s.edges[0].node.field2.edges[0].node.field1
+			res.createTestClass2s.edges[0].node.field2.edges[0].node.field1,
 		).toBe('field1')
 
 		await wabe.close()
@@ -2418,8 +2415,7 @@ describe('GraphqlSchema', () => {
 
 		expect(resAfterAdd.createTestClass2s.edges[0].node.name).toBe('name')
 		expect(
-			resAfterAdd.createTestClass2s.edges[0].node.field2.edges[0].node
-				.field1
+			resAfterAdd.createTestClass2s.edges[0].node.field2.edges[0].node.field1,
 		).toBe('field1')
 
 		await wabe.close()
@@ -2490,8 +2486,7 @@ describe('GraphqlSchema', () => {
 
 		expect(resAfterUpdate.updateTestClass2.testClass2.name).toBe('name')
 		expect(
-			resAfterUpdate.updateTestClass2.testClass2.field2.edges[0].node
-				.field1
+			resAfterUpdate.updateTestClass2.testClass2.field2.edges[0].node.field1,
 		).toBe('field1')
 
 		await wabe.close()
@@ -2572,8 +2567,7 @@ describe('GraphqlSchema', () => {
 
 		expect(resAfterUpdate.updateTestClass2.testClass2.name).toBe('name')
 		expect(
-			resAfterUpdate.updateTestClass2.testClass2.field2.edges[0].node
-				.field1
+			resAfterUpdate.updateTestClass2.testClass2.field2.edges[0].node.field1,
 		).toBe('field1')
 
 		await wabe.close()
@@ -2659,7 +2653,7 @@ describe('GraphqlSchema', () => {
 
 		expect(resAfterUpdate.updateTestClass2.testClass2.name).toBe('name')
 		expect(
-			resAfterUpdate.updateTestClass2.testClass2.field2.edges.length
+			resAfterUpdate.updateTestClass2.testClass2.field2.edges.length,
 		).toEqual(0)
 
 		await wabe.close()
@@ -2733,7 +2727,7 @@ describe('GraphqlSchema', () => {
 		expect(resAfterUpdate.updateTestClass2s.edges[0].node.name).toBe('name')
 		expect(
 			resAfterUpdate.updateTestClass2s.edges[0].node.field2.edges[0].node
-				.field1
+				.field1,
 		).toBe('field1')
 
 		await wabe.close()
@@ -2817,7 +2811,7 @@ describe('GraphqlSchema', () => {
 		expect(resAfterUpdate.updateTestClass2s.edges[0].node.name).toBe('name')
 		expect(
 			resAfterUpdate.updateTestClass2s.edges[0].node.field2.edges[0].node
-				.field1
+				.field1,
 		).toBe('field1')
 
 		await wabe.close()
@@ -2905,7 +2899,7 @@ describe('GraphqlSchema', () => {
 
 		expect(resAfterUpdate.updateTestClass2s.edges[0].node.name).toBe('name')
 		expect(
-			resAfterUpdate.updateTestClass2s.edges[0].node.field2.edges.length
+			resAfterUpdate.updateTestClass2s.edges[0].node.field2.edges.length,
 		).toBe(0)
 
 		await wabe.close()
@@ -2993,7 +2987,7 @@ describe('GraphqlSchema', () => {
 
 		expect(resAfterUpdate.updateTestClass2s.edges[0].node.name).toBe('name')
 		expect(
-			resAfterUpdate.updateTestClass2s.edges[0].node.field2.edges.length
+			resAfterUpdate.updateTestClass2s.edges[0].node.field2.edges.length,
 		).toBe(0)
 
 		await wabe.close()

@@ -23,10 +23,7 @@ describe('Default fields', () => {
 				object: {} as any,
 			})
 
-			const spyHookObjectUpsertNewData = spyOn(
-				hookObject,
-				'upsertNewData',
-			)
+			const spyHookObjectUpsertNewData = spyOn(hookObject, 'upsertNewData')
 
 			await defaultBeforeCreateForCreatedAt(hookObject)
 
@@ -65,10 +62,7 @@ describe('Default fields', () => {
 				object: {} as any,
 			})
 
-			const spyHookObjectUpsertNewData = spyOn(
-				hookObject,
-				'upsertNewData',
-			)
+			const spyHookObjectUpsertNewData = spyOn(hookObject, 'upsertNewData')
 
 			await defaultBeforeUpdateForUpdatedAt(hookObject)
 			expect(spyHookObjectUpsertNewData).toHaveBeenCalledTimes(1)
@@ -119,10 +113,7 @@ describe('Default fields', () => {
 				object: {} as any,
 			})
 
-			const spyHookObjectUpsertNewData = spyOn(
-				hookObject,
-				'upsertNewData',
-			)
+			const spyHookObjectUpsertNewData = spyOn(hookObject, 'upsertNewData')
 
 			await defaultBeforeCreateForDefaultValue(hookObject)
 
@@ -142,10 +133,7 @@ describe('Default fields', () => {
 				object: {} as any,
 			})
 
-			const spyHookObjectUpsertNewData = spyOn(
-				hookObject,
-				'upsertNewData',
-			)
+			const spyHookObjectUpsertNewData = spyOn(hookObject, 'upsertNewData')
 
 			await defaultBeforeCreateForDefaultValue(hookObject)
 

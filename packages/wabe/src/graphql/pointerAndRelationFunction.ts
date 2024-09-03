@@ -165,9 +165,7 @@ export const remove = async ({
 
 		const olderValues = currentValue[fieldName] || []
 
-		return olderValues.filter(
-			(olderValue: any) => !remove.includes(olderValue),
-		)
+		return olderValues.filter((olderValue: any) => !remove.includes(olderValue))
 	}
 
 	if (typeOfExecution === 'updateMany' && where) {

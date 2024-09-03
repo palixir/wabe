@@ -35,9 +35,7 @@ export const generateWabeFile = ({
 
 	const wabeEnumsGlobalTypesString =
 		wabeEnumsGlobalTypes.length > 0
-			? `export type WabeSchemaEnums = ${wabeEnumsGlobalTypes.join(
-					' | ',
-				)}`
+			? `export type WabeSchemaEnums = ${wabeEnumsGlobalTypes.join(' | ')}`
 			: ''
 
 	// Classes
@@ -117,15 +115,11 @@ export const generateCodegen = async ({
 	} catch {}
 
 	await new Promise((resolve, reject) =>
-		writeFile(
-			`${path}/wabe.ts`,
-			`${graphqlOutput}\n\n${wabeOutput}`,
-			(err) => {
-				if (err) reject(err)
+		writeFile(`${path}/wabe.ts`, `${graphqlOutput}\n\n${wabeOutput}`, (err) => {
+			if (err) reject(err)
 
-				resolve('ok')
-			},
-		),
+			resolve('ok')
+		}),
 	)
 
 	await new Promise((resolve, reject) =>

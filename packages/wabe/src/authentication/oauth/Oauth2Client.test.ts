@@ -23,19 +23,19 @@ describe('Oauth2Client', () => {
 			'https://authorizationendpoint/?response_type=code&client_id=clientId&redirect_uri=https%3A%2F%2FredirectURI',
 		)
 
-		const authorizationURLWithState =
-			await oauthClient.createAuthorizationURL({
-				state: 'state',
-			})
+		const authorizationURLWithState = await oauthClient.createAuthorizationURL({
+			state: 'state',
+		})
 
 		expect(authorizationURLWithState.toString()).toEqual(
 			'https://authorizationendpoint/?response_type=code&client_id=clientId&state=state&redirect_uri=https%3A%2F%2FredirectURI',
 		)
 
-		const authorizationURLWithScopes =
-			await oauthClient.createAuthorizationURL({
+		const authorizationURLWithScopes = await oauthClient.createAuthorizationURL(
+			{
 				scopes: ['scope1', 'scope2'],
-			})
+			},
+		)
 
 		expect(authorizationURLWithScopes.toString()).toEqual(
 			'https://authorizationendpoint/?response_type=code&client_id=clientId&scope=scope1+scope2&redirect_uri=https%3A%2F%2FredirectURI',
@@ -167,9 +167,7 @@ describe('Oauth2Client', () => {
 		expect(receivedRequest.headers.get('content-type')).toEqual(
 			'application/x-www-form-urlencoded',
 		)
-		expect(receivedRequest.headers.get('accept')).toEqual(
-			'application/json',
-		)
+		expect(receivedRequest.headers.get('accept')).toEqual('application/json')
 		expect(receivedRequest.headers.get('user-agent')).toEqual('wabe')
 		expect(receivedRequest.headers.get('authorization')).toEqual(
 			`Basic ${encodeCredentials}`,

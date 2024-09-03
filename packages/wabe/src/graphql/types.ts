@@ -66,8 +66,7 @@ export const FileScalarType = new GraphQLScalarType({
 
 export const SearchScalarType = new GraphQLScalarType({
 	name: 'Search',
-	description:
-		'Search scalar to tokenize and search for all searchable fields',
+	description: 'Search scalar to tokenize and search for all searchable fields',
 	parseValue: (value: any) => {
 		if (typeof value !== 'string') throw new Error('Invalid search term')
 

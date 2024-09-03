@@ -56,9 +56,7 @@ describe('Google oauth', () => {
 			'codeVerifier',
 		)
 
-		expect(spyOauth2ClientValidateAuthorizationCode).toHaveBeenCalledTimes(
-			1,
-		)
+		expect(spyOauth2ClientValidateAuthorizationCode).toHaveBeenCalledTimes(1)
 		expect(spyOauth2ClientValidateAuthorizationCode).toHaveBeenCalledWith(
 			'code',
 			{

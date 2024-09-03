@@ -52,10 +52,9 @@ describe('Authentication utils', () => {
 
 	it('should throw an error if we provided two authentication methods', () => {
 		expect(() =>
-			getAuthenticationMethod(
-				['emailPassword', 'otherAuthenticationMethod'],
-				{ wabe: { config } } as any,
-			),
+			getAuthenticationMethod(['emailPassword', 'otherAuthenticationMethod'], {
+				wabe: { config },
+			} as any),
 		).toThrow('One authentication method is required at the time')
 	})
 

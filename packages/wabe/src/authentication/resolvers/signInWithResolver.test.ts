@@ -245,12 +245,12 @@ describe('SignInWith', () => {
 		const accessTokenExpiresIn = mockSetCookie.mock.calls[1][2].expires
 
 		// - 1000 to avoid flaky
-		expect(
-			refreshTokenExpiresIn.getTime() - Date.now(),
-		).toBeGreaterThanOrEqual(1000 * 30 * 24 * 60 * 60 - 1000)
-		expect(
-			accessTokenExpiresIn.getTime() - Date.now(),
-		).toBeGreaterThanOrEqual(1000 * 15 * 60 - 1000)
+		expect(refreshTokenExpiresIn.getTime() - Date.now()).toBeGreaterThanOrEqual(
+			1000 * 30 * 24 * 60 * 60 - 1000,
+		)
+		expect(accessTokenExpiresIn.getTime() - Date.now()).toBeGreaterThanOrEqual(
+			1000 * 15 * 60 - 1000,
+		)
 
 		expect(mockCreateSession).toHaveBeenCalledTimes(1)
 		expect(mockCreateSession).toHaveBeenCalledWith('id', expect.anything())
