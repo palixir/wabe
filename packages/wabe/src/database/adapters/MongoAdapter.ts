@@ -43,8 +43,7 @@ export const buildMongoWhereQuery = <
 			if (value?.notEqualTo)
 				acc[keyToWrite] = {
 					$ne:
-						keyToWrite === '_id' &&
-						typeof value.notEqualTo === 'string'
+						keyToWrite === '_id' && typeof value.notEqualTo === 'string'
 							? ObjectId.createFromHexString(value.notEqualTo)
 							: value.notEqualTo,
 				}
@@ -62,13 +61,8 @@ export const buildMongoWhereQuery = <
 					$in:
 						keyToWrite === '_id'
 							? value.in
-									.filter(
-										(inValue) =>
-											typeof inValue === 'string',
-									)
-									.map((inValue) =>
-										ObjectId.createFromHexString(inValue),
-									)
+									.filter((inValue) => typeof inValue === 'string')
+									.map((inValue) => ObjectId.createFromHexString(inValue))
 							: value.in,
 				}
 			if (value?.notIn)
@@ -76,15 +70,8 @@ export const buildMongoWhereQuery = <
 					$nin:
 						keyToWrite === '_id'
 							? value.notIn
-									.filter(
-										(notInValue) =>
-											typeof notInValue === 'string',
-									)
-									.map((notInValue) =>
-										ObjectId.createFromHexString(
-											notInValue,
-										),
-									)
+									.filter((notInValue) => typeof notInValue === 'string')
+									.map((notInValue) => ObjectId.createFromHexString(notInValue))
 							: value.notIn,
 				}
 
@@ -104,8 +91,7 @@ export const buildMongoWhereQuery = <
 
 				if (entries.length > 0)
 					return {
-						[`${keyToWrite.toString()}.${entries[0][0]}`]:
-							entries[0][1],
+						[`${keyToWrite.toString()}.${entries[0][0]}`]: entries[0][1],
 					}
 			}
 
@@ -316,11 +302,9 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter {
 
 		const res = await collection.insertMany(data, {})
 
-		const orStatement = Object.entries(res.insertedIds).map(
-			([, value]) => ({
-				id: { equalTo: value },
-			}),
-		)
+		const orStatement = Object.entries(res.insertedIds).map(([, value]) => ({
+			id: { equalTo: value },
+		}))
 
 		const allObjects = await context.wabe.controllers.database.getObjects({
 			className,
@@ -378,8 +362,7 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter {
 		if (!this.database)
 			throw new Error('Connection to database is not established')
 
-		const { className, where, data, fields, offset, first, context } =
-			params
+		const { className, where, data, fields, offset, first, context } = params
 
 		const whereBuilded = buildMongoWhereQuery<T, W>(where)
 
@@ -395,8 +378,7 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter {
 				context,
 			})
 
-		if (objectsBeforeUpdate.length === 0)
-			throw new Error('Object not found')
+		if (objectsBeforeUpdate.length === 0) throw new Error('Object not found')
 
 		await collection.updateMany(whereBuilded, {
 			$set: data,

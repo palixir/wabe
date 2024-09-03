@@ -57,17 +57,12 @@ export const signInWithResolver = async (
 
 		const session = new Session()
 
-		const { refreshToken, accessToken } = await session.create(
-			userId,
-			context,
-		)
+		const { refreshToken, accessToken } = await session.create(userId, context)
 
 		return {
 			refreshToken,
 			accessToken,
-			accessTokenExpiresAt: session.getAccessTokenExpireAt(
-				context.wabe.config,
-			),
+			accessTokenExpiresAt: session.getAccessTokenExpireAt(context.wabe.config),
 			refreshTokenExpiresAt: session.getRefreshTokenExpireAt(
 				context.wabe.config,
 			),

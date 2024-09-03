@@ -36,11 +36,7 @@ describe.skip('Auth handler', () => {
 
 	it('should throw an error if no google code provided', async () => {
 		expect(
-			authHandler(
-				{ query: {} } as any,
-				{ config } as any,
-				ProviderEnum.google,
-			),
+			authHandler({ query: {} } as any, { config } as any, ProviderEnum.google),
 		).rejects.toThrow('Authentication failed')
 
 		expect(

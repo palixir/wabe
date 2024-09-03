@@ -70,9 +70,7 @@ export class Session {
 			{
 				userId,
 				iat: Date.now(),
-				exp: this.getRefreshTokenExpireAt(
-					context.wabe.config,
-				).getTime(),
+				exp: this.getRefreshTokenExpireAt(context.wabe.config).getTime(),
 			},
 			import.meta.env.JWT_SECRET || 'dev',
 		)
@@ -82,9 +80,7 @@ export class Session {
 			context,
 			data: {
 				accessToken: this.accessToken,
-				accessTokenExpiresAt: this.getAccessTokenExpireAt(
-					context.wabe.config,
-				),
+				accessTokenExpiresAt: this.getAccessTokenExpireAt(context.wabe.config),
 
 				refreshToken: this.refreshToken,
 				refreshTokenExpiresAt: this.getRefreshTokenExpireAt(
@@ -172,9 +168,7 @@ export class Session {
 			{
 				userId: user?.id,
 				iat: Date.now(),
-				exp: this.getRefreshTokenExpireAt(
-					context.wabe.config,
-				).getTime(),
+				exp: this.getRefreshTokenExpireAt(context.wabe.config).getTime(),
 			},
 			import.meta.env.JWT_SECRET || 'dev',
 		)
@@ -188,9 +182,7 @@ export class Session {
 			id,
 			data: {
 				accessToken: newAccessToken,
-				accessTokenExpiresAt: this.getAccessTokenExpireAt(
-					context.wabe.config,
-				),
+				accessTokenExpiresAt: this.getAccessTokenExpireAt(context.wabe.config),
 
 				refreshToken: newRefreshToken,
 				refreshTokenExpiresAt: this.getRefreshTokenExpireAt(

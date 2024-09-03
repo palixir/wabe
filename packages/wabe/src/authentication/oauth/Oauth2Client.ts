@@ -58,9 +58,7 @@ export class OAuth2Client {
 		return authorizationUrl
 	}
 
-	async validateAuthorizationCode<
-		_TokenResponseBody extends TokenResponseBody,
-	>(
+	async validateAuthorizationCode<_TokenResponseBody extends TokenResponseBody>(
 		authorizationCode: string,
 		options?: {
 			codeVerifier?: string
@@ -73,8 +71,7 @@ export class OAuth2Client {
 		body.set('client_id', this.clientId)
 		body.set('grant_type', 'authorization_code')
 
-		if (this.redirectURI !== null)
-			body.set('redirect_uri', this.redirectURI)
+		if (this.redirectURI !== null) body.set('redirect_uri', this.redirectURI)
 
 		if (options?.codeVerifier !== undefined)
 			body.set('code_verifier', options.codeVerifier)
@@ -114,8 +111,7 @@ export class OAuth2Client {
 		headers.set('User-Agent', 'wabe')
 
 		if (options?.credentials !== undefined) {
-			const authenticateWith =
-				options?.authenticateWith || 'http_basic_auth'
+			const authenticateWith = options?.authenticateWith || 'http_basic_auth'
 			if (authenticateWith === 'http_basic_auth') {
 				const encodedCredentials = btoa(
 					`${this.clientId}:${options.credentials}`,
@@ -136,11 +132,7 @@ export class OAuth2Client {
 		const result: _TokenResponseBody = await response.json()
 
 		// providers are allowed to return non-400 status code for errors
-		if (
-			!('access_token' in result) ||
-			response.status !== 200 ||
-			!response.ok
-		)
+		if (!('access_token' in result) || response.status !== 200 || !response.ok)
 			throw new Error('Error in token request')
 
 		return result

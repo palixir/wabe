@@ -42,7 +42,8 @@ describe('File upload', () => {
 		formData.append(
 			'operations',
 			JSON.stringify({
-				query: 'mutation ($file: File!) {createTest3(input: {fields: {file: $file}}){test3{id, file}}}',
+				query:
+					'mutation ($file: File!) {createTest3(input: {fields: {file: $file}}){test3{id, file}}}',
 				variables: { file: null },
 			}),
 		)
@@ -74,7 +75,8 @@ describe('File upload', () => {
 		formData.append(
 			'operations',
 			JSON.stringify({
-				query: 'mutation ($file: File!) {createTest3(input: {fields: {file: $file}}){test3{id, file}}}',
+				query:
+					'mutation ($file: File!) {createTest3(input: {fields: {file: $file}}){test3{id, file}}}',
 				variables: { file: null },
 			}),
 		)

@@ -6,9 +6,7 @@ import { Session } from './Session'
 describe('_Session', () => {
 	const mockGetObject = mock(() => Promise.resolve({}) as any)
 	const mockGetObjects = mock(() => Promise.resolve([]) as any)
-	const mockCreateObject = mock(() =>
-		Promise.resolve({ id: 'userId' }),
-	) as any
+	const mockCreateObject = mock(() => Promise.resolve({ id: 'userId' })) as any
 	const mockDeleteObject = mock(() => Promise.resolve()) as any
 	const mockUpdateObject = mock(() => Promise.resolve()) as any
 
@@ -72,18 +70,16 @@ describe('_Session', () => {
 					id: 'userId',
 					email: 'userEmail',
 				},
-				refreshTokenExpiresAt: new Date(
-					Date.now() + 1000 * 60 * 60 * 24 * 30,
-				),
+				refreshTokenExpiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
 			},
 		])
 
 		const session = new Session()
 
-		const { sessionId, user } = await session.meFromAccessToken(
-			'accessToken',
-			{ isRoot: true, wabe: { controllers } } as any,
-		)
+		const { sessionId, user } = await session.meFromAccessToken('accessToken', {
+			isRoot: true,
+			wabe: { controllers },
+		} as any)
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
 		expect(mockGetObjects).toHaveBeenCalledWith({
@@ -136,9 +132,7 @@ describe('_Session', () => {
 
 		expect(decodedRefreshToken).not.toBeNull()
 		expect(decodedRefreshToken.userId).toEqual('userId')
-		expect(decodedRefreshToken.exp).toBeGreaterThanOrEqual(
-			thirtyDays.getTime(),
-		)
+		expect(decodedRefreshToken.exp).toBeGreaterThanOrEqual(thirtyDays.getTime())
 		expect(decodedRefreshToken.iat).toBeGreaterThanOrEqual(Date.now() - 500) // minus 500ms to avoid flaky
 
 		expect(mockCreateObject).toHaveBeenCalledTimes(1)
@@ -183,9 +177,7 @@ describe('_Session', () => {
 			{
 				id: 'sessionId',
 				refreshToken: 'refreshToken',
-				refreshTokenExpiresAt: new Date(
-					Date.now() + 1000 * 60 * 60 * 24 * 30,
-				),
+				refreshTokenExpiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
 				user: {
 					id: 'userId',
 					email: 'userEmail',
@@ -250,9 +242,7 @@ describe('_Session', () => {
 			{
 				id: 'sessionId',
 				refreshToken: 'refreshToken',
-				refreshTokenExpiresAt: new Date(
-					Date.now() + 1000 * 60 * 60 * 24 * 1,
-				),
+				refreshTokenExpiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 1),
 				user: {
 					id: 'userId',
 					email: 'userEmail',
@@ -333,9 +323,7 @@ describe('_Session', () => {
 			{
 				id: 'sessionId',
 				refreshToken: 'refreshToken',
-				refreshTokenExpiresAt: new Date(
-					Date.now() + 1000 * 60 * 60 * 24 * 30,
-				),
+				refreshTokenExpiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
 				user: {
 					id: 'userId',
 					email: 'userEmail',

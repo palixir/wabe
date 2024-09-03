@@ -154,9 +154,7 @@ describe('Hooks', () => {
 	it('should run callback in priorities order', async () => {
 		const spy_findHooksByPriority = spyOn(index, '_findHooksByPriority')
 
-		mockGetObjects.mockResolvedValueOnce([
-			{ id: 'id', name: 'name' },
-		] as never)
+		mockGetObjects.mockResolvedValueOnce([{ id: 'id', name: 'name' }] as never)
 
 		const hooks = index.initializeHook({
 			className: 'ClassName',
@@ -177,9 +175,7 @@ describe('Hooks', () => {
 	})
 
 	it('should call hook that is trigger by operation type', async () => {
-		mockGetObjects.mockResolvedValueOnce([
-			{ id: 'id', name: 'name' },
-		] as never)
+		mockGetObjects.mockResolvedValueOnce([{ id: 'id', name: 'name' }] as never)
 
 		const hooks = index.initializeHook({
 			className: 'ClassName',

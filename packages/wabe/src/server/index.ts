@@ -36,7 +36,7 @@ export interface WabeConfig<T extends WabeTypes> {
 }
 
 export type WabeTypes = {
-  types: Record<any, any>
+	types: Record<any, any>
 	scalars: string
 	enums: string
 }
@@ -80,13 +80,10 @@ export class Wabe<T extends WabeTypes> {
 			},
 		}
 
-		this.server = new Wobe<WobeCustomContext<T>>().get(
-			'/health',
-			(context) => {
-				context.res.status = 200
-				context.res.send('OK')
-			},
-		)
+		this.server = new Wobe<WobeCustomContext<T>>().get('/health', (context) => {
+			context.res.status = 200
+			context.res.send('OK')
+		})
 
 		const databaseAdapter = new MongoAdapter({
 			databaseName: database.name,
@@ -107,8 +104,7 @@ export class Wabe<T extends WabeTypes> {
 			...this.config.authentication,
 			customAuthenticationMethods: [
 				...defaultAuthenticationMethods<T>(),
-				...(this.config.authentication?.customAuthenticationMethods ||
-					[]),
+				...(this.config.authentication?.customAuthenticationMethods || []),
 			],
 		}
 	}
@@ -215,10 +211,7 @@ export class Wabe<T extends WabeTypes> {
 					!!this.config.authentication?.session?.cookieSession
 
 				if (isCookieSession)
-					return getCookieInRequestHeaders(
-						'accessToken',
-						ctx.request.headers,
-					)
+					return getCookieInRequestHeaders('accessToken', ctx.request.headers)
 
 				return headers.get('Wabe-Access-Token')
 			}
@@ -235,13 +228,10 @@ export class Wabe<T extends WabeTypes> {
 
 			const session = new Session()
 
-			const { user, sessionId } = await session.meFromAccessToken(
-				accessToken,
-				{
-					isRoot: true,
-					wabe: this,
-				},
-			)
+			const { user, sessionId } = await session.meFromAccessToken(accessToken, {
+				isRoot: true,
+				wabe: this,
+			})
 
 			ctx.wabe = {
 				isRoot: false,
@@ -283,32 +273,22 @@ export class Wabe<T extends WabeTypes> {
 							const {
 								accessToken: newAccessToken,
 								refreshToken: newRefreshToken,
-							} = await session.refresh(
-								accessToken,
-								refreshToken,
-								{} as any,
-							)
+							} = await session.refresh(accessToken, refreshToken, {} as any)
 
 							if (accessToken !== newAccessToken)
 								res.setCookie('accessToken', newAccessToken, {
 									httpOnly: true,
 									path: '/',
-									expires: session.getAccessTokenExpireAt(
-										this.config,
-									),
-									secure:
-										process.env.NODE_ENV === 'production',
+									expires: session.getAccessTokenExpireAt(this.config),
+									secure: process.env.NODE_ENV === 'production',
 								})
 
 							if (refreshToken !== newRefreshToken)
 								res.setCookie('refreshToken', newRefreshToken, {
 									httpOnly: true,
 									path: '/',
-									expires: session.getRefreshTokenExpireAt(
-										this.config,
-									),
-									secure:
-										process.env.NODE_ENV === 'production',
+									expires: session.getRefreshTokenExpireAt(this.config),
+									secure: process.env.NODE_ENV === 'production',
 								})
 						}
 					}
@@ -321,8 +301,7 @@ export class Wabe<T extends WabeTypes> {
 		await initializeRoles(this)
 
 		this.server.listen(this.config.port, ({ port }) => {
-			if (!process.env.TEST)
-				console.log(`Server is running on port ${port}`)
+			if (!process.env.TEST) console.log(`Server is running on port ${port}`)
 		})
 	}
 

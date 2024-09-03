@@ -218,10 +218,7 @@ export class Schema<T extends WabeTypes> {
 			{
 				name: 'AuthenticationProvider',
 				values: Object.fromEntries(
-					Object.values(AuthenticationProvider).map((key) => [
-						key,
-						key,
-					]),
+					Object.values(AuthenticationProvider).map((key) => [key, key]),
 				),
 			},
 			{
@@ -411,8 +408,7 @@ export class Schema<T extends WabeTypes> {
 								},
 								resolve: refreshResolver,
 							},
-							...(Object.keys(challengeInputObject.object.fields)
-								.length > 0
+							...(Object.keys(challengeInputObject.object.fields).length > 0
 								? {
 										verifyChallenge: {
 											type: 'Boolean',

@@ -149,9 +149,7 @@ export const initializeHook = <T extends keyof WabeTypes['types']>({
 		return res
 	}
 
-	const hooksOrderByPriorities = _getHooksOrderByPriorities(
-		context.wabe.config,
-	)
+	const hooksOrderByPriorities = _getHooksOrderByPriorities(context.wabe.config)
 
 	return {
 		runOnSingleObject: async ({
@@ -228,25 +226,20 @@ export const initializeHook = <T extends keyof WabeTypes['types']>({
 					})
 
 					// We need to keep the order of the data but we need to execute the hooks in parallel
-					await hooksOrderByPriorities.reduce(
-						async (acc, priority) => {
-							await acc
+					await hooksOrderByPriorities.reduce(async (acc, priority) => {
+						await acc
 
-							const hooksToCompute = await _findHooksByPriority({
-								className,
-								operationType,
-								priority,
-								config: context.wabe.config,
-							})
+						const hooksToCompute = await _findHooksByPriority({
+							className,
+							operationType,
+							priority,
+							config: context.wabe.config,
+						})
 
-							await Promise.all(
-								hooksToCompute.map((hook) =>
-									hook.callback(hookObject),
-								),
-							)
-						},
-						Promise.resolve(),
-					)
+						await Promise.all(
+							hooksToCompute.map((hook) => hook.callback(hookObject)),
+						)
+					}, Promise.resolve())
 
 					return hookObject.getNewData()
 				}),
