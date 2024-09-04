@@ -1,4 +1,4 @@
-import { describe, expect, it, mock, spyOn, beforeEach } from 'bun:test'
+import { describe, expect, it, mock, spyOn, afterEach } from 'bun:test'
 import { EmailPassword } from './EmailPassword'
 
 describe('Email password', () => {
@@ -6,6 +6,7 @@ describe('Email password', () => {
   const mockCreateObject = mock(() => Promise.resolve({ id: 'userId' })) as any
 
   const spyArgonPasswordVerify = spyOn(Bun.password, 'verify')
+  const spyBunPasswordHash = spyOn(Bun.password, 'hash')
 
   const controllers = {
     controllers: {
@@ -16,18 +17,17 @@ describe('Email password', () => {
     },
   } as any
 
-  beforeEach(() => {
+  afterEach(() => {
     mockGetObjects.mockClear()
     mockCreateObject.mockClear()
     spyArgonPasswordVerify.mockClear()
+    spyBunPasswordHash.mockClear()
   })
 
   const emailPassword = new EmailPassword()
 
   it('should signUp with email password', async () => {
-    const spyBunPasswordHash = spyOn(Bun.password, 'hash').mockResolvedValue(
-      '$argon2id$hashedPassword',
-    )
+    spyBunPasswordHash.mockResolvedValue('$argon2id$hashedPassword')
 
     const {
       authenticationDataToSave: { email, password },
@@ -41,8 +41,6 @@ describe('Email password', () => {
 
     expect(spyBunPasswordHash).toHaveBeenCalledTimes(1)
     expect(spyBunPasswordHash).toHaveBeenCalledWith('password', 'argon2id')
-
-    spyBunPasswordHash.mockRestore()
   })
 
   it('should signIn with email password', async () => {
