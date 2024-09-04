@@ -6,7 +6,7 @@ on:
             - '**'
         types: [opened, synchronize, reopened, unlabeled]
         paths:
-          - 'packages/wabe/**'
+          - 'packages/**'
         
 concurrency:
     group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -22,4 +22,4 @@ jobs:
               with:
                   bun-version: latest
             - run: bun install
-            - run: bun --filter wabe ci
+            - run: bun ci
