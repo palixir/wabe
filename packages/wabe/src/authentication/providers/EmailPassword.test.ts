@@ -6,7 +6,7 @@ describe('Email password', () => {
   const mockGetObjects = mock(() => Promise.resolve([]))
   const mockCreateObject = mock(() => Promise.resolve({ id: 'userId' })) as any
 
-  const spyArgonPasswordVerify = spyOn(argon2, 'verify')
+  const spyArgonPasswordVerify = spyOn(Bun.password, 'verify')
 
   const controllers = {
     controllers: {
@@ -26,7 +26,7 @@ describe('Email password', () => {
   const emailPassword = new EmailPassword()
 
   it('should signUp with email password', async () => {
-    const spyBunPasswordHash = spyOn(argon2, 'hash').mockResolvedValue(
+    const spyBunPasswordHash = spyOn(Bun.password, 'hash').mockResolvedValue(
       '$argon2id$hashedPassword',
     )
 
@@ -41,7 +41,7 @@ describe('Email password', () => {
     expect(password).toBe('$argon2id$hashedPassword')
 
     expect(spyBunPasswordHash).toHaveBeenCalledTimes(1)
-    expect(spyBunPasswordHash).toHaveBeenCalledWith('password')
+    expect(spyBunPasswordHash).toHaveBeenCalledWith('password', 'argon2id')
 
     spyBunPasswordHash.mockRestore()
   })
@@ -78,8 +78,9 @@ describe('Email password', () => {
 
     expect(spyArgonPasswordVerify).toHaveBeenCalledTimes(1)
     expect(spyArgonPasswordVerify).toHaveBeenCalledWith(
-      'hashedPassword',
       'password',
+      'hashedPassword',
+      'argon2id',
     )
   })
 
