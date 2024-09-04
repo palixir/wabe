@@ -33,7 +33,7 @@ describe('Roles', () => {
     })
   })
 
-  it('should call database if there is no roles', async () => {
+  it('should not call database if there is no roles', async () => {
     await initializeRoles({
       controllers: {
         database: {
