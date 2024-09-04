@@ -27,7 +27,7 @@ describe('Email password', () => {
   const emailPassword = new EmailPassword()
 
   it('should signUp with email password', async () => {
-    spyBunPasswordHash.mockResolvedValue('$argon2id$hashedPassword')
+    spyBunPasswordHash.mockResolvedValueOnce('$argon2id$hashedPassword')
 
     const {
       authenticationDataToSave: { email, password },
@@ -56,7 +56,7 @@ describe('Email password', () => {
       } as never,
     ])
 
-    spyArgonPasswordVerify.mockResolvedValue(true)
+    spyArgonPasswordVerify.mockResolvedValueOnce(true)
 
     const { user } = await emailPassword.onSignIn({
       context: { wabe: controllers } as any,
@@ -82,7 +82,7 @@ describe('Email password', () => {
   })
 
   it('should not signIn with email password if password is undefined', async () => {
-    spyArgonPasswordVerify.mockResolvedValue(false)
+    spyArgonPasswordVerify.mockResolvedValueOnce(false)
 
     expect(
       emailPassword.onSignIn({
@@ -120,7 +120,7 @@ describe('Email password', () => {
       } as never,
     ])
 
-    spyArgonPasswordVerify.mockResolvedValue(true)
+    spyArgonPasswordVerify.mockResolvedValueOnce(true)
 
     expect(
       emailPassword.onSignIn({
