@@ -1,47 +1,46 @@
 {
-	"$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
-	"files": {
-		"include": ["**/*.ts", "**/*.js", "**/*.vue", "**/*.tsx"],
-		"ignore": [
-			"**/dist/**",
-			"**/node_modules/**",
-			".vitepress/**",
-			"build/**",
-			"**/generated/**"
-		],
-		"ignoreUnknown": true
-	},
-	"organizeImports": {
-		"enabled": true
-	},
-	"linter": {
-		"enabled": true,
-		"rules": {
-			"recommended": true,
-			"suspicious": {
-				"noExplicitAny": "off"
-			},
-			"style": {
-				"useTemplate": "off"
-			},
-			"performance": {
-				"noAccumulatingSpread": "off"
-			},
-			"correctness": {
-				"noUnusedImports": "error",
-				"noUnusedVariables": "error"
-			}
-		}
-	},
-	"formatter": {
-		"enabled": true,
-		"indentStyle": "tab",
-		"formatWithErrors": false
-	},
-	"javascript": {
-		"formatter": {
-			"quoteStyle": "single",
-			"semicolons": "asNeeded"
-		}
-	}
+  "$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
+  "files": {
+    "include": ["**/*.ts", "**/*.js", "**/*.vue", "**/*.tsx"],
+    "ignore": [
+      "**/dist/**",
+      "**/node_modules/**",
+      "build/**",
+      "**/generated/**"
+    ],
+    "ignoreUnknown": true
+  },
+  "organizeImports": {
+    "enabled": true
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "suspicious": {
+        "noExplicitAny": "off"
+      },
+      "style": {
+        "useTemplate": "off"
+      },
+      "performance": {
+        "noAccumulatingSpread": "off"
+      },
+      "correctness": {
+        "noUnusedImports": "error",
+        "noUnusedVariables": "error"
+      }
+    }
+  },
+  "formatter": {
+    "enabled": true,
+    "formatWithErrors": false,
+    "indentStyle": "space"
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "semicolons": "asNeeded"
+    }
+  }
 }

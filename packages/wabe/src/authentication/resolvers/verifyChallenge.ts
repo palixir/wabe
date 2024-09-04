@@ -5,38 +5,38 @@ import type { SecondaryProviderInterface } from '../interface'
 import { getAuthenticationMethod } from '../utils'
 
 export const verifyChallengeResolver = async (
-	_: any,
-	{
-		input,
-	}: {
-		input: VerifyChallengeInput
-	},
-	context: WabeContext<any>,
+  _: any,
+  {
+    input,
+  }: {
+    input: VerifyChallengeInput
+  },
+  context: WabeContext<any>,
 ) => {
-	if (!input.factor) throw new Error('One factor is required')
+  if (!input.factor) throw new Error('One factor is required')
 
-	const listOfFactor = Object.keys(input.factor)
+  const listOfFactor = Object.keys(input.factor)
 
-	if (Object.keys(input.factor).length !== 1)
-		throw new Error('Only one factor is allowed')
+  if (Object.keys(input.factor).length !== 1)
+    throw new Error('Only one factor is allowed')
 
-	const { provider, name } = getAuthenticationMethod<
-		any,
-		SecondaryProviderInterface
-	>(listOfFactor, context)
+  const { provider, name } = getAuthenticationMethod<
+    any,
+    SecondaryProviderInterface
+  >(listOfFactor, context)
 
-	const userId = context.user?.id
+  const userId = context.user?.id
 
-	if (!userId) throw new Error('Invalid user')
+  if (!userId) throw new Error('Invalid user')
 
-	// @ts-expect-error
-	const res = await provider.onVerifyChallenge(input.factor[name])
+  // @ts-expect-error
+  const res = await provider.onVerifyChallenge(input.factor[name])
 
-	if (!res) throw new Error('Invalid challenge')
+  if (!res) throw new Error('Invalid challenge')
 
-	const session = new Session()
+  const session = new Session()
 
-	await session.create(userId, context)
+  await session.create(userId, context)
 
-	return true
+  return true
 }

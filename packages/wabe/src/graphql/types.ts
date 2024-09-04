@@ -1,194 +1,194 @@
 import {
-	GraphQLBoolean,
-	GraphQLFloat,
-	GraphQLInputObjectType,
-	GraphQLInt,
-	GraphQLList,
-	GraphQLScalarType,
-	GraphQLString,
-	GraphQLID,
+  GraphQLBoolean,
+  GraphQLFloat,
+  GraphQLInputObjectType,
+  GraphQLInt,
+  GraphQLList,
+  GraphQLScalarType,
+  GraphQLString,
+  GraphQLID,
 } from 'graphql'
 import { tokenize } from '../utils'
 
 export const AnyScalarType = new GraphQLScalarType({
-	name: 'Any',
-	description:
-		'The Any scalar type is used in operations and types that involve any type of value.',
-	parseValue: (value) => value,
-	serialize: (value) => value,
+  name: 'Any',
+  description:
+    'The Any scalar type is used in operations and types that involve any type of value.',
+  parseValue: (value) => value,
+  serialize: (value) => value,
 })
 
 export const DateScalarType = new GraphQLScalarType({
-	name: 'Date',
-	description: 'Date scalar type',
-	parseValue(value: any) {
-		const date = new Date(value)
+  name: 'Date',
+  description: 'Date scalar type',
+  parseValue(value: any) {
+    const date = new Date(value)
 
-		if (Number.isNaN(date.getTime())) throw new Error('Invalid date')
+    if (Number.isNaN(date.getTime())) throw new Error('Invalid date')
 
-		return date
-	},
-	serialize(value: any) {
-		return value.toISOString()
-	},
+    return date
+  },
+  serialize(value: any) {
+    return value.toISOString()
+  },
 })
 
 export const EmailScalarType = new GraphQLScalarType({
-	name: 'Email',
-	description: 'Email scalar type',
-	parseValue(value: any) {
-		if (typeof value !== 'string') throw new Error('Invalid email')
+  name: 'Email',
+  description: 'Email scalar type',
+  parseValue(value: any) {
+    if (typeof value !== 'string') throw new Error('Invalid email')
 
-		if (!value.match(/^[^@\s]+@[^@\s]+\.[^@\s]+$/))
-			throw new Error('Invalid email')
+    if (!value.match(/^[^@\s]+@[^@\s]+\.[^@\s]+$/))
+      throw new Error('Invalid email')
 
-		return value
-	},
+    return value
+  },
 })
 
 const parseFileValue = (value: any) => {
-	if (value instanceof Blob) return value
+  if (value instanceof Blob) return value
 
-	throw new Error('Invalid file')
+  throw new Error('Invalid file')
 }
 
 export const FileScalarType = new GraphQLScalarType({
-	name: 'File',
-	description: 'File scalar type',
-	parseValue: parseFileValue,
-	serialize: (value: any) => {
-		return value
-	},
-	parseLiteral: () => {
-		throw new Error('Invalid file')
-	},
+  name: 'File',
+  description: 'File scalar type',
+  parseValue: parseFileValue,
+  serialize: (value: any) => {
+    return value
+  },
+  parseLiteral: () => {
+    throw new Error('Invalid file')
+  },
 })
 
 export const SearchScalarType = new GraphQLScalarType({
-	name: 'Search',
-	description: 'Search scalar to tokenize and search for all searchable fields',
-	parseValue: (value: any) => {
-		if (typeof value !== 'string') throw new Error('Invalid search term')
+  name: 'Search',
+  description: 'Search scalar to tokenize and search for all searchable fields',
+  parseValue: (value: any) => {
+    if (typeof value !== 'string') throw new Error('Invalid search term')
 
-		if (value === '') return ''
+    if (value === '') return ''
 
-		return tokenize(value).split(' ')
-	},
+    return tokenize(value).split(' ')
+  },
 })
 
 export const SearchWhereInput = new GraphQLInputObjectType({
-	name: 'SearchWhereInput',
-	fields: {
-		contains: { type: SearchScalarType },
-	},
+  name: 'SearchWhereInput',
+  fields: {
+    contains: { type: SearchScalarType },
+  },
 })
 
 export const AnyWhereInput = new GraphQLInputObjectType({
-	name: 'AnyWhereInput',
-	fields: {
-		equalTo: { type: AnyScalarType },
-		notEqualTo: { type: AnyScalarType },
-	},
+  name: 'AnyWhereInput',
+  fields: {
+    equalTo: { type: AnyScalarType },
+    notEqualTo: { type: AnyScalarType },
+  },
 })
 
 export const FileWhereInput = new GraphQLInputObjectType({
-	name: 'FileWhereInput',
-	fields: {
-		equalTo: { type: FileScalarType },
-		notEqualTo: { type: FileScalarType },
-		in: { type: new GraphQLList(FileScalarType) },
-		notInt: { type: new GraphQLList(FileScalarType) },
-	},
+  name: 'FileWhereInput',
+  fields: {
+    equalTo: { type: FileScalarType },
+    notEqualTo: { type: FileScalarType },
+    in: { type: new GraphQLList(FileScalarType) },
+    notInt: { type: new GraphQLList(FileScalarType) },
+  },
 })
 
 export const ArrayWhereInput = new GraphQLInputObjectType({
-	name: 'ArrayWhereInput',
-	fields: {
-		equalTo: { type: AnyScalarType },
-		notEqualTo: { type: AnyScalarType },
-		contains: { type: AnyScalarType },
-		notContains: { type: AnyScalarType },
-	},
+  name: 'ArrayWhereInput',
+  fields: {
+    equalTo: { type: AnyScalarType },
+    notEqualTo: { type: AnyScalarType },
+    contains: { type: AnyScalarType },
+    notContains: { type: AnyScalarType },
+  },
 })
 
 export const DateWhereInput = new GraphQLInputObjectType({
-	name: 'DateWhereInput',
-	fields: {
-		equalTo: { type: DateScalarType },
-		notEqualTo: { type: DateScalarType },
-		in: { type: new GraphQLList(DateScalarType) },
-		notIn: { type: new GraphQLList(DateScalarType) },
-		lessThan: { type: DateScalarType },
-		lessThanOrEqualTo: { type: DateScalarType },
-		greaterThan: { type: DateScalarType },
-		greaterThanOrEqualTo: { type: DateScalarType },
-	},
+  name: 'DateWhereInput',
+  fields: {
+    equalTo: { type: DateScalarType },
+    notEqualTo: { type: DateScalarType },
+    in: { type: new GraphQLList(DateScalarType) },
+    notIn: { type: new GraphQLList(DateScalarType) },
+    lessThan: { type: DateScalarType },
+    lessThanOrEqualTo: { type: DateScalarType },
+    greaterThan: { type: DateScalarType },
+    greaterThanOrEqualTo: { type: DateScalarType },
+  },
 })
 
 export const EmailWhereInput = new GraphQLInputObjectType({
-	name: 'EmailWhereInput',
-	fields: {
-		equalTo: { type: EmailScalarType },
-		notEqualTo: { type: EmailScalarType },
-		in: { type: new GraphQLList(EmailScalarType) },
-		notIn: { type: new GraphQLList(EmailScalarType) },
-	},
+  name: 'EmailWhereInput',
+  fields: {
+    equalTo: { type: EmailScalarType },
+    notEqualTo: { type: EmailScalarType },
+    in: { type: new GraphQLList(EmailScalarType) },
+    notIn: { type: new GraphQLList(EmailScalarType) },
+  },
 })
 
 export const IdWhereInput = new GraphQLInputObjectType({
-	name: 'IdWhereInput',
-	fields: {
-		equalTo: { type: GraphQLID },
-		notEqualTo: { type: GraphQLID },
-		in: { type: new GraphQLList(GraphQLID) },
-		notIn: { type: new GraphQLList(GraphQLID) },
-	},
+  name: 'IdWhereInput',
+  fields: {
+    equalTo: { type: GraphQLID },
+    notEqualTo: { type: GraphQLID },
+    in: { type: new GraphQLList(GraphQLID) },
+    notIn: { type: new GraphQLList(GraphQLID) },
+  },
 })
 
 export const StringWhereInput = new GraphQLInputObjectType({
-	name: 'StringWhereInput',
-	fields: {
-		equalTo: { type: GraphQLString },
-		notEqualTo: { type: GraphQLString },
-		in: { type: new GraphQLList(GraphQLString) },
-		notIn: { type: new GraphQLList(GraphQLString) },
-	},
+  name: 'StringWhereInput',
+  fields: {
+    equalTo: { type: GraphQLString },
+    notEqualTo: { type: GraphQLString },
+    in: { type: new GraphQLList(GraphQLString) },
+    notIn: { type: new GraphQLList(GraphQLString) },
+  },
 })
 
 export const IntWhereInput = new GraphQLInputObjectType({
-	name: 'IntWhereInput',
-	fields: {
-		equalTo: { type: GraphQLInt },
-		notEqualTo: { type: GraphQLInt },
-		lessThan: { type: GraphQLInt },
-		lessThanOrEqualTo: { type: GraphQLInt },
-		greaterThan: { type: GraphQLInt },
-		greaterThanOrEqualTo: { type: GraphQLInt },
-		in: { type: new GraphQLList(GraphQLInt) },
-		notIn: { type: new GraphQLList(GraphQLInt) },
-	},
+  name: 'IntWhereInput',
+  fields: {
+    equalTo: { type: GraphQLInt },
+    notEqualTo: { type: GraphQLInt },
+    lessThan: { type: GraphQLInt },
+    lessThanOrEqualTo: { type: GraphQLInt },
+    greaterThan: { type: GraphQLInt },
+    greaterThanOrEqualTo: { type: GraphQLInt },
+    in: { type: new GraphQLList(GraphQLInt) },
+    notIn: { type: new GraphQLList(GraphQLInt) },
+  },
 })
 
 export const FloatWhereInput = new GraphQLInputObjectType({
-	name: 'FloatWhereInput',
-	fields: {
-		equalTo: { type: GraphQLFloat },
-		notEqualTo: { type: GraphQLFloat },
-		lessThan: { type: GraphQLFloat },
-		lessThanOrEqualTo: { type: GraphQLFloat },
-		greaterThan: { type: GraphQLFloat },
-		greaterThanOrEqualTo: { type: GraphQLFloat },
-		in: { type: new GraphQLList(GraphQLFloat) },
-		notIn: { type: new GraphQLList(GraphQLFloat) },
-	},
+  name: 'FloatWhereInput',
+  fields: {
+    equalTo: { type: GraphQLFloat },
+    notEqualTo: { type: GraphQLFloat },
+    lessThan: { type: GraphQLFloat },
+    lessThanOrEqualTo: { type: GraphQLFloat },
+    greaterThan: { type: GraphQLFloat },
+    greaterThanOrEqualTo: { type: GraphQLFloat },
+    in: { type: new GraphQLList(GraphQLFloat) },
+    notIn: { type: new GraphQLList(GraphQLFloat) },
+  },
 })
 
 export const BooleanWhereInput = new GraphQLInputObjectType({
-	name: 'BooleanWhereInput',
-	fields: {
-		equalTo: { type: GraphQLBoolean },
-		notEqualTo: { type: GraphQLBoolean },
-		in: { type: new GraphQLList(GraphQLBoolean) },
-		notIn: { type: new GraphQLList(GraphQLBoolean) },
-	},
+  name: 'BooleanWhereInput',
+  fields: {
+    equalTo: { type: GraphQLBoolean },
+    notEqualTo: { type: GraphQLBoolean },
+    in: { type: new GraphQLList(GraphQLBoolean) },
+    notIn: { type: new GraphQLList(GraphQLBoolean) },
+  },
 })

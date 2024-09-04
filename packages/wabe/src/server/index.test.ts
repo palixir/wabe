@@ -7,161 +7,161 @@ import { Schema } from '../schema'
 import { OperationType } from '../hooks'
 
 describe('Server', () => {
-	it('should run server', async () => {
-		const databaseId = uuid()
+  it('should run server', async () => {
+    const databaseId = uuid()
 
-		const port = await getPort()
-		const wabe = new Wabe({
-			rootKey:
-				'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
-			database: {
-				type: DatabaseEnum.Mongo,
-				url: 'mongodb://127.0.0.1:27045',
-				name: databaseId,
-			},
-			port,
-			schema: {
-				classes: [
-					{
-						name: 'Collection1',
-						fields: { name: { type: 'String' } },
-					},
-				],
-			},
-		})
+    const port = await getPort()
+    const wabe = new Wabe({
+      rootKey:
+        'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+      database: {
+        type: DatabaseEnum.Mongo,
+        url: 'mongodb://127.0.0.1:27045',
+        name: databaseId,
+      },
+      port,
+      schema: {
+        classes: [
+          {
+            name: 'Collection1',
+            fields: { name: { type: 'String' } },
+          },
+        ],
+      },
+    })
 
-		await wabe.start()
+    await wabe.start()
 
-		const res = await fetch(`http://127.0.0.1:${port}/health`)
+    const res = await fetch(`http://127.0.0.1:${port}/health`)
 
-		expect(res.status).toEqual(200)
-		await wabe.close()
-	})
+    expect(res.status).toEqual(200)
+    await wabe.close()
+  })
 
-	it('should throw an error if hook has negative value', async () => {
-		const databaseId = uuid()
+  it('should throw an error if hook has negative value', async () => {
+    const databaseId = uuid()
 
-		const port = await getPort()
-		expect(
-			() =>
-				new Wabe({
-					rootKey:
-						'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
-					database: {
-						type: DatabaseEnum.Mongo,
-						url: 'mongodb://127.0.0.1:27045',
-						name: databaseId,
-					},
-					port,
-					hooks: [
-						{
-							operationType: OperationType.BeforeCreate,
-							callback: () => {},
-							priority: -1,
-						},
-					],
-				}),
-		).toThrow('Hook priority <= 0 is reserved for internal uses')
+    const port = await getPort()
+    expect(
+      () =>
+        new Wabe({
+          rootKey:
+            'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+          database: {
+            type: DatabaseEnum.Mongo,
+            url: 'mongodb://127.0.0.1:27045',
+            name: databaseId,
+          },
+          port,
+          hooks: [
+            {
+              operationType: OperationType.BeforeCreate,
+              callback: () => {},
+              priority: -1,
+            },
+          ],
+        }),
+    ).toThrow('Hook priority <= 0 is reserved for internal uses')
 
-		expect(
-			() =>
-				new Wabe({
-					rootKey:
-						'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
-					database: {
-						type: DatabaseEnum.Mongo,
-						url: 'mongodb://127.0.0.1:27045',
-						name: databaseId,
-					},
-					port,
-					hooks: [],
-				}),
-		).not.toThrow()
+    expect(
+      () =>
+        new Wabe({
+          rootKey:
+            'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+          database: {
+            type: DatabaseEnum.Mongo,
+            url: 'mongodb://127.0.0.1:27045',
+            name: databaseId,
+          },
+          port,
+          hooks: [],
+        }),
+    ).not.toThrow()
 
-		expect(
-			() =>
-				new Wabe({
-					rootKey:
-						'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
-					database: {
-						type: DatabaseEnum.Mongo,
-						url: 'mongodb://127.0.0.1:27045',
-						name: databaseId,
-					},
-					port,
-					hooks: [
-						{
-							operationType: OperationType.BeforeCreate,
-							callback: () => {},
-							priority: 1,
-						},
-					],
-				}),
-		).not.toThrow()
-	})
+    expect(
+      () =>
+        new Wabe({
+          rootKey:
+            'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+          database: {
+            type: DatabaseEnum.Mongo,
+            url: 'mongodb://127.0.0.1:27045',
+            name: databaseId,
+          },
+          port,
+          hooks: [
+            {
+              operationType: OperationType.BeforeCreate,
+              callback: () => {},
+              priority: 1,
+            },
+          ],
+        }),
+    ).not.toThrow()
+  })
 
-	it('should run server without schema object', async () => {
-		const databaseId = uuid()
+  it('should run server without schema object', async () => {
+    const databaseId = uuid()
 
-		const port = await getPort()
-		const wabe = new Wabe({
-			rootKey:
-				'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
-			database: {
-				type: DatabaseEnum.Mongo,
-				url: 'mongodb://127.0.0.1:27045',
-				name: databaseId,
-			},
-			port,
-		})
+    const port = await getPort()
+    const wabe = new Wabe({
+      rootKey:
+        'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+      database: {
+        type: DatabaseEnum.Mongo,
+        url: 'mongodb://127.0.0.1:27045',
+        name: databaseId,
+      },
+      port,
+    })
 
-		await wabe.start()
+    await wabe.start()
 
-		const res = await fetch(`http://127.0.0.1:${port}/health`)
+    const res = await fetch(`http://127.0.0.1:${port}/health`)
 
-		expect(res.status).toEqual(200)
-		await wabe.close()
-	})
+    expect(res.status).toEqual(200)
+    await wabe.close()
+  })
 
-	it('should update the schema to static Wabe after the Schema initialization', async () => {
-		const spySchemaDefaultClass = spyOn(Schema.prototype, 'defaultClass')
-		const spySchemaDefaultEnum = spyOn(Schema.prototype, 'defaultEnum')
+  it('should update the schema to static Wabe after the Schema initialization', async () => {
+    const spySchemaDefaultClass = spyOn(Schema.prototype, 'defaultClass')
+    const spySchemaDefaultEnum = spyOn(Schema.prototype, 'defaultEnum')
 
-		const databaseId = uuid()
+    const databaseId = uuid()
 
-		const port = await getPort()
+    const port = await getPort()
 
-		const wabe = new Wabe({
-			rootKey:
-				'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
-			database: {
-				type: DatabaseEnum.Mongo,
-				url: 'mongodb://127.0.0.1:27045',
-				name: databaseId,
-			},
-			port,
-			schema: {
-				classes: [
-					{
-						name: 'Collection1',
-						fields: { name: { type: 'String' } },
-					},
-				],
-			},
-		})
+    const wabe = new Wabe({
+      rootKey:
+        'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+      database: {
+        type: DatabaseEnum.Mongo,
+        url: 'mongodb://127.0.0.1:27045',
+        name: databaseId,
+      },
+      port,
+      schema: {
+        classes: [
+          {
+            name: 'Collection1',
+            fields: { name: { type: 'String' } },
+          },
+        ],
+      },
+    })
 
-		await wabe.start()
+    await wabe.start()
 
-		// _Session class is a default class so if it's present the schema is updated
-		const isSessionClassExist = wabe.config.schema?.classes?.find(
-			(schemaClass) => schemaClass.name === '_Session',
-		)
+    // _Session class is a default class so if it's present the schema is updated
+    const isSessionClassExist = wabe.config.schema?.classes?.find(
+      (schemaClass) => schemaClass.name === '_Session',
+    )
 
-		expect(isSessionClassExist).not.toBeUndefined()
+    expect(isSessionClassExist).not.toBeUndefined()
 
-		expect(spySchemaDefaultClass).toHaveBeenCalledTimes(1)
-		expect(spySchemaDefaultEnum).toHaveBeenCalledTimes(1)
+    expect(spySchemaDefaultClass).toHaveBeenCalledTimes(1)
+    expect(spySchemaDefaultEnum).toHaveBeenCalledTimes(1)
 
-		await wabe.close()
-	})
+    await wabe.close()
+  })
 })

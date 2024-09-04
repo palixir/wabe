@@ -7,49 +7,49 @@ import { Session } from '../Session'
 // 2 - We create the user
 // 3 - We create session
 export const signUpWithResolver = async (
-	_: any,
-	{
-		input,
-	}: {
-		input: SignUpWithInput
-	},
-	context: WabeContext<any>,
+  _: any,
+  {
+    input,
+  }: {
+    input: SignUpWithInput
+  },
+  context: WabeContext<any>,
 ) => {
-	// Create object call the provider signUp
-	const { id: userId } = await context.wabe.controllers.database.createObject({
-		className: 'User',
-		data: {
-			authentication: input.authentication,
-		},
-		context: {
-			...context,
-			isRoot: true,
-		},
-		fields: ['id'],
-	})
+  // Create object call the provider signUp
+  const { id: userId } = await context.wabe.controllers.database.createObject({
+    className: 'User',
+    data: {
+      authentication: input.authentication,
+    },
+    context: {
+      ...context,
+      isRoot: true,
+    },
+    fields: ['id'],
+  })
 
-	const session = new Session()
+  const session = new Session()
 
-	const { accessToken, refreshToken } = await session.create(userId, {
-		...context,
-		isRoot: true,
-	})
+  const { accessToken, refreshToken } = await session.create(userId, {
+    ...context,
+    isRoot: true,
+  })
 
-	if (context.wabe.config.authentication?.session?.cookieSession) {
-		context.response?.setCookie('refreshToken', refreshToken, {
-			httpOnly: true,
-			path: '/',
-			secure: process.env.NODE_ENV === 'production',
-			expires: session.getRefreshTokenExpireAt(context.wabe.config),
-		})
+  if (context.wabe.config.authentication?.session?.cookieSession) {
+    context.response?.setCookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      path: '/',
+      secure: process.env.NODE_ENV === 'production',
+      expires: session.getRefreshTokenExpireAt(context.wabe.config),
+    })
 
-		context.response?.setCookie('accessToken', accessToken, {
-			httpOnly: true,
-			path: '/',
-			secure: process.env.NODE_ENV === 'production',
-			expires: session.getAccessTokenExpireAt(context.wabe.config),
-		})
-	}
+    context.response?.setCookie('accessToken', accessToken, {
+      httpOnly: true,
+      path: '/',
+      secure: process.env.NODE_ENV === 'production',
+      expires: session.getAccessTokenExpireAt(context.wabe.config),
+    })
+  }
 
-	return { accessToken, refreshToken, id: userId }
+  return { accessToken, refreshToken, id: userId }
 }

@@ -4,66 +4,66 @@ import type { WabeTypes, WabeConfig } from '../server'
 import { getGraphqlClient } from './helper'
 
 export const getClient = (config: WabeConfig<WabeTypes>) => {
-	// We do this to avoid failing import when wabe.ts is not already generated
-	// @ts-ignore
-	const getSdk = wabeFile.getSdk
+  // We do this to avoid failing import when wabe.ts is not already generated
+  // @ts-ignore
+  const getSdk = wabeFile.getSdk
 
-	if (!getSdk) return
+  if (!getSdk) return
 
-	if (!config.port) throw new Error('config.port is not defined')
+  if (!config.port) throw new Error('config.port is not defined')
 
-	const client = getGraphqlClient(config.port)
+  const client = getGraphqlClient(config.port)
 
-	return getSdk(client)
+  return getSdk(client)
 }
 
 export const firstLetterInUpperCase = (str: string) => {
-	const indexOfFirstLetter = str.search(/[a-z]/i)
+  const indexOfFirstLetter = str.search(/[a-z]/i)
 
-	return (
-		str.slice(0, indexOfFirstLetter) +
-		str[indexOfFirstLetter].toUpperCase() +
-		str.slice(indexOfFirstLetter + 1)
-	)
+  return (
+    str.slice(0, indexOfFirstLetter) +
+    str[indexOfFirstLetter].toUpperCase() +
+    str.slice(indexOfFirstLetter + 1)
+  )
 }
 
 export const firstLetterInLowerCase = (str: string) => {
-	const indexOfFirstLetter = str.search(/[a-z]/i)
+  const indexOfFirstLetter = str.search(/[a-z]/i)
 
-	return (
-		str.slice(0, indexOfFirstLetter) +
-		str[indexOfFirstLetter].toLowerCase() +
-		str.slice(indexOfFirstLetter + 1)
-	)
+  return (
+    str.slice(0, indexOfFirstLetter) +
+    str[indexOfFirstLetter].toLowerCase() +
+    str.slice(indexOfFirstLetter + 1)
+  )
 }
 
 export const getClassFromClassName = <T extends WabeTypes>(
-	className: string,
-	config: WabeConfig<any>,
+  className: string,
+  config: WabeConfig<any>,
 ): ClassInterface<T> => {
-	const classInSchema = config.schema?.classes?.find(
-		(schemaClass) => schemaClass.name === className,
-	)
+  const classInSchema = config.schema?.classes?.find(
+    (schemaClass) => schemaClass.name === className,
+  )
 
-	if (!classInSchema) throw new Error('Class not found in schema')
+  if (!classInSchema) throw new Error('Class not found in schema')
 
-	return classInSchema
+  return classInSchema
 }
 
 // TODO: Put this in wobe
 export const getCookieInRequestHeaders = (
-	cookieName: string,
-	headers: Headers,
+  cookieName: string,
+  headers: Headers,
 ) => {
-	const cookies = headers.get('Cookie')
+  const cookies = headers.get('Cookie')
 
-	if (!cookies) return
+  if (!cookies) return
 
-	const cookie = cookies.split(';').find((c) => c.includes(cookieName))
+  const cookie = cookies.split(';').find((c) => c.includes(cookieName))
 
-	if (!cookie) return
+  if (!cookie) return
 
-	return cookie.split('=')[1]
+  return cookie.split('=')[1]
 }
 
 /**
@@ -77,17 +77,17 @@ export const getCookieInRequestHeaders = (
  * - trim
  */
 export const tokenize = (value: string) => {
-	const tmpValue = value
-		.toLowerCase()
-		.normalize('NFD')
-		// biome-ignore lint/suspicious/noMisleadingCharacterClass:
-		.replace(/[\u0300-\u036f]/g, '')
-		.replace(/\s\s+/g, ' ')
+  const tmpValue = value
+    .toLowerCase()
+    .normalize('NFD')
+    // biome-ignore lint/suspicious/noMisleadingCharacterClass:
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s\s+/g, ' ')
 
-	return (
-		tmpValue
-			// Replace all non alpha
-			.replace(/[\W_]+/g, ' ')
-			.trim()
-	)
+  return (
+    tmpValue
+      // Replace all non alpha
+      .replace(/[\W_]+/g, ' ')
+      .trim()
+  )
 }

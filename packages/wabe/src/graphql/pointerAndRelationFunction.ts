@@ -11,188 +11,188 @@ type CreateAndAdd = Array<any>
 export type TypeOfExecution = 'create' | 'update' | 'updateMany'
 
 export type InputFields = Record<
-	string,
-	| {
-			createAndLink?: CreateAndLink
-			link?: Link
-			unlink?: Unlink
-			add?: Add
-			remove?: Remove
-			createAndAdd?: CreateAndAdd
-	  }
-	| string
+  string,
+  | {
+      createAndLink?: CreateAndLink
+      link?: Link
+      unlink?: Unlink
+      add?: Add
+      remove?: Remove
+      createAndAdd?: CreateAndAdd
+    }
+  | string
 >
 
 export const createAndLink = async ({
-	createAndLink,
-	context,
-	fieldName,
-	className,
+  createAndLink,
+  context,
+  fieldName,
+  className,
 }: {
-	createAndLink: CreateAndLink
-	fieldName: string
-	context: WabeContext<any>
-	className: string
+  createAndLink: CreateAndLink
+  fieldName: string
+  context: WabeContext<any>
+  className: string
 }) => {
-	const classInSchema = getClassFromClassName(className, context.wabe.config)
+  const classInSchema = getClassFromClassName(className, context.wabe.config)
 
-	const { id } = await context.wabe.controllers.database.createObject({
-		// @ts-expect-error
-		className: classInSchema.fields[fieldName].class,
-		data: createAndLink,
-		fields: ['id'],
-		context,
-	})
+  const { id } = await context.wabe.controllers.database.createObject({
+    // @ts-expect-error
+    className: classInSchema.fields[fieldName].class,
+    data: createAndLink,
+    fields: ['id'],
+    context,
+  })
 
-	return id
+  return id
 }
 
 export const createAndAdd = async ({
-	createAndAdd,
-	context,
-	fieldName,
-	className,
+  createAndAdd,
+  context,
+  fieldName,
+  className,
 }: {
-	createAndAdd: CreateAndAdd
-	fieldName: string
-	context: WabeContext<any>
-	className: string
+  createAndAdd: CreateAndAdd
+  fieldName: string
+  context: WabeContext<any>
+  className: string
 }) => {
-	const classInSchema = getClassFromClassName(className, context.wabe.config)
+  const classInSchema = getClassFromClassName(className, context.wabe.config)
 
-	const result = await context.wabe.controllers.database.createObjects({
-		// @ts-expect-error
-		className: classInSchema.fields[fieldName].class,
-		data: createAndAdd,
-		fields: ['id'],
-		context,
-	})
+  const result = await context.wabe.controllers.database.createObjects({
+    // @ts-expect-error
+    className: classInSchema.fields[fieldName].class,
+    data: createAndAdd,
+    fields: ['id'],
+    context,
+  })
 
-	return result.map((object: any) => object.id)
+  return result.map((object: any) => object.id)
 }
 
 export const add = async ({
-	add,
-	context,
-	fieldName,
-	typeOfExecution,
-	id,
-	className,
-	where,
+  add,
+  context,
+  fieldName,
+  typeOfExecution,
+  id,
+  className,
+  where,
 }: {
-	add: Add
-	fieldName: string
-	context: WabeContext<any>
-	typeOfExecution: TypeOfExecution
-	id?: string
-	className: string
-	where: any
+  add: Add
+  fieldName: string
+  context: WabeContext<any>
+  typeOfExecution: TypeOfExecution
+  id?: string
+  className: string
+  where: any
 }) => {
-	if (typeOfExecution === 'create') return add
+  if (typeOfExecution === 'create') return add
 
-	const classInSchema = getClassFromClassName(className, context.wabe.config)
+  const classInSchema = getClassFromClassName(className, context.wabe.config)
 
-	const fieldInClass = classInSchema.fields[fieldName]
+  const fieldInClass = classInSchema.fields[fieldName]
 
-	if (typeOfExecution === 'update' && id) {
-		const currentValue = await context.wabe.controllers.database.getObject({
-			className,
-			id,
-			fields: [fieldName],
-			context,
-		})
+  if (typeOfExecution === 'update' && id) {
+    const currentValue = await context.wabe.controllers.database.getObject({
+      className,
+      id,
+      fields: [fieldName],
+      context,
+    })
 
-		return [...(currentValue[fieldName] || []), ...add]
-	}
+    return [...(currentValue[fieldName] || []), ...add]
+  }
 
-	// For update many we need to get all objects that match the where and add the new value
-	// So we doesn't update the field for updateMany
-	if (typeOfExecution === 'updateMany' && where) {
-		const allObjectsMatchedWithWhere =
-			await context.wabe.controllers.database.getObjects({
-				// @ts-expect-error
-				className: fieldInClass.class,
-				where,
-				fields: [fieldName],
-				context,
-			})
+  // For update many we need to get all objects that match the where and add the new value
+  // So we doesn't update the field for updateMany
+  if (typeOfExecution === 'updateMany' && where) {
+    const allObjectsMatchedWithWhere =
+      await context.wabe.controllers.database.getObjects({
+        // @ts-expect-error
+        className: fieldInClass.class,
+        where,
+        fields: [fieldName],
+        context,
+      })
 
-		await Promise.all(
-			allObjectsMatchedWithWhere.map(async (object: any) => {
-				const currentValue = object[fieldName]
+    await Promise.all(
+      allObjectsMatchedWithWhere.map(async (object: any) => {
+        const currentValue = object[fieldName]
 
-				return context.wabe.controllers.database.updateObject({
-					// @ts-expect-error
-					className: classInSchema.fields[fieldName].class,
-					id: object.id,
-					data: {
-						[fieldName]: [...(currentValue || []), ...add],
-					},
-					context,
-					fields: [],
-				})
-			}),
-		)
-	}
+        return context.wabe.controllers.database.updateObject({
+          // @ts-expect-error
+          className: classInSchema.fields[fieldName].class,
+          id: object.id,
+          data: {
+            [fieldName]: [...(currentValue || []), ...add],
+          },
+          context,
+          fields: [],
+        })
+      }),
+    )
+  }
 }
 
 export const remove = async ({
-	remove,
-	context,
-	fieldName,
-	typeOfExecution,
-	id,
-	className,
-	where,
+  remove,
+  context,
+  fieldName,
+  typeOfExecution,
+  id,
+  className,
+  where,
 }: {
-	remove: Remove
-	fieldName: string
-	context: WabeContext<any>
-	typeOfExecution: TypeOfExecution
-	id?: string
-	className: string
-	where: any
+  remove: Remove
+  fieldName: string
+  context: WabeContext<any>
+  typeOfExecution: TypeOfExecution
+  id?: string
+  className: string
+  where: any
 }) => {
-	if (typeOfExecution === 'create') return []
+  if (typeOfExecution === 'create') return []
 
-	if (typeOfExecution === 'update' && id) {
-		const currentValue = await context.wabe.controllers.database.getObject({
-			className,
-			id,
-			fields: [fieldName],
-			context,
-		})
+  if (typeOfExecution === 'update' && id) {
+    const currentValue = await context.wabe.controllers.database.getObject({
+      className,
+      id,
+      fields: [fieldName],
+      context,
+    })
 
-		const olderValues = currentValue[fieldName] || []
+    const olderValues = currentValue[fieldName] || []
 
-		return olderValues.filter((olderValue: any) => !remove.includes(olderValue))
-	}
+    return olderValues.filter((olderValue: any) => !remove.includes(olderValue))
+  }
 
-	if (typeOfExecution === 'updateMany' && where) {
-		const allObjectsMatchedWithWhere =
-			await context.wabe.controllers.database.getObjects({
-				className,
-				where,
-				fields: ['id'],
-				context,
-			})
+  if (typeOfExecution === 'updateMany' && where) {
+    const allObjectsMatchedWithWhere =
+      await context.wabe.controllers.database.getObjects({
+        className,
+        where,
+        fields: ['id'],
+        context,
+      })
 
-		await Promise.all(
-			allObjectsMatchedWithWhere.map(async (object: any) => {
-				const olderValues = object[fieldName]?.[fieldName] || []
+    await Promise.all(
+      allObjectsMatchedWithWhere.map(async (object: any) => {
+        const olderValues = object[fieldName]?.[fieldName] || []
 
-				return context.wabe.controllers.database.updateObject({
-					className,
-					id: object.id,
-					data: {
-						[fieldName]: olderValues.filter(
-							(olderValue: any) => !remove.includes(olderValue),
-						),
-					},
-					context,
-					fields: [],
-				})
-			}),
-		)
-	}
+        return context.wabe.controllers.database.updateObject({
+          className,
+          id: object.id,
+          data: {
+            [fieldName]: olderValues.filter(
+              (olderValue: any) => !remove.includes(olderValue),
+            ),
+          },
+          context,
+          fields: [],
+        })
+      }),
+    )
+  }
 }

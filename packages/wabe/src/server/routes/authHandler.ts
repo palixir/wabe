@@ -19,22 +19,22 @@ import { generateRandomValues } from '../../authentication/oauth/utils'
 
 // https://www.rfc-editor.org/rfc/rfc7636#section-4.4 not precise the storage of codeVerifier
 export const oauthHandlerCallback = async (
-	context: Context,
-	wabeContext: WabeContext<any>,
+  context: Context,
+  wabeContext: WabeContext<any>,
 ) => {
-	try {
-		const state = context.query.state
-		const code = context.query.code
+  try {
+    const state = context.query.state
+    const code = context.query.code
 
-		const stateInCookie = context.getCookie('state')
+    const stateInCookie = context.getCookie('state')
 
-		if (state !== stateInCookie) throw new Error('Authentication failed')
+    if (state !== stateInCookie) throw new Error('Authentication failed')
 
-		const codeVerifier = context.getCookie('code_verifier')
-		const provider = context.getCookie('provider')
+    const codeVerifier = context.getCookie('code_verifier')
+    const provider = context.getCookie('provider')
 
-		await getGraphqlClient(wabeContext.wabe.config.port).request<any>(
-			gql`
+    await getGraphqlClient(wabeContext.wabe.config.port).request<any>(
+      gql`
 				mutation signInWith(
 					$authorizationCode: String!
 					$codeVerifier: String!
@@ -53,72 +53,72 @@ export const oauthHandlerCallback = async (
 					}
 				}
 			`,
-			{
-				authorizationCode: code,
-				codeVerifier,
-			},
-		)
+      {
+        authorizationCode: code,
+        codeVerifier,
+      },
+    )
 
-		context.redirect(
-			wabeContext.wabe.config.authentication?.successRedirectPath || '/',
-		)
-	} catch (error) {
-		console.error(error)
-		// context.redirect(
-		// 	wabeContext.wabe.config.authentication?.failureRedirectPath ||
-		// 		'/',
-		// )
-	}
+    context.redirect(
+      wabeContext.wabe.config.authentication?.successRedirectPath || '/',
+    )
+  } catch (error) {
+    console.error(error)
+    // context.redirect(
+    // 	wabeContext.wabe.config.authentication?.failureRedirectPath ||
+    // 		'/',
+    // )
+  }
 }
 
 export const authHandler = async (
-	context: Context,
-	wabeContext: WabeContext<any>,
-	provider: ProviderEnum,
+  context: Context,
+  wabeContext: WabeContext<any>,
+  provider: ProviderEnum,
 ) => {
-	if (!wabeContext.wabe.config) throw new Error('Wabe config not found')
+  if (!wabeContext.wabe.config) throw new Error('Wabe config not found')
 
-	context.res.setCookie('provider', provider, {
-		httpOnly: true,
-		path: '/',
-		maxAge: 60 * 10, // 10 minutes
-		secure: process.env.NODE_ENV === 'production',
-	})
+  context.res.setCookie('provider', provider, {
+    httpOnly: true,
+    path: '/',
+    maxAge: 60 * 10, // 10 minutes
+    secure: process.env.NODE_ENV === 'production',
+  })
 
-	switch (provider) {
-		case ProviderEnum.google: {
-			const googleOauth = new Google(wabeContext.wabe.config)
+  switch (provider) {
+    case ProviderEnum.google: {
+      const googleOauth = new Google(wabeContext.wabe.config)
 
-			const state = generateRandomValues()
-			const codeVerifier = generateRandomValues()
+      const state = generateRandomValues()
+      const codeVerifier = generateRandomValues()
 
-			context.res.setCookie('code_verifier', codeVerifier, {
-				httpOnly: true,
-				path: '/',
-				maxAge: 60 * 10, // 10 minutes
-				secure: process.env.NODE_ENV === 'production',
-			})
+      context.res.setCookie('code_verifier', codeVerifier, {
+        httpOnly: true,
+        path: '/',
+        maxAge: 60 * 10, // 10 minutes
+        secure: process.env.NODE_ENV === 'production',
+      })
 
-			context.res.setCookie('state', state, {
-				httpOnly: true,
-				path: '/',
-				maxAge: 60 * 10, // 10 minutes
-				secure: process.env.NODE_ENV === 'production',
-			})
+      context.res.setCookie('state', state, {
+        httpOnly: true,
+        path: '/',
+        maxAge: 60 * 10, // 10 minutes
+        secure: process.env.NODE_ENV === 'production',
+      })
 
-			const authorizationURL = await googleOauth.createAuthorizationURL(
-				state,
-				codeVerifier,
-				{
-					scopes: ['email'],
-				},
-			)
+      const authorizationURL = await googleOauth.createAuthorizationURL(
+        state,
+        codeVerifier,
+        {
+          scopes: ['email'],
+        },
+      )
 
-			context.redirect(authorizationURL.toString())
+      context.redirect(authorizationURL.toString())
 
-			break
-		}
-		default:
-			break
-	}
+      break
+    }
+    default:
+      break
+  }
 }
