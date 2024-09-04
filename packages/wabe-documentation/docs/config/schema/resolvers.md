@@ -28,7 +28,7 @@ const run = async () => {
               },
             },
             // The resolver to call when we call the query
-            // Context argument contains the Wabe context (you can see more informations about it in the Context sections in Wabe notions)
+            // Context argument contains the Wabe context (you can see more information about it in the Context sections in Wabe notions)
             resolve: (root, args, context) => "Hello World",
           },
         },

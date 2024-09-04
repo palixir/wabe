@@ -6,7 +6,7 @@ For a quick start, we’ll assume you are beginning a new backend project. For s
 
 ### Install bun
 
-You can found more informations [here](https://bun.sh/docs/installation#installing).
+You can found more information [here](https://bun.sh/docs/installation#installing).
 
 ```sh
 brew install oven-sh/bun/bun # for macOS and Linux

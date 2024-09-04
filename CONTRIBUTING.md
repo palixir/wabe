@@ -33,7 +33,7 @@ bun ci # Run test and lint on all packages
 
 Before any commit a pre-commit command that will run on your machine to ensure that the code is correctly formatted and the lint is respected. If you have any error of formatting during the pre-commit you can simply run the following command (at the root of the repository):
 
-Wabe repository also uses the conventional commits to ensure a consistence and facilitate the release. Yours PR and yours commits need to follow this convention. You can see here to see more informations about [Conventional commits](https://www.conventionalcommits.org/en/v1.0.0/).
+Wabe repository also uses the conventional commits to ensure a consistence and facilitate the release. Yours PR and yours commits need to follow this convention. You can see here to see more information about [Conventional commits](https://www.conventionalcommits.org/en/v1.0.0/).
 
 ```sh
 bun format
