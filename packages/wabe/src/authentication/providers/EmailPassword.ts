@@ -44,20 +44,14 @@ export class EmailPassword
     if (!userDatabasePassword)
       throw new Error('Invalid authentication credentials')
 
-    const isPasswordEquals = await argon2.verify(
-      userDatabasePassword,
-      input.password,
-    )
-
-    // const isPasswordEquals = await Bun.password.verify(
-    // 	input.password,
-    // 	userDatabasePassword,
-    // 	'argon2id',
-    // )
-
-    console.log(
-      JSON.stringify({ userDatabasePassword, input: input.password }, null, 2),
-    )
+    // biome-ignore lint/correctness/noConstantCondition: <explanation>
+    const isPasswordEquals = typeof Bun
+      ? await Bun.password.verify(
+          input.password,
+          userDatabasePassword,
+          'argon2id',
+        )
+      : await argon2.verify(userDatabasePassword, input.password)
 
     if (
       !isPasswordEquals ||
@@ -93,7 +87,10 @@ export class EmailPassword
     return {
       authenticationDataToSave: {
         email: input.email,
-        password: await argon2.hash(input.password),
+        // biome-ignore lint/correctness/noConstantCondition: <explanation>
+        password: typeof Bun
+          ? await Bun.password.hash(input.password, 'argon2id')
+          : await argon2.hash(input.password),
       },
     }
   }
