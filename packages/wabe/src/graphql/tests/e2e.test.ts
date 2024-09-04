@@ -418,6 +418,7 @@ describe('GraphQL : E2E', () => {
     })
   })
 
+  // biome-ignore lint/suspicious/noFocusedTests: <explanation>
   it.only('should not signIn with emailPassword if the password is incorrect', async () => {
     expect(
       client.request<any>(graphql.signInWith, {
