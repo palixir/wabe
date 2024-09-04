@@ -22,7 +22,7 @@
     "ci": "bun generate:codegen && bun check && bun lint $(pwd) && bun test src",
     "format": "biome format --write . --config-path=../../",
     "dev": "bun generate:codegen && bun run --watch dev/index.ts",
-    "generate:codegen":"touch generated/wabe.ts && CODEGEN=true bun dev/index.ts"
+    "generate:codegen": "touch generated/wabe.ts && CODEGEN=true bun dev/index.ts"
   },
   "dependencies": {
     "@graphql-codegen/core": "4.0.2",
@@ -41,6 +41,7 @@
     "@parcel/watcher": "2.3.0",
     "@types/bun": "1.1.8",
     "@types/jsonwebtoken": "9.0.6",
+    "@types/react": "^18.3.5",
     "@types/uuid": "9.0.6",
     "dts-bundle-generator": "9.5.1",
     "get-port": "7.1.0",

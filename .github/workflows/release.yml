@@ -9,6 +9,7 @@ on:
                 type: choice
                 options:
                     - 'wabe'
+                    - 'wabe-resend'
 
 jobs:
     release:
