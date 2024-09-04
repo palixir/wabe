@@ -90,6 +90,39 @@ describe('Authentication', () => {
     await rootClient.request<any>(graphql.deleteTests)
   })
 
+  it('should not authorize create object when authorizedRoles is empty', async () => {
+    const { userClient } = await createUserAndUpdateRole({
+      anonymousClient: client,
+      port,
+      roleName: 'Client',
+      rootClient,
+    })
+
+    expect(
+      userClient.request<any>(gql`
+				mutation createTest2 {
+					createTest2(input:{fields:{name: "test"}}){
+						test2{
+							id
+						}
+					}
+				}
+		`),
+    ).rejects.toThrow('Permission denied to create class Test2')
+
+    expect(() =>
+      rootClient.request<any>(gql`
+				mutation createTest2 {
+					createTest2(input:{fields:{name: "test"}}){
+						test2{
+							id
+						}
+					}
+				}
+		`),
+    ).not.toThrow()
+  })
+
   it('should not authorize an user to read an object when the user has not access on read to the object (ACL)', async () => {
     const { userClient, userId } = await createUserAndUpdateRole({
       anonymousClient: client,
