@@ -55,6 +55,8 @@ export class EmailPassword
     // 	'argon2id',
     // )
 
+    console.log(JSON.stringify({ isPasswordEquals, user, input }, null, 2))
+
     if (
       !isPasswordEquals ||
       input.email !== user.authentication?.emailPassword?.email
