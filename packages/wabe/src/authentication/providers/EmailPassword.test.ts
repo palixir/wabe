@@ -1,5 +1,4 @@
 import { describe, expect, it, mock, spyOn, beforeEach } from 'bun:test'
-import argon2 from 'argon2'
 import { EmailPassword } from './EmailPassword'
 
 describe('Email password', () => {
