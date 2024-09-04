@@ -6,7 +6,7 @@ export const runDatabase = async () => {
 
   const res = await MongoMemoryReplSet.create({
     binary: {
-      version: '7.0.11',
+      version: '6.0.9',
     },
     instanceOpts: [
       {
