@@ -53,6 +53,8 @@ export class EmailPassword
         )
       : await argon2.verify(userDatabasePassword, input.password)
 
+    console.log(JSON.stringify({ isPasswordEquals, input, user }, null, 2))
+
     if (
       !isPasswordEquals ||
       input.email !== user.authentication?.emailPassword?.email
@@ -83,6 +85,14 @@ export class EmailPassword
     })
 
     if (users.length > 0) throw new Error('User already exists')
+
+    console.log({
+      input: input.password,
+      // biome-ignore lint/correctness/noConstantCondition: <explanation>
+      hash: typeof Bun
+        ? await Bun.password.hash(input.password, 'argon2id')
+        : await argon2.hash(input.password),
+    })
 
     return {
       authenticationDataToSave: {

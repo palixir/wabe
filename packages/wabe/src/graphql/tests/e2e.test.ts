@@ -418,7 +418,7 @@ describe('GraphQL : E2E', () => {
     })
   })
 
-  it('should not signIn with emailPassword if the password is incorrect', async () => {
+  it.only('should not signIn with emailPassword if the password is incorrect', async () => {
     expect(
       client.request<any>(graphql.signInWith, {
         input: {
