@@ -4,8 +4,14 @@ import type { DevWabeTypes } from '../../utils/helper'
 
 export const sendEmailResolver = async (
   _: any,
-  args: MutationSendEmailArgs,
+  { input }: MutationSendEmailArgs,
   context: WabeContext<DevWabeTypes>,
 ) => {
-  return context.wabe.controllers.email?.send(args.input)
+  if (!context.user && !context.isRoot) throw new Error('Permission denied')
+
+  return context.wabe.controllers.email?.send({
+    ...input,
+    text: input.text ?? undefined,
+    html: input.html ?? undefined,
+  })
 }

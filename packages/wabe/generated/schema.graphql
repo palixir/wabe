@@ -1154,7 +1154,7 @@ input SecondCustomMutationSumInput {
 
 input SendEmailInput {
   from: String!
-  to: [String]!
+  to: [String!]!
   subject: String!
   text: String
   html: String

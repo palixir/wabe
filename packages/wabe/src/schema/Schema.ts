@@ -341,6 +341,7 @@ export class Schema<T extends WabeTypes> {
                 type: 'Array',
                 typeValue: 'String',
                 required: true,
+                requiredValue: true,
               },
               subject: {
                 type: 'String',
