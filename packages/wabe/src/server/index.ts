@@ -18,6 +18,7 @@ import { initializeRoles } from '../authentication/roles'
 import type { FileConfig } from '../files'
 import { fileDevAdapter } from '../files/devAdapter'
 import type { EmailConfig } from '../email'
+import { EmailController } from '../email/EmailController'
 
 export interface WabeConfig<T extends WabeTypes> {
   port: number
@@ -33,7 +34,7 @@ export interface WabeConfig<T extends WabeTypes> {
   routes?: WabeRoute[]
   rootKey: string
   hooks?: Hook<any>[]
-  emails: EmailConfig
+  emails?: EmailConfig
   file?: FileConfig
 }
 
@@ -47,13 +48,16 @@ export type WobeCustomContext<T extends WabeTypes> = {
   wabe: WabeContext<T>
 }
 
+type WabeControllers<T extends WabeTypes> = {
+  database: DatabaseController<T>
+  email?: EmailController
+}
+
 export class Wabe<T extends WabeTypes> {
   public server: Wobe<WobeCustomContext<T>>
 
   public config: WabeConfig<T>
-  public controllers: {
-    database: DatabaseController<T>
-  }
+  public controllers: WabeControllers<T>
 
   constructor({
     port,
@@ -64,6 +68,8 @@ export class Wabe<T extends WabeTypes> {
     codegen,
     hooks,
     file,
+    emails,
+    routes,
   }: WabeConfig<T>) {
     this.config = {
       port,
@@ -80,6 +86,8 @@ export class Wabe<T extends WabeTypes> {
             ? fileDevAdapter
             : () => {}) as any),
       },
+      emails,
+      routes,
     }
 
     this.server = new Wobe<WobeCustomContext<T>>().get('/health', (context) => {
@@ -94,6 +102,7 @@ export class Wabe<T extends WabeTypes> {
 
     this.controllers = {
       database: new DatabaseController<T>(databaseAdapter),
+      email: emails?.adapter ? new EmailController(emails.adapter) : undefined,
     }
 
     this.loadDefaultRoutes()

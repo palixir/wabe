@@ -815,6 +815,7 @@ type Mutation {
   createMutation(input: CreateMutationInput): Boolean!
   customMutation(input: CustomMutationInput): Int
   secondCustomMutation(input: SecondCustomMutationInput): Int
+  sendEmail(input: SendEmailInput): Boolean
   signInWith(input: SignInWithInput): SignInWithOutput
   signUpWith(input: SignUpWithInput): SignUpWithOutput
   signOut: Boolean
@@ -1149,6 +1150,14 @@ input SecondCustomMutationInput {
 input SecondCustomMutationSumInput {
   a: Int!
   b: Int!
+}
+
+input SendEmailInput {
+  from: String!
+  to: [String]!
+  subject: String!
+  text: String
+  html: String
 }
 
 type SignInWithOutput {
