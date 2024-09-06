@@ -973,7 +973,7 @@ describe('GraphqlSchema', () => {
         name: 'createTestClass',
       }),
     ).toEqual({
-      input: { input: 'CreateTestClassInput' },
+      input: { input: 'CreateTestClassInput!' },
       output: 'CreateTestClassPayload',
     })
   })
@@ -986,7 +986,7 @@ describe('GraphqlSchema', () => {
         name: 'createTestClasses',
       }),
     ).toEqual({
-      input: { input: 'CreateTestClassesInput' },
+      input: { input: 'CreateTestClassesInput!' },
       output: 'TestClassConnection!',
     })
   })
@@ -999,7 +999,7 @@ describe('GraphqlSchema', () => {
         name: 'updateTestClass',
       }),
     ).toEqual({
-      input: { input: 'UpdateTestClassInput' },
+      input: { input: 'UpdateTestClassInput!' },
       output: 'UpdateTestClassPayload',
     })
   })
@@ -1012,7 +1012,7 @@ describe('GraphqlSchema', () => {
         name: 'updateTestClasses',
       }),
     ).toEqual({
-      input: { input: 'UpdateTestClassesInput' },
+      input: { input: 'UpdateTestClassesInput!' },
       output: 'TestClassConnection!',
     })
   })
@@ -1025,7 +1025,7 @@ describe('GraphqlSchema', () => {
         name: 'deleteTestClass',
       }),
     ).toEqual({
-      input: { input: 'DeleteTestClassInput' },
+      input: { input: 'DeleteTestClassInput!' },
       output: 'DeleteTestClassPayload',
     })
   })
@@ -1038,7 +1038,7 @@ describe('GraphqlSchema', () => {
         name: 'deleteTestClasses',
       }),
     ).toEqual({
-      input: { input: 'DeleteTestClassesInput' },
+      input: { input: 'DeleteTestClassesInput!' },
       output: 'TestClassConnection!',
     })
   })

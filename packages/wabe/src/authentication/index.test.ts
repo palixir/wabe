@@ -814,7 +814,7 @@ const graphql = {
 		}
 	`,
   refresh: gql`
-		mutation refresh($input: RefreshInput) {
+		mutation refresh($input: RefreshInput!) {
   		refresh(input: $input) {
     		accessToken
     		refreshToken

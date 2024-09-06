@@ -778,49 +778,49 @@ type MeOutput {
 
 type Mutation {
   """User class"""
-  createUser(input: CreateUserInput): CreateUserPayload
+  createUser(input: CreateUserInput!): CreateUserPayload
 
   """User class"""
-  createUsers(input: CreateUsersInput): UserConnection!
+  createUsers(input: CreateUsersInput!): UserConnection!
 
   """User class"""
-  updateUser(input: UpdateUserInput): UpdateUserPayload
+  updateUser(input: UpdateUserInput!): UpdateUserPayload
 
   """User class"""
-  updateUsers(input: UpdateUsersInput): UserConnection!
+  updateUsers(input: UpdateUsersInput!): UserConnection!
 
   """User class"""
-  deleteUser(input: DeleteUserInput): DeleteUserPayload
+  deleteUser(input: DeleteUserInput!): DeleteUserPayload
 
   """User class"""
-  deleteUsers(input: DeleteUsersInput): UserConnection!
-  createPost(input: CreatePostInput): CreatePostPayload
-  createPosts(input: CreatePostsInput): PostConnection!
-  updatePost(input: UpdatePostInput): UpdatePostPayload
-  updatePosts(input: UpdatePostsInput): PostConnection!
-  deletePost(input: DeletePostInput): DeletePostPayload
-  deletePosts(input: DeletePostsInput): PostConnection!
-  create_Session(input: Create_SessionInput): Create_SessionPayload
-  create_Sessions(input: Create_SessionsInput): _SessionConnection!
-  update_Session(input: Update_SessionInput): Update_SessionPayload
-  update_Sessions(input: Update_SessionsInput): _SessionConnection!
-  delete_Session(input: Delete_SessionInput): Delete_SessionPayload
-  delete_Sessions(input: Delete_SessionsInput): _SessionConnection!
-  createRole(input: CreateRoleInput): CreateRolePayload
-  createRoles(input: CreateRolesInput): RoleConnection!
-  updateRole(input: UpdateRoleInput): UpdateRolePayload
-  updateRoles(input: UpdateRolesInput): RoleConnection!
-  deleteRole(input: DeleteRoleInput): DeleteRolePayload
-  deleteRoles(input: DeleteRolesInput): RoleConnection!
-  createMutation(input: CreateMutationInput): Boolean!
-  customMutation(input: CustomMutationInput): Int
-  secondCustomMutation(input: SecondCustomMutationInput): Int
-  sendEmail(input: SendEmailInput): Boolean
-  signInWith(input: SignInWithInput): SignInWithOutput
-  signUpWith(input: SignUpWithInput): SignUpWithOutput
+  deleteUsers(input: DeleteUsersInput!): UserConnection!
+  createPost(input: CreatePostInput!): CreatePostPayload
+  createPosts(input: CreatePostsInput!): PostConnection!
+  updatePost(input: UpdatePostInput!): UpdatePostPayload
+  updatePosts(input: UpdatePostsInput!): PostConnection!
+  deletePost(input: DeletePostInput!): DeletePostPayload
+  deletePosts(input: DeletePostsInput!): PostConnection!
+  create_Session(input: Create_SessionInput!): Create_SessionPayload
+  create_Sessions(input: Create_SessionsInput!): _SessionConnection!
+  update_Session(input: Update_SessionInput!): Update_SessionPayload
+  update_Sessions(input: Update_SessionsInput!): _SessionConnection!
+  delete_Session(input: Delete_SessionInput!): Delete_SessionPayload
+  delete_Sessions(input: Delete_SessionsInput!): _SessionConnection!
+  createRole(input: CreateRoleInput!): CreateRolePayload
+  createRoles(input: CreateRolesInput!): RoleConnection!
+  updateRole(input: UpdateRoleInput!): UpdateRolePayload
+  updateRoles(input: UpdateRolesInput!): RoleConnection!
+  deleteRole(input: DeleteRoleInput!): DeleteRolePayload
+  deleteRoles(input: DeleteRolesInput!): RoleConnection!
+  createMutation(input: CreateMutationInput!): Boolean!
+  customMutation(input: CustomMutationInput!): Int
+  secondCustomMutation(input: SecondCustomMutationInput!): Int
+  sendEmail(input: SendEmailInput!): Boolean
+  signInWith(input: SignInWithInput!): SignInWithOutput
+  signUpWith(input: SignUpWithInput!): SignUpWithOutput
   signOut: Boolean
-  refresh(input: RefreshInput): RefreshSessionOutput
-  verifyChallenge(input: VerifyChallengeInput): Boolean
+  refresh(input: RefreshInput!): RefreshSessionOutput
+  verifyChallenge(input: VerifyChallengeInput!): Boolean
 }
 
 type CreateUserPayload {

@@ -532,7 +532,7 @@ export class GraphQLSchema {
           type: required ? new GraphQLNonNull(outputType) : outputType,
           args:
             numberOfFieldsInInput > 0
-              ? { input: { type: graphqlInput } }
+              ? { input: { type: new GraphQLNonNull(graphqlInput) } }
               : undefined,
           description: currentMutation.description,
           resolve: currentMutation.resolve,
@@ -736,7 +736,7 @@ export class GraphQLSchema {
       [`create${className}`]: {
         type: createPayloadType,
         description: object.description,
-        args: { input: { type: createInputType } },
+        args: { input: { type: new GraphQLNonNull(createInputType) } },
         resolve: (root, args, ctx, info) =>
           mutationToCreateObject(
             root,
@@ -749,7 +749,7 @@ export class GraphQLSchema {
       [`create${pluralize(className)}`]: {
         type: new GraphQLNonNull(connectionObject),
         description: object.description,
-        args: { input: { type: createsInputType } },
+        args: { input: { type: new GraphQLNonNull(createsInputType) } },
         resolve: (root, args, ctx, info) =>
           mutationToCreateMultipleObjects(
             root,
@@ -762,7 +762,7 @@ export class GraphQLSchema {
       [`update${className}`]: {
         type: updatePayloadType,
         description: object.description,
-        args: { input: { type: updateInputType } },
+        args: { input: { type: new GraphQLNonNull(updateInputType) } },
         resolve: (root, args, ctx, info) =>
           mutationToUpdateObject(
             root,
@@ -775,7 +775,7 @@ export class GraphQLSchema {
       [`update${pluralize(className)}`]: {
         type: new GraphQLNonNull(connectionObject),
         description: object.description,
-        args: { input: { type: updatesInputType } },
+        args: { input: { type: new GraphQLNonNull(updatesInputType) } },
         resolve: (root, args, ctx, info) =>
           mutationToUpdateMultipleObjects(
             root,
@@ -790,7 +790,7 @@ export class GraphQLSchema {
         description: object.description,
         args: {
           input: {
-            type: deleteInputType,
+            type: new GraphQLNonNull(deleteInputType),
           },
         },
         resolve: (root, args, ctx, info) =>
@@ -805,7 +805,7 @@ export class GraphQLSchema {
       [`delete${pluralize(className)}`]: {
         type: new GraphQLNonNull(connectionObject),
         description: object.description,
-        args: { input: { type: deletesInputType } },
+        args: { input: { type: new GraphQLNonNull(deletesInputType) } },
         resolve: (root, args, ctx, info) =>
           mutationToDeleteMultipleObjects(
             root,
