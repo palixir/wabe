@@ -7,12 +7,12 @@
     "strict": true,
     "skipLibCheck": true,
     "moduleResolution": "node",
-    "outDir": "lib",
+    "outDir": "dist",
     "declaration": true
   },
   "exclude": [
     "node_modules",
-    "lib",
+    "dist",
     "**/*.test.ts"
-  ],
+  ]
 }

@@ -329,6 +329,34 @@ export class Schema<T extends WabeTypes> {
         },
       },
       mutations: {
+        sendEmail: {
+          type: 'Boolean',
+          args: {
+            input: {
+              from: {
+                type: 'String',
+                required: true,
+              },
+              to: {
+                type: 'Array',
+                typeValue: 'String',
+                required: true,
+                requiredValue: true,
+              },
+              subject: {
+                type: 'String',
+                required: true,
+              },
+              text: {
+                type: 'String',
+              },
+              html: {
+                type: 'String',
+              },
+            },
+          },
+          resolve: () => {},
+        },
         ...(customAuthenticationConfig.length > 0
           ? {
               signInWith: {

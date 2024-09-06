@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+      xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+<!-- created with Free Online Sitemap Generator www.xml-sitemaps.com -->
+
+
+<url>
+  <loc>https://wabe.dev/</loc>
+  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+<url>
+  <loc>https://wabe.dev/wabe/motivations.html</loc>
+  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://wabe.dev/wabe/start.html</loc>
+  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://wabe.dev/wabe/concepts.html</loc>
+  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://wabe.dev/config/schema/classes.html</loc>
+  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://wabe.dev/config/schema/resolvers.html</loc>
+  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://wabe.dev/config/schema/enums.html</loc>
+  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://wabe.dev/config/schema/scalars.html</loc>
+  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://wabe.dev/config/files.html</loc>
+  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://wabe.dev/config/authentication/interact.html</loc>
+  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://wabe.dev/config/authentication/sessions.html</loc>
+  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://wabe.dev/config/authentication/roles.html</loc>
+  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://wabe.dev/config/authentication/oauth.html</loc>
+  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://wabe.dev/config/authentication/customMethods.html</loc>
+  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://wabe.dev/config/hooks.html</loc>
+  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://wabe.dev/config/routes.html</loc>
+  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://wabe.dev/config/codegen.html</loc>
+  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://wabe.dev/config/rootKey.html</loc>
+  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://wabe.dev/graphql/api.html</loc>
+  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://wabe.dev/database/index.html</loc>
+  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://wabe.dev/security/index.html</loc>
+  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+
+
+</urlset>

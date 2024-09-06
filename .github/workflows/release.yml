@@ -9,6 +9,7 @@ on:
                 type: choice
                 options:
                     - 'wabe'
+                    - 'wabe-resend'
 
 jobs:
     release:
@@ -35,8 +36,8 @@ jobs:
                   registry-url: 'https://registry.npmjs.org'
 
             - run: bun install
+            - run: bun run build
             - run: bun ci
-            - run: bun --filter ./packages/${{inputs.package}} build
 
             - name: 'Get Previous tag'
               id: previousTag
