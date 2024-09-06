@@ -13,7 +13,7 @@ describe('Resend', () => {
       send: mockSend,
     } as never)
 
-    const adapter = new ResendAdapter('re_TZchaYhd_2342hGqU3NxyrhumhvtK3xWc')
+    const adapter = new ResendAdapter('FAKE_API_KEY')
 
     await adapter.send({
       from: 'test@wabe.dev',

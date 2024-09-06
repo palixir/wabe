@@ -1,14 +1,14 @@
 import { Resend } from 'resend'
-import type { MailAdapter, MailSendOptions } from 'wabe'
+import type { EMailAdapter, EMailSendOptions } from 'wabe'
 
-export class ResendAdapter implements MailAdapter {
+export class ResendAdapter implements EmailAdapter {
   private resend: Resend
 
   constructor(apiKey: string) {
     this.resend = new Resend(apiKey)
   }
 
-  async send({ node, ...input }: MailSendOptions) {
+  async send({ node, ...input }: EmailSendOptions) {
     const { data, error } = await this.resend.emails.send({
       ...input,
       react: node,

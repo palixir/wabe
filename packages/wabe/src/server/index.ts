@@ -17,6 +17,7 @@ import type { WabeContext } from './interface'
 import { initializeRoles } from '../authentication/roles'
 import type { FileConfig } from '../files'
 import { fileDevAdapter } from '../files/devAdapter'
+import type { EmailConfig } from '../email'
 
 export interface WabeConfig<T extends WabeTypes> {
   port: number
@@ -32,6 +33,7 @@ export interface WabeConfig<T extends WabeTypes> {
   routes?: WabeRoute[]
   rootKey: string
   hooks?: Hook<any>[]
+  emails: EmailConfig
   file?: FileConfig
 }
 
