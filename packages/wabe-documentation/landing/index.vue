@@ -69,6 +69,8 @@ import Package from './Package.vue'
 
                 <Card href="/config/hooks" title="Hooks" description="Powerful hooks system to execute custom actions before or after database requests." iconName="hooks.png"/>
 
+                 <Card href="/email/index" title="Emails" description="Send emails with your favorite provider with very simple integration." iconName="email.png"/>
+
             </div>
         </div>
     </section>
