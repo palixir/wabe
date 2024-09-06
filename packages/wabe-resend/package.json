@@ -27,7 +27,7 @@
   },
   "devDependencies": {
     "@types/bun": "1.1.8",
-    "@types/react": "^18.3.5",
+    "@types/react": "18.3.5",
     "wabe": "workspace:*"
   }
 }

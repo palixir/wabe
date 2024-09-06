@@ -1,5 +1,5 @@
 import { Resend } from 'resend'
-import type { EMailAdapter, EMailSendOptions } from 'wabe'
+import type { EmailAdapter, EmailSendOptions } from 'wabe'
 
 export class ResendAdapter implements EmailAdapter {
   private resend: Resend
