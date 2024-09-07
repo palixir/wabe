@@ -98,20 +98,18 @@ export const generateCodegen = async ({
     classes: schema.classes || [],
   })
 
-  const content = `${graphqlOutput}\n\n${wabeOutput}`
-
   try {
-    const contentOfActualWabeFile = await new Promise((resolve, reject) =>
-      readFile(`${path}/wabe.ts`, (err, data) => {
+    const contentOfSchemaFile = (await new Promise((resolve, reject) =>
+      readFile(`${path}/schema.graphql`, (err, data) => {
         if (err) reject(err)
 
-        resolve(data)
+        resolve(data.toString('utf-8'))
       }),
-    )
+    )) as string
 
     // We will need to find a better way to avoid infinite loop of loading
     // Better solution will be that bun implements watch ignores
-    if (content === contentOfActualWabeFile) return
+    if (contentOfSchemaFile === graphqlSchemaContent) return
   } catch {}
 
   await new Promise((resolve, reject) =>
@@ -126,7 +124,7 @@ export const generateCodegen = async ({
     writeFile(`${path}/schema.graphql`, graphqlSchemaContent, (err) => {
       if (err) reject(err)
 
-      resolve('OK')
+      resolve('ok')
     }),
   )
 }
