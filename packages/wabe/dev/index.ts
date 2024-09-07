@@ -1,4 +1,5 @@
 import { runDatabase } from 'wabe-mongodb-launcher'
+import { ResendAdapter } from 'wabe-resend'
 import { DatabaseEnum, Wabe } from '../src'
 import type {
   WabeSchemaEnums,
@@ -18,8 +19,10 @@ const run = async () => {
       enabled: true,
       path: `${import.meta.dirname}/../generated/`,
     },
-    rootKey:
-      '0uwFvUxM$ceFuF1aEtTtZMa7DUN2NZudqgY5ve5W*QCyb58cwMj9JeoaV@d#%29v&aJzswuudVU1%nAT+rxS0Bh&OkgBYc0PH18*',
+    emails: {
+      adapter: new ResendAdapter('API_KEY'),
+    },
+    rootKey: 'dev',
     authentication: {
       session: {
         cookieSession: true,
