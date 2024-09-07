@@ -24,9 +24,10 @@ bun install
 You can run the tests in all packages by running the following commands at the root repository:
 
 ```sh
-bun test # Run test on all packages
+cd packages/wabe
+bun test # Run test on wabe package
 # or
-bun ci # Run test and lint on all packages
+bun ci # Run lint + test on package
 ```
 
 ## Pre-commit
