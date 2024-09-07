@@ -34,7 +34,7 @@ export interface WabeConfig<T extends WabeTypes> {
   routes?: WabeRoute[]
   rootKey: string
   hooks?: Hook<any>[]
-  emails?: EmailConfig
+  email?: EmailConfig
   file?: FileConfig
 }
 
@@ -68,7 +68,7 @@ export class Wabe<T extends WabeTypes> {
     codegen,
     hooks,
     file,
-    emails,
+    email,
     routes,
   }: WabeConfig<T>) {
     this.config = {
@@ -86,7 +86,7 @@ export class Wabe<T extends WabeTypes> {
             ? fileDevAdapter
             : () => {}) as any),
       },
-      emails,
+      email,
       routes,
     }
 
@@ -102,7 +102,7 @@ export class Wabe<T extends WabeTypes> {
 
     this.controllers = {
       database: new DatabaseController<T>(databaseAdapter),
-      email: emails?.adapter ? new EmailController(emails.adapter) : undefined,
+      email: email?.adapter ? new EmailController(email.adapter) : undefined,
     }
 
     this.loadDefaultRoutes()
