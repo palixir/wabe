@@ -43,7 +43,7 @@ jobs:
               id: previousTag
               run: |
                 echo "Fetching tags..."
-                previous_tag=$(git tag -l "${{inputs.package}}-*" --sort=-v:refname | head -n 1)
+                previous_tag=$(git tag -l "${{inputs.package}}-[0-9]*" --sort=-v:refname | head -n 1)
                 echo "Found previous tag: $previous_tag"
                 echo "tag=$previous_tag" >> $GITHUB_ENV
 
@@ -131,4 +131,3 @@ jobs:
               with:
                   tag_name: ${{inputs.package}}-${{env.next_version}}
                   body: ${{steps.github_release.outputs.changelog}}
-
