@@ -3,6 +3,28 @@ import { sendEmailResolver } from './sendEmail'
 import type { WabeContext } from '../../server/interface'
 
 describe('SendEmail', () => {
+  it('should throw an error if email adapter is not defined', async () => {
+    expect(
+      sendEmailResolver(
+        undefined,
+        {
+          input: { from: 'from', to: ['to'], subject: 'subject', text: 'text' },
+        },
+        {
+          isRoot: false,
+          user: {
+            id: 'id',
+          },
+          wabe: {
+            controllers: {
+              email: undefined,
+            } as any,
+          },
+        } as WabeContext<any>,
+      ),
+    ).rejects.toThrow('Email adapter not defined')
+  })
+
   it('should send email when user is connected', async () => {
     const mockSend = mock(() => {}).mockResolvedValueOnce(true as never)
 

@@ -815,7 +815,9 @@ type Mutation {
   createMutation(input: CreateMutationInput!): Boolean!
   customMutation(input: CustomMutationInput!): Int
   secondCustomMutation(input: SecondCustomMutationInput!): Int
-  sendEmail(input: SendEmailInput!): Boolean
+
+  """Send basic email with text and html, returns the id of the email"""
+  sendEmail(input: SendEmailInput!): String
   signInWith(input: SignInWithInput!): SignInWithOutput
   signUpWith(input: SignUpWithInput!): SignUpWithOutput
   signOut: Boolean

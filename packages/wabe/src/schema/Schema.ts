@@ -8,6 +8,7 @@ import { signOutResolver } from '../authentication/resolvers/signOutResolver'
 import { verifyChallengeResolver } from '../authentication/resolvers/verifyChallenge'
 import type { WabeConfig, WabeTypes } from '../server'
 import { meResolver } from './resolvers/meResolver'
+import { sendEmailResolver } from './resolvers/sendEmail'
 
 export type WabePrimaryTypes =
   | 'String'
@@ -330,7 +331,9 @@ export class Schema<T extends WabeTypes> {
       },
       mutations: {
         sendEmail: {
-          type: 'Boolean',
+          type: 'String',
+          description:
+            'Send basic email with text and html, returns the id of the email',
           args: {
             input: {
               from: {
@@ -355,7 +358,7 @@ export class Schema<T extends WabeTypes> {
               },
             },
           },
-          resolve: () => {},
+          resolve: sendEmailResolver,
         },
         ...(customAuthenticationConfig.length > 0
           ? {

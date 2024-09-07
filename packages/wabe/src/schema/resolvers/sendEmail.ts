@@ -9,7 +9,11 @@ export const sendEmailResolver = async (
 ) => {
   if (!context.user && !context.isRoot) throw new Error('Permission denied')
 
-  return context.wabe.controllers.email?.send({
+  const emailController = context.wabe.controllers.email
+
+  if (!emailController) throw new Error('Email adapter not defined')
+
+  return emailController.send({
     ...input,
     text: input.text ?? undefined,
     html: input.html ?? undefined,
