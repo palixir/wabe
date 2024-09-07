@@ -109,7 +109,8 @@ export const generateCodegen = async ({
 
     // We will need to find a better way to avoid infinite loop of loading
     // Better solution will be that bun implements watch ignores
-    if (contentOfSchemaFile === graphqlSchemaContent) return
+    if (!process.env.CODEGEN && contentOfSchemaFile === graphqlSchemaContent)
+      return
   } catch {}
 
   await new Promise((resolve, reject) =>
