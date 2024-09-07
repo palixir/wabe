@@ -23,7 +23,7 @@ import { ResendAdapter } from "wabe-resend";
 const run = async () => {
   const wabe = new Wabe({
     // ... others config fields
-    emails: {
+    email: {
       adapter: new ResendAdapter("API_KEY"),
     },
   });
