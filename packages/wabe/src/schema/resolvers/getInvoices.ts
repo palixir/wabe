@@ -1,10 +1,10 @@
-import type { MutationGetInvoicesArgs } from '../../../generated/wabe'
+import type { QueryGetInvoicesArgs } from '../../../generated/wabe'
 import type { WabeContext } from '../../server/interface'
 import type { DevWabeTypes } from '../../utils/helper'
 
 export const getInvoicesResolver = async (
   _: any,
-  { input }: MutationGetInvoicesArgs,
+  { email }: QueryGetInvoicesArgs,
   context: WabeContext<DevWabeTypes>,
 ) => {
   if (!context.user && !context.isRoot) throw new Error('Permission denied')
@@ -13,5 +13,5 @@ export const getInvoicesResolver = async (
 
   if (!paymentController) throw new Error('Payment adapter not defined')
 
-  return paymentController.getInvoices(input)
+  return paymentController.getInvoices({ email })
 }

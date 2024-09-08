@@ -58,9 +58,7 @@ describe('getInvoicesResolver', () => {
     await getInvoicesResolver(
       null,
       {
-        input: {
-          email: 'test@test.com',
-        },
+        email: 'test@test.com',
       },
       context as any,
     )
