@@ -19,6 +19,11 @@ enum PaymentReccuringInterval {
   year
 }
 
+enum Currency {
+  eur
+  usd
+}
+
 """User class"""
 type User {
   id: ID!
@@ -830,6 +835,10 @@ type Mutation {
   Create a payment with the payment provider. Returns the url to redirect the user to pay
   """
   createPayment(input: CreatePaymentInput!): String
+  cancelSubscription(input: CancelSubscriptionInput!): Boolean
+
+  """Get invoices of a customer"""
+  getInvoices(input: GetInvoicesInput!): [Invoice]!
 
   """Send basic email with text and html, returns the id of the email"""
   sendEmail(input: SendEmailInput!): String
@@ -1183,6 +1192,24 @@ input CreatePaymentProductInput {
   name: String!
   unitAmount: Int!
   quantity: Int!
+}
+
+input CancelSubscriptionInput {
+  email: Email!
+}
+
+type Invoice {
+  amountDue: Int!
+  amountPaid: Int!
+  currency: Currency!
+  id: String!
+  created: Int!
+  invoiceUrl: String!
+  isPaid: Boolean!
+}
+
+input GetInvoicesInput {
+  email: Email!
 }
 
 input SendEmailInput {

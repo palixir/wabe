@@ -40,15 +40,15 @@ createPayment(input: CreatePaymentInput!): String
 You can easily initialize an adapter like this by passing your API key as a parameter to the adapter.
 
 ```ts
-import { Wabe } from "wabe";
-import { ResendAdapter } from "wabe-resend";
+import { Wabe, Currency } from "wabe";
+import { StripeAdapter } from "wabe-stripe";
 
 const run = async () => {
   const wabe = new Wabe({
     // ... others config fields
     payment: {
       adapter: new StripeAdapter('YOU_STRIPE_SECRET_KEY'),
-      currency: 'usd',
+      currency: Currency.USD,
       supportedPaymentMethods: ['card', 'paypal'],
     },
   });

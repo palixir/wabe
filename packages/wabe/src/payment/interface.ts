@@ -1,4 +1,7 @@
-export type Currency = 'eur' | 'usd'
+export enum Currency {
+  EUR = 'eur',
+  USD = 'usd',
+}
 
 export type Address = {
   city: string

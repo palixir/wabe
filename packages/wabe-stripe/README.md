@@ -26,7 +26,7 @@ yarn add wabe-stripe # On yarn
 ## Basic example of wabe-resend usage
 
 ```ts
-import { DatabaseEnum, Wabe, PaymentMode } from "wabe";
+import { DatabaseEnum, Wabe, PaymentMode, Currency } from "wabe";
 import { StripeAdapter } from "wabe-stripe";
 
 const run = async () => {
@@ -43,7 +43,7 @@ const run = async () => {
     },
     payment: {
       adapter: new StripeAdapter('YOU_STRIPE_SECRET_KEY'),
-      currency: 'usd',
+      currency: Currency.USD,
       supportedPaymentMethods: ['card', 'paypal'],
     },
     port: 3000,

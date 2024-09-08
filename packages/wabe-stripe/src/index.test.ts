@@ -1,7 +1,7 @@
 import { describe, expect, it, mock, spyOn, beforeEach } from 'bun:test'
 import { StripeAdapter } from '.'
 import Stripe from 'stripe'
-import { PaymentMode } from 'wabe'
+import { Currency, PaymentMode } from 'wabe'
 
 const mockListCustomers = mock(() => {})
 const mockCreateCustomer = mock(() => {})
@@ -97,7 +97,7 @@ describe('wabe-stripe', () => {
 
     await adapter.createPayment({
       customerEmail: 'lucas.coratger@gmail.com',
-      currency: 'eur',
+      currency: Currency.EUR,
       paymentMethod: ['card'],
       products: [
         {
@@ -164,7 +164,7 @@ describe('wabe-stripe', () => {
     expect(
       adapter.createPayment({
         customerEmail: 'lucas.coratger@gmail.com',
-        currency: 'eur',
+        currency: Currency.EUR,
         paymentMethod: ['card'],
         products: [
           {
@@ -305,7 +305,7 @@ describe('wabe-stripe', () => {
       {
         amountDue: 1000,
         amountPaid: 0,
-        currency: 'eur',
+        currency: Currency.EUR,
         id: 'in_123',
         created: 1679481600,
         invoiceUrl: '',

@@ -1,6 +1,6 @@
 import { describe, expect, it, mock } from 'bun:test'
 import { PaymentController } from './PaymentController'
-import { PaymentMode } from './interface'
+import { Currency, PaymentMode } from './interface'
 
 describe('PaymentController', () => {
   it("should call the adapter's createCustomer method", async () => {
@@ -12,7 +12,7 @@ describe('PaymentController', () => {
 
     const paymentController = new PaymentController({
       adapter,
-      currency: 'eur',
+      currency: Currency.EUR,
       supportedPaymentMethods: ['card'],
     })
 
@@ -57,7 +57,7 @@ describe('PaymentController', () => {
 
     const paymentController = new PaymentController({
       adapter,
-      currency: 'eur',
+      currency: Currency.EUR,
       supportedPaymentMethods: ['card'],
     })
 
@@ -90,7 +90,7 @@ describe('PaymentController', () => {
 
     const paymentController = new PaymentController({
       adapter,
-      currency: 'eur',
+      currency: Currency.EUR,
       supportedPaymentMethods: ['card'],
     })
 
@@ -113,7 +113,7 @@ describe('PaymentController', () => {
 
     const paymentController = new PaymentController({
       adapter,
-      currency: 'eur',
+      currency: Currency.EUR,
       supportedPaymentMethods: ['card'],
     })
 
