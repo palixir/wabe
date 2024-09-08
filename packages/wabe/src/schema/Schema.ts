@@ -356,7 +356,8 @@ export class Schema<T extends WabeTypes> {
             input: {
               customerEmail: {
                 type: 'Email',
-                required: true,
+                description:
+                  "The payer's email, if not provided, the payer's email will be the user's email that call the mutation.",
               },
               paymentMode: {
                 type: 'PaymentMode',
@@ -369,6 +370,29 @@ export class Schema<T extends WabeTypes> {
               cancelUrl: {
                 type: 'String',
                 required: true,
+              },
+              products: {
+                type: 'Array',
+                typeValue: 'Object',
+                object: {
+                  name: 'Product',
+                  fields: {
+                    name: {
+                      type: 'String',
+                      required: true,
+                    },
+                    unitAmount: {
+                      type: 'Int',
+                      required: true,
+                    },
+                    quantity: {
+                      type: 'Int',
+                      required: true,
+                    },
+                  },
+                },
+                required: true,
+                requiredValue: true,
               },
               automaticTax: {
                 type: 'Boolean',

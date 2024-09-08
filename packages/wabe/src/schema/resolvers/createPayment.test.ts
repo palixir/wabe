@@ -3,6 +3,29 @@ import { createPaymentResolver } from './createPayment'
 import { PaymentMode } from '../../payment'
 
 describe('createPaymentResolver', () => {
+  it('should throw an error if the customer email is not provided', async () => {
+    const paymentController = {
+      createPayment: mock(() => {}),
+    }
+
+    const context = {
+      user: {
+        id: '123',
+        email: undefined,
+      },
+      isRoot: false,
+      wabe: {
+        controllers: {
+          payment: paymentController,
+        },
+      },
+    }
+
+    expect(
+      createPaymentResolver(null, { input: {} } as any, context as any),
+    ).rejects.toThrow('Customer email is required')
+  })
+
   it('should throw an error if the user is not authenticated', async () => {
     const context = {
       user: null,
@@ -60,6 +83,7 @@ describe('createPaymentResolver', () => {
       null,
       {
         input: {
+          products: [{ name: 'product1', unitAmount: 100, quantity: 1 }],
           customerEmail: 'test@test.com',
           paymentMode: PaymentMode.Payment,
           successUrl: 'https://example.com',
@@ -78,6 +102,7 @@ describe('createPaymentResolver', () => {
       cancelUrl: 'https://example.com',
       automaticTax: true,
       recurringInterval: 'month',
+      products: [{ name: 'product1', unitAmount: 100, quantity: 1 }],
     })
   })
 })

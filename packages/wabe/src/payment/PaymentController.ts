@@ -21,15 +21,11 @@ export class PaymentController implements PaymentAdapter {
   }
 
   async createPayment(
-    options: Omit<
-      CreatePaymentOptions,
-      'currency' | 'products' | 'paymentMethod'
-    >,
+    options: Omit<CreatePaymentOptions, 'currency' | 'paymentMethod'>,
   ) {
     return this.adapter.createPayment({
       ...options,
       currency: this.config.currency,
-      products: this.config.products,
       paymentMethod: this.config.supportedPaymentMethods,
     })
   }

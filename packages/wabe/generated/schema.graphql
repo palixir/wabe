@@ -1170,12 +1170,19 @@ input SecondCustomMutationSumInput {
 }
 
 input CreatePaymentInput {
-  customerEmail: Email!
+  customerEmail: Email
   paymentMode: PaymentMode!
   successUrl: String!
   cancelUrl: String!
+  products: [CreatePaymentProductInput]!
   automaticTax: Boolean
   recurringInterval: PaymentReccuringInterval
+}
+
+input CreatePaymentProductInput {
+  name: String!
+  unitAmount: Int!
+  quantity: Int!
 }
 
 input SendEmailInput {

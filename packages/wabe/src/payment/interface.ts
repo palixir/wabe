@@ -29,7 +29,6 @@ export type Product = {
 
 export interface PaymentConfig {
   adapter: PaymentAdapter
-  products: Array<Product>
   supportedPaymentMethods: Array<PaymentMethod>
   currency: Currency
 }

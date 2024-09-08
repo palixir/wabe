@@ -13,7 +13,6 @@ describe('PaymentController', () => {
     const paymentController = new PaymentController({
       adapter,
       currency: 'eur',
-      products: [{ name: 'Product', unitAmount: 10, quantity: 1 }],
       supportedPaymentMethods: ['card'],
     })
 
@@ -59,7 +58,6 @@ describe('PaymentController', () => {
     const paymentController = new PaymentController({
       adapter,
       currency: 'eur',
-      products: [{ name: 'Product', unitAmount: 10, quantity: 1 }],
       supportedPaymentMethods: ['card'],
     })
 
@@ -68,6 +66,7 @@ describe('PaymentController', () => {
       successUrl: 'https://example.com/success',
       cancelUrl: 'https://example.com/cancel',
       paymentMode: PaymentMode.Payment,
+      products: [{ name: 'Product', unitAmount: 10, quantity: 1 }],
     })
 
     expect(mockCreatePayment).toHaveBeenCalledTimes(1)
@@ -92,7 +91,6 @@ describe('PaymentController', () => {
     const paymentController = new PaymentController({
       adapter,
       currency: 'eur',
-      products: [{ name: 'Product', unitAmount: 10, quantity: 1 }],
       supportedPaymentMethods: ['card'],
     })
 
@@ -116,7 +114,6 @@ describe('PaymentController', () => {
     const paymentController = new PaymentController({
       adapter,
       currency: 'eur',
-      products: [{ name: 'Product', unitAmount: 10, quantity: 1 }],
       supportedPaymentMethods: ['card'],
     })
 

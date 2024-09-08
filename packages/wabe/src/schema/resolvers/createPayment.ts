@@ -1,4 +1,5 @@
 import type { MutationCreatePaymentArgs } from '../../../generated/wabe'
+import type { Product } from '../../payment'
 import type { WabeContext } from '../../server/interface'
 import type { DevWabeTypes } from '../../utils/helper'
 
@@ -20,14 +21,20 @@ export const createPaymentResolver = async (
     paymentMode,
     automaticTax,
     recurringInterval,
+    products,
   } = input
+
+  const email = customerEmail || context.user?.email
+
+  if (!email) throw new Error('Customer email is required')
 
   return paymentController.createPayment({
     cancelUrl,
     successUrl,
-    customerEmail,
+    customerEmail: email,
     paymentMode,
     automaticTax: automaticTax ?? false,
     recurringInterval: recurringInterval ?? 'month',
+    products: products as Product[],
   })
 }
