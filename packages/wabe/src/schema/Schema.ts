@@ -113,29 +113,29 @@ export type TypeField<T extends WabeTypes> =
 
 export type SchemaFields<T extends WabeTypes> = Record<string, TypeField<T>>
 
-export type QueryResolver<T extends WabeTypes> = {
+export type ResolverType<T extends WabeTypes> = {
   required?: boolean
   description?: string
-  args?: SchemaFields<T>
   resolve: (...args: any) => any
 } & (
   | { type: WabePrimaryTypes }
   | { type: 'Object'; outputObject: ClassInterface<T> }
-  | { type: 'Array'; typeValue: WabePrimaryTypes }
+  | { type: 'Array'; typeValue: WabePrimaryTypes; typeValueRequired?: boolean }
+  | {
+      type: 'Array'
+      typeValue: 'Object'
+      outputObject: ClassInterface<T>
+      typeValueRequired?: boolean
+    }
 )
 
+export type QueryResolver<T extends WabeTypes> = {
+  args?: SchemaFields<T>
+} & ResolverType<T>
+
 export type MutationResolver<T extends WabeTypes> = {
-  required?: boolean
-  description?: string
-  args?: {
-    input: SchemaFields<T>
-  }
-  resolve: (...args: any) => any
-} & (
-  | { type: WabePrimaryTypes }
-  | { type: 'Object'; outputObject: ClassInterface<T> }
-  | { type: 'Array'; typeValue: WabePrimaryTypes }
-)
+  args?: { input: SchemaFields<T> }
+} & ResolverType<T>
 
 export type TypeResolver<T extends WabeTypes> = {
   queries?: {
