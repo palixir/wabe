@@ -19,6 +19,8 @@ import type { FileConfig } from '../files'
 import { fileDevAdapter } from '../files/devAdapter'
 import type { EmailConfig } from '../email'
 import { EmailController } from '../email/EmailController'
+import type { PaymentConfig } from '../payment/interface'
+import { PaymentController } from '../payment/PaymentController'
 
 export interface WabeConfig<T extends WabeTypes> {
   port: number
@@ -35,6 +37,7 @@ export interface WabeConfig<T extends WabeTypes> {
   rootKey: string
   hooks?: Hook<any>[]
   email?: EmailConfig
+  payment?: PaymentConfig
   file?: FileConfig
 }
 
@@ -51,6 +54,7 @@ export type WobeCustomContext<T extends WabeTypes> = {
 type WabeControllers<T extends WabeTypes> = {
   database: DatabaseController<T>
   email?: EmailController
+  payment?: PaymentController
 }
 
 export class Wabe<T extends WabeTypes> {
@@ -69,6 +73,7 @@ export class Wabe<T extends WabeTypes> {
     hooks,
     file,
     email,
+    payment,
     routes,
   }: WabeConfig<T>) {
     this.config = {
@@ -87,6 +92,7 @@ export class Wabe<T extends WabeTypes> {
             : () => {}) as any),
       },
       email,
+      payment,
       routes,
     }
 
@@ -103,6 +109,7 @@ export class Wabe<T extends WabeTypes> {
     this.controllers = {
       database: new DatabaseController<T>(databaseAdapter),
       email: email?.adapter ? new EmailController(email.adapter) : undefined,
+      payment: payment?.adapter ? new PaymentController(payment) : undefined,
     }
 
     this.loadDefaultRoutes()

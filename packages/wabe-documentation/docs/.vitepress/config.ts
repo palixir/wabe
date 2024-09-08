@@ -144,6 +144,15 @@ export default defineConfig({
           },
         ],
       },
+      {
+        text: 'Payment',
+        items: [
+          {
+            text: 'Create payment',
+            link: '/payment/index.md',
+          },
+        ],
+      },
     ],
     socialLinks: [{ icon: 'github', link: 'https://github.com/palixir/wabe' }],
   },

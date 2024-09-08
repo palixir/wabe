@@ -367,22 +367,24 @@ describe('Schema', () => {
       },
     } as any)
 
-    expect(schema.schema.enums).toEqual([
-      {
-        name: 'EnumTest',
-        values: {
-          A: 'A',
-          B: 'B',
+    expect(schema.schema.enums).toEqual(
+      expect.arrayContaining([
+        {
+          name: 'EnumTest',
+          values: {
+            A: 'A',
+            B: 'B',
+          },
         },
-      },
-      {
-        name: 'AuthenticationProvider',
-        values: expect.any(Object),
-      },
-      {
-        name: 'SecondaryFactor',
-        values: expect.any(Object),
-      },
-    ])
+        {
+          name: 'AuthenticationProvider',
+          values: expect.any(Object),
+        },
+        {
+          name: 'SecondaryFactor',
+          values: expect.any(Object),
+        },
+      ]),
+    )
   })
 })

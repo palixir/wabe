@@ -1,0 +1,32 @@
+{
+  "name": "wabe-stripe",
+  "version": "0.5.0",
+  "description": "Stripe payment adapter for Wabe",
+  "homepage": "https://wabe.dev",
+  "author": {
+    "name": "coratgerl",
+    "url": "https://github.com/coratgerl"
+  },
+  "license": "Apache-2.0",
+  "keywords": ["backend", "wabe", "graphql", "baas"],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/palixir/wabe.git"
+  },
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "bun build --outdir dist $(pwd)/src/index.ts --target=node && bun generate:types",
+    "generate:types": "dts-bundle-generator -o dist/index.d.ts src/index.ts --no-check --external-imports=wobe",
+    "check": "tsc --project $(pwd)/tsconfig.json",
+    "lint": "biome lint . --no-errors-on-unmatched --config-path=../../",
+    "ci": "bun check && bun lint $(pwd) && bun test src",
+    "format": "biome format --write . --config-path=../../"
+  },
+  "dependencies": {
+    "stripe": "16.10.0"
+  },
+  "devDependencies": {
+    "@types/bun": "1.1.8",
+    "wabe": "workspace:*"
+  }
+}
