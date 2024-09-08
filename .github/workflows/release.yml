@@ -10,6 +10,7 @@ on:
                 options:
                     - 'wabe'
                     - 'wabe-resend'
+                    - 'wabe-stripe'
 
 jobs:
     release:
