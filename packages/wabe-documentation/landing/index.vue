@@ -25,7 +25,7 @@ import Package from './Package.vue'
                 <a href="/wabe/motivations" class="bg-primary text-white px-8 py-3 rounded-lg font-medium hover:bg-secondary transition duration-150">View documentation</a>
 
                 <a href="https://github.com/palixir/wabe" class="flex items-center gap-2 bg-background-primary text-white px-8 py-3 rounded-lg font-medium hover:bg-gray-800 transition duration-150" target="_blank">
-                    <img src="github.png" alt="GitHub" class="h-6"/>
+                    <img src="/github.png" alt="GitHub" class="h-6"/>
 
                     Star us on GitHub
                 </a>
