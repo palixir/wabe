@@ -9,6 +9,16 @@ enum SecondaryFactor {
   EmailOTP
 }
 
+enum PaymentMode {
+  payment
+  subscription
+}
+
+enum PaymentReccuringInterval {
+  month
+  year
+}
+
 """User class"""
 type User {
   id: ID!
@@ -816,6 +826,11 @@ type Mutation {
   customMutation(input: CustomMutationInput!): Int
   secondCustomMutation(input: SecondCustomMutationInput!): Int
 
+  """
+  Create a payment with the payment provider. Returns the url to redirect the user to pay
+  """
+  createPayment(input: CreatePaymentInput!): String
+
   """Send basic email with text and html, returns the id of the email"""
   sendEmail(input: SendEmailInput!): String
   signInWith(input: SignInWithInput!): SignInWithOutput
@@ -1152,6 +1167,15 @@ input SecondCustomMutationInput {
 input SecondCustomMutationSumInput {
   a: Int!
   b: Int!
+}
+
+input CreatePaymentInput {
+  customerEmail: Email!
+  paymentMode: PaymentMode!
+  successUrl: String!
+  cancelUrl: String!
+  automaticTax: Boolean
+  recurringInterval: PaymentReccuringInterval
 }
 
 input SendEmailInput {

@@ -9,9 +9,17 @@ export type Address = {
   state: string
 }
 
-export type PaymentMode = 'payment' | 'subscription'
+export enum PaymentMode {
+  Payment = 'payment',
+  Subscription = 'subscription',
+}
 
 export type PaymentMethod = 'card'
+
+export enum PaymentReccuringInterval {
+  Month = 'month',
+  Year = 'year',
+}
 
 export type Product = {
   name: string

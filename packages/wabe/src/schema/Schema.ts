@@ -9,6 +9,12 @@ import { verifyChallengeResolver } from '../authentication/resolvers/verifyChall
 import type { WabeConfig, WabeTypes } from '../server'
 import { meResolver } from './resolvers/meResolver'
 import { sendEmailResolver } from './resolvers/sendEmail'
+import {
+  PaymentMethod,
+  PaymentMode,
+  PaymentReccuringInterval,
+} from '../payment'
+import { createPaymentResolver } from './resolvers/createPayment'
 
 export type WabePrimaryTypes =
   | 'String'
@@ -228,6 +234,18 @@ export class Schema<T extends WabeTypes> {
           EmailOTP: 'emailOTP',
         },
       },
+      {
+        name: 'PaymentMode',
+        values: Object.fromEntries(
+          Object.values(PaymentMode).map((key) => [key, key]),
+        ),
+      },
+      {
+        name: 'PaymentReccuringInterval',
+        values: Object.fromEntries(
+          Object.values(PaymentReccuringInterval).map((key) => [key, key]),
+        ),
+      },
     ]
   }
 
@@ -330,6 +348,38 @@ export class Schema<T extends WabeTypes> {
         },
       },
       mutations: {
+        createPayment: {
+          type: 'String',
+          description:
+            'Create a payment with the payment provider. Returns the url to redirect the user to pay',
+          args: {
+            input: {
+              customerEmail: {
+                type: 'Email',
+                required: true,
+              },
+              paymentMode: {
+                type: 'PaymentMode',
+                required: true,
+              },
+              successUrl: {
+                type: 'String',
+                required: true,
+              },
+              cancelUrl: {
+                type: 'String',
+                required: true,
+              },
+              automaticTax: {
+                type: 'Boolean',
+              },
+              recurringInterval: {
+                type: 'PaymentReccuringInterval',
+              },
+            },
+          },
+          resolve: createPaymentResolver,
+        },
         sendEmail: {
           type: 'String',
           description:
