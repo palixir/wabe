@@ -154,6 +154,12 @@ export default defineConfig({
         ],
       },
     ],
-    socialLinks: [{ icon: 'github', link: 'https://github.com/palixir/wabe' }],
+    socialLinks: [
+      {
+        icon: 'github',
+        link: 'https://github.com/palixir/wabe',
+        ariaLabel: 'GitHub',
+      },
+    ],
   },
 })
