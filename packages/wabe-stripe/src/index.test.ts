@@ -1,6 +1,7 @@
 import { describe, expect, it, mock, spyOn, beforeEach } from 'bun:test'
 import { StripeAdapter } from '.'
 import Stripe from 'stripe'
+import { PaymentMode } from 'wabe'
 
 const mockListCustomers = mock(() => {})
 const mockCreateCustomer = mock(() => {})
@@ -105,7 +106,7 @@ describe('wabe-stripe', () => {
           quantity: 1,
         },
       ],
-      paymentMode: 'subscription',
+      paymentMode: PaymentMode.Subscription,
       successUrl: 'https://wabe.dev',
       cancelUrl: 'https://wabe.dev',
     })
@@ -172,7 +173,7 @@ describe('wabe-stripe', () => {
             quantity: 1,
           },
         ],
-        paymentMode: 'subscription',
+        paymentMode: PaymentMode.Subscription,
         successUrl: 'https://wabe.dev',
         cancelUrl: 'https://wabe.dev',
       }),

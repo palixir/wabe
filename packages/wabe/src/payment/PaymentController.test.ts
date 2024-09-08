@@ -1,5 +1,6 @@
 import { describe, expect, it, mock } from 'bun:test'
 import { PaymentController } from './PaymentController'
+import { PaymentMode } from './interface'
 
 describe('PaymentController', () => {
   it("should call the adapter's createCustomer method", async () => {
@@ -66,7 +67,7 @@ describe('PaymentController', () => {
       customerEmail: 'john@doe.com',
       successUrl: 'https://example.com/success',
       cancelUrl: 'https://example.com/cancel',
-      paymentMode: 'payment',
+      paymentMode: PaymentMode.Payment,
     })
 
     expect(mockCreatePayment).toHaveBeenCalledTimes(1)
