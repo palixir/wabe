@@ -9,8 +9,6 @@ import { verifyChallengeResolver } from '../authentication/resolvers/verifyChall
 import type { WabeConfig, WabeTypes } from '../server'
 import { meResolver } from './resolvers/meResolver'
 import { sendEmailResolver } from './resolvers/sendEmail'
-import { PaymentMode, PaymentReccuringInterval } from '../payment'
-import { createPaymentResolver } from './resolvers/createPayment'
 
 export type WabePrimaryTypes =
   | 'String'
@@ -115,29 +113,29 @@ export type TypeField<T extends WabeTypes> =
 
 export type SchemaFields<T extends WabeTypes> = Record<string, TypeField<T>>
 
-export type QueryResolver<T extends WabeTypes> = {
+export type ResolverType<T extends WabeTypes> = {
   required?: boolean
   description?: string
-  args?: SchemaFields<T>
   resolve: (...args: any) => any
 } & (
   | { type: WabePrimaryTypes }
   | { type: 'Object'; outputObject: ClassInterface<T> }
-  | { type: 'Array'; typeValue: WabePrimaryTypes }
+  | { type: 'Array'; typeValue: WabePrimaryTypes; typeValueRequired?: boolean }
+  | {
+      type: 'Array'
+      typeValue: 'Object'
+      outputObject: ClassInterface<T>
+      typeValueRequired?: boolean
+    }
 )
 
+export type QueryResolver<T extends WabeTypes> = {
+  args?: SchemaFields<T>
+} & ResolverType<T>
+
 export type MutationResolver<T extends WabeTypes> = {
-  required?: boolean
-  description?: string
-  args?: {
-    input: SchemaFields<T>
-  }
-  resolve: (...args: any) => any
-} & (
-  | { type: WabePrimaryTypes }
-  | { type: 'Object'; outputObject: ClassInterface<T> }
-  | { type: 'Array'; typeValue: WabePrimaryTypes | WabeCustomTypes }
-)
+  args?: { input: SchemaFields<T> }
+} & ResolverType<T>
 
 export type TypeResolver<T extends WabeTypes> = {
   queries?: {
@@ -229,18 +227,6 @@ export class Schema<T extends WabeTypes> {
         values: {
           EmailOTP: 'emailOTP',
         },
-      },
-      {
-        name: 'PaymentMode',
-        values: Object.fromEntries(
-          Object.values(PaymentMode).map((key) => [key, key]),
-        ),
-      },
-      {
-        name: 'PaymentReccuringInterval',
-        values: Object.fromEntries(
-          Object.values(PaymentReccuringInterval).map((key) => [key, key]),
-        ),
       },
     ]
   }
@@ -344,115 +330,6 @@ export class Schema<T extends WabeTypes> {
         },
       },
       mutations: {
-        createPayment: {
-          type: 'String',
-          description:
-            'Create a payment with the payment provider. Returns the url to redirect the user to pay',
-          args: {
-            input: {
-              customerEmail: {
-                type: 'Email',
-                description:
-                  "The payer's email, if not provided, the payer's email will be the user's email that call the mutation.",
-              },
-              paymentMode: {
-                type: 'PaymentMode',
-                required: true,
-              },
-              successUrl: {
-                type: 'String',
-                required: true,
-              },
-              cancelUrl: {
-                type: 'String',
-                required: true,
-              },
-              products: {
-                type: 'Array',
-                typeValue: 'Object',
-                object: {
-                  name: 'Product',
-                  fields: {
-                    name: {
-                      type: 'String',
-                      required: true,
-                    },
-                    unitAmount: {
-                      type: 'Int',
-                      required: true,
-                    },
-                    quantity: {
-                      type: 'Int',
-                      required: true,
-                    },
-                  },
-                },
-                required: true,
-                requiredValue: true,
-              },
-              automaticTax: {
-                type: 'Boolean',
-              },
-              recurringInterval: {
-                type: 'PaymentReccuringInterval',
-              },
-            },
-          },
-          resolve: createPaymentResolver,
-        },
-        cancelSubscription: {
-          type: 'Boolean',
-          args: {
-            input: {
-              email: {
-                type: 'Email',
-                required: true,
-              },
-            },
-          },
-          resolve: cancelSubscriptionResolver,
-        },
-        getInvoices: {
-          type: 'Array',
-          typeValue: 'Object',
-
-          object: {
-            name: 'Invoice',
-            fields: {
-              amountDue: {
-                type: 'Int',
-              },
-              amountPaid: {
-                type: 'Int',
-              },
-              currency: {
-                type: 'Currency',
-              },
-              id: {
-                type: 'String',
-              },
-              created: {
-                type: 'Int',
-              },
-              invoiceUrl: {
-                type: 'String',
-              },
-              isPaid: {
-                type: 'Boolean',
-              },
-            },
-          },
-          description: 'Get invoices of a customer',
-          args: {
-            input: {
-              email: {
-                type: 'Email',
-                required: true,
-              },
-            },
-          },
-          resolve: getInvoicesResolver,
-        },
         sendEmail: {
           type: 'String',
           description:

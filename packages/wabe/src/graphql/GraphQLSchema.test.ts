@@ -158,11 +158,45 @@ describe('GraphqlSchema', () => {
               type: 'Boolean',
               resolve: () => true,
             },
+            mutationWithCustomTypes: {
+              type: 'Array',
+              typeValue: 'Object',
+              required: true,
+              typeValueRequired: true,
+              outputObject: {
+                name: 'TestMutation',
+                fields: {
+                  name: {
+                    type: 'String',
+                  },
+                },
+              },
+              resolve: () => {
+                return [{ name: 'test' }]
+              },
+            },
           },
           queries: {
             customQuery: {
               type: 'Boolean',
               resolve: () => true,
+            },
+            queryWithCustomTypes: {
+              type: 'Array',
+              typeValue: 'Object',
+              required: true,
+              typeValueRequired: true,
+              outputObject: {
+                name: 'TestQuery',
+                fields: {
+                  name: {
+                    type: 'String',
+                  },
+                },
+              },
+              resolve: () => {
+                return [{ name: 'test' }]
+              },
             },
           },
         },
@@ -417,6 +451,24 @@ describe('GraphqlSchema', () => {
     })
 
     await wabe.close()
+  })
+
+  it('should support custom output types for queries and mutations', async () => {
+    expect(
+      getTypeFromGraphQLSchema({
+        schema,
+        type: 'Query',
+        name: 'queryWithCustomTypes',
+      }).output,
+    ).toEqual('[TestQuery!]!')
+
+    expect(
+      getTypeFromGraphQLSchema({
+        schema,
+        type: 'Mutation',
+        name: 'mutationWithCustomTypes',
+      }).output,
+    ).toEqual('[TestMutation!]!')
   })
 
   it('should support file type', async () => {

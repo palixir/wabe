@@ -19,6 +19,7 @@ import type {
   MutationResolver,
   QueryResolver,
   Schema,
+  SchemaFields,
 } from '../schema'
 import { firstLetterInLowerCase } from '../utils'
 import type { DevWabeTypes } from '../utils/helper'
@@ -471,6 +472,63 @@ export class GraphQLSchema {
     }
   }
 
+  _getGraphQLOutputType(
+    currentQueryOrMutation:
+      | QueryResolver<DevWabeTypes>
+      | MutationResolver<DevWabeTypes>,
+    graphqlParser: GraphqlParserFactory,
+    currentArgs: SchemaFields<DevWabeTypes>,
+  ): GraphQLOutputType | undefined {
+    if (currentQueryOrMutation.type === 'Object') {
+      const objectGraphqlParser = graphqlParser({
+        schemaFields: currentQueryOrMutation.outputObject.fields,
+        graphqlObjectType: 'Object',
+        allObjects: this.allObjects,
+      })
+
+      return new GraphQLObjectType({
+        name: currentQueryOrMutation.outputObject.name,
+        fields: () =>
+          objectGraphqlParser.getGraphqlFields(
+            currentQueryOrMutation.outputObject.name,
+          ),
+      })
+    }
+
+    if (
+      currentQueryOrMutation.type === 'Array' &&
+      currentQueryOrMutation.typeValue === 'Object'
+    ) {
+      const outputObject = graphqlParser({
+        schemaFields: currentQueryOrMutation.outputObject.fields,
+        graphqlObjectType: 'Object',
+        allObjects: this.allObjects,
+      })
+
+      const graphqlObject = new GraphQLObjectType({
+        name: currentQueryOrMutation.outputObject.name,
+        fields: () =>
+          outputObject.getGraphqlFields(
+            currentQueryOrMutation.outputObject.name,
+          ),
+      })
+
+      return new GraphQLList(
+        currentQueryOrMutation.typeValueRequired
+          ? new GraphQLNonNull(graphqlObject)
+          : graphqlObject,
+      )
+    }
+
+    const graphqlParserWithInput = graphqlParser({
+      schemaFields: currentArgs,
+      graphqlObjectType: 'Object',
+      allObjects: this.allObjects,
+    })
+
+    return graphqlParserWithInput.getGraphqlType(currentQueryOrMutation)
+  }
+
   createCustomMutations({
     resolvers,
     graphqlParser,
@@ -495,29 +553,11 @@ export class GraphQLSchema {
           allObjects: this.allObjects,
         })
 
-        const getGraphqlOutputType = (): GraphQLOutputType | undefined => {
-          if (currentMutation.type !== 'Object')
-            return graphqlParserWithInput.getGraphqlType({
-              ...currentMutation,
-            })
-
-          const objectGraphqlParser = graphqlParser({
-            schemaFields: currentMutation.outputObject.fields,
-            graphqlObjectType: 'Object',
-            allObjects: this.allObjects,
-          })
-
-          return new GraphQLObjectType({
-            name: currentMutation.outputObject.name,
-            fields: () => ({
-              ...objectGraphqlParser.getGraphqlFields(
-                currentMutation.outputObject.name,
-              ),
-            }),
-          })
-        }
-
-        const outputType = getGraphqlOutputType()
+        const outputType = this._getGraphQLOutputType(
+          currentMutation,
+          graphqlParser,
+          input,
+        )
 
         if (!outputType) throw new Error('Invalid mutation output type')
 
@@ -563,31 +603,11 @@ export class GraphQLSchema {
           allObjects: this.allObjects,
         })
 
-        const getGraphqlOutputType = (): GraphQLOutputType | undefined => {
-          if (currentQuery.type !== 'Object')
-            return graphqlParserWithInput.getGraphqlType({
-              ...currentQuery,
-            })
-
-          if (currentQuery.type === 'Object') {
-            const objectGraphqlParser = graphqlParser({
-              schemaFields: currentQuery.outputObject.fields,
-              graphqlObjectType: 'Object',
-              allObjects: this.allObjects,
-            })
-
-            return new GraphQLObjectType({
-              name: currentQuery.outputObject.name,
-              fields: () => ({
-                ...objectGraphqlParser.getGraphqlFields(
-                  currentQuery.outputObject.name,
-                ),
-              }),
-            })
-          }
-        }
-
-        const outputType = getGraphqlOutputType()
+        const outputType = this._getGraphQLOutputType(
+          currentQuery,
+          graphqlParser,
+          currentArgs,
+        )
 
         if (!outputType) throw new Error('Invalid mutation output type')
 
