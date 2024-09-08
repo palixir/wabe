@@ -9,11 +9,7 @@ import { verifyChallengeResolver } from '../authentication/resolvers/verifyChall
 import type { WabeConfig, WabeTypes } from '../server'
 import { meResolver } from './resolvers/meResolver'
 import { sendEmailResolver } from './resolvers/sendEmail'
-import {
-  PaymentMethod,
-  PaymentMode,
-  PaymentReccuringInterval,
-} from '../payment'
+import { PaymentMode, PaymentReccuringInterval } from '../payment'
 import { createPaymentResolver } from './resolvers/createPayment'
 
 export type WabePrimaryTypes =
