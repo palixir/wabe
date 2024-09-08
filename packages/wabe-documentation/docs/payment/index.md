@@ -35,6 +35,57 @@ Create a payment with the payment provider. Returns the url to redirect the user
 createPayment(input: CreatePaymentInput!): String
 ```
 
+## Cancel subscription
+
+You can cancel a subscription by using the default graphql mutation `cancelSubscription`.
+
+With controller :
+```ts
+const fn = async (context: WabeContext<any>) => {
+  await context.wabe.controllers.payment.cancelSubscription({
+    email: 'john.doe@example.com',
+  })
+}
+```
+
+With GraphQL mutation :
+
+```graphql
+input CancelSubscriptionInput {
+  email: Email!
+}
+"""
+Cancel a subscription
+"""
+cancelSubscription(input: CancelSubscriptionInput!): String
+```
+
+## Get invoices
+
+You can get the invoices of a customer by using the default graphql query `getInvoices`.
+
+With controller :
+
+```ts
+const fn = async (context: WabeContext<any>) => {
+  const invoices = await context.wabe.controllers.payment.getInvoices({
+    email: 'john.doe@example.com',
+  })
+}
+```
+
+With GraphQL query :
+
+```graphql
+input GetInvoicesInput {
+  email: Email!
+}
+"""
+Get invoices of a customer
+"""
+getInvoices(input: GetInvoicesInput!): [Invoice]!
+```
+
 ## Stripe adapter
 
 You can easily initialize an adapter like this by passing your API key as a parameter to the adapter.

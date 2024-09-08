@@ -350,6 +350,52 @@ export class Schema<T extends WabeTypes> {
           },
           resolve: meResolver,
         },
+        getInvoices: {
+          type: 'Array',
+          typeValue: 'Object',
+          required: true,
+          outputObject: {
+            name: 'Invoice',
+            fields: {
+              amountDue: {
+                type: 'Int',
+                required: true,
+              },
+              amountPaid: {
+                type: 'Int',
+                required: true,
+              },
+              currency: {
+                type: 'Currency',
+                required: true,
+              },
+              id: {
+                type: 'String',
+                required: true,
+              },
+              created: {
+                type: 'Int',
+                required: true,
+              },
+              invoiceUrl: {
+                type: 'String',
+                required: true,
+              },
+              isPaid: {
+                type: 'Boolean',
+                required: true,
+              },
+            },
+          },
+          description: 'Get invoices of a customer',
+          args: {
+            email: {
+              type: 'Email',
+              required: true,
+            },
+          },
+          resolve: getInvoicesResolver,
+        },
       },
       mutations: {
         createPayment: {
@@ -420,54 +466,7 @@ export class Schema<T extends WabeTypes> {
           },
           resolve: cancelSubscriptionResolver,
         },
-        getInvoices: {
-          type: 'Array',
-          typeValue: 'Object',
-          required: true,
-          outputObject: {
-            name: 'Invoice',
-            fields: {
-              amountDue: {
-                type: 'Int',
-                required: true,
-              },
-              amountPaid: {
-                type: 'Int',
-                required: true,
-              },
-              currency: {
-                type: 'Currency',
-                required: true,
-              },
-              id: {
-                type: 'String',
-                required: true,
-              },
-              created: {
-                type: 'Int',
-                required: true,
-              },
-              invoiceUrl: {
-                type: 'String',
-                required: true,
-              },
-              isPaid: {
-                type: 'Boolean',
-                required: true,
-              },
-            },
-          },
-          description: 'Get invoices of a customer',
-          args: {
-            input: {
-              email: {
-                type: 'Email',
-                required: true,
-              },
-            },
-          },
-          resolve: getInvoicesResolver,
-        },
+
         sendEmail: {
           type: 'String',
           description:

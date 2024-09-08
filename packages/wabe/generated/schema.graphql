@@ -520,6 +520,9 @@ type Query {
   """Hello world description"""
   helloWorld(name: String!): String
   me: MeOutput
+
+  """Get invoices of a customer"""
+  getInvoices(email: Email!): [Invoice]!
 }
 
 """User class"""
@@ -791,6 +794,16 @@ type MeOutput {
   user: User
 }
 
+type Invoice {
+  amountDue: Int!
+  amountPaid: Int!
+  currency: Currency!
+  id: String!
+  created: Int!
+  invoiceUrl: String!
+  isPaid: Boolean!
+}
+
 type Mutation {
   """User class"""
   createUser(input: CreateUserInput!): CreateUserPayload
@@ -836,9 +849,6 @@ type Mutation {
   """
   createPayment(input: CreatePaymentInput!): String
   cancelSubscription(input: CancelSubscriptionInput!): Boolean
-
-  """Get invoices of a customer"""
-  getInvoices(input: GetInvoicesInput!): [Invoice]!
 
   """Send basic email with text and html, returns the id of the email"""
   sendEmail(input: SendEmailInput!): String
@@ -1195,20 +1205,6 @@ input CreatePaymentProductInput {
 }
 
 input CancelSubscriptionInput {
-  email: Email!
-}
-
-type Invoice {
-  amountDue: Int!
-  amountPaid: Int!
-  currency: Currency!
-  id: String!
-  created: Int!
-  invoiceUrl: String!
-  isPaid: Boolean!
-}
-
-input GetInvoicesInput {
   email: Email!
 }
 
