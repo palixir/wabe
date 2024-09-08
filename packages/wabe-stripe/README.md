@@ -11,23 +11,23 @@
 
 Wabe is an open-source backend that allows you to create your own fully customizable backend in just a few minutes. It handles database access, automatic GraphQL API generation, authentication with various methods (classic or OAuth), permissions, security, and more for you.
 
-## Install for wabe-resend
+## Install for wabe-stripe
 
 ```sh
 bun install wabe # On bun
 npm install wabe # On npm
 yarn add wabe # On yarn
 
-bun install wabe-resend # On bun
-npm install wabe-resend # On npm
-yarn add wabe-resend # On yarn
+bun install wabe-stripe # On bun
+npm install wabe-stripe # On npm
+yarn add wabe-stripe # On yarn
 ```
 
 ## Basic example of wabe-resend usage
 
 ```ts
-import { DatabaseEnum, Wabe } from "wabe";
-import { ResendAdapter } from "wabe-resend";
+import { DatabaseEnum, Wabe, PaymentMode } from "wabe";
+import { StripeAdapter } from "wabe-stripe";
 
 const run = async () => {
   // Ensure your database is running before run the file
@@ -41,20 +41,26 @@ const run = async () => {
       url: "mongodb://127.0.0.1:27045",
       name: "WabeApp",
     },
-    email: {
-      adapter : new ResendAdapter("YOUR_RESEND_API_KEY"),
-    }
+    payment: {
+      adapter: new StripeAdapter('YOU_STRIPE_SECRET_KEY'),
+      currency: 'usd',
+      supportedPaymentMethods: ['card', 'paypal'],
+    },
     port: 3000,
   });
 
   await wabe.start();
 
-  await wabe.controllers.email.send({
-    from : "test@test.com",
-    to: ["target@gmail.com"],
-    subject: "Test",
-    text: "Test",
-  });
+  await wabe.controllers.payment.createPayment({
+      cancelUrl: 'https://example.com/cancel',
+      successUrl: 'https://example.com/success',
+      customerEmail: 'john.doe@example.com',
+      paymentMode: PaymentMode.Subscription,
+      // Compute the taxe automatically or not
+      automaticTax: true,
+      recurringInterval: 'month',
+      products: [{ name: 'MacBook Pro', unitAmount: 100, quantity: 1 }],
+  })
 };
 
 await run();

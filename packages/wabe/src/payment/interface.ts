@@ -14,7 +14,13 @@ export enum PaymentMode {
   Subscription = 'subscription',
 }
 
-export type PaymentMethod = 'card'
+export type PaymentMethod =
+  | 'card'
+  | 'paypal'
+  | 'link'
+  | 'sepa_debit'
+  | 'revolut_pay'
+  | 'us_bank_account'
 
 export enum PaymentReccuringInterval {
   Month = 'month',
