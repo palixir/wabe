@@ -19,6 +19,13 @@ export type Product = {
   quantity: number
 }
 
+export interface PaymentConfig {
+  adapter: PaymentAdapter
+  products: Array<Product>
+  supportedPaymentMethods: Array<PaymentMethod>
+  currency: Currency
+}
+
 export type Invoice = {
   amountDue: number
   amountPaid: number

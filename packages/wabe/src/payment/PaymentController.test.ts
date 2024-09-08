@@ -1,6 +1,131 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it, mock } from 'bun:test'
 import { PaymentController } from './PaymentController'
 
 describe('PaymentController', () => {
-  it('should test', async () => {})
+  it("should call the adapter's createCustomer method", async () => {
+    const mockCreateCustomer = mock(() => {})
+
+    const adapter = {
+      createCustomer: mockCreateCustomer,
+    } as any
+
+    const paymentController = new PaymentController({
+      adapter,
+      currency: 'eur',
+      products: [{ name: 'Product', unitAmount: 10, quantity: 1 }],
+      supportedPaymentMethods: ['card'],
+    })
+
+    await paymentController.createCustomer({
+      customerName: 'John Doe',
+      customerEmail: 'john@doe.com',
+      customerPhone: '+33612345678',
+      address: {
+        city: 'Paris',
+        country: 'France',
+        line1: '1 rue de la Paix',
+        line2: '75008 Paris',
+        postalCode: '75008',
+        state: 'Paris',
+      },
+      paymentMethod: 'card',
+    })
+
+    expect(mockCreateCustomer).toHaveBeenCalledTimes(1)
+    expect(mockCreateCustomer).toHaveBeenCalledWith({
+      customerName: 'John Doe',
+      customerEmail: 'john@doe.com',
+      customerPhone: '+33612345678',
+      address: {
+        city: 'Paris',
+        country: 'France',
+        line1: '1 rue de la Paix',
+        line2: '75008 Paris',
+        postalCode: '75008',
+        state: 'Paris',
+      },
+      paymentMethod: 'card',
+    })
+  })
+
+  it("should call the adapter's createPayment method", async () => {
+    const mockCreatePayment = mock(() => {})
+
+    const adapter = {
+      createPayment: mockCreatePayment,
+    } as any
+
+    const paymentController = new PaymentController({
+      adapter,
+      currency: 'eur',
+      products: [{ name: 'Product', unitAmount: 10, quantity: 1 }],
+      supportedPaymentMethods: ['card'],
+    })
+
+    await paymentController.createPayment({
+      customerEmail: 'john@doe.com',
+      successUrl: 'https://example.com/success',
+      cancelUrl: 'https://example.com/cancel',
+      paymentMode: 'payment',
+    })
+
+    expect(mockCreatePayment).toHaveBeenCalledTimes(1)
+    expect(mockCreatePayment).toHaveBeenCalledWith({
+      customerEmail: 'john@doe.com',
+      paymentMode: 'payment',
+      paymentMethod: ['card'],
+      successUrl: 'https://example.com/success',
+      cancelUrl: 'https://example.com/cancel',
+      currency: 'eur',
+      products: [{ name: 'Product', unitAmount: 10, quantity: 1 }],
+    })
+  })
+
+  it("should call the adapter's cancelSubscription method", async () => {
+    const mockCancelSubscription = mock(() => {})
+
+    const adapter = {
+      cancelSubscription: mockCancelSubscription,
+    } as any
+
+    const paymentController = new PaymentController({
+      adapter,
+      currency: 'eur',
+      products: [{ name: 'Product', unitAmount: 10, quantity: 1 }],
+      supportedPaymentMethods: ['card'],
+    })
+
+    await paymentController.cancelSubscription({
+      email: 'john@doe.com',
+    })
+
+    expect(mockCancelSubscription).toHaveBeenCalledTimes(1)
+    expect(mockCancelSubscription).toHaveBeenCalledWith({
+      email: 'john@doe.com',
+    })
+  })
+
+  it("should call the adapter's getInvoices method", async () => {
+    const mockGetInvoices = mock(() => {})
+
+    const adapter = {
+      getInvoices: mockGetInvoices,
+    } as any
+
+    const paymentController = new PaymentController({
+      adapter,
+      currency: 'eur',
+      products: [{ name: 'Product', unitAmount: 10, quantity: 1 }],
+      supportedPaymentMethods: ['card'],
+    })
+
+    await paymentController.getInvoices({
+      email: 'john@doe.com',
+    })
+
+    expect(mockGetInvoices).toHaveBeenCalledTimes(1)
+    expect(mockGetInvoices).toHaveBeenCalledWith({
+      email: 'john@doe.com',
+    })
+  })
 })
