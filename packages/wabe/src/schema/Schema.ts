@@ -136,7 +136,7 @@ export type MutationResolver<T extends WabeTypes> = {
 } & (
   | { type: WabePrimaryTypes }
   | { type: 'Object'; outputObject: ClassInterface<T> }
-  | { type: 'Array'; typeValue: WabePrimaryTypes }
+  | { type: 'Array'; typeValue: WabePrimaryTypes | WabeCustomTypes }
 )
 
 export type TypeResolver<T extends WabeTypes> = {
@@ -399,6 +399,59 @@ export class Schema<T extends WabeTypes> {
             },
           },
           resolve: createPaymentResolver,
+        },
+        cancelSubscription: {
+          type: 'Boolean',
+          args: {
+            input: {
+              email: {
+                type: 'Email',
+                required: true,
+              },
+            },
+          },
+          resolve: cancelSubscriptionResolver,
+        },
+        getInvoices: {
+          type: 'Array',
+          typeValue: 'Object',
+
+          object: {
+            name: 'Invoice',
+            fields: {
+              amountDue: {
+                type: 'Int',
+              },
+              amountPaid: {
+                type: 'Int',
+              },
+              currency: {
+                type: 'Currency',
+              },
+              id: {
+                type: 'String',
+              },
+              created: {
+                type: 'Int',
+              },
+              invoiceUrl: {
+                type: 'String',
+              },
+              isPaid: {
+                type: 'Boolean',
+              },
+            },
+          },
+          description: 'Get invoices of a customer',
+          args: {
+            input: {
+              email: {
+                type: 'Email',
+                required: true,
+              },
+            },
+          },
+          resolve: getInvoicesResolver,
         },
         sendEmail: {
           type: 'String',
