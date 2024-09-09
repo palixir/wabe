@@ -1,6 +1,6 @@
 {
   "name": "wabe",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "Your backend in minutes not days",
   "homepage": "https://wabe.dev",
   "author": {
@@ -8,14 +8,19 @@
     "url": "https://github.com/coratgerl"
   },
   "license": "Apache-2.0",
-  "keywords": ["backend", "wabe", "graphql", "baas"],
+  "keywords": [
+    "backend",
+    "wabe",
+    "graphql",
+    "baas"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/palixir/wabe.git"
   },
   "main": "dist/index.js",
   "scripts": {
-    "build": "bun generate:codegen && bun build --outdir dist $(pwd)/src/index.ts --target=node && bun generate:types",
+    "build": "bun generate:codegen && bun build --outdir dist $(pwd)/src/index.ts --target=node --external=argon2 && bun generate:types",
     "generate:types": "dts-bundle-generator -o dist/index.d.ts src/index.ts --no-check --external-imports=wobe",
     "check": "tsc --project $(pwd)/tsconfig.json",
     "lint": "biome lint . --no-errors-on-unmatched --config-path=../../",
