@@ -157,7 +157,7 @@ export class StripeAdapter implements PaymentAdapter {
   }
 
   async getTotalRevenue({ startRangeTimestamp, endRangeTimestamp, charge }: GetTotalRevenueOptions) {
-    const recursiveToGetGrossRevenue = async (totalRevenue = 0, idToStart?: string): Promise<number> => {
+    const recursiveToGetTotalRevenue = async (totalRevenue = 0, idToStart?: string): Promise<number> => {
       const transactions = await this.stripe.balanceTransactions.list({
         limit: 100,
         starting_after: idToStart,
@@ -176,9 +176,9 @@ export class StripeAdapter implements PaymentAdapter {
 
       const lastElement = transactions.data[transactions.data.length - 1]
 
-      return recursiveToGetGrossRevenue(newTotalRevenue, lastElement.id)
+      return recursiveToGetTotalRevenue(newTotalRevenue, lastElement.id)
     }
 
-    return recursiveToGetGrossRevenue()
+    return recursiveToGetTotalRevenue()
   }
 }
