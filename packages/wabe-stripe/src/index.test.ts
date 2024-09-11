@@ -3,13 +3,13 @@ import { StripeAdapter } from '.'
 import Stripe from 'stripe'
 import { Currency, PaymentMode } from 'wabe'
 
-const mockListCustomers = mock(() => { })
-const mockCreateCustomer = mock(() => { })
-const mockCreatePayment = mock(() => { })
-const mockListSubscriptions = mock(() => { })
-const mockCancelSubscription = mock(() => { })
-const mockGetInvoices = mock(() => { })
-const mockListTransactions = mock(() => { })
+const mockListCustomers = mock(() => {})
+const mockCreateCustomer = mock(() => {})
+const mockCreatePayment = mock(() => {})
+const mockListSubscriptions = mock(() => {})
+const mockCancelSubscription = mock(() => {})
+const mockGetInvoices = mock(() => {})
+const mockListTransactions = mock(() => {})
 
 spyOn(Stripe.prototype, 'customers').mockReturnValue({
   create: mockCreateCustomer,
@@ -46,7 +46,7 @@ describe('wabe-stripe', () => {
     mockListTransactions.mockClear()
   })
 
-  it("should get the total gross revenue", async () => {
+  it('should get the total gross revenue', async () => {
     const adapter = new StripeAdapter('API_KEY')
 
     mockListTransactions.mockResolvedValue({
@@ -68,7 +68,7 @@ describe('wabe-stripe', () => {
     } as never)
 
     await adapter.getTotalRevenue({
-      charge: 'gross'
+      charge: 'gross',
     })
 
     expect(mockListTransactions).toHaveBeenCalledTimes(1)
@@ -78,11 +78,11 @@ describe('wabe-stripe', () => {
       created: {
         gte: undefined,
         lt: undefined,
-      }
+      },
     })
   })
 
-  it("should get the total net revenue", async () => {
+  it('should get the total net revenue', async () => {
     const adapter = new StripeAdapter('API_KEY')
 
     mockListTransactions.mockResolvedValue({
@@ -104,7 +104,7 @@ describe('wabe-stripe', () => {
     } as never)
 
     await adapter.getTotalRevenue({
-      charge: 'net'
+      charge: 'net',
     })
 
     expect(mockListTransactions).toHaveBeenCalledTimes(1)
@@ -113,7 +113,7 @@ describe('wabe-stripe', () => {
       created: {
         gte: undefined,
         lt: undefined,
-      }
+      },
     })
   })
 

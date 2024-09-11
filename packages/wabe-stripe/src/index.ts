@@ -10,7 +10,6 @@ import type {
   PaymentAdapter,
 } from 'wabe'
 
-
 export class StripeAdapter implements PaymentAdapter {
   private stripe: Stripe
 
@@ -79,10 +78,10 @@ export class StripeAdapter implements PaymentAdapter {
         unit_amount: unitAmount,
         ...(paymentMode === 'subscription'
           ? {
-            recurring: {
-              interval: recurringInterval || 'month',
-            },
-          }
+              recurring: {
+                interval: recurringInterval || 'month',
+              },
+            }
           : {}),
       },
       quantity,
@@ -156,16 +155,23 @@ export class StripeAdapter implements PaymentAdapter {
     return formatInvoices
   }
 
-  async getTotalRevenue({ startRangeTimestamp, endRangeTimestamp, charge }: GetTotalRevenueOptions) {
-    const recursiveToGetTotalRevenue = async (totalRevenue = 0, idToStart?: string): Promise<number> => {
+  async getTotalRevenue({
+    startRangeTimestamp,
+    endRangeTimestamp,
+    charge,
+  }: GetTotalRevenueOptions) {
+    const recursiveToGetTotalRevenue = async (
+      totalRevenue = 0,
+      idToStart?: string,
+    ): Promise<number> => {
       const transactions = await this.stripe.balanceTransactions.list({
         limit: 100,
         starting_after: idToStart,
         created: {
           gte: startRangeTimestamp,
-          lt: endRangeTimestamp
+          lt: endRangeTimestamp,
         },
-        type: charge === 'net' ? undefined : 'charge'
+        type: charge === 'net' ? undefined : 'charge',
       })
 
       const newTotalRevenue = transactions.data.reduce((acc, transaction) => {
