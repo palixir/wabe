@@ -6,6 +6,7 @@ import type {
   PaymentAdapter,
   PaymentConfig,
   GetTotalRevenueOptions,
+  GetAllTransactionsOptions,
 } from './interface'
 
 export class PaymentController implements PaymentAdapter {
@@ -41,5 +42,9 @@ export class PaymentController implements PaymentAdapter {
 
   async getTotalRevenue(options: GetTotalRevenueOptions) {
     return this.adapter.getTotalRevenue(options)
+  }
+
+  async getAllTransactions(options: GetAllTransactionsOptions) {
+    return this.adapter.getAllTransactions(options)
   }
 }

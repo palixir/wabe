@@ -10,10 +10,16 @@ const mockListSubscriptions = mock(() => {})
 const mockCancelSubscription = mock(() => {})
 const mockGetInvoices = mock(() => {})
 const mockListTransactions = mock(() => {})
+const mockInvoicesRetrieve = mock(() => {})
+const mockSubscriptionsRetrieve = mock(() => {})
+const mockChargesRetrieve = mock(() => {})
+const mockCustomersRetrieve = mock(() => {})
+const mockListCharges = mock(() => {})
 
 spyOn(Stripe.prototype, 'customers').mockReturnValue({
   create: mockCreateCustomer,
   list: mockListCustomers,
+  retrieve: mockCustomersRetrieve,
 } as never)
 
 spyOn(Stripe.prototype, 'checkout').mockReturnValue({
@@ -25,14 +31,21 @@ spyOn(Stripe.prototype, 'checkout').mockReturnValue({
 spyOn(Stripe.prototype, 'subscriptions').mockReturnValue({
   list: mockListSubscriptions,
   cancel: mockCancelSubscription,
+  retrieve: mockSubscriptionsRetrieve,
 } as never)
 
 spyOn(Stripe.prototype, 'invoices').mockReturnValue({
   list: mockGetInvoices,
+  retrieve: mockInvoicesRetrieve,
 } as never)
 
 spyOn(Stripe.prototype, 'balanceTransactions').mockReturnValue({
   list: mockListTransactions,
+} as never)
+
+spyOn(Stripe.prototype, 'charges').mockReturnValue({
+  list: mockListCharges,
+  retrieve: mockChargesRetrieve,
 } as never)
 
 describe('wabe-stripe', () => {
@@ -44,6 +57,186 @@ describe('wabe-stripe', () => {
     mockCancelSubscription.mockClear()
     mockGetInvoices.mockClear()
     mockListTransactions.mockClear()
+    mockInvoicesRetrieve.mockClear()
+    mockSubscriptionsRetrieve.mockClear()
+    mockChargesRetrieve.mockClear()
+    mockCustomersRetrieve.mockClear()
+    mockListCharges.mockClear()
+  })
+
+  it('should get all transactions with first to 50', async () => {
+    const adapter = new StripeAdapter('API_KEY')
+
+    mockListCharges.mockResolvedValue({
+      data: [
+        {
+          id: 'txn_123',
+          amount: 100,
+          created: 1679481600,
+          currency: Currency.EUR,
+        },
+        {
+          id: 'txn_124',
+          amount: 200,
+          created: 1679481600,
+          currency: Currency.EUR,
+        },
+        {
+          id: 'txn_125',
+          amount: 300,
+          created: 1679481600,
+          currency: Currency.EUR,
+        },
+      ],
+      has_more: false,
+    } as never)
+
+    mockInvoicesRetrieve.mockResolvedValue({
+      subscription: 'sub_123',
+    } as never)
+
+    mockSubscriptionsRetrieve.mockResolvedValue({
+      items: {
+        data: [
+          {
+            plan: {
+              interval_count: 1,
+              interval: 'month',
+            },
+          },
+        ],
+      },
+    } as never)
+
+    mockCustomersRetrieve.mockResolvedValue({
+      email: 'test@wabe.dev',
+    } as never)
+
+    const res = await adapter.getAllTransactions({
+      startRangeTimestamp: 1679481600,
+      endRangeTimestamp: 1679481600,
+      first: 50,
+    })
+
+    expect(mockListCharges).toHaveBeenCalledTimes(1)
+    expect(mockListCharges).toHaveBeenCalledWith({
+      limit: 50,
+      created: {
+        gte: 1679481600,
+        lt: 1679481600,
+      },
+    })
+
+    expect(res).toEqual([
+      {
+        customerEmail: 'test@wabe.dev',
+        amount: 100,
+        currency: Currency.EUR,
+        created: 1679481600,
+        isSubscription: true,
+        reccuringInterval: 'month',
+      },
+      {
+        customerEmail: 'test@wabe.dev',
+        amount: 200,
+        currency: Currency.EUR,
+        created: 1679481600,
+        isSubscription: true,
+        reccuringInterval: 'month',
+      },
+      {
+        customerEmail: 'test@wabe.dev',
+        amount: 300,
+        currency: Currency.EUR,
+        created: 1679481600,
+        isSubscription: true,
+        reccuringInterval: 'month',
+      },
+    ])
+  })
+
+  it('should return isSubscription false if no subscription found', async () => {
+    const adapter = new StripeAdapter('API_KEY')
+
+    mockListCharges.mockResolvedValue({
+      data: [
+        {
+          id: 'txn_123',
+          amount: 100,
+          created: 1679481600,
+          currency: Currency.EUR,
+        },
+        {
+          id: 'txn_124',
+          amount: 200,
+          created: 1679481600,
+          currency: Currency.EUR,
+        },
+        {
+          id: 'txn_125',
+          amount: 300,
+          created: 1679481600,
+          currency: Currency.EUR,
+        },
+      ],
+      has_more: false,
+    } as never)
+
+    mockInvoicesRetrieve.mockResolvedValue({
+      subscription: undefined,
+    } as never)
+
+    mockSubscriptionsRetrieve.mockResolvedValue({
+      items: {
+        data: [
+          {
+            plan: {},
+          },
+        ],
+      },
+    } as never)
+
+    mockCustomersRetrieve.mockResolvedValue({
+      email: 'test@wabe.dev',
+    } as never)
+
+    const res = await adapter.getAllTransactions({
+      startRangeTimestamp: 1679481600,
+      endRangeTimestamp: 1679481600,
+    })
+
+    expect(mockListCharges).toHaveBeenCalledTimes(1)
+    expect(mockListCharges).toHaveBeenCalledWith({
+      limit: 100,
+      created: {
+        gte: 1679481600,
+        lt: 1679481600,
+      },
+    })
+
+    expect(res).toEqual([
+      {
+        customerEmail: 'test@wabe.dev',
+        amount: 100,
+        currency: Currency.EUR,
+        created: 1679481600,
+        isSubscription: false,
+      },
+      {
+        customerEmail: 'test@wabe.dev',
+        amount: 200,
+        currency: Currency.EUR,
+        created: 1679481600,
+        isSubscription: false,
+      },
+      {
+        customerEmail: 'test@wabe.dev',
+        amount: 300,
+        currency: Currency.EUR,
+        created: 1679481600,
+        isSubscription: false,
+      },
+    ])
   })
 
   it('should get the total gross revenue', async () => {
