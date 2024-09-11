@@ -5,10 +5,13 @@ import type {
   CreatePaymentOptions,
   Currency,
   GetInvoicesOptions,
+  GetTotalRevenueOptions,
   Invoice,
+  PaymentAdapter,
 } from 'wabe'
 
-export class StripeAdapter {
+
+export class StripeAdapter implements PaymentAdapter {
   private stripe: Stripe
 
   constructor(apiKey: string) {
@@ -43,6 +46,8 @@ export class StripeAdapter {
       payment_method: paymentMethod,
     })
 
+    if (!customer.email) throw new Error('Error creating Stripe customer')
+
     return customer.email
   }
 
@@ -74,10 +79,10 @@ export class StripeAdapter {
         unit_amount: unitAmount,
         ...(paymentMode === 'subscription'
           ? {
-              recurring: {
-                interval: recurringInterval || 'month',
-              },
-            }
+            recurring: {
+              interval: recurringInterval || 'month',
+            },
+          }
           : {}),
       },
       quantity,
@@ -149,5 +154,31 @@ export class StripeAdapter {
       })) || []
 
     return formatInvoices
+  }
+
+  async getTotalRevenue({ startRangeTimestamp, endRangeTimestamp, charge }: GetTotalRevenueOptions) {
+    const recursiveToGetGrossRevenue = async (totalRevenue = 0, idToStart?: string): Promise<number> => {
+      const transactions = await this.stripe.balanceTransactions.list({
+        limit: 100,
+        starting_after: idToStart,
+        created: {
+          gte: startRangeTimestamp,
+          lt: endRangeTimestamp
+        },
+        type: charge === 'net' ? undefined : 'charge'
+      })
+
+      const newTotalRevenue = transactions.data.reduce((acc, transaction) => {
+        return acc + transaction.amount
+      }, totalRevenue)
+
+      if (!transactions.has_more) return newTotalRevenue / 100
+
+      const lastElement = transactions.data[transactions.data.length - 1]
+
+      return recursiveToGetGrossRevenue(newTotalRevenue, lastElement.id)
+    }
+
+    return recursiveToGetGrossRevenue()
   }
 }
