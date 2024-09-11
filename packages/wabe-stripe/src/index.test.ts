@@ -9,6 +9,7 @@ const mockCreatePayment = mock(() => {})
 const mockListSubscriptions = mock(() => {})
 const mockCancelSubscription = mock(() => {})
 const mockGetInvoices = mock(() => {})
+const mockListTransactions = mock(() => {})
 
 spyOn(Stripe.prototype, 'customers').mockReturnValue({
   create: mockCreateCustomer,
@@ -30,6 +31,10 @@ spyOn(Stripe.prototype, 'invoices').mockReturnValue({
   list: mockGetInvoices,
 } as never)
 
+spyOn(Stripe.prototype, 'balanceTransactions').mockReturnValue({
+  list: mockListTransactions,
+} as never)
+
 describe('wabe-stripe', () => {
   beforeEach(() => {
     mockListCustomers.mockClear()
@@ -38,6 +43,80 @@ describe('wabe-stripe', () => {
     mockListSubscriptions.mockClear()
     mockCancelSubscription.mockClear()
     mockGetInvoices.mockClear()
+    mockListTransactions.mockClear()
+  })
+
+  it('should get the total gross revenue', async () => {
+    const adapter = new StripeAdapter('API_KEY')
+
+    mockListTransactions.mockResolvedValue({
+      data: [
+        {
+          id: 'txn_123',
+          amount: 100,
+        },
+        {
+          id: 'txn_124',
+          amount: 200,
+        },
+        {
+          id: 'txn_125',
+          amount: 300,
+        },
+      ],
+      has_more: false,
+    } as never)
+
+    await adapter.getTotalRevenue({
+      charge: 'gross',
+    })
+
+    expect(mockListTransactions).toHaveBeenCalledTimes(1)
+    expect(mockListTransactions).toHaveBeenCalledWith({
+      limit: 100,
+      type: 'charge',
+      created: {
+        gte: undefined,
+        lt: undefined,
+      },
+    })
+  })
+
+  it('should get the total net revenue', async () => {
+    const adapter = new StripeAdapter('API_KEY')
+
+    mockListTransactions.mockResolvedValue({
+      data: [
+        {
+          id: 'txn_123',
+          amount: 100,
+        },
+        {
+          id: 'txn_124',
+          amount: 200,
+        },
+        {
+          id: 'txn_125',
+          amount: 300,
+        },
+      ],
+      has_more: false,
+    } as never)
+
+    await adapter.getTotalRevenue({
+      charge: 'net',
+      endRangeTimestamp: 1679481600,
+      startRangeTimestamp: 1679481600,
+    })
+
+    expect(mockListTransactions).toHaveBeenCalledTimes(1)
+    expect(mockListTransactions).toHaveBeenCalledWith({
+      limit: 100,
+      created: {
+        gte: 1679481600,
+        lt: 1679481600,
+      },
+    })
   })
 
   it('should create a customer', async () => {

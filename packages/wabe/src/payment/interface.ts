@@ -80,6 +80,12 @@ export type GetInvoicesOptions = {
   email: string
 }
 
+export type GetTotalRevenueOptions = {
+  startRangeTimestamp?: number
+  endRangeTimestamp?: number
+  charge: 'net' | 'gross'
+}
+
 export interface PaymentAdapter {
   /**
    * Create a customer
@@ -104,4 +110,10 @@ export interface PaymentAdapter {
    * @returns The invoices of a customer
    */
   getInvoices: (options: GetInvoicesOptions) => Promise<Invoice[]>
+  /**
+   * Get total revenue
+   * @param options The type of charge (net or gross) and the start and end range timestamps to get the total revenue
+   * @returns The total amount
+   */
+  getTotalRevenue: (options: GetTotalRevenueOptions) => Promise<number>
 }
