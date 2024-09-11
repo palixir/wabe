@@ -112,7 +112,7 @@ export interface PaymentAdapter {
   getInvoices: (options: GetInvoicesOptions) => Promise<Invoice[]>
   /**
    * Get total revenue
-   * @param options OPTIONAL: The start and end range timestamps to get the total revenue
+   * @param options The type of charge (net or gross) and the start and end range timestamps to get the total revenue
    * @returns The total amount
    */
   getTotalRevenue: (options: GetTotalRevenueOptions) => Promise<number>

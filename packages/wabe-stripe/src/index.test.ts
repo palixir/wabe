@@ -105,14 +105,16 @@ describe('wabe-stripe', () => {
 
     await adapter.getTotalRevenue({
       charge: 'net',
+      endRangeTimestamp: 1679481600,
+      startRangeTimestamp: 1679481600,
     })
 
     expect(mockListTransactions).toHaveBeenCalledTimes(1)
     expect(mockListTransactions).toHaveBeenCalledWith({
       limit: 100,
       created: {
-        gte: undefined,
-        lt: undefined,
+        gte: 1679481600,
+        lt: 1679481600,
       },
     })
   })
