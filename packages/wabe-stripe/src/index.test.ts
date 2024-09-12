@@ -64,6 +64,59 @@ describe('wabe-stripe', () => {
     mockListCharges.mockClear()
   })
 
+  it('should get the hypothetical revenue', async () => {
+    const adapter = new StripeAdapter('API_KEY')
+
+    mockListSubscriptions.mockResolvedValueOnce({
+      data: [
+        {
+          id: 'sub_123',
+          items: {
+            data: [
+              {
+                plan: {
+                  amount: 100,
+                },
+              },
+            ],
+          },
+        },
+      ],
+      has_more: true,
+    } as never)
+
+    mockListSubscriptions.mockResolvedValueOnce({
+      data: [
+        {
+          id: 'sub_123',
+          items: {
+            data: [
+              {
+                plan: {
+                  amount: 100,
+                },
+              },
+            ],
+          },
+        },
+      ],
+      has_more: false,
+    } as never)
+
+    await adapter.getHypotheticalSubscriptionRevenue()
+
+    expect(mockListSubscriptions).toHaveBeenCalledTimes(2)
+    expect(mockListSubscriptions).toHaveBeenNthCalledWith(1, {
+      status: 'active',
+      limit: 100,
+    })
+    expect(mockListSubscriptions).toHaveBeenNthCalledWith(2, {
+      status: 'active',
+      limit: 100,
+      starting_after: 'sub_123',
+    })
+  })
+
   it('should get all transactions with first to 50', async () => {
     const adapter = new StripeAdapter('API_KEY')
 

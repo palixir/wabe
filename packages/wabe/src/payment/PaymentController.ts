@@ -47,4 +47,8 @@ export class PaymentController implements PaymentAdapter {
   async getAllTransactions(options: GetAllTransactionsOptions) {
     return this.adapter.getAllTransactions(options)
   }
+
+  async getHypotheticalSubscriptionRevenue() {
+    return this.adapter.getHypotheticalSubscriptionRevenue()
+  }
 }

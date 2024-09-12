@@ -258,4 +258,29 @@ export class StripeAdapter implements PaymentAdapter {
 
     return recursiveToGetAllTransactions()
   }
+
+  async getHypotheticalSubscriptionRevenue() {
+    const recursiveGetSubscriptionRevenue = async (
+      totalRevenue = 0,
+      idToStart?: string,
+    ): Promise<number> => {
+      const subscriptions = await this.stripe.subscriptions.list({
+        status: 'active',
+        limit: 100,
+        starting_after: idToStart,
+      })
+
+      const newTotalRevenue = subscriptions.data.reduce((acc, subscription) => {
+        return acc + (subscription.items.data[0].plan.amount || 0)
+      }, totalRevenue)
+
+      if (!subscriptions.has_more) return newTotalRevenue / 100
+
+      const lastElement = subscriptions.data[subscriptions.data.length - 1]
+
+      return recursiveGetSubscriptionRevenue(newTotalRevenue, lastElement.id)
+    }
+
+    return recursiveGetSubscriptionRevenue()
+  }
 }
