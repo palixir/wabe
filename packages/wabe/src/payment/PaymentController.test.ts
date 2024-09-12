@@ -180,10 +180,11 @@ describe('PaymentController', () => {
   })
 
   it("should call the adapter's getHypotheticalRevenue method", async () => {
-    const mockGetHypotheticalRevenue = mock(() => {})
+    const mockGetHypotheticalSubscriptionRevenue = mock(() => {})
 
     const adapter = {
-      getHypotheticalRevenue: mockGetHypotheticalRevenue,
+      getHypotheticalSubscriptionRevenue:
+        mockGetHypotheticalSubscriptionRevenue,
     } as any
 
     const paymentController = new PaymentController({
@@ -194,11 +195,7 @@ describe('PaymentController', () => {
 
     await paymentController.getHypotheticalSubscriptionRevenue()
 
-    expect(mockGetHypotheticalRevenue).toHaveBeenCalledTimes(1)
-    expect(mockGetHypotheticalRevenue).toHaveBeenCalledWith({
-      charge: 'gross',
-      startRangeTimestamp: 1679481600,
-      endRangeTimestamp: 1679481600,
-    })
+    expect(mockGetHypotheticalSubscriptionRevenue).toHaveBeenCalledTimes(1)
+    expect(mockGetHypotheticalSubscriptionRevenue).toHaveBeenCalledWith()
   })
 })
