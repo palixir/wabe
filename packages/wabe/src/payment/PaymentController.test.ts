@@ -126,4 +126,56 @@ describe('PaymentController', () => {
       email: 'john@doe.com',
     })
   })
+
+  it('should get total revenue', async () => {
+    const mockGetTotalRevenue = mock(() => {})
+
+    const adapter = {
+      getTotalRevenue: mockGetTotalRevenue,
+    } as any
+
+    const paymentController = new PaymentController({
+      adapter,
+      currency: Currency.EUR,
+      supportedPaymentMethods: ['card'],
+    })
+
+    await paymentController.getTotalRevenue({
+      charge: 'gross',
+      startRangeTimestamp: 1679481600,
+      endRangeTimestamp: 1679481600,
+    })
+
+    expect(mockGetTotalRevenue).toHaveBeenCalledTimes(1)
+    expect(mockGetTotalRevenue).toHaveBeenCalledWith({
+      charge: 'gross',
+      startRangeTimestamp: 1679481600,
+      endRangeTimestamp: 1679481600,
+    })
+  })
+
+  it("should call the adapter's getAllTransactions method", async () => {
+    const mockGetAllTransactions = mock(() => {})
+
+    const adapter = {
+      getAllTransactions: mockGetAllTransactions,
+    } as any
+
+    const paymentController = new PaymentController({
+      adapter,
+      currency: Currency.EUR,
+      supportedPaymentMethods: ['card'],
+    })
+
+    await paymentController.getAllTransactions({
+      startRangeTimestamp: 1679481600,
+      endRangeTimestamp: 1679481600,
+    })
+
+    expect(mockGetAllTransactions).toHaveBeenCalledTimes(1)
+    expect(mockGetAllTransactions).toHaveBeenCalledWith({
+      startRangeTimestamp: 1679481600,
+      endRangeTimestamp: 1679481600,
+    })
+  })
 })

@@ -4,10 +4,12 @@ import type {
   CreateCustomerOptions,
   CreatePaymentOptions,
   Currency,
+  GetAllTransactionsOptions,
   GetInvoicesOptions,
   GetTotalRevenueOptions,
   Invoice,
   PaymentAdapter,
+  Transaction,
 } from 'wabe'
 
 export class StripeAdapter implements PaymentAdapter {
@@ -186,5 +188,74 @@ export class StripeAdapter implements PaymentAdapter {
     }
 
     return recursiveToGetTotalRevenue()
+  }
+
+  async getAllTransactions({
+    startRangeTimestamp,
+    endRangeTimestamp,
+    first,
+  }: GetAllTransactionsOptions) {
+    const _getSubscriptionInterval = async (chargeId?: string) => {
+      const invoice = await this.stripe.invoices.retrieve(chargeId || '')
+
+      if (!invoice.subscription) return undefined
+
+      const subscription = await this.stripe.subscriptions.retrieve(
+        invoice.subscription?.toString() || '',
+      )
+
+      const intervalCount = subscription.items.data[0].plan.interval_count
+      const interval = subscription.items.data[0].plan.interval
+
+      return { intervalCount, interval }
+    }
+
+    const recursiveToGetAllTransactions = async (
+      transactions: Transaction[] = [],
+      idToStart?: string,
+    ): Promise<Transaction[]> => {
+      const charges = await this.stripe.charges.list({
+        limit: !first || first > 100 ? 100 : first,
+        created: {
+          gte: startRangeTimestamp,
+          lt: endRangeTimestamp,
+        },
+        starting_after: idToStart,
+      })
+
+      const newTransactions = (await Promise.all(
+        charges.data.map(async (charge) => {
+          const customer = (await this.stripe.customers.retrieve(
+            charge.customer?.toString() || '',
+          )) as Stripe.Customer
+
+          const interval = await _getSubscriptionInterval(
+            charge.invoice?.toString(),
+          )
+
+          return {
+            customerEmail: customer.email,
+            amount: charge.amount,
+            currency: charge.currency as Currency,
+            created: charge.created,
+            isSubscription: !!interval,
+            reccuringInterval: interval?.interval,
+          }
+        }),
+      )) as Transaction[]
+
+      const newArrayOfTransactions = [...transactions, ...newTransactions]
+
+      if (!charges.has_more) return newArrayOfTransactions
+
+      const lastElement = charges.data[charges.data.length - 1]
+
+      return recursiveToGetAllTransactions(
+        newArrayOfTransactions,
+        lastElement.id,
+      )
+    }
+
+    return recursiveToGetAllTransactions()
   }
 }

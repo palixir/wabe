@@ -52,6 +52,15 @@ export type Invoice = {
   isPaid: boolean
 }
 
+export type Transaction = {
+  customerEmail: string
+  amount: number
+  currency: Currency
+  created: number
+  isSubscription: boolean
+  reccuringInterval?: 'month' | 'year'
+}
+
 export type CreateCustomerOptions = {
   customerName?: string
   customerEmail: string
@@ -86,6 +95,12 @@ export type GetTotalRevenueOptions = {
   charge: 'net' | 'gross'
 }
 
+export type GetAllTransactionsOptions = {
+  startRangeTimestamp?: number
+  endRangeTimestamp?: number
+  first?: number
+}
+
 export interface PaymentAdapter {
   /**
    * Create a customer
@@ -116,4 +131,12 @@ export interface PaymentAdapter {
    * @returns The total amount
    */
   getTotalRevenue: (options: GetTotalRevenueOptions) => Promise<number>
+  /**
+   * Get the list of all transactions
+   * @param options The start and end range timestamps to get the transactions
+   * @returns The list of transactions
+   */
+  getAllTransactions: (
+    options: GetAllTransactionsOptions,
+  ) => Promise<Transaction[]>
 }
