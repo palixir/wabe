@@ -69,7 +69,7 @@ export const defaultQueries: {
   },
 }
 
-export const defaultMutations : {
+export const defaultMutations: {
   [key: string]: MutationResolver<any>
 } = {
   createPayment: {
@@ -170,5 +170,5 @@ export const defaultMutations : {
       },
     },
     resolve: sendEmailResolver,
-  }
+  },
 }
