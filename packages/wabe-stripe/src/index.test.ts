@@ -65,9 +65,7 @@ describe('wabe-stripe', () => {
   })
 
   it('should get the hypothetical revenue', async () => {
-    const adapter = new StripeAdapter(
-      'sk_test_51PwPuY03lK6GhXcHTe3aLjUKhhYC22tdzB5eOkW9ARaZHYq7yfP1oqLocK0k8DziES7wezYQy7w5D6PdynKsq6Jb00efsV9hrd',
-    )
+    const adapter = new StripeAdapter('API_KEY')
 
     mockListSubscriptions.mockResolvedValueOnce({
       data: [
