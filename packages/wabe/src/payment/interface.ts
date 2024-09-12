@@ -139,4 +139,9 @@ export interface PaymentAdapter {
   getAllTransactions: (
     options: GetAllTransactionsOptions,
   ) => Promise<Transaction[]>
+  /**
+   * Get the hypothetical revenue of subscriptions
+   * @returns The hypothetical revenue of subscriptions
+   */
+  getHypotheticalSubscriptionRevenue: () => Promise<number>
 }

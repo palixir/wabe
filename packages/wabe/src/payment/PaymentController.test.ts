@@ -178,4 +178,27 @@ describe('PaymentController', () => {
       endRangeTimestamp: 1679481600,
     })
   })
+
+  it("should call the adapter's getHypotheticalRevenue method", async () => {
+    const mockGetHypotheticalRevenue = mock(() => {})
+
+    const adapter = {
+      getHypotheticalRevenue: mockGetHypotheticalRevenue,
+    } as any
+
+    const paymentController = new PaymentController({
+      adapter,
+      currency: Currency.EUR,
+      supportedPaymentMethods: ['card'],
+    })
+
+    await paymentController.getHypotheticalSubscriptionRevenue()
+
+    expect(mockGetHypotheticalRevenue).toHaveBeenCalledTimes(1)
+    expect(mockGetHypotheticalRevenue).toHaveBeenCalledWith({
+      charge: 'gross',
+      startRangeTimestamp: 1679481600,
+      endRangeTimestamp: 1679481600,
+    })
+  })
 })
