@@ -106,9 +106,14 @@ describe('wabe-stripe', () => {
     await adapter.getHypotheticalSubscriptionRevenue()
 
     expect(mockListSubscriptions).toHaveBeenCalledTimes(2)
-    expect(mockListSubscriptions).toHaveBeenCalledWith({
+    expect(mockListSubscriptions).toHaveBeenNthCalledWith(1, {
       status: 'active',
       limit: 100,
+    })
+    expect(mockListSubscriptions).toHaveBeenNthCalledWith(2, {
+      status: 'active',
+      limit: 100,
+      starting_after: 'sub_123',
     })
   })
 
