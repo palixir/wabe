@@ -112,6 +112,11 @@ export class Wabe<T extends WabeTypes> {
       payment: payment?.adapter ? new PaymentController(payment) : undefined,
     }
 
+    if (this.controllers.payment)
+      this.controllers.payment.initWebhook({
+        webhookUrl: `http://127.0.0.1:${this.config.port}/webhooks/payment`,
+      })
+
     this.loadRoleEnum()
     this.loadDefaultRoutes()
     this.loadHooks()

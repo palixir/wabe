@@ -1,3 +1,5 @@
+import { Context } from 'wobe'
+
 export enum Currency {
   EUR = 'eur',
   USD = 'usd',
@@ -40,6 +42,8 @@ export interface PaymentConfig {
   adapter: PaymentAdapter
   supportedPaymentMethods: Array<PaymentMethod>
   currency: Currency
+  onPaymentSucceed?: (context: Context) => void
+  onPaymentFailed?: (context: Context) => void
 }
 
 export type Invoice = {
@@ -79,6 +83,10 @@ export type CreatePaymentOptions = {
   cancelUrl: string
   automaticTax?: boolean
   recurringInterval?: 'month' | 'year'
+}
+
+export type InitWebhookOptions = {
+  webhookUrl: string
 }
 
 export type CancelSubscriptionOptions = {
@@ -144,4 +152,9 @@ export interface PaymentAdapter {
    * @returns The hypothetical revenue of subscriptions
    */
   getHypotheticalSubscriptionRevenue: () => Promise<number>
+  /**
+   * Init the webhook for succeed and failed payments
+   * @param options The webhook url
+   */
+  initWebhook: (options: InitWebhookOptions) => Promise<void>
 }

@@ -3,6 +3,29 @@ import { PaymentController } from './PaymentController'
 import { Currency, PaymentMode } from './interface'
 
 describe('PaymentController', () => {
+  it("should call the adapter's initWebhook method", async () => {
+    const mockInitWebhook = mock(() => {})
+
+    const adapter = {
+      initWebhook: mockInitWebhook,
+    } as any
+
+    const paymentController = new PaymentController({
+      adapter,
+      currency: Currency.EUR,
+      supportedPaymentMethods: ['card'],
+    })
+
+    await paymentController.initWebhook({
+      webhookUrl: 'https://example.com/webhook',
+    })
+
+    expect(mockInitWebhook).toHaveBeenCalledTimes(1)
+    expect(mockInitWebhook).toHaveBeenCalledWith({
+      webhookUrl: 'https://example.com/webhook',
+    })
+  })
+
   it("should call the adapter's createCustomer method", async () => {
     const mockCreateCustomer = mock(() => {})
 

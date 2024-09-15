@@ -30,4 +30,11 @@ export const defaultRoutes = (): WabeRoute[] => [
       return oauthHandlerCallback(context, context.wabe)
     },
   },
+  {
+    method: 'POST',
+    path: '/webhooks/payment',
+    handler: async (context) => {
+      return context.wabe.controllers.payment?.handleWebhook(context)
+    },
+  },
 ]
