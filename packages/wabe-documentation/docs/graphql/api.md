@@ -79,6 +79,33 @@ input IntWhereInput {
 }
 ```
 
+## Order
+
+You can also define an `order` object to specify the order of the results. This object will be used to sort the results according to the fields you specify. You can specify multiple fields to sort by, and you can also specify the order (ascending or descending). Here is an example of an `OrderInput`:
+
+```graphql
+enum CompanyOrder {
+  name_ASC
+  name_DESC
+}
+```
+
+You can use it like this in a GraphQL query:
+
+```graphql
+query companies {
+  companies(
+      order: [name_ASC]
+  ) {
+    edges {
+      node {
+        id
+      }
+    }
+  }
+}
+```
+
 ## Pagination
 
 As you may have noticed in the query that retrieves multiple objects, you have the option to define an `offset`, which corresponds to the number of results from which you want to start retrieving. You can also specify a `first` number of items to retrieve. The `offset` and `first` fields are **GraphQL Relay** compliant.
