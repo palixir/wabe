@@ -81,22 +81,24 @@ interface GraphqlParserConstructorOptions {
   enums: GraphQLEnumType[]
 }
 
-export type GraphqlParserFactory = (options: GraphqlParserFactoryOptions) => {
+export type GraphqlParserFactory<T extends WabeTypes> = (
+  options: GraphqlParserFactoryOptions,
+) => {
   _parseWabeObject(options: ParseObjectOptions): any
   _parseWabeWhereInputObject(options: ParseObjectOptions): any
   _parseWabeInputObject(options: ParseObjectOptions): any
   _parseWabeUpdateInputObject(options: ParseObjectOptions): any
   getGraphqlType(options: {
-    type: WabePrimaryTypes | 'Array'
+    type: WabePrimaryTypes | 'Array' | T['enums'] | T['scalars']
     typeValue?: WabePrimaryTypes
     isWhereType?: boolean
   }): any
   getGraphqlFields(nameOfTheObject: string): any
 }
 
-export type GraphqlParserConstructor = (
+export type GraphqlParserConstructor = <T extends WabeTypes>(
   options: GraphqlParserConstructorOptions,
-) => GraphqlParserFactory
+) => GraphqlParserFactory<T>
 
 export const GraphqlParser: GraphqlParserConstructor =
   ({ scalars, enums }: GraphqlParserConstructorOptions) =>

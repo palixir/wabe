@@ -118,7 +118,7 @@ export type ResolverType<T extends WabeTypes> = {
   description?: string
   resolve: (...args: any) => any
 } & (
-  | { type: WabePrimaryTypes }
+  | { type: WabePrimaryTypes | T['enums'] | T['scalars'] }
   | { type: 'Object'; outputObject: ClassInterface<T> }
   | { type: 'Array'; typeValue: WabePrimaryTypes; typeValueRequired?: boolean }
   | {
