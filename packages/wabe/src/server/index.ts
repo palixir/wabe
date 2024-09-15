@@ -339,6 +339,7 @@ export class Wabe<T extends WabeTypes> {
       }),
     )
 
+    // @ts-expect-error
     await initializeRoles(this)
 
     this.server.listen(this.config.port, ({ port }) => {
