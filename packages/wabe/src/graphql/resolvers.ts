@@ -132,6 +132,21 @@ export const executeRelationOnFields = async ({
   )
 }
 
+const transformOrder = (
+  order?: Array<string>,
+): Record<string, 'ASC' | 'DESC'> =>
+  order?.reduce(
+    (acc, currentOrder) => {
+      const [key, value] = Object.entries(currentOrder)[0]
+
+      // @ts-expect-error
+      acc[key] = value
+
+      return acc
+    },
+    {} as Record<string, 'ASC' | 'DESC'>,
+  ) || {}
+
 export const queryForOneObject = (
   _: any,
   { id }: any,
@@ -151,7 +166,7 @@ export const queryForOneObject = (
 
 export const queryForMultipleObject = async (
   _: any,
-  { where, offset, first }: any,
+  { where, offset, first, order }: any,
   context: WabeContext<any>,
   info: GraphQLResolveInfo,
   className: keyof WabeTypes['types'],
@@ -165,6 +180,7 @@ export const queryForMultipleObject = async (
     offset,
     first,
     context,
+    order: transformOrder(order),
   })
 
   return {
@@ -209,13 +225,13 @@ export const mutationToCreateObject = async (
 
 export const mutationToCreateMultipleObjects = async (
   _: any,
-  args: any,
+  { input: { fields, offset, first, order } }: any,
   context: WabeContext<any>,
   info: GraphQLResolveInfo,
   className: keyof WabeTypes['types'],
 ) => {
-  const fields = getFieldsFromInfo(info, className)
-  const inputFields = args.input?.fields as Array<any>
+  const outputFields = getFieldsFromInfo(info, className)
+  const inputFields = fields as Array<any>
 
   const updatedFieldsToCreate = await Promise.all(
     inputFields.map((inputField) =>
@@ -230,10 +246,11 @@ export const mutationToCreateMultipleObjects = async (
   const objects = await context.wabe.controllers.database.createObjects({
     className,
     data: updatedFieldsToCreate,
-    fields,
-    offset: args.input?.offset,
-    first: args.input?.first,
+    fields: outputFields,
+    offset,
+    first,
     context,
+    order: transformOrder(order),
   })
 
   return {
@@ -272,29 +289,30 @@ export const mutationToUpdateObject = async (
 
 export const mutationToUpdateMultipleObjects = async (
   _: any,
-  args: any,
+  { input: { fields, where, offset, first, order } }: any,
   context: WabeContext<any>,
   info: GraphQLResolveInfo,
   className: keyof WabeTypes['types'],
 ) => {
-  const fields = getFieldsFromInfo(info, className)
+  const outputFields = getFieldsFromInfo(info, className)
 
   const updatedFields = await executeRelationOnFields({
     className,
-    fields: args.input?.fields,
+    fields,
     context,
     typeOfExecution: 'updateMany',
-    where: args.input?.where,
+    where,
   })
 
   const objects = await context.wabe.controllers.database.updateObjects({
     className,
-    where: args.input?.where,
+    where,
     data: updatedFields,
-    fields,
-    offset: args.input?.offset,
-    first: args.input?.first,
+    fields: outputFields,
+    offset,
+    first,
     context,
+    order,
   })
 
   return {
@@ -324,20 +342,21 @@ export const mutationToDeleteObject = async (
 
 export const mutationToDeleteMultipleObjects = async (
   _: any,
-  args: any,
+  { input: { where, offset, first, order } }: any,
   context: WabeContext<any>,
   info: GraphQLResolveInfo,
   className: keyof WabeTypes['types'],
 ) => {
-  const fields = getFieldsFromInfo(info, className)
+  const outputFields = getFieldsFromInfo(info, className)
 
   const objects = await context.wabe.controllers.database.deleteObjects({
     className,
-    where: args.input?.where,
-    fields,
-    offset: args.input?.offset,
-    first: args.input?.first,
+    where,
+    fields: outputFields,
+    offset,
+    first,
     context,
+    order,
   })
 
   return {
