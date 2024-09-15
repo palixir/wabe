@@ -1,6 +1,7 @@
 import type { Wabe } from '..'
+import type { DevWabeTypes } from '../utils/helper'
 
-export const initializeRoles = async (wabe: Wabe<any>) => {
+export const initializeRoles = async (wabe: Wabe<DevWabeTypes>) => {
   const roles = wabe.config?.authentication?.roles || []
 
   if (roles.length === 0) return
