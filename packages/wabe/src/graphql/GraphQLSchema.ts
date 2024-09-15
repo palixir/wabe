@@ -229,7 +229,7 @@ export class GraphQLSchema {
     graphqlParser,
   }: {
     wabeClass: ClassInterface<DevWabeTypes>
-    graphqlParser: GraphqlParserFactory
+    graphqlParser: GraphqlParserFactory<DevWabeTypes>
   }) {
     const { name, fields, description } = wabeClass
 
@@ -305,7 +305,7 @@ export class GraphQLSchema {
     graphqlParser,
   }: {
     wabeClass: ClassInterface<DevWabeTypes>
-    graphqlParser: GraphqlParserFactory
+    graphqlParser: GraphqlParserFactory<DevWabeTypes>
   }) {
     const { name, fields, description } = wabeClass
 
@@ -331,7 +331,7 @@ export class GraphQLSchema {
     graphqlParser,
   }: {
     wabeClass: ClassInterface<DevWabeTypes>
-    graphqlParser: GraphqlParserFactory
+    graphqlParser: GraphqlParserFactory<DevWabeTypes>
   }) {
     const { name, fields, description } = wabeClass
 
@@ -357,7 +357,7 @@ export class GraphQLSchema {
     graphqlParser,
   }: {
     wabeClass: ClassInterface<DevWabeTypes>
-    graphqlParser: GraphqlParserFactory
+    graphqlParser: GraphqlParserFactory<DevWabeTypes>
   }) {
     const { name, fields, description } = wabeClass
 
@@ -383,7 +383,7 @@ export class GraphQLSchema {
     graphqlParser,
   }: {
     wabeClass: ClassInterface<DevWabeTypes>
-    graphqlParser: GraphqlParserFactory
+    graphqlParser: GraphqlParserFactory<DevWabeTypes>
   }) {
     const { name, fields, description } = wabeClass
 
@@ -443,7 +443,7 @@ export class GraphQLSchema {
   }
 
   createCompleteObject(
-    graphqlParser: GraphqlParserFactory,
+    graphqlParser: GraphqlParserFactory<DevWabeTypes>,
     wabeClass: ClassInterface<DevWabeTypes>,
   ) {
     const object = this.createObject({ graphqlParser, wabeClass })
@@ -502,7 +502,7 @@ export class GraphQLSchema {
     currentQueryOrMutation:
       | QueryResolver<DevWabeTypes>
       | MutationResolver<DevWabeTypes>,
-    graphqlParser: GraphqlParserFactory,
+    graphqlParser: GraphqlParserFactory<DevWabeTypes>,
     currentArgs: SchemaFields<DevWabeTypes>,
   ): GraphQLOutputType | undefined {
     if (currentQueryOrMutation.type === 'Object') {
@@ -560,7 +560,7 @@ export class GraphQLSchema {
     graphqlParser,
   }: {
     resolvers: Record<string, MutationResolver<DevWabeTypes>>
-    graphqlParser: GraphqlParserFactory
+    graphqlParser: GraphqlParserFactory<DevWabeTypes>
   }) {
     return Object.keys(resolvers).reduce(
       (acc, currentKey) => {
@@ -615,7 +615,7 @@ export class GraphQLSchema {
     graphqlParser,
   }: {
     resolvers: Record<string, QueryResolver<DevWabeTypes>>
-    graphqlParser: GraphqlParserFactory
+    graphqlParser: GraphqlParserFactory<DevWabeTypes>
   }) {
     return Object.keys(resolvers).reduce(
       (acc, currentKey) => {
