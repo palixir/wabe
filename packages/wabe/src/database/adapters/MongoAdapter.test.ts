@@ -46,6 +46,94 @@ describe('Mongo adapter', () => {
       await Promise.all(collections?.map((collection) => collection.drop()))
   })
 
+  it("should order the result by the field 'name' in ascending order", async () => {
+    await mongoAdapter.createObjects({
+      className: 'User',
+      data: [
+        {
+          name: 'A',
+          age: 20,
+        },
+        {
+          name: 'B',
+          age: 18,
+        },
+      ],
+      fields: [],
+      context,
+    })
+
+    const res = await mongoAdapter.getObjects({
+      className: 'User',
+      fields: ['name'],
+      order: {
+        name: 'ASC',
+      },
+      context,
+    })
+
+    expect(res.map((user) => user.name)).toEqual(['A', 'B'])
+  })
+
+  it("should order the result by the field 'name' in descending order", async () => {
+    await mongoAdapter.createObjects({
+      className: 'User',
+      data: [
+        {
+          name: 'A',
+          age: 20,
+        },
+        {
+          name: 'B',
+          age: 18,
+        },
+      ],
+      fields: [],
+      context,
+    })
+
+    const res = await mongoAdapter.getObjects({
+      className: 'User',
+      fields: ['name'],
+      order: {
+        name: 'DESC',
+      },
+      context,
+    })
+
+    expect(res.map((user) => user.name)).toEqual(['B', 'A'])
+  })
+
+  it("should order the result by the field 'age' and 'name' in descending order", async () => {
+    await mongoAdapter.createObjects({
+      className: 'User',
+      data: [
+        {
+          name: 'A',
+          age: 20,
+        },
+        {
+          name: 'B',
+          age: 18,
+        },
+      ],
+      fields: [],
+      context,
+    })
+
+    const res = await mongoAdapter.getObjects({
+      className: 'User',
+      fields: ['name'],
+      order: {
+        age: 'ASC',
+        name: 'DESC',
+      },
+      context,
+    })
+
+    expect(res.map((user) => user.name)).toEqual(['B', 'A'])
+  })
+
   it('should count all elements corresponds to where condition in collection', async () => {
     const res = await mongoAdapter.count({
       className: 'User',

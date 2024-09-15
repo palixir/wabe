@@ -87,6 +87,30 @@ describe('Database', () => {
     spyGetObjects.mockClear()
   })
 
+  it('should order the element in the query by name ASC using order enum', async () => {
+    await wabe.controllers.database.createObjects({
+      className: 'User',
+      context,
+      data: [
+        { name: 'test1' },
+        { name: 'test2' },
+        { name: 'test3' },
+        { name: 'test4' },
+      ],
+      fields: [],
+    })
+
+    const res = await wabe.controllers.database.getObjects({
+      className: 'User',
+      context,
+      fields: ['name'],
+      order: { name: 'ASC' },
+    })
+
+    expect(res[0].name).toBe('test1')
+    expect(res[1].name).toBe('test2')
+  })
+
   it('should create object with subobject (hooks default call authentication before create user)', async () => {
     const res = await wabe.controllers.database.createObject({
       className: 'User',

@@ -13,9 +13,33 @@ import type {
   DeleteObjectOptions,
   OutputType,
   CountOptions,
+  OrderType,
 } from './adaptersInterface'
 import type { WabeTypes } from '../../server'
 import type { WabeContext } from '../../server/interface'
+
+export const buildMongoOrderQuery = <
+  T extends keyof WabeTypes['types'],
+  K extends keyof WabeTypes['types'][T],
+>(
+  order?: OrderType<T, K>,
+): Record<string, any> => {
+  if (!order) return {}
+
+  const objectKeys = Object.keys(order) as Array<keyof OrderType<T, K>>
+
+  return objectKeys.reduce(
+    (acc, key) => {
+      const value = order[key]
+
+      if (value === 'ASC') acc[key] = 1
+      if (value === 'DESC') acc[key] = -1
+
+      return acc
+    },
+    {} as Record<any, number>,
+  )
+}
 
 export const buildMongoWhereQuery = <
   T extends keyof WabeTypes['types'],
@@ -221,13 +245,15 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter {
     U extends keyof T['types'],
     K extends keyof T['types'][U],
     W extends keyof T['types'][U],
-  >(params: GetObjectsOptions<U, K, W>): Promise<OutputType<U, K>[]> {
+    X extends keyof T['types'][U],
+  >(params: GetObjectsOptions<U, K, W, X>): Promise<OutputType<U, K>[]> {
     if (!this.database)
       throw new Error('Connection to database is not established')
 
-    const { className, fields, where, offset, first, context } = params
+    const { className, fields, where, offset, first, context, order } = params
 
     const whereBuilded = buildMongoWhereQuery(where)
+    const orderBuilded = buildMongoOrderQuery(order)
 
     const objectOfFieldsToGet = fields?.reduce(
       (acc, prev) => {
@@ -252,6 +278,7 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter {
       })
       .limit(first || 0)
       .skip(offset || 0)
+      .sort(orderBuilded)
       .toArray()
 
     return res.map((object) => {
@@ -292,11 +319,12 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter {
     U extends keyof T['types'],
     K extends keyof T['types'][U],
     W extends keyof T['types'][U],
-  >(params: CreateObjectsOptions<U, K, W>): Promise<OutputType<U, K>[]> {
+    X extends keyof T['types'][U],
+  >(params: CreateObjectsOptions<U, K, W, X>): Promise<OutputType<U, K>[]> {
     if (!this.database)
       throw new Error('Connection to database is not established')
 
-    const { className, data, fields, offset, first, context } = params
+    const { className, data, fields, offset, first, context, order } = params
 
     const collection = await this.createClassIfNotExist(className, context)
 
@@ -313,6 +341,7 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter {
       offset,
       first,
       context,
+      order,
     })
 
     return allObjects as OutputType<U, K>[]
@@ -358,11 +387,13 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter {
     U extends keyof T['types'],
     K extends keyof T['types'][U],
     W extends keyof T['types'][U],
-  >(params: UpdateObjectsOptions<U, K, W>): Promise<OutputType<U, K>[]> {
+    X extends keyof T['types'][U],
+  >(params: UpdateObjectsOptions<U, K, W, X>): Promise<OutputType<U, K>[]> {
     if (!this.database)
       throw new Error('Connection to database is not established')
 
-    const { className, where, data, fields, offset, first, context } = params
+    const { className, where, data, fields, offset, first, context, order } =
+      params
 
     const whereBuilded = buildMongoWhereQuery<T, W>(where)
 
@@ -376,6 +407,7 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter {
         offset,
         first,
         context,
+        order,
       })
 
     if (objectsBeforeUpdate.length === 0) throw new Error('Object not found')
@@ -428,7 +460,8 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter {
     U extends keyof T['types'],
     K extends keyof T['types'][U],
     W extends keyof T['types'][U],
-  >(params: DeleteObjectsOptions<U, K, W>) {
+    X extends keyof T['types'][U],
+  >(params: DeleteObjectsOptions<U, K, W, X>) {
     if (!this.database)
       throw new Error('Connection to database is not established')
 

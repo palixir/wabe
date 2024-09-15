@@ -220,6 +220,133 @@ describe('GraphqlSchema', () => {
     })
   })
 
+  it('should order the element in the query by name and age ASC using order enum', async () => {
+    const { client, wabe } = await createWabe({
+      classes: [
+        {
+          name: 'TestClass',
+          fields: {
+            name: {
+              type: 'String',
+            },
+            age: {
+              type: 'Int',
+            },
+          },
+        },
+      ],
+    })
+
+    await client.request<any>(
+      gql`
+          mutation createTestClasses {
+            createTestClasses(
+              input: {
+                fields: [
+                  { name: "A", age: 20 },
+                  { name: "B", age: 19 },
+                  { name: "C", age: 18 },
+                  { name: "D", age: 17 },
+                ]
+              }
+            ) {
+              edges {
+                node {
+                  name
+                }
+              }
+            }
+          }
+        `,
+      {},
+    )
+
+    const res = await client.request<any>(
+      gql`
+          query testClasses {
+            testClasses(
+              order: [name_DESC, age_ASC]
+            ) {
+              edges {
+                node {
+                  name
+                }
+              }
+            }
+          }
+        `,
+      {},
+    )
+
+    expect(res.testClasses.edges[0].node.name).toBe('D')
+    expect(res.testClasses.edges[1].node.name).toBe('C')
+    expect(res.testClasses.edges[2].node.name).toBe('B')
+    expect(res.testClasses.edges[3].node.name).toBe('A')
+
+    await wabe.close()
+  })
+
+  it('should order the element in the query by name ASC using order enum', async () => {
+    const { client, wabe } = await createWabe({
+      classes: [
+        {
+          name: 'TestClass',
+          fields: {
+            name: {
+              type: 'String',
+            },
+          },
+        },
+      ],
+    })
+
+    await client.request<any>(
+      gql`
+          mutation createTestClasses {
+            createTestClasses(
+              input: {
+                fields: [
+                  { name: "test1" },
+                  { name: "test2" },
+                  { name: "test3" },
+                  { name: "test4" },
+                ]
+              }
+            ) {
+              edges {
+                node {
+                  name
+                }
+              }
+            }
+          }
+        `,
+      {},
+    )
+
+    const res = await client.request<any>(
+      gql`
+          query testClasses {
+            testClasses(
+              where: { name: { equalTo: "test1" } }
+              order: [name_ASC]
+            ) {
+              edges {
+                node {
+                  name
+                }
+              }
+            }
+          }
+        `,
+      {},
+    )
+
+    expect(res.testClasses.edges[0].node.name).toBe('test1')
+
+    await wabe.close()
+  })
+
   it('should use the searchUsers to search all testClasses for corresponding term', async () => {
     const { client, wabe } = await createWabe({
       classes: [
@@ -1012,6 +1139,7 @@ describe('GraphqlSchema', () => {
         first: 'Int',
         offset: 'Int',
         where: 'TestClassWhereInput',
+        order: '[TestClassOrder!]',
       },
       output: 'TestClassConnection!',
     })

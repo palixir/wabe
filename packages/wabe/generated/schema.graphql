@@ -509,13 +509,13 @@ type Query {
   user(id: ID): User
 
   """User class"""
-  users(where: UserWhereInput, offset: Int, first: Int): UserConnection!
+  users(where: UserWhereInput, offset: Int, first: Int, order: [UserOrder!]): UserConnection!
   post(id: ID): Post
-  posts(where: PostWhereInput, offset: Int, first: Int): PostConnection!
+  posts(where: PostWhereInput, offset: Int, first: Int, order: [PostOrder!]): PostConnection!
   _session(id: ID): _Session
-  _sessions(where: _SessionWhereInput, offset: Int, first: Int): _SessionConnection!
+  _sessions(where: _SessionWhereInput, offset: Int, first: Int, order: [_SessionOrder!]): _SessionConnection!
   role(id: ID): Role
-  roles(where: RoleWhereInput, offset: Int, first: Int): RoleConnection!
+  roles(where: RoleWhereInput, offset: Int, first: Int, order: [RoleOrder!]): RoleConnection!
 
   """Hello world description"""
   helloWorld(name: String!): String
@@ -730,6 +730,35 @@ input _SessionACLObjectRolesACLWhereInput {
   AND: [_SessionACLObjectRolesACLWhereInput]
 }
 
+enum UserOrder {
+  name_ASC
+  name_DESC
+  age_ASC
+  age_DESC
+  acl_ASC
+  acl_DESC
+  createdAt_ASC
+  createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  search_ASC
+  search_DESC
+  authentication_ASC
+  authentication_DESC
+  provider_ASC
+  provider_DESC
+  isOauth_ASC
+  isOauth_DESC
+  email_ASC
+  email_DESC
+  verifiedEmail_ASC
+  verifiedEmail_DESC
+  role_ASC
+  role_DESC
+  sessions_ASC
+  sessions_DESC
+}
+
 type PostConnection {
   totalCount: Int
   edges: [PostEdge]
@@ -781,6 +810,42 @@ input PostACLObjectRolesACLWhereInput {
   AND: [PostACLObjectRolesACLWhereInput]
 }
 
+enum PostOrder {
+  name_ASC
+  name_DESC
+  test_ASC
+  test_DESC
+  acl_ASC
+  acl_DESC
+  createdAt_ASC
+  createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  search_ASC
+  search_DESC
+}
+
+enum _SessionOrder {
+  user_ASC
+  user_DESC
+  accessToken_ASC
+  accessToken_DESC
+  accessTokenExpiresAt_ASC
+  accessTokenExpiresAt_DESC
+  refreshToken_ASC
+  refreshToken_DESC
+  refreshTokenExpiresAt_ASC
+  refreshTokenExpiresAt_DESC
+  acl_ASC
+  acl_DESC
+  createdAt_ASC
+  createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  search_ASC
+  search_DESC
+}
+
 type RoleConnection {
   totalCount: Int
   edges: [RoleEdge]
@@ -788,6 +853,21 @@ type RoleConnection {
 
 type RoleEdge {
   node: Role!
+}
+
+enum RoleOrder {
+  name_ASC
+  name_DESC
+  users_ASC
+  users_DESC
+  acl_ASC
+  acl_DESC
+  createdAt_ASC
+  createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  search_ASC
+  search_DESC
 }
 
 type MeOutput {
@@ -872,6 +952,7 @@ input CreateUsersInput {
   fields: [UserCreateFieldsInput]!
   offset: Int
   first: Int
+  order: [UserOrder]
 }
 
 type UpdateUserPayload {
@@ -939,6 +1020,7 @@ input UpdateUsersInput {
   where: UserWhereInput
   offset: Int
   first: Int
+  order: [UserOrder]
 }
 
 type DeleteUserPayload {
@@ -952,6 +1034,7 @@ input DeleteUserInput {
 
 input DeleteUsersInput {
   where: UserWhereInput
+  order: [UserOrder]
 }
 
 type CreatePostPayload {
@@ -967,6 +1050,7 @@ input CreatePostsInput {
   fields: [PostCreateFieldsInput]!
   offset: Int
   first: Int
+  order: [PostOrder]
 }
 
 type UpdatePostPayload {
@@ -1010,6 +1094,7 @@ input UpdatePostsInput {
   where: PostWhereInput
   offset: Int
   first: Int
+  order: [PostOrder]
 }
 
 type DeletePostPayload {
@@ -1023,6 +1108,7 @@ input DeletePostInput {
 
 input DeletePostsInput {
   where: PostWhereInput
+  order: [PostOrder]
 }
 
 type Create_SessionPayload {
@@ -1038,6 +1124,7 @@ input Create_SessionsInput {
   fields: [_SessionCreateFieldsInput]!
   offset: Int
   first: Int
+  order: [_SessionOrder]
 }
 
 type Update_SessionPayload {
@@ -1084,6 +1171,7 @@ input Update_SessionsInput {
   where: _SessionWhereInput
   offset: Int
   first: Int
+  order: [_SessionOrder]
 }
 
 type Delete_SessionPayload {
@@ -1097,6 +1185,7 @@ input Delete_SessionInput {
 
 input Delete_SessionsInput {
   where: _SessionWhereInput
+  order: [_SessionOrder]
 }
 
 type CreateRolePayload {
@@ -1112,6 +1201,7 @@ input CreateRolesInput {
   fields: [RoleCreateFieldsInput]!
   offset: Int
   first: Int
+  order: [RoleOrder]
 }
 
 type UpdateRolePayload {
@@ -1155,6 +1245,7 @@ input UpdateRolesInput {
   where: RoleWhereInput
   offset: Int
   first: Int
+  order: [RoleOrder]
 }
 
 type DeleteRolePayload {
@@ -1168,6 +1259,7 @@ input DeleteRoleInput {
 
 input DeleteRolesInput {
   where: RoleWhereInput
+  order: [RoleOrder]
 }
 
 input CreateMutationInput {

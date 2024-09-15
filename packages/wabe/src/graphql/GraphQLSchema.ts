@@ -45,6 +45,7 @@ type AllPossibleObject =
   | 'relationInputObject'
   | 'updateInputObject'
   | 'createInputObject'
+  | 'orderEnumType'
 
 export type AllObjects = Record<string, Record<AllPossibleObject, any>>
 
@@ -89,6 +90,7 @@ export class GraphQLSchema {
           updateInputObject,
           whereInputObject,
           connectionObject,
+          orderEnumType,
         } = currentObject
 
         // Queries
@@ -97,6 +99,7 @@ export class GraphQLSchema {
           whereInputType: whereInputObject,
           object,
           connectionObject,
+          orderEnumType,
         })
 
         const defaultMutations = this.createDefaultMutations({
@@ -106,6 +109,7 @@ export class GraphQLSchema {
           connectionObject,
           defaultUpdateInputType: updateInputObject,
           defaultCreateInputType: createInputObject,
+          orderEnumType,
         })
 
         const defaultQueriesKeys = Object.keys(defaultQueries)
@@ -177,6 +181,25 @@ export class GraphQLSchema {
           }),
       ) || []
     )
+  }
+
+  createOrderEnumType(wabeClass: ClassInterface<DevWabeTypes>) {
+    const fields = wabeClass.fields
+
+    const classEnums = Object.keys(fields).reduce(
+      (acc, fieldName) => {
+        acc[`${fieldName}_ASC`] = { value: { [fieldName]: 'ASC' } }
+        acc[`${fieldName}_DESC`] = { value: { [fieldName]: 'DESC' } }
+
+        return acc
+      },
+      {} as Record<string, any>,
+    )
+
+    return new GraphQLEnumType({
+      name: `${wabeClass.name}Order`,
+      values: classEnums,
+    })
   }
 
   createEnums() {
@@ -460,6 +483,8 @@ export class GraphQLSchema {
       wabeClass,
     })
 
+    const orderEnumType = this.createOrderEnumType(wabeClass)
+
     this.allObjects[wabeClass.name] = {
       connectionObject,
       createInputObject,
@@ -469,6 +494,7 @@ export class GraphQLSchema {
       relationInputObject,
       inputObject,
       object,
+      orderEnumType,
     }
   }
 
@@ -629,11 +655,13 @@ export class GraphQLSchema {
     whereInputType,
     object,
     connectionObject,
+    orderEnumType,
   }: {
     className: string
     whereInputType: GraphQLInputObjectType
     object: GraphQLObjectType
     connectionObject: GraphQLObjectType
+    orderEnumType: GraphQLEnumType
   }) {
     const classNameWithFirstLetterLowerCase = firstLetterInLowerCase(className)
 
@@ -652,6 +680,7 @@ export class GraphQLSchema {
           where: { type: whereInputType },
           offset: { type: GraphQLInt },
           first: { type: GraphQLInt },
+          order: { type: new GraphQLList(new GraphQLNonNull(orderEnumType)) },
         },
         resolve: (root, args, ctx, info) =>
           queryForMultipleObject(root, args, ctx, info, className),
@@ -666,6 +695,7 @@ export class GraphQLSchema {
     defaultCreateInputType,
     whereInputType,
     connectionObject,
+    orderEnumType,
   }: {
     className: string
     defaultUpdateInputType: GraphQLInputObjectType
@@ -673,6 +703,7 @@ export class GraphQLSchema {
     whereInputType: GraphQLInputObjectType
     object: GraphQLObjectType
     connectionObject: GraphQLObjectType
+    orderEnumType: GraphQLEnumType
   }) {
     const classNameWithFirstLetterLowerCase = firstLetterInLowerCase(className)
 
@@ -701,6 +732,7 @@ export class GraphQLSchema {
         },
         offset: { type: GraphQLInt },
         first: { type: GraphQLInt },
+        order: { type: new GraphQLList(orderEnumType) },
       }),
     })
 
@@ -727,6 +759,7 @@ export class GraphQLSchema {
         where: { type: whereInputType },
         offset: { type: GraphQLInt },
         first: { type: GraphQLInt },
+        order: { type: new GraphQLList(orderEnumType) },
       }),
     })
 
@@ -749,6 +782,7 @@ export class GraphQLSchema {
       name: `Delete${pluralClassName}Input`,
       fields: () => ({
         where: { type: whereInputType },
+        order: { type: new GraphQLList(orderEnumType) },
       }),
     })
 
