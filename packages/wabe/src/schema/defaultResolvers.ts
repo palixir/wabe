@@ -1,6 +1,6 @@
 import type { MutationResolver, QueryResolver } from './Schema'
 import { cancelSubscriptionResolver } from './resolvers/cancelSubscription'
-import { createPaymentResolver } from './resolvers/createPayment'
+import { makePaymentResolver } from './resolvers/makePayment'
 import { getInvoicesResolver } from './resolvers/getInvoices'
 import { meResolver } from './resolvers/meResolver'
 import { sendEmailResolver } from './resolvers/sendEmail'
@@ -72,7 +72,7 @@ export const defaultQueries: {
 export const defaultMutations: {
   [key: string]: MutationResolver<any>
 } = {
-  createPayment: {
+  makePayment: {
     type: 'String',
     description:
       'Create a payment with the payment provider. Returns the url to redirect the user to pay',
@@ -126,7 +126,7 @@ export const defaultMutations: {
         },
       },
     },
-    resolve: createPaymentResolver,
+    resolve: makePaymentResolver,
   },
   cancelSubscription: {
     type: 'Boolean',

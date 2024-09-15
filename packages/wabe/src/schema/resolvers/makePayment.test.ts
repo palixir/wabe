@@ -1,8 +1,14 @@
-import { describe, expect, it, mock } from 'bun:test'
-import { createPaymentResolver } from './createPayment'
+import { describe, expect, it, mock, afterEach } from 'bun:test'
+import { makePaymentResolver } from './makePayment'
 import { PaymentMode } from '../../payment'
 
 describe('createPaymentResolver', () => {
+  const mockGetObjects = mock(() => {})
+
+  afterEach(() => {
+    mockGetObjects.mockClear()
+  })
+
   it('should throw an error if the customer email is not provided', async () => {
     const paymentController = {
       createPayment: mock(() => {}),
@@ -22,7 +28,7 @@ describe('createPaymentResolver', () => {
     }
 
     expect(
-      createPaymentResolver(null, { input: {} } as any, context as any),
+      makePaymentResolver(null, { input: {} } as any, context as any),
     ).rejects.toThrow('Customer email is required')
   })
 
@@ -38,7 +44,7 @@ describe('createPaymentResolver', () => {
     }
 
     expect(
-      createPaymentResolver(null, {} as any, context as any),
+      makePaymentResolver(null, {} as any, context as any),
     ).rejects.toThrow('Permission denied')
   })
 
@@ -57,7 +63,7 @@ describe('createPaymentResolver', () => {
     }
 
     expect(
-      createPaymentResolver(null, {} as any, context as any),
+      makePaymentResolver(null, {} as any, context as any),
     ).rejects.toThrow('Payment adapter not defined')
   })
 
@@ -65,6 +71,8 @@ describe('createPaymentResolver', () => {
     const paymentController = {
       createPayment: mock(() => {}),
     }
+
+    mockGetObjects.mockResolvedValueOnce([{ id: 'userId' }] as never)
 
     const context = {
       user: {
@@ -75,11 +83,14 @@ describe('createPaymentResolver', () => {
       wabe: {
         controllers: {
           payment: paymentController,
+          database: {
+            getObjects: mockGetObjects,
+          },
         },
       },
     }
 
-    await createPaymentResolver(
+    await makePaymentResolver(
       null,
       {
         input: {
@@ -104,5 +115,46 @@ describe('createPaymentResolver', () => {
       recurringInterval: 'month',
       products: [{ name: 'product1', unitAmount: 100, quantity: 1 }],
     })
+  })
+
+  it('should throw an error if the user is not found', async () => {
+    const paymentController = {
+      createPayment: mock(() => {}),
+    }
+
+    mockGetObjects.mockResolvedValueOnce([] as never)
+
+    const context = {
+      user: {
+        id: '123',
+        email: 'test@test.com',
+      },
+      isRoot: false,
+      wabe: {
+        controllers: {
+          payment: paymentController,
+          database: {
+            getObjects: mockGetObjects,
+          },
+        },
+      },
+    }
+
+    expect(
+      makePaymentResolver(
+        null,
+        {
+          input: {
+            products: [{ name: 'product1', unitAmount: 100, quantity: 1 }],
+            customerEmail: 'test@test.com',
+            paymentMode: PaymentMode.Payment,
+            successUrl: 'https://example.com',
+            cancelUrl: 'https://example.com',
+            automaticTax: true,
+          },
+        },
+        context as any,
+      ),
+    ).rejects.toThrow('User not found')
   })
 })

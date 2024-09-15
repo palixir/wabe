@@ -461,6 +461,27 @@ export class Schema<T extends WabeTypes> {
     }
   }
 
+  paymentClass(): ClassInterface<T> {
+    return {
+      name: 'Payment',
+      fields: {
+        user: {
+          type: 'Pointer',
+          class: 'User',
+          required: true,
+        },
+        amount: {
+          type: 'Int',
+          required: true,
+        },
+        currency: {
+          type: 'Currency',
+          required: true,
+        },
+      },
+    }
+  }
+
   roleClass(): ClassInterface<T> {
     return {
       name: 'Role',
@@ -655,6 +676,7 @@ export class Schema<T extends WabeTypes> {
       this.userClass(),
       this.sessionClass(),
       this.roleClass(),
+      this.paymentClass(),
     ])
   }
 }

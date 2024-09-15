@@ -509,6 +509,102 @@ input RoleRelationInput {
   createAndAdd: [RoleCreateFieldsInput!]
 }
 
+type Payment {
+  id: ID!
+  user: User
+  amount: Int!
+  currency: Currency!
+  acl: PaymentACLObject
+  createdAt: Date
+  updatedAt: Date
+  search: [String]
+}
+
+type PaymentACLObject {
+  users: [PaymentACLObjectUsersACL]
+  roles: [PaymentACLObjectRolesACL]
+}
+
+type PaymentACLObjectUsersACL {
+  userId: String!
+  read: Boolean!
+  write: Boolean!
+}
+
+type PaymentACLObjectRolesACL {
+  roleId: String!
+  read: Boolean!
+  write: Boolean!
+}
+
+input PaymentInput {
+  user: UserPointerInput
+  amount: Int!
+  currency: Currency!
+  acl: PaymentACLObjectInput
+  createdAt: Date
+  updatedAt: Date
+  search: [String]
+}
+
+input PaymentACLObjectInput {
+  users: [PaymentACLObjectUsersACLInput]
+  roles: [PaymentACLObjectRolesACLInput]
+}
+
+input PaymentACLObjectUsersACLInput {
+  userId: String!
+  read: Boolean!
+  write: Boolean!
+}
+
+input PaymentACLObjectRolesACLInput {
+  roleId: String!
+  read: Boolean!
+  write: Boolean!
+}
+
+"""Input to link an object to a pointer Payment"""
+input PaymentPointerInput {
+  unlink: Boolean
+  link: ID
+  createAndLink: PaymentCreateFieldsInput
+}
+
+input PaymentCreateFieldsInput {
+  user: UserPointerInput
+  amount: Int
+  currency: Currency
+  acl: PaymentACLObjectCreateFieldsInput
+  createdAt: Date
+  updatedAt: Date
+  search: [String]
+}
+
+input PaymentACLObjectCreateFieldsInput {
+  users: [PaymentACLObjectUsersACLCreateFieldsInput]
+  roles: [PaymentACLObjectRolesACLCreateFieldsInput]
+}
+
+input PaymentACLObjectUsersACLCreateFieldsInput {
+  userId: String
+  read: Boolean
+  write: Boolean
+}
+
+input PaymentACLObjectRolesACLCreateFieldsInput {
+  roleId: String
+  read: Boolean
+  write: Boolean
+}
+
+"""Input to add a relation to the class Payment"""
+input PaymentRelationInput {
+  add: [ID!]
+  remove: [ID!]
+  createAndAdd: [PaymentCreateFieldsInput!]
+}
+
 type Query {
   """User class"""
   user(id: ID): User
@@ -521,6 +617,8 @@ type Query {
   _sessions(where: _SessionWhereInput, offset: Int, first: Int, order: [_SessionOrder!]): _SessionConnection!
   role(id: ID): Role
   roles(where: RoleWhereInput, offset: Int, first: Int, order: [RoleOrder!]): RoleConnection!
+  payment(id: ID): Payment
+  payments(where: PaymentWhereInput, offset: Int, first: Int, order: [PaymentOrder!]): PaymentConnection!
 
   """Hello world description"""
   helloWorld(name: String!): String
@@ -875,6 +973,68 @@ enum RoleOrder {
   search_DESC
 }
 
+type PaymentConnection {
+  totalCount: Int
+  edges: [PaymentEdge]
+}
+
+type PaymentEdge {
+  node: Payment!
+}
+
+input PaymentWhereInput {
+  id: IdWhereInput
+  user: UserWhereInput
+  amount: IntWhereInput
+  currency: AnyWhereInput
+  acl: PaymentACLObjectWhereInput
+  createdAt: DateWhereInput
+  updatedAt: DateWhereInput
+  search: SearchWhereInput
+  OR: [PaymentWhereInput]
+  AND: [PaymentWhereInput]
+}
+
+input PaymentACLObjectWhereInput {
+  users: [PaymentACLObjectUsersACLWhereInput]
+  roles: [PaymentACLObjectRolesACLWhereInput]
+  OR: [PaymentACLObjectWhereInput]
+  AND: [PaymentACLObjectWhereInput]
+}
+
+input PaymentACLObjectUsersACLWhereInput {
+  userId: StringWhereInput
+  read: BooleanWhereInput
+  write: BooleanWhereInput
+  OR: [PaymentACLObjectUsersACLWhereInput]
+  AND: [PaymentACLObjectUsersACLWhereInput]
+}
+
+input PaymentACLObjectRolesACLWhereInput {
+  roleId: StringWhereInput
+  read: BooleanWhereInput
+  write: BooleanWhereInput
+  OR: [PaymentACLObjectRolesACLWhereInput]
+  AND: [PaymentACLObjectRolesACLWhereInput]
+}
+
+enum PaymentOrder {
+  user_ASC
+  user_DESC
+  amount_ASC
+  amount_DESC
+  currency_ASC
+  currency_DESC
+  acl_ASC
+  acl_DESC
+  createdAt_ASC
+  createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  search_ASC
+  search_DESC
+}
+
 type MeOutput {
   user: User
 }
@@ -925,6 +1085,12 @@ type Mutation {
   updateRoles(input: UpdateRolesInput!): RoleConnection!
   deleteRole(input: DeleteRoleInput!): DeleteRolePayload
   deleteRoles(input: DeleteRolesInput!): RoleConnection!
+  createPayment(input: CreatePaymentInput!): CreatePaymentPayload
+  createPayments(input: CreatePaymentsInput!): PaymentConnection!
+  updatePayment(input: UpdatePaymentInput!): UpdatePaymentPayload
+  updatePayments(input: UpdatePaymentsInput!): PaymentConnection!
+  deletePayment(input: DeletePaymentInput!): DeletePaymentPayload
+  deletePayments(input: DeletePaymentsInput!): PaymentConnection!
   createMutation(input: CreateMutationInput!): Boolean!
   customMutation(input: CustomMutationInput!): Int
   secondCustomMutation(input: SecondCustomMutationInput!): Int
@@ -932,7 +1098,7 @@ type Mutation {
   """
   Create a payment with the payment provider. Returns the url to redirect the user to pay
   """
-  createPayment(input: CreatePaymentInput!): String
+  makePayment(input: MakePaymentInput!): String
   cancelSubscription(input: CancelSubscriptionInput!): Boolean
 
   """Send basic email with text and html, returns the id of the email"""
@@ -1267,6 +1433,81 @@ input DeleteRolesInput {
   order: [RoleOrder]
 }
 
+type CreatePaymentPayload {
+  payment: Payment
+  clientMutationId: String
+}
+
+input CreatePaymentInput {
+  fields: PaymentCreateFieldsInput
+}
+
+input CreatePaymentsInput {
+  fields: [PaymentCreateFieldsInput]!
+  offset: Int
+  first: Int
+  order: [PaymentOrder]
+}
+
+type UpdatePaymentPayload {
+  payment: Payment
+  clientMutationId: String
+}
+
+input UpdatePaymentInput {
+  id: ID
+  fields: PaymentUpdateFieldsInput
+}
+
+input PaymentUpdateFieldsInput {
+  user: UserPointerInput
+  amount: Int
+  currency: Currency
+  acl: PaymentACLObjectUpdateFieldsInput
+  createdAt: Date
+  updatedAt: Date
+  search: [String]
+}
+
+input PaymentACLObjectUpdateFieldsInput {
+  users: [PaymentACLObjectUsersACLUpdateFieldsInput]
+  roles: [PaymentACLObjectRolesACLUpdateFieldsInput]
+}
+
+input PaymentACLObjectUsersACLUpdateFieldsInput {
+  userId: String
+  read: Boolean
+  write: Boolean
+}
+
+input PaymentACLObjectRolesACLUpdateFieldsInput {
+  roleId: String
+  read: Boolean
+  write: Boolean
+}
+
+input UpdatePaymentsInput {
+  fields: PaymentUpdateFieldsInput
+  where: PaymentWhereInput
+  offset: Int
+  first: Int
+  order: [PaymentOrder]
+}
+
+type DeletePaymentPayload {
+  payment: Payment
+  clientMutationId: String
+}
+
+input DeletePaymentInput {
+  id: ID
+}
+
+input DeletePaymentsInput {
+  where: PaymentWhereInput
+  order: [PaymentOrder]
+}
+
 input CreateMutationInput {
   name: Int!
 }
@@ -1285,17 +1526,17 @@ input SecondCustomMutationSumInput {
   b: Int!
 }
 
-input CreatePaymentInput {
+input MakePaymentInput {
   customerEmail: Email
   paymentMode: PaymentMode!
   successUrl: String!
   cancelUrl: String!
-  products: [CreatePaymentProductInput]!
+  products: [MakePaymentProductInput]!
   automaticTax: Boolean
   recurringInterval: PaymentReccuringInterval
 }
 
-input CreatePaymentProductInput {
+input MakePaymentProductInput {
   name: String!
   unitAmount: Int!
   quantity: Int!
