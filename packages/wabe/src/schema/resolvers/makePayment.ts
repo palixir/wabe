@@ -28,16 +28,6 @@ export const makePaymentResolver = async (
 
   if (!email) throw new Error('Customer email is required')
 
-  const url = await paymentController.createPayment({
-    cancelUrl,
-    successUrl,
-    customerEmail: email,
-    paymentMode,
-    automaticTax: automaticTax ?? false,
-    recurringInterval: recurringInterval ?? 'month',
-    products: products as Product[],
-  })
-
   const userWithEmail = await context.wabe.controllers.database.getObjects({
     className: 'User',
     context: {
@@ -53,27 +43,16 @@ export const makePaymentResolver = async (
     first: 1,
   })
 
-  if (userWithEmail.length === 0) throw new Error('User not found')
+  if (!userWithEmail.length) throw new Error('User not found')
 
-  const userId = userWithEmail[0].id
-
-  const amount = products.reduce(
-    (acc, product) =>
-      acc + (product?.unitAmount || 0) * (product?.quantity || 0),
-    0,
-  )
-
-  await context.wabe.controllers.database.createObject({
-    className: 'Payment',
-    context: {
-      ...context,
-      isRoot: true,
-    },
-    data: {
-      user: userId,
-      amount,
-    },
-    fields: [],
+  const url = await paymentController.createPayment({
+    cancelUrl,
+    successUrl,
+    customerEmail: email,
+    paymentMode,
+    automaticTax: automaticTax ?? false,
+    recurringInterval: recurringInterval ?? 'month',
+    products: products as Product[],
   })
 
   return url

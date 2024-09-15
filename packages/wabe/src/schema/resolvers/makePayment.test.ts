@@ -4,11 +4,9 @@ import { PaymentMode } from '../../payment'
 
 describe('createPaymentResolver', () => {
   const mockGetObjects = mock(() => {})
-  const mockCreateObject = mock(() => {})
 
   afterEach(() => {
     mockGetObjects.mockClear()
-    mockCreateObject.mockClear()
   })
 
   it('should throw an error if the customer email is not provided', async () => {
@@ -87,7 +85,6 @@ describe('createPaymentResolver', () => {
           payment: paymentController,
           database: {
             getObjects: mockGetObjects,
-            createObject: mockCreateObject,
           },
         },
       },
@@ -118,20 +115,6 @@ describe('createPaymentResolver', () => {
       recurringInterval: 'month',
       products: [{ name: 'product1', unitAmount: 100, quantity: 1 }],
     })
-
-    expect(mockCreateObject).toHaveBeenCalledTimes(1)
-    expect(mockCreateObject).toHaveBeenCalledWith({
-      className: 'Payment',
-      context: {
-        ...context,
-        isRoot: true,
-      },
-      data: {
-        user: 'userId',
-        amount: 100,
-      },
-      fields: [],
-    })
   })
 
   it('should throw an error if the user is not found', async () => {
@@ -152,7 +135,6 @@ describe('createPaymentResolver', () => {
           payment: paymentController,
           database: {
             getObjects: mockGetObjects,
-            createObject: mockCreateObject,
           },
         },
       },
