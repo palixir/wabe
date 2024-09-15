@@ -1,6 +1,11 @@
 """Phone custom scalar type"""
 scalar Phone
 
+enum RoleEnum {
+  Admin
+  Client
+}
+
 enum AuthenticationProvider {
   Google
 }

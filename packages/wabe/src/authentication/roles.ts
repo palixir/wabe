@@ -1,14 +1,31 @@
 import type { Wabe } from '..'
 
-// TODO: Before create check if role not already exists
 export const initializeRoles = async (wabe: Wabe<any>) => {
   const roles = wabe.config?.authentication?.roles || []
 
   if (roles.length === 0) return
 
-  const objectsToCreate = roles.map((role) => ({
-    name: role,
-  }))
+  const res = await wabe.controllers.database.getObjects({
+    className: 'Role',
+    context: {
+      isRoot: true,
+      wabe,
+    },
+    fields: ['name'],
+    where: {
+      name: {
+        in: roles,
+      },
+    },
+  })
+
+  const alreadyCreatedRoles = res.map((role) => role.name)
+
+  const objectsToCreate = roles
+    .filter((role) => !alreadyCreatedRoles.includes(role))
+    .map((role) => ({ name: role }))
+
+  if (objectsToCreate.length === 0) return
 
   await wabe.controllers.database.createObjects({
     className: 'Role',

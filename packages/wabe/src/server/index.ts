@@ -112,9 +112,32 @@ export class Wabe<T extends WabeTypes> {
       payment: payment?.adapter ? new PaymentController(payment) : undefined,
     }
 
+    this.loadRoleEnum()
     this.loadDefaultRoutes()
     this.loadHooks()
     this.loadAuthenticationMethods()
+  }
+
+  loadRoleEnum() {
+    const roles = this.config.authentication?.roles || []
+
+    if (roles.length === 0) return
+
+    const roleEnum = {
+      name: 'RoleEnum',
+      values: roles.reduce(
+        (acc, currentRole) => {
+          acc[currentRole] = { value: currentRole }
+          return acc
+        },
+        {} as Record<string, any>,
+      ),
+    }
+
+    this.config.schema = {
+      ...this.config.schema,
+      enums: [...(this.config.schema?.enums || []), roleEnum],
+    }
   }
 
   loadAuthenticationMethods() {
