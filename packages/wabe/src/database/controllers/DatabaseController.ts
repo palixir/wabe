@@ -462,6 +462,7 @@ export class DatabaseController<T extends WabeTypes> {
     U extends keyof T['types'],
     K extends keyof T['types'][U],
     W extends keyof T['types'][U],
+    X extends keyof T['types'][U],
   >({
     className,
     fields,
@@ -470,7 +471,8 @@ export class DatabaseController<T extends WabeTypes> {
     skipHooks,
     first,
     offset,
-  }: GetObjectsOptions<U, K, W>): Promise<OutputType<U, K>[]> {
+    order,
+  }: GetObjectsOptions<U, K, W, X>): Promise<OutputType<U, K>[]> {
     const typedFields = fields as string[]
 
     const { pointersFieldsId, pointers } = this._getPointerObject(
@@ -519,6 +521,7 @@ export class DatabaseController<T extends WabeTypes> {
       offset,
       where: whereWithACLCondition,
       fields: fieldsWithPointerFields,
+      order,
     })
 
     objects.map((object) =>
@@ -540,6 +543,7 @@ export class DatabaseController<T extends WabeTypes> {
       offset,
       where: whereWithACLCondition,
       fields: fieldsWithPointerFields,
+      order,
     })
 
     return Promise.all(
@@ -602,6 +606,7 @@ export class DatabaseController<T extends WabeTypes> {
     U extends keyof T['types'],
     K extends keyof T['types'][U],
     W extends keyof T['types'][U],
+    X extends keyof T['types'][U],
   >({
     data,
     fields,
@@ -609,7 +614,8 @@ export class DatabaseController<T extends WabeTypes> {
     context,
     first,
     offset,
-  }: CreateObjectsOptions<U, K, W>) {
+    order,
+  }: CreateObjectsOptions<U, K, W, X>) {
     if (data.length === 0) return []
 
     const hooks = await Promise.all(
@@ -640,6 +646,7 @@ export class DatabaseController<T extends WabeTypes> {
       data: arrayOfComputedData,
       first,
       offset,
+      order,
     })
 
     const objectsId = objects.map((object) => object.id)
@@ -671,6 +678,7 @@ export class DatabaseController<T extends WabeTypes> {
       skipHooks: true,
       first,
       offset,
+      order,
     })
 
     return objectsToReturn
@@ -733,6 +741,7 @@ export class DatabaseController<T extends WabeTypes> {
     U extends keyof T['types'],
     K extends keyof T['types'][U],
     W extends keyof T['types'][U],
+    X extends keyof T['types'][U],
   >({
     className,
     where,
@@ -741,7 +750,8 @@ export class DatabaseController<T extends WabeTypes> {
     data,
     first,
     offset,
-  }: UpdateObjectsOptions<U, K, W>) {
+    order,
+  }: UpdateObjectsOptions<U, K, W, X>) {
     const whereObject = await this._getWhereObjectWithPointerOrRelation(
       className,
       where || {},
@@ -773,6 +783,7 @@ export class DatabaseController<T extends WabeTypes> {
       where: whereWithACLCondition,
       first,
       offset,
+      order,
     })
 
     const objectsId = objects.map((object) => object.id)
@@ -799,6 +810,7 @@ export class DatabaseController<T extends WabeTypes> {
       skipHooks: true,
       first,
       offset,
+      order,
     })
 
     return objectsToReturn
@@ -848,6 +860,7 @@ export class DatabaseController<T extends WabeTypes> {
     U extends keyof T['types'],
     K extends keyof T['types'][U],
     W extends keyof T['types'][U],
+    X extends keyof T['types'][U],
   >({
     className,
     context,
@@ -855,7 +868,8 @@ export class DatabaseController<T extends WabeTypes> {
     where,
     first,
     offset,
-  }: DeleteObjectsOptions<U, K, W>) {
+    order,
+  }: DeleteObjectsOptions<U, K, W, X>) {
     const whereObject = await this._getWhereObjectWithPointerOrRelation(
       className,
       where || {},
@@ -880,6 +894,7 @@ export class DatabaseController<T extends WabeTypes> {
       context,
       first,
       offset,
+      order,
     })
 
     const { objects } = await hook.runOnMultipleObjects({
@@ -894,6 +909,7 @@ export class DatabaseController<T extends WabeTypes> {
       first,
       offset,
       where: whereWithACLCondition,
+      order,
     })
 
     await hook.runOnMultipleObjects({
