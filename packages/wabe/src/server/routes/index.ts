@@ -2,7 +2,7 @@ import type { WobeHandler } from 'wobe'
 import type { ProviderEnum } from '../../authentication/interface'
 import { authHandler, oauthHandlerCallback } from './authHandler'
 import type { WobeCustomContext } from '..'
-import {
+import type {
   OnPaymentFailedOptions,
   OnPaymentSucceedOptions,
 } from '../../payment/interface'
