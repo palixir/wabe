@@ -86,6 +86,37 @@ Get invoices of a customer
 getInvoices(input: GetInvoicesInput!): [Invoice]!
 ```
 
+## Webhooks
+
+Wabe offers the ability to create webhooks for payments. The webhooks are created automatically when you initialize the payment adapter. For the moment we only support two callbacks, one for successful payments and one for failed payments. You can for example do something like sending a welcome email after each successful payment.
+
+```ts
+import { Wabe, Currency } from "wabe";
+import { StripeAdapter } from "wabe-stripe";
+
+const run = async () => {
+  const wabe = new Wabe({
+    // ... others config fields
+    publicUrl: 'https://you-app.com',
+    payment: {
+      adapter: new StripeAdapter('YOU_STRIPE_SECRET_KEY'),
+      currency: Currency.USD,
+      supportedPaymentMethods: ['card', 'paypal'],
+      onPaymentSucceed: async (options) => {
+        // Do something with the options
+      },
+      onPaymentFailed: async (options) => {
+        // Do something with the options
+      },
+    },
+  });
+
+  await wabe.start();
+};
+
+await run();
+```
+
 ## Stripe adapter
 
 You can easily initialize an adapter like this by passing your API key as a parameter to the adapter.

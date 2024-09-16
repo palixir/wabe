@@ -36,10 +36,39 @@ export type Product = {
   quantity: number
 }
 
+export interface OnPaymentSucceedOptions {
+  created: string
+  amount: number
+  customerEmail: string | null
+  billingDetails: {
+    address: {
+      city: string | null
+      country: string | null
+      line1: string | null
+      line2: string | null
+      postalCode: string | null
+      state: string | null
+    }
+    name: string | null
+    phone: string | null
+  }
+  currency: string
+  paymentMethodTypes: Array<string>
+}
+
+export interface OnPaymentFailedOptions {
+  created: string
+  amount: number
+  messageError: string
+  paymentMethodTypes: Array<string>
+}
+
 export interface PaymentConfig {
   adapter: PaymentAdapter
   supportedPaymentMethods: Array<PaymentMethod>
   currency: Currency
+  onPaymentSucceed?: (options: OnPaymentSucceedOptions) => Promise<void>
+  onPaymentFailed?: (options: OnPaymentFailedOptions) => Promise<void>
 }
 
 export type Invoice = {
@@ -79,6 +108,10 @@ export type CreatePaymentOptions = {
   cancelUrl: string
   automaticTax?: boolean
   recurringInterval?: 'month' | 'year'
+}
+
+export type InitWebhookOptions = {
+  webhookUrl: string
 }
 
 export type CancelSubscriptionOptions = {
@@ -144,4 +177,9 @@ export interface PaymentAdapter {
    * @returns The hypothetical revenue of subscriptions
    */
   getHypotheticalSubscriptionRevenue: () => Promise<number>
+  /**
+   * Init the webhook for succeed and failed payments
+   * @param options The webhook url
+   */
+  initWebhook: (options: InitWebhookOptions) => Promise<void>
 }

@@ -24,6 +24,7 @@ import { PaymentController } from '../payment/PaymentController'
 
 export interface WabeConfig<T extends WabeTypes> {
   port: number
+  publicUrl?: string
   schema?: SchemaInterface<T>
   database: DatabaseConfig
   codegen?:
@@ -75,6 +76,7 @@ export class Wabe<T extends WabeTypes> {
     email,
     payment,
     routes,
+    publicUrl,
   }: WabeConfig<T>) {
     this.config = {
       port,
@@ -84,6 +86,7 @@ export class Wabe<T extends WabeTypes> {
       authentication,
       rootKey,
       hooks,
+      publicUrl,
       file: {
         adapter:
           file?.adapter ||
@@ -110,6 +113,15 @@ export class Wabe<T extends WabeTypes> {
       database: new DatabaseController<T>(databaseAdapter),
       email: email?.adapter ? new EmailController(email.adapter) : undefined,
       payment: payment?.adapter ? new PaymentController(payment) : undefined,
+    }
+
+    if (this.controllers.payment) {
+      if (!this.config.publicUrl)
+        throw new Error('publicUrl config is not defined')
+
+      this.controllers.payment.initWebhook({
+        webhookUrl: `http://${this.config.publicUrl}:${this.config.port}/webhooks/payment`,
+      })
     }
 
     this.loadRoleEnum()

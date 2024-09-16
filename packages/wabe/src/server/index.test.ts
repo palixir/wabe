@@ -1,4 +1,4 @@
-import { describe, expect, it, spyOn } from 'bun:test'
+import { describe, expect, it, spyOn, mock } from 'bun:test'
 import { v4 as uuid } from 'uuid'
 import getPort from 'get-port'
 import { Wabe } from '.'
@@ -38,6 +38,152 @@ describe('Server', () => {
     await wabe.close()
   })
 
+  it('should call the onPaymentSucceed hook', async () => {
+    const databaseId = uuid()
+    const port = await getPort()
+
+    const mockOnPaymentSucceed = mock(() => {})
+
+    const wabe = new Wabe({
+      rootKey:
+        'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+      publicUrl: 'http://127.0.0.1',
+      database: {
+        type: DatabaseEnum.Mongo,
+        url: 'mongodb://127.0.0.1:27045',
+        name: databaseId,
+      },
+      port,
+      payment: {
+        // @ts-expect-error
+        onPaymentSucceed: async (options: any) => mockOnPaymentSucceed(options),
+      } as any,
+    })
+
+    await wabe.start()
+
+    await fetch(`http://127.0.0.1:${port}/webhooks/payment`, {
+      method: 'POST',
+      body: JSON.stringify({
+        type: 'payment_intent.succeeded',
+        created: 'created',
+        data: {
+          object: {
+            amount: 100,
+            currency: 'eur',
+            customer: {
+              email: 'customer@test.com',
+            },
+            payment_method_types: ['card'],
+            shipping: {
+              address: {
+                city: 'Paris',
+                country: 'France',
+                line1: '1 rue de la Paix',
+                line2: '75008 Paris',
+                postalCode: '75008',
+                state: 'Paris',
+              },
+              name: 'John Doe',
+              phone: '+33612345678',
+            },
+          },
+        },
+      }),
+    })
+
+    expect(mockOnPaymentSucceed).toHaveBeenCalledTimes(1)
+    expect(mockOnPaymentSucceed).toHaveBeenCalledWith({
+      created: 'created',
+      amount: 100,
+      customerEmail: 'customer@test.com',
+      billingDetails: {
+        address: {
+          city: 'Paris',
+          country: 'France',
+          line1: '1 rue de la Paix',
+          line2: '75008 Paris',
+          postalCode: '75008',
+          state: 'Paris',
+        },
+        name: 'John Doe',
+        phone: '+33612345678',
+      },
+      currency: 'eur',
+      paymentMethodTypes: ['card'],
+    })
+
+    await wabe.close()
+  })
+
+  it('should call the onPaymentFailed hook', async () => {
+    const databaseId = uuid()
+    const port = await getPort()
+
+    const mockOnPaymentFailed = mock(() => {})
+
+    const wabe = new Wabe({
+      rootKey:
+        'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+      publicUrl: 'http://127.0.0.1',
+      database: {
+        type: DatabaseEnum.Mongo,
+        url: 'mongodb://127.0.0.1:27045',
+        name: databaseId,
+      },
+      port,
+      payment: {
+        // @ts-expect-error
+        onPaymentFailed: async (options: any) => mockOnPaymentFailed(options),
+      } as any,
+    })
+
+    await wabe.start()
+
+    await fetch(`http://127.0.0.1:${port}/webhooks/payment`, {
+      method: 'POST',
+      body: JSON.stringify({
+        type: 'payment_intent.payment_failed',
+        created: 'created',
+        data: {
+          object: {
+            amount: 100,
+            currency: 'eur',
+            customer: {
+              email: 'customer@test.com',
+            },
+            payment_method_types: ['card'],
+            last_payment_error: {
+              message: 'Payment failed',
+            },
+            shipping: {
+              address: {
+                city: 'Paris',
+                country: 'France',
+                line1: '1 rue de la Paix',
+                line2: '75008 Paris',
+                postalCode: '75008',
+                state: 'Paris',
+              },
+              name: 'John Doe',
+              phone: '+33612345678',
+            },
+          },
+        },
+      }),
+    })
+
+    expect(mockOnPaymentFailed).toHaveBeenCalledTimes(1)
+    expect(mockOnPaymentFailed).toHaveBeenCalledWith({
+      created: 'created',
+      amount: 100,
+      messageError: 'Payment failed',
+      paymentMethodTypes: ['card'],
+    })
+
+    await wabe.close()
+  })
+
   it('should throw an error if hook has negative value', async () => {
     const databaseId = uuid()
 
@@ -45,6 +191,7 @@ describe('Server', () => {
     expect(
       () =>
         new Wabe({
+          publicUrl: 'http://127.0.0.1',
           rootKey:
             'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
           database: {
@@ -66,6 +213,7 @@ describe('Server', () => {
     expect(
       () =>
         new Wabe({
+          publicUrl: 'http://127.0.0.1',
           rootKey:
             'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
           database: {
@@ -81,6 +229,7 @@ describe('Server', () => {
     expect(
       () =>
         new Wabe({
+          publicUrl: 'http://127.0.0.1',
           rootKey:
             'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
           database: {
