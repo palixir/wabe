@@ -15,6 +15,7 @@ const mockSubscriptionsRetrieve = mock(() => {})
 const mockChargesRetrieve = mock(() => {})
 const mockCustomersRetrieve = mock(() => {})
 const mockListCharges = mock(() => {})
+const mockWebhookEndpointsCreate = mock(() => {})
 
 spyOn(Stripe.prototype, 'customers').mockReturnValue({
   create: mockCreateCustomer,
@@ -48,6 +49,10 @@ spyOn(Stripe.prototype, 'charges').mockReturnValue({
   retrieve: mockChargesRetrieve,
 } as never)
 
+spyOn(Stripe.prototype, 'webhookEndpoints').mockReturnValue({
+  create: mockWebhookEndpointsCreate,
+} as never)
+
 describe('wabe-stripe', () => {
   beforeEach(() => {
     mockListCustomers.mockClear()
@@ -62,6 +67,26 @@ describe('wabe-stripe', () => {
     mockChargesRetrieve.mockClear()
     mockCustomersRetrieve.mockClear()
     mockListCharges.mockClear()
+    mockWebhookEndpointsCreate.mockClear()
+  })
+
+  it('should init the webhooks', async () => {
+    const adapter = new StripeAdapter('API_KEY')
+
+    mockWebhookEndpointsCreate.mockResolvedValue({
+      id: 'wh_123',
+    } as never)
+
+    await adapter.initWebhooks('https://wabe.dev')
+
+    expect(mockWebhookEndpointsCreate).toHaveBeenCalledTimes(1)
+    expect(mockWebhookEndpointsCreate).toHaveBeenCalledWith({
+      url: 'https://wabe.dev',
+      enabled_events: [
+        'payment_intent.succeeded',
+        'payment_intent.payment_failed',
+      ],
+    })
   })
 
   it('should get the hypothetical revenue', async () => {
