@@ -7,6 +7,7 @@ import type {
   GetAllTransactionsOptions,
   GetInvoicesOptions,
   GetTotalRevenueOptions,
+  InitWebhookOptions,
   Invoice,
   PaymentAdapter,
   Transaction,
@@ -25,9 +26,9 @@ export class StripeAdapter implements PaymentAdapter {
     })
   }
 
-  async initWebhooks(url: string) {
-    return this.stripe.webhookEndpoints.create({
-      url,
+  async initWebhook({ webhookUrl }: InitWebhookOptions) {
+    await this.stripe.webhookEndpoints.create({
+      url: webhookUrl,
       enabled_events: [
         'payment_intent.succeeded',
         'payment_intent.payment_failed',

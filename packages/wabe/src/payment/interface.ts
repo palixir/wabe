@@ -1,5 +1,3 @@
-import { Context } from 'wobe'
-
 export enum Currency {
   EUR = 'eur',
   USD = 'usd',

@@ -77,7 +77,7 @@ describe('wabe-stripe', () => {
       id: 'wh_123',
     } as never)
 
-    await adapter.initWebhooks('https://wabe.dev')
+    await adapter.initWebhook({ webhookUrl: 'https://wabe.dev' })
 
     expect(mockWebhookEndpointsCreate).toHaveBeenCalledTimes(1)
     expect(mockWebhookEndpointsCreate).toHaveBeenCalledWith({
