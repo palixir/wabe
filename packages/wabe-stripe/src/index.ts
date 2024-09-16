@@ -25,6 +25,16 @@ export class StripeAdapter implements PaymentAdapter {
     })
   }
 
+  async initWebhooks(url: string) {
+    return this.stripe.webhookEndpoints.create({
+      url,
+      enabled_events: [
+        'payment_intent.succeeded',
+        'payment_intent.payment_failed',
+      ],
+    })
+  }
+
   async createCustomer({
     customerName,
     customerPhone,
