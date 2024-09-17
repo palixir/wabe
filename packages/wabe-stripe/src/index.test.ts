@@ -70,7 +70,7 @@ describe('wabe-stripe', () => {
     mockWebhookEndpointsCreate.mockClear()
   })
 
-  it.only('should get a customer by id', async () => {
+  it('should get a customer by id', async () => {
     const adapter = new StripeAdapter('API_KEY')
 
     mockCustomersRetrieve.mockResolvedValue({
