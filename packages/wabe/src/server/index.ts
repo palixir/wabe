@@ -120,7 +120,7 @@ export class Wabe<T extends WabeTypes> {
         throw new Error('publicUrl config is not defined')
 
       this.controllers.payment.initWebhook({
-        webhookUrl: `http://${this.config.publicUrl}:${this.config.port}/webhooks/payment`,
+        webhookUrl: `${this.config.publicUrl}/webhooks/payment`,
       })
     }
 
