@@ -11,12 +11,12 @@ import {
   remove,
 } from './pointerAndRelationFunction'
 
-const ignoredFields = ['edges', 'node']
-
 export const extractFieldsFromSetNode = (
   selectionSet: SelectionSetNode,
   className: string,
 ): Array<any> => {
+  const ignoredFields = ['edges', 'node']
+
   if (className) ignoredFields.push(firstLetterInLowerCase(className))
 
   return selectionSet.selections

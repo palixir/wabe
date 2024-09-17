@@ -70,6 +70,26 @@ describe('wabe-stripe', () => {
     mockWebhookEndpointsCreate.mockClear()
   })
 
+  it.only('should get a customer by id', async () => {
+    const adapter = new StripeAdapter('API_KEY')
+
+    mockCustomersRetrieve.mockResolvedValue({
+      id: 'cus_123',
+      email: 'test@wabe.dev',
+    } as never)
+
+    const customer = await adapter.getCustomerById({
+      id: 'cus_123',
+    })
+
+    expect(mockCustomersRetrieve).toHaveBeenCalledTimes(1)
+    expect(mockCustomersRetrieve).toHaveBeenCalledWith('cus_123')
+
+    expect(customer).toEqual({
+      email: 'test@wabe.dev',
+    })
+  })
+
   it('should init the webhooks', async () => {
     const adapter = new StripeAdapter('API_KEY')
 

@@ -71,9 +71,7 @@ describe('Server', () => {
           object: {
             amount: 100,
             currency: 'eur',
-            customer: {
-              email: 'customer@test.com',
-            },
+            customer: 'customerId',
             payment_method_types: ['card'],
             shipping: {
               address: {
@@ -95,8 +93,8 @@ describe('Server', () => {
     expect(mockOnPaymentSucceed).toHaveBeenCalledTimes(1)
     expect(mockOnPaymentSucceed).toHaveBeenCalledWith({
       created: 'created',
-      amount: 100,
-      customerEmail: 'customer@test.com',
+      amount: 1,
+      customerEmail: '',
       billingDetails: {
         address: {
           city: 'Paris',
@@ -176,7 +174,7 @@ describe('Server', () => {
     expect(mockOnPaymentFailed).toHaveBeenCalledTimes(1)
     expect(mockOnPaymentFailed).toHaveBeenCalledWith({
       created: 'created',
-      amount: 100,
+      amount: 1,
       messageError: 'Payment failed',
       paymentMethodTypes: ['card'],
     })
