@@ -5,6 +5,7 @@ import type {
   CreatePaymentOptions,
   Currency,
   GetAllTransactionsOptions,
+  GetCustomerByIdOptions,
   GetInvoicesOptions,
   GetTotalRevenueOptions,
   InitWebhookOptions,
@@ -24,6 +25,16 @@ export class StripeAdapter implements PaymentAdapter {
       },
       typescript: true,
     })
+  }
+
+  async getCustomerById({ id }: GetCustomerByIdOptions) {
+    const customer = (await this.stripe.customers.retrieve(
+      id,
+    )) as Stripe.Customer
+
+    return {
+      email: customer.email,
+    }
   }
 
   async initWebhook({ webhookUrl }: InitWebhookOptions) {

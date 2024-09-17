@@ -8,6 +8,7 @@ import type {
   GetTotalRevenueOptions,
   GetAllTransactionsOptions,
   InitWebhookOptions,
+  GetCustomerByIdOptions,
 } from './interface'
 
 export class PaymentController implements PaymentAdapter {
@@ -17,6 +18,10 @@ export class PaymentController implements PaymentAdapter {
   constructor(paymentConfig: PaymentConfig) {
     this.adapter = paymentConfig.adapter
     this.config = paymentConfig
+  }
+
+  async getCustomerById(options: GetCustomerByIdOptions) {
+    return this.adapter.getCustomerById(options)
   }
 
   async initWebhook({ webhookUrl }: InitWebhookOptions) {

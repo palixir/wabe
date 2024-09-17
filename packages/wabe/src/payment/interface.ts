@@ -134,7 +134,19 @@ export type GetAllTransactionsOptions = {
   first?: number
 }
 
+export type GetCustomerByIdOptions = {
+  id: string
+}
+
 export interface PaymentAdapter {
+  /**
+   * Get a customer by id
+   * @param id The customer id
+   * @returns The customer
+   */
+  getCustomerById: (
+    options: GetCustomerByIdOptions,
+  ) => Promise<{ email: string | null }>
   /**
    * Create a customer
    * @param options CreateCustomerOptions
