@@ -4,7 +4,6 @@ import {
   it,
   beforeAll,
   afterAll,
-  mock,
   spyOn,
   afterEach,
 } from 'bun:test'
@@ -41,20 +40,6 @@ describe('webhookPayment route', () => {
   const spyLinkPayment = spyOn(linkPayment, 'linkPayment')
 
   it('should call link payment and onPaymentSucceed when the webhook is called', async () => {
-    const mockGetCustomerById = mock(() => {}).mockResolvedValue({
-      email: 'customer@test.com',
-    } as never)
-
-    wabe.controllers = {
-      ...wabe.controllers,
-      payment: {
-        // @ts-expect-error
-        getCustomerById: mockGetCustomerById,
-        onPaymentSucceed: async () => mock(() => {}),
-        onPaymentFailed: async () => mock(() => {}),
-      },
-    }
-
     await client.request<any>(gql`
 				mutation createUser {
 					createUser(input: {fields: {email: "customer@test.com"}}) {
@@ -126,20 +111,6 @@ describe('webhookPayment route', () => {
   })
 
   it('should call onPaymentFailed when the webhook is called', async () => {
-    const mockGetCustomerById = mock(() => {}).mockResolvedValue({
-      email: 'customer@test.com',
-    } as never)
-
-    wabe.controllers = {
-      ...wabe.controllers,
-      payment: {
-        // @ts-expect-error
-        getCustomerById: mockGetCustomerById,
-        onPaymentSucceed: async () => mock(() => {}),
-        onPaymentFailed: async () => mock(() => {}),
-      },
-    }
-
     await client.request<any>(gql`
 				mutation createUser {
 					createUser(input: {fields: {email: "customer@test.com"}}) {
