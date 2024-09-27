@@ -83,6 +83,8 @@ export const setupTests = async () => {
     },
     port,
     publicUrl: 'http://127.0.0.1',
+    // @ts-expect-error
+    payment: {},
     schema: {
       classes: [
         {
