@@ -87,6 +87,8 @@ export const setupTests = async () => {
     payment: {
       // @ts-expect-error
       adapter: new PaymentDevAdapter(),
+      asyhnonPaymentSucceed: async () => {},
+      onPaymentFailed: async () => {},
     },
     schema: {
       classes: [

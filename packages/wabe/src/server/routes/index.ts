@@ -6,7 +6,7 @@ import type {
   OnPaymentFailedOptions,
   OnPaymentSucceedOptions,
 } from '../../payment/interface'
-// import { linkPayment } from '../../payment/linkPayment'
+import { linkPayment } from '../../payment/linkPayment'
 
 export interface WabeRoute {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE'
@@ -59,13 +59,13 @@ export const defaultRoutes = (): WabeRoute[] => [
             customerEmail,
           }
 
-          // if (extractedBody.customerEmail)
-          //   await linkPayment(
-          //     context.wabe,
-          //     extractedBody.customerEmail,
-          //     extractedBody.amount,
-          //     extractedBody.currency,
-          //   )
+          if (extractedBody.customerEmail)
+            await linkPayment(
+              context.wabe,
+              extractedBody.customerEmail,
+              extractedBody.amount,
+              extractedBody.currency,
+            )
 
           await context.wabe.wabe.config.payment?.onPaymentSucceed?.(
             extractedBody,

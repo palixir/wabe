@@ -34,11 +34,11 @@ describe('webhookPayment route', () => {
     await closeTests(wabe)
   })
 
+  const spyLinkPayment = spyOn(linkPayment, 'linkPayment')
+
   afterEach(() => {
     spyLinkPayment.mockClear()
   })
-
-  const spyLinkPayment = spyOn(linkPayment, 'linkPayment')
 
   it('should call link payment and onPaymentSucceed when the webhook is called', async () => {
     await client.request<any>(gql`
