@@ -89,6 +89,8 @@ export const defaultRoutes = (): WabeRoute[] => [
           break
       }
 
+      console.log('CONTEXT', context.res)
+
       return context.res.sendJson({ received: true })
     },
   },
