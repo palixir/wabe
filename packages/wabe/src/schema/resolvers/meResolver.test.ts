@@ -3,7 +3,6 @@ import type { Wabe } from '../../server'
 import {
   closeTests,
   getAnonymousClient,
-  getGraphqlClient,
   getUserClient,
   setupTests,
   type DevWabeTypes,
@@ -14,14 +13,12 @@ describe('me', () => {
   let wabe: Wabe<DevWabeTypes>
   let port: number
   let client: GraphQLClient
-  let rootClient: GraphQLClient
 
   beforeAll(async () => {
     const setup = await setupTests()
     wabe = setup.wabe
     port = setup.port
     client = getAnonymousClient(port)
-    rootClient = getGraphqlClient(port)
   })
 
   afterAll(async () => {
