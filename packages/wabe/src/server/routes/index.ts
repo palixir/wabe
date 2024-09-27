@@ -6,7 +6,7 @@ import type {
   OnPaymentFailedOptions,
   OnPaymentSucceedOptions,
 } from '../../payment/interface'
-import { linkPayment } from '../../payment/linkPayment'
+// import { linkPayment } from '../../payment/linkPayment'
 
 export interface WabeRoute {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE'
