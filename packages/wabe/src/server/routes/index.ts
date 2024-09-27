@@ -59,13 +59,13 @@ export const defaultRoutes = (): WabeRoute[] => [
             customerEmail,
           }
 
-          if (extractedBody.customerEmail)
-            await linkPayment(
-              context.wabe,
-              extractedBody.customerEmail,
-              extractedBody.amount,
-              extractedBody.currency,
-            )
+          // if (extractedBody.customerEmail)
+          //   await linkPayment(
+          //     context.wabe,
+          //     extractedBody.customerEmail,
+          //     extractedBody.amount,
+          //     extractedBody.currency,
+          //   )
 
           await context.wabe.wabe.config.payment?.onPaymentSucceed?.(
             extractedBody,
