@@ -17,6 +17,7 @@ import type { Wabe } from '../..'
 import { gql, type GraphQLClient } from 'graphql-request'
 import * as linkPayment from '../../payment/linkPayment'
 
+// Passed in local but not in CI so weird server/index.test.ts passed with similar code
 describe('webhookPayment route', () => {
   let wabe: Wabe<DevWabeTypes>
   let port: number
