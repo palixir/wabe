@@ -2148,6 +2148,9 @@ describe('GraphqlSchema', () => {
 						testClass2 {
 							id
 							name
+							field2 {
+								field1
+							}
 						}
 					}
 				}
@@ -2155,9 +2158,10 @@ describe('GraphqlSchema', () => {
       {},
     )
 
-    expect(
-      client.request<any>(
-        gql`
+    expect(res.createTestClass2.testClass2.field2.field1).toBe('field1')
+
+    const res2 = await client.request<any>(
+      gql`
 				mutation updateTestClass {
 					updateTestClass2(input: {
   					id: "${res.createTestClass2.testClass2.id}"
@@ -2174,9 +2178,10 @@ describe('GraphqlSchema', () => {
 					}
 				}
 			`,
-        {},
-      ),
-    ).rejects.toThrow('Object not found')
+      {},
+    )
+
+    expect(res2.updateTestClass2.testClass2.field2).toBeNull()
 
     await wabe.close()
   })

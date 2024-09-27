@@ -159,7 +159,8 @@ export class DatabaseController<T extends WabeTypes> {
           pointerClass,
         )
 
-        if (isPointer && pointerClass) {
+        // @ts-expect-error
+        if (isPointer && pointerClass && objectData?.[pointerField]) {
           const pointerObject = await this.getObject({
             className: pointerClass,
             fields: fieldsOfPointerClass,

@@ -48,15 +48,7 @@ describe('_Session', () => {
         accessToken: { equalTo: 'accessToken' },
       },
       first: 1,
-      fields: [
-        'id',
-        'user.id',
-        'user.email',
-        'user.role.name',
-        'user.role.id',
-        'refreshToken',
-        'refreshTokenExpiresAt',
-      ],
+      fields: ['user.*', 'user.role.*'],
       context: { isRoot: true, wabe: { controllers } },
     })
   })
@@ -88,15 +80,7 @@ describe('_Session', () => {
         accessToken: { equalTo: 'accessToken' },
       },
       first: 1,
-      fields: [
-        'id',
-        'user.id',
-        'user.email',
-        'user.role.name',
-        'user.role.id',
-        'refreshToken',
-        'refreshTokenExpiresAt',
-      ],
+      fields: ['user.*', 'user.role.*'],
       context: expect.any(Object),
     })
 

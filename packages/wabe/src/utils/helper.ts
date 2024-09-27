@@ -77,6 +77,9 @@ export const setupTests = async () => {
     },
     authentication: {
       roles: ['Client', 'Client2', 'Client3'],
+      session: {
+        cookieSession: true,
+      },
     },
     port,
     schema: {

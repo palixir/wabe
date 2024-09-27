@@ -503,7 +503,7 @@ describe('Authentication', () => {
 						id
 					}
 				}
-			}		
+			}
 		`)
 
     const res = await userClient.request<any>(gql`
