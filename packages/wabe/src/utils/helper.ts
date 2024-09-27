@@ -8,6 +8,7 @@ import type {
 } from '../../generated/wabe'
 import { DatabaseEnum } from '../database'
 import { Wabe } from '../server'
+import { PaymentDevAdapter } from '../payment/DevAdapter'
 
 type NotNill<T> = T extends null | undefined ? never : T
 
@@ -77,8 +78,18 @@ export const setupTests = async () => {
     },
     authentication: {
       roles: ['Client', 'Client2', 'Client3'],
+      session: {
+        cookieSession: true,
+      },
     },
     port,
+    publicUrl: 'http://127.0.0.1',
+    payment: {
+      // @ts-expect-error
+      adapter: new PaymentDevAdapter(),
+      asyhnonPaymentSucceed: async () => {},
+      onPaymentFailed: async () => {},
+    },
     schema: {
       classes: [
         {

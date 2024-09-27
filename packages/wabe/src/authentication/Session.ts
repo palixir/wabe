@@ -36,20 +36,11 @@ export class Session {
         accessToken: { equalTo: accessToken },
       },
       first: 1,
-      fields: [
-        'id',
-        'user.id',
-        'user.email',
-        'user.role.name',
-        'user.role.id',
-        'refreshToken',
-        'refreshTokenExpiresAt',
-      ],
+      fields: ['user.*', 'user.role.*'],
       context,
     })
 
     const session = sessions[0]
-
     // @ts-expect-error
     const user = session?.user
 

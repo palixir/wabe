@@ -255,18 +255,22 @@ export class Wabe<T extends WabeTypes> {
         ctx.wabe = {
           isRoot: true,
           wabe: this,
+          response: ctx.res,
         }
         return
       }
 
       const getAccessToken = () => {
+        if (headers.get('Wabe-Access-Token'))
+          return headers.get('Wabe-Access-Token')
+
         const isCookieSession =
           !!this.config.authentication?.session?.cookieSession
 
         if (isCookieSession)
           return getCookieInRequestHeaders('accessToken', ctx.request.headers)
 
-        return headers.get('Wabe-Access-Token')
+        return null
       }
 
       const accessToken = getAccessToken()
@@ -275,6 +279,7 @@ export class Wabe<T extends WabeTypes> {
         ctx.wabe = {
           isRoot: false,
           wabe: this,
+          response: ctx.res,
         }
         return
       }
@@ -291,6 +296,7 @@ export class Wabe<T extends WabeTypes> {
         sessionId,
         user,
         wabe: this,
+        response: ctx.res,
       }
     })
 
@@ -326,7 +332,10 @@ export class Wabe<T extends WabeTypes> {
               const {
                 accessToken: newAccessToken,
                 refreshToken: newRefreshToken,
-              } = await session.refresh(accessToken, refreshToken, {} as any)
+              } = await session.refresh(accessToken, refreshToken, {
+                wabe: this,
+                isRoot: true,
+              })
 
               if (accessToken !== newAccessToken)
                 res.setCookie('accessToken', newAccessToken, {

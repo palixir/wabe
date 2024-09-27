@@ -7,40 +7,36 @@ export const linkPayment = async (
   amount: number,
   currency: string,
 ) => {
-  try {
-    const user = await context.wabe.controllers.database.getObjects({
-      className: 'User',
-      context: {
-        ...context,
-        isRoot: true,
+  const user = await context.wabe.controllers.database.getObjects({
+    className: 'User',
+    context: {
+      ...context,
+      isRoot: true,
+    },
+    fields: ['id'],
+    where: {
+      email: {
+        equalTo: email,
       },
-      fields: ['id'],
-      where: {
-        email: {
-          equalTo: email,
-        },
-      },
-      first: 1,
-    })
+    },
+    first: 1,
+  })
 
-    if (user.length === 0) return
+  if (user.length === 0) return
 
-    const userId = user[0].id
+  const userId = user[0].id
 
-    await context.wabe.controllers.database.createObject({
-      className: 'Payment',
-      context: {
-        ...context,
-        isRoot: true,
-      },
-      data: {
-        user: userId,
-        amount,
-        currency,
-      },
-      fields: [],
-    })
-  } catch (err) {
-    console.error(err)
-  }
+  await context.wabe.controllers.database.createObject({
+    className: 'Payment',
+    context: {
+      ...context,
+      isRoot: true,
+    },
+    data: {
+      user: userId,
+      amount,
+      currency,
+    },
+    fields: [],
+  })
 }
