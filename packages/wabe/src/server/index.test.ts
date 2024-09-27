@@ -62,7 +62,7 @@ describe('Server', () => {
 
     await wabe.start()
 
-    await fetch(`http://127.0.0.1:${port}/webhooks/payment`, {
+    const res = await fetch(`http://127.0.0.1:${port}/webhooks/payment`, {
       method: 'POST',
       body: JSON.stringify({
         type: 'payment_intent.succeeded',
@@ -89,6 +89,8 @@ describe('Server', () => {
         },
       }),
     })
+
+    expect(res.status).toEqual(200)
 
     expect(mockOnPaymentSucceed).toHaveBeenCalledTimes(1)
     expect(mockOnPaymentSucceed).toHaveBeenCalledWith({
