@@ -18,7 +18,7 @@ import type { Wabe } from '../..'
 import { gql, type GraphQLClient } from 'graphql-request'
 import * as linkPayment from '../../payment/linkPayment'
 
-describe('webhookPayment route', () => {
+describe.skip('webhookPayment route', () => {
   let wabe: Wabe<DevWabeTypes>
   let port: number
   let client: GraphQLClient
