@@ -189,6 +189,8 @@ describe('webhookPayment route', () => {
       }),
     })
 
+    console.log(res)
+
     expect(res.status).toEqual(200)
 
     const res2 = await client.request<any>(
