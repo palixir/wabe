@@ -50,6 +50,8 @@ describe('webhookPayment route', () => {
       payment: {
         // @ts-expect-error
         getCustomerById: mockGetCustomerById,
+        onPaymentSucceed: async () => mock(() => {}),
+        onPaymentFailed: async () => mock(() => {}),
       },
     }
 
@@ -133,6 +135,8 @@ describe('webhookPayment route', () => {
       payment: {
         // @ts-expect-error
         getCustomerById: mockGetCustomerById,
+        onPaymentSucceed: async () => mock(() => {}),
+        onPaymentFailed: async () => mock(() => {}),
       },
     }
 
