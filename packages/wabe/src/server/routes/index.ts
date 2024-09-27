@@ -39,7 +39,6 @@ export const defaultRoutes = (): WabeRoute[] => [
     method: 'POST',
     path: '/webhooks/payment',
     handler: async (context) => {
-      console.log('HERE')
       const body = await context.request.json()
 
       switch (body.type) {
