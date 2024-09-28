@@ -4,8 +4,8 @@ import {
   it,
   beforeAll,
   afterAll,
-  // spyOn,
-  // afterEach,
+  spyOn,
+  afterEach,
 } from 'bun:test'
 import {
   closeTests,
@@ -15,7 +15,7 @@ import {
 } from '../../utils/helper'
 import type { Wabe } from '../..'
 import { gql, type GraphQLClient } from 'graphql-request'
-// import * as linkPayment from '../../payment/linkPayment'
+import * as linkPayment from '../../payment/linkPayment'
 
 // Passed in local but not in CI so weird server/index.test.ts passed with similar code since #50
 describe('webhookPayment route', () => {
@@ -34,11 +34,11 @@ describe('webhookPayment route', () => {
     await closeTests(wabe)
   })
 
-  // const spyLinkPayment = spyOn(linkPayment, 'linkPayment')
+  const spyLinkPayment = spyOn(linkPayment, 'linkPayment')
 
-  // afterEach(() => {
-  //   spyLinkPayment.mockClear()
-  // })
+  afterEach(() => {
+    spyLinkPayment.mockClear()
+  })
 
   it('should call link payment and onPaymentSucceed when the webhook is called', async () => {
     //  await client.request<any>(gql`

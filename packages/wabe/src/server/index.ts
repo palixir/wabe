@@ -171,7 +171,6 @@ export class Wabe<T extends WabeTypes> {
 
   loadDefaultRoutes() {
     const wabeRoutes = defaultRoutes()
-    console.log({ wabeRoutes })
 
     wabeRoutes.map((route) => {
       const { method } = route
@@ -250,7 +249,6 @@ export class Wabe<T extends WabeTypes> {
 
     // Set the wabe context
     this.server.beforeHandler(async (ctx) => {
-      console.log('beforeHandler', ctx.request.url)
       const headers = ctx.request.headers
 
       if (headers.get('Wabe-Root-Key') === this.config.rootKey) {
