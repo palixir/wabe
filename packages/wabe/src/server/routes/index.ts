@@ -2,11 +2,11 @@ import type { WobeHandler } from 'wobe'
 import type { ProviderEnum } from '../../authentication/interface'
 import { authHandler, oauthHandlerCallback } from './authHandler'
 import type { WobeCustomContext } from '..'
-import type {
-  OnPaymentFailedOptions,
-  OnPaymentSucceedOptions,
-} from '../../payment/interface'
-import { linkPayment } from '../../payment/linkPayment'
+// import type {
+//   OnPaymentFailedOptions,
+//   OnPaymentSucceedOptions,
+// } from '../../payment/interface'
+// import { linkPayment } from '../../payment/linkPayment'
 
 export interface WabeRoute {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE'
