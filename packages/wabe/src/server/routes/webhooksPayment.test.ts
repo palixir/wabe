@@ -41,19 +41,43 @@ describe('webhookPayment route', () => {
   })
 
   it('should call link payment and onPaymentSucceed when the webhook is called', async () => {
-    //  await client.request<any>(gql`
-    // 	mutation createUser {
-    // 		createUser(input: {fields: {email: "customer@test.com"}}) {
-    // 			user {
-    // 				id
-    // 				email
-    // 			}
-    // 		}
-    // 	}
-    // `)
+    await client.request<any>(gql`
+				mutation createUser {
+					createUser(input: {fields: {email: "customer@test.com"}}) {
+						user {
+							id
+							email
+						}
+					}
+				}
+			`)
 
     const res = await fetch(`http://127.0.0.1:${port}/webhooks/payment`, {
       method: 'POST',
+      body: JSON.stringify({
+        type: 'payment_intent.succeeded',
+        created: 'created',
+        data: {
+          object: {
+            amount: 100,
+            currency: 'eur',
+            customer: 'customerId',
+            payment_method_types: ['card'],
+            shipping: {
+              address: {
+                city: 'Paris',
+                country: 'France',
+                line1: '1 rue de la Paix',
+                line2: '75008 Paris',
+                postalCode: '75008',
+                state: 'Paris',
+              },
+              name: 'John Doe',
+              phone: '+33612345678',
+            },
+          },
+        },
+      }),
     })
 
     expect(res.status).toEqual(200)
