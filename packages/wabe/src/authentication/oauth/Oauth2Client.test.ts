@@ -1,4 +1,4 @@
-import { describe, expect, it, spyOn, mock } from 'bun:test'
+import { describe, expect, it, spyOn, mock, afterAll } from 'bun:test'
 import { fail } from 'node:assert'
 import { OAuth2Client } from './Oauth2Client'
 import { base64URLencode } from './utils'
@@ -15,6 +15,10 @@ describe('Oauth2Client', () => {
     'https://tokenEndpoint',
     'https://redirectURI',
   )
+
+  afterAll(() => {
+    mockFetch.mockRestore()
+  })
 
   it('should create authorization URl', async () => {
     const authorizationURL = await oauthClient.createAuthorizationURL()
