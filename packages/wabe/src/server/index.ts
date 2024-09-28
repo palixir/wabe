@@ -171,6 +171,7 @@ export class Wabe<T extends WabeTypes> {
 
   loadDefaultRoutes() {
     const wabeRoutes = defaultRoutes()
+    console.log({ wabeRoutes })
 
     wabeRoutes.map((route) => {
       const { method } = route
