@@ -6,7 +6,7 @@ import { DatabaseEnum } from '../database'
 import { Schema } from '../schema'
 import { OperationType } from '../hooks'
 
-describe.skip('Server', () => {
+describe('Server', () => {
   it('should run server', async () => {
     const databaseId = uuid()
 
