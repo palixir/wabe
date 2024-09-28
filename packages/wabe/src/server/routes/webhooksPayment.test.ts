@@ -166,26 +166,26 @@ describe('webhookPayment route', () => {
 
     expect(res.status).toEqual(200)
 
-    //  const res2 = await client.request<any>(
-    //    gql`query payments {
-    //          payments {
-    //            edges {
-    //              node {
-    //                amount
-    //                user {
-    //                  id
-    //                  email
-    //                }
-    //              }
-    //            }
-    //          }
-    //        }
-    // `,
-    //  )
+    const res2 = await client.request<any>(
+      gql`query payments {
+             payments {
+               edges {
+                 node {
+                   amount
+                   user {
+                     id
+                     email
+                   }
+                 }
+               }
+             }
+           }
+    `,
+    )
 
-    //  expect(res2.payments.edges[0].node.amount).toEqual(1)
-    //  expect(res2.payments.edges[0].node.user.email).toEqual('customer@test.com')
+    expect(res2.payments.edges[0].node.amount).toEqual(1)
+    expect(res2.payments.edges[0].node.user.email).toEqual('customer@test.com')
 
-    //  expect(spyLinkPayment).toHaveBeenCalledTimes(0)
+    expect(spyLinkPayment).toHaveBeenCalledTimes(0)
   })
 })

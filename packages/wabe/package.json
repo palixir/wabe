@@ -24,7 +24,7 @@
     "generate:types": "dts-bundle-generator -o dist/index.d.ts src/index.ts --no-check --external-imports=wobe",
     "check": "tsc --project $(pwd)/tsconfig.json",
     "lint": "biome lint . --no-errors-on-unmatched --config-path=../../",
-    "ci": "bun generate:codegen && bun check && bun lint $(pwd) && bun test webhooksPayment",
+    "ci": "bun generate:codegen && bun check && bun lint $(pwd) && bun test src",
     "format": "biome format --write . --config-path=../../",
     "dev": "bun run --watch dev/index.ts",
     "generate:codegen": "touch generated/wabe.ts && CODEGEN=true bun dev/index.ts"
