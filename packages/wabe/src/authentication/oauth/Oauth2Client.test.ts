@@ -5,6 +5,8 @@ import { base64URLencode } from './utils'
 
 const mockFetch = mock(() => {})
 
+const originalFetch = global.fetch
+
 // @ts-expect-error
 global.fetch = mockFetch
 
@@ -17,7 +19,7 @@ describe('Oauth2Client', () => {
   )
 
   afterAll(() => {
-    mockFetch.mockReset()
+    global.fetch = originalFetch
   })
 
   it('should create authorization URl', async () => {
