@@ -1,9 +1,11 @@
-import { describe, expect, it, spyOn, mock } from 'bun:test'
+import { describe, expect, it, spyOn, mock, afterAll } from 'bun:test'
 import { fail } from 'node:assert'
 import { OAuth2Client } from './Oauth2Client'
 import { base64URLencode } from './utils'
 
 const mockFetch = mock(() => {})
+
+const originalFetch = global.fetch
 
 // @ts-expect-error
 global.fetch = mockFetch
@@ -15,6 +17,10 @@ describe('Oauth2Client', () => {
     'https://tokenEndpoint',
     'https://redirectURI',
   )
+
+  afterAll(() => {
+    global.fetch = originalFetch
+  })
 
   it('should create authorization URl', async () => {
     const authorizationURL = await oauthClient.createAuthorizationURL()

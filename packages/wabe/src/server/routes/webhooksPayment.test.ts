@@ -17,8 +17,7 @@ import type { Wabe } from '../..'
 import { gql, type GraphQLClient } from 'graphql-request'
 import * as linkPayment from '../../payment/linkPayment'
 
-// Passed in local but not in CI so weird server/index.test.ts passed with similar code since #50
-describe.skip('webhookPayment route', () => {
+describe('webhookPayment route', () => {
   let wabe: Wabe<DevWabeTypes>
   let port: number
   let client: GraphQLClient
@@ -84,19 +83,19 @@ describe.skip('webhookPayment route', () => {
 
     const res2 = await client.request<any>(
       gql`query payments {
-            payments {
-              edges {
-                node {
-                  amount
-                  user {
-                    id
-                    email
-                  }
-                }
-              }
-            }
-          }
-			`,
+             payments {
+               edges {
+                 node {
+                   amount
+                   user {
+                     id
+                     email
+                   }
+                 }
+               }
+             }
+           }
+    `,
     )
 
     expect(res2.payments.edges[0].node.amount).toEqual(1)
@@ -169,19 +168,19 @@ describe.skip('webhookPayment route', () => {
 
     const res2 = await client.request<any>(
       gql`query payments {
-            payments {
-              edges {
-                node {
-                  amount
-                  user {
-                    id
-                    email
-                  }
-                }
-              }
-            }
-          }
-			`,
+             payments {
+               edges {
+                 node {
+                   amount
+                   user {
+                     id
+                     email
+                   }
+                 }
+               }
+             }
+           }
+    `,
     )
 
     expect(res2.payments.edges[0].node.amount).toEqual(1)
