@@ -52,6 +52,8 @@ await run();
 - **Database**: A powerful, scalable database to store and manage you data.
 - **GraphQL API**: A flexible and powerful GraphQL API (following GraphQL Relay standard) to interact with your data.
 - **Hooks**: Powerful hooks system to execute custom actions before or after database requests.
+- **Email**: Send emails with your favorite provider with very simple integration.
+- **Payment**: Accept payments with Stripe or create your own payment provider adapter.
 
 ## Contributing
 
