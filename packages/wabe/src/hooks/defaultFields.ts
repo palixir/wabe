@@ -5,8 +5,11 @@ import type { HookObject } from './HookObject'
 export const defaultBeforeCreateForCreatedAt = async (
   object: HookObject<any>,
 ) => {
-  object.upsertNewData('createdAt', new Date())
-  object.upsertNewData('updatedAt', new Date())
+  if (!object.isFieldUpdate('createdAt'))
+    object.upsertNewData('createdAt', new Date())
+
+  if (!object.isFieldUpdate('updatedAt'))
+    object.upsertNewData('updatedAt', new Date())
 }
 
 export const defaultBeforeUpdateForUpdatedAt = async (

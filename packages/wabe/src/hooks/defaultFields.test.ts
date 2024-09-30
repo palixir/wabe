@@ -78,6 +78,44 @@ describe('Default fields', () => {
       expect(updatedAt.getMonth()).toEqual(now.getMonth())
       expect(updatedAt.getFullYear()).toEqual(now.getFullYear())
     })
+
+    it('should not overwrite if the createdAt field is already set', async () => {
+      const hookObject = new HookObject<DevWabeTypes>({
+        className: 'User',
+        operationType: OperationType.BeforeCreate,
+        newData: {
+          email: 'email@test.fr',
+          createdAt: now,
+        } as any,
+        context: {} as any,
+        object: {} as any,
+      })
+
+      const spyHookObjectUpsertNewData = spyOn(hookObject, 'upsertNewData')
+
+      await defaultBeforeCreateForCreatedAt(hookObject)
+
+      expect(spyHookObjectUpsertNewData).toHaveBeenCalledTimes(1)
+    })
+
+    it('should not overwrite if the updatedAt field is already set', async () => {
+      const hookObject = new HookObject<DevWabeTypes>({
+        className: 'User',
+        operationType: OperationType.BeforeCreate,
+        newData: {
+          email: 'email@test.fr',
+          updatedAt: now,
+        } as any,
+        context: {} as any,
+        object: {} as any,
+      })
+
+      const spyHookObjectUpsertNewData = spyOn(hookObject, 'upsertNewData')
+
+      await defaultBeforeCreateForCreatedAt(hookObject)
+
+      expect(spyHookObjectUpsertNewData).toHaveBeenCalledTimes(1)
+    })
   })
 
   describe('Default value', () => {
