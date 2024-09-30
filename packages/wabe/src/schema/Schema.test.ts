@@ -387,4 +387,67 @@ describe('Schema', () => {
       ]),
     )
   })
+
+  it('should merge default class with permissions', () => {
+    const schema = new Schema({
+      schema: {
+        classes: [
+          {
+            name: 'Payment',
+            fields: {},
+            permissions: {
+              read: {
+                authorizedRoles: ['Admin'],
+                requireAuthentication: true,
+              },
+              update: {
+                authorizedRoles: ['Admin'],
+                requireAuthentication: true,
+              },
+              delete: {
+                authorizedRoles: ['Admin'],
+                requireAuthentication: true,
+              },
+              create: {
+                authorizedRoles: ['Admin'],
+                requireAuthentication: true,
+              },
+            },
+          },
+        ],
+      },
+    } as any)
+
+    const paymenClass = schema.schema?.classes?.find(
+      (schemaClass) => schemaClass.name === 'Payment',
+    )
+
+    expect(paymenClass).toEqual({
+      name: 'Payment',
+      fields: expect.objectContaining({
+        amount: {
+          type: 'Int',
+          required: true,
+        },
+      }),
+      permissions: {
+        read: {
+          authorizedRoles: ['Admin'],
+          requireAuthentication: true,
+        },
+        update: {
+          authorizedRoles: ['Admin'],
+          requireAuthentication: true,
+        },
+        delete: {
+          authorizedRoles: ['Admin'],
+          requireAuthentication: true,
+        },
+        create: {
+          authorizedRoles: ['Admin'],
+          requireAuthentication: true,
+        },
+      },
+    })
+  })
 })
