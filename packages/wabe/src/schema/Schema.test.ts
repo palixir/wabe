@@ -428,6 +428,7 @@ describe('Schema', () => {
         amount: {
           type: 'Int',
           required: true,
+          description: 'Amount in cents',
         },
       }),
       permissions: {
