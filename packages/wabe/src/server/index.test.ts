@@ -95,7 +95,7 @@ describe('Server', () => {
     expect(mockOnPaymentSucceed).toHaveBeenCalledTimes(1)
     expect(mockOnPaymentSucceed).toHaveBeenCalledWith({
       created: 'created',
-      amount: 1,
+      amount: 100,
       customerEmail: '',
       billingDetails: {
         address: {
@@ -176,7 +176,7 @@ describe('Server', () => {
     expect(mockOnPaymentFailed).toHaveBeenCalledTimes(1)
     expect(mockOnPaymentFailed).toHaveBeenCalledWith({
       created: 'created',
-      amount: 1,
+      amount: 100,
       messageError: 'Payment failed',
       paymentMethodTypes: ['card'],
     })

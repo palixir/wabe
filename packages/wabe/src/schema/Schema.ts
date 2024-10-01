@@ -473,6 +473,7 @@ export class Schema<T extends WabeTypes> {
         amount: {
           type: 'Int',
           required: true,
+          description: 'Amount in cents',
         },
         currency: {
           type: 'Currency',

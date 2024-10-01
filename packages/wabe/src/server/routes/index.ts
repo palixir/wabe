@@ -53,7 +53,7 @@ export const defaultRoutes = (): WabeRoute[] => [
           const extractedBody: OnPaymentSucceedOptions = {
             created: body.created,
             currency: body.data.object.currency,
-            amount: body.data.object.amount / 100,
+            amount: body.data.object.amount,
             billingDetails: body.data.object.shipping,
             paymentMethodTypes: body.data.object.payment_method_types,
             customerEmail,
@@ -75,7 +75,7 @@ export const defaultRoutes = (): WabeRoute[] => [
         case 'payment_intent.payment_failed': {
           const extractedBody: OnPaymentFailedOptions = {
             created: body.created,
-            amount: body.data.object.amount / 100,
+            amount: body.data.object.amount,
             messageError: body.data.object.last_payment_error?.message,
             paymentMethodTypes: body.data.object.payment_method_types,
           }
