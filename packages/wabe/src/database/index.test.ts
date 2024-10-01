@@ -10,9 +10,17 @@ import {
   type Mock,
 } from 'bun:test'
 import type { Wabe } from '../server'
-import { type DevWabeTypes, setupTests, closeTests } from '../utils/helper'
+import {
+  type DevWabeTypes,
+  setupTests,
+  closeTests,
+  getAnonymousClient,
+  getUserClient,
+} from '../utils/helper'
 import type { WabeContext } from '../server/interface'
 import { OperationType, getDefaultHooks } from '../hooks'
+import { gql } from 'graphql-request'
+import { Currency } from '../payment'
 
 describe('Database', () => {
   let wabe: Wabe<DevWabeTypes>
@@ -63,21 +71,7 @@ describe('Database', () => {
   })
 
   beforeEach(async () => {
-    await wabe.controllers.database.deleteObjects({
-      className: 'User',
-      where: { name: { equalTo: 'Lucas' } },
-      context,
-      fields: [],
-    })
-
-    await wabe.controllers.database.deleteObjects({
-      // @ts-expect-error
-      className: 'Test2',
-      // @ts-expect-error
-      where: { name: { equalTo: 'test2' } },
-      context,
-      fields: [],
-    })
+    await wabe.controllers.database.adapter.clearDatabase()
 
     wabe.config.hooks = getDefaultHooks()
 
@@ -85,6 +79,51 @@ describe('Database', () => {
     mockAfterUpdate.mockClear()
     spyGetObject.mockClear()
     spyGetObjects.mockClear()
+  })
+
+  it("should return all elements of a class when the object doesn't have ACL but the user is connected", async () => {
+    const anonymousClient = getAnonymousClient(context.wabe.config.port)
+
+    const { signUpWith } = await anonymousClient.request<any>(
+      graphql.signUpWith,
+      {
+        input: {
+          authentication: {
+            emailPassword: {
+              email: 'email@test.fr',
+              password: 'password',
+            },
+          },
+        },
+      },
+    )
+
+    const userClient = getUserClient(
+      context.wabe.config.port,
+      signUpWith.accessToken,
+    )
+
+    await wabe.controllers.database.createObject({
+      className: 'Payment',
+      context,
+      data: {
+        amount: 10,
+        currency: Currency.EUR,
+      },
+      fields: ['id'],
+    })
+
+    const {
+      payments: { edges },
+    } = await userClient.request<any>(graphql.payments)
+
+    expect(edges.length).toEqual(1)
+
+    const {
+      payments: { edges: edges2 },
+    } = await anonymousClient.request<any>(graphql.payments)
+
+    expect(edges2.length).toEqual(1)
   })
 
   it('should order the element in the query by name ASC using order enum', async () => {
@@ -416,3 +455,33 @@ describe('Database', () => {
     expect(mockAfterUpdate).toHaveBeenCalledTimes(1)
   })
 })
+
+const graphql = {
+  signUpWith: gql`
+      mutation signUpWith($input: SignUpWithInput!) {
+        signUpWith(input:	$input){
+          id
+          accessToken
+          refreshToken
+        }
+      }
+    `,
+  payments: gql`
+    query payments {
+      payments {
+        edges {
+            node {
+            id
+            amount
+            acl{
+                users{
+                    userId
+                }
+
+            }
+            }
+        }
+      }
+    }
+    `,
+}

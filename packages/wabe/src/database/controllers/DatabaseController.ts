@@ -291,6 +291,9 @@ export class DatabaseController<T extends WabeTypes> {
         userId || roleId
           ? {
               OR: [
+                {
+                  acl: { equalTo: null },
+                },
                 userId
                   ? {
                       AND: [

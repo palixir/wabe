@@ -57,14 +57,16 @@ export const buildMongoWhereQuery = <
 
       const keyToWrite = key === 'id' ? '_id' : key
 
-      if (value?.contains) acc[keyToWrite] = { $all: value.contains }
-      if (value?.notContains) acc[keyToWrite] = { $ne: value.notContains }
-      if (value?.equalTo)
+      if (value?.contains || value?.contains === null)
+        acc[keyToWrite] = { $all: value.contains }
+      if (value?.notContains || value?.notContains === null)
+        acc[keyToWrite] = { $ne: value.notContains }
+      if (value?.equalTo || value?.equalTo === null)
         acc[keyToWrite] =
           keyToWrite === '_id' && typeof value.equalTo === 'string'
             ? ObjectId.createFromHexString(value.equalTo)
             : value.equalTo
-      if (value?.notEqualTo)
+      if (value?.notEqualTo || value?.notEqualTo === null)
         acc[keyToWrite] = {
           $ne:
             keyToWrite === '_id' && typeof value.notEqualTo === 'string'
@@ -72,15 +74,17 @@ export const buildMongoWhereQuery = <
               : value.notEqualTo,
         }
 
-      if (value?.greaterThan) acc[keyToWrite] = { $gt: value.greaterThan }
-      if (value?.greaterThanOrEqualTo)
+      if (value?.greaterThan || value?.greaterThan === null)
+        acc[keyToWrite] = { $gt: value.greaterThan }
+      if (value?.greaterThanOrEqualTo || value?.greaterThanOrEqualTo === null)
         acc[keyToWrite] = { $gte: value.greaterThanOrEqualTo }
 
-      if (value?.lessThan) acc[keyToWrite] = { $lt: value.lessThan }
-      if (value?.lessThanOrEqualTo)
+      if (value?.lessThan || value?.lessThan === null)
+        acc[keyToWrite] = { $lt: value.lessThan }
+      if (value?.lessThanOrEqualTo || value?.lessThanOrEqualTo === null)
         acc[keyToWrite] = { $lte: value.lessThanOrEqualTo }
 
-      if (value?.in)
+      if (value?.in || value?.in === null)
         acc[keyToWrite] = {
           $in:
             keyToWrite === '_id'
@@ -89,7 +93,7 @@ export const buildMongoWhereQuery = <
                   .map((inValue) => ObjectId.createFromHexString(inValue))
               : value.in,
         }
-      if (value?.notIn)
+      if (value?.notIn || value?.notIn === null)
         acc[keyToWrite] = {
           $nin:
             keyToWrite === '_id'

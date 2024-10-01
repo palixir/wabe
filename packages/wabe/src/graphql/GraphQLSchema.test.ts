@@ -382,81 +382,81 @@ describe('GraphqlSchema', () => {
 
     const res = await client.request<any>(
       gql`
-				query testClasses {
-					testClasses(
-						where: {
-							AND: [
-								{ age: { equalTo: 30 } }
-								{ search: { contains: "t" } }
-							]
-						}
-					) {
-						totalCount
-					}
-				}
-			`,
+    	query testClasses {
+    		testClasses(
+    			where: {
+    				AND: [
+    					{ age: { equalTo: 30 } }
+    					{ search: { contains: "t" } }
+    				]
+    			}
+    		) {
+    			totalCount
+    		}
+    	}
+    `,
     )
 
     expect(res.testClasses.totalCount).toEqual(1)
 
     const res2 = await client.request<any>(
       gql`
-				query testClasses {
-					testClasses(where: { search: { contains: "invalid" } }) {
-						totalCount
-					}
-				}
-			`,
+    	query testClasses {
+    		testClasses(where: { search: { contains: "invalid" } }) {
+    			totalCount
+    		}
+    	}
+    `,
     )
 
     expect(res2.testClasses.totalCount).toEqual(0)
 
     const res3 = await client.request<any>(
       gql`
-				query testClasses {
-					testClasses(where: { search: { contains: "test" } }) {
-						totalCount
-					}
-				}
-			`,
+    	query testClasses {
+    		testClasses(where: { search: { contains: "test" } }) {
+    			totalCount
+    		}
+    	}
+    `,
     )
 
     expect(res3.testClasses.totalCount).toEqual(1)
 
     const res4 = await client.request<any>(
       gql`
-				query testClasses {
-					testClasses(
-						where: {
-							AND: [
-								{ age: { equalTo: 1111 } }
-								{ search: { contains: "test" } }
-							]
-						}
-					) {
-						totalCount
-					}
-				}
-			`,
+    	query testClasses {
+    		testClasses(
+    			where: {
+    				AND: [
+    					{ age: { equalTo: 1111 } }
+    					{ search: { contains: "test" } }
+    				]
+    			}
+    		) {
+    			totalCount
+    		}
+    	}
+    `,
     )
 
     expect(res4.testClasses.totalCount).toEqual(0)
 
     const res5 = await client.request<any>(
       gql`
-				query testClasses {
-					testClasses(
-						where: {
-							AND: [
-								{ age: { equalTo: 30 } }
-								{ search: { contains: "" } }
-							]
-						}
-					) {
-						totalCount
-					}
-				}
-			`,
+    	query testClasses {
+    		testClasses(
+    			where: {
+    				AND: [
+    					{ age: { equalTo: 30 } }
+    					{ search: { contains: "" } }
+    				]
+    			}
+    		) {
+    			totalCount
+    		}
+    	}
+    `,
     )
 
     expect(res5.testClasses.totalCount).toEqual(1)
