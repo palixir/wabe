@@ -202,7 +202,7 @@ export class StripeAdapter implements PaymentAdapter {
         return acc + transaction.amount
       }, totalRevenue)
 
-      if (!transactions.has_more) return newTotalRevenue / 100
+      if (!transactions.has_more) return newTotalRevenue
 
       const lastElement = transactions.data[transactions.data.length - 1]
 
@@ -296,7 +296,7 @@ export class StripeAdapter implements PaymentAdapter {
         return acc + (subscription.items.data[0].plan.amount || 0)
       }, totalRevenue)
 
-      if (!subscriptions.has_more) return newTotalRevenue / 100
+      if (!subscriptions.has_more) return newTotalRevenue
 
       const lastElement = subscriptions.data[subscriptions.data.length - 1]
 
