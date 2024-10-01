@@ -222,6 +222,9 @@ describe('DatabaseController', () => {
         {
           OR: [
             {
+              acl: { equalTo: null },
+            },
+            {
               AND: [
                 {
                   acl: {
@@ -280,6 +283,9 @@ describe('DatabaseController', () => {
         { id: { equalTo: 'id' } },
         {
           OR: [
+            {
+              acl: { equalTo: null },
+            },
             {
               AND: [
                 {

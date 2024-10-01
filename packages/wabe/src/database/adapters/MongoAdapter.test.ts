@@ -1516,6 +1516,17 @@ describe('Mongo adapter', () => {
     expect(resAfterDelete.length).toEqual(0)
   })
 
+  it('should build where query with equalTo null', async () => {
+    const where = buildMongoWhereQuery({
+      // @ts-expect-error
+      acl: { equalTo: null },
+    })
+
+    expect(where).toEqual({
+      acl: null,
+    })
+  })
+
   it('should build where query for mongo adapter', () => {
     const where = buildMongoWhereQuery({
       name: { equalTo: 'John' },
