@@ -98,14 +98,14 @@ describe('webhookPayment route', () => {
     `,
     )
 
-    expect(res2.payments.edges[0].node.amount).toEqual(1)
+    expect(res2.payments.edges[0].node.amount).toEqual(100)
     expect(res2.payments.edges[0].node.user.email).toEqual('customer@test.com')
 
     expect(spyLinkPayment).toHaveBeenCalledTimes(1)
     expect(spyLinkPayment).toHaveBeenCalledWith(
       expect.any(Object),
       'customer@test.com',
-      1,
+      100,
       'eur',
     )
   })
@@ -183,7 +183,7 @@ describe('webhookPayment route', () => {
     `,
     )
 
-    expect(res2.payments.edges[0].node.amount).toEqual(1)
+    expect(res2.payments.edges[0].node.amount).toEqual(100)
     expect(res2.payments.edges[0].node.user.email).toEqual('customer@test.com')
 
     expect(spyLinkPayment).toHaveBeenCalledTimes(0)
