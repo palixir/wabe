@@ -10,8 +10,7 @@
 		"moduleResolution": "bundler",
 		"verbatimModuleSyntax": false,
 		"outDir":"dist",
-		"declaration": true,
-		"emitDeclarationOnly": true,
+		"noEmit": true,
 
 		"strict": true,
 		"skipLibCheck": true,
@@ -24,4 +23,3 @@
 	"exclude": ["node_modules", "dist", "generated", "dev"],
 	"include": ["src/**/*.ts"]
 }
-

@@ -395,11 +395,10 @@ export class GraphQLSchema {
       allObjects: this.allObjects,
     })
 
-    // @ts-expect-error
     const inputObject = new GraphQLInputObjectType({
       name: `${nameWithoutSpace}WhereInput`,
       description,
-      fields: () => ({
+      fields: (): any => ({
         id: { type: IdWhereInput },
         ...graphqlParserWithInput.getGraphqlFields(nameWithoutSpace),
         ...{
