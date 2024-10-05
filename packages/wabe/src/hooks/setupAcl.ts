@@ -2,10 +2,12 @@ import type { ACLProperties } from '../schema'
 import type { HookObject } from './HookObject'
 
 const isReadTrueOnUser = (aclObject: ACLProperties) =>
+  // @ts-expect-error
   aclObject.authorizedUsers?.read?.includes('self')
 
 const isWriteTrueOnUser = (aclObject: ACLProperties) =>
-  aclObject.authorizedUsers?.write?.includes('self')
+  // @ts-expect-error
+  aclObject.authorizedUsers.write?.includes('self')
 
 export const defaultSetupAcl = async (object: HookObject<any>) => {
   const className = object.className
@@ -21,10 +23,10 @@ export const defaultSetupAcl = async (object: HookObject<any>) => {
 
   if (object.isFieldUpdate('acl') || !acl) return
 
-  const { authorizedUsers, callback, authorizedRoles } = acl
-
-  if (callback) {
-    await callback(object)
+  // @ts-expect-error
+  if (acl.callback) {
+    // @ts-expect-error
+    await acl.callback(object)
     return
   }
 
@@ -36,6 +38,7 @@ export const defaultSetupAcl = async (object: HookObject<any>) => {
   const isWriteUser = isWriteTrueOnUser(acl)
 
   const getIdOfAllAuthorizedRoles = async (
+    // @ts-expect-error
     authorizedRoles: ACLProperties['authorizedRoles'],
     property: 'read' | 'write',
   ) => {
@@ -52,11 +55,13 @@ export const defaultSetupAcl = async (object: HookObject<any>) => {
   }
 
   const idOfAllReadRoles = await getIdOfAllAuthorizedRoles(
-    authorizedRoles,
+    // @ts-expect-error
+    acl.authorizedRoles,
     'read',
   )
   const idOfAllWriteRoles = await getIdOfAllAuthorizedRoles(
-    authorizedRoles,
+    // @ts-expect-error
+    acl.authorizedRoles,
     'write',
   )
 
@@ -68,8 +73,10 @@ export const defaultSetupAcl = async (object: HookObject<any>) => {
   ]
 
   const isReadOrWriteSpecified =
-    (authorizedUsers.read && authorizedUsers.read.length > 0) ||
-    (authorizedUsers.write && authorizedUsers.write.length > 0)
+    // @ts-expect-error
+    (acl.authorizedUsers.read && acl.authorizedUsers.read.length > 0) ||
+    // @ts-expect-error
+    (acl.authorizedUsers.write && acl.authorizedUsers.write.length > 0)
 
   object.upsertNewData('acl', {
     users: isReadOrWriteSpecified

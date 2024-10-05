@@ -119,7 +119,6 @@ export const setupTests = async (
             name: { type: 'String' },
             pointer: {
               type: 'Pointer',
-              // @ts-expect-error
               class: 'Test2',
             },
           },
