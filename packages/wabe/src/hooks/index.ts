@@ -25,6 +25,7 @@ import {
   defaultSearchableFieldsBeforeCreate,
   defaultSearchableFieldsBeforeUpdate,
 } from './searchableFields'
+import { defaultSetupAcl } from './setupAcl'
 
 export enum OperationType {
   AfterCreate = 'AfterCreate',
@@ -317,5 +318,10 @@ export const getDefaultHooks = (): Hook<any>[] => [
     operationType: OperationType.BeforeUpdate,
     priority: 1,
     callback: defaultSearchableFieldsBeforeUpdate,
+  },
+  {
+    operationType: OperationType.BeforeCreate,
+    priority: 1,
+    callback: defaultSetupAcl,
   },
 ]

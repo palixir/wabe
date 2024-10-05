@@ -60,11 +60,82 @@ const run = async () => {
 await run();
 ```
 
-## Object level permissions (OLP)
+## Access control lists (ACL)
 
-`Object-level permissions` are much more granular. They allow, for example, an object to be read, modified, or deleted only by one or more specific users. A very simple use case is to prevent the deletion of a user by anyone except the user themselves.
+`Access control lists` are much more granular. They allow, for example, an object to be read, modified, or deleted only by one or more specific users. A very simple use case is to prevent the deletion of a user by anyone except the user themselves.
 
-Unlike class-level permissions, defining `object-level permissions` requires manual handling (we are considering ways to manage this with a relatively modular configuration).
+To define an `access control list` you can use the default configuration that Wabe provides. It should cover most of the use cases but let know if you need something more specific. Here is an example :
+
+```ts
+import { Wabe } from "wabe";
+
+const run = async () => {
+  const wabe = new Wabe({
+    // ... others config fields
+    authentication: {
+      // We create one role named Admin
+      roles: ["Admin"],
+    },
+    schema: {
+      classes: [
+        {
+          name: "Company",
+          fields: {
+            name: {
+              type: "String",
+            },
+            contactEmail: {
+              type: "Email",
+            },
+          },
+          permissions: {
+            create: {
+              authorizedRoles: ["Admin"],
+              requireAuthentication: true,
+            },
+            read: {
+              authorizedRoles: ["Admin"],
+              requireAuthentication: false,
+            },
+            update: {
+              requireAuthentication: true,
+              authorizedRoles: ["Admin"],
+            },
+            delete: {
+              requireAuthentication: true,
+              authorizedRoles: ["Admin"],
+            },
+            acl: {
+              authorizedUsers: {
+                // Only the user that created the object can read / write it
+                read: ['self'],
+                write: ['self'],
+              },
+              // Above we set the authorizedRole 'Admin' to read on the class but here the configuration overwrites it
+              // Only the client role can read / write it. It can be more granular
+              authorizedRoles: {
+                read: ['Client'],
+                write: ['Client'],
+              },
+              // If you have a specific use case and authorizedUsers and authorizedRoles are not enough,
+              // you can use the callback to define your own logic
+              callback: async (hookObject: HookObject<any>) => {
+               // Some custom logic here
+              }
+            },
+          },
+        },
+      ],
+    },
+  });
+
+  await wabe.start();
+};
+
+await run();
+```
+
+If your use is more specific, you can create your own `hook` to set the acl on the class.
 
 Here is an example of a `hook` that can be created to set acl on the class `Company` before creation.
 

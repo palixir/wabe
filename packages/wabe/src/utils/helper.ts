@@ -9,6 +9,7 @@ import type {
 import { DatabaseEnum } from '../database'
 import { Wabe } from '../server'
 import { PaymentDevAdapter } from '../payment/DevAdapter'
+import type { ClassInterface } from '../schema'
 
 type NotNill<T> = T extends null | undefined ? never : T
 
@@ -63,7 +64,9 @@ export const getUserClient = (
   return { ...client, request: client.request<any> } as GraphQLClient
 }
 
-export const setupTests = async () => {
+export const setupTests = async (
+  additionalClasses: ClassInterface<any>[] = [],
+) => {
   const databaseId = uuid()
 
   const port = await getPort()
@@ -92,6 +95,7 @@ export const setupTests = async () => {
     },
     schema: {
       classes: [
+        ...additionalClasses,
         {
           name: 'User',
           fields: {
@@ -115,7 +119,6 @@ export const setupTests = async () => {
             name: { type: 'String' },
             pointer: {
               type: 'Pointer',
-              // @ts-expect-error
               class: 'Test2',
             },
           },
