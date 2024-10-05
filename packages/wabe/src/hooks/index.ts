@@ -40,7 +40,7 @@ export enum OperationType {
 export type Hook<T extends WabeTypes> = {
   operationType: OperationType
   // If the className is undefined the hook is called on each class
-  className?: T
+  className?: T['types']
   // The priority of the hook. The lower the number the earlier the hook is called
   // The priority 0 is for the security hooks
   // The default priority is 1
