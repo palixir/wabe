@@ -183,6 +183,46 @@ describe('setupAcl', () => {
           },
         },
       },
+      {
+        name: 'SetupACL6',
+        fields: {
+          test: {
+            type: 'String',
+          },
+        },
+        permissions: {
+          acl: {
+            authorizedUsers: {
+              read: ['self'],
+              write: ['self'],
+            },
+            authorizedRoles: {
+              read: ['Client'],
+              write: ['Client'],
+            },
+          },
+        },
+      },
+      {
+        name: 'SetupACL7',
+        fields: {
+          test: {
+            type: 'String',
+          },
+        },
+        permissions: {
+          acl: {
+            authorizedUsers: {
+              read: ['self'],
+              write: ['self'],
+            },
+            authorizedRoles: {
+              read: ['Client'],
+              write: ['Client'],
+            },
+          },
+        },
+      },
     ])
 
     wabe = setup.wabe
@@ -198,7 +238,6 @@ describe('setupAcl', () => {
 
   afterEach(async () => {
     await rootClient.request<any>(graphql.deleteUsers)
-    await rootClient.request<any>(graphql.deleteTests)
   })
 
   it('should update acl object if self is precised and user (with role client2) is authenticated (on read)', async () => {
@@ -400,22 +439,98 @@ describe('setupAcl', () => {
       ),
     ).toEqual('Client2')
   })
+
+  it('should not setup acl if the acl field is already provided in the creation', async () => {
+    const { userClient } = await createUserAndUpdateRole({
+      anonymousClient,
+      port,
+      roleName: 'Client',
+      rootClient,
+    })
+
+    expect(
+      userClient.request<any>(gql`
+        mutation createSetupACL6 {
+          createSetupACL6(input: {fields: {test: "test", acl: {users: [{userId: "test", read: true, write: true}], roles: [{roleId: "test", read: true, write: true}]}}}) {
+            setupACL6 {
+              id
+              acl {
+                users {
+                  userId
+                  read
+                  write
+                }
+                roles {
+                  roleId
+                  read
+                  write
+                }
+              }
+            }
+          }
+        }
+    `),
+      // Error because the id provided is not valid
+    ).rejects.toThrow('Object not found')
+
+    const res = await rootClient.request<any>(gql`
+        query setupACLs {
+            setupACL6s{
+              edges {
+                node {
+                  id
+                  acl {
+                    users {
+                      userId
+                      read
+                      write
+                    }
+                    roles {
+                      roleId
+                      read
+                      write
+                    }
+                  }
+                }
+              }
+            }
+          }
+      `)
+
+    expect(res.setupACL6s.edges[0].node.acl).toEqual({
+      users: [{ userId: 'test', read: true, write: true }],
+      roles: [{ roleId: 'test', read: true, write: true }],
+    })
+  })
+
+  it('should not setup acl if the user is anonmymous', async () => {
+    const res = await anonymousClient.request<any>(gql`
+        mutation createSetupACL7 {
+          createSetupACL7(input: {fields: {test: "test"}}) {
+            setupACL7 {
+              id
+              acl {
+                users {
+                  userId
+                  read
+                  write
+                }
+                roles {
+                  roleId
+                  read
+                  write
+                }
+              }
+            }
+          }
+        }
+    `)
+
+    expect(res.createSetupACL7.setupACL7.acl).toBeNull()
+  })
 })
 
 const graphql = {
-  deleteTests: gql`
-		mutation deleteTests {
-  		deleteTests(
-    		input: {where: {name: {equalTo: "test"}}}
-  		) {
-    		edges {
-      		node {
-        		id
-      		}
-    		}
-  		}
-		}
-	`,
   deleteUsers: gql`
 		mutation deleteUser {
   		deleteUsers(
@@ -429,15 +544,6 @@ const graphql = {
   		}
 		}
 	`,
-  signInWith: gql`
-		 mutation signInWith($input: SignInWithInput!) {
-  		signInWith(input: $input){
-  			id
-  			accessToken
-  			refreshToken
-  		}
-		}
-	`,
   signUpWith: gql`
 		 mutation signUpWith($input: SignUpWithInput!) {
   		signUpWith(input:	$input){
@@ -447,17 +553,4 @@ const graphql = {
   		}
   	}
 	 `,
-  signOut: gql`
-		 mutation signOut {
-			signOut
-		}
-	`,
-  refresh: gql`
-		mutation refresh($input: RefreshInput!) {
-  		refresh(input: $input) {
-    		accessToken
-    		refreshToken
-  		}
-		}
-	`,
 }
