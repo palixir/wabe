@@ -664,6 +664,15 @@ export class Schema<T extends WabeTypes> {
               ...classItem.fields,
               ...this.defaultFields(),
             },
+            permissions:
+              classItem.permissions || acc.permissions
+                ? {
+                    // Order is important because we put the provided schema before so we always consider
+                    // the provided schema as the source of truth
+                    ...classItem.permissions,
+                    ...acc.permissions,
+                  }
+                : undefined,
           }
         },
         allClassWithSameName[0] as ClassInterface<T>,

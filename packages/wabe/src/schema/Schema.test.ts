@@ -388,6 +388,50 @@ describe('Schema', () => {
     )
   })
 
+  it('should overwrite class permissions', () => {
+    const schema = new Schema({
+      schema: {
+        classes: [
+          {
+            name: 'User',
+            fields: {},
+            permissions: {
+              read: {
+                requireAuthentication: false,
+              },
+              update: {
+                requireAuthentication: false,
+              },
+            },
+          },
+        ],
+      },
+    } as any)
+
+    const userClass = schema.schema?.classes?.find(
+      (schemaClass) => schemaClass.name === 'User',
+    )
+
+    expect(userClass?.permissions).toEqual({
+      // Default permissions
+      create: {
+        authorizedRoles: [],
+        requireAuthentication: false,
+      },
+      delete: {
+        authorizedRoles: [],
+        requireAuthentication: true,
+      },
+      // Overwrite permissions
+      read: {
+        requireAuthentication: false,
+      },
+      update: {
+        requireAuthentication: false,
+      },
+    })
+  })
+
   it('should merge default class with permissions', () => {
     const schema = new Schema({
       schema: {
