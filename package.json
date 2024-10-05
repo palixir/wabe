@@ -10,7 +10,7 @@
 	"workspaces": ["packages/*"],
 	"scripts": {
 		"build:wabe":"bun --filter './packages/wabe' build",
-		"build":"bun build:wabe && bun --filter './packages/*' build",
+		"build":"bun build:wabe && bun --filter './packages/wabe-*' build",
 		"ci": "bun --filter './packages/*' ci",
 		"format": "bun --filter './packages/*' format && biome format --write ./*.json",
 		"lint": "bun --filter './packages/*' lint",
