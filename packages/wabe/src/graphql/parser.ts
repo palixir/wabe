@@ -294,11 +294,10 @@ export const GraphqlParser: GraphqlParserConstructor =
         nameOfTheObject,
       })
 
-      // @ts-expect-error
       const graphqlObject = new GraphQLInputObjectType({
         name: `${nameOfTheObject}WhereInput`,
         description: description,
-        fields: () => ({
+        fields: (): any => ({
           ...graphqlFields,
           ...{
             OR: {

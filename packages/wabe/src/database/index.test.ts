@@ -51,7 +51,25 @@ describe('Database', () => {
   let spyGetObject: Mock<any>
 
   beforeAll(async () => {
-    const setup = await setupTests()
+    const setup = await setupTests([
+      {
+        name: 'Test2',
+        fields: {
+          name: { type: 'String' },
+          age: { type: 'Int' },
+        },
+        permissions: {
+          read: {
+            authorizedRoles: ['Client2'],
+            requireAuthentication: true,
+          },
+          create: {
+            authorizedRoles: [],
+            requireAuthentication: true,
+          },
+        },
+      },
+    ])
     wabe = setup.wabe
 
     context = {

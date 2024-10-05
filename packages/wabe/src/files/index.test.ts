@@ -16,7 +16,14 @@ describe('File upload', () => {
   let spyFileDevAdapter: any
 
   beforeAll(async () => {
-    const setup = await setupTests()
+    const setup = await setupTests([
+      {
+        name: 'Test3',
+        fields: {
+          file: { type: 'File' },
+        },
+      },
+    ])
     wabe = setup.wabe
     port = setup.port
 

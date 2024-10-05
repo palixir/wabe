@@ -74,7 +74,53 @@ describe('Authentication', () => {
   let rootClient: GraphQLClient
 
   beforeAll(async () => {
-    const setup = await setupTests()
+    const setup = await setupTests([
+      {
+        name: 'Test',
+        fields: {
+          name: { type: 'String' },
+          pointer: {
+            type: 'Pointer',
+            class: 'Test2',
+          },
+        },
+        permissions: {
+          read: {
+            authorizedRoles: ['Client', 'Client2'],
+            requireAuthentication: true,
+          },
+          update: {
+            authorizedRoles: ['Client'],
+            requireAuthentication: true,
+          },
+          delete: {
+            authorizedRoles: ['Client'],
+            requireAuthentication: true,
+          },
+          create: {
+            authorizedRoles: ['Client2'],
+            requireAuthentication: true,
+          },
+        },
+      },
+      {
+        name: 'Test2',
+        fields: {
+          name: { type: 'String' },
+          age: { type: 'Int' },
+        },
+        permissions: {
+          read: {
+            authorizedRoles: ['Client2'],
+            requireAuthentication: true,
+          },
+          create: {
+            authorizedRoles: [],
+            requireAuthentication: true,
+          },
+        },
+      },
+    ])
     wabe = setup.wabe
     port = setup.port
     client = getAnonymousClient(port)
