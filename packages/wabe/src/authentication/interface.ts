@@ -95,5 +95,6 @@ export interface Provider {
 }
 
 export enum AuthenticationProvider {
-  Google = 'Google',
+  Google = 'google',
+  EmailPassword = 'emailPassword',
 }

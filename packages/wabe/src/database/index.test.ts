@@ -32,6 +32,7 @@ describe('Database', () => {
       where: {
         name: { equalTo: 'Lucas' },
       },
+      // @ts-expect-error
       data: { age: 21 },
       context,
       fields: [],
@@ -234,6 +235,7 @@ describe('Database', () => {
     await wabe.controllers.database.updateObject({
       className: 'User',
       context,
+      // @ts-expect-error
       data: [{ name: 'Lucas' }],
       fields: ['id'],
       id,
@@ -257,6 +259,7 @@ describe('Database', () => {
     await wabe.controllers.database.updateObjects({
       className: 'User',
       context,
+      // @ts-expect-error
       data: { name: 'Lucas' },
       fields: ['id'],
       where: { id: { equalTo: id } },
@@ -430,7 +433,7 @@ describe('Database', () => {
       context,
       fields: ['name'],
       where: { name: { equalTo: 'test' } },
-      data: { age: 20 },
+      data: { name: 20 },
     })
 
     expect(res.length).toEqual(1)

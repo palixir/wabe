@@ -57,7 +57,6 @@ describe('searchablesFields', () => {
 
     defaultSearchableFieldsBeforeCreate(hookObject)
 
-    // @ts-expect-error
     expect(hookObject.getNewData().search).toEqual([
       't',
       'te',
@@ -98,7 +97,6 @@ describe('searchablesFields', () => {
 
     defaultSearchableFieldsBeforeUpdate(hookObject)
 
-    // @ts-expect-error
     expect(hookObject.getNewData().search).toEqual([
       't',
       'ta',

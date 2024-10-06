@@ -1,4 +1,4 @@
-import type { OutputType, WhereType } from '../database'
+import type { MutationData, OutputType, WhereType } from '../database'
 import {
   defaultBeforeCreateUpload,
   defaultBeforeUpdateUpload,
@@ -26,6 +26,7 @@ import {
   defaultSearchableFieldsBeforeCreate,
   defaultSearchableFieldsBeforeUpdate,
 } from './searchableFields'
+import { defaultSetEmail, defaultSetEmailOnUpdate } from './setEmail'
 import { defaultSetupAcl } from './setupAcl'
 
 export enum OperationType {
@@ -49,11 +50,6 @@ export type Hook<T extends WabeTypes, K extends keyof WabeTypes['types']> = {
   priority: number
   callback: (hookObject: HookObject<T, K>) => Promise<void> | void
 }
-
-export type TypedNewData<T extends keyof WabeTypes['types']> = Record<
-  keyof WabeTypes['types'][T],
-  any
->
 
 export const _findHooksByPriority = async <T extends keyof WabeTypes['types']>({
   className,
@@ -88,7 +84,7 @@ export const initializeHook = <T extends keyof WabeTypes['types']>({
   context,
 }: {
   className: T
-  newData?: TypedNewData<any>
+  newData?: MutationData<any, any>
   context: WabeContext<any>
 }) => {
   const computeObject = async ({
@@ -326,5 +322,17 @@ export const getDefaultHooks = (): Hook<any, any>[] => [
     operationType: OperationType.BeforeCreate,
     priority: 1,
     callback: defaultSetupAcl,
+  },
+  {
+    className: 'User',
+    operationType: OperationType.BeforeCreate,
+    priority: 1,
+    callback: defaultSetEmail,
+  },
+  {
+    className: 'User',
+    operationType: OperationType.BeforeUpdate,
+    priority: 1,
+    callback: defaultSetEmailOnUpdate,
   },
 ]

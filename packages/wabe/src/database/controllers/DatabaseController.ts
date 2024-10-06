@@ -792,6 +792,7 @@ export class DatabaseController<T extends WabeTypes> {
       context,
       fields,
       data: newData[0],
+      // @ts-expect-error
       where: whereWithACLCondition,
       first,
       offset,

@@ -456,6 +456,7 @@ describe('DatabaseController', () => {
       className: 'TestClass',
       context,
       where: { id: { equalTo: 'id' } },
+      // @ts-expect-error
       data: { name: 'test' },
       fields: ['id'],
     })
