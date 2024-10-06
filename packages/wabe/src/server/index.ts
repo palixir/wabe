@@ -36,7 +36,7 @@ export interface WabeConfig<T extends WabeTypes> {
   authentication?: AuthenticationConfig<T>
   routes?: WabeRoute[]
   rootKey: string
-  hooks?: Hook<any>[]
+  hooks?: Hook<T, any>[]
   email?: EmailConfig
   payment?: PaymentConfig
   file?: FileConfig

@@ -5,6 +5,7 @@ import {
 } from '../files/hookUploadFile'
 import type { WabeTypes, WabeConfig } from '../server'
 import type { WabeContext } from '../server/interface'
+import type { DevWabeTypes } from '../utils/helper'
 import { HookObject } from './HookObject'
 import {
   defaultCallAuthenticationProviderOnBeforeCreateUser,
@@ -38,15 +39,15 @@ export enum OperationType {
   BeforeRead = 'beforeRead',
 }
 
-export type Hook<T extends WabeTypes> = {
+export type Hook<T extends WabeTypes, K extends keyof WabeTypes['types']> = {
   operationType: OperationType
   // If the className is undefined the hook is called on each class
-  className?: keyof T['types']
+  className?: K
   // The priority of the hook. The lower the number the earlier the hook is called
   // The priority 0 is for the security hooks
   // The default priority is 1
   priority: number
-  callback: (hookObject: HookObject<T>) => Promise<void> | void
+  callback: (hookObject: HookObject<T, K>) => Promise<void> | void
 }
 
 export type TypedNewData<T extends keyof WabeTypes['types']> = Record<
@@ -171,11 +172,12 @@ export const initializeHook = <T extends keyof WabeTypes['types']>({
         object: inputObject,
       })
 
-      const hookObject = new HookObject({
+      const hookObject = new HookObject<DevWabeTypes, T>({
         className,
         newData,
         operationType,
         context,
+        // @ts-expect-error
         object,
       })
 
@@ -218,11 +220,12 @@ export const initializeHook = <T extends keyof WabeTypes['types']>({
 
       const newDataAfterHooks = await Promise.all(
         objects.map(async (object) => {
-          const hookObject = new HookObject({
+          const hookObject = new HookObject<DevWabeTypes, T>({
             className,
             newData,
             operationType,
             context,
+            // @ts-expect-error
             object,
           })
 
@@ -251,7 +254,7 @@ export const initializeHook = <T extends keyof WabeTypes['types']>({
   }
 }
 
-export const getDefaultHooks = (): Hook<any>[] => [
+export const getDefaultHooks = (): Hook<any, any>[] => [
   {
     operationType: OperationType.BeforeRead,
     priority: 0,

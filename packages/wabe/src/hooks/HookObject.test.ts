@@ -7,7 +7,7 @@ describe('HookObject', () => {
   it('should return correctly value depends on the update state of the field', () => {
     const userData = { name: 'John Doe' }
 
-    const hookObject = new HookObject<DevWabeTypes>({
+    const hookObject = new HookObject<DevWabeTypes, 'User'>({
       className: 'User',
       newData: userData,
       context: {} as any,
@@ -15,16 +15,14 @@ describe('HookObject', () => {
       object: {},
     })
 
-    // @ts-expect-error
     expect(hookObject.isFieldUpdate('name')).toBeTrue()
-    // @ts-expect-error
     expect(hookObject.isFieldUpdate('age')).toBeFalse()
   })
 
   it('should create a clone of the data', () => {
     const userData = { name: 'John Doe', age: 30 }
 
-    const hookObject = new HookObject({
+    const hookObject = new HookObject<DevWabeTypes, 'User'>({
       className: 'User',
       newData: userData as any,
       operationType: OperationType.BeforeCreate,
@@ -32,7 +30,6 @@ describe('HookObject', () => {
       object: {},
     })
 
-    // @ts-expect-error
     hookObject.upsertNewData('name', 'tata')
 
     expect(hookObject.getNewData()).toEqual({
@@ -52,7 +49,6 @@ describe('HookObject', () => {
       object: {},
     })
 
-    // @ts-expect-error
     expect(() => hookObject.upsertNewData('name', 'tata')).toThrow(
       'Cannot set data in a hook that is not a before hook',
     )

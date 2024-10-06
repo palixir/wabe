@@ -1,6 +1,6 @@
 import type { HookObject } from '../hooks/HookObject'
 
-const handleFile = async (hookObject: HookObject<any>) => {
+const handleFile = async (hookObject: HookObject<any, any>) => {
   const newData = hookObject.getNewData()
 
   const schema = hookObject.context.wabe.config.schema?.classes?.find(
@@ -22,8 +22,8 @@ const handleFile = async (hookObject: HookObject<any>) => {
   )
 }
 
-export const defaultBeforeCreateUpload = (hookObject: HookObject<any>) =>
+export const defaultBeforeCreateUpload = (hookObject: HookObject<any, any>) =>
   handleFile(hookObject)
 
-export const defaultBeforeUpdateUpload = (hookObject: HookObject<any>) =>
+export const defaultBeforeUpdateUpload = (hookObject: HookObject<any, any>) =>
   handleFile(hookObject)

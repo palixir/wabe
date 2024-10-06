@@ -576,6 +576,7 @@ export class DatabaseController<T extends WabeTypes> {
       className,
       context,
       fields,
+      // @ts-expect-error
       data: newData,
     })
 

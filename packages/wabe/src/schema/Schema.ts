@@ -182,7 +182,7 @@ export type ACLProperties =
         write: Array<string>
       }
     }
-  | { callback?: (hookObject: HookObject<any>) => void | Promise<void> }
+  | { callback?: (hookObject: HookObject<any, any>) => void | Promise<void> }
 
 export type ClassPermissions = Partial<
   Record<PermissionsOperations, PermissionProperties> & { acl: ACLProperties }
