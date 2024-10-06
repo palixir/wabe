@@ -322,7 +322,7 @@ describe('DatabaseController', () => {
     )
 
     expect(newWhere).toEqual({
-      AND: [{ id: { equalTo: 'id' } }],
+      AND: [{ id: { equalTo: 'id' } }, { acl: { equalTo: null } }],
     } as any)
   })
 

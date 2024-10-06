@@ -288,6 +288,13 @@ export class DatabaseController<T extends WabeTypes> {
       // @ts-expect-error
       AND: [
         { ...where },
+        // If the user is not connected we need to have a null acl
+        !userId
+          ? {
+              acl: { equalTo: null },
+            }
+          : undefined,
+        // If we have user or role we need to check the acl
         userId || roleId
           ? {
               OR: [

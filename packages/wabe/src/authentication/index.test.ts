@@ -15,17 +15,19 @@ const createUserAndUpdateRole = async ({
   rootClient,
   roleName,
   port,
+  email,
 }: {
   port: number
   anonymousClient: GraphQLClient
   rootClient: GraphQLClient
   roleName: string
+  email?: string
 }) => {
   const res = await anonymousClient.request<any>(graphql.signUpWith, {
     input: {
       authentication: {
         emailPassword: {
-          email: 'email@test.fr',
+          email: email || 'email@test.fr',
           password: 'password',
         },
       },
@@ -120,6 +122,24 @@ describe('Authentication', () => {
           },
         },
       },
+      {
+        name: 'Test3',
+        fields: {
+          name: { type: 'String' },
+        },
+        permissions: {
+          acl: {
+            authorizedUsers: {
+              read: ['self'],
+              write: ['self'],
+            },
+            authorizedRoles: {
+              read: [],
+              write: [],
+            },
+          },
+        },
+      },
     ])
     wabe = setup.wabe
     port = setup.port
@@ -134,6 +154,61 @@ describe('Authentication', () => {
   afterEach(async () => {
     await rootClient.request<any>(graphql.deleteUsers)
     await rootClient.request<any>(graphql.deleteTests)
+  })
+
+  it('should authorize user to access to created object with self acl but not an other user', async () => {
+    const { userClient } = await createUserAndUpdateRole({
+      anonymousClient: client,
+      port,
+      roleName: 'Client',
+      rootClient,
+    })
+
+    const { userClient: userClient2 } = await createUserAndUpdateRole({
+      anonymousClient: client,
+      port,
+      roleName: 'Client',
+      rootClient,
+      email: 'email2@test.fr',
+    })
+
+    const res = await userClient.request<any>(gql`
+    	mutation createTest3{
+    		createTest3(input:{fields:{name: "test"}}){
+    			test3{
+    				id
+    			}
+    		}
+    	}
+    `)
+
+    const res2 = await userClient2.request<any>(gql`
+          query test3s{
+            test3s {
+              edges {
+                node {
+                  id
+                }
+              }
+            }
+          }
+        `)
+
+    const res3 = await getAnonymousClient(port).request<any>(gql`
+        query test3s{
+          test3s {
+            edges {
+              node {
+                id
+              }
+            }
+          }
+        }
+      `)
+
+    expect(res.createTest3.test3.id).toBeDefined()
+    expect(res2.test3s.edges.length).toEqual(0)
+    expect(res3.test3s.edges.length).toEqual(0)
   })
 
   it('should not authorize create object when authorizedRoles is empty', async () => {
