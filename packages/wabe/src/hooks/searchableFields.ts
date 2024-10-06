@@ -26,7 +26,7 @@ export const stringExtraction = (value: any): Array<string> => {
 }
 
 export const defaultSearchableFieldsBeforeCreate = (
-  object: HookObject<any>,
+  object: HookObject<any, any>,
 ) => {
   const searchablesFields = object.context.wabe.config.schema?.classes?.find(
     (currentClass) => currentClass.name === object.className,
@@ -48,7 +48,7 @@ export const defaultSearchableFieldsBeforeCreate = (
 }
 
 export const defaultSearchableFieldsBeforeUpdate = (
-  object: HookObject<any>,
+  object: HookObject<any, any>,
 ) => {
   const searchablesFields = object.context.wabe.config.schema?.classes?.find(
     (currentClass) => currentClass.name === object.className,

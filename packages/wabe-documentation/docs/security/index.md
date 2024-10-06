@@ -119,7 +119,7 @@ const run = async () => {
               },
               // If you have a specific use case and authorizedUsers and authorizedRoles are not enough,
               // you can use the callback to define your own logic
-              callback: async (hookObject: HookObject<any>) => {
+              callback: async (hookObject: HookObject<any, any>) => {
                // Some custom logic here
               }
             },
@@ -141,7 +141,7 @@ Here is an example of a `hook` that can be created to set acl on the class `Comp
 
 ```ts
 // Hook on class Company beforeCreate
-const setAclOnCompany = async (hookObject: HookObject<any>) => {
+const setAclOnCompany = async (hookObject: HookObject<any, any>) => {
   hookObject.upsertNewData("acl", {
     // Array of users with access on read and write for each one
     users: [

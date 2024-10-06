@@ -13,7 +13,7 @@ describe('Default fields', () => {
 
   describe('CreatedAt and UpdatedAt', () => {
     it('should add createdAt and updatedAt value on insert operation type', async () => {
-      const hookObject = new HookObject<DevWabeTypes>({
+      const hookObject = new HookObject<DevWabeTypes, 'User'>({
         className: 'User',
         operationType: OperationType.BeforeCreate,
         newData: {
@@ -52,7 +52,7 @@ describe('Default fields', () => {
     })
 
     it('shoud add updatedAt value on update operation type', async () => {
-      const hookObject = new HookObject<DevWabeTypes>({
+      const hookObject = new HookObject<DevWabeTypes, 'User'>({
         className: 'User',
         operationType: OperationType.BeforeUpdate,
         newData: {
@@ -80,7 +80,7 @@ describe('Default fields', () => {
     })
 
     it('should not overwrite if the createdAt field is already set', async () => {
-      const hookObject = new HookObject<DevWabeTypes>({
+      const hookObject = new HookObject<DevWabeTypes, 'User'>({
         className: 'User',
         operationType: OperationType.BeforeCreate,
         newData: {
@@ -99,7 +99,7 @@ describe('Default fields', () => {
     })
 
     it('should not overwrite if the updatedAt field is already set', async () => {
-      const hookObject = new HookObject<DevWabeTypes>({
+      const hookObject = new HookObject<DevWabeTypes, 'User'>({
         className: 'User',
         operationType: OperationType.BeforeCreate,
         newData: {
@@ -140,7 +140,7 @@ describe('Default fields', () => {
     const context = { wabe: { config } } as any
 
     it('should add the value if a default value is defined in schema but not specified', async () => {
-      const hookObject = new HookObject<DevWabeTypes>({
+      const hookObject = new HookObject<DevWabeTypes, 'User'>({
         className: 'User',
         operationType: OperationType.BeforeCreate,
         newData: {
@@ -159,7 +159,7 @@ describe('Default fields', () => {
     })
 
     it('should not add a default value if a value is specified', async () => {
-      const hookObject = new HookObject<DevWabeTypes>({
+      const hookObject = new HookObject<DevWabeTypes, 'User'>({
         className: 'User',
         operationType: OperationType.BeforeCreate,
         newData: {

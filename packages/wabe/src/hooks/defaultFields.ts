@@ -3,7 +3,7 @@ import type { DevWabeTypes } from '../utils/helper'
 import type { HookObject } from './HookObject'
 
 export const defaultBeforeCreateForCreatedAt = async (
-  object: HookObject<any>,
+  object: HookObject<any, any>,
 ) => {
   if (!object.isFieldUpdate('createdAt'))
     object.upsertNewData('createdAt', new Date())
@@ -13,13 +13,13 @@ export const defaultBeforeCreateForCreatedAt = async (
 }
 
 export const defaultBeforeUpdateForUpdatedAt = async (
-  object: HookObject<any>,
+  object: HookObject<any, any>,
 ) => {
   object.upsertNewData('updatedAt', new Date())
 }
 
 export const defaultBeforeCreateForDefaultValue = async (
-  object: HookObject<any>,
+  object: HookObject<any, any>,
 ) => {
   const schemaClass = getClassFromClassName<DevWabeTypes>(
     object.className,

@@ -3,7 +3,7 @@ import { getAuthenticationMethod } from '../authentication/utils'
 import type { HookObject } from './HookObject'
 
 export const callAuthenticationProvider = async (
-  hookObject: HookObject<any>,
+  hookObject: HookObject<any, any>,
 ) => {
   if (
     !hookObject.isFieldUpdate('authentication') ||
@@ -38,9 +38,9 @@ export const callAuthenticationProvider = async (
 }
 
 export const defaultCallAuthenticationProviderOnBeforeCreateUser = (
-  hookObject: HookObject<any>,
+  hookObject: HookObject<any, any>,
 ) => callAuthenticationProvider(hookObject)
 
 export const defaultCallAuthenticationProviderOnBeforeUpdateUser = (
-  hookObject: HookObject<any>,
+  hookObject: HookObject<any, any>,
 ) => callAuthenticationProvider(hookObject)

@@ -39,7 +39,7 @@ export const _getPermissionPropertiesOfAClass = async ({
 }
 
 export const _checkCLP = async (
-  object: HookObject<any>,
+  object: HookObject<any, any>,
   operationType: OperationType,
 ) => {
   if (object.context.isRoot) return
@@ -100,14 +100,14 @@ export const _checkCLP = async (
     )
 }
 
-export const defaultCheckPermissionOnRead = (object: HookObject<any>) =>
+export const defaultCheckPermissionOnRead = (object: HookObject<any, any>) =>
   _checkCLP(object, OperationType.BeforeRead)
 
-export const defaultCheckPermissionOnCreate = (object: HookObject<any>) =>
+export const defaultCheckPermissionOnCreate = (object: HookObject<any, any>) =>
   _checkCLP(object, OperationType.BeforeCreate)
 
-export const defaultCheckPermissionOnUpdate = (object: HookObject<any>) =>
+export const defaultCheckPermissionOnUpdate = (object: HookObject<any, any>) =>
   _checkCLP(object, OperationType.BeforeUpdate)
 
-export const defaultCheckPermissionOnDelete = (object: HookObject<any>) =>
+export const defaultCheckPermissionOnDelete = (object: HookObject<any, any>) =>
   _checkCLP(object, OperationType.BeforeDelete)

@@ -30,7 +30,7 @@ describe('searchablesFields', () => {
   })
 
   it('should complete the search fields of each object on insert', async () => {
-    const hookObject = new HookObject<DevWabeTypes>({
+    const hookObject = new HookObject<DevWabeTypes, 'User'>({
       className: 'User',
       operationType: OperationType.BeforeCreate,
       newData: {
@@ -68,7 +68,7 @@ describe('searchablesFields', () => {
   })
 
   it('should complete the search fields of each object on update', async () => {
-    const hookObject = new HookObject<DevWabeTypes>({
+    const hookObject = new HookObject<DevWabeTypes, 'User'>({
       className: 'User',
       operationType: OperationType.BeforeUpdate,
       newData: {

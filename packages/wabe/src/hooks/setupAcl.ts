@@ -9,7 +9,7 @@ const isWriteTrueOnUser = (aclObject: ACLProperties) =>
   // @ts-expect-error
   aclObject.authorizedUsers.write?.includes('self')
 
-export const defaultSetupAcl = async (object: HookObject<any>) => {
+export const defaultSetupAcl = async (object: HookObject<any, any>) => {
   const className = object.className
 
   const schemaPermissionsObject =
