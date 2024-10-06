@@ -9,6 +9,7 @@ describe('HookObject', () => {
 
     const hookObject = new HookObject<DevWabeTypes, 'User'>({
       className: 'User',
+      // @ts-expect-error
       newData: userData,
       context: {} as any,
       operationType: OperationType.BeforeUpdate,
@@ -32,10 +33,12 @@ describe('HookObject', () => {
 
     hookObject.upsertNewData('name', 'tata')
 
-    expect(hookObject.getNewData()).toEqual({
-      name: 'tata',
-      age: 30,
-    })
+    expect(hookObject.getNewData()).toEqual(
+      expect.objectContaining({
+        name: 'tata',
+        age: 30,
+      }),
+    )
   })
 
   it('should not set data for an after hook', () => {

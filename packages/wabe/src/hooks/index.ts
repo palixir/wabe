@@ -1,4 +1,4 @@
-import type { OutputType, WhereType } from '../database'
+import type { MutationData, OutputType, WhereType } from '../database'
 import {
   defaultBeforeCreateUpload,
   defaultBeforeUpdateUpload,
@@ -51,11 +51,6 @@ export type Hook<T extends WabeTypes, K extends keyof WabeTypes['types']> = {
   callback: (hookObject: HookObject<T, K>) => Promise<void> | void
 }
 
-export type TypedNewData<T extends keyof WabeTypes['types']> = Record<
-  keyof WabeTypes['types'][T],
-  any
->
-
 export const _findHooksByPriority = async <T extends keyof WabeTypes['types']>({
   className,
   operationType,
@@ -89,7 +84,7 @@ export const initializeHook = <T extends keyof WabeTypes['types']>({
   context,
 }: {
   className: T
-  newData?: TypedNewData<any>
+  newData?: MutationData<any, any>
   context: WabeContext<any>
 }) => {
   const computeObject = async ({

@@ -195,12 +195,10 @@ describe('Mongo adapter', () => {
       className: '_Session',
       data: [
         {
-          name: 'Lucas',
-          age: 20,
+          refreshToken: 'refreshToken',
         },
         {
-          name: 'LucasBis',
-          age: 18,
+          refreshToken: 'refreshToken',
         },
       ],
       fields: [],
@@ -1376,16 +1374,15 @@ describe('Mongo adapter', () => {
       where: {
         name: { equalTo: 'Lucas' },
       },
-      data: { age: 21 },
-      fields: ['name', 'id', 'age'],
+      data: { name: 'Doe' },
+      fields: ['name', 'id'],
       context,
     })
 
     expect(updatedObjects).toEqual([
       {
         id: expect.any(String),
-        name: 'Lucas',
-        age: 21,
+        name: 'Doe',
       },
     ])
 
@@ -1402,7 +1399,7 @@ describe('Mongo adapter', () => {
     expect(updatedObjects2).toEqual([
       {
         id: expect.any(String),
-        name: 'Lucas',
+        name: 'Doe',
         age: 23,
       },
       {

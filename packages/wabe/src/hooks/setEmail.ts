@@ -2,7 +2,6 @@ import type { DevWabeTypes } from '../utils/helper'
 import type { HookObject } from './HookObject'
 
 const updateEmail = async (object: HookObject<DevWabeTypes, 'User'>) => {
-  // @ts-expect-error
   const authentication = object.getNewData().authentication
 
   if (!authentication) return

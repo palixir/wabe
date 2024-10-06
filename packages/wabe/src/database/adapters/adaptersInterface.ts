@@ -43,10 +43,10 @@ export interface AdapterOptions {
   databaseName: string
 }
 
-export type MutationData<T extends keyof WabeTypes['types']> = Record<
-  keyof WabeTypes['types'][T],
-  any
->
+export type MutationData<
+  T extends keyof WabeTypes['types'],
+  K extends keyof WabeTypes['types'][T],
+> = Record<K, any>
 
 export interface CountOptions<
   T extends keyof WabeTypes['types'],
@@ -92,7 +92,7 @@ export interface CreateObjectOptions<
   W extends keyof WabeTypes['types'][T],
 > {
   className: T
-  data: MutationData<W>
+  data: MutationData<T, W>
   fields: Array<K | '*'>
   context: WabeContext<any>
 }
@@ -103,7 +103,7 @@ export interface CreateObjectsOptions<
   X extends keyof WabeTypes['types'][T],
 > {
   className: T
-  data: Array<MutationData<W>>
+  data: Array<MutationData<T, W>>
   fields: Array<K | '*'>
   offset?: number
   first?: number
@@ -119,7 +119,7 @@ export interface UpdateObjectOptions<
   className: T
   id: string
   where?: WhereType<T, W>
-  data: MutationData<W>
+  data: MutationData<T, W>
   fields: Array<K | '*'>
   context: WabeContext<any>
 }
@@ -133,7 +133,7 @@ export interface UpdateObjectsOptions<
   className: T
   where: WhereType<T, W>
   order?: OrderType<T, X>
-  data: MutationData<W>
+  data: MutationData<T, W>
   fields: Array<K | '*'>
   offset?: number
   first?: number
