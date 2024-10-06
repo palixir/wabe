@@ -26,6 +26,7 @@ import {
   defaultSearchableFieldsBeforeCreate,
   defaultSearchableFieldsBeforeUpdate,
 } from './searchableFields'
+import { defaultSetEmail, defaultSetEmailOnUpdate } from './setEmail'
 import { defaultSetupAcl } from './setupAcl'
 
 export enum OperationType {
@@ -326,5 +327,17 @@ export const getDefaultHooks = (): Hook<any, any>[] => [
     operationType: OperationType.BeforeCreate,
     priority: 1,
     callback: defaultSetupAcl,
+  },
+  {
+    className: 'User',
+    operationType: OperationType.BeforeCreate,
+    priority: 1,
+    callback: defaultSetEmail,
+  },
+  {
+    className: 'User',
+    operationType: OperationType.BeforeUpdate,
+    priority: 1,
+    callback: defaultSetEmailOnUpdate,
   },
 ]
