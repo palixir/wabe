@@ -3,6 +3,7 @@ import { EmailPassword } from './EmailPassword'
 
 describe('Email password', () => {
   const mockGetObjects = mock(() => Promise.resolve([]))
+  const mockCount = mock(() => Promise.resolve(0)) as any
   const mockCreateObject = mock(() => Promise.resolve({ id: 'userId' })) as any
 
   const spyArgonPasswordVerify = spyOn(Bun.password, 'verify')
@@ -13,6 +14,7 @@ describe('Email password', () => {
       database: {
         getObjects: mockGetObjects,
         createObject: mockCreateObject,
+        count: mockCount,
       },
     },
   } as any

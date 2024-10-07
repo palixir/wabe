@@ -1,6 +1,7 @@
 import argon2 from 'argon2'
 import type {
   AuthenticationEventsOptions,
+  AuthenticationEventsOptionsWithUserId,
   ProviderInterface,
 } from '../interface'
 
@@ -16,7 +17,6 @@ export class EmailPassword
     input,
     context,
   }: AuthenticationEventsOptions<EmailPasswordInterface>) {
-    // TODO : Use first here but need to refactor in graphql and mongoadapter to have first and not limit
     const users = await context.wabe.controllers.database.getObjects({
       className: 'User',
       where: {
@@ -32,6 +32,7 @@ export class EmailPassword
         isRoot: true,
       },
       fields: ['authentication'],
+      first: 1,
     })
 
     if (users.length === 0)
@@ -68,7 +69,7 @@ export class EmailPassword
     input,
     context,
   }: AuthenticationEventsOptions<EmailPasswordInterface>) {
-    const users = await context.wabe.controllers.database.getObjects({
+    const users = await context.wabe.controllers.database.count({
       className: 'User',
       where: {
         authentication: {
@@ -79,10 +80,37 @@ export class EmailPassword
         },
       },
       context,
-      fields: [],
     })
 
-    if (users.length > 0) throw new Error('User already exists')
+    if (users > 0) throw new Error('User already exists')
+
+    return {
+      authenticationDataToSave: {
+        email: input.email,
+        // biome-ignore lint/correctness/noConstantCondition: <explanation>
+        password: typeof Bun
+          ? await Bun.password.hash(input.password, 'argon2id')
+          : await argon2.hash(input.password),
+      },
+    }
+  }
+
+  async onUpdateAuthenticationData({
+    userId,
+    input,
+    context,
+  }: AuthenticationEventsOptionsWithUserId<EmailPasswordInterface>) {
+    const users = await context.wabe.controllers.database.count({
+      className: 'User',
+      where: {
+        id: {
+          equalTo: userId,
+        },
+      },
+      context,
+    })
+
+    if (users === 0) throw new Error('User not found')
 
     return {
       authenticationDataToSave: {

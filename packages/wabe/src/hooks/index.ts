@@ -7,10 +7,7 @@ import type { WabeTypes, WabeConfig } from '../server'
 import type { WabeContext } from '../server/interface'
 import type { DevWabeTypes } from '../utils/helper'
 import { HookObject } from './HookObject'
-import {
-  defaultCallAuthenticationProviderOnBeforeCreateUser,
-  defaultCallAuthenticationProviderOnBeforeUpdateUser,
-} from './authentication'
+import { defaultCallAuthenticationProviderOnBeforeCreateUser } from './authentication'
 import {
   defaultBeforeCreateForCreatedAt,
   defaultBeforeCreateForDefaultValue,
@@ -301,12 +298,6 @@ export const getDefaultHooks = (): Hook<any, any>[] => [
     operationType: OperationType.BeforeCreate,
     priority: 1,
     callback: defaultCallAuthenticationProviderOnBeforeCreateUser,
-  },
-  {
-    className: 'User',
-    operationType: OperationType.BeforeUpdate,
-    priority: 1,
-    callback: defaultCallAuthenticationProviderOnBeforeUpdateUser,
   },
   {
     operationType: OperationType.BeforeCreate,

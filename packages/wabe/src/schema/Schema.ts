@@ -10,6 +10,7 @@ import type { WabeConfig, WabeTypes } from '../server'
 import { Currency, PaymentMode, PaymentReccuringInterval } from '../payment'
 import { defaultMutations, defaultQueries } from './defaultResolvers'
 import type { HookObject } from '../hooks/HookObject'
+import { updateAuthenticationDataResolver } from '../authentication/resolvers/updateAuthenticationDataResolver'
 
 export type WabePrimaryTypes =
   | 'String'
@@ -347,6 +348,7 @@ export class Schema<T extends WabeTypes> {
             required: false,
           },
         },
+        required: true,
       },
     }
 
@@ -364,6 +366,21 @@ export class Schema<T extends WabeTypes> {
         ...defaultMutations,
         ...(customAuthenticationConfig.length > 0
           ? {
+              updateAuthenticationData: {
+                description:
+                  'Allow to update authentication data of a user. It will call onUpdateAuthenticationData method of the provided provider',
+                type: 'Boolean',
+                args: {
+                  input: {
+                    userId: {
+                      type: 'String',
+                      required: true,
+                    },
+                    authentication: authenticationInput,
+                  },
+                },
+                resolve: updateAuthenticationDataResolver,
+              },
               signInWith: {
                 type: 'Object',
                 outputObject: {

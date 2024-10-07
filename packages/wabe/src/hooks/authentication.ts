@@ -40,7 +40,3 @@ export const callAuthenticationProvider = async (
 export const defaultCallAuthenticationProviderOnBeforeCreateUser = (
   hookObject: HookObject<any, any>,
 ) => callAuthenticationProvider(hookObject)
-
-export const defaultCallAuthenticationProviderOnBeforeUpdateUser = (
-  hookObject: HookObject<any, any>,
-) => callAuthenticationProvider(hookObject)
