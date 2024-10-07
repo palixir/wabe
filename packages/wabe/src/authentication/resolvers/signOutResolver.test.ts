@@ -10,9 +10,11 @@ describe('signOut', () => {
       'delete',
     ).mockResolvedValue(undefined)
 
-    await signOutResolver(undefined, {}, {
+    const res = await signOutResolver(undefined, {}, {
       sessionId: 'sessionId',
     } as WabeContext<any>)
+
+    expect(res).toBe(true)
 
     expect(spyDeleteSession).toHaveBeenCalledTimes(1)
     expect(spyDeleteSession).toHaveBeenCalledWith({
