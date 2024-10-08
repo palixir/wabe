@@ -7,7 +7,10 @@ import type { WabeTypes, WabeConfig } from '../server'
 import type { WabeContext } from '../server/interface'
 import type { DevWabeTypes } from '../utils/helper'
 import { HookObject } from './HookObject'
-import { defaultCallAuthenticationProviderOnBeforeCreateUser } from './authentication'
+import {
+  defaultCallAuthenticationProviderOnBeforeCreateUser,
+  defaultCallAuthenticationProviderOnBeforeUpdateUser,
+} from './authentication'
 import {
   defaultBeforeCreateForCreatedAt,
   defaultBeforeCreateForDefaultValue,
@@ -24,14 +27,17 @@ import {
   defaultSearchableFieldsBeforeUpdate,
 } from './searchableFields'
 import { defaultSetEmail, defaultSetEmailOnUpdate } from './setEmail'
-import { defaultSetupAcl } from './setupAcl'
+import {
+  defaultSetupAclBeforeCreate,
+  defaultSetupAclOnUserAfterCreate,
+} from './setupAcl'
 
 export enum OperationType {
-  AfterCreate = 'AfterCreate',
+  AfterCreate = 'afterCreate',
   AfterUpdate = 'afterUpdate',
   AfterDelete = 'afterDelete',
   AfterRead = 'afterRead',
-  BeforeCreate = 'beforeInsert',
+  BeforeCreate = 'beforeCreate',
   BeforeUpdate = 'beforeUpdate',
   BeforeDelete = 'beforeDelete',
   BeforeRead = 'beforeRead',
@@ -300,6 +306,12 @@ export const getDefaultHooks = (): Hook<any, any>[] => [
     callback: defaultCallAuthenticationProviderOnBeforeCreateUser,
   },
   {
+    className: 'User',
+    operationType: OperationType.BeforeUpdate,
+    priority: 1,
+    callback: defaultCallAuthenticationProviderOnBeforeUpdateUser,
+  },
+  {
     operationType: OperationType.BeforeCreate,
     priority: 1,
     callback: defaultSearchableFieldsBeforeCreate,
@@ -311,8 +323,14 @@ export const getDefaultHooks = (): Hook<any, any>[] => [
   },
   {
     operationType: OperationType.BeforeCreate,
-    priority: 1,
-    callback: defaultSetupAcl,
+    priority: 0,
+    callback: defaultSetupAclBeforeCreate,
+  },
+  {
+    className: 'User',
+    operationType: OperationType.AfterCreate,
+    priority: 0,
+    callback: defaultSetupAclOnUserAfterCreate,
   },
   {
     className: 'User',

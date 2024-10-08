@@ -9,30 +9,32 @@ const isWriteTrueOnUser = (aclObject: ACLProperties) =>
   // @ts-expect-error
   aclObject.authorizedUsers.write?.includes('self')
 
-export const defaultSetupAcl = async (object: HookObject<any, any>) => {
-  const className = object.className
-
+const setAcl = async ({
+  hookObject,
+  userId,
+  isBeforeHook,
+}: {
+  hookObject: HookObject<any, any>
+  userId: string
+  isBeforeHook: boolean
+}) => {
   const schemaPermissionsObject =
-    object.context.wabe.config.schema?.classes?.find(
-      (c) => c.name === className,
+    hookObject.context.wabe.config.schema?.classes?.find(
+      (c) => c.name === hookObject.className,
     )?.permissions
 
   if (!schemaPermissionsObject) return
 
   const { acl } = schemaPermissionsObject
 
-  if (object.isFieldUpdate('acl') || !acl) return
+  if (hookObject.isFieldUpdate('acl') || !acl) return
 
   // @ts-expect-error
   if (acl.callback) {
     // @ts-expect-error
-    await acl.callback(object)
+    await acl.callback(hookObject)
     return
   }
-
-  const userId = object.getUser()?.id
-
-  if (!userId) return
 
   const isReadUser = isReadTrueOnUser(acl)
   const isWriteUser = isWriteTrueOnUser(acl)
@@ -41,8 +43,8 @@ export const defaultSetupAcl = async (object: HookObject<any, any>) => {
     // @ts-expect-error
     authorizedRoles: ACLProperties['authorizedRoles'],
     property: 'read' | 'write',
-  ) => {
-    return object.context.wabe.controllers.database.getObjects({
+  ) =>
+    hookObject.context.wabe.controllers.database.getObjects({
       className: 'Role',
       fields: ['id'],
       where: {
@@ -50,9 +52,8 @@ export const defaultSetupAcl = async (object: HookObject<any, any>) => {
           in: authorizedRoles?.[property],
         },
       },
-      context: object.context,
+      context: hookObject.context,
     })
-  }
 
   const idOfAllReadRoles = await getIdOfAllAuthorizedRoles(
     // @ts-expect-error
@@ -78,7 +79,7 @@ export const defaultSetupAcl = async (object: HookObject<any, any>) => {
     // @ts-expect-error
     (acl.authorizedUsers.write && acl.authorizedUsers.write.length > 0)
 
-  object.upsertNewData('acl', {
+  const aclObject = {
     users: isReadOrWriteSpecified
       ? [{ userId, read: !!isReadUser, write: !!isWriteUser }]
       : [],
@@ -89,5 +90,36 @@ export const defaultSetupAcl = async (object: HookObject<any, any>) => {
         write: idOfAllWriteRoles.some((role) => role.id === roleId),
       })),
     ],
-  })
+  }
+
+  if (isBeforeHook) hookObject.upsertNewData('acl', aclObject)
+  else {
+    await hookObject.context.wabe.controllers.database.updateObject({
+      className: hookObject.className,
+      context: { ...hookObject.context, isRoot: true },
+      id: userId,
+      data: {
+        acl: aclObject,
+      },
+      fields: [],
+    })
+  }
+}
+
+export const defaultSetupAclBeforeCreate = async (
+  hookObject: HookObject<any, any>,
+) => {
+  const userId = hookObject.getUser()?.id
+  if (hookObject.className === 'User' || !userId) return
+
+  await setAcl({ hookObject, userId, isBeforeHook: true })
+}
+
+export const defaultSetupAclOnUserAfterCreate = async (
+  hookObject: HookObject<any, any>,
+) => {
+  const userId = hookObject.object.id
+  if (!userId) return
+
+  await setAcl({ hookObject, userId, isBeforeHook: false })
 }

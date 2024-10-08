@@ -240,6 +240,25 @@ describe('setupAcl', () => {
     await rootClient.request<any>(graphql.deleteUsers)
   })
 
+  it('should setup acl on user creation (user can be created with anonymous client)', async () => {
+    const res = await anonymousClient.request<any>(gql`
+        mutation createUser {
+          createUser(input:{fields:{name: "test" }}){
+            user{
+              id
+              acl {
+                  users {
+                      userId
+                  }
+              }
+            }
+          }
+        }
+    `)
+
+    expect(res.createUser.user.acl).not.toBeNull()
+  })
+
   it('should update acl object if self is precised and user (with role client2) is authenticated (on read)', async () => {
     const { userClient, userId } = await createUserAndUpdateRole({
       anonymousClient,

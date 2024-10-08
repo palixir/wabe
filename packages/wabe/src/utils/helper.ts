@@ -112,6 +112,24 @@ export const setupTests = async (
               type: 'Phone',
             },
           },
+          permissions: {
+            update: {
+              requireAuthentication: false,
+            },
+            read: {
+              requireAuthentication: false,
+            },
+            acl: {
+              authorizedUsers: {
+                read: ['self'],
+                write: ['self'],
+              },
+              authorizedRoles: {
+                read: [],
+                write: [],
+              },
+            },
+          },
         },
       ],
       scalars: [

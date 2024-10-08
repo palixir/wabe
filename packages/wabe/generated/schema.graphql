@@ -1104,11 +1104,6 @@ type Mutation {
 
   """Send basic email with text and html, returns the id of the email"""
   sendEmail(input: SendEmailInput!): String
-
-  """
-  Allow to update authentication data of a user. It will call onUpdateAuthenticationData method of the provided provider
-  """
-  updateAuthenticationData(input: UpdateAuthenticationDataInput!): Boolean
   signInWith(input: SignInWithInput!): SignInWithOutput
   signUpWith(input: SignUpWithInput!): SignUpWithOutput
   signOut: Boolean
@@ -1558,32 +1553,6 @@ input SendEmailInput {
   subject: String!
   text: String
   html: String
-}
-
-input UpdateAuthenticationDataInput {
-  userId: String!
-  authentication: UpdateAuthenticationDataAuthenticationInput
-}
-
-input UpdateAuthenticationDataAuthenticationInput {
-  emailPassword: UpdateAuthenticationDataAuthenticationEmailPasswordInput
-  google: UpdateAuthenticationDataAuthenticationGoogleInput
-  otp: UpdateAuthenticationDataAuthenticationOtpInput
-  secondaryFactor: SecondaryFactor
-}
-
-input UpdateAuthenticationDataAuthenticationEmailPasswordInput {
-  email: Email!
-  password: String!
-}
-
-input UpdateAuthenticationDataAuthenticationGoogleInput {
-  authorizationCode: String!
-  codeVerifier: String!
-}
-
-input UpdateAuthenticationDataAuthenticationOtpInput {
-  code: String
 }
 
 type SignInWithOutput {
