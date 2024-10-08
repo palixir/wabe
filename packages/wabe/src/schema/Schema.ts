@@ -347,6 +347,7 @@ export class Schema<T extends WabeTypes> {
             required: false,
           },
         },
+        required: true,
       },
     }
 

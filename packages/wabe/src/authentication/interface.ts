@@ -18,6 +18,11 @@ export type AuthenticationEventsOptions<T> = {
   context: WabeContext<any>
 }
 
+export type AuthenticationEventsOptionsWithUserId<T> =
+  AuthenticationEventsOptions<T> & {
+    userId: string
+  }
+
 export type ProviderInterface<T = any> = {
   onSignIn: (options: AuthenticationEventsOptions<T>) => Promise<{
     user: Partial<User>
@@ -30,6 +35,9 @@ export type ProviderInterface<T = any> = {
   }>
   onSignUp: (
     options: AuthenticationEventsOptions<T>,
+  ) => Promise<{ authenticationDataToSave: any }>
+  onUpdateAuthenticationData?: (
+    options: AuthenticationEventsOptionsWithUserId<T>,
   ) => Promise<{ authenticationDataToSave: any }>
 }
 

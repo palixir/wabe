@@ -605,7 +605,12 @@ export class DatabaseController<T extends WabeTypes> {
 
     const objectToReturn = await this.getObject({
       className,
-      context,
+      context: {
+        ...context,
+        // Because if you create an object like an user, it will add the user to the ACL
+        // but if you have right to create the object you can read it during the creation
+        isRoot: true,
+      },
       fields,
       id: object.id,
       skipHooks: true,

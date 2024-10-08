@@ -27,14 +27,17 @@ import {
   defaultSearchableFieldsBeforeUpdate,
 } from './searchableFields'
 import { defaultSetEmail, defaultSetEmailOnUpdate } from './setEmail'
-import { defaultSetupAcl } from './setupAcl'
+import {
+  defaultSetupAclBeforeCreate,
+  defaultSetupAclOnUserAfterCreate,
+} from './setupAcl'
 
 export enum OperationType {
-  AfterCreate = 'AfterCreate',
+  AfterCreate = 'afterCreate',
   AfterUpdate = 'afterUpdate',
   AfterDelete = 'afterDelete',
   AfterRead = 'afterRead',
-  BeforeCreate = 'beforeInsert',
+  BeforeCreate = 'beforeCreate',
   BeforeUpdate = 'beforeUpdate',
   BeforeDelete = 'beforeDelete',
   BeforeRead = 'beforeRead',
@@ -320,8 +323,14 @@ export const getDefaultHooks = (): Hook<any, any>[] => [
   },
   {
     operationType: OperationType.BeforeCreate,
-    priority: 1,
-    callback: defaultSetupAcl,
+    priority: 0,
+    callback: defaultSetupAclBeforeCreate,
+  },
+  {
+    className: 'User',
+    operationType: OperationType.AfterCreate,
+    priority: 0,
+    callback: defaultSetupAclOnUserAfterCreate,
   },
   {
     className: 'User',

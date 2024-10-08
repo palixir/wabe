@@ -3,6 +3,7 @@ import { EmailPassword } from './EmailPassword'
 
 describe('Email password', () => {
   const mockGetObjects = mock(() => Promise.resolve([]))
+  const mockCount = mock(() => Promise.resolve(0)) as any
   const mockCreateObject = mock(() => Promise.resolve({ id: 'userId' })) as any
 
   const spyArgonPasswordVerify = spyOn(Bun.password, 'verify')
@@ -13,6 +14,7 @@ describe('Email password', () => {
       database: {
         getObjects: mockGetObjects,
         createObject: mockCreateObject,
+        count: mockCount,
       },
     },
   } as any
@@ -133,5 +135,42 @@ describe('Email password', () => {
     ).rejects.toThrow('Invalid authentication credentials')
 
     expect(spyArgonPasswordVerify).toHaveBeenCalledTimes(1)
+  })
+
+  it('should not update authentication data if there is no user found', async () => {
+    mockGetObjects.mockResolvedValue([])
+
+    spyArgonPasswordVerify.mockResolvedValueOnce(true)
+
+    expect(
+      emailPassword.onUpdateAuthenticationData?.({
+        context: { wabe: controllers } as any,
+        input: {
+          email: 'email@test.fr',
+          password: 'password',
+        },
+        userId: 'userId',
+      }),
+    ).rejects.toThrow('User not found')
+  })
+
+  it('should  update authentication data if the userId match with an user', async () => {
+    mockCount.mockResolvedValue(1)
+
+    spyBunPasswordHash.mockResolvedValueOnce('$argon2id$hashedPassword')
+
+    const res = await emailPassword.onUpdateAuthenticationData?.({
+      context: { wabe: controllers } as any,
+      input: {
+        email: 'email@test.fr',
+        password: 'password',
+      },
+      userId: 'userId',
+    })
+
+    expect(res.authenticationDataToSave.email).toBe('email@test.fr')
+    expect(res.authenticationDataToSave.password).toBe(
+      '$argon2id$hashedPassword',
+    )
   })
 })

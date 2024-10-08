@@ -61,6 +61,9 @@ type ProviderInterface<T = any> = {
   onSignUp: (
     options: AuthenticationEventsOptions<T>,
   ) => Promise<{ authenticationDataToSave: any }>;
+  onUpdateAuthenticationData?: (
+    options: AuthenticationEventsOptionsWithUserId<T>,
+  ) => Promise<{ authenticationDataToSave: any }>
 };
 ```
 
@@ -160,6 +163,34 @@ export class EmailPassword
         password: await Bun.password.hash(input.password, "argon2id"),
       },
     };
+  }
+
+  async onUpdateAuthenticationData({
+    userId,
+    input,
+    context,
+  }: AuthenticationEventsOptionsWithUserId<EmailPasswordInterface>) {
+    const users = await context.wabe.controllers.database.count({
+      className: 'User',
+      where: {
+        id: {
+          equalTo: userId,
+        },
+      },
+      context,
+    })
+
+    if (users === 0) throw new Error('User not found')
+
+    return {
+      authenticationDataToSave: {
+        email: input.email,
+        // biome-ignore lint/correctness/noConstantCondition: <explanation>
+        password: typeof Bun
+          ? await Bun.password.hash(input.password, 'argon2id')
+          : await argon2.hash(input.password),
+      },
+    }
   }
 }
 ```

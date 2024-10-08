@@ -1,107 +1,304 @@
-import { mock, describe, expect, it, beforeEach } from 'bun:test'
-import { HookObject } from './HookObject'
-import { OperationType } from '.'
-import { callAuthenticationProvider } from './authentication'
+import { describe, beforeAll, afterAll, it, expect } from 'bun:test'
+import { gql, type GraphQLClient } from 'graphql-request'
+import {
+  closeTests,
+  type DevWabeTypes,
+  getAnonymousClient,
+  getGraphqlClient,
+  getUserClient,
+  setupTests,
+} from '../utils/helper'
+import type { Wabe } from '../server'
 
-describe('Hooks authentication', () => {
-  const mockSignUp = mock(() => ({}))
+describe('updateAuthenticationDataResolver', () => {
+  let wabe: Wabe<DevWabeTypes>
+  let port: number
+  let client: GraphQLClient
 
-  const customAuthenticationMethods = [
-    {
-      name: 'emailPassword',
-      input: {
-        email: {
-          type: 'Email',
-          required: true,
-        },
-        password: {
-          type: 'String',
-          required: true,
-        },
-      },
-      provider: {
-        onSignUp: mockSignUp,
-      },
-    },
-  ]
-
-  beforeEach(() => {
-    mockSignUp.mockClear()
+  beforeAll(async () => {
+    const setup = await setupTests()
+    wabe = setup.wabe
+    port = setup.port
+    client = getGraphqlClient(port)
   })
 
-  it('should call the good one auth provider when create an user', async () => {
-    const hookObject = new HookObject({
-      className: 'User',
-      context: {
-        isRoot: true,
-        wabe: {
-          config: {
-            authentication: {
-              customAuthenticationMethods,
+  afterAll(async () => {
+    await closeTests(wabe)
+  })
+
+  it('should create an user with createUser mutation and sign in', async () => {
+    const userCreated = await client.request<any>(graphql.createUser, {
+      input: {
+        fields: {
+          authentication: {
+            emailPassword: {
+              email: 'email0@test.fr',
+              password: 'password',
             },
-          } as any,
-          databaseController: {} as any,
-        } as any,
+          },
+        },
       },
-      object: {},
-      operationType: OperationType.BeforeCreate,
-      newData: {
+    })
+
+    const anonymousClient = getAnonymousClient(port)
+
+    const res = await anonymousClient.request<any>(graphql.signInWith, {
+      input: {
         authentication: {
           emailPassword: {
-            email: 'email@gmail.com',
+            email: 'email0@test.fr',
             password: 'password',
           },
         },
       },
     })
 
-    await callAuthenticationProvider(hookObject)
+    expect(res.signInWith.id).toEqual(userCreated.createUser.user.id)
 
-    expect(mockSignUp).toHaveBeenCalledTimes(1)
-    expect(mockSignUp).toHaveBeenCalledWith({
-      input: {
-        email: 'email@gmail.com',
-        password: 'password',
-      },
-      context: expect.any(Object),
-    })
+    expect(
+      anonymousClient.request<any>(graphql.signInWith, {
+        input: {
+          authentication: {
+            emailPassword: {
+              email: 'email0r@test.fr',
+              password: 'password',
+            },
+          },
+        },
+      }),
+    ).rejects.toThrow('Invalid authentication credentials')
   })
 
-  it('should call the good one auth provider when update an user', async () => {
-    const hookObject = new HookObject({
-      className: 'User',
-      context: {
-        isRoot: true,
-        wabe: {
-          config: {
-            authentication: {
-              customAuthenticationMethods,
-            },
-          } as any,
-          databaseController: {} as any,
-        } as any,
-      },
-      object: {},
-      operationType: OperationType.BeforeUpdate,
-      newData: {
+  it('should update the authentication password of an user for a specific provider', async () => {
+    const {
+      signUpWith: { id, accessToken },
+    } = await client.request<any>(graphql.signUpWith, {
+      input: {
         authentication: {
           emailPassword: {
-            email: 'email@gmail.com',
+            email: 'email@test.fr',
             password: 'password',
           },
         },
       },
     })
 
-    await callAuthenticationProvider(hookObject)
+    const userClient = getUserClient(port, accessToken)
 
-    expect(mockSignUp).toHaveBeenCalledTimes(1)
-    expect(mockSignUp).toHaveBeenCalledWith({
+    await userClient.request<any>(graphql.updateUser, {
       input: {
-        email: 'email@gmail.com',
-        password: 'password',
+        id,
+        fields: {
+          authentication: {
+            emailPassword: {
+              email: 'email@test.fr',
+              password: 'password2',
+            },
+          },
+        },
       },
-      context: expect.any(Object),
     })
+
+    const res = await userClient.request<any>(graphql.signInWith, {
+      input: {
+        authentication: {
+          emailPassword: {
+            email: 'email@test.fr',
+            password: 'password2',
+          },
+        },
+      },
+    })
+
+    expect(res.signInWith.id).toEqual(id)
+
+    expect(
+      userClient.request<any>(graphql.signInWith, {
+        input: {
+          authentication: {
+            emailPassword: {
+              email: 'email@test.fr',
+              password: 'password',
+            },
+          },
+        },
+      }),
+    ).rejects.toThrow('Invalid authentication credentials')
+  })
+
+  it('should update the authentication email of an user for a specific provider', async () => {
+    const {
+      signUpWith: { id, accessToken },
+    } = await client.request<any>(graphql.signUpWith, {
+      input: {
+        authentication: {
+          emailPassword: {
+            email: 'email2@test.fr',
+            password: 'password',
+          },
+        },
+      },
+    })
+
+    const userClient = getUserClient(port, accessToken)
+
+    await userClient.request<any>(graphql.updateUser, {
+      input: {
+        id,
+        fields: {
+          authentication: {
+            emailPassword: {
+              email: 'email2-bis@test.fr',
+              password: 'password',
+            },
+          },
+        },
+      },
+    })
+
+    const res = await userClient.request<any>(graphql.signInWith, {
+      input: {
+        authentication: {
+          emailPassword: {
+            email: 'email2-bis@test.fr',
+            password: 'password',
+          },
+        },
+      },
+    })
+
+    expect(res.signInWith.id).toEqual(id)
+
+    expect(
+      userClient.request<any>(graphql.signInWith, {
+        input: {
+          authentication: {
+            emailPassword: {
+              email: 'email2@test.fr',
+              password: 'password',
+            },
+          },
+        },
+      }),
+    ).rejects.toThrow('Invalid authentication credentials')
+  })
+
+  it('should not update the authentication of an if the user is not the owner of the object', async () => {
+    const {
+      signUpWith: { id },
+    } = await client.request<any>(graphql.signUpWith, {
+      input: {
+        authentication: {
+          emailPassword: {
+            email: 'email3@test.fr',
+            password: 'password',
+          },
+        },
+      },
+    })
+
+    const {
+      signUpWith: { accessToken: otherUserAccessToken },
+    } = await client.request<any>(graphql.signUpWith, {
+      input: {
+        authentication: {
+          emailPassword: {
+            email: 'email3-invalid@test.fr',
+            password: 'password',
+          },
+        },
+      },
+    })
+
+    const userClient = getUserClient(port, otherUserAccessToken)
+
+    expect(
+      userClient.request<any>(graphql.updateUser, {
+        input: {
+          id,
+          fields: {
+            authentication: {
+              emailPassword: {
+                email: 'email3@test.fr',
+                password: 'password2',
+              },
+            },
+          },
+        },
+      }),
+    ).rejects.toThrow('Object not found')
+
+    expect(
+      getAnonymousClient(port).request<any>(graphql.updateUser, {
+        input: {
+          id,
+          fields: {
+            authentication: {
+              emailPassword: {
+                email: 'email3@test.fr',
+                password: 'password2',
+              },
+            },
+          },
+        },
+      }),
+    ).rejects.toThrow('Object not found')
+
+    const res = await userClient.request<any>(graphql.signInWith, {
+      input: {
+        authentication: {
+          emailPassword: {
+            email: 'email3@test.fr',
+            password: 'password',
+          },
+        },
+      },
+    })
+
+    expect(res.signInWith.id).toEqual(id)
   })
 })
+
+const graphql = {
+  createUser: gql`
+      mutation createUser($input: CreateUserInput!) {
+        createUser(input: $input) {
+          user {
+            id
+          }
+        }
+      }
+    `,
+  signInWith: gql`
+		 mutation signInWith($input: SignInWithInput!) {
+  		signInWith(input: $input){
+  			id
+  			accessToken
+  			refreshToken
+  		}
+		}
+	`,
+  signUpWith: gql`
+		 mutation signUpWith($input: SignUpWithInput!) {
+  		signUpWith(input:	$input){
+  			id
+  			accessToken
+  			refreshToken
+  		}
+  	}
+	 `,
+  updateUser: gql`
+		 mutation updateUser($input: UpdateUserInput!) {
+  		updateUser(input: $input){
+        user {
+            id
+            acl {
+                users {
+                    userId
+                }
+            }
+        }
+      }
+  	}
+	 `,
+}
