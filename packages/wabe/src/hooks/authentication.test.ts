@@ -228,6 +228,22 @@ describe('updateAuthenticationDataResolver', () => {
       }),
     ).rejects.toThrow('Object not found')
 
+    expect(
+      getAnonymousClient(port).request<any>(graphql.updateUser, {
+        input: {
+          id,
+          fields: {
+            authentication: {
+              emailPassword: {
+                email: 'email3@test.fr',
+                password: 'password2',
+              },
+            },
+          },
+        },
+      }),
+    ).rejects.toThrow('Object not found')
+
     const res = await userClient.request<any>(graphql.signInWith, {
       input: {
         authentication: {

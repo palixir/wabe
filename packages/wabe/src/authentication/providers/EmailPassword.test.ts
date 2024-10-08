@@ -136,4 +136,41 @@ describe('Email password', () => {
 
     expect(spyArgonPasswordVerify).toHaveBeenCalledTimes(1)
   })
+
+  it('should not update authentication data if there is no user found', async () => {
+    mockGetObjects.mockResolvedValue([])
+
+    spyArgonPasswordVerify.mockResolvedValueOnce(true)
+
+    expect(
+      emailPassword.onUpdateAuthenticationData?.({
+        context: { wabe: controllers } as any,
+        input: {
+          email: 'email@test.fr',
+          password: 'password',
+        },
+        userId: 'userId',
+      }),
+    ).rejects.toThrow('User not found')
+  })
+
+  it('should  update authentication data if the userId match with an user', async () => {
+    mockCount.mockResolvedValue(1)
+
+    spyBunPasswordHash.mockResolvedValueOnce('$argon2id$hashedPassword')
+
+    const res = await emailPassword.onUpdateAuthenticationData?.({
+      context: { wabe: controllers } as any,
+      input: {
+        email: 'email@test.fr',
+        password: 'password',
+      },
+      userId: 'userId',
+    })
+
+    expect(res.authenticationDataToSave.email).toBe('email@test.fr')
+    expect(res.authenticationDataToSave.password).toBe(
+      '$argon2id$hashedPassword',
+    )
+  })
 })
