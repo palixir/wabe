@@ -9,6 +9,10 @@ Contributions are welcome! Here's how you can help:
 
 Note: Each code contribution must be tested either by an existing test or a new one.
 
+## Note about new PR
+
+First of all, thanks you for taking time to improve Wabe. Wabe have a great test coverage, to keep this code quality, please add tests that cover your changes 🙂.
+
 ## Install
 
 Wabe uses Bun, so you need the latest version of Bun. You can see [here](https://bun.sh/docs/installation) if Bun is not installed on your machine.
@@ -25,6 +29,8 @@ You can run the tests in all packages by running the following commands at the r
 
 ```sh
 cd packages/wabe
+bun dev # Run server and create all codegen
+
 bun test # Run test on wabe package
 # or
 bun ci # Run lint + test on package
