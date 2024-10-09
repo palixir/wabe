@@ -199,7 +199,9 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter {
     const collections = await this.database.collections()
 
     await Promise.all(
-      collections.map((collection) => collection.deleteMany({})),
+      collections
+        .filter((collection) => collection.collectionName !== 'Role')
+        .map((collection) => collection.deleteMany({})),
     )
   }
 
