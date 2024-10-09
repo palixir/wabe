@@ -43,7 +43,11 @@ describe('Mongo adapter', () => {
     const collections = await mongoAdapter.database?.collections()
 
     if (collections)
-      await Promise.all(collections?.map((collection) => collection.drop()))
+      await Promise.all(
+        collections
+          ?.filter((collection) => collection.collectionName !== 'Role')
+          .map((collection) => collection.drop()),
+      )
   })
 
   it("should order the result by the field 'name' in ascending order", async () => {
@@ -174,7 +178,7 @@ describe('Mongo adapter', () => {
     expect(res3).toEqual(1)
   })
 
-  it('should clear all database', async () => {
+  it('should clear all database except Role collection', async () => {
     await mongoAdapter.createObjects({
       className: 'User',
       data: [
@@ -219,8 +223,15 @@ describe('Mongo adapter', () => {
       context,
     })
 
+    const res3 = await mongoAdapter.getObjects({
+      className: 'Role',
+      fields: ['id'],
+      context,
+    })
+
     expect(res.length).toEqual(0)
     expect(res2.length).toEqual(0)
+    expect(res3.length).not.toEqual(0)
   })
 
   it('should support where on getObject for additional check (acl for example)', async () => {
