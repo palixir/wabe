@@ -21,7 +21,7 @@ export const AnyScalarType = new GraphQLScalarType({
 export const DateScalarType = new GraphQLScalarType({
   name: 'Date',
   description: 'Date scalar type',
-  parseValue(value: any) {
+  parseValue(value: any): Date {
     const date = new Date(value)
 
     if (Number.isNaN(date.getTime())) throw new Error('Invalid date')
@@ -36,7 +36,7 @@ export const DateScalarType = new GraphQLScalarType({
 export const EmailScalarType = new GraphQLScalarType({
   name: 'Email',
   description: 'Email scalar type',
-  parseValue(value: any) {
+  parseValue(value: any): string {
     if (typeof value !== 'string') throw new Error('Invalid email')
 
     if (!value.match(/^[^@\s]+@[^@\s]+\.[^@\s]+$/))

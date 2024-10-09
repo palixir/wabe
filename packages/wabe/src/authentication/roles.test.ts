@@ -1,80 +1,56 @@
-import { describe, expect, it, mock, afterEach } from 'bun:test'
+import { afterAll, beforeAll, describe, it, expect } from 'bun:test'
+import type { Wabe } from '../server'
+import { type DevWabeTypes, setupTests, closeTests } from '../utils/helper'
 import { initializeRoles } from './roles'
 
-describe('Roles', () => {
-  const mockCreateObjects = mock(() => {})
-  const mockGetObjects = mock(() => {})
+describe('roles', () => {
+  let wabe: Wabe<DevWabeTypes>
 
-  const wabe = {
-    config: {
-      authentication: {
-        roles: ['Role1', 'Role2'],
-      },
-    },
-    controllers: {
-      database: {
-        getObjects: mockGetObjects,
-        createObjects: mockCreateObjects,
-      },
-    },
-  } as any
-
-  afterEach(() => {
-    mockCreateObjects.mockClear()
-    mockGetObjects.mockClear()
+  beforeAll(async () => {
+    const setup = await setupTests()
+    wabe = setup.wabe
   })
 
-  it("should not create a role if it's already created", async () => {
-    mockGetObjects.mockResolvedValueOnce([
-      { name: 'Role1' },
-      { name: 'Role2' },
-    ] as never)
-
-    await initializeRoles(wabe)
-
-    expect(mockCreateObjects).toHaveBeenCalledTimes(0)
-  })
-
-  it('should create only one role if one of them is already created', async () => {
-    mockGetObjects.mockResolvedValueOnce([{ name: 'Role1' }] as never)
-
-    await initializeRoles(wabe)
-
-    expect(mockCreateObjects).toHaveBeenCalledTimes(1)
-    expect(mockCreateObjects).toHaveBeenCalledWith({
-      className: 'Role',
-      context: { isRoot: true, wabe: wabe },
-      data: [{ name: 'Role2' }],
-      fields: [],
-    })
+  afterAll(async () => {
+    await closeTests(wabe)
   })
 
   it('should create all roles', async () => {
-    mockGetObjects.mockResolvedValueOnce([] as never)
+    await wabe.controllers.database.clearDatabase()
 
     await initializeRoles(wabe)
 
-    expect(mockCreateObjects).toHaveBeenCalledTimes(1)
-    expect(mockCreateObjects).toHaveBeenCalledWith({
+    const res = await wabe.controllers.database.getObjects({
       className: 'Role',
       context: { isRoot: true, wabe: wabe },
-      data: [{ name: 'Role1' }, { name: 'Role2' }],
-      fields: [],
+      fields: ['name'],
     })
+
+    expect(res.length).toEqual(3)
+    expect(res.map((role) => role.name)).toEqual([
+      'Client',
+      'Client2',
+      'Client3',
+    ])
   })
 
-  it('should not call database if there is no roles', async () => {
-    await initializeRoles({
-      controllers: {
-        database: {
-          createObjects: mockCreateObjects,
-        },
-      },
-      authentication: {
-        roles: [],
-      },
-    } as any)
+  it('should not create all roles if there already exist', async () => {
+    await wabe.controllers.database.clearDatabase()
 
-    expect(mockCreateObjects).toHaveBeenCalledTimes(0)
+    await initializeRoles(wabe)
+    await initializeRoles(wabe)
+
+    const res = await wabe.controllers.database.getObjects({
+      className: 'Role',
+      context: { isRoot: true, wabe: wabe },
+      fields: ['name'],
+    })
+
+    expect(res.length).toEqual(3)
+    expect(res.map((role) => role.name)).toEqual([
+      'Client',
+      'Client2',
+      'Client3',
+    ])
   })
 })
