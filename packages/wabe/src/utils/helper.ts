@@ -112,6 +112,7 @@ export const setupTests = async (
               type: 'Phone',
             },
           },
+          searchableFields: ['email'],
           permissions: {
             update: {
               requireAuthentication: false,

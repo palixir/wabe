@@ -313,12 +313,14 @@ export const getDefaultHooks = (): Hook<any, any>[] => [
   },
   {
     operationType: OperationType.BeforeCreate,
-    priority: 1,
+    // Need to be after email setup
+    priority: 2,
     callback: defaultSearchableFieldsBeforeCreate,
   },
   {
     operationType: OperationType.BeforeUpdate,
-    priority: 1,
+    // Need to be after email setup
+    priority: 2,
     callback: defaultSearchableFieldsBeforeUpdate,
   },
   {
