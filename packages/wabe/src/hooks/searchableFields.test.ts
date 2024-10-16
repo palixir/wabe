@@ -1,14 +1,69 @@
-import { describe, expect, it } from 'bun:test'
+import { afterAll, beforeAll, describe, expect, it } from 'bun:test'
 import {
   defaultSearchableFieldsBeforeCreate,
   defaultSearchableFieldsBeforeUpdate,
   stringExtraction,
 } from './searchableFields'
 import { HookObject } from './HookObject'
-import type { DevWabeTypes } from '../utils/helper'
+import { closeTests, setupTests, type DevWabeTypes } from '../utils/helper'
 import { OperationType } from '.'
+import type { Wabe } from '../server'
 
 describe('searchablesFields', () => {
+  let wabe: Wabe<DevWabeTypes>
+
+  beforeAll(async () => {
+    const setup = await setupTests()
+    wabe = setup.wabe
+  })
+
+  afterAll(async () => {
+    await closeTests(wabe)
+  })
+
+  it('should extract searchable fields from email (searchableFields hook should be after emails hook)', async () => {
+    await wabe.controllers.database.createObject({
+      className: 'User',
+      context: {
+        isRoot: true,
+        wabe,
+      },
+      data: {
+        authentication: {
+          emailPassword: {
+            email: 'admin@wabe.dev',
+            password: 'admin',
+          },
+        },
+      },
+      fields: [],
+    })
+
+    const res = await wabe.controllers.database.getObjects({
+      className: 'User',
+      fields: ['search'],
+      context: {
+        isRoot: true,
+        wabe,
+      },
+    })
+
+    expect(res[0].search).toEqual([
+      'a',
+      'ad',
+      'adm',
+      'admi',
+      'admin',
+      'w',
+      'wa',
+      'wab',
+      'wabe',
+      'd',
+      'de',
+      'dev',
+    ])
+  })
+
   it('should extract string correctly', () => {
     expect(stringExtraction('test')).toEqual(['t', 'te', 'tes', 'test'])
 
