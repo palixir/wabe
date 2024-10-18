@@ -13,7 +13,7 @@ const run = async () => {
         // ... Upload the file on a bucket, you can for example use the sdk of the host if exists
 
         // return the url of the file for example
-        return "http://bucket.storage/123456/logo.png";
+        return "http://bucket.storage/123456/logo.webp";
       },
     },
   });

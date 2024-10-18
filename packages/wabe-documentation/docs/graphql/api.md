@@ -350,7 +350,7 @@ new Wabe({
       // ... Upload the file on a bucket
 
       // return the url of the file for example (this url will be store in the database)
-      return "http://bucket.storage/123456/logo.png";
+      return "http://bucket.storage/123456/logo.webp";
     },
   },
 });

@@ -25,7 +25,7 @@ import Package from './Package.vue'
                 <a href="/wabe/motivations" class="bg-primary text-white px-8 py-3 rounded-lg font-medium hover:bg-secondary transition duration-150">View documentation</a>
 
                 <a href="https://github.com/palixir/wabe" class="flex items-center gap-2 bg-background-primary text-white px-8 py-3 rounded-lg font-medium hover:bg-gray-800 transition duration-150" target="_blank">
-                    <img src="/github.png" alt="GitHub" class="h-6"/>
+                    <img src="/github.webp" alt="GitHub" class="h-6"/>
 
                     Star us on GitHub
                 </a>
@@ -61,19 +61,19 @@ import Package from './Package.vue'
             <p class="mt-4 text-lg text-gray-300">Wabe offers a comprehensive set of features to power your backend.</p>
 
             <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
-                <Card href="/config/authentication/sessions" title="Authentication" description="Secure and scalable authentication for your applications." variant="feature" iconName="auth.png"/>
+                <Card href="/config/authentication/sessions" title="Authentication" description="Secure and scalable authentication for your applications." variant="feature" iconName="auth.webp"/>
 
-                <Card href="/security/index" title="Permissions" description="Granular permissions control to secure your resources." variant="feature" iconName="permissions.png"/>
+                <Card href="/security/index" title="Permissions" description="Granular permissions control to secure your resources." variant="feature" iconName="permissions.webp"/>
 
-                <Card href="/database/index" title="Database" description="A powerful, scalable database to store and manage you data." variant="feature" iconName="database.png"/>
+                <Card href="/database/index" title="Database" description="A powerful, scalable database to store and manage you data." variant="feature" iconName="database.webp"/>
 
-                <Card href="/graphql/api" title="GraphQL API" description="A flexible and powerful GraphQL API (following GraphQL Relay standard) to interact with your data." variant="feature" iconName="graphql.png"/>
+                <Card href="/graphql/api" title="GraphQL API" description="A flexible and powerful GraphQL API (following GraphQL Relay standard) to interact with your data." variant="feature" iconName="graphql.webp"/>
 
-                <Card href="/config/hooks" title="Hooks" description="Powerful hooks system to execute custom actions before or after database requests." iconName="hooks.png"/>
+                <Card href="/config/hooks" title="Hooks" description="Powerful hooks system to execute custom actions before or after database requests." iconName="hooks.webp"/>
 
-                <Card href="/email/index" title="Emails" description="Send emails with your favorite provider with very simple integration." iconName="email.png"/>
+                <Card href="/email/index" title="Emails" description="Send emails with your favorite provider with very simple integration." iconName="email.webp"/>
 
-                <Card href="/payment/index" title="Payments" description="Accept payments with Stripe or create your own payment provider adapter." iconName="payment.png"/>
+                <Card href="/payment/index" title="Payments" description="Accept payments with Stripe or create your own payment provider adapter." iconName="payment.webp"/>
             </div>
         </div>
     </section>
@@ -114,7 +114,11 @@ import Package from './Package.vue'
 
     <!-- Footer -->
     <footer class="text-gray-400">
-        <div class="flex justify-center items-center p-8">
+        <div class="flex flex-col justify-center items-center p-8">
+            <div class="text-center text-gray-400">
+                <p>Wabe is powered by <strong><a href="https://bun.sh">Bun</a></strong> !</p>
+            </div>
+
             <div class="text-center text-gray-500 text-sm">
                 <p>&copy; 2024 Wabe. All rights reserved.</p>
             </div>

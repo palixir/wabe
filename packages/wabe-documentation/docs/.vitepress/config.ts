@@ -2,10 +2,28 @@ import { defineConfig } from 'vitepress'
 
 export default defineConfig({
   title: 'Wabe',
+  description:
+    'Wabe simplifies backend development. Using easily essential features like Authentication, Payment, Email, Database, etc. You can build and scale applications effortlessly.',
   appearance: 'force-dark',
   head: [
     ['link', { rel: 'icon', href: 'favicon.ico' }],
+    ['link', { rel: 'canonical', href: 'https://wabe.dev' }],
     ['script', { src: '/_vercel/insights/script.js', defer: 'true' }],
+    [
+      'meta',
+      {
+        property: 'og:title',
+        content: 'Wabe - Your backend in minutes not days for Node.js / Bun',
+      },
+    ],
+    [
+      'meta',
+      {
+        property: 'og:description',
+        content:
+          'Wabe simplifies backend development. Using easily essential features like Authentication, Payment, Email, Database, etc. You can build and scale applications effortlessly.',
+      },
+    ],
     [
       'meta',
       {
@@ -31,7 +49,7 @@ export default defineConfig({
       'meta',
       {
         property: 'twitter:image',
-        content: 'https://wabe.dev/cover.png',
+        content: 'https://wabe.dev/cover.webp',
       },
     ],
     [
@@ -160,6 +178,7 @@ export default defineConfig({
         link: 'https://github.com/palixir/wabe',
         ariaLabel: 'GitHub',
       },
+      { icon: 'twitter', link: 'https://x.com/coratgerl', ariaLabel: 'X' },
     ],
   },
 })

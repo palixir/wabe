@@ -9,107 +9,117 @@
 
 <url>
   <loc>https://wabe.dev/</loc>
-  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <lastmod>2024-10-18T13:57:12+00:00</lastmod>
   <priority>1.00</priority>
 </url>
 <url>
   <loc>https://wabe.dev/wabe/motivations.html</loc>
-  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <lastmod>2024-10-18T13:57:12+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://wabe.dev/wabe/start.html</loc>
-  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <lastmod>2024-10-18T13:57:13+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
   <loc>https://wabe.dev/wabe/concepts.html</loc>
-  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <lastmod>2024-10-18T13:57:13+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
   <loc>https://wabe.dev/config/schema/classes.html</loc>
-  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <lastmod>2024-10-18T13:57:14+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
   <loc>https://wabe.dev/config/schema/resolvers.html</loc>
-  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <lastmod>2024-10-18T13:57:14+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
   <loc>https://wabe.dev/config/schema/enums.html</loc>
-  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <lastmod>2024-10-18T13:57:14+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
   <loc>https://wabe.dev/config/schema/scalars.html</loc>
-  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <lastmod>2024-10-18T13:57:14+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
   <loc>https://wabe.dev/config/files.html</loc>
-  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <lastmod>2024-10-18T13:57:14+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
   <loc>https://wabe.dev/config/authentication/interact.html</loc>
-  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <lastmod>2024-10-18T13:57:14+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
   <loc>https://wabe.dev/config/authentication/sessions.html</loc>
-  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <lastmod>2024-10-18T13:57:14+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
   <loc>https://wabe.dev/config/authentication/roles.html</loc>
-  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <lastmod>2024-10-18T13:57:15+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
   <loc>https://wabe.dev/config/authentication/oauth.html</loc>
-  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <lastmod>2024-10-18T13:57:15+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
   <loc>https://wabe.dev/config/authentication/customMethods.html</loc>
-  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <lastmod>2024-10-18T13:57:15+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
   <loc>https://wabe.dev/config/hooks.html</loc>
-  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <lastmod>2024-10-18T13:57:15+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
   <loc>https://wabe.dev/config/routes.html</loc>
-  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <lastmod>2024-10-18T13:57:15+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
   <loc>https://wabe.dev/config/codegen.html</loc>
-  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <lastmod>2024-10-18T13:57:15+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
   <loc>https://wabe.dev/config/rootKey.html</loc>
-  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <lastmod>2024-10-18T13:57:15+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
   <loc>https://wabe.dev/graphql/api.html</loc>
-  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <lastmod>2024-10-18T13:57:16+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
   <loc>https://wabe.dev/database/index.html</loc>
-  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <lastmod>2024-10-18T13:57:16+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
   <loc>https://wabe.dev/security/index.html</loc>
-  <lastmod>2024-09-06T12:32:39+00:00</lastmod>
+  <lastmod>2024-10-18T13:57:16+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://wabe.dev/email/index.html</loc>
+  <lastmod>2024-10-18T13:57:16+00:00</lastmod>
+  <priority>0.64</priority>
+</url>
+<url>
+  <loc>https://wabe.dev/payment/index.html</loc>
+  <lastmod>2024-10-18T13:57:16+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 

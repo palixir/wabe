@@ -1,5 +1,5 @@
 ---
-title: Wabe - Your backend in minutes not days
+title: Wabe - Your backend in minutes not days for Node.js / Bun
 layout: page
 sidebar: false
 ---

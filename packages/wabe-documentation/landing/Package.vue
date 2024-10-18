@@ -22,7 +22,7 @@
 		 	<button @click="copyToClipboard" class="px-3 py-1 text-primary rounded">
 				<div class="flex items-center gap-4 p-2">
 					<span :class="[isCopied ? '': 'opacity-0']">Copied !</span>
-					<img src="/copy.png" alt="Copy to clipboard" class="h-6">
+					<img src="/copy.webp" alt="Copy to clipboard" class="h-6">
 				</div>
 			</button>
 		</div>
@@ -39,30 +39,30 @@ const selectedTab = ref('npm')
 let isCopied = ref(false)
 
 const installCommand = computed(() => {
-	switch (selectedTab.value) {
-		case 'npm':
-			return 'npm install wabe'
-		case 'yarn':
-			return 'yarn add wabe'
-		case 'pnpm':
-			return 'pnpm add wabe'
-		case 'bun':
-			return 'bun add wabe'
-		default:
-			return ''
-	}
+  switch (selectedTab.value) {
+    case 'npm':
+      return 'npm install wabe'
+    case 'yarn':
+      return 'yarn add wabe'
+    case 'pnpm':
+      return 'pnpm add wabe'
+    case 'bun':
+      return 'bun add wabe'
+    default:
+      return ''
+  }
 })
 
 const copyToClipboard = async () => {
-	try {
-		await navigator.clipboard.writeText(installCommand.value)
-		isCopied.value = true
+  try {
+    await navigator.clipboard.writeText(installCommand.value)
+    isCopied.value = true
 
-		setTimeout(() => {
-			isCopied.value = false
-		}, 2000)
-	} catch (err) {
-		console.error('Copy failed:', err)
-	}
+    setTimeout(() => {
+      isCopied.value = false
+    }, 2000)
+  } catch (err) {
+    console.error('Copy failed:', err)
+  }
 }
 </script>
