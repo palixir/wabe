@@ -3,7 +3,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: 'Wabe',
   description:
-    'Wabe simplifies backend development. Using easily essential features like Authentication, Payment, Email, Database, etc. You can build and scale applications effortlessly.',
+    'Wabe simplifies backend development with essential features like Authentication, Payments, Email, and Database, enabling effortless app building and scaling.',
   appearance: 'force-dark',
   head: [
     ['link', { rel: 'icon', href: 'favicon.ico' }],
@@ -21,7 +21,7 @@ export default defineConfig({
       {
         property: 'og:description',
         content:
-          'Wabe simplifies backend development. Using easily essential features like Authentication, Payment, Email, Database, etc. You can build and scale applications effortlessly.',
+          'Wabe simplifies backend development with essential features like Authentication, Payments, Email, and Database, enabling effortless app building and scaling.',
       },
     ],
     [

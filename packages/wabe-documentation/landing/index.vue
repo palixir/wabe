@@ -1,8 +1,39 @@
 <script setup lang="ts">
 import './tailwind.css'
 
+import { onMounted } from 'vue'
+
 import Card from './Card.vue'
 import Package from './Package.vue'
+
+onMounted(() => {
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Wabe',
+    url: 'https://wabe.dev',
+    description:
+      'Wabe simplifies backend development. It offers essential features like Authentication, Permissions, Database Management, Hooks, and more.',
+    author: {
+      '@type': 'Organization',
+      name: 'Wabe',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'Wabe',
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': 'https://wabe.dev',
+    },
+  }
+
+  const script = document.createElement('script')
+  script.type = 'application/ld+json'
+  script.text = JSON.stringify(structuredData)
+
+  document.head.appendChild(script)
+})
 </script>
 
 
@@ -24,7 +55,7 @@ import Package from './Package.vue'
             <div class="mt-8 flex justify-center space-x-4">
                 <a href="/wabe/motivations" class="bg-primary text-white px-8 py-3 rounded-lg font-medium hover:bg-secondary transition duration-150">View documentation</a>
 
-                <a href="https://github.com/palixir/wabe" class="flex items-center gap-2 bg-background-primary text-white px-8 py-3 rounded-lg font-medium hover:bg-gray-800 transition duration-150" target="_blank">
+                <a href="https://github.com/palixir/wabe" rel="noopener noreferrer" class="flex items-center gap-2 bg-background-primary text-white px-8 py-3 rounded-lg font-medium hover:bg-gray-800 transition duration-150" target="_blank">
                     <img src="/github.webp" alt="GitHub" class="h-6"/>
 
                     Star us on GitHub
@@ -36,7 +67,8 @@ import Package from './Package.vue'
     <!-- Key Goals Section with Classic Dark Background -->
     <section id="goals" class="py-20">
         <div class="max-w-5xl mx-auto text-center">
-            <h2 class="text-4xl font-extrabold text-gray-100">Wabe is built with strong principles in mind.</h2>
+            <h2 class="text-4xl font-extrabold text-gray-100">Our philosophy</h2>
+            <p class="mt-4 text-lg text-gray-300">Wabe is built with strong principles in mind. Because quality is always better than quantity</p>
 
             <div class="mt-12 grid grid-cols-1 md:grid-cols-4 gap-8">
                 <!-- Goal 1: Performance -->
@@ -58,7 +90,7 @@ import Package from './Package.vue'
     <section id="features" class="py-20">
         <div class="max-w-5xl mx-auto text-center">
             <h2 class="text-4xl font-extrabold text-gray-100">Features</h2>
-            <p class="mt-4 text-lg text-gray-300">Wabe offers a comprehensive set of features to power your backend.</p>
+            <p class="mt-4 text-lg text-gray-300">Unlock the power to produce like a team of hundreds and launch your product in days. Get access to a scalable, secure backend solution built for rapid growth and success.</p>
 
             <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
                 <Card href="/config/authentication/sessions" title="Authentication" description="Secure and scalable authentication for your applications." variant="feature" iconName="auth.webp"/>
@@ -83,7 +115,7 @@ import Package from './Package.vue'
     <section id="future" class="py-20">
         <div class="max-w-3xl mx-auto text-center">
             <h2 class="text-4xl font-extrabold text-gray-100">Roadmap</h2>
-            <p class="mt-4 text-lg text-gray-300">We're working hard to build the ultimate tool, and exciting about the future of Wabe 🤩</p>
+            <p class="mt-4 text-lg text-gray-300">Today, we've achieved several of our key milestones, but this is just the beginning of our journey. The future holds incredible potential, and here are some of our main goals moving forward ! 🚀</p>
 
             <div class="mt-12 flex gap-8">
                 <Card title="Fully featured Dashboard" description="Visualize and manage your data with a powerful new dashboard." variant="feature" isComingSoon/>
@@ -106,7 +138,7 @@ import Package from './Package.vue'
                 </div>
 
                 <div class="mt-8">
-                    <a href="https://github.com/palixir/wabe" class="bg-primary text-white px-8 py-3 rounded-lg font-medium hover:bg-blue-600 transition duration-150" target="_blank">View on GitHub</a>
+                    <a href="https://github.com/palixir/wabe"  rel="noopener noreferrer" class="bg-primary text-white px-8 py-3 rounded-lg font-medium hover:bg-blue-600 transition duration-150" target="_blank">View on GitHub</a>
                 </div>
             </div>
         </div>
