@@ -44,7 +44,7 @@ describe('sendtpcodeResolver', () => {
     wabe.config.email = {
       ...wabe.config.email,
       htmlTemplates: {
-        sendConfirmationCode: () => 'toto',
+        sendOTPCode: () => 'toto',
       },
     }
 

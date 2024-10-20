@@ -38,12 +38,15 @@ export const sendOtpCodeResolver = async (
     .update(`${secret}:${userId}`)
     .digest('hex')
 
+  // 5 minutes
+  totp.options.step = 60 * 5
+
   const otp = totp.generate(hashedSecret)
 
   const mainEmail = context.wabe.config.email?.mainEmail || 'noreply@wabe.com'
 
   const template =
-    context.wabe.config.email?.htmlTemplates?.sendConfirmationCode(otp) ||
+    context.wabe.config.email?.htmlTemplates?.sendOTPCode(otp) ||
     sendOtpCodeTemplate(otp)
 
   await emailController.send({

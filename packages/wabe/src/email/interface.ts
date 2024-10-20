@@ -1,6 +1,6 @@
 import type React from 'react'
 
-export type Templates = 'sendConfirmationCode'
+export type Templates = 'sendOTPCode'
 
 export interface EmailSendOptions {
   from: string

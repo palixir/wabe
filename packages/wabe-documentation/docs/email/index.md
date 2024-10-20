@@ -14,7 +14,7 @@ sendEmail(input: SendEmailInput!): Boolean
 
 ## Email configuration
 
-You can configure the email adapter (see below for the available adapters) and the main email to use for emails sent by Wabe (for example your support email). You can also provided your own html templates that Wabe can use to send emails provided by Wabe like `sendConfirmationCode` (with mutation sendConfirmationCode). If you don't provide your own templates, Wabe will use the default ones.
+You can configure the email adapter (see below for the available adapters) and the main email to use for emails sent by Wabe (for example your support email). You can also provided your own html templates that Wabe can use to send emails provided by Wabe like `sendOTPCode` (with mutation sendOTPCode). If you don't provide your own templates, Wabe will use the default ones.
 
 ```ts
 import { Wabe } from "wabe";
@@ -27,7 +27,7 @@ const run = async () => {
       adapter: new ResendAdapter("API_KEY"),
       mainEmail: 'support@yourcompany.com',
       htmlTemplates: {
-        sendConfirmationCode: (payload: any) =>
+        sendOTPCode: (payload: any) =>
           `<h1>Hello ${payload.name}</h1><p>You have a new confirmation code: ${payload.code}</p>`,
       }
     },
