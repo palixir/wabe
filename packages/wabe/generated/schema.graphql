@@ -606,6 +606,102 @@ input PaymentRelationInput {
   createAndAdd: [PaymentCreateFieldsInput!]
 }
 
+type _InternalConfig {
+  id: ID!
+  configKey: String!
+  configValue: String!
+  description: String
+  acl: _InternalConfigACLObject
+  createdAt: Date
+  updatedAt: Date
+  search: [String]
+}
+
+type _InternalConfigACLObject {
+  users: [_InternalConfigACLObjectUsersACL]
+  roles: [_InternalConfigACLObjectRolesACL]
+}
+
+type _InternalConfigACLObjectUsersACL {
+  userId: String!
+  read: Boolean!
+  write: Boolean!
+}
+
+type _InternalConfigACLObjectRolesACL {
+  roleId: String!
+  read: Boolean!
+  write: Boolean!
+}
+
+input _InternalConfigInput {
+  configKey: String!
+  configValue: String!
+  description: String
+  acl: _InternalConfigACLObjectInput
+  createdAt: Date
+  updatedAt: Date
+  search: [String]
+}
+
+input _InternalConfigACLObjectInput {
+  users: [_InternalConfigACLObjectUsersACLInput]
+  roles: [_InternalConfigACLObjectRolesACLInput]
+}
+
+input _InternalConfigACLObjectUsersACLInput {
+  userId: String!
+  read: Boolean!
+  write: Boolean!
+}
+
+input _InternalConfigACLObjectRolesACLInput {
+  roleId: String!
+  read: Boolean!
+  write: Boolean!
+}
+
+"""Input to link an object to a pointer _InternalConfig"""
+input _InternalConfigPointerInput {
+  unlink: Boolean
+  link: ID
+  createAndLink: _InternalConfigCreateFieldsInput
+}
+
+input _InternalConfigCreateFieldsInput {
+  configKey: String
+  configValue: String
+  description: String
+  acl: _InternalConfigACLObjectCreateFieldsInput
+  createdAt: Date
+  updatedAt: Date
+  search: [String]
+}
+
+input _InternalConfigACLObjectCreateFieldsInput {
+  users: [_InternalConfigACLObjectUsersACLCreateFieldsInput]
+  roles: [_InternalConfigACLObjectRolesACLCreateFieldsInput]
+}
+
+input _InternalConfigACLObjectUsersACLCreateFieldsInput {
+  userId: String
+  read: Boolean
+  write: Boolean
+}
+
+input _InternalConfigACLObjectRolesACLCreateFieldsInput {
+  roleId: String
+  read: Boolean
+  write: Boolean
+}
+
+"""Input to add a relation to the class _InternalConfig"""
+input _InternalConfigRelationInput {
+  add: [ID!]
+  remove: [ID!]
+  createAndAdd: [_InternalConfigCreateFieldsInput!]
+}
+
 type Query {
   """User class"""
   user(id: ID): User
@@ -620,6 +716,8 @@ type Query {
   roles(where: RoleWhereInput, offset: Int, first: Int, order: [RoleOrder!]): RoleConnection!
   payment(id: ID): Payment
   payments(where: PaymentWhereInput, offset: Int, first: Int, order: [PaymentOrder!]): PaymentConnection!
+  _internalConfig(id: ID): _InternalConfig
+  _internalConfigs(where: _InternalConfigWhereInput, offset: Int, first: Int, order: [_InternalConfigOrder!]): _InternalConfigConnection!
 
   """Hello world description"""
   helloWorld(name: String!): String
@@ -1036,6 +1134,68 @@ enum PaymentOrder {
   search_DESC
 }
 
+type _InternalConfigConnection {
+  totalCount: Int
+  edges: [_InternalConfigEdge]
+}
+
+type _InternalConfigEdge {
+  node: _InternalConfig!
+}
+
+input _InternalConfigWhereInput {
+  id: IdWhereInput
+  configKey: StringWhereInput
+  configValue: StringWhereInput
+  description: StringWhereInput
+  acl: _InternalConfigACLObjectWhereInput
+  createdAt: DateWhereInput
+  updatedAt: DateWhereInput
+  search: SearchWhereInput
+  OR: [_InternalConfigWhereInput]
+  AND: [_InternalConfigWhereInput]
+}
+
+input _InternalConfigACLObjectWhereInput {
+  users: [_InternalConfigACLObjectUsersACLWhereInput]
+  roles: [_InternalConfigACLObjectRolesACLWhereInput]
+  OR: [_InternalConfigACLObjectWhereInput]
+  AND: [_InternalConfigACLObjectWhereInput]
+}
+
+input _InternalConfigACLObjectUsersACLWhereInput {
+  userId: StringWhereInput
+  read: BooleanWhereInput
+  write: BooleanWhereInput
+  OR: [_InternalConfigACLObjectUsersACLWhereInput]
+  AND: [_InternalConfigACLObjectUsersACLWhereInput]
+}
+
+input _InternalConfigACLObjectRolesACLWhereInput {
+  roleId: StringWhereInput
+  read: BooleanWhereInput
+  write: BooleanWhereInput
+  OR: [_InternalConfigACLObjectRolesACLWhereInput]
+  AND: [_InternalConfigACLObjectRolesACLWhereInput]
+}
+
+enum _InternalConfigOrder {
+  configKey_ASC
+  configKey_DESC
+  configValue_ASC
+  configValue_DESC
+  description_ASC
+  description_DESC
+  acl_ASC
+  acl_DESC
+  createdAt_ASC
+  createdAt_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  search_ASC
+  search_DESC
+}
+
 type MeOutput {
   user: User
 }
@@ -1092,6 +1252,12 @@ type Mutation {
   updatePayments(input: UpdatePaymentsInput!): PaymentConnection!
   deletePayment(input: DeletePaymentInput!): DeletePaymentPayload
   deletePayments(input: DeletePaymentsInput!): PaymentConnection!
+  create_InternalConfig(input: Create_InternalConfigInput!): Create_InternalConfigPayload
+  create_InternalConfigs(input: Create_InternalConfigsInput!): _InternalConfigConnection!
+  update_InternalConfig(input: Update_InternalConfigInput!): Update_InternalConfigPayload
+  update_InternalConfigs(input: Update_InternalConfigsInput!): _InternalConfigConnection!
+  delete_InternalConfig(input: Delete_InternalConfigInput!): Delete_InternalConfigPayload
+  delete_InternalConfigs(input: Delete_InternalConfigsInput!): _InternalConfigConnection!
   createMutation(input: CreateMutationInput!): Boolean!
   customMutation(input: CustomMutationInput!): Int
   secondCustomMutation(input: SecondCustomMutationInput!): Int
@@ -1508,6 +1674,81 @@ input DeletePaymentInput {
 input DeletePaymentsInput {
   where: PaymentWhereInput
   order: [PaymentOrder]
+}
+
+type Create_InternalConfigPayload {
+  _internalConfig: _InternalConfig
+  clientMutationId: String
+}
+
+input Create_InternalConfigInput {
+  fields: _InternalConfigCreateFieldsInput
+}
+
+input Create_InternalConfigsInput {
+  fields: [_InternalConfigCreateFieldsInput]!
+  offset: Int
+  first: Int
+  order: [_InternalConfigOrder]
+}
+
+type Update_InternalConfigPayload {
+  _internalConfig: _InternalConfig
+  clientMutationId: String
+}
+
+input Update_InternalConfigInput {
+  id: ID
+  fields: _InternalConfigUpdateFieldsInput
+}
+
+input _InternalConfigUpdateFieldsInput {
+  configKey: String
+  configValue: String
+  description: String
+  acl: _InternalConfigACLObjectUpdateFieldsInput
+  createdAt: Date
+  updatedAt: Date
+  search: [String]
+}
+
+input _InternalConfigACLObjectUpdateFieldsInput {
+  users: [_InternalConfigACLObjectUsersACLUpdateFieldsInput]
+  roles: [_InternalConfigACLObjectRolesACLUpdateFieldsInput]
+}
+
+input _InternalConfigACLObjectUsersACLUpdateFieldsInput {
+  userId: String
+  read: Boolean
+  write: Boolean
+}
+
+input _InternalConfigACLObjectRolesACLUpdateFieldsInput {
+  roleId: String
+  read: Boolean
+  write: Boolean
+}
+
+input Update_InternalConfigsInput {
+  fields: _InternalConfigUpdateFieldsInput
+  where: _InternalConfigWhereInput
+  offset: Int
+  first: Int
+  order: [_InternalConfigOrder]
+}
+
+type Delete_InternalConfigPayload {
+  _internalConfig: _InternalConfig
+  clientMutationId: String
+}
+
+input Delete_InternalConfigInput {
+  id: ID
+}
+
+input Delete_InternalConfigsInput {
+  where: _InternalConfigWhereInput
+  order: [_InternalConfigOrder]
 }
 
 input CreateMutationInput {
