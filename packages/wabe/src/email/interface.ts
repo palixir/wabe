@@ -1,5 +1,7 @@
 import type React from 'react'
 
+export type Templates = 'sendOTPCode'
+
 export interface EmailSendOptions {
   from: string
   to: Array<string>
@@ -18,6 +20,14 @@ export interface EmailAdapter {
   send(options: EmailSendOptions): Promise<string>
 }
 
+/**
+ * Configuration for the email in Wabe
+ * @property adapter The adapter to use to send emails
+ * @property mainEmail The email to use as sender for emails sent by Wabe
+ * @property templates The html templates to use for a specific email. If not provided, Wabe will use the default templates
+ */
 export interface EmailConfig {
   adapter: EmailAdapter
+  mainEmail?: string
+  htmlTemplates?: Record<Templates, (payload: any) => string>
 }

@@ -105,6 +105,10 @@ export default defineConfig({
                 link: '/config/authentication/interact',
               },
               {
+                text: 'Reset password',
+                link: '/config/authentication/resetPassword',
+              },
+              {
                 text: 'Sessions',
                 link: '/config/authentication/sessions',
               },

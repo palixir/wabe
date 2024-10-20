@@ -4,10 +4,12 @@ import type {
   AuthenticationEventsOptionsWithUserId,
   ProviderInterface,
 } from '../interface'
+import { hashPassword } from '../utils'
 
 type EmailPasswordInterface = {
   password: string
   email: string
+  otp?: string
 }
 
 export class EmailPassword
@@ -87,10 +89,7 @@ export class EmailPassword
     return {
       authenticationDataToSave: {
         email: input.email,
-        // biome-ignore lint/correctness/noConstantCondition: <explanation>
-        password: typeof Bun
-          ? await Bun.password.hash(input.password, 'argon2id')
-          : await argon2.hash(input.password),
+        password: await hashPassword(input.password),
       },
     }
   }
@@ -115,10 +114,7 @@ export class EmailPassword
     return {
       authenticationDataToSave: {
         email: input.email,
-        // biome-ignore lint/correctness/noConstantCondition: <explanation>
-        password: typeof Bun
-          ? await Bun.password.hash(input.password, 'argon2id')
-          : await argon2.hash(input.password),
+        password: await hashPassword(input.password),
       },
     }
   }

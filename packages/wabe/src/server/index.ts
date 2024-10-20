@@ -361,7 +361,7 @@ export class Wabe<T extends WabeTypes> {
     )
 
     // @ts-expect-error
-    await initializeRoles(this)
+    await Promise.all([initializeRoles(this)])
 
     this.server.listen(this.config.port, ({ port }) => {
       if (!process.env.TEST) console.log(`Server is running on port ${port}`)

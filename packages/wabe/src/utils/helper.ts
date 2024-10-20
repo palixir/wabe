@@ -10,6 +10,7 @@ import { DatabaseEnum } from '../database'
 import { Wabe } from '../server'
 import { PaymentDevAdapter } from '../payment/DevAdapter'
 import type { ClassInterface } from '../schema'
+import { EmailDevAdapter } from '../email/DevAdapter'
 
 type NotNill<T> = T extends null | undefined ? never : T
 
@@ -87,6 +88,10 @@ export const setupTests = async (
     },
     port,
     publicUrl: 'http://127.0.0.1',
+    email: {
+      adapter: new EmailDevAdapter(),
+      mainEmail: 'main.email@wabe.com',
+    },
     payment: {
       // @ts-expect-error
       adapter: new PaymentDevAdapter(),
