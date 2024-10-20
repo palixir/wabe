@@ -25,7 +25,7 @@ export const resetPasswordResolver = async (
 
   const userId = user[0].id
 
-  const secret = context.wabe.config.internalConfig?.otpSecret
+  const secret = context.wabe.config.rootKey
 
   const hashedSecret = createHash('sha256')
     .update(`${secret}:${userId}`)
