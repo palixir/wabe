@@ -40,7 +40,8 @@
     "jsonwebtoken": "9.0.2",
     "mongodb": "6.8.0",
     "wobe": "1.1.8",
-    "wobe-graphql-yoga": "1.2.5"
+    "wobe-graphql-yoga": "1.2.5",
+    "otplib": "12.0.1"
   },
   "devDependencies": {
     "@parcel/watcher": "2.3.0",

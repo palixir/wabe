@@ -1104,6 +1104,7 @@ type Mutation {
 
   """Send basic email with text and html, returns the id of the email"""
   sendEmail(input: SendEmailInput!): String
+  resetPassword(input: ResetPasswordInput!): Boolean
   signInWith(input: SignInWithInput!): SignInWithOutput
   signUpWith(input: SignUpWithInput!): SignUpWithOutput
   signOut: Boolean
@@ -1553,6 +1554,31 @@ input SendEmailInput {
   subject: String!
   text: String
   html: String
+}
+
+input ResetPasswordInput {
+  authentication: ResetPasswordAuthenticationInput
+}
+
+input ResetPasswordAuthenticationInput {
+  emailPassword: ResetPasswordAuthenticationEmailPasswordInput
+  google: ResetPasswordAuthenticationGoogleInput
+  otp: ResetPasswordAuthenticationOtpInput
+  secondaryFactor: SecondaryFactor
+}
+
+input ResetPasswordAuthenticationEmailPasswordInput {
+  email: Email!
+  password: String!
+}
+
+input ResetPasswordAuthenticationGoogleInput {
+  authorizationCode: String!
+  codeVerifier: String!
+}
+
+input ResetPasswordAuthenticationOtpInput {
+  code: String
 }
 
 type SignInWithOutput {

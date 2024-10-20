@@ -1,9 +1,11 @@
 import argon2 from 'argon2'
+import { totp, authenticator } from 'otplib'
 import type {
   AuthenticationEventsOptions,
   AuthenticationEventsOptionsWithUserId,
   ProviderInterface,
 } from '../interface'
+import { defaultResetPasswordTemplate } from './defaultResetPasswordTemplate'
 
 type EmailPasswordInterface = {
   password: string
@@ -121,5 +123,23 @@ export class EmailPassword
           : await argon2.hash(input.password),
       },
     }
+  }
+
+  async onResetPassword({
+    input,
+    context,
+  }: AuthenticationEventsOptions<EmailPasswordInterface>) {
+    const emailController = context.wabe.controllers.email
+
+    if (!emailController) throw new Error('Email adapter not found')
+
+    const otp = totp.generate(input.otp)
+
+    await emailController.send({
+      from: 'noreply@wabe.com',
+      to: [''],
+      subject: 'Reset your password',
+      html: defaultResetPasswordTemplate(input.otp),
+    })
   }
 }

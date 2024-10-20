@@ -10,6 +10,7 @@ import type { WabeConfig, WabeTypes } from '../server'
 import { Currency, PaymentMode, PaymentReccuringInterval } from '../payment'
 import { defaultMutations, defaultQueries } from './defaultResolvers'
 import type { HookObject } from '../hooks/HookObject'
+import { resetPasswordResolver } from '../authentication/resolvers/resetPasswordResolver'
 
 export type WabePrimaryTypes =
   | 'String'
@@ -365,6 +366,15 @@ export class Schema<T extends WabeTypes> {
         ...defaultMutations,
         ...(customAuthenticationConfig.length > 0
           ? {
+              resetPassword: {
+                type: 'Boolean',
+                args: {
+                  input: {
+                    authentication: authenticationInput,
+                  },
+                },
+                resolve: resetPasswordResolver,
+              },
               signInWith: {
                 type: 'Object',
                 outputObject: {
