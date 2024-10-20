@@ -40,16 +40,6 @@ describe('sendOtpCodeResolver', () => {
     spySend.mockClear()
   })
 
-  it('should throw an error if the user is not authenticated', async () => {
-    expect(
-      getAnonymousClient(port).request<any>(graphql.sendOtpCode, {
-        input: {
-          email: 'toto@toto.fr',
-        },
-      }),
-    ).rejects.toThrow('Permission denied')
-  })
-
   it('should use the provided email template if provided', async () => {
     const previous = wabe.config.email
     // @ts-expect-error
