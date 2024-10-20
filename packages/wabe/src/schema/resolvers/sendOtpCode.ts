@@ -42,11 +42,15 @@ export const sendOtpCodeResolver = async (
 
   const mainEmail = context.wabe.config.email?.mainEmail || 'noreply@wabe.com'
 
+  const template =
+    context.wabe.config.email?.htmlTemplates?.sendConfirmationCode(otp) ||
+    sendOtpCodeTemplate(otp)
+
   await emailController.send({
     from: mainEmail,
     to: [input.email],
     subject: 'Confirmation code',
-    html: sendOtpCodeTemplate(otp),
+    html: template,
   })
 
   return true

@@ -39,6 +39,43 @@ describe('sendtpcodeResolver', () => {
     spySend.mockClear()
   })
 
+  it('should use the provided email template if provided', async () => {
+    // @ts-expect-error
+    wabe.config.email = {
+      ...wabe.config.email,
+      htmlTemplates: {
+        sendConfirmationCode: () => 'toto',
+      },
+    }
+
+    await client.request<any>(graphql.createUser, {
+      input: {
+        fields: {
+          authentication: {
+            emailPassword: {
+              email: 'tata@toto.fr',
+              password: 'totototo',
+            },
+          },
+        },
+      },
+    })
+
+    await client.request<any>(graphql.sendOtpCode, {
+      input: {
+        email: 'tata@toto.fr',
+      },
+    })
+
+    expect(spySend).toHaveBeenCalledTimes(1)
+    expect(spySend).toHaveBeenCalledWith({
+      from: 'main.email@wabe.com',
+      to: ['tata@toto.fr'],
+      subject: 'Confirmation code',
+      html: 'toto',
+    })
+  })
+
   it("should send an OTP code to the user's email", async () => {
     await client.request<any>(graphql.createUser, {
       input: {
