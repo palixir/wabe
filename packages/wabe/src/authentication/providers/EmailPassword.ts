@@ -7,10 +7,12 @@ import type {
   ProviderInterface,
 } from '../interface'
 import { defaultResetPasswordTemplate } from './defaultResetPasswordTemplate'
+import { hashPassword } from '../utils'
 
 type EmailPasswordInterface = {
   password: string
   email: string
+  otp?: string
 }
 
 export class EmailPassword
@@ -90,10 +92,7 @@ export class EmailPassword
     return {
       authenticationDataToSave: {
         email: input.email,
-        // biome-ignore lint/correctness/noConstantCondition: <explanation>
-        password: typeof Bun
-          ? await Bun.password.hash(input.password, 'argon2id')
-          : await argon2.hash(input.password),
+        password: await hashPassword(input.password),
       },
     }
   }
@@ -118,57 +117,8 @@ export class EmailPassword
     return {
       authenticationDataToSave: {
         email: input.email,
-        // biome-ignore lint/correctness/noConstantCondition: <explanation>
-        password: typeof Bun
-          ? await Bun.password.hash(input.password, 'argon2id')
-          : await argon2.hash(input.password),
+        password: await hashPassword(input.password),
       },
     }
-  }
-
-  async onResetPassword({
-    input,
-    context,
-  }: AuthenticationEventsOptions<EmailPasswordInterface>) {
-    const emailController = context.wabe.controllers.email
-
-    if (!emailController) throw new Error('Email adapter not found')
-
-    const email = input.email
-
-    const user = await context.wabe.controllers.database.getObjects({
-      className: 'User',
-      where: {
-        authentication: {
-          equalTo: {
-            emailPassword: {
-              email,
-            },
-          },
-        },
-      },
-      fields: ['id'],
-      first: 1,
-      context,
-    })
-
-    if (user.length === 0) throw new Error('User not found')
-
-    const userId = user[0].id
-
-    const secret = context.wabe.config.internalConfig.otpSecret
-
-    const hashedSecret = createHash('sha256')
-      .update(`${secret}:${userId}`)
-      .digest('hex')
-
-    const otp = totp.generate(hashedSecret)
-
-    await emailController.send({
-      from: 'noreply@wabe.com',
-      to: [''],
-      subject: 'Reset your password',
-      html: defaultResetPasswordTemplate(otp),
-    })
   }
 }

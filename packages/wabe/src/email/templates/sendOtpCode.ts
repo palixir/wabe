@@ -1,4 +1,4 @@
-export const defaultResetPasswordTemplate = (otp: string) => `
+export const sendOtpCodeTemplate = (otp: string) => `
   <!DOCTYPE html>
   <html lang="en">
 
@@ -97,16 +97,15 @@ export const defaultResetPasswordTemplate = (otp: string) => `
       <div class="email-container">
           <!-- Email Header -->
           <div class="header">
-              <h1>Reset Your Password</h1>
+              <h1>Confirmation code</h1>
           </div>
 
           <!-- Email Content -->
           <div class="content">
               <p>Hello,</p>
-              <p>We received a request to reset your password. Please use the OTP code below to proceed with resetting your
-                  password:</p>
+              <p>Here is your confirmation code. Please use the OTP code below to proceed the action:</p>
               <p class="otp-code">${otp}</p>
-              <p>If you did not request a password reset, please ignore this email.</p>
+              <p>If you did not request this code, please ignore this email.</p>
               <p>Thank you</p>
           </div>
 

@@ -1262,6 +1262,12 @@ type Mutation {
   customMutation(input: CustomMutationInput!): Int
   secondCustomMutation(input: SecondCustomMutationInput!): Int
 
+  """Mutation to reset the password of the user"""
+  resetPassword(input: ResetPasswordInput!): Boolean
+
+  """Send an OTP code by email to the user"""
+  sendOtpCode(input: SendOtpCodeInput!): Boolean
+
   """
   Create a payment with the payment provider. Returns the url to redirect the user to pay
   """
@@ -1270,7 +1276,6 @@ type Mutation {
 
   """Send basic email with text and html, returns the id of the email"""
   sendEmail(input: SendEmailInput!): String
-  resetPassword(input: ResetPasswordInput!): Boolean
   signInWith(input: SignInWithInput!): SignInWithOutput
   signUpWith(input: SignUpWithInput!): SignUpWithOutput
   signOut: Boolean
@@ -1769,6 +1774,17 @@ input SecondCustomMutationSumInput {
   b: Int!
 }
 
+input ResetPasswordInput {
+  password: String!
+  email: Email!
+  otp: String!
+  provider: AuthenticationProvider!
+}
+
+input SendOtpCodeInput {
+  email: Email!
+}
+
 input MakePaymentInput {
   customerEmail: Email
   paymentMode: PaymentMode!
@@ -1795,31 +1811,6 @@ input SendEmailInput {
   subject: String!
   text: String
   html: String
-}
-
-input ResetPasswordInput {
-  authentication: ResetPasswordAuthenticationInput
-}
-
-input ResetPasswordAuthenticationInput {
-  emailPassword: ResetPasswordAuthenticationEmailPasswordInput
-  google: ResetPasswordAuthenticationGoogleInput
-  otp: ResetPasswordAuthenticationOtpInput
-  secondaryFactor: SecondaryFactor
-}
-
-input ResetPasswordAuthenticationEmailPasswordInput {
-  email: Email!
-  password: String!
-}
-
-input ResetPasswordAuthenticationGoogleInput {
-  authorizationCode: String!
-  codeVerifier: String!
-}
-
-input ResetPasswordAuthenticationOtpInput {
-  code: String
 }
 
 type SignInWithOutput {

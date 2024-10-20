@@ -81,7 +81,6 @@ export class Wabe<T extends WabeTypes> {
     payment,
     routes,
     publicUrl,
-    internalConfig,
   }: WabeConfig<T>) {
     this.config = {
       port,
@@ -102,7 +101,7 @@ export class Wabe<T extends WabeTypes> {
       email,
       payment,
       routes,
-      internalConfig,
+      internalConfig: { otpSecret: '' },
     }
 
     this.server = new Wobe<WobeCustomContext<T>>().get('/health', (context) => {

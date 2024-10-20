@@ -39,7 +39,6 @@ export type ProviderInterface<T = any> = {
   onUpdateAuthenticationData?: (
     options: AuthenticationEventsOptionsWithUserId<T>,
   ) => Promise<{ authenticationDataToSave: any }>
-  onResetPassword?: (options: AuthenticationEventsOptions<T>) => Promise<void>
 }
 
 export type SecondaryProviderInterface<T = any> = {

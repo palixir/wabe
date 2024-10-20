@@ -366,15 +366,6 @@ export class Schema<T extends WabeTypes> {
         ...defaultMutations,
         ...(customAuthenticationConfig.length > 0
           ? {
-              resetPassword: {
-                type: 'Boolean',
-                args: {
-                  input: {
-                    authentication: authenticationInput,
-                  },
-                },
-                resolve: resetPasswordResolver,
-              },
               signInWith: {
                 type: 'Object',
                 outputObject: {

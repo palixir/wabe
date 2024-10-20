@@ -4,6 +4,8 @@ import { makePaymentResolver } from './resolvers/makePayment'
 import { getInvoicesResolver } from './resolvers/getInvoices'
 import { meResolver } from './resolvers/meResolver'
 import { sendEmailResolver } from './resolvers/sendEmail'
+import { resetPasswordResolver } from './resolvers/resetPassword'
+import { sendOtpCodeResolver } from './resolvers/sendOtpCode'
 
 export const defaultQueries: {
   [key: string]: QueryResolver<any>
@@ -72,6 +74,44 @@ export const defaultQueries: {
 export const defaultMutations: {
   [key: string]: MutationResolver<any>
 } = {
+  resetPassword: {
+    type: 'Boolean',
+    description: 'Mutation to reset the password of the user',
+    args: {
+      input: {
+        password: {
+          type: 'String',
+          required: true,
+        },
+        email: {
+          type: 'Email',
+          required: true,
+        },
+        otp: {
+          type: 'String',
+          required: true,
+        },
+        provider: {
+          type: 'AuthenticationProvider',
+          required: true,
+        },
+      },
+    },
+    resolve: resetPasswordResolver,
+  },
+  sendOtpCode: {
+    type: 'Boolean',
+    description: 'Send an OTP code by email to the user',
+    args: {
+      input: {
+        email: {
+          type: 'Email',
+          required: true,
+        },
+      },
+    },
+    resolve: sendOtpCodeResolver,
+  },
   makePayment: {
     type: 'String',
     description:
