@@ -9,8 +9,6 @@ export const sendOtpCodeResolver = async (
   { input }: MutationSendOtpCodeArgs,
   context: WabeContext<DevWabeTypes>,
 ) => {
-  if (!context.user && !context.isRoot) throw new Error('Permission denied')
-
   const emailController = context.wabe.controllers.email
 
   if (!emailController) throw new Error('Email adapter not defined')
