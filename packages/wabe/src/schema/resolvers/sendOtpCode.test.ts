@@ -14,7 +14,6 @@ import {
   setupTests,
   getGraphqlClient,
   closeTests,
-  getAnonymousClient,
 } from '../../utils/helper'
 import { EmailDevAdapter } from '../../email/DevAdapter'
 
