@@ -21,6 +21,9 @@ import type { EmailConfig } from '../email'
 import { EmailController } from '../email/EmailController'
 import type { PaymentConfig } from '../payment/interface'
 import { PaymentController } from '../payment/PaymentController'
+import { initializeInternalConfig } from './initializeInternalConfig'
+
+type InternalConfigKey = 'otpSecret'
 
 export interface WabeConfig<T extends WabeTypes> {
   port: number
@@ -40,6 +43,7 @@ export interface WabeConfig<T extends WabeTypes> {
   email?: EmailConfig
   payment?: PaymentConfig
   file?: FileConfig
+  internalConfig: Record<InternalConfigKey, string>
 }
 
 export type WabeTypes = {
@@ -77,6 +81,7 @@ export class Wabe<T extends WabeTypes> {
     payment,
     routes,
     publicUrl,
+    internalConfig,
   }: WabeConfig<T>) {
     this.config = {
       port,
@@ -97,6 +102,7 @@ export class Wabe<T extends WabeTypes> {
       email,
       payment,
       routes,
+      internalConfig,
     }
 
     this.server = new Wobe<WobeCustomContext<T>>().get('/health', (context) => {
@@ -361,7 +367,7 @@ export class Wabe<T extends WabeTypes> {
     )
 
     // @ts-expect-error
-    await initializeRoles(this)
+    await Promise.all([initializeRoles(this), initializeInternalConfig(this)])
 
     this.server.listen(this.config.port, ({ port }) => {
       if (!process.env.TEST) console.log(`Server is running on port ${port}`)

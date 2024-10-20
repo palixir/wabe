@@ -1,5 +1,6 @@
 import argon2 from 'argon2'
-import { totp, authenticator } from 'otplib'
+import { createHash } from 'node:crypto'
+import { totp } from 'otplib'
 import type {
   AuthenticationEventsOptions,
   AuthenticationEventsOptionsWithUserId,
@@ -133,13 +134,41 @@ export class EmailPassword
 
     if (!emailController) throw new Error('Email adapter not found')
 
-    const otp = totp.generate(input.otp)
+    const email = input.email
+
+    const user = await context.wabe.controllers.database.getObjects({
+      className: 'User',
+      where: {
+        authentication: {
+          equalTo: {
+            emailPassword: {
+              email,
+            },
+          },
+        },
+      },
+      fields: ['id'],
+      first: 1,
+      context,
+    })
+
+    if (user.length === 0) throw new Error('User not found')
+
+    const userId = user[0].id
+
+    const secret = context.wabe.config.internalConfig.otpSecret
+
+    const hashedSecret = createHash('sha256')
+      .update(`${secret}:${userId}`)
+      .digest('hex')
+
+    const otp = totp.generate(hashedSecret)
 
     await emailController.send({
       from: 'noreply@wabe.com',
       to: [''],
       subject: 'Reset your password',
-      html: defaultResetPasswordTemplate(input.otp),
+      html: defaultResetPasswordTemplate(otp),
     })
   }
 }
