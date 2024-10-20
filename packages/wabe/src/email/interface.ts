@@ -18,6 +18,12 @@ export interface EmailAdapter {
   send(options: EmailSendOptions): Promise<string>
 }
 
+/**
+ * Configuration for the email in Wabe
+ * @property adapter The adapter to use to send emails
+ * @property mainEmail The email to use as sender for emails sent by Wabe
+ */
 export interface EmailConfig {
   adapter: EmailAdapter
+  mainEmail?: string
 }

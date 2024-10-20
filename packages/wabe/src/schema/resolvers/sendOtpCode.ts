@@ -40,8 +40,10 @@ export const sendOtpCodeResolver = async (
 
   const otp = totp.generate(hashedSecret)
 
+  const mainEmail = context.wabe.config.email?.mainEmail || 'noreply@wabe.com'
+
   await emailController.send({
-    from: 'noreply@wabe.com',
+    from: mainEmail,
     to: [input.email],
     subject: 'Confirmation code',
     html: sendOtpCodeTemplate(otp),
