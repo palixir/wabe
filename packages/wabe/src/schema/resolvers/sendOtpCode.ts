@@ -1,9 +1,8 @@
-import { createHash } from 'node:crypto'
-import { totp } from 'otplib'
 import type { MutationSendOtpCodeArgs } from '../../../generated/wabe'
 import type { WabeContext } from '../../server/interface'
 import type { DevWabeTypes } from '../../utils/helper'
 import { sendOtpCodeTemplate } from '../../email/templates/sendOtpCode'
+import { OTP } from '../../authentication/OTP'
 
 export const sendOtpCodeResolver = async (
   _: any,
@@ -32,16 +31,9 @@ export const sendOtpCodeResolver = async (
 
   const userId = user[0].id
 
-  const secret = context.wabe.config.rootKey
+  const otpClass = new OTP(context.wabe.config.rootKey)
 
-  const hashedSecret = createHash('sha256')
-    .update(`${secret}:${userId}`)
-    .digest('hex')
-
-  // 5 minutes
-  totp.options.step = 60 * 5
-
-  const otp = totp.generate(hashedSecret)
+  const otp = otpClass.generate(userId)
 
   const mainEmail = context.wabe.config.email?.mainEmail || 'noreply@wabe.com'
 

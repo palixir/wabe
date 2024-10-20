@@ -17,7 +17,7 @@ import {
 } from '../../utils/helper'
 import { EmailDevAdapter } from '../../email/DevAdapter'
 
-describe('sendtpcodeResolver', () => {
+describe('sendOtpCodeResolver', () => {
   let wabe: Wabe<DevWabeTypes>
   let port: number
   let client: GraphQLClient
@@ -40,6 +40,7 @@ describe('sendtpcodeResolver', () => {
   })
 
   it('should use the provided email template if provided', async () => {
+    const previous = wabe.config.email
     // @ts-expect-error
     wabe.config.email = {
       ...wabe.config.email,
@@ -74,6 +75,8 @@ describe('sendtpcodeResolver', () => {
       subject: 'Confirmation code',
       html: 'toto',
     })
+
+    wabe.config.email = previous
   })
 
   it("should send an OTP code to the user's email", async () => {

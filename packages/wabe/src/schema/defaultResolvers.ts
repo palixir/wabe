@@ -180,7 +180,6 @@ export const defaultMutations: {
     },
     resolve: cancelSubscriptionResolver,
   },
-
   sendEmail: {
     type: 'String',
     description:

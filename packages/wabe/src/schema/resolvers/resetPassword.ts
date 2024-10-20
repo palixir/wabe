@@ -1,6 +1,5 @@
-import { createHash } from 'node:crypto'
-import { totp } from 'otplib'
 import type { MutationResetPasswordArgs } from '../../../generated/wabe'
+import { OTP } from '../../authentication/OTP'
 import type { WabeContext } from '../../server/interface'
 import type { DevWabeTypes } from '../../utils/helper'
 
@@ -25,15 +24,10 @@ export const resetPasswordResolver = async (
 
   const userId = user[0].id
 
-  const secret = context.wabe.config.rootKey
-
-  const hashedSecret = createHash('sha256')
-    .update(`${secret}:${userId}`)
-    .digest('hex')
+  const otpClass = new OTP(context.wabe.config.rootKey)
 
   if (
-    (!totp.verify({ secret: hashedSecret, token: otp }) &&
-      process.env.NODE_ENV === 'production') ||
+    (!otpClass.verify(otp, userId) && process.env.NODE_ENV === 'production') ||
     (process.env.NODE_ENV !== 'production' && otp !== '000000')
   )
     throw new Error('Invalid OTP code')
