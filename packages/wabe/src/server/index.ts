@@ -43,7 +43,7 @@ export interface WabeConfig<T extends WabeTypes> {
   email?: EmailConfig
   payment?: PaymentConfig
   file?: FileConfig
-  internalConfig: Record<InternalConfigKey, string>
+  internalConfig?: Record<InternalConfigKey, string>
 }
 
 export type WabeTypes = {
@@ -101,7 +101,6 @@ export class Wabe<T extends WabeTypes> {
       email,
       payment,
       routes,
-      internalConfig: { otpSecret: '' },
     }
 
     this.server = new Wobe<WobeCustomContext<T>>().get('/health', (context) => {

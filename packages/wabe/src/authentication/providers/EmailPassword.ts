@@ -1,12 +1,9 @@
 import argon2 from 'argon2'
-import { createHash } from 'node:crypto'
-import { totp } from 'otplib'
 import type {
   AuthenticationEventsOptions,
   AuthenticationEventsOptionsWithUserId,
   ProviderInterface,
 } from '../interface'
-import { defaultResetPasswordTemplate } from './defaultResetPasswordTemplate'
 import { hashPassword } from '../utils'
 
 type EmailPasswordInterface = {

@@ -46,7 +46,7 @@ describe('resetPasswordResolver', () => {
 
     const userId = user.id
 
-    const secret = wabe.config.internalConfig.otpSecret
+    const secret = wabe.config.internalConfig?.otpSecret
 
     const hashedSecret = createHash('sha256')
       .update(`${secret}:${userId}`)

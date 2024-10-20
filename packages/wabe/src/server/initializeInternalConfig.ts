@@ -19,7 +19,11 @@ export const initializeInternalConfig = async (wabe: Wabe<DevWabeTypes>) => {
   })
 
   if (internalConfig.length > 0) {
-    wabe.config.internalConfig.otpSecret = internalConfig[0].configValue
+    if (!wabe.config.internalConfig)
+      wabe.config.internalConfig = {
+        otpSecret: internalConfig[0].configValue,
+      }
+    else wabe.config.internalConfig.otpSecret = internalConfig[0].configValue
 
     return
   }
@@ -41,5 +45,9 @@ export const initializeInternalConfig = async (wabe: Wabe<DevWabeTypes>) => {
     fields: [],
   })
 
-  wabe.config.internalConfig.otpSecret = secret
+  if (!wabe.config.internalConfig)
+    wabe.config.internalConfig = {
+      otpSecret: secret,
+    }
+  else wabe.config.internalConfig.otpSecret = secret
 }

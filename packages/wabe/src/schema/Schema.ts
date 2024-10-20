@@ -10,7 +10,6 @@ import type { WabeConfig, WabeTypes } from '../server'
 import { Currency, PaymentMode, PaymentReccuringInterval } from '../payment'
 import { defaultMutations, defaultQueries } from './defaultResolvers'
 import type { HookObject } from '../hooks/HookObject'
-import { resetPasswordResolver } from '../authentication/resolvers/resetPasswordResolver'
 
 export type WabePrimaryTypes =
   | 'String'
