@@ -527,6 +527,44 @@ export class Schema<T extends WabeTypes> {
     }
   }
 
+  internalConfigClass(): ClassInterface<T> {
+    return {
+      name: '_InternalConfig',
+      fields: {
+        configKey: {
+          type: 'String',
+          required: true,
+        },
+        configValue: {
+          type: 'String',
+          required: true,
+        },
+        description: {
+          type: 'String',
+        },
+      },
+      // Only root key
+      permissions: {
+        create: {
+          authorizedRoles: [],
+          requireAuthentication: true,
+        },
+        read: {
+          authorizedRoles: [],
+          requireAuthentication: true,
+        },
+        update: {
+          authorizedRoles: [],
+          requireAuthentication: true,
+        },
+        delete: {
+          authorizedRoles: [],
+          requireAuthentication: true,
+        },
+      },
+    }
+  }
+
   userClass(): ClassInterface<T> {
     const customAuthenticationConfig =
       this.config.authentication?.customAuthenticationMethods || []
@@ -715,6 +753,7 @@ export class Schema<T extends WabeTypes> {
       this.sessionClass(),
       this.roleClass(),
       this.paymentClass(),
+      this.internalConfigClass(),
     ])
   }
 }
