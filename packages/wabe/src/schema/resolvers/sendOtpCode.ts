@@ -22,7 +22,10 @@ export const sendOtpCodeResolver = async (
     },
     fields: ['id'],
     first: 1,
-    context,
+    context: {
+      ...context,
+      isRoot: true,
+    },
   })
 
   if (user.length === 0) throw new Error('User not found')

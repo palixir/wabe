@@ -14,6 +14,7 @@ import {
   setupTests,
   getGraphqlClient,
   closeTests,
+  getAnonymousClient,
 } from '../../utils/helper'
 import { EmailDevAdapter } from '../../email/DevAdapter'
 
@@ -79,8 +80,10 @@ describe('sendOtpCodeResolver', () => {
     wabe.config.email = previous
   })
 
-  it("should send an OTP code to the user's email", async () => {
-    await client.request<any>(graphql.createUser, {
+  it("should send an OTP code to the user's email as anonymous client", async () => {
+    const anonymousClient = getAnonymousClient(port)
+
+    await anonymousClient.request<any>(graphql.createUser, {
       input: {
         fields: {
           authentication: {
@@ -93,7 +96,7 @@ describe('sendOtpCodeResolver', () => {
       },
     })
 
-    await client.request<any>(graphql.sendOtpCode, {
+    await anonymousClient.request<any>(graphql.sendOtpCode, {
       input: {
         email: 'toto@toto.fr',
       },
