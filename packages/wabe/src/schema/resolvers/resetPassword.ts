@@ -17,7 +17,10 @@ export const resetPasswordResolver = async (
     },
     fields: ['id'],
     first: 1,
-    context,
+    context: {
+      ...context,
+      isRoot: true,
+    },
   })
 
   if (user.length === 0) throw new Error('User not found')
@@ -47,7 +50,10 @@ export const resetPasswordResolver = async (
       },
     },
     fields: [],
-    context,
+    context: {
+      ...context,
+      isRoot: true,
+    },
   })
 
   return true

@@ -1,10 +1,11 @@
-import { describe, it, afterAll, beforeAll, expect } from 'bun:test'
+import { describe, it, afterAll, beforeAll, expect, beforeEach } from 'bun:test'
 import { createHash } from 'node:crypto'
 import { totp } from 'otplib'
 import { gql, type GraphQLClient } from 'graphql-request'
 import {
   closeTests,
   type DevWabeTypes,
+  getAnonymousClient,
   getGraphqlClient,
   setupTests,
 } from '../../utils/helper'
@@ -24,6 +25,65 @@ describe('resetPasswordResolver', () => {
 
   afterAll(async () => {
     await closeTests(wabe)
+  })
+
+  beforeEach(async () => {
+    await wabe.controllers.database.clearDatabase()
+  })
+
+  it('should let an anonymous reset the password of an user', async () => {
+    process.env.NODE_ENV = 'production'
+
+    const anonymousClient = getAnonymousClient(port)
+
+    const {
+      createUser: { user },
+    } = await anonymousClient.request<any>(graphql.createUser, {
+      input: {
+        fields: {
+          authentication: {
+            emailPassword: {
+              email: 'toto@toto.fr',
+              password: 'totototo',
+            },
+          },
+        },
+      },
+    })
+
+    const userId = user.id
+
+    const secret = wabe.config.rootKey
+
+    const hashedSecret = createHash('sha256')
+      .update(`${secret}:${userId}`)
+      .digest('hex')
+
+    const otp = totp.generate(hashedSecret)
+
+    await anonymousClient.request<any>(graphql.resetPassword, {
+      input: {
+        email: 'toto@toto.fr',
+        password: 'tata',
+        otp,
+        provider: 'emailPassword',
+      },
+    })
+
+    const res = await anonymousClient.request<any>(graphql.signInWith, {
+      input: {
+        authentication: {
+          emailPassword: {
+            email: 'toto@toto.fr',
+            password: 'tata',
+          },
+        },
+      },
+    })
+
+    expect(res.signInWith.id).toEqual(userId)
+
+    process.env.NODE_ENV = 'test'
   })
 
   it('should reset password of an user if the OTP code is valid', async () => {
