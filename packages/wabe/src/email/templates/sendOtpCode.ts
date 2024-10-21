@@ -103,7 +103,7 @@ export const sendOtpCodeTemplate = (otp: string) => `
           <!-- Email Content -->
           <div class="content">
               <p>Hello,</p>
-              <p>Here is your confirmation code. Please use the OTP code below to proceed the action:</p>
+              <p>Here is your confirmation code. Please use the OTP code (valid for 5 minutes) below to proceed the action:</p>
               <p class="otp-code">${otp}</p>
               <p>If you did not request this code, please ignore this email.</p>
               <p>Thank you</p>

@@ -79,6 +79,57 @@ describe('resetPasswordResolver', () => {
     process.env.NODE_ENV = 'test'
   })
 
+  it('should reset password in dev mode with valid normal code', async () => {
+    process.env.NODE_ENV = 'test'
+
+    const {
+      createUser: { user },
+    } = await client.request<any>(graphql.createUser, {
+      input: {
+        fields: {
+          authentication: {
+            emailPassword: {
+              email: 'toto@toto.fr',
+              password: 'totototo',
+            },
+          },
+        },
+      },
+    })
+
+    const userId = user.id
+
+    const secret = wabe.config.rootKey
+
+    const hashedSecret = createHash('sha256')
+      .update(`${secret}:${userId}`)
+      .digest('hex')
+
+    const otp = totp.generate(hashedSecret)
+
+    await client.request<any>(graphql.resetPassword, {
+      input: {
+        email: 'toto@toto.fr',
+        password: 'tata',
+        otp,
+        provider: 'emailPassword',
+      },
+    })
+
+    const res = await client.request<any>(graphql.signInWith, {
+      input: {
+        authentication: {
+          emailPassword: {
+            email: 'toto@toto.fr',
+            password: 'tata',
+          },
+        },
+      },
+    })
+
+    expect(res.signInWith.id).toEqual(userId)
+  })
+
   it('should reset password in dev mode with code 000000', async () => {
     process.env.NODE_ENV = 'test'
 
