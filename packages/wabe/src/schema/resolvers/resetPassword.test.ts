@@ -9,7 +9,7 @@ import {
   getGraphqlClient,
   setupTests,
 } from '../../utils/helper'
-import { Wabe } from '../../server'
+import type { Wabe } from '../../server'
 
 describe('resetPasswordResolver', () => {
   let wabe: Wabe<DevWabeTypes>
