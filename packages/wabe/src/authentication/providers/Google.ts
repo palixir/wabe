@@ -51,7 +51,10 @@ export class Google implements ProviderInterface<GoogleInterface> {
           },
         },
       },
-      context,
+      context: {
+        ...context,
+        isRoot: true,
+      },
       fields: ['id'],
     })
 
@@ -71,7 +74,10 @@ export class Google implements ProviderInterface<GoogleInterface> {
             google: authenticationDataToSave,
           },
         },
-        context,
+        context: {
+          ...context,
+          isRoot: true,
+        },
         fields: ['*'],
       })
 
