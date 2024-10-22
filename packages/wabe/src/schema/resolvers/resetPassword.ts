@@ -23,16 +23,19 @@ export const resetPasswordResolver = async (
     },
   })
 
-  if (user.length === 0) throw new Error('User not found')
+  // We return true if the user doesn't exist to avoid leaking that the user exists or not
+  if (user.length === 0) return true
 
   const userId = user[0].id
 
   const otpClass = new OTP(context.wabe.config.rootKey)
 
-  if (
-    (!otpClass.verify(otp, userId) && process.env.NODE_ENV === 'production') ||
-    (process.env.NODE_ENV !== 'production' && otp !== '000000')
-  )
+  const isOtpValid = otpClass.verify(otp, userId)
+
+  if (process.env.NODE_ENV === 'production' && !isOtpValid)
+    throw new Error('Invalid OTP code')
+
+  if (process.env.NODE_ENV !== 'production' && otp !== '000000' && !isOtpValid)
     throw new Error('Invalid OTP code')
 
   await context.wabe.controllers.database.updateObject({
