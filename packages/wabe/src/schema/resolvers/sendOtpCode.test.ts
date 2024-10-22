@@ -111,16 +111,16 @@ describe('sendOtpCodeResolver', () => {
     })
   })
 
-  it("should throw an error if the user doesn't exist", async () => {
+  it("should return true if the user doesn't exist (hide sensitive data)", async () => {
     const spySend = spyOn(EmailDevAdapter.prototype, 'send')
 
-    expect(
-      client.request<any>(graphql.sendOtpCode, {
-        input: {
-          email: 'invalidUser@toto.fr',
-        },
-      }),
-    ).rejects.toThrow('User not found')
+    const res = await client.request<any>(graphql.sendOtpCode, {
+      input: {
+        email: 'invalidUser@toto.fr',
+      },
+    })
+
+    expect(res.sendOtpCode).toEqual(true)
 
     expect(spySend).toHaveBeenCalledTimes(0)
   })

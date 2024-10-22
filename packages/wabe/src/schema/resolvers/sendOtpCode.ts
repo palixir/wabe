@@ -28,7 +28,8 @@ export const sendOtpCodeResolver = async (
     },
   })
 
-  if (user.length === 0) throw new Error('User not found')
+  // We return true if the user doesn't exist to avoid leaking that the user exists or not
+  if (user.length === 0) return true
 
   const userId = user[0].id
 

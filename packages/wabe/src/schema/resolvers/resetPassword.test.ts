@@ -233,19 +233,19 @@ describe('resetPasswordResolver', () => {
     expect(res.signInWith.id).toEqual(userId)
   })
 
-  it("should not reset password if the user doesn't exist", async () => {
+  it("should return true if the user doesn't exist (hide sensitive data)", async () => {
     process.env.NODE_ENV = 'test'
 
-    expect(
-      client.request<any>(graphql.resetPassword, {
-        input: {
-          email: 'invalidUser@toto.fr',
-          password: 'tata',
-          otp: '000000',
-          provider: 'emailPassword',
-        },
-      }),
-    ).rejects.toThrow('User not found')
+    const res = await client.request<any>(graphql.resetPassword, {
+      input: {
+        email: 'invalidUser@toto.fr',
+        password: 'tata',
+        otp: '000000',
+        provider: 'emailPassword',
+      },
+    })
+
+    expect(res.resetPassword).toEqual(true)
   })
 
   it('should not reset password of an user if the OTP code is invalid', async () => {
