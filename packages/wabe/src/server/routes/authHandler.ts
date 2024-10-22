@@ -64,10 +64,9 @@ export const oauthHandlerCallback = async (
     )
   } catch (error) {
     console.error(error)
-    // context.redirect(
-    // 	wabeContext.wabe.config.authentication?.failureRedirectPath ||
-    // 		'/',
-    // )
+    context.redirect(
+      wabeContext.wabe.config.authentication?.failureRedirectPath || '/',
+    )
   }
 }
 
