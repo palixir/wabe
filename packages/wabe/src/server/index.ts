@@ -247,6 +247,14 @@ export class Wabe<T extends WabeTypes> {
       }),
     )
 
+    this.server.beforeHandler(
+      cors({
+        origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+        // allowHeaders: ['content-type', 'Wabe-Access-Token', 'Wabe-Root-Key'],
+        credentials: true,
+      }),
+    )
+
     // Set the wabe context
     this.server.beforeHandler(async (ctx) => {
       const headers = ctx.request.headers
@@ -267,8 +275,9 @@ export class Wabe<T extends WabeTypes> {
         const isCookieSession =
           !!this.config.authentication?.session?.cookieSession
 
-        if (isCookieSession)
+        if (isCookieSession) {
           return getCookieInRequestHeaders('accessToken', ctx.request.headers)
+        }
 
         return null
       }
@@ -329,29 +338,35 @@ export class Wabe<T extends WabeTypes> {
             if (accessToken && refreshToken) {
               const session = new Session()
 
-              const {
-                accessToken: newAccessToken,
-                refreshToken: newRefreshToken,
-              } = await session.refresh(accessToken, refreshToken, {
-                wabe: this,
-                isRoot: true,
-              })
-
-              if (accessToken !== newAccessToken)
-                res.setCookie('accessToken', newAccessToken, {
-                  httpOnly: true,
-                  path: '/',
-                  expires: session.getAccessTokenExpireAt(this.config),
-                  secure: process.env.NODE_ENV === 'production',
+              try {
+                const {
+                  accessToken: newAccessToken,
+                  refreshToken: newRefreshToken,
+                } = await session.refresh(accessToken, refreshToken, {
+                  wabe: this,
+                  isRoot: true,
                 })
 
-              if (refreshToken !== newRefreshToken)
-                res.setCookie('refreshToken', newRefreshToken, {
-                  httpOnly: true,
-                  path: '/',
-                  expires: session.getRefreshTokenExpireAt(this.config),
-                  secure: process.env.NODE_ENV === 'production',
-                })
+                if (accessToken !== newAccessToken)
+                  res.setCookie('accessToken', newAccessToken, {
+                    httpOnly: true,
+                    path: '/',
+                    expires: session.getAccessTokenExpireAt(this.config),
+                    sameSite: 'None',
+                    secure: true,
+                  })
+
+                if (refreshToken !== newRefreshToken)
+                  res.setCookie('refreshToken', newRefreshToken, {
+                    httpOnly: true,
+                    path: '/',
+                    expires: session.getRefreshTokenExpireAt(this.config),
+                    sameSite: 'None',
+                    secure: true,
+                  })
+              } catch (error) {
+                console.log(error)
+              }
             }
           }
 
