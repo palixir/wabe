@@ -236,7 +236,7 @@ export class Wabe<T extends WabeTypes> {
     }
 
     this.server.options(
-      '*',
+      '/*',
       (ctx) => {
         return ctx.res.send('OK')
       },
@@ -307,7 +307,7 @@ export class Wabe<T extends WabeTypes> {
         cors: {
           origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
           credentials: true,
-          allowedHeaders: ['content-type'],
+          // allowedHeaders: ['content-type'],
         },
         graphqlEndpoint: '/graphql',
         context: async (ctx): Promise<WabeContext<T>> => ctx.wabe,

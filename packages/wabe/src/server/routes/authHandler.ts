@@ -64,6 +64,8 @@ export const oauthHandlerCallback = async (
     const accessToken = signInWith.accessToken
 
     context.res.setCookie('accessToken', accessToken, {
+      // Need to keep httpOnly to false because the front will need to get it and this is
+      // the only way to transmit this token to the front (because of redirection)
       httpOnly: false,
       path: '/',
       maxAge:
