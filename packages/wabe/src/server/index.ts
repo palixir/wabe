@@ -364,8 +364,8 @@ export class Wabe<T extends WabeTypes> {
                     sameSite: 'None',
                     secure: true,
                   })
-              } catch (error) {
-                console.log(error)
+              } catch {
+                // Session not found error, do nothing
               }
             }
           }
