@@ -31,7 +31,7 @@ export const signInWithResolver = async (
     input.authentication[name]
 
   // 1 - We call the onSignIn method of the provider
-  const { user, oauth } = await provider.onSignIn({
+  const { user } = await provider.onSignIn({
     input: inputOfTheGoodAuthenticationMethod,
     context,
   })
@@ -52,31 +52,18 @@ export const signInWithResolver = async (
     return { accessToken: null, refreshToken: null, id: userId }
   }
 
-  const getRefreshAndAccessToken = async () => {
-    if (user.isOauth && oauth) return oauth
+  const session = new Session()
 
-    const session = new Session()
-
-    const { refreshToken, accessToken } = await session.create(userId, context)
-
-    return {
-      refreshToken,
-      accessToken,
-      accessTokenExpiresAt: session.getAccessTokenExpireAt(context.wabe.config),
-      refreshTokenExpiresAt: session.getRefreshTokenExpireAt(
-        context.wabe.config,
-      ),
-    }
-  }
-
-  const {
-    accessToken,
-    refreshToken,
-    accessTokenExpiresAt,
-    refreshTokenExpiresAt,
-  } = await getRefreshAndAccessToken()
+  const { refreshToken, accessToken } = await session.create(userId, context)
 
   if (context.wabe.config.authentication?.session?.cookieSession) {
+    const accessTokenExpiresAt = session.getAccessTokenExpireAt(
+      context.wabe.config,
+    )
+    const refreshTokenExpiresAt = session.getRefreshTokenExpireAt(
+      context.wabe.config,
+    )
+
     context.response?.setCookie('refreshToken', refreshToken, {
       httpOnly: true,
       path: '/',

@@ -33,7 +33,9 @@ export const oauthHandlerCallback = async (
     const codeVerifier = context.getCookie('code_verifier')
     const provider = context.getCookie('provider')
 
-    await getGraphqlClient(wabeContext.wabe.config.port).request<any>(
+    const { signInWith } = await getGraphqlClient(
+      wabeContext.wabe.config.port,
+    ).request<any>(
       gql`
 				mutation signInWith(
 					$authorizationCode: String!
@@ -59,6 +61,17 @@ export const oauthHandlerCallback = async (
       },
     )
 
+    const accessToken = signInWith.accessToken
+
+    context.res.setCookie('accessToken', accessToken, {
+      httpOnly: false,
+      path: '/',
+      maxAge:
+        (wabeContext.wabe.config.authentication?.session
+          ?.accessTokenExpiresInMs || 60 * 60 * 24 * 1 * 1000) / 1000, // 1 day in seconds
+      secure: process.env.NODE_ENV === 'production',
+    })
+
     context.redirect(
       wabeContext.wabe.config.authentication?.successRedirectPath || '/',
     )
@@ -80,7 +93,7 @@ export const authHandler = async (
   context.res.setCookie('provider', provider, {
     httpOnly: true,
     path: '/',
-    maxAge: 60 * 10, // 10 minutes
+    maxAge: 60 * 5, // 5 minutes
     secure: process.env.NODE_ENV === 'production',
   })
 
@@ -94,14 +107,14 @@ export const authHandler = async (
       context.res.setCookie('code_verifier', codeVerifier, {
         httpOnly: true,
         path: '/',
-        maxAge: 60 * 10, // 10 minutes
+        maxAge: 60 * 5, // 5 minutes
         secure: process.env.NODE_ENV === 'production',
       })
 
       context.res.setCookie('state', state, {
         httpOnly: true,
         path: '/',
-        maxAge: 60 * 10, // 10 minutes
+        maxAge: 60 * 5, // 5 minutes
         secure: process.env.NODE_ENV === 'production',
       })
 
