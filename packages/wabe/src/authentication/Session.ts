@@ -16,14 +16,19 @@ export class Session {
     return new Date(Date.now() + customExpiresInMs)
   }
 
-  getRefreshTokenExpireAt(config: WabeConfig<any>) {
+  _getRefreshTokenExpiresInMs(config: WabeConfig<any>) {
     const customExpiresInMs =
       config?.authentication?.session?.refreshTokenExpiresInMs
 
-    if (!customExpiresInMs)
-      return new Date(Date.now() + 1000 * 60 * 60 * 24 * 30) // 30 days in ms
+    if (!customExpiresInMs) return 1000 * 60 * 60 * 24 * 30 // 30 days in ms
 
-    return new Date(Date.now() + customExpiresInMs)
+    return customExpiresInMs
+  }
+
+  getRefreshTokenExpireAt(config: WabeConfig<any>) {
+    const expiresInMs = this._getRefreshTokenExpiresInMs(config)
+
+    return new Date(Date.now() + expiresInMs)
   }
 
   async meFromAccessToken(
@@ -100,6 +105,18 @@ export class Session {
     })
   }
 
+  _isRefreshTokenExpired(
+    userRefreshTokenExpiresAt: Date,
+    refreshTokenAgeInMs: number,
+  ) {
+    const refreshTokenEmittedAt =
+      userRefreshTokenExpiresAt.getTime() - refreshTokenAgeInMs
+    const numberOfMsSinceRefreshTokenEmitted =
+      Date.now() - refreshTokenEmittedAt
+
+    return numberOfMsSinceRefreshTokenEmitted >= 0.75 * refreshTokenAgeInMs
+  }
+
   async refresh(
     accessToken: string,
     refreshToken: string,
@@ -129,15 +146,10 @@ export class Session {
     if (refreshTokenExpiresAt < new Date(Date.now()))
       throw new Error('Refresh token expired')
 
-    const refreshTokenExpireIn = this.getRefreshTokenExpireAt(
-      context.wabe.config,
-    ).getTime()
+    const expiresInMs = this._getRefreshTokenExpiresInMs(context.wabe.config)
 
     // We refresh only if the refresh token is about to expire (75% of the time)
-    if (
-      refreshTokenExpiresAt.getTime() - Date.now() <
-      0.75 * (refreshTokenExpireIn - Date.now())
-    )
+    if (!this._isRefreshTokenExpired(refreshTokenExpiresAt, expiresInMs))
       return {
         accessToken,
         refreshToken,
@@ -174,7 +186,6 @@ export class Session {
       data: {
         accessToken: newAccessToken,
         accessTokenExpiresAt: this.getAccessTokenExpireAt(context.wabe.config),
-
         refreshToken: newRefreshToken,
         refreshTokenExpiresAt: this.getRefreshTokenExpireAt(
           context.wabe.config,

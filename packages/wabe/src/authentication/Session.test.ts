@@ -222,40 +222,27 @@ describe('_Session', () => {
   })
 
   it('should not refresh session if the access token does not already take 75% of time', async () => {
-    mockGetObjects.mockResolvedValue([
-      {
-        id: 'sessionId',
-        refreshToken: 'refreshToken',
-        refreshTokenExpiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 1),
-        user: {
-          id: 'userId',
-          email: 'userEmail',
-        },
-      },
-    ])
-
     const session = new Session()
 
-    const { accessToken, refreshToken } = await session.refresh(
-      'accessToken',
-      'refreshToken',
-      { wabe: { controllers } } as any,
+    // 1 hour
+    const refreshTokenAgeInMs = 1000 * 60 * 60
+
+    // Expires in 1 hour
+    const date1 = new Date(Date.now() + 1000 * 60 * 60)
+    // Expires in 20 minutes
+    const date2 = new Date(Date.now() + 1000 * 60 * 15)
+    // Expired since 20 minutes
+    const date3 = new Date(Date.now() - 1000 * 60 * 20)
+
+    expect(session._isRefreshTokenExpired(date1, refreshTokenAgeInMs)).toBe(
+      false,
     )
-
-    expect(accessToken).toBe('accessToken')
-    expect(refreshToken).toBe('refreshToken')
-
-    expect(mockGetObjects).toHaveBeenCalledTimes(1)
-    expect(mockGetObjects).toHaveBeenCalledWith({
-      className: '_Session',
-      where: {
-        accessToken: { equalTo: 'accessToken' },
-      },
-      fields: ['id', 'user', 'refreshToken', 'refreshTokenExpiresAt'],
-      context: expect.any(Object),
-    })
-
-    expect(mockUpdateObject).toHaveBeenCalledTimes(0)
+    expect(session._isRefreshTokenExpired(date2, refreshTokenAgeInMs)).toBe(
+      true,
+    )
+    expect(session._isRefreshTokenExpired(date3, refreshTokenAgeInMs)).toBe(
+      true,
+    )
   })
 
   it('should throw an error on refresh session if session not found', async () => {

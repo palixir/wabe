@@ -23,8 +23,8 @@ export const oauthHandlerCallback = async (
   wabeContext: WabeContext<any>,
 ) => {
   try {
-    const state = context.query.state
-    const code = context.query.code
+    const state = decodeURIComponent(context.query.state)
+    const code = decodeURIComponent(context.query.code)
 
     const stateInCookie = context.getCookie('state')
 
@@ -33,7 +33,9 @@ export const oauthHandlerCallback = async (
     const codeVerifier = context.getCookie('code_verifier')
     const provider = context.getCookie('provider')
 
-    await getGraphqlClient(wabeContext.wabe.config.port).request<any>(
+    const { signInWith } = await getGraphqlClient(
+      wabeContext.wabe.config.port,
+    ).request<any>(
       gql`
 				mutation signInWith(
 					$authorizationCode: String!
@@ -59,6 +61,19 @@ export const oauthHandlerCallback = async (
       },
     )
 
+    const accessToken = signInWith.accessToken
+
+    context.res.setCookie('accessToken', accessToken, {
+      // Need to keep httpOnly to false because the front will need to get it and this is
+      // the only way to transmit this token to the front (because of redirection)
+      httpOnly: false,
+      path: '/',
+      maxAge:
+        (wabeContext.wabe.config.authentication?.session
+          ?.accessTokenExpiresInMs || 60 * 60 * 24 * 1 * 1000) / 1000, // 1 day in seconds
+      secure: process.env.NODE_ENV === 'production',
+    })
+
     context.redirect(
       wabeContext.wabe.config.authentication?.successRedirectPath || '/',
     )
@@ -80,7 +95,7 @@ export const authHandler = async (
   context.res.setCookie('provider', provider, {
     httpOnly: true,
     path: '/',
-    maxAge: 60 * 10, // 10 minutes
+    maxAge: 60 * 5, // 5 minutes
     secure: process.env.NODE_ENV === 'production',
   })
 
@@ -94,14 +109,14 @@ export const authHandler = async (
       context.res.setCookie('code_verifier', codeVerifier, {
         httpOnly: true,
         path: '/',
-        maxAge: 60 * 10, // 10 minutes
+        maxAge: 60 * 5, // 5 minutes
         secure: process.env.NODE_ENV === 'production',
       })
 
       context.res.setCookie('state', state, {
         httpOnly: true,
         path: '/',
-        maxAge: 60 * 10, // 10 minutes
+        maxAge: 60 * 5, // 5 minutes
         secure: process.env.NODE_ENV === 'production',
       })
 
