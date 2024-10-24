@@ -1,6 +1,5 @@
 import type { SignInWithInput } from '../../../generated/wabe'
 import type { WabeContext } from '../../server/interface'
-import { getCookieInRequestHeaders } from '../../utils'
 import type { DevWabeTypes } from '../../utils/helper'
 import { Session } from '../Session'
 import type {
@@ -70,8 +69,8 @@ export const signInWithResolver = async (
       path: '/',
       sameSite: 'None',
       secure: true,
-      // expires: refreshTokenExpiresAt,
-      expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
+      expires: refreshTokenExpiresAt,
+      // expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
     })
 
     context.response?.setCookie('accessToken', accessToken, {
@@ -79,7 +78,8 @@ export const signInWithResolver = async (
       path: '/',
       sameSite: 'None',
       secure: true,
-      expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
+      expires: accessTokenExpiresAt,
+      // expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
     })
   }
 

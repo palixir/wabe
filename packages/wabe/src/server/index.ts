@@ -270,19 +270,27 @@ export class Wabe<T extends WabeTypes> {
 
       const getAccessToken = () => {
         if (headers.get('Wabe-Access-Token'))
-          return headers.get('Wabe-Access-Token')
+          return { accessToken: headers.get('Wabe-Access-Token') }
 
         const isCookieSession =
           !!this.config.authentication?.session?.cookieSession
 
-        if (isCookieSession) {
-          return getCookieInRequestHeaders('accessToken', ctx.request.headers)
-        }
+        if (isCookieSession)
+          return {
+            accessToken: getCookieInRequestHeaders(
+              'accessToken',
+              ctx.request.headers,
+            ),
+            refreshToken: getCookieInRequestHeaders(
+              'refreshToken',
+              ctx.request.headers,
+            ),
+          }
 
-        return null
+        return { accessToken: null, refreshToken: null }
       }
 
-      const accessToken = getAccessToken()
+      const { accessToken, refreshToken } = getAccessToken()
 
       if (!accessToken) {
         ctx.wabe = {
@@ -299,6 +307,36 @@ export class Wabe<T extends WabeTypes> {
         isRoot: true,
         wabe: this,
       })
+
+      if (
+        accessToken &&
+        refreshToken &&
+        this.config.authentication?.session?.cookieSession
+      ) {
+        const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
+          await session.refresh(accessToken, refreshToken, {
+            wabe: this,
+            isRoot: true,
+          })
+
+        if (accessToken !== newAccessToken)
+          ctx.res.setCookie('accessToken', newAccessToken, {
+            httpOnly: true,
+            path: '/',
+            expires: session.getAccessTokenExpireAt(this.config),
+            sameSite: 'None',
+            secure: true,
+          })
+
+        if (refreshToken !== newRefreshToken)
+          ctx.res.setCookie('refreshToken', newRefreshToken, {
+            httpOnly: true,
+            path: '/',
+            expires: session.getRefreshTokenExpireAt(this.config),
+            sameSite: 'None',
+            secure: true,
+          })
+      }
 
       ctx.wabe = {
         isRoot: false,
@@ -320,58 +358,6 @@ export class Wabe<T extends WabeTypes> {
         },
         graphqlEndpoint: '/graphql',
         context: async (ctx): Promise<WabeContext<T>> => ctx.wabe,
-        graphqlMiddleware: async (resolve, res) => {
-          const response = await resolve()
-
-          if (this.config.authentication?.session?.cookieSession) {
-            // TODO : Add tests for this
-            const accessToken = getCookieInRequestHeaders(
-              'accessToken',
-              res.request.headers,
-            )
-
-            const refreshToken = getCookieInRequestHeaders(
-              'refreshToken',
-              res.request.headers,
-            )
-
-            if (accessToken && refreshToken) {
-              const session = new Session()
-
-              try {
-                const {
-                  accessToken: newAccessToken,
-                  refreshToken: newRefreshToken,
-                } = await session.refresh(accessToken, refreshToken, {
-                  wabe: this,
-                  isRoot: true,
-                })
-
-                if (accessToken !== newAccessToken)
-                  res.setCookie('accessToken', newAccessToken, {
-                    httpOnly: true,
-                    path: '/',
-                    expires: session.getAccessTokenExpireAt(this.config),
-                    sameSite: 'None',
-                    secure: true,
-                  })
-
-                if (refreshToken !== newRefreshToken)
-                  res.setCookie('refreshToken', newRefreshToken, {
-                    httpOnly: true,
-                    path: '/',
-                    expires: session.getRefreshTokenExpireAt(this.config),
-                    sameSite: 'None',
-                    secure: true,
-                  })
-              } catch {
-                // Session not found error, do nothing
-              }
-            }
-          }
-
-          return response
-        },
       }),
     )
 
