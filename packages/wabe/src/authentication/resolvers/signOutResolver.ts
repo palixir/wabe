@@ -14,8 +14,8 @@ export const signOutResolver = async (
   await session.delete(context)
 
   if (context.wabe.config.authentication?.session?.cookieSession) {
-    context.response?.deleteCookie('refreshToken')
     context.response?.deleteCookie('accessToken')
+    context.response?.deleteCookie('refreshToken')
   }
 
   return true

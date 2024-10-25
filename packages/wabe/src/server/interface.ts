@@ -5,7 +5,7 @@ import type { User } from '../../generated/wabe'
 export interface WabeContext<T extends WabeTypes> {
   response?: WobeResponse
   user?: User | null
-  sessionId?: string
+  sessionId?: string | null
   isRoot: boolean
   wabe: Wabe<T>
 }

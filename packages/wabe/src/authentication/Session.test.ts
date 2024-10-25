@@ -161,7 +161,7 @@ describe('_Session', () => {
       {
         id: 'sessionId',
         refreshToken: 'refreshToken',
-        refreshTokenExpiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
+        refreshTokenExpiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
         user: {
           id: 'userId',
           email: 'userEmail',
@@ -245,16 +245,21 @@ describe('_Session', () => {
     )
   })
 
-  it('should throw an error on refresh session if session not found', async () => {
+  it('should return null on refresh session if session not found', async () => {
     mockGetObjects.mockResolvedValue([])
 
     const session = new Session()
 
-    expect(
-      session.refresh('accessToken', 'refreshToken', {
+    const { accessToken, refreshToken } = await session.refresh(
+      'accessToken',
+      'refreshToken',
+      {
         wabe: { controllers },
-      } as any),
-    ).rejects.toThrow('Session not found')
+      } as any,
+    )
+
+    expect(accessToken).toBeNull()
+    expect(refreshToken).toBeNull()
 
     expect(mockGetObjects).toHaveBeenCalledTimes(1)
     expect(mockGetObjects).toHaveBeenCalledWith({
@@ -294,7 +299,7 @@ describe('_Session', () => {
       {
         id: 'sessionId',
         refreshToken: 'refreshToken',
-        refreshTokenExpiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
+        refreshTokenExpiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
         user: {
           id: 'userId',
           email: 'userEmail',

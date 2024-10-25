@@ -55,6 +55,7 @@ export class Google implements ProviderInterface<GoogleInterface> {
         ...context,
         isRoot: true,
       },
+      first: 1,
       fields: ['id'],
     })
 
@@ -107,7 +108,10 @@ export class Google implements ProviderInterface<GoogleInterface> {
     return this._googleAuthentication(options)
   }
 
+  // @ts-expect-error
   async onSignUp() {
-    return { authenticationDataToSave: {} }
+    throw new Error(
+      'SignUp is not implemented for Oauth provider, you should use signIn instead.',
+    )
   }
 }

@@ -39,14 +39,16 @@ export const signUpWithResolver = async (
     context.response?.setCookie('refreshToken', refreshToken, {
       httpOnly: true,
       path: '/',
-      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'None',
+      secure: true,
       expires: session.getRefreshTokenExpireAt(context.wabe.config),
     })
 
     context.response?.setCookie('accessToken', accessToken, {
       httpOnly: true,
       path: '/',
-      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'None',
+      secure: true,
       expires: session.getAccessTokenExpireAt(context.wabe.config),
     })
   }

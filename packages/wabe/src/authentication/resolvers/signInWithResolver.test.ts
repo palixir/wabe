@@ -222,7 +222,8 @@ describe('SignInWith', () => {
       {
         httpOnly: true,
         path: '/',
-        secure: false,
+        secure: true,
+        sameSite: 'None',
         expires: expect.any(Date),
       },
     )
@@ -234,7 +235,8 @@ describe('SignInWith', () => {
       {
         httpOnly: true,
         path: '/',
-        secure: false,
+        secure: true,
+        sameSite: 'None',
         expires: expect.any(Date),
       },
     )

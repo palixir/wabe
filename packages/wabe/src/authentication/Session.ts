@@ -34,7 +34,7 @@ export class Session {
   async meFromAccessToken(
     accessToken: string,
     context: WabeContext<any>,
-  ): Promise<{ sessionId: string; user: User | null }> {
+  ): Promise<{ sessionId: string | null; user: User | null }> {
     const sessions = await context.wabe.controllers.database.getObjects({
       className: '_Session',
       where: {
@@ -44,6 +44,8 @@ export class Session {
       fields: ['user.*', 'user.role.*'],
       context,
     })
+
+    if (sessions.length === 0) return { sessionId: null, user: null }
 
     const session = sessions[0]
     // @ts-expect-error
@@ -134,7 +136,11 @@ export class Session {
       },
     })
 
-    if (!session.length) throw new Error('Session not found')
+    if (!session.length)
+      return {
+        accessToken: null,
+        refreshToken: null,
+      }
 
     const {
       refreshTokenExpiresAt,
@@ -158,9 +164,17 @@ export class Session {
     if (refreshToken !== databaseRefreshToken)
       throw new Error('Invalid refresh token')
 
+    const userId = user?.id
+
+    if (!userId)
+      return {
+        accessToken: null,
+        refreshToken: null,
+      }
+
     const newAccessToken = jwt.sign(
       {
-        userId: user?.id,
+        userId,
         iat: Date.now(),
         exp: this.getAccessTokenExpireAt(context.wabe.config).getTime(),
       },
@@ -169,7 +183,7 @@ export class Session {
 
     const newRefreshToken = jwt.sign(
       {
-        userId: user?.id,
+        userId,
         iat: Date.now(),
         exp: this.getRefreshTokenExpireAt(context.wabe.config).getTime(),
       },

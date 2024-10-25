@@ -52,6 +52,7 @@ export const oauthHandlerCallback = async (
 						}
 					){
 						accessToken
+						refreshToken
 					}
 				}
 			`,
@@ -61,17 +62,33 @@ export const oauthHandlerCallback = async (
       },
     )
 
-    const accessToken = signInWith.accessToken
+    const { accessToken, refreshToken } = signInWith
+
+    const isCookieSession =
+      !!wabeContext.wabe.config.authentication?.session?.cookieSession
 
     context.res.setCookie('accessToken', accessToken, {
-      // Need to keep httpOnly to false because the front will need to get it and this is
-      // the only way to transmit this token to the front (because of redirection)
-      httpOnly: false,
+      // If cookie session we put httpOnly to true, otherwise the front will need to get it
+      // So we keep it to false
+      httpOnly: isCookieSession,
       path: '/',
       maxAge:
         (wabeContext.wabe.config.authentication?.session
-          ?.accessTokenExpiresInMs || 60 * 60 * 24 * 1 * 1000) / 1000, // 1 day in seconds
-      secure: process.env.NODE_ENV === 'production',
+          ?.accessTokenExpiresInMs || 60 * 15 * 1000) / 1000, // 15 minutes in seconds
+      sameSite: 'None',
+      secure: true,
+    })
+
+    context.res.setCookie('refreshToken', refreshToken, {
+      // If cookie session we put httpOnly to true, otherwise the front will need to get it
+      // So we keep it to false
+      httpOnly: isCookieSession,
+      path: '/',
+      maxAge:
+        (wabeContext.wabe.config.authentication?.session
+          ?.accessTokenExpiresInMs || 60 * 15 * 1000) / 1000, // 15 minutes in seconds
+      sameSite: 'None',
+      secure: true,
     })
 
     context.redirect(
@@ -96,7 +113,7 @@ export const authHandler = async (
     httpOnly: true,
     path: '/',
     maxAge: 60 * 5, // 5 minutes
-    secure: process.env.NODE_ENV === 'production',
+    secure: true,
   })
 
   switch (provider) {
@@ -110,14 +127,14 @@ export const authHandler = async (
         httpOnly: true,
         path: '/',
         maxAge: 60 * 5, // 5 minutes
-        secure: process.env.NODE_ENV === 'production',
+        secure: true,
       })
 
       context.res.setCookie('state', state, {
         httpOnly: true,
         path: '/',
         maxAge: 60 * 5, // 5 minutes
-        secure: process.env.NODE_ENV === 'production',
+        secure: true,
       })
 
       const authorizationURL = await googleOauth.createAuthorizationURL(

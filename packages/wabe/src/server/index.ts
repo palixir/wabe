@@ -281,16 +281,12 @@ export class Wabe<T extends WabeTypes> {
               'accessToken',
               ctx.request.headers,
             ),
-            refreshToken: getCookieInRequestHeaders(
-              'refreshToken',
-              ctx.request.headers,
-            ),
           }
 
-        return { accessToken: null, refreshToken: null }
+        return { accessToken: null }
       }
 
-      const { accessToken, refreshToken } = getAccessToken()
+      const { accessToken } = getAccessToken()
 
       if (!accessToken) {
         ctx.wabe = {
@@ -307,36 +303,6 @@ export class Wabe<T extends WabeTypes> {
         isRoot: true,
         wabe: this,
       })
-
-      if (
-        accessToken &&
-        refreshToken &&
-        this.config.authentication?.session?.cookieSession
-      ) {
-        const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
-          await session.refresh(accessToken, refreshToken, {
-            wabe: this,
-            isRoot: true,
-          })
-
-        if (accessToken !== newAccessToken)
-          ctx.res.setCookie('accessToken', newAccessToken, {
-            httpOnly: true,
-            path: '/',
-            expires: session.getAccessTokenExpireAt(this.config),
-            sameSite: 'None',
-            secure: true,
-          })
-
-        if (refreshToken !== newRefreshToken)
-          ctx.res.setCookie('refreshToken', newRefreshToken, {
-            httpOnly: true,
-            path: '/',
-            expires: session.getRefreshTokenExpireAt(this.config),
-            sameSite: 'None',
-            secure: true,
-          })
-      }
 
       ctx.wabe = {
         isRoot: false,
@@ -358,6 +324,60 @@ export class Wabe<T extends WabeTypes> {
         },
         graphqlEndpoint: '/graphql',
         context: async (ctx): Promise<WabeContext<T>> => ctx.wabe,
+        graphqlMiddleware: async (resolve, res) => {
+          const response = await resolve()
+
+          try {
+            if (this.config.authentication?.session?.cookieSession) {
+              // TODO : Add tests for this
+              const accessToken = getCookieInRequestHeaders(
+                'accessToken',
+                res.request.headers,
+              )
+              const refreshToken = getCookieInRequestHeaders(
+                'refreshToken',
+                res.request.headers,
+              )
+
+              if (accessToken && refreshToken) {
+                const session = new Session()
+
+                const {
+                  accessToken: newAccessToken,
+                  refreshToken: newRefreshToken,
+                } = await session.refresh(accessToken, refreshToken, {
+                  wabe: this,
+                  isRoot: true,
+                })
+
+                if (!newAccessToken || !newRefreshToken) return response
+
+                if (accessToken !== newAccessToken)
+                  res.setCookie('accessToken', newAccessToken, {
+                    httpOnly: true,
+                    path: '/',
+                    expires: session.getAccessTokenExpireAt(this.config),
+                    sameSite: 'None',
+                    secure: true,
+                  })
+
+                if (refreshToken !== newRefreshToken)
+                  res.setCookie('refreshToken', newRefreshToken, {
+                    httpOnly: true,
+                    path: '/',
+                    expires: session.getRefreshTokenExpireAt(this.config),
+                    sameSite: 'None',
+                    secure: true,
+                  })
+              }
+            }
+          } catch (e) {
+            console.error(e)
+            return response
+          }
+
+          return response
+        },
       }),
     )
 
