@@ -56,6 +56,8 @@ export const defaultAuthenticationMethods = <
         required: true,
       },
     },
+    // There is no signUp method for Google provider
+    // @ts-expect-error
     provider: new Google(),
   },
 ]
