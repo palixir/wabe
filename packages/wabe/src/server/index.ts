@@ -236,10 +236,18 @@ export class Wabe<T extends WabeTypes> {
     }
 
     this.server.options(
-      '*',
+      '/*',
       (ctx) => {
         return ctx.res.send('OK')
       },
+      cors({
+        origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+        // allowHeaders: ['content-type', 'Wabe-Access-Token', 'Wabe-Root-Key'],
+        credentials: true,
+      }),
+    )
+
+    this.server.beforeHandler(
       cors({
         origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
         // allowHeaders: ['content-type', 'Wabe-Access-Token', 'Wabe-Root-Key'],
@@ -262,18 +270,23 @@ export class Wabe<T extends WabeTypes> {
 
       const getAccessToken = () => {
         if (headers.get('Wabe-Access-Token'))
-          return headers.get('Wabe-Access-Token')
+          return { accessToken: headers.get('Wabe-Access-Token') }
 
         const isCookieSession =
           !!this.config.authentication?.session?.cookieSession
 
         if (isCookieSession)
-          return getCookieInRequestHeaders('accessToken', ctx.request.headers)
+          return {
+            accessToken: getCookieInRequestHeaders(
+              'accessToken',
+              ctx.request.headers,
+            ),
+          }
 
-        return null
+        return { accessToken: null }
       }
 
-      const accessToken = getAccessToken()
+      const { accessToken } = getAccessToken()
 
       if (!accessToken) {
         ctx.wabe = {
@@ -307,52 +320,60 @@ export class Wabe<T extends WabeTypes> {
         cors: {
           origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
           credentials: true,
-          allowedHeaders: ['content-type'],
+          // allowedHeaders: ['content-type'],
         },
         graphqlEndpoint: '/graphql',
         context: async (ctx): Promise<WabeContext<T>> => ctx.wabe,
         graphqlMiddleware: async (resolve, res) => {
           const response = await resolve()
 
-          if (this.config.authentication?.session?.cookieSession) {
-            // TODO : Add tests for this
-            const accessToken = getCookieInRequestHeaders(
-              'accessToken',
-              res.request.headers,
-            )
+          try {
+            if (this.config.authentication?.session?.cookieSession) {
+              // TODO : Add tests for this
+              const accessToken = getCookieInRequestHeaders(
+                'accessToken',
+                res.request.headers,
+              )
+              const refreshToken = getCookieInRequestHeaders(
+                'refreshToken',
+                res.request.headers,
+              )
 
-            const refreshToken = getCookieInRequestHeaders(
-              'refreshToken',
-              res.request.headers,
-            )
+              if (accessToken && refreshToken) {
+                const session = new Session()
 
-            if (accessToken && refreshToken) {
-              const session = new Session()
-
-              const {
-                accessToken: newAccessToken,
-                refreshToken: newRefreshToken,
-              } = await session.refresh(accessToken, refreshToken, {
-                wabe: this,
-                isRoot: true,
-              })
-
-              if (accessToken !== newAccessToken)
-                res.setCookie('accessToken', newAccessToken, {
-                  httpOnly: true,
-                  path: '/',
-                  expires: session.getAccessTokenExpireAt(this.config),
-                  secure: process.env.NODE_ENV === 'production',
+                const {
+                  accessToken: newAccessToken,
+                  refreshToken: newRefreshToken,
+                } = await session.refresh(accessToken, refreshToken, {
+                  wabe: this,
+                  isRoot: true,
                 })
 
-              if (refreshToken !== newRefreshToken)
-                res.setCookie('refreshToken', newRefreshToken, {
-                  httpOnly: true,
-                  path: '/',
-                  expires: session.getRefreshTokenExpireAt(this.config),
-                  secure: process.env.NODE_ENV === 'production',
-                })
+                if (!newAccessToken || !newRefreshToken) return response
+
+                if (accessToken !== newAccessToken)
+                  res.setCookie('accessToken', newAccessToken, {
+                    httpOnly: true,
+                    path: '/',
+                    expires: session.getAccessTokenExpireAt(this.config),
+                    sameSite: 'None',
+                    secure: true,
+                  })
+
+                if (refreshToken !== newRefreshToken)
+                  res.setCookie('refreshToken', newRefreshToken, {
+                    httpOnly: true,
+                    path: '/',
+                    expires: session.getRefreshTokenExpireAt(this.config),
+                    sameSite: 'None',
+                    secure: true,
+                  })
+              }
             }
+          } catch (e) {
+            console.error(e)
+            return response
           }
 
           return response

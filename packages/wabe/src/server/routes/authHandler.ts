@@ -23,8 +23,8 @@ export const oauthHandlerCallback = async (
   wabeContext: WabeContext<any>,
 ) => {
   try {
-    const state = context.query.state
-    const code = context.query.code
+    const state = decodeURIComponent(context.query.state)
+    const code = decodeURIComponent(context.query.code)
 
     const stateInCookie = context.getCookie('state')
 
@@ -33,7 +33,9 @@ export const oauthHandlerCallback = async (
     const codeVerifier = context.getCookie('code_verifier')
     const provider = context.getCookie('provider')
 
-    await getGraphqlClient(wabeContext.wabe.config.port).request<any>(
+    const { signInWith } = await getGraphqlClient(
+      wabeContext.wabe.config.port,
+    ).request<any>(
       gql`
 				mutation signInWith(
 					$authorizationCode: String!
@@ -50,6 +52,7 @@ export const oauthHandlerCallback = async (
 						}
 					){
 						accessToken
+						refreshToken
 					}
 				}
 			`,
@@ -58,6 +61,35 @@ export const oauthHandlerCallback = async (
         codeVerifier,
       },
     )
+
+    const { accessToken, refreshToken } = signInWith
+
+    const isCookieSession =
+      !!wabeContext.wabe.config.authentication?.session?.cookieSession
+
+    context.res.setCookie('accessToken', accessToken, {
+      // If cookie session we put httpOnly to true, otherwise the front will need to get it
+      // So we keep it to false
+      httpOnly: isCookieSession,
+      path: '/',
+      maxAge:
+        (wabeContext.wabe.config.authentication?.session
+          ?.accessTokenExpiresInMs || 60 * 15 * 1000) / 1000, // 15 minutes in seconds
+      sameSite: 'None',
+      secure: true,
+    })
+
+    context.res.setCookie('refreshToken', refreshToken, {
+      // If cookie session we put httpOnly to true, otherwise the front will need to get it
+      // So we keep it to false
+      httpOnly: isCookieSession,
+      path: '/',
+      maxAge:
+        (wabeContext.wabe.config.authentication?.session
+          ?.accessTokenExpiresInMs || 60 * 15 * 1000) / 1000, // 15 minutes in seconds
+      sameSite: 'None',
+      secure: true,
+    })
 
     context.redirect(
       wabeContext.wabe.config.authentication?.successRedirectPath || '/',
@@ -80,8 +112,8 @@ export const authHandler = async (
   context.res.setCookie('provider', provider, {
     httpOnly: true,
     path: '/',
-    maxAge: 60 * 10, // 10 minutes
-    secure: process.env.NODE_ENV === 'production',
+    maxAge: 60 * 5, // 5 minutes
+    secure: true,
   })
 
   switch (provider) {
@@ -94,15 +126,15 @@ export const authHandler = async (
       context.res.setCookie('code_verifier', codeVerifier, {
         httpOnly: true,
         path: '/',
-        maxAge: 60 * 10, // 10 minutes
-        secure: process.env.NODE_ENV === 'production',
+        maxAge: 60 * 5, // 5 minutes
+        secure: true,
       })
 
       context.res.setCookie('state', state, {
         httpOnly: true,
         path: '/',
-        maxAge: 60 * 10, // 10 minutes
-        secure: process.env.NODE_ENV === 'production',
+        maxAge: 60 * 5, // 5 minutes
+        secure: true,
       })
 
       const authorizationURL = await googleOauth.createAuthorizationURL(
