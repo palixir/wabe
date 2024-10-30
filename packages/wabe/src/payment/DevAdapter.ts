@@ -9,5 +9,8 @@ export class PaymentDevAdapter implements PaymentAdapter {
     }
   }
 
-  async initWebhook() {}
+  // biome-ignore lint/suspicious/useAwait: false
+  async initWebhook() {
+    return 'id'
+  }
 }

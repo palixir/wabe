@@ -26,6 +26,25 @@ describe('PaymentController', () => {
     })
   })
 
+  it("should call the adapter's deleteWebhook method", async () => {
+    const mockDeleteWebhook = mock(() => {})
+
+    const adapter = {
+      deleteWebhook: mockDeleteWebhook,
+    } as any
+
+    const paymentController = new PaymentController({
+      adapter,
+      currency: Currency.EUR,
+      supportedPaymentMethods: ['card'],
+    })
+
+    await paymentController.deleteWebhook('id')
+
+    expect(mockDeleteWebhook).toHaveBeenCalledTimes(1)
+    expect(mockDeleteWebhook).toHaveBeenCalledWith('id')
+  })
+
   it("should call the adapter's createCustomer method", async () => {
     const mockCreateCustomer = mock(() => {})
 
