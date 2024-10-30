@@ -212,6 +212,7 @@ export class StripeAdapter implements PaymentAdapter {
     return recursiveToGetTotalRevenue()
   }
 
+  // biome-ignore lint/suspicious/useAwait: false
   async getAllTransactions({
     startRangeTimestamp,
     endRangeTimestamp,
