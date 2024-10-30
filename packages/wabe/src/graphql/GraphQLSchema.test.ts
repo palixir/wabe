@@ -464,7 +464,7 @@ describe('GraphqlSchema', () => {
     await wabe.close()
   })
 
-  it('should contain totalCount elements in query multiple objects', async () => {
+  it('should contain totalCount elements in query multiple objects', () => {
     expect(
       getTypeFromGraphQLSchema({
         schema,
@@ -580,7 +580,7 @@ describe('GraphqlSchema', () => {
     await wabe.close()
   })
 
-  it('should support custom output types for queries and mutations', async () => {
+  it('should support custom output types for queries and mutations', () => {
     expect(
       getTypeFromGraphQLSchema({
         schema,
@@ -598,7 +598,7 @@ describe('GraphqlSchema', () => {
     ).toEqual('[TestMutation!]!')
   })
 
-  it('should support file type', async () => {
+  it('should support file type', () => {
     expect(
       getTypeFromGraphQLSchema({
         schema,
@@ -608,7 +608,7 @@ describe('GraphqlSchema', () => {
     ).toEqual('File!')
   })
 
-  it('should have required field on object fields', async () => {
+  it('should have required field on object fields', () => {
     expect(
       getTypeFromGraphQLSchema({
         schema,
@@ -634,7 +634,7 @@ describe('GraphqlSchema', () => {
     ).toEqual('[TestClassRequiredTestObjectArray]!')
   })
 
-  it('should support object of array of object', async () => {
+  it('should support object of array of object', () => {
     expect(
       getTypeFromGraphQLSchema({
         schema,

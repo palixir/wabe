@@ -103,7 +103,7 @@ describe('SignInWith', () => {
     })
   })
 
-  it('should throw an error if no custom authentication configuration is provided', async () => {
+  it('should throw an error if no custom authentication configuration is provided', () => {
     expect(
       signInWithResolver(
         {},
@@ -122,7 +122,7 @@ describe('SignInWith', () => {
     ).rejects.toThrow('No custom authentication methods found')
   })
 
-  it('should throw an error if a custom authentication is provided but not in the custom authentication config', async () => {
+  it('should throw an error if a custom authentication is provided but not in the custom authentication config', () => {
     expect(
       signInWithResolver(
         {},

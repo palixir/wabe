@@ -18,7 +18,7 @@ export const defaultRoutes = (): WabeRoute[] => [
   {
     method: 'GET',
     path: '/auth/oauth',
-    handler: async (context) => {
+    handler: (context) => {
       const provider = context.query.provider
 
       if (!provider)
@@ -31,9 +31,7 @@ export const defaultRoutes = (): WabeRoute[] => [
   {
     method: 'GET',
     path: '/auth/oauth/callback',
-    handler: async (context) => {
-      return oauthHandlerCallback(context, context.wabe)
-    },
+    handler: (context) => oauthHandlerCallback(context, context.wabe),
   },
   {
     method: 'POST',

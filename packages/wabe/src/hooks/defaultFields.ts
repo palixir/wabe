@@ -2,7 +2,7 @@ import { getClassFromClassName } from '../utils'
 import type { DevWabeTypes } from '../utils/helper'
 import type { HookObject } from './HookObject'
 
-export const defaultBeforeCreateForCreatedAt = async (
+export const defaultBeforeCreateForCreatedAt = (
   object: HookObject<any, any>,
 ) => {
   if (!object.isFieldUpdate('createdAt'))
@@ -12,7 +12,7 @@ export const defaultBeforeCreateForCreatedAt = async (
     object.upsertNewData('updatedAt', new Date())
 }
 
-export const defaultBeforeUpdateForUpdatedAt = async (
+export const defaultBeforeUpdateForUpdatedAt = (
   object: HookObject<any, any>,
 ) => {
   object.upsertNewData('updatedAt', new Date())

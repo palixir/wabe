@@ -221,7 +221,7 @@ describe('_Session', () => {
     )
   })
 
-  it('should not refresh session if the access token does not already take 75% of time', async () => {
+  it('should not refresh session if the access token does not already take 75% of time', () => {
     const session = new Session()
 
     // 1 hour
@@ -272,7 +272,7 @@ describe('_Session', () => {
     })
   })
 
-  it("should throw an error on refresh session if session's refresh token is expired", async () => {
+  it("should throw an error on refresh session if session's refresh token is expired", () => {
     mockGetObjects.mockResolvedValue([
       {
         id: 'sessionId',
@@ -294,7 +294,7 @@ describe('_Session', () => {
     ).rejects.toThrow('Refresh token expired')
   })
 
-  it("should throw an error on refresh session if session's refresh token is not the same as the one in the database", async () => {
+  it("should throw an error on refresh session if session's refresh token is not the same as the one in the database", () => {
     mockGetObjects.mockResolvedValue([
       {
         id: 'sessionId',

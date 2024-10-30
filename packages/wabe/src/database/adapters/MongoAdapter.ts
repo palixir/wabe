@@ -145,7 +145,7 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter {
     return client
   }
 
-  async close() {
+  close() {
     return this.client.close()
   }
 

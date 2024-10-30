@@ -84,7 +84,7 @@ describe('searchablesFields', () => {
     ])
   })
 
-  it('should complete the search fields of each object on insert', async () => {
+  it('should complete the search fields of each object on insert', () => {
     const hookObject = new HookObject<DevWabeTypes, 'User'>({
       className: 'User',
       operationType: OperationType.BeforeCreate,
@@ -121,7 +121,7 @@ describe('searchablesFields', () => {
     ])
   })
 
-  it('should complete the search fields of each object on update', async () => {
+  it('should complete the search fields of each object on update', () => {
     const hookObject = new HookObject<DevWabeTypes, 'User'>({
       className: 'User',
       operationType: OperationType.BeforeUpdate,

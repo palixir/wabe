@@ -2,7 +2,7 @@ import { describe, expect, it, mock } from 'bun:test'
 import { cancelSubscriptionResolver } from './cancelSubscription'
 
 describe('cancelSubscriptionResolver', () => {
-  it('should throw an error if the user is not authenticated', async () => {
+  it('should throw an error if the user is not authenticated', () => {
     const context = {
       user: null,
       isRoot: false,
@@ -13,12 +13,12 @@ describe('cancelSubscriptionResolver', () => {
       },
     }
 
-    expect(
+    expect(() =>
       cancelSubscriptionResolver(null, {} as any, context as any),
-    ).rejects.toThrow('Permission denied')
+    ).toThrow('Permission denied')
   })
 
-  it('should throw an error if the payment controller is not defined', async () => {
+  it('should throw an error if the payment controller is not defined', () => {
     const context = {
       user: {
         id: '123',
@@ -32,9 +32,9 @@ describe('cancelSubscriptionResolver', () => {
       },
     }
 
-    expect(
+    expect(() =>
       cancelSubscriptionResolver(null, {} as any, context as any),
-    ).rejects.toThrow('Payment adapter not defined')
+    ).toThrow('Payment adapter not defined')
   })
 
   it("should call the payment controller's cancelSubscription method", async () => {

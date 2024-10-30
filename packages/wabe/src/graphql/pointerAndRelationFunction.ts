@@ -118,7 +118,7 @@ export const add = async ({
       })
 
     await Promise.all(
-      allObjectsMatchedWithWhere.map(async (object: any) => {
+      allObjectsMatchedWithWhere.map((object: any) => {
         const currentValue = object[fieldName]
 
         return context.wabe.controllers.database.updateObject({

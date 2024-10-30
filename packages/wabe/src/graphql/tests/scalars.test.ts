@@ -96,7 +96,7 @@ describe('GraphQL : Scalars', () => {
       expect(date.getDate()).toEqual(birthDate.getDate())
     })
 
-    it('should not create a date with invalid string', async () => {
+    it('should not create a date with invalid string', () => {
       expect(
         client.request(graphql.createUsers, {
           input: {
@@ -167,7 +167,7 @@ describe('GraphQL : Scalars', () => {
       ).resolves.toEqual(expect.anything())
     })
 
-    it('should not create an invalid email', async () => {
+    it('should not create an invalid email', () => {
       expect(
         client.request(graphql.createUsers, {
           input: {

@@ -90,7 +90,7 @@ export const initializeHook = <T extends keyof WabeTypes['types']>({
   newData?: MutationData<any, any>
   context: WabeContext<any>
 }) => {
-  const computeObject = async ({
+  const computeObject = ({
     id,
     object,
     operationType,
@@ -99,7 +99,7 @@ export const initializeHook = <T extends keyof WabeTypes['types']>({
     object?: OutputType<any, any>
     operationType: OperationType
   }): Promise<OutputType<any, any>> => {
-    if (object) return object
+    if (object) return Promise.resolve(object)
 
     // @ts-expect-error
     if (operationType === OperationType.BeforeCreate) return newData

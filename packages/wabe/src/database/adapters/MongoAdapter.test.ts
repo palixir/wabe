@@ -492,7 +492,7 @@ describe('Mongo adapter', () => {
     spyCollection.mockRestore()
   })
 
-  it("should not create class if it's not connected", async () => {
+  it("should not create class if it's not connected", () => {
     const cloneMongoAdapter = Object.assign(
       Object.create(Object.getPrototypeOf(mongoAdapter)),
       mongoAdapter,
@@ -1213,7 +1213,7 @@ describe('Mongo adapter', () => {
     ])
   })
 
-  it("should throw object not found if the object doesn't exist", async () => {
+  it("should throw object not found if the object doesn't exist", () => {
     expect(
       mongoAdapter.getObject({
         className: 'User',
@@ -1524,7 +1524,7 @@ describe('Mongo adapter', () => {
     expect(resAfterDelete.length).toEqual(0)
   })
 
-  it('should build where query with equalTo null', async () => {
+  it('should build where query with equalTo null', () => {
     const where = buildMongoWhereQuery({
       // @ts-expect-error
       acl: { equalTo: null },

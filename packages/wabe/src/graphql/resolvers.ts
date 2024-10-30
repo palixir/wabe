@@ -59,7 +59,7 @@ const getFieldsFromInfo = (info: GraphQLResolveInfo, className: string) => {
   return fields
 }
 
-export const executeRelationOnFields = async ({
+export const executeRelationOnFields = ({
   className,
   fields,
   context,

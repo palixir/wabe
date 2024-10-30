@@ -20,21 +20,21 @@ export class PaymentController implements PaymentAdapter {
     this.config = paymentConfig
   }
 
-  async getCustomerById(options: GetCustomerByIdOptions) {
+  getCustomerById(options: GetCustomerByIdOptions) {
     return this.adapter.getCustomerById(options)
   }
 
-  async initWebhook({ webhookUrl }: InitWebhookOptions) {
+  initWebhook({ webhookUrl }: InitWebhookOptions) {
     return this.adapter.initWebhook({
       webhookUrl,
     })
   }
 
-  async createCustomer(options: CreateCustomerOptions) {
+  createCustomer(options: CreateCustomerOptions) {
     return this.adapter.createCustomer(options)
   }
 
-  async createPayment(
+  createPayment(
     options: Omit<CreatePaymentOptions, 'currency' | 'paymentMethod'>,
   ) {
     return this.adapter.createPayment({
@@ -44,23 +44,23 @@ export class PaymentController implements PaymentAdapter {
     })
   }
 
-  async cancelSubscription(options: CancelSubscriptionOptions) {
+  cancelSubscription(options: CancelSubscriptionOptions) {
     return this.adapter.cancelSubscription(options)
   }
 
-  async getInvoices(options: GetInvoicesOptions) {
+  getInvoices(options: GetInvoicesOptions) {
     return this.adapter.getInvoices(options)
   }
 
-  async getTotalRevenue(options: GetTotalRevenueOptions) {
+  getTotalRevenue(options: GetTotalRevenueOptions) {
     return this.adapter.getTotalRevenue(options)
   }
 
-  async getAllTransactions(options: GetAllTransactionsOptions) {
+  getAllTransactions(options: GetAllTransactionsOptions) {
     return this.adapter.getAllTransactions(options)
   }
 
-  async getHypotheticalSubscriptionRevenue() {
+  getHypotheticalSubscriptionRevenue() {
     return this.adapter.getHypotheticalSubscriptionRevenue()
   }
 }

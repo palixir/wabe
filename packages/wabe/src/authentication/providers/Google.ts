@@ -104,12 +104,12 @@ export class Google implements ProviderInterface<GoogleInterface> {
     }
   }
 
-  async onSignIn(options: AuthenticationEventsOptions<GoogleInterface>) {
+  onSignIn(options: AuthenticationEventsOptions<GoogleInterface>) {
     return this._googleAuthentication(options)
   }
 
   // @ts-expect-error
-  async onSignUp() {
+  onSignUp() {
     throw new Error(
       'SignUp is not implemented for Oauth provider, you should use signIn instead.',
     )

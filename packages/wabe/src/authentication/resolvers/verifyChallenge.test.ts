@@ -38,7 +38,7 @@ describe('verifyChallenge', () => {
     mockOnVerifyChallenge.mockClear()
   })
 
-  it('should throw an error if no one factor is provided', async () => {
+  it('should throw an error if no one factor is provided', () => {
     expect(
       verifyChallengeResolver(
         undefined,
@@ -50,7 +50,7 @@ describe('verifyChallenge', () => {
     ).rejects.toThrow('One factor is required')
   })
 
-  it('should throw an error if more than one factor is provided', async () => {
+  it('should throw an error if more than one factor is provided', () => {
     expect(
       verifyChallengeResolver(
         undefined,
@@ -68,7 +68,7 @@ describe('verifyChallenge', () => {
     ).rejects.toThrow('Only one factor is allowed')
   })
 
-  it('should throw an error if the onVerifyChallenge failed', async () => {
+  it('should throw an error if the onVerifyChallenge failed', () => {
     mockOnVerifyChallenge.mockResolvedValue(false as never)
 
     expect(

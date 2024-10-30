@@ -32,7 +32,7 @@ describe('createPaymentResolver', () => {
     ).rejects.toThrow('Customer email is required')
   })
 
-  it('should throw an error if the user is not authenticated', async () => {
+  it('should throw an error if the user is not authenticated', () => {
     const context = {
       user: null,
       isRoot: false,
@@ -48,7 +48,7 @@ describe('createPaymentResolver', () => {
     ).rejects.toThrow('Permission denied')
   })
 
-  it('should throw an error if the payment controller is not defined', async () => {
+  it('should throw an error if the payment controller is not defined', () => {
     const context = {
       user: {
         id: '123',

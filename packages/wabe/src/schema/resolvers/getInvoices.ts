@@ -2,7 +2,7 @@ import type { QueryGetInvoicesArgs } from '../../../generated/wabe'
 import type { WabeContext } from '../../server/interface'
 import type { DevWabeTypes } from '../../utils/helper'
 
-export const getInvoicesResolver = async (
+export const getInvoicesResolver = (
   _: any,
   { email }: QueryGetInvoicesArgs,
   context: WabeContext<DevWabeTypes>,

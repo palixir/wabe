@@ -83,7 +83,7 @@ describe('Email password', () => {
     )
   })
 
-  it('should not signIn with email password if password is undefined', async () => {
+  it('should not signIn with email password if password is undefined', () => {
     spyArgonPasswordVerify.mockResolvedValueOnce(false)
 
     expect(
@@ -95,7 +95,7 @@ describe('Email password', () => {
     ).rejects.toThrow('Invalid authentication credentials')
   })
 
-  it('should not signIn with email password if there is no user found', async () => {
+  it('should not signIn with email password if there is no user found', () => {
     mockGetObjects.mockResolvedValue([])
 
     expect(
@@ -111,7 +111,7 @@ describe('Email password', () => {
     expect(spyArgonPasswordVerify).toHaveBeenCalledTimes(0)
   })
 
-  it('should not signIn with email password if there is email is invalid', async () => {
+  it('should not signIn with email password if there is email is invalid', () => {
     mockGetObjects.mockResolvedValue([
       {
         authentication: {
@@ -137,7 +137,7 @@ describe('Email password', () => {
     expect(spyArgonPasswordVerify).toHaveBeenCalledTimes(1)
   })
 
-  it('should not update authentication data if there is no user found', async () => {
+  it('should not update authentication data if there is no user found', () => {
     mockGetObjects.mockResolvedValue([])
 
     spyArgonPasswordVerify.mockResolvedValueOnce(true)
