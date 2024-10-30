@@ -7,6 +7,44 @@ import { Schema } from '../schema'
 import { OperationType } from '../hooks'
 
 describe('Server', () => {
+  it('should load routes', async () => {
+    const databaseId = uuid()
+
+    const port = await getPort()
+    const wabe = new Wabe({
+      rootKey:
+        'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+      database: {
+        type: DatabaseEnum.Mongo,
+        url: 'mongodb://127.0.0.1:27045',
+        name: databaseId,
+      },
+      port,
+      routes: [
+        {
+          handler: (ctx) => ctx.res.send('Hello World!'),
+          path: '/hello',
+          method: 'GET',
+        },
+      ],
+      schema: {
+        classes: [
+          {
+            name: 'Collection1',
+            fields: { name: { type: 'String' } },
+          },
+        ],
+      },
+    })
+
+    await wabe.start()
+
+    const res = await fetch(`http://127.0.0.1:${port}/hello`)
+
+    expect(await res.text()).toBe('Hello World!')
+    await wabe.close()
+  })
+
   it('should run server', async () => {
     const databaseId = uuid()
 
