@@ -515,7 +515,7 @@ describe('wabe-stripe', () => {
     })
   })
 
-  it('should throw an error if the session url is not returned by Stripewhen creating a payment', async () => {
+  it('should throw an error if the session url is not returned by Stripewhen creating a payment', () => {
     const adapter = new StripeAdapter('API_KEY')
 
     mockListCustomers.mockResolvedValue({
@@ -584,7 +584,7 @@ describe('wabe-stripe', () => {
     expect(mockCancelSubscription).toHaveBeenCalledWith('sub_123')
   })
 
-  it("should throw an error if the customer doesn't have any subscription when cancelling a subscription", async () => {
+  it("should throw an error if the customer doesn't have any subscription when cancelling a subscription", () => {
     const adapter = new StripeAdapter('API_KEY')
 
     mockListCustomers.mockResolvedValue({
@@ -607,7 +607,7 @@ describe('wabe-stripe', () => {
     ).rejects.toThrow("Customer don't have any subscription")
   })
 
-  it("should throw an error if the customer doesn't have any subscription when cancelling a subscription", async () => {
+  it("should throw an error if the customer doesn't have any subscription when cancelling a subscription", () => {
     const adapter = new StripeAdapter('API_KEY')
 
     mockListCustomers.mockResolvedValue({
@@ -684,7 +684,7 @@ describe('wabe-stripe', () => {
     ])
   })
 
-  it("should throw an error if the customer doesn't exist when getting invoices", async () => {
+  it("should throw an error if the customer doesn't exist when getting invoices", () => {
     const adapter = new StripeAdapter('API_KEY')
 
     mockListCustomers.mockResolvedValue({

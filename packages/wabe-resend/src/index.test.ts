@@ -35,7 +35,7 @@ describe('Resend', () => {
     })
   })
 
-  it('should throw error if something wrong', async () => {
+  it('should throw error if something wrong', () => {
     mockSend.mockResolvedValueOnce({
       data: { id: 'id' },
       error: {
