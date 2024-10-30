@@ -125,7 +125,7 @@ export class Wabe<T extends WabeTypes> {
     }
 
     this.loadRoleEnum()
-    this.loadDefaultRoutes()
+    this.loadRoutes()
     this.loadHooks()
     this.loadAuthenticationMethods()
   }
@@ -169,8 +169,8 @@ export class Wabe<T extends WabeTypes> {
     this.config.hooks = [...getDefaultHooks(), ...(this.config.hooks || [])]
   }
 
-  loadDefaultRoutes() {
-    const wabeRoutes = defaultRoutes()
+  loadRoutes() {
+    const wabeRoutes = [...defaultRoutes(), ...(this.config.routes || [])]
 
     wabeRoutes.map((route) => {
       const { method } = route
