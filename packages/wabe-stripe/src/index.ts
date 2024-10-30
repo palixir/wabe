@@ -38,13 +38,19 @@ export class StripeAdapter implements PaymentAdapter {
   }
 
   async initWebhook({ webhookUrl }: InitWebhookOptions) {
-    await this.stripe.webhookEndpoints.create({
+    const webhook = await this.stripe.webhookEndpoints.create({
       url: webhookUrl,
       enabled_events: [
         'payment_intent.succeeded',
         'payment_intent.payment_failed',
       ],
     })
+
+    return webhook.id
+  }
+
+  async deleteWebhook(webhookId: string) {
+    await this.stripe.webhookEndpoints.del(webhookId)
   }
 
   async createCustomer({

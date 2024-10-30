@@ -192,6 +192,12 @@ export interface PaymentAdapter {
   /**
    * Init the webhook for succeed and failed payments
    * @param options The webhook url
+   * @returns The webhook id
    */
-  initWebhook: (options: InitWebhookOptions) => Promise<void>
+  initWebhook: (options: InitWebhookOptions) => Promise<string>
+  /**
+   * Delete the webhook
+   * @param options The webhook id
+   */
+  deleteWebhook: (webhookId: string) => Promise<void>
 }

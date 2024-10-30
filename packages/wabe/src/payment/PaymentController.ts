@@ -30,6 +30,10 @@ export class PaymentController implements PaymentAdapter {
     })
   }
 
+  deleteWebhook(webhookId: string) {
+    return this.adapter.deleteWebhook(webhookId)
+  }
+
   createCustomer(options: CreateCustomerOptions) {
     return this.adapter.createCustomer(options)
   }

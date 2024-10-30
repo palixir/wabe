@@ -16,6 +16,7 @@ const mockChargesRetrieve = mock(() => {})
 const mockCustomersRetrieve = mock(() => {})
 const mockListCharges = mock(() => {})
 const mockWebhookEndpointsCreate = mock(() => {})
+const mockDeleteWebhook = mock(() => {})
 
 spyOn(Stripe.prototype, 'customers').mockReturnValue({
   create: mockCreateCustomer,
@@ -51,6 +52,7 @@ spyOn(Stripe.prototype, 'charges').mockReturnValue({
 
 spyOn(Stripe.prototype, 'webhookEndpoints').mockReturnValue({
   create: mockWebhookEndpointsCreate,
+  del: mockDeleteWebhook,
 } as never)
 
 describe('wabe-stripe', () => {
@@ -68,6 +70,7 @@ describe('wabe-stripe', () => {
     mockCustomersRetrieve.mockClear()
     mockListCharges.mockClear()
     mockWebhookEndpointsCreate.mockClear()
+    mockDeleteWebhook.mockClear()
   })
 
   it('should get a customer by id', async () => {
@@ -107,6 +110,15 @@ describe('wabe-stripe', () => {
         'payment_intent.payment_failed',
       ],
     })
+  })
+
+  it('should delete a webhook', async () => {
+    const adapter = new StripeAdapter('API_KEY')
+
+    await adapter.deleteWebhook('id')
+
+    expect(mockDeleteWebhook).toHaveBeenCalledTimes(1)
+    expect(mockDeleteWebhook).toHaveBeenCalledWith('id')
   })
 
   it('should get the hypothetical revenue', async () => {
