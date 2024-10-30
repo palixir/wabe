@@ -67,7 +67,7 @@ describe('Permissions', () => {
       expect(permission2).toBeUndefined()
     })
 
-    it('should throw permission denied if no session id is provided but class require authentication', async () => {
+    it('should throw permission denied if no session id is provided but class require authentication', () => {
       const context: WabeContext<any> = {
         sessionId: '',
         // @ts-expect-error
@@ -88,7 +88,7 @@ describe('Permissions', () => {
       )
     })
 
-    it('should throw permission denied if role is not an authorized role', async () => {
+    it('should throw permission denied if role is not an authorized role', () => {
       mockGetObject.mockResolvedValue({
         id: 'sessionId',
         user: { id: 'userId' },
@@ -122,7 +122,7 @@ describe('Permissions', () => {
       )
     })
 
-    it('should not throw permission denied if valid session id is provided', async () => {
+    it('should not throw permission denied if valid session id is provided', () => {
       mockGetObject.mockResolvedValue({
         id: 'sessionId',
         user: { id: 'userId' },
@@ -154,7 +154,7 @@ describe('Permissions', () => {
       expect(_checkCLP(obj, OperationType.BeforeRead)).resolves
     })
 
-    it('should not throw permission denied if client is root', async () => {
+    it('should not throw permission denied if client is root', () => {
       const context: WabeContext<any> = {
         sessionId: '',
         user: {
@@ -174,7 +174,7 @@ describe('Permissions', () => {
       expect(_checkCLP(obj, OperationType.BeforeRead)).resolves
     })
 
-    it('should call _checkPermission on beforeRead', async () => {
+    it('should call _checkPermission on beforeRead', () => {
       const spyBeforeRead = spyOn(
         permissions,
         'defaultCheckPermissionOnRead',
@@ -188,7 +188,7 @@ describe('Permissions', () => {
       spyBeforeRead.mockRestore()
     })
 
-    it('should call _checkPermission on beforeCreate', async () => {
+    it('should call _checkPermission on beforeCreate', () => {
       const spyBeforeCreate = spyOn(
         permissions,
         'defaultCheckPermissionOnCreate',
@@ -208,7 +208,7 @@ describe('Permissions', () => {
       spyBeforeCreate.mockRestore()
     })
 
-    it('should call _checkPermission on beforeUpdate', async () => {
+    it('should call _checkPermission on beforeUpdate', () => {
       const spyBeforeUpdate = spyOn(
         permissions,
         'defaultCheckPermissionOnUpdate',
@@ -228,7 +228,7 @@ describe('Permissions', () => {
       spyBeforeUpdate.mockRestore()
     })
 
-    it('should call _checkPermission on beforeDelete', async () => {
+    it('should call _checkPermission on beforeDelete', () => {
       const spyBeforeDelete = spyOn(
         permissions,
         'defaultCheckPermissionOnDelete',

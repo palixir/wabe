@@ -2,7 +2,7 @@ import type { MutationSendEmailArgs } from '../../../generated/wabe'
 import type { WabeContext } from '../../server/interface'
 import type { DevWabeTypes } from '../../utils/helper'
 
-export const sendEmailResolver = async (
+export const sendEmailResolver = (
   _: any,
   { input }: MutationSendEmailArgs,
   context: WabeContext<DevWabeTypes>,

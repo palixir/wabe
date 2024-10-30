@@ -21,7 +21,7 @@ describe('Google oauth', () => {
     const spyOauth2ClientCreateAuthorizationUrl = spyOn(
       OAuth2Client.prototype,
       'createAuthorizationURL',
-    ).mockResolvedValue(new URL('https://url') as any)
+    ).mockResolvedValue(new URL('https://url') as never)
 
     const authorizationUrl = await googleOauth.createAuthorizationURL(
       'state',

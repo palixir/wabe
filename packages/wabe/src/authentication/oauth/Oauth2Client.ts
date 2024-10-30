@@ -29,11 +29,11 @@ export class OAuth2Client {
     this.redirectURI = redirectURI
   }
 
-  async createAuthorizationURL(options?: {
+  createAuthorizationURL(options?: {
     state?: string
     codeVerifier?: string
     scopes?: string[]
-  }): Promise<URL> {
+  }): URL {
     const scopes = Array.from(new Set(options?.scopes || [])) // remove duplicates
     const authorizationUrl = new URL(this.authorizeEndpoint)
     authorizationUrl.searchParams.set('response_type', 'code')
@@ -58,7 +58,7 @@ export class OAuth2Client {
     return authorizationUrl
   }
 
-  async validateAuthorizationCode<_TokenResponseBody extends TokenResponseBody>(
+  validateAuthorizationCode<_TokenResponseBody extends TokenResponseBody>(
     authorizationCode: string,
     options?: {
       codeVerifier?: string

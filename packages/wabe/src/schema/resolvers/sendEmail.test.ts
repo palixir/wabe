@@ -3,8 +3,8 @@ import { sendEmailResolver } from './sendEmail'
 import type { WabeContext } from '../../server/interface'
 
 describe('SendEmail', () => {
-  it('should throw an error if email adapter is not defined', async () => {
-    expect(
+  it('should throw an error if email adapter is not defined', () => {
+    expect(() =>
       sendEmailResolver(
         undefined,
         {
@@ -22,7 +22,7 @@ describe('SendEmail', () => {
           },
         } as WabeContext<any>,
       ),
-    ).rejects.toThrow('Email adapter not defined')
+    ).toThrow('Email adapter not defined')
   })
 
   it('should send email when user is connected', async () => {
@@ -90,10 +90,10 @@ describe('SendEmail', () => {
     })
   })
 
-  it('should not send email when user is not connected and is not root', async () => {
+  it('should not send email when user is not connected and is not root', () => {
     const mockSend = mock(() => {}).mockResolvedValueOnce(true as never)
 
-    expect(
+    expect(() =>
       sendEmailResolver(
         undefined,
         {
@@ -111,7 +111,7 @@ describe('SendEmail', () => {
           },
         } as WabeContext<any>,
       ),
-    ).rejects.toThrow('Permission denied')
+    ).toThrow('Permission denied')
 
     expect(mockSend).toHaveBeenCalledTimes(0)
   })

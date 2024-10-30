@@ -2,7 +2,7 @@ import type { MutationCancelSubscriptionArgs } from '../../../generated/wabe'
 import type { WabeContext } from '../../server/interface'
 import type { DevWabeTypes } from '../../utils/helper'
 
-export const cancelSubscriptionResolver = async (
+export const cancelSubscriptionResolver = (
   _: any,
   { input }: MutationCancelSubscriptionArgs,
   context: WabeContext<DevWabeTypes>,

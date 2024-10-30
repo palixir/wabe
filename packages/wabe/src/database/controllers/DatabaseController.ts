@@ -40,15 +40,15 @@ export class DatabaseController<T extends WabeTypes> {
     this.inMemoryCache = new InMemoryCache({ interval: 5000 })
   }
 
-  async connect() {
+  connect() {
     return this.adapter.connect()
   }
 
-  async close() {
+  close() {
     return this.adapter.close()
   }
 
-  async createClassIfNotExist(className: string, context: WabeContext<T>) {
+  createClassIfNotExist(className: string, context: WabeContext<T>) {
     return this.adapter.createClassIfNotExist(className, context)
   }
 
@@ -373,7 +373,7 @@ export class DatabaseController<T extends WabeTypes> {
     return `${String(className)}-${id}-${fields.join(',')}`
   }
 
-  async count<U extends keyof T['types'], K extends keyof T['types'][U]>(
+  count<U extends keyof T['types'], K extends keyof T['types'][U]>(
     params: CountOptions<U, K>,
   ) {
     return this.adapter.count(params)

@@ -18,7 +18,8 @@
     "rules": {
       "recommended": true,
       "suspicious": {
-        "noExplicitAny": "off"
+        "noExplicitAny": "off",
+        "useAwait": "error"
       },
       "style": {
         "useTemplate": "off"
