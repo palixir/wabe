@@ -16,6 +16,7 @@ import {
 import type { Wabe } from '../..'
 import { gql, type GraphQLClient } from 'graphql-request'
 import * as linkPayment from '../../payment/linkPayment'
+import { PaymentDevAdapter } from '../../payment/DevAdapter'
 
 describe('webhookPayment route', () => {
   let wabe: Wabe<DevWabeTypes>
@@ -40,6 +41,18 @@ describe('webhookPayment route', () => {
   })
 
   it('should call link payment and onPaymentSucceed when the webhook is called', async () => {
+    spyOn(PaymentDevAdapter.prototype, 'validateWebhook').mockResolvedValue({
+      isValid: true,
+      payload: {
+        type: 'payment_intent.succeeded',
+        amount: 100,
+        createdAt: 1679481600,
+        currency: 'eur',
+        customerId: 'customerId',
+        paymentMethod: ['card'],
+      },
+    } as never)
+
     await client.request<any>(gql`
 				mutation createUser {
 					createUser(input: {fields: {email: "customer@test.com"}}) {
@@ -51,7 +64,7 @@ describe('webhookPayment route', () => {
 				}
 			`)
 
-    const res = await fetch(`http://127.0.0.1:${port}/webhooks/payment`, {
+    const res = await fetch(`http://127.0.0.1:${port}/webhook/linkPayment`, {
       method: 'POST',
       body: JSON.stringify({
         type: 'payment_intent.succeeded',
@@ -111,6 +124,18 @@ describe('webhookPayment route', () => {
   })
 
   it('should call onPaymentFailed when the webhook is called', async () => {
+    spyOn(PaymentDevAdapter.prototype, 'validateWebhook').mockResolvedValue({
+      isValid: true,
+      payload: {
+        type: 'payment_intent.payment_failed',
+        amount: 100,
+        createdAt: 1679481600,
+        currency: 'eur',
+        customerId: 'customerId',
+        paymentMethod: ['card'],
+      },
+    } as never)
+
     await client.request<any>(gql`
 				mutation createUser {
 					createUser(input: {fields: {email: "customer@test.com"}}) {
@@ -133,7 +158,7 @@ describe('webhookPayment route', () => {
 				}
 			`)
 
-    const res = await fetch(`http://127.0.0.1:${port}/webhooks/payment`, {
+    const res = await fetch(`http://127.0.0.1:${port}/webhook/linkPayment`, {
       method: 'POST',
       body: JSON.stringify({
         type: 'payment_intent.payment_failed',

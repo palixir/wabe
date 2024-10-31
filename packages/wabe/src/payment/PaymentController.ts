@@ -7,7 +7,6 @@ import type {
   PaymentConfig,
   GetTotalRevenueOptions,
   GetAllTransactionsOptions,
-  InitWebhookOptions,
   GetCustomerByIdOptions,
 } from './interface'
 
@@ -24,14 +23,8 @@ export class PaymentController implements PaymentAdapter {
     return this.adapter.getCustomerById(options)
   }
 
-  initWebhook({ webhookUrl }: InitWebhookOptions) {
-    return this.adapter.initWebhook({
-      webhookUrl,
-    })
-  }
-
-  deleteWebhook(webhookId: string) {
-    return this.adapter.deleteWebhook(webhookId)
+  validateWebhook(ctx: any) {
+    return this.adapter.validateWebhook(ctx)
   }
 
   createCustomer(options: CreateCustomerOptions) {

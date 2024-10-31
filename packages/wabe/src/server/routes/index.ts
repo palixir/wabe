@@ -1,12 +1,13 @@
 import type { WobeHandler } from 'wobe'
 import type { ProviderEnum } from '../../authentication/interface'
 import { authHandler, oauthHandlerCallback } from './authHandler'
-import type { WobeCustomContext } from '..'
+import type { Wabe, WobeCustomContext } from '..'
 import type {
   OnPaymentFailedOptions,
   OnPaymentSucceedOptions,
 } from '../../payment/interface'
 import { linkPayment } from '../../payment/linkPayment'
+import type { DevWabeTypes } from '../../utils/helper'
 
 export interface WabeRoute {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE'
@@ -14,80 +15,114 @@ export interface WabeRoute {
   handler: WobeHandler<WobeCustomContext<any>>
 }
 
-export const defaultRoutes = (): WabeRoute[] => [
-  {
-    method: 'GET',
-    path: '/auth/oauth',
-    handler: (context) => {
-      const provider = context.query.provider
+const webhookRoute = (wabe: Wabe<DevWabeTypes>): Array<WabeRoute> => {
+  const webhookUrl =
+    wabe.config.payment?.linkPaymentWebhook?.url || '/webhook/linkPayment'
 
-      if (!provider)
-        throw new Error('Authentication failed, provider not found')
+  return [
+    {
+      method: 'POST',
+      path: webhookUrl,
+      handler: async (context) => {
+        const paymentController = context.wabe.wabe.controllers.payment
 
-      // TODO: Maybe check if the value is in the enum
-      return authHandler(context, context.wabe, provider as ProviderEnum)
-    },
-  },
-  {
-    method: 'GET',
-    path: '/auth/oauth/callback',
-    handler: (context) => oauthHandlerCallback(context, context.wabe),
-  },
-  {
-    method: 'POST',
-    path: '/webhooks/payment',
-    handler: async (context) => {
-      const body = await context.request.json()
+        if (!paymentController)
+          return context.res.send('No payment controller', {
+            status: 400,
+          })
 
-      switch (body.type) {
-        case 'payment_intent.succeeded': {
-          const res =
-            await context.wabe.wabe.controllers.payment?.getCustomerById({
-              id: body.data.object.customer?.id || '',
-            })
+        const paymentEndpointSecret =
+          context.wabe.wabe.config.payment?.linkPaymentWebhook?.secret
 
-          const customerEmail = res?.email || ''
+        if (!paymentEndpointSecret)
+          return context.res.send('Bad request', {
+            status: 400,
+          })
 
-          const extractedBody: OnPaymentSucceedOptions = {
-            created: body.created,
-            currency: body.data.object.currency,
-            amount: body.data.object.amount,
-            billingDetails: body.data.object.shipping,
-            paymentMethodTypes: body.data.object.payment_method_types,
-            customerEmail,
-          }
+        const { payload, isValid } = await paymentController.validateWebhook({
+          ctx: context,
+          endpointSecret: paymentEndpointSecret,
+        })
 
-          if (extractedBody.customerEmail)
-            await linkPayment(
-              context.wabe,
-              extractedBody.customerEmail,
-              extractedBody.amount,
-              extractedBody.currency,
+        if (!isValid)
+          return context.res.send('Invalid webhook', {
+            status: 400,
+          })
+
+        switch (payload.type) {
+          case 'payment_intent.succeeded': {
+            const res =
+              await context.wabe.wabe.controllers.payment?.getCustomerById({
+                id: payload.customerId || '',
+              })
+
+            const customerEmail = res?.email || ''
+
+            const extractedBody: OnPaymentSucceedOptions = {
+              createdAt: payload.createdAt || 0,
+              currency: payload.currency || '',
+              amount: payload.amount || 0,
+              paymentMethodTypes: payload.paymentMethod || [],
+              customerEmail,
+            }
+
+            if (extractedBody.customerEmail)
+              await linkPayment(
+                context.wabe,
+                extractedBody.customerEmail,
+                extractedBody.amount,
+                extractedBody.currency,
+              )
+
+            await context.wabe.wabe.config.payment?.onPaymentSucceed?.(
+              extractedBody,
             )
-
-          await context.wabe.wabe.config.payment?.onPaymentSucceed?.(
-            extractedBody,
-          )
-          break
-        }
-        case 'payment_intent.payment_failed': {
-          const extractedBody: OnPaymentFailedOptions = {
-            created: body.created,
-            amount: body.data.object.amount,
-            messageError: body.data.object.last_payment_error?.message,
-            paymentMethodTypes: body.data.object.payment_method_types,
+            break
           }
+          case 'payment_intent.payment_failed': {
+            const extractedBody: OnPaymentFailedOptions = {
+              createdAt: payload.createdAt || 0,
+              amount: payload.amount || 0,
+              paymentMethodTypes: payload.paymentMethod || [],
+            }
 
-          await context.wabe.wabe.config.payment?.onPaymentFailed?.(
-            extractedBody,
-          )
-          break
+            await context.wabe.wabe.config.payment?.onPaymentFailed?.(
+              extractedBody,
+            )
+            break
+          }
+          default:
+            break
         }
-        default:
-          break
-      }
 
-      return context.res.sendJson({ received: true })
+        return context.res.sendJson({ received: true })
+      },
     },
-  },
-]
+  ]
+}
+
+export const defaultRoutes = (wabe: Wabe<DevWabeTypes>): WabeRoute[] => {
+  const routes: WabeRoute[] = [
+    {
+      method: 'GET',
+      path: '/auth/oauth',
+      handler: (context) => {
+        const provider = context.query.provider
+
+        if (!provider)
+          throw new Error('Authentication failed, provider not found')
+
+        // TODO: Maybe check if the value is in the enum
+        return authHandler(context, context.wabe, provider as ProviderEnum)
+      },
+    },
+    {
+      method: 'GET',
+      path: '/auth/oauth/callback',
+      handler: (context) => oauthHandlerCallback(context, context.wabe),
+    },
+    ...webhookRoute(wabe),
+  ]
+
+  return routes
+}

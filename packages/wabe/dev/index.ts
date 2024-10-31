@@ -26,17 +26,6 @@ const run = async () => {
       roles: ['Admin', 'Client'],
       successRedirectPath: 'http://localhost:3000/auth/oauth?provider=google',
       failureRedirectPath: 'http://localhost:3000/auth/oauth?provider=google',
-      providers: {
-        x: {
-          clientId: 'SVFhTWpONVM4S09TWVB6dF9CZjc6MTpjaQ',
-          clientSecret: 'V95bDcUgQgYNqweVRO8RFrqWJxr_yckd_b5Npp-MmEBxMr6KuR',
-        },
-        google: {
-          clientId:
-            '296431040556-4jh84e5s264rmrgnh8bmegb0kl550teg.apps.googleusercontent.com',
-          clientSecret: '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',
-        },
-      },
       customAuthenticationMethods: [
         {
           name: 'otp',

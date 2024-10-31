@@ -3,11 +3,11 @@ import { PaymentController } from './PaymentController'
 import { Currency, PaymentMode } from './interface'
 
 describe('PaymentController', () => {
-  it("should call the adapter's initWebhook method", async () => {
-    const mockInitWebhook = mock(() => {})
+  it("should call the adapter's validateWebhook method", async () => {
+    const mockValidateWebhook = mock(() => {})
 
     const adapter = {
-      initWebhook: mockInitWebhook,
+      validateWebhook: mockValidateWebhook,
     } as any
 
     const paymentController = new PaymentController({
@@ -16,33 +16,22 @@ describe('PaymentController', () => {
       supportedPaymentMethods: ['card'],
     })
 
-    await paymentController.initWebhook({
-      webhookUrl: 'https://example.com/webhook',
+    await paymentController.validateWebhook({
+      request: {
+        headers: {
+          get: () => 'provider',
+        },
+      },
     })
 
-    expect(mockInitWebhook).toHaveBeenCalledTimes(1)
-    expect(mockInitWebhook).toHaveBeenCalledWith({
-      webhookUrl: 'https://example.com/webhook',
+    expect(mockValidateWebhook).toHaveBeenCalledTimes(1)
+    expect(mockValidateWebhook).toHaveBeenCalledWith({
+      request: {
+        headers: {
+          get: expect.any(Function),
+        },
+      },
     })
-  })
-
-  it("should call the adapter's deleteWebhook method", async () => {
-    const mockDeleteWebhook = mock(() => {})
-
-    const adapter = {
-      deleteWebhook: mockDeleteWebhook,
-    } as any
-
-    const paymentController = new PaymentController({
-      adapter,
-      currency: Currency.EUR,
-      supportedPaymentMethods: ['card'],
-    })
-
-    await paymentController.deleteWebhook('id')
-
-    expect(mockDeleteWebhook).toHaveBeenCalledTimes(1)
-    expect(mockDeleteWebhook).toHaveBeenCalledWith('id')
   })
 
   it("should call the adapter's createCustomer method", async () => {
