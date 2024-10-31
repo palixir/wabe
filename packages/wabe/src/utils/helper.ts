@@ -97,9 +97,8 @@ export const setupTests = async (
       adapter: new PaymentDevAdapter(),
       onPaymentSucceed: async () => {},
       onPaymentFailed: async () => {},
-      webhook: {
+      linkPaymentWebhook: {
         secret: 'secret',
-        url: '/webhooks/payment',
       },
     },
     schema: {

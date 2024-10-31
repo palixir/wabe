@@ -16,14 +16,13 @@ export interface WabeRoute {
 }
 
 const webhookRoute = (wabe: Wabe<DevWabeTypes>): Array<WabeRoute> => {
-  const webhookUrl = wabe.config.payment?.webhook?.url || ''
-
-  if (!webhookUrl) return []
+  const webhookUrl =
+    wabe.config.payment?.linkPaymentWebhook?.url || '/webhook/linkPayment'
 
   return [
     {
       method: 'POST',
-      path: '/webhooks/payment',
+      path: webhookUrl,
       handler: async (context) => {
         const paymentController = context.wabe.wabe.controllers.payment
 
@@ -33,7 +32,7 @@ const webhookRoute = (wabe: Wabe<DevWabeTypes>): Array<WabeRoute> => {
           })
 
         const paymentEndpointSecret =
-          context.wabe.wabe.config.payment?.webhook?.secret
+          context.wabe.wabe.config.payment?.linkPaymentWebhook?.secret
 
         if (!paymentEndpointSecret)
           return context.res.send('Bad request', {

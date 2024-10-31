@@ -64,7 +64,7 @@ describe('webhookPayment route', () => {
 				}
 			`)
 
-    const res = await fetch(`http://127.0.0.1:${port}/webhooks/payment`, {
+    const res = await fetch(`http://127.0.0.1:${port}/webhook/linkPayment`, {
       method: 'POST',
       body: JSON.stringify({
         type: 'payment_intent.succeeded',
@@ -158,7 +158,7 @@ describe('webhookPayment route', () => {
 				}
 			`)
 
-    const res = await fetch(`http://127.0.0.1:${port}/webhooks/payment`, {
+    const res = await fetch(`http://127.0.0.1:${port}/webhook/linkPayment`, {
       method: 'POST',
       body: JSON.stringify({
         type: 'payment_intent.payment_failed',

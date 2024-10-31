@@ -1,6 +1,6 @@
 # Create payment
 
-With wabe, you have the ability to create payments either by using official adapters or by creating your own. You can then access it in the controllers object or create create payment with the default graphql mutation `createPayment`.
+With wabe, you have the ability to create payments either by using official adapters or by creating your own. You can then access it in the controllers object or create payment with the default graphql mutation `createPayment`.
 
 ```ts
 // With controller
@@ -88,7 +88,7 @@ getInvoices(input: GetInvoicesInput!): [Invoice]!
 
 ## Webhooks
 
-Wabe offers the ability to create webhooks for payments. The webhooks are created automatically when you initialize the payment adapter. For the moment we only support two callbacks, one for successful payments and one for failed payments. You can for example do something like sending a welcome email after each successful payment.
+Wabe offers the ability to create webhooks for payments. The webhooks are created automatically when you initialize the payment adapter. For the moment we only support two callbacks, one for successful payments and one for failed payments. You can for example do something like sending a welcome email after each successful payment. This callbacks will be called in the linkPayment webhook. You need to define create a webhook on your provider dashboard (for example : Stripe Dashboard) with the specified url in the Wabe config and add the webhook secret (we recommend to use env variable for this secret).
 
 ```ts
 import { Wabe, Currency } from "wabe";
@@ -107,6 +107,11 @@ const run = async () => {
       },
       onPaymentFailed: async (options) => {
         // Do something with the options
+      },
+      // You can define the default url or not for the linkPayment webhook
+      linkPaymentWebhook: {
+        secret: 'secret',
+        url: '/webhooks/payment',
       },
     },
   });

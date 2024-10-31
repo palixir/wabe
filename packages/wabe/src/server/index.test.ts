@@ -109,16 +109,15 @@ describe('Server', () => {
         adapter: new PaymentDevAdapter(),
         // @ts-expect-error
         onPaymentSucceed: async (options: any) => mockOnPaymentSucceed(options),
-        webhook: {
+        linkPaymentWebhook: {
           secret: 'secret',
-          url: '/webhooks/payment',
         },
       } as any,
     })
 
     await wabe.start()
 
-    const res = await fetch(`http://127.0.0.1:${port}/webhooks/payment`, {
+    const res = await fetch(`http://127.0.0.1:${port}/webhook/linkPayment`, {
       method: 'POST',
       body: JSON.stringify({
         type: 'payment_intent.succeeded',
@@ -192,16 +191,15 @@ describe('Server', () => {
         adapter: new PaymentDevAdapter(),
         // @ts-expect-error
         onPaymentFailed: async (options: any) => mockOnPaymentFailed(options),
-        webhook: {
+        linkPaymentWebhook: {
           secret: 'secret',
-          url: '/webhooks/payment',
         },
       } as any,
     })
 
     await wabe.start()
 
-    await fetch(`http://127.0.0.1:${port}/webhooks/payment`, {
+    await fetch(`http://127.0.0.1:${port}/webhook/linkPayment`, {
       method: 'POST',
       body: JSON.stringify({
         type: 'payment_intent.payment_failed',
