@@ -115,15 +115,6 @@ export class Wabe<T extends WabeTypes> {
       payment: payment?.adapter ? new PaymentController(payment) : undefined,
     }
 
-    if (this.controllers.payment) {
-      if (!this.config.publicUrl)
-        throw new Error('publicUrl config is not defined')
-
-      this.controllers.payment.initWebhook({
-        webhookUrl: `${this.config.publicUrl}/webhooks/payment`,
-      })
-    }
-
     this.loadRoleEnum()
     this.loadRoutes()
     this.loadHooks()
@@ -170,7 +161,8 @@ export class Wabe<T extends WabeTypes> {
   }
 
   loadRoutes() {
-    const wabeRoutes = [...defaultRoutes(), ...(this.config.routes || [])]
+    // @ts-expect-error
+    const wabeRoutes = [...defaultRoutes(this), ...(this.config.routes || [])]
 
     wabeRoutes.map((route) => {
       const { method } = route

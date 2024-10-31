@@ -15,8 +15,7 @@ const mockSubscriptionsRetrieve = mock(() => {})
 const mockChargesRetrieve = mock(() => {})
 const mockCustomersRetrieve = mock(() => {})
 const mockListCharges = mock(() => {})
-const mockWebhookEndpointsCreate = mock(() => {})
-const mockDeleteWebhook = mock(() => {})
+const mockConstructEventAsync = mock(() => {})
 
 spyOn(Stripe.prototype, 'customers').mockReturnValue({
   create: mockCreateCustomer,
@@ -50,10 +49,13 @@ spyOn(Stripe.prototype, 'charges').mockReturnValue({
   retrieve: mockChargesRetrieve,
 } as never)
 
-spyOn(Stripe.prototype, 'webhookEndpoints').mockReturnValue({
-  create: mockWebhookEndpointsCreate,
-  del: mockDeleteWebhook,
+spyOn(Stripe.prototype, 'webhooks').mockReturnValue({
+  constructEventAsync: mockConstructEventAsync,
 } as never)
+
+spyOn(StripeAdapter.prototype, '_streamToString').mockReturnValue(
+  Promise.resolve('body'),
+)
 
 describe('wabe-stripe', () => {
   beforeEach(() => {
@@ -69,8 +71,116 @@ describe('wabe-stripe', () => {
     mockChargesRetrieve.mockClear()
     mockCustomersRetrieve.mockClear()
     mockListCharges.mockClear()
-    mockWebhookEndpointsCreate.mockClear()
-    mockDeleteWebhook.mockClear()
+    mockConstructEventAsync.mockClear()
+  })
+
+  it('should return isValid false if the constructEventAsync throw an error', async () => {
+    mockConstructEventAsync.mockImplementation(() => {
+      throw new Error('Error')
+    })
+
+    const adapter = new StripeAdapter('API_KEY')
+
+    const { isValid } = await adapter.validateWebhook({
+      ctx: {
+        request: {
+          body: 'body',
+          headers: {
+            get: () => 'stripe-signature',
+          },
+        },
+      } as any,
+      endpointSecret: 'secret',
+    })
+
+    expect(mockConstructEventAsync).toHaveBeenCalledTimes(1)
+    expect(isValid).toBe(false)
+  })
+
+  it('should return isValid false if there is not a stripe-signature header', async () => {
+    const adapter = new StripeAdapter('API_KEY')
+
+    const { isValid } = await adapter.validateWebhook({
+      ctx: {
+        request: {
+          headers: {
+            get: () => undefined,
+          },
+        },
+      } as any,
+      endpointSecret: 'secret',
+    })
+
+    expect(isValid).toBe(false)
+  })
+
+  it('should return isValid false if there is no body', async () => {
+    const adapter = new StripeAdapter('API_KEY')
+
+    const { isValid } = await adapter.validateWebhook({
+      ctx: {
+        request: {
+          headers: {
+            get: () => 'stripe-signature',
+          },
+        },
+      } as any,
+      endpointSecret: 'secret',
+    })
+
+    expect(isValid).toBe(false)
+  })
+
+  it('should return all elements of the payload if the signature is valid', async () => {
+    const adapter = new StripeAdapter('API_KEY')
+
+    mockConstructEventAsync.mockResolvedValueOnce({
+      type: 'payment_intent.succeeded',
+      created: 1679481600,
+      data: {
+        object: {
+          amount: 100,
+          currency: 'eur',
+          customer: 'customerId',
+          payment_method_types: ['card'],
+          shipping: {
+            address: {
+              city: 'Paris',
+              country: 'France',
+              line1: '1 rue de la Paix',
+              line2: '75008 Paris',
+              postalCode: '75008',
+              state: 'Paris',
+            },
+            name: 'John Doe',
+            phone: '+33612345678',
+          },
+        },
+      },
+    } as never)
+
+    const { isValid, payload } = await adapter.validateWebhook({
+      ctx: {
+        request: {
+          body: 'body',
+          headers: {
+            get: () => 'stripe-signature',
+          },
+        },
+      } as any,
+      endpointSecret: 'secret',
+    })
+
+    expect(mockConstructEventAsync).toHaveBeenCalledTimes(1)
+    expect(isValid).toBe(true)
+    expect(payload).toEqual({
+      type: 'payment_intent.succeeded',
+      amount: 100,
+      createdAt: 1679481600,
+      currency: 'eur',
+      customerId: 'customerId',
+      paymentMethod: ['card'],
+    })
   })
 
   it('should get a customer by id', async () => {
@@ -91,34 +201,6 @@ describe('wabe-stripe', () => {
     expect(customer).toEqual({
       email: 'test@wabe.dev',
     })
-  })
-
-  it('should init the webhooks', async () => {
-    const adapter = new StripeAdapter('API_KEY')
-
-    mockWebhookEndpointsCreate.mockResolvedValue({
-      id: 'wh_123',
-    } as never)
-
-    await adapter.initWebhook({ webhookUrl: 'https://wabe.dev' })
-
-    expect(mockWebhookEndpointsCreate).toHaveBeenCalledTimes(1)
-    expect(mockWebhookEndpointsCreate).toHaveBeenCalledWith({
-      url: 'https://wabe.dev',
-      enabled_events: [
-        'payment_intent.succeeded',
-        'payment_intent.payment_failed',
-      ],
-    })
-  })
-
-  it('should delete a webhook', async () => {
-    const adapter = new StripeAdapter('API_KEY')
-
-    await adapter.deleteWebhook('id')
-
-    expect(mockDeleteWebhook).toHaveBeenCalledTimes(1)
-    expect(mockDeleteWebhook).toHaveBeenCalledWith('id')
   })
 
   it('should get the hypothetical revenue', async () => {

@@ -1,6 +1,8 @@
 import { Stripe } from 'stripe'
 import type {
   CancelSubscriptionOptions,
+  ValidateWebhookOptions,
+  ValidateWebhookOutput,
   CreateCustomerOptions,
   CreatePaymentOptions,
   Currency,
@@ -8,7 +10,6 @@ import type {
   GetCustomerByIdOptions,
   GetInvoicesOptions,
   GetTotalRevenueOptions,
-  InitWebhookOptions,
   Invoice,
   PaymentAdapter,
   Transaction,
@@ -37,20 +38,73 @@ export class StripeAdapter implements PaymentAdapter {
     }
   }
 
-  async initWebhook({ webhookUrl }: InitWebhookOptions) {
-    const webhook = await this.stripe.webhookEndpoints.create({
-      url: webhookUrl,
-      enabled_events: [
-        'payment_intent.succeeded',
-        'payment_intent.payment_failed',
-      ],
-    })
+  async _streamToString(stream: ReadableStream<Uint8Array>) {
+    // Create a new TextDecoder instance to decode UTF-8 encoded data
+    const decoder = new TextDecoder('utf-8')
+    let result = ''
 
-    return webhook.id
+    // Get a reader from the stream
+    const reader = stream.getReader()
+
+    while (true) {
+      // Read from the stream
+      const { done, value } = await reader.read()
+
+      // Exit loop if there's no more data
+      if (done) break
+
+      // Decode and append the chunk to the result
+      result += decoder.decode(value, { stream: true })
+    }
+
+    // Return the final result
+    return result
   }
 
-  async deleteWebhook(webhookId: string) {
-    await this.stripe.webhookEndpoints.del(webhookId)
+  async validateWebhook({
+    ctx,
+    endpointSecret,
+  }: ValidateWebhookOptions): Promise<ValidateWebhookOutput> {
+    const stripeSignature = ctx.request.headers.get('stripe-signature')
+
+    const body = ctx.request.body
+
+    if (!body || !stripeSignature)
+      return {
+        isValid: false,
+        payload: {
+          type: '',
+        },
+      }
+
+    try {
+      const event = await this.stripe.webhooks.constructEventAsync(
+        await this._streamToString(body),
+        stripeSignature,
+        endpointSecret,
+      )
+
+      const object = event.data.object as any
+
+      return {
+        isValid: true,
+        payload: {
+          type: event.type,
+          customerId: object.customer || '',
+          createdAt: event.created,
+          currency: object.currency,
+          amount: object.amount,
+          paymentMethod: object.payment_method_types,
+        },
+      }
+    } catch {
+      return {
+        isValid: false,
+        payload: {
+          type: '',
+        },
+      }
+    }
   }
 
   async createCustomer({

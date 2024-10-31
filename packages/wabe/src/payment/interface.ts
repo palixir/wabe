@@ -1,3 +1,5 @@
+import type { Context } from 'wobe'
+
 export enum Currency {
   EUR = 'eur',
   USD = 'usd',
@@ -37,38 +39,40 @@ export type Product = {
 }
 
 export interface OnPaymentSucceedOptions {
-  created: string
+  createdAt: number
   amount: number
   customerEmail: string | null
-  billingDetails: {
-    address: {
-      city: string | null
-      country: string | null
-      line1: string | null
-      line2: string | null
-      postalCode: string | null
-      state: string | null
-    }
-    name: string | null
-    phone: string | null
-  }
   currency: string
   paymentMethodTypes: Array<string>
 }
 
 export interface OnPaymentFailedOptions {
-  created: string
+  createdAt: number
   amount: number
-  messageError: string
   paymentMethodTypes: Array<string>
 }
 
+/**
+ * PaymentConfig
+ * @property adapter - The payment adapter
+ * @property supportedPaymentMethods - The supported payment methods
+ * @property currency - The currency
+ * @property onPaymentSucceed - The callback function for when a payment is succeeded
+ * @property onPaymentFailed - The callback function for when a payment is failed
+ * @property webhook - The webhook configuration
+ * @property webhook.secret - The webhook secret
+ * @property webhook.url - The webhook url (Example: /webhooks/payment)
+ */
 export interface PaymentConfig {
   adapter: PaymentAdapter
   supportedPaymentMethods: Array<PaymentMethod>
   currency: Currency
   onPaymentSucceed?: (options: OnPaymentSucceedOptions) => Promise<void>
   onPaymentFailed?: (options: OnPaymentFailedOptions) => Promise<void>
+  webhook?: {
+    secret: string
+    url: string
+  }
 }
 
 export type Invoice = {
@@ -138,6 +142,39 @@ export type GetCustomerByIdOptions = {
   id: string
 }
 
+export type ValidateWebhookOptions = {
+  ctx: Context
+  endpointSecret: string
+}
+
+/**
+ * ValidateWebhookOutput
+ * @property valid - Whether the webhook is valid or not
+ * @property payload - The payload of the webhook
+ * @property type - The type of the webhook
+ * @property customerId - The customer id
+ * @property createdAt - The created at timestamp in seconds
+ * @property currency - The currency
+ * @property amount - The amount
+ * @property paymentMethod - The payment method
+ */
+export type ValidateWebhookOutput = {
+  isValid: boolean
+  payload: {
+    type: string
+    customerId?: string
+    createdAt?: number
+    currency?: string
+    amount?: number
+    paymentMethod?: Array<string>
+  }
+}
+
+export type InitWebhookOutput = {
+  webhookId: string
+  endpointSecret: string
+}
+
 export interface PaymentAdapter {
   /**
    * Get a customer by id
@@ -190,14 +227,11 @@ export interface PaymentAdapter {
    */
   getHypotheticalSubscriptionRevenue: () => Promise<number>
   /**
-   * Init the webhook for succeed and failed payments
-   * @param options The webhook url
-   * @returns The webhook id
+   * Check if the request on webhook is from a valid provier
+   * @param ctx The Wobe context of the request
+   * @returns True if the request is from a valid provider, false otherwise
    */
-  initWebhook: (options: InitWebhookOptions) => Promise<string>
-  /**
-   * Delete the webhook
-   * @param options The webhook id
-   */
-  deleteWebhook: (webhookId: string) => Promise<void>
+  validateWebhook: (
+    options: ValidateWebhookOptions,
+  ) => Promise<ValidateWebhookOutput>
 }

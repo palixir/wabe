@@ -95,8 +95,12 @@ export const setupTests = async (
     payment: {
       // @ts-expect-error
       adapter: new PaymentDevAdapter(),
-      asyhnonPaymentSucceed: async () => {},
+      onPaymentSucceed: async () => {},
       onPaymentFailed: async () => {},
+      webhook: {
+        secret: 'secret',
+        url: '/webhooks/payment',
+      },
     },
     schema: {
       classes: [

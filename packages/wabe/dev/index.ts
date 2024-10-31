@@ -1,5 +1,6 @@
 import { runDatabase } from 'wabe-mongodb-launcher'
-import { DatabaseEnum, Wabe } from '../src'
+import { StripeAdapter } from 'wabe-stripe'
+import { Currency, DatabaseEnum, Wabe } from '../src'
 import type {
   WabeSchemaEnums,
   WabeSchemaScalars,
@@ -26,17 +27,6 @@ const run = async () => {
       roles: ['Admin', 'Client'],
       successRedirectPath: 'http://localhost:3000/auth/oauth?provider=google',
       failureRedirectPath: 'http://localhost:3000/auth/oauth?provider=google',
-      providers: {
-        x: {
-          clientId: 'SVFhTWpONVM4S09TWVB6dF9CZjc6MTpjaQ',
-          clientSecret: 'V95bDcUgQgYNqweVRO8RFrqWJxr_yckd_b5Npp-MmEBxMr6KuR',
-        },
-        google: {
-          clientId:
-            '296431040556-4jh84e5s264rmrgnh8bmegb0kl550teg.apps.googleusercontent.com',
-          clientSecret: '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',
-        },
-      },
       customAuthenticationMethods: [
         {
           name: 'otp',
@@ -56,6 +46,16 @@ const run = async () => {
       name: 'Wabe',
     },
     port: 3000,
+    payment: {
+      adapter: new StripeAdapter(''),
+      currency: Currency.EUR,
+      supportedPaymentMethods: ['card'],
+      webhook: {
+        secret:
+          'whsec_56d339bf51e617aa4a3de35564a6bd5740517dbcfcd827226425bda49c033e5a',
+        url: '/webhooks/payment',
+      },
+    },
     schema: {
       classes: [
         {

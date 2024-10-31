@@ -5,6 +5,7 @@ import { Wabe } from '.'
 import { DatabaseEnum } from '../database'
 import { Schema } from '../schema'
 import { OperationType } from '../hooks'
+import { PaymentDevAdapter } from '../payment/DevAdapter'
 
 describe('Server', () => {
   it('should load routes', async () => {
@@ -82,6 +83,18 @@ describe('Server', () => {
 
     const mockOnPaymentSucceed = mock(() => {})
 
+    spyOn(PaymentDevAdapter.prototype, 'validateWebhook').mockResolvedValue({
+      isValid: true,
+      payload: {
+        type: 'payment_intent.succeeded',
+        amount: 100,
+        createdAt: 1679481600,
+        currency: 'eur',
+        customerId: 'customerId',
+        paymentMethod: ['card'],
+      },
+    } as never)
+
     const wabe = new Wabe({
       rootKey:
         'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
@@ -93,8 +106,13 @@ describe('Server', () => {
       },
       port,
       payment: {
+        adapter: new PaymentDevAdapter(),
         // @ts-expect-error
         onPaymentSucceed: async (options: any) => mockOnPaymentSucceed(options),
+        webhook: {
+          secret: 'secret',
+          url: '/webhooks/payment',
+        },
       } as any,
     })
 
@@ -132,23 +150,11 @@ describe('Server', () => {
 
     expect(mockOnPaymentSucceed).toHaveBeenCalledTimes(1)
     expect(mockOnPaymentSucceed).toHaveBeenCalledWith({
-      created: 'created',
-      amount: 100,
-      customerEmail: '',
-      billingDetails: {
-        address: {
-          city: 'Paris',
-          country: 'France',
-          line1: '1 rue de la Paix',
-          line2: '75008 Paris',
-          postalCode: '75008',
-          state: 'Paris',
-        },
-        name: 'John Doe',
-        phone: '+33612345678',
-      },
+      createdAt: 1679481600,
       currency: 'eur',
+      amount: 100,
       paymentMethodTypes: ['card'],
+      customerEmail: 'customer@test.com',
     })
 
     await wabe.close()
@@ -159,6 +165,18 @@ describe('Server', () => {
     const port = await getPort()
 
     const mockOnPaymentFailed = mock(() => {})
+
+    spyOn(PaymentDevAdapter.prototype, 'validateWebhook').mockResolvedValue({
+      isValid: true,
+      payload: {
+        type: 'payment_intent.payment_failed',
+        amount: 100,
+        createdAt: 1679481600,
+        currency: 'eur',
+        customerId: 'customerId',
+        paymentMethod: ['card'],
+      },
+    } as never)
 
     const wabe = new Wabe({
       rootKey:
@@ -171,8 +189,13 @@ describe('Server', () => {
       },
       port,
       payment: {
+        adapter: new PaymentDevAdapter(),
         // @ts-expect-error
         onPaymentFailed: async (options: any) => mockOnPaymentFailed(options),
+        webhook: {
+          secret: 'secret',
+          url: '/webhooks/payment',
+        },
       } as any,
     })
 
@@ -213,9 +236,8 @@ describe('Server', () => {
 
     expect(mockOnPaymentFailed).toHaveBeenCalledTimes(1)
     expect(mockOnPaymentFailed).toHaveBeenCalledWith({
-      created: 'created',
+      createdAt: 1679481600,
       amount: 100,
-      messageError: 'Payment failed',
       paymentMethodTypes: ['card'],
     })
 

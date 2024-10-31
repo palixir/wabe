@@ -1,6 +1,5 @@
 import type { PaymentAdapter } from './interface'
 
-// @ts-expect-error
 export class PaymentDevAdapter implements PaymentAdapter {
   // biome-ignore lint/suspicious/useAwait: false
   async getCustomerById() {
@@ -9,8 +8,9 @@ export class PaymentDevAdapter implements PaymentAdapter {
     }
   }
 
+  // @ts-expect-error
   // biome-ignore lint/suspicious/useAwait: false
-  async initWebhook() {
-    return 'id'
+  async validateWebhook() {
+    return { isValid: true, payload: {} }
   }
 }

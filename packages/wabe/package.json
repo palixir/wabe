@@ -44,6 +44,7 @@
     "otplib": "12.0.1"
   },
   "devDependencies": {
+    "wabe-stripe": "workspace:*",
     "@parcel/watcher": "2.3.0",
     "@types/bun": "1.1.8",
     "@types/jsonwebtoken": "9.0.6",
