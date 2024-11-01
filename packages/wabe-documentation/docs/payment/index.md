@@ -91,6 +91,52 @@ getInvoices(input: GetInvoicesInput!): [Invoice]!
 You can create your own webhooks for payment. See below for an example of a webhook to create an object payment for each successful payment. You just need to add a route in the `routes` field of the Wabe config.
 
 ```ts
+
+export const linkPayment = async ({
+  context,
+  email,
+  amount,
+  currency,
+}: {
+  context: WabeContext<BackTypes>
+  email: string
+  amount: number
+  currency: string
+}) => {
+  const user = await context.wabe.controllers.database.getObjects({
+    className: 'User',
+    context: {
+      ...context,
+      isRoot: true,
+    },
+    fields: ['id'],
+    where: {
+      email: {
+        equalTo: email,
+      },
+    },
+    first: 1,
+  })
+
+  if (user.length === 0) return
+
+  const userId = user[0].id
+
+  await context.wabe.controllers.database.createObject({
+    className: 'Payment',
+    context: {
+      ...context,
+      isRoot: true,
+    },
+    data: {
+      user: userId,
+      amount,
+      currency,
+    },
+    fields: [],
+  })
+}
+
 export const linkPaymentRoute: WabeRoute = {
   method: 'POST',
   path: '/webhook/linkPayment',
