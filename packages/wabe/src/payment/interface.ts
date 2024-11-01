@@ -57,22 +57,11 @@ export interface OnPaymentFailedOptions {
  * @property adapter - The payment adapter
  * @property supportedPaymentMethods - The supported payment methods
  * @property currency - The currency
- * @property onPaymentSucceed - The callback function for when a payment is succeeded
- * @property onPaymentFailed - The callback function for when a payment is failed
- * @property linkPaymentWebhook - The webhook that link the payment on payment succeeded configuration
- * @property linkPaymentWebhook.secret - The webhook secret
- * @property linkPaymentWebhook.url - The webhook url (Default: /webhook/linkPayment)
  */
 export interface PaymentConfig {
   adapter: PaymentAdapter
   supportedPaymentMethods: Array<PaymentMethod>
   currency: Currency
-  onPaymentSucceed?: (options: OnPaymentSucceedOptions) => Promise<void>
-  onPaymentFailed?: (options: OnPaymentFailedOptions) => Promise<void>
-  linkPaymentWebhook?: {
-    secret: string
-    url?: string
-  }
 }
 
 export type Invoice = {
