@@ -16,6 +16,7 @@ import {
   defaultBeforeCreateForDefaultValue,
   defaultBeforeUpdateForUpdatedAt,
 } from './defaultFields'
+import { defaultDeleteSessionOnDeleteUser } from './deleteSession'
 import {
   defaultCheckPermissionOnCreate,
   defaultCheckPermissionOnDelete,
@@ -345,5 +346,11 @@ export const getDefaultHooks = (): Hook<any, any>[] => [
     operationType: OperationType.BeforeUpdate,
     priority: 1,
     callback: defaultSetEmailOnUpdate,
+  },
+  {
+    className: 'User',
+    operationType: OperationType.AfterDelete,
+    priority: 1,
+    callback: defaultDeleteSessionOnDeleteUser,
   },
 ]
