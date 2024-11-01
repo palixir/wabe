@@ -248,19 +248,26 @@ export class DatabaseController<T extends WabeTypes> {
       // @ts-expect-error
       const fieldTargetClass = field.class
 
+      // @ts-expect-error
+      const defaultWhere = where[typedWhereKey]
+
       const objects = await this.getObjects({
         className: fieldTargetClass,
         fields: ['id'],
-        // @ts-expect-error
-        where: where[typedWhereKey],
+        where: defaultWhere,
         context,
       })
 
       return {
         ...acc,
-        [typedWhereKey]: {
-          in: objects.map((object) => object.id),
-        },
+        // If we don't found any object we just execute the query with the default where
+        // Without any transformation for pointer or relation
+        [typedWhereKey]:
+          objects.length > 0
+            ? {
+                in: objects.map((object) => object.id),
+              }
+            : defaultWhere,
       }
     }, Promise.resolve({}))
 
@@ -905,7 +912,7 @@ export class DatabaseController<T extends WabeTypes> {
       'write',
     )
 
-    const objectBeforeDelete = await this.getObjects({
+    const objectsBeforeDelete = await this.getObjects({
       className,
       where,
       fields,
@@ -935,6 +942,6 @@ export class DatabaseController<T extends WabeTypes> {
       objects,
     })
 
-    return objectBeforeDelete
+    return objectsBeforeDelete
   }
 }
