@@ -88,38 +88,109 @@ getInvoices(input: GetInvoicesInput!): [Invoice]!
 
 ## Webhooks
 
-Wabe offers the ability to create webhooks for payments. The webhooks are created automatically when you initialize the payment adapter. For the moment we only support two callbacks, one for successful payments and one for failed payments. You can for example do something like sending a welcome email after each successful payment. This callbacks will be called in the linkPayment webhook. You need to define create a webhook on your provider dashboard (for example : Stripe Dashboard) with the specified url in the Wabe config and add the webhook secret (we recommend to use env variable for this secret).
+You can create your own webhooks for payment. See below for an example of a webhook to create an object payment for each successful payment. You just need to add a route in the `routes` field of the Wabe config.
 
 ```ts
-import { Wabe, Currency } from "wabe";
-import { StripeAdapter } from "wabe-stripe";
 
-const run = async () => {
-  const wabe = new Wabe({
-    // ... others config fields
-    publicUrl: 'https://you-app.com',
-    payment: {
-      adapter: new StripeAdapter('YOU_STRIPE_SECRET_KEY'),
-      currency: Currency.USD,
-      supportedPaymentMethods: ['card', 'paypal'],
-      onPaymentSucceed: async (options) => {
-        // Do something with the options
-      },
-      onPaymentFailed: async (options) => {
-        // Do something with the options
-      },
-      // You can define the default url or not for the linkPayment webhook
-      linkPaymentWebhook: {
-        secret: 'secret',
-        url: '/webhooks/payment',
+export const linkPayment = async ({
+  context,
+  email,
+  amount,
+  currency,
+}: {
+  context: WabeContext<BackTypes>
+  email: string
+  amount: number
+  currency: string
+}) => {
+  const user = await context.wabe.controllers.database.getObjects({
+    className: 'User',
+    context: {
+      ...context,
+      isRoot: true,
+    },
+    fields: ['id'],
+    where: {
+      email: {
+        equalTo: email,
       },
     },
-  });
+    first: 1,
+  })
 
-  await wabe.start();
-};
+  if (user.length === 0) return
 
-await run();
+  const userId = user[0].id
+
+  await context.wabe.controllers.database.createObject({
+    className: 'Payment',
+    context: {
+      ...context,
+      isRoot: true,
+    },
+    data: {
+      user: userId,
+      amount,
+      currency,
+    },
+    fields: [],
+  })
+}
+
+export const linkPaymentRoute: WabeRoute = {
+  method: 'POST',
+  path: '/webhook/linkPayment',
+  handler: async (context) => {
+    const paymentController = context.wabe.wabe.controllers.payment
+    if (!paymentController)
+      return context.res.send('No payment controller', {
+        status: 400,
+      })
+
+    const endpointSecret = 'yourEndpointSecret'
+
+    if (!endpointSecret)
+      return context.res.send('Bad request', {
+        status: 400,
+      })
+
+    const { payload, isValid } = await paymentController.validateWebhook({
+      ctx: context,
+      endpointSecret,
+    })
+
+    if (!isValid)
+      return context.res.send('Invalid webhook', {
+        status: 400,
+      })
+
+    switch (payload.type) {
+      case 'payment_intent.succeeded': {
+        const res =
+          await context.wabe.wabe.controllers.payment?.getCustomerById({
+            id: payload.customerId || '',
+          })
+
+        const customerEmail = res?.email || ''
+
+        if (customerEmail)
+          await linkPayment({
+            context: context.wabe,
+            email: customerEmail,
+            amount: payload.amount || 0,
+            currency: payload.currency || '',
+          })
+
+        break
+      }
+      default:
+        break
+    }
+
+    return context.res.sendJson({ received: true })
+  },
+}
+
 ```
 
 ## Stripe adapter
