@@ -1,4 +1,4 @@
-// import { executeCodegen, type CodegenConfig } from '@graphql-codegen/cli'
+import { executeCodegen, type CodegenConfig } from '@graphql-codegen/cli'
 import { type GraphQLSchema, printSchema } from 'graphql'
 
 import { writeFile, readFile } from 'node:fs/promises'
@@ -51,43 +51,41 @@ export const generateWabeFile = ({
 export const generateGraphqlTypes = async ({
   graphqlSchemaContent,
 }: { graphqlSchemaContent: string }) => {
-  // const config: CodegenConfig = {
-  //   documents: [],
-  //   config: {},
-  //   schema: graphqlSchemaContent,
-  //   generates: {
-  //     'generated/wabe.ts': {
-  //       // Output file for TypeScript types and operations
-  //       plugins: [
-  //         'typescript', // Generates TypeScript definitions for your schema
-  //         'typescript-graphql-request', // Generates TypeScript types for your GraphQL operations
-  //         'typescript-operations', // Generates TypeScript types for your GraphQL operations
-  //       ],
-  //       config: {
-  //         scalars: {
-  //           Date: {
-  //             input: 'Date',
-  //             output: 'string',
-  //           },
-  //           Email: {
-  //             input: 'string',
-  //             output: 'string',
-  //           },
-  //           Phone: {
-  //             input: 'string',
-  //             output: 'string',
-  //           },
-  //         },
-  //       },
-  //     },
-  //   },
-  // }
+  const config: CodegenConfig = {
+    documents: [],
+    config: {},
+    schema: graphqlSchemaContent,
+    generates: {
+      'generated/wabe.ts': {
+        // Output file for TypeScript types and operations
+        plugins: [
+          'typescript', // Generates TypeScript definitions for your schema
+          'typescript-graphql-request', // Generates TypeScript types for your GraphQL operations
+          'typescript-operations', // Generates TypeScript types for your GraphQL operations
+        ],
+        config: {
+          scalars: {
+            Date: {
+              input: 'Date',
+              output: 'string',
+            },
+            Email: {
+              input: 'string',
+              output: 'string',
+            },
+            Phone: {
+              input: 'string',
+              output: 'string',
+            },
+          },
+        },
+      },
+    },
+  }
 
-  // const output = await executeCodegen(config)
+  const output = await executeCodegen(config)
 
-  // return output[0].content
-  //
-  return ''
+  return output[0].content
 }
 
 export const generateCodegen = async ({
