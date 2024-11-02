@@ -134,7 +134,7 @@ export const buildMongoWhereQuery = <
   )
 }
 
-export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter {
+export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
   public options: AdapterOptions
   public database?: Db
   private client: MongoClient

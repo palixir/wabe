@@ -32,10 +32,10 @@ interface PointerFields {
 }
 
 export class DatabaseController<T extends WabeTypes> {
-  public adapter: DatabaseAdapter
+  public adapter: DatabaseAdapter<T>
   public inMemoryCache: InMemoryCache<OutputType<T, any, any> | undefined>
 
-  constructor(adapter: DatabaseAdapter) {
+  constructor(adapter: DatabaseAdapter<T>) {
     this.adapter = adapter
     this.inMemoryCache = new InMemoryCache({ interval: 5000 })
   }

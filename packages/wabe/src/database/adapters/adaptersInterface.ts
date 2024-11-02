@@ -195,7 +195,7 @@ export type OutputType<
   U extends keyof T['types'][K],
 > = Pick<T['types'][K], U> & { id: string }
 
-export interface DatabaseAdapter {
+export interface DatabaseAdapter<T extends WabeTypes> {
   connect(): Promise<any>
   close(): Promise<any>
 
@@ -210,26 +210,21 @@ export interface DatabaseAdapter {
     params: CountOptions<T, K>,
   ): Promise<number>
 
-  getObject<
-    T extends WabeTypes,
-    K extends keyof T['types'],
-    U extends keyof T['types'][K],
-  >(params: GetObjectOptions<T, K, U>): Promise<OutputType<T, K, U>>
+  getObject<K extends keyof T['types'], U extends keyof T['types'][K]>(
+    params: GetObjectOptions<T, K, U>,
+  ): Promise<OutputType<T, K, U>>
   getObjects<
-    T extends WabeTypes,
     K extends keyof T['types'],
     U extends keyof T['types'][K],
     W extends keyof T['types'][K],
   >(params: GetObjectsOptions<T, K, U, W>): Promise<OutputType<T, K, W>[]>
 
   createObject<
-    T extends WabeTypes,
     K extends keyof T['types'],
     U extends keyof T['types'][K],
     W extends keyof T['types'][K],
   >(params: CreateObjectOptions<T, K, U, W>): Promise<OutputType<T, K, W>>
   createObjects<
-    T extends WabeTypes,
     K extends keyof T['types'],
     U extends keyof T['types'][K],
     W extends keyof T['types'][K],
@@ -237,26 +232,21 @@ export interface DatabaseAdapter {
   >(params: CreateObjectsOptions<T, K, U, W, X>): Promise<OutputType<T, K, W>[]>
 
   updateObject<
-    T extends WabeTypes,
     K extends keyof T['types'],
     U extends keyof T['types'][K],
     W extends keyof T['types'][K],
   >(params: UpdateObjectOptions<T, K, U, W>): Promise<OutputType<T, K, W>>
   updateObjects<
-    T extends WabeTypes,
     K extends keyof T['types'],
     U extends keyof T['types'][K],
     W extends keyof T['types'][K],
     X extends keyof T['types'][K],
   >(params: UpdateObjectsOptions<T, K, U, W, X>): Promise<OutputType<T, K, W>[]>
 
-  deleteObject<
-    T extends WabeTypes,
-    K extends keyof T['types'],
-    U extends keyof T['types'][K],
-  >(params: DeleteObjectOptions<T, K, U>): Promise<void>
+  deleteObject<K extends keyof T['types'], U extends keyof T['types'][K]>(
+    params: DeleteObjectOptions<T, K, U>,
+  ): Promise<void>
   deleteObjects<
-    T extends WabeTypes,
     K extends keyof T['types'],
     U extends keyof T['types'][K],
     W extends keyof T['types'][K],
