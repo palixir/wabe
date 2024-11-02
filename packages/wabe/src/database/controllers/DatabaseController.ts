@@ -33,7 +33,7 @@ interface PointerFields {
 
 export class DatabaseController<T extends WabeTypes> {
   public adapter: DatabaseAdapter
-  public inMemoryCache: InMemoryCache<OutputType<any, any> | undefined>
+  public inMemoryCache: InMemoryCache<OutputType<T, any, any> | undefined>
 
   constructor(adapter: DatabaseAdapter) {
     this.adapter = adapter
@@ -97,8 +97,8 @@ export class DatabaseController<T extends WabeTypes> {
     )
   }
 
-  _isRelationField<U extends keyof T['types']>(
-    originClassName: U,
+  _isRelationField<K extends keyof T['types']>(
+    originClassName: K,
     context: WabeContext<T>,
     pointerClassName?: string,
   ) {
@@ -117,8 +117,8 @@ export class DatabaseController<T extends WabeTypes> {
     )
   }
 
-  _isPointerField<U extends keyof T['types']>(
-    originClassName: U,
+  _isPointerField<K extends keyof T['types']>(
+    originClassName: K,
     context: WabeContext<T>,
     pointerClassName?: string,
   ) {
@@ -138,12 +138,12 @@ export class DatabaseController<T extends WabeTypes> {
   }
 
   async _getFinalObjectWithPointer<
-    U extends keyof T['types'],
-    K extends keyof T['types'][U],
+    K extends keyof T['types'],
+    U extends keyof T['types'][K],
   >(
-    objectData: OutputType<U, K> | null,
+    objectData: OutputType<T, K, U> | null,
     pointersObject: PointerObject,
-    originClassName: U,
+    originClassName: K,
     context: WabeContext<T>,
   ): Promise<Record<any, any>> {
     return Object.entries(pointersObject).reduce(
@@ -208,11 +208,12 @@ export class DatabaseController<T extends WabeTypes> {
     )
   }
 
-  async _getWhereObjectWithPointerOrRelation<
-    U extends keyof T['types'],
-    K extends keyof T['types'][U],
-  >(className: U, where: WhereType<U, K>, context: WabeContext<T>) {
-    const whereKeys = Object.keys(where) as Array<keyof WhereType<U, K>>
+  async _getWhereObjectWithPointerOrRelation<U extends keyof T['types']>(
+    className: U,
+    where: WhereType<T, U>,
+    context: WabeContext<T>,
+  ) {
+    const whereKeys = Object.keys(where) as Array<keyof WhereType<T, U>>
 
     const realClass = context.wabe.config.schema?.classes?.find(
       // @ts-expect-error
@@ -248,12 +249,12 @@ export class DatabaseController<T extends WabeTypes> {
       // @ts-expect-error
       const fieldTargetClass = field.class
 
-      // @ts-expect-error
       const defaultWhere = where[typedWhereKey]
 
       const objects = await this.getObjects({
         className: fieldTargetClass,
         fields: ['id'],
+        // @ts-expect-error
         where: defaultWhere,
         context,
       })
@@ -262,12 +263,9 @@ export class DatabaseController<T extends WabeTypes> {
         ...acc,
         // If we don't found any object we just execute the query with the default where
         // Without any transformation for pointer or relation
-        [typedWhereKey]:
-          objects.length > 0
-            ? {
-                in: objects.map((object) => object.id),
-              }
-            : defaultWhere,
+        [typedWhereKey]: {
+          in: objects.map((object) => object.id),
+        },
       }
     }, Promise.resolve({}))
 
@@ -277,11 +275,11 @@ export class DatabaseController<T extends WabeTypes> {
     }
   }
 
-  _buildWhereWithACL<U extends keyof T['types'], K extends keyof T['types'][U]>(
-    where: WhereType<U, K>,
+  _buildWhereWithACL<K extends keyof T['types']>(
+    where: WhereType<T, K>,
     context: WabeContext<T>,
     operation: 'write' | 'read',
-  ): WhereType<U, K> {
+  ): WhereType<T, K> {
     if (context.isRoot) return where
 
     const roleId = context.user?.role?.id
@@ -291,8 +289,8 @@ export class DatabaseController<T extends WabeTypes> {
     // If we don't have user we check role
     // If the role is good we return
 
+    // @ts-expect-error
     return {
-      // @ts-expect-error
       AND: [
         { ...where },
         // If the user is not connected we need to have a null acl
@@ -372,17 +370,15 @@ export class DatabaseController<T extends WabeTypes> {
     }
   }
 
-  _buildCacheKey<U extends keyof T['types']>(
-    className: U,
+  _buildCacheKey<K extends keyof T['types']>(
+    className: K,
     id: string,
     fields: Array<string>,
   ) {
     return `${String(className)}-${id}-${fields.join(',')}`
   }
 
-  count<U extends keyof T['types'], K extends keyof T['types'][U]>(
-    params: CountOptions<U, K>,
-  ) {
+  count<K extends keyof T['types']>(params: CountOptions<T, K>) {
     return this.adapter.count(params)
   }
 
@@ -390,14 +386,14 @@ export class DatabaseController<T extends WabeTypes> {
     await this.adapter.clearDatabase()
   }
 
-  async getObject<U extends keyof T['types'], K extends keyof T['types'][U]>({
+  async getObject<K extends keyof T['types'], U extends keyof T['types'][K]>({
     fields,
     className,
     context,
     skipHooks,
     id,
     where,
-  }: GetObjectOptions<U, K>): Promise<OutputType<U, K>> {
+  }: GetObjectOptions<T, K, U>): Promise<OutputType<T, K, U>> {
     const typedFields = fields as string[]
 
     const { pointersFieldsId, pointers } = this._getPointerObject(
@@ -437,7 +433,6 @@ export class DatabaseController<T extends WabeTypes> {
       className,
       context,
       id,
-      // @ts-expect-error
       fields: fieldsWithPointerFields,
       where: whereWithACLCondition,
     })
@@ -463,7 +458,6 @@ export class DatabaseController<T extends WabeTypes> {
           className,
           id,
           context,
-          // @ts-expect-error
           fields: fieldsWithPointerFields,
           where: whereWithACLCondition,
         })
@@ -477,10 +471,9 @@ export class DatabaseController<T extends WabeTypes> {
   }
 
   async getObjects<
-    U extends keyof T['types'],
-    K extends keyof T['types'][U],
-    W extends keyof T['types'][U],
-    X extends keyof T['types'][U],
+    K extends keyof T['types'],
+    U extends keyof T['types'][K],
+    W extends keyof T['types'][K],
   >({
     className,
     fields,
@@ -490,7 +483,7 @@ export class DatabaseController<T extends WabeTypes> {
     first,
     offset,
     order,
-  }: GetObjectsOptions<U, K, W, X>): Promise<OutputType<U, K>[]> {
+  }: GetObjectsOptions<T, K, U, W>): Promise<OutputType<T, K, W>[]> {
     const typedFields = fields as string[]
 
     const { pointersFieldsId, pointers } = this._getPointerObject(
@@ -568,14 +561,19 @@ export class DatabaseController<T extends WabeTypes> {
       objectsToReturn.map((object) =>
         this._getFinalObjectWithPointer(object, pointers, className, context),
       ),
-    ) as Promise<OutputType<U, K>[]>
+    ) as Promise<OutputType<T, K, W>[]>
   }
 
   async createObject<
-    U extends keyof T['types'],
-    K extends keyof T['types'][U],
-    W extends keyof T['types'][U],
-  >({ className, context, data, fields }: CreateObjectOptions<U, K, W>) {
+    K extends keyof T['types'],
+    U extends keyof T['types'][K],
+    W extends keyof T['types'][K],
+  >({
+    className,
+    context,
+    data,
+    fields,
+  }: CreateObjectOptions<T, K, U, W>): Promise<OutputType<T, K, W>> {
     const hook = initializeHook({
       className,
       context,
@@ -590,7 +588,6 @@ export class DatabaseController<T extends WabeTypes> {
       className,
       context,
       fields,
-      // @ts-expect-error
       data: newData,
     })
 
@@ -627,10 +624,10 @@ export class DatabaseController<T extends WabeTypes> {
   }
 
   async createObjects<
-    U extends keyof T['types'],
-    K extends keyof T['types'][U],
-    W extends keyof T['types'][U],
-    X extends keyof T['types'][U],
+    K extends keyof T['types'],
+    U extends keyof T['types'][K],
+    W extends keyof T['types'][K],
+    X extends keyof T['types'][K],
   >({
     data,
     fields,
@@ -639,7 +636,7 @@ export class DatabaseController<T extends WabeTypes> {
     first,
     offset,
     order,
-  }: CreateObjectsOptions<U, K, W, X>) {
+  }: CreateObjectsOptions<T, K, U, W, X>): Promise<OutputType<T, K, W>[]> {
     if (data.length === 0) return []
 
     const hooks = await Promise.all(
@@ -698,6 +695,7 @@ export class DatabaseController<T extends WabeTypes> {
       className,
       context,
       fields,
+      // @ts-expect-error
       where: { id: { in: objectsId } },
       skipHooks: true,
       first,
@@ -709,10 +707,16 @@ export class DatabaseController<T extends WabeTypes> {
   }
 
   async updateObject<
-    U extends keyof T['types'],
-    K extends keyof T['types'][U],
-    W extends keyof T['types'][U],
-  >({ id, className, context, data, fields }: UpdateObjectOptions<U, K, W>) {
+    K extends keyof T['types'],
+    U extends keyof T['types'][K],
+    W extends keyof T['types'][K],
+  >({
+    id,
+    className,
+    context,
+    data,
+    fields,
+  }: UpdateObjectOptions<T, K, U, W>): Promise<OutputType<T, K, W>> {
     const hook = initializeHook({
       className,
       context,
@@ -762,10 +766,10 @@ export class DatabaseController<T extends WabeTypes> {
   }
 
   async updateObjects<
-    U extends keyof T['types'],
-    K extends keyof T['types'][U],
-    W extends keyof T['types'][U],
-    X extends keyof T['types'][U],
+    K extends keyof T['types'],
+    U extends keyof T['types'][K],
+    W extends keyof T['types'][K],
+    X extends keyof T['types'][K],
   >({
     className,
     where,
@@ -775,7 +779,7 @@ export class DatabaseController<T extends WabeTypes> {
     first,
     offset,
     order,
-  }: UpdateObjectsOptions<U, K, W, X>) {
+  }: UpdateObjectsOptions<T, K, U, W, X>): Promise<OutputType<T, K, W>[]> {
     const whereObject = await this._getWhereObjectWithPointerOrRelation(
       className,
       where || {},
@@ -804,7 +808,6 @@ export class DatabaseController<T extends WabeTypes> {
       context,
       fields,
       data: newData[0],
-      // @ts-expect-error
       where: whereWithACLCondition,
       first,
       offset,
@@ -831,6 +834,7 @@ export class DatabaseController<T extends WabeTypes> {
       className,
       context,
       fields,
+      // @ts-expect-error
       where: { id: { in: objectsId } },
       skipHooks: true,
       first,
@@ -842,10 +846,14 @@ export class DatabaseController<T extends WabeTypes> {
   }
 
   async deleteObject<
-    U extends keyof T['types'],
-    K extends keyof T['types'][U],
-    W extends keyof T['types'][U],
-  >({ context, className, id, fields }: DeleteObjectOptions<U, K, W>) {
+    K extends keyof T['types'],
+    U extends keyof T['types'][K],
+  >({
+    context,
+    className,
+    id,
+    fields,
+  }: DeleteObjectOptions<T, K, U>): Promise<OutputType<T, K, U>> {
     const hook = initializeHook({
       className,
       context,
@@ -882,10 +890,9 @@ export class DatabaseController<T extends WabeTypes> {
   }
 
   async deleteObjects<
-    U extends keyof T['types'],
-    K extends keyof T['types'][U],
-    W extends keyof T['types'][U],
-    X extends keyof T['types'][U],
+    K extends keyof T['types'],
+    U extends keyof T['types'][K],
+    W extends keyof T['types'][K],
   >({
     className,
     context,
@@ -894,7 +901,7 @@ export class DatabaseController<T extends WabeTypes> {
     first,
     offset,
     order,
-  }: DeleteObjectsOptions<U, K, W, X>) {
+  }: DeleteObjectsOptions<T, K, U, W>): Promise<OutputType<T, K, W>[]> {
     const whereObject = await this._getWhereObjectWithPointerOrRelation(
       className,
       where || {},
@@ -921,6 +928,8 @@ export class DatabaseController<T extends WabeTypes> {
       offset,
       order,
     })
+
+    if (objectsBeforeDelete.length === 0) return objectsBeforeDelete
 
     const { objects } = await hook.runOnMultipleObjects({
       operationType: OperationType.BeforeDelete,

@@ -8,7 +8,7 @@ export class HookObject<
   K extends keyof WabeTypes['types'],
 > {
   public className: K
-  private newData: MutationData<K, keyof T['types'][K]> | undefined
+  private newData: MutationData<T, K, keyof T['types'][K]> | undefined
   private operationType: OperationType
   public context: WabeContext<T>
   public object: Partial<Record<keyof T['types'][K], any>>
@@ -21,7 +21,7 @@ export class HookObject<
     object,
   }: {
     className: K
-    newData?: MutationData<K, keyof T['types'][K]>
+    newData?: MutationData<T, K, keyof T['types'][K]>
     operationType: OperationType
     context: WabeContext<T>
     object: Partial<Record<keyof T['types'][K], any>>
@@ -50,7 +50,7 @@ export class HookObject<
     this.newData[field] = value
   }
 
-  getNewData(): MutationData<K, keyof T['types'][K]> {
+  getNewData(): MutationData<T, K, keyof T['types'][K]> {
     return this.newData || ({} as any)
   }
 }

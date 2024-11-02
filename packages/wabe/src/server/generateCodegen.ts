@@ -1,9 +1,7 @@
-import { codegen } from '@graphql-codegen/core'
-import * as typescriptPlugin from '@graphql-codegen/typescript'
-import * as graphqlRequestPlugin from '@graphql-codegen/typescript-graphql-request'
-import * as graphqlOperationsPlugin from '@graphql-codegen/typescript-operations'
-import { type GraphQLSchema, parse, printSchema } from 'graphql'
-import { writeFile, readFile } from 'node:fs'
+import { executeCodegen, type CodegenConfig } from '@graphql-codegen/cli'
+import { type GraphQLSchema, printSchema } from 'graphql'
+
+import { writeFile, readFile } from 'node:fs/promises'
 import type {
   ClassInterface,
   EnumInterface,
@@ -52,28 +50,42 @@ export const generateWabeFile = ({
 
 export const generateGraphqlTypes = async ({
   graphqlSchemaContent,
-  path,
-}: { path: string; graphqlSchemaContent: string }) => {
-  const config = {
+}: { graphqlSchemaContent: string }) => {
+  const config: CodegenConfig = {
     documents: [],
     config: {},
-    filename: `${path}/wabe.ts`,
-    schema: parse(graphqlSchemaContent),
-    plugins: [
-      { typescript: {} },
-      { 'typescript-graphql-request': {} },
-      { 'typescript-graphql-operations': {} },
-    ],
-    pluginMap: {
-      typescript: typescriptPlugin,
-      'typescript-graphql-request': graphqlRequestPlugin,
-      'typescript-graphql-operations': graphqlOperationsPlugin,
+    schema: graphqlSchemaContent,
+    generates: {
+      'generated/wabe.ts': {
+        // Output file for TypeScript types and operations
+        plugins: [
+          'typescript', // Generates TypeScript definitions for your schema
+          'typescript-graphql-request', // Generates TypeScript types for your GraphQL operations
+          'typescript-operations', // Generates TypeScript types for your GraphQL operations
+        ],
+        config: {
+          scalars: {
+            Date: {
+              input: 'Date',
+              output: 'string',
+            },
+            Email: {
+              input: 'string',
+              output: 'string',
+            },
+            Phone: {
+              input: 'string',
+              output: 'string',
+            },
+          },
+        },
+      },
     },
   }
 
-  const output = await codegen(config as any)
+  const output = await executeCodegen(config)
 
-  return output
+  return output[0].content
 }
 
 export const generateCodegen = async ({
@@ -89,7 +101,6 @@ export const generateCodegen = async ({
 
   const graphqlOutput = await generateGraphqlTypes({
     graphqlSchemaContent,
-    path,
   })
 
   const wabeOutput = generateWabeFile({
@@ -98,34 +109,16 @@ export const generateCodegen = async ({
     classes: schema.classes || [],
   })
 
-  try {
-    const contentOfSchemaFile = (await new Promise((resolve, reject) =>
-      readFile(`${path}/schema.graphql`, (err, data) => {
-        if (err) reject(err)
+  const wabeTsContent = `${graphqlOutput}\n\n${wabeOutput}`
 
-        resolve(data.toString('utf-8'))
-      }),
-    )) as string
+  try {
+    const contentOfWabeFile = (await readFile(`${path}/wabe.ts`)).toString()
 
     // We will need to find a better way to avoid infinite loop of loading
     // Better solution will be that bun implements watch ignores
-    if (!process.env.CODEGEN && contentOfSchemaFile === graphqlSchemaContent)
-      return
+    if (!process.env.CODEGEN && contentOfWabeFile === wabeTsContent) return
   } catch {}
 
-  await new Promise((resolve, reject) =>
-    writeFile(`${path}/wabe.ts`, `${graphqlOutput}\n\n${wabeOutput}`, (err) => {
-      if (err) reject(err)
-
-      resolve('ok')
-    }),
-  )
-
-  await new Promise((resolve, reject) =>
-    writeFile(`${path}/schema.graphql`, graphqlSchemaContent, (err) => {
-      if (err) reject(err)
-
-      resolve('ok')
-    }),
-  )
+  await writeFile(`${path}/wabe.ts`, wabeTsContent)
+  await writeFile(`${path}/schema.graphql`, graphqlSchemaContent)
 }

@@ -30,7 +30,7 @@
     "generate:codegen": "touch generated/wabe.ts && CODEGEN=true bun dev/index.ts"
   },
   "dependencies": {
-    "@graphql-codegen/core": "4.0.2",
+    "@graphql-codegen/cli": "5.0.3",
     "@graphql-codegen/typescript": "4.0.1",
     "@graphql-codegen/typescript-graphql-request": "6.2.0",
     "@graphql-codegen/typescript-operations": "4.0.1",
@@ -39,9 +39,9 @@
     "argon2": "0.41.1",
     "jsonwebtoken": "9.0.2",
     "mongodb": "6.8.0",
+    "otplib": "12.0.1",
     "wobe": "1.1.8",
-    "wobe-graphql-yoga": "1.2.5",
-    "otplib": "12.0.1"
+    "wobe-graphql-yoga": "1.2.5"
   },
   "devDependencies": {
     "@parcel/watcher": "2.3.0",

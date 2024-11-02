@@ -3,7 +3,7 @@ import {
   defaultBeforeCreateUpload,
   defaultBeforeUpdateUpload,
 } from '../files/hookUploadFile'
-import type { WabeTypes, WabeConfig } from '../server'
+import type { WabeConfig, WabeTypes } from '../server'
 import type { WabeContext } from '../server/interface'
 import type { DevWabeTypes } from '../utils/helper'
 import { HookObject } from './HookObject'
@@ -82,13 +82,16 @@ const _getHooksOrderByPriorities = (config: WabeConfig<any>) =>
     }, [] as number[])
     .sort((a, b) => a - b) || []
 
-export const initializeHook = <T extends keyof WabeTypes['types']>({
+export const initializeHook = <
+  T extends WabeTypes,
+  K extends keyof T['types'],
+>({
   className,
   newData,
   context,
 }: {
-  className: T
-  newData?: MutationData<any, any>
+  className: K
+  newData?: MutationData<DevWabeTypes, any, any>
   context: WabeContext<any>
 }) => {
   const computeObject = ({
@@ -97,9 +100,9 @@ export const initializeHook = <T extends keyof WabeTypes['types']>({
     operationType,
   }: {
     id?: string
-    object?: OutputType<any, any>
+    object?: OutputType<DevWabeTypes, any, any>
     operationType: OperationType
-  }): Promise<OutputType<any, any>> => {
+  }): Promise<OutputType<DevWabeTypes, any, any>> => {
     if (object) return Promise.resolve(object)
 
     // @ts-expect-error
@@ -108,7 +111,6 @@ export const initializeHook = <T extends keyof WabeTypes['types']>({
     if (!id) throw new Error('Object not found')
 
     return context.wabe.controllers.database.getObject({
-      // @ts-expect-error
       className,
       context: {
         ...context,
@@ -125,10 +127,10 @@ export const initializeHook = <T extends keyof WabeTypes['types']>({
     operationType,
     where,
   }: {
-    where?: WhereType<any, any>
-    objects?: OutputType<any, any>[]
+    where?: WhereType<DevWabeTypes, any>
+    objects?: OutputType<DevWabeTypes, any, any>[]
     operationType: OperationType
-  }): Promise<OutputType<any, any>[]> => {
+  }): Promise<OutputType<DevWabeTypes, any, any>[]> => {
     if (objects) return objects
 
     // @ts-expect-error
@@ -161,8 +163,8 @@ export const initializeHook = <T extends keyof WabeTypes['types']>({
     }: {
       operationType: OperationType
       id?: string
-      object?: OutputType<any, any>
-    }) => {
+      object?: OutputType<DevWabeTypes, any, any>
+    }): Promise<MutationData<T, K, any>> => {
       if (hooksOrderByPriorities.length === 0)
         return { object: undefined, newData: {} }
 
@@ -172,7 +174,7 @@ export const initializeHook = <T extends keyof WabeTypes['types']>({
         object: inputObject,
       })
 
-      const hookObject = new HookObject<DevWabeTypes, T>({
+      const hookObject = new HookObject<DevWabeTypes, K>({
         className,
         newData,
         operationType,
@@ -207,7 +209,7 @@ export const initializeHook = <T extends keyof WabeTypes['types']>({
     }: {
       operationType: OperationType
       where?: WhereType<any, any>
-      objects?: OutputType<any, any>[]
+      objects?: OutputType<DevWabeTypes, any, any>[]
     }) => {
       if (hooksOrderByPriorities.length === 0)
         return { objects: [], newData: [newData || {}] }
@@ -220,7 +222,7 @@ export const initializeHook = <T extends keyof WabeTypes['types']>({
 
       const newDataAfterHooks = await Promise.all(
         objects.map(async (object) => {
-          const hookObject = new HookObject<DevWabeTypes, T>({
+          const hookObject = new HookObject<DevWabeTypes, K>({
             className,
             newData,
             operationType,
@@ -349,7 +351,9 @@ export const getDefaultHooks = (): Hook<any, any>[] => [
   },
   {
     className: 'User',
-    operationType: OperationType.AfterDelete,
+    // TODO: It should better to do this in after delete to avoid case when deleteUser failed
+    // For the moment KISS
+    operationType: OperationType.BeforeDelete,
     priority: 1,
     callback: defaultDeleteSessionOnDeleteUser,
   },

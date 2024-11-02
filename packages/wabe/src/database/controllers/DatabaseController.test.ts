@@ -10,6 +10,7 @@ import {
 import { DatabaseController, type WhereType } from '..'
 import * as hooks from '../../hooks/index'
 import type { WabeContext } from '../../server/interface'
+import type { DevWabeTypes } from '../../utils/helper'
 
 describe('DatabaseController', () => {
   const mockGetObject = mock(() => {})
@@ -193,7 +194,7 @@ describe('DatabaseController', () => {
   it('should create new where include the ACL from context on read operation', () => {
     const databaseController = new DatabaseController(mockAdapter() as any)
 
-    const where: WhereType<any, any> = {
+    const where: WhereType<DevWabeTypes, any> = {
       id: { equalTo: 'id' },
     }
 
@@ -456,7 +457,6 @@ describe('DatabaseController', () => {
       className: 'TestClass',
       context,
       where: { id: { equalTo: 'id' } },
-      // @ts-expect-error
       data: { name: 'test' },
       fields: ['id'],
     })

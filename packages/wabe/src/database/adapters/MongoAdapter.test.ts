@@ -581,7 +581,9 @@ describe('Mongo adapter', () => {
       className: 'User',
       where: {
         id: {
-          equalTo: ObjectId.createFromHexString(insertedObjects[0].id),
+          equalTo: ObjectId.createFromHexString(
+            insertedObjects[0].id,
+          ).toString(),
         },
       },
       context,
@@ -1526,7 +1528,6 @@ describe('Mongo adapter', () => {
 
   it('should build where query with equalTo null', () => {
     const where = buildMongoWhereQuery({
-      // @ts-expect-error
       acl: { equalTo: null },
     })
 
@@ -1541,17 +1542,15 @@ describe('Mongo adapter', () => {
       age: { greaterThan: 20 },
       OR: [
         {
-          // @ts-expect-error
           age: { lessThan: 10 },
         },
         {
-          // @ts-expect-error
           name: { equalTo: 'John' },
         },
+        // @ts-expect-error
         {
           OR: [
             {
-              // @ts-expect-error
               name: { equalTo: 'Tata' },
             },
           ],
@@ -1559,17 +1558,15 @@ describe('Mongo adapter', () => {
       ],
       AND: [
         {
-          // @ts-expect-error
           age: { lessThan: 10 },
         },
         {
-          // @ts-expect-error
           name: { equalTo: 'John' },
         },
+        // @ts-expect-error
         {
           AND: [
             {
-              // @ts-expect-error
               name: { equalTo: 'Tata' },
             },
           ],
@@ -1632,7 +1629,6 @@ describe('Mongo adapter', () => {
       className: 'User',
       where: {
         authentication: {
-          // @ts-expect-error
           emailPassword: {
             email: { equalTo: 'email@test.fr' },
           },
@@ -1666,7 +1662,6 @@ describe('Mongo adapter', () => {
       className: 'User',
       where: {
         authentication: {
-          // @ts-expect-error
           emailPassword: {
             email: { equalTo: 'email@test.fr' },
           },

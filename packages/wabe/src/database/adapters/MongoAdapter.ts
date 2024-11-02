@@ -19,14 +19,15 @@ import type { WabeTypes } from '../../server'
 import type { WabeContext } from '../../server/interface'
 
 export const buildMongoOrderQuery = <
-  T extends keyof WabeTypes['types'],
-  K extends keyof WabeTypes['types'][T],
+  T extends WabeTypes,
+  K extends keyof T['types'],
+  U extends keyof T['types'][K],
 >(
-  order?: OrderType<T, K>,
+  order?: OrderType<T, K, U>,
 ): Record<string, any> => {
   if (!order) return {}
 
-  const objectKeys = Object.keys(order) as Array<keyof OrderType<T, K>>
+  const objectKeys = Object.keys(order) as Array<keyof OrderType<T, K, U>>
 
   return objectKeys.reduce(
     (acc, key) => {
@@ -42,8 +43,8 @@ export const buildMongoOrderQuery = <
 }
 
 export const buildMongoWhereQuery = <
-  T extends keyof WabeTypes['types'],
-  K extends keyof WabeTypes['types'][T],
+  T extends WabeTypes,
+  K extends keyof T['types'],
 >(
   where?: WhereType<T, K>,
 ): Record<string, any> => {
@@ -89,7 +90,9 @@ export const buildMongoWhereQuery = <
           $in:
             keyToWrite === '_id'
               ? value.in
+                  // @ts-expect-error
                   .filter((inValue) => typeof inValue === 'string')
+                  // @ts-expect-error
                   .map((inValue) => ObjectId.createFromHexString(inValue))
               : value.in,
         }
@@ -98,7 +101,9 @@ export const buildMongoWhereQuery = <
           $nin:
             keyToWrite === '_id'
               ? value.notIn
+                  // @ts-expect-error
                   .filter((notInValue) => typeof notInValue === 'string')
+                  // @ts-expect-error
                   .map((notInValue) => ObjectId.createFromHexString(notInValue))
               : value.notIn,
         }
@@ -180,9 +185,7 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter {
     return collection
   }
 
-  async count<U extends keyof T['types'], K extends keyof T['types'][U]>(
-    params: CountOptions<U, K>,
-  ) {
+  async count<K extends keyof T['types']>(params: CountOptions<T, K>) {
     const { className, where, context } = params
 
     const collection = await this.createClassIfNotExist(className, context)
@@ -205,9 +208,9 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter {
     )
   }
 
-  async getObject<U extends keyof T['types'], K extends keyof T['types'][U]>(
-    params: GetObjectOptions<U, K>,
-  ): Promise<OutputType<U, K>> {
+  async getObject<K extends keyof T['types'], U extends keyof T['types'][K]>(
+    params: GetObjectOptions<T, K, U>,
+  ): Promise<OutputType<T, K, U>> {
     if (!this.database)
       throw new Error('Connection to database is not established')
 
@@ -244,15 +247,14 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter {
     return {
       ...resultWithout_Id,
       ...{ id: _id.toString() },
-    } as OutputType<U, K>
+    } as OutputType<T, K, U>
   }
 
   async getObjects<
-    U extends keyof T['types'],
-    K extends keyof T['types'][U],
-    W extends keyof T['types'][U],
-    X extends keyof T['types'][U],
-  >(params: GetObjectsOptions<U, K, W, X>): Promise<OutputType<U, K>[]> {
+    K extends keyof T['types'],
+    U extends keyof T['types'][K],
+    W extends keyof T['types'][K],
+  >(params: GetObjectsOptions<T, K, U, W>): Promise<OutputType<T, K, W>[]> {
     if (!this.database)
       throw new Error('Connection to database is not established')
 
@@ -293,15 +295,15 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter {
       return {
         ...resultWithout_Id,
         ...{ id: _id.toString() },
-      } as OutputType<U, K>
+      } as OutputType<T, K, W>
     })
   }
 
   async createObject<
-    U extends keyof T['types'],
-    K extends keyof T['types'][U],
-    W extends keyof T['types'][U],
-  >(params: CreateObjectOptions<U, K, W>): Promise<OutputType<U, K>> {
+    K extends keyof T['types'],
+    U extends keyof T['types'][K],
+    W extends keyof T['types'][K],
+  >(params: CreateObjectOptions<T, K, U, W>): Promise<OutputType<T, K, W>> {
     if (!this.database)
       throw new Error('Connection to database is not established')
 
@@ -322,11 +324,13 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter {
   }
 
   async createObjects<
-    U extends keyof T['types'],
-    K extends keyof T['types'][U],
-    W extends keyof T['types'][U],
-    X extends keyof T['types'][U],
-  >(params: CreateObjectsOptions<U, K, W, X>): Promise<OutputType<U, K>[]> {
+    K extends keyof T['types'],
+    U extends keyof T['types'][K],
+    W extends keyof T['types'][K],
+    X extends keyof T['types'][K],
+  >(
+    params: CreateObjectsOptions<T, K, U, W, X>,
+  ): Promise<OutputType<T, K, W>[]> {
     if (!this.database)
       throw new Error('Connection to database is not established')
 
@@ -350,14 +354,14 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter {
       order,
     })
 
-    return allObjects as OutputType<U, K>[]
+    return allObjects
   }
 
   async updateObject<
-    U extends keyof T['types'],
-    K extends keyof T['types'][U],
-    W extends keyof T['types'][U],
-  >(params: UpdateObjectOptions<U, K, W>): Promise<OutputType<U, K>> {
+    K extends keyof T['types'],
+    U extends keyof T['types'][K],
+    W extends keyof T['types'][K],
+  >(params: UpdateObjectOptions<T, K, U, W>): Promise<OutputType<T, K, W>> {
     if (!this.database)
       throw new Error('Connection to database is not established')
 
@@ -390,11 +394,13 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter {
   }
 
   async updateObjects<
-    U extends keyof T['types'],
-    K extends keyof T['types'][U],
-    W extends keyof T['types'][U],
-    X extends keyof T['types'][U],
-  >(params: UpdateObjectsOptions<U, K, W, X>): Promise<OutputType<U, K>[]> {
+    K extends keyof T['types'],
+    U extends keyof T['types'][K],
+    W extends keyof T['types'][K],
+    X extends keyof T['types'][K],
+  >(
+    params: UpdateObjectsOptions<T, K, U, W, X>,
+  ): Promise<OutputType<T, K, W>[]> {
     if (!this.database)
       throw new Error('Connection to database is not established')
 
@@ -437,14 +443,12 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter {
       context,
     })
 
-    return objects as OutputType<U, K>[]
+    return objects
   }
 
-  async deleteObject<
-    U extends keyof T['types'],
-    K extends keyof T['types'][U],
-    W extends keyof T['types'][U],
-  >(params: DeleteObjectOptions<U, K, W>) {
+  async deleteObject<K extends keyof T['types'], U extends keyof T['types'][K]>(
+    params: DeleteObjectOptions<T, K, U>,
+  ) {
     if (!this.database)
       throw new Error('Connection to database is not established')
 
@@ -463,11 +467,10 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter {
   }
 
   async deleteObjects<
-    U extends keyof T['types'],
-    K extends keyof T['types'][U],
+    K extends keyof T['types'],
+    U extends keyof T['types'][U],
     W extends keyof T['types'][U],
-    X extends keyof T['types'][U],
-  >(params: DeleteObjectsOptions<U, K, W, X>) {
+  >(params: DeleteObjectsOptions<T, K, U, W>) {
     if (!this.database)
       throw new Error('Connection to database is not established')
 
