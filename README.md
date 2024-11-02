@@ -19,6 +19,7 @@ npm install wabe # On npm
 yarn add wabe # On yarn
 ```
 
+
 ## Basic example
 
 ```ts
