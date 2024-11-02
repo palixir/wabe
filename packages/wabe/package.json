@@ -20,7 +20,7 @@
   },
   "main": "dist/index.js",
   "scripts": {
-    "build": "bun generate:codegen && bun build $(pwd)/index.ts --outdir dist/ --target=node --external=argon2 --external=@graphql-codegen/cli && bun generate:types",
+    "build": "bun generate:codegen && bun build $(pwd)/src/index.ts --outdir dist/ --target=node --external=argon2 --external=@graphql-codegen/cli --external=typescript-graphql-request && bun generate:types",
     "generate:types": "dts-bundle-generator -o dist/index.d.ts src/index.ts --no-check --external-imports=wobe",
     "check": "tsc --project $(pwd)/tsconfig.json",
     "lint": "biome lint . --no-errors-on-unmatched --config-path=../../",
