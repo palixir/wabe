@@ -1,6 +1,6 @@
 import { describe, expect, it, mock, afterEach } from 'bun:test'
 import { makePaymentResolver } from './makePayment'
-import { PaymentMode } from '../../payment'
+import { PaymentMode } from '../../../generated/wabe'
 
 describe('createPaymentResolver', () => {
   const mockGetObjects = mock(() => {})

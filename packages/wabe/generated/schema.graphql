@@ -16,8 +16,8 @@ enum SecondaryFactor {
 }
 
 enum PaymentMode {
-  payment
-  subscription
+  Payment
+  Subscription
 }
 
 enum PaymentReccuringInterval {

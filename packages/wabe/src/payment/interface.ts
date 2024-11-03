@@ -15,8 +15,8 @@ export type Address = {
 }
 
 export enum PaymentMode {
-  Payment = 'payment',
-  Subscription = 'subscription',
+  Payment = 'Payment',
+  Subscription = 'Subscription',
 }
 
 export type PaymentMethod =

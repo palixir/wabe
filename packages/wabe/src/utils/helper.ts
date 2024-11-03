@@ -32,6 +32,9 @@ export interface DevWabeTypes extends WabeTypes {
   enums: WabeSchemaEnums
 }
 
+export const firstLetterUpperCase = (str: string): string =>
+  str.charAt(0).toUpperCase() + str.slice(1)
+
 export const notEmpty = <T>(value: T | null | undefined): value is T =>
   value !== null && value !== undefined
 
