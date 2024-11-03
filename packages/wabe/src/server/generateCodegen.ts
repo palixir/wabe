@@ -1,4 +1,3 @@
-import { executeCodegen, type CodegenConfig } from '@graphql-codegen/cli'
 import {
   DocumentNode,
   EnumTypeDefinitionNode,
