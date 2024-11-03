@@ -30,10 +30,6 @@
     "generate:codegen": "touch generated/wabe.ts && CODEGEN=true bun dev/index.ts"
   },
   "dependencies": {
-    "@graphql-codegen/cli": "5.0.3",
-    "@graphql-codegen/typescript": "4.0.1",
-    "@graphql-codegen/typescript-graphql-request": "6.2.0",
-    "@graphql-codegen/typescript-operations": "4.0.1",
     "@graphql-tools/graphql-file-loader": "8.0.1",
     "@graphql-tools/load": "8.0.2",
     "argon2": "0.41.1",
