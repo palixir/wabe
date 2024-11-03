@@ -32,7 +32,6 @@ describe('Database', () => {
       where: {
         name: { equalTo: 'Lucas' },
       },
-      // @ts-expect-error
       data: { age: 21 },
       context,
       fields: [],
@@ -173,7 +172,7 @@ describe('Database', () => {
     const res = await wabe.controllers.database.createObject({
       className: 'User',
       context,
-      fields: ['*'],
+      fields: ['authentication'],
       data: {
         provider: 'Google',
         isOauth: true,
@@ -187,7 +186,7 @@ describe('Database', () => {
       },
     })
 
-    expect(res.authentication.google).toEqual({
+    expect(res.authentication?.google).toEqual({
       email: 'email@test.fr',
       verifiedEmail: true,
       idToken: 'idToken',
@@ -259,7 +258,6 @@ describe('Database', () => {
     await wabe.controllers.database.updateObjects({
       className: 'User',
       context,
-      // @ts-expect-error
       data: { name: 'Lucas' },
       fields: ['id'],
       where: { id: { equalTo: id } },

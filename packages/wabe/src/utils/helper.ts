@@ -7,7 +7,7 @@ import type {
   WabeSchemaTypes,
 } from '../../generated/wabe'
 import { DatabaseEnum } from '../database'
-import { Wabe } from '../server'
+import { Wabe, type WabeTypes } from '../server'
 import { PaymentDevAdapter } from '../payment/DevAdapter'
 import type { ClassInterface } from '../schema'
 import { EmailDevAdapter } from '../email/DevAdapter'
@@ -26,11 +26,14 @@ export type DeepRequired<T> = T extends Primitive
           : DeepRequired<T[P]>
     }
 
-export type DevWabeTypes = {
+export interface DevWabeTypes extends WabeTypes {
   types: WabeSchemaTypes
   scalars: WabeSchemaScalars
   enums: WabeSchemaEnums
 }
+
+export const firstLetterUpperCase = (str: string): string =>
+  str.charAt(0).toUpperCase() + str.slice(1)
 
 export const notEmpty = <T>(value: T | null | undefined): value is T =>
   value !== null && value !== undefined

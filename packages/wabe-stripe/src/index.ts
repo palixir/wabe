@@ -1,18 +1,19 @@
 import { Stripe } from 'stripe'
-import type {
-  CancelSubscriptionOptions,
-  ValidateWebhookOptions,
-  ValidateWebhookOutput,
-  CreateCustomerOptions,
-  CreatePaymentOptions,
-  Currency,
-  GetAllTransactionsOptions,
-  GetCustomerByIdOptions,
-  GetInvoicesOptions,
-  GetTotalRevenueOptions,
-  Invoice,
-  PaymentAdapter,
-  Transaction,
+import {
+  type CancelSubscriptionOptions,
+  type ValidateWebhookOptions,
+  type ValidateWebhookOutput,
+  type CreateCustomerOptions,
+  type CreatePaymentOptions,
+  type Currency,
+  type GetAllTransactionsOptions,
+  type GetCustomerByIdOptions,
+  type GetInvoicesOptions,
+  type GetTotalRevenueOptions,
+  type Invoice,
+  type PaymentAdapter,
+  type Transaction,
+  PaymentMode,
 } from 'wabe'
 
 export class StripeAdapter implements PaymentAdapter {
@@ -160,7 +161,7 @@ export class StripeAdapter implements PaymentAdapter {
           name,
         },
         unit_amount: unitAmount,
-        ...(paymentMode === 'subscription'
+        ...(paymentMode === PaymentMode.subscription
           ? {
               recurring: {
                 interval: recurringInterval || 'month',

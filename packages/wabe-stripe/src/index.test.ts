@@ -570,7 +570,7 @@ describe('wabe-stripe', () => {
           quantity: 1,
         },
       ],
-      paymentMode: PaymentMode.Subscription,
+      paymentMode: PaymentMode.subscription,
       successUrl: 'https://wabe.dev',
       cancelUrl: 'https://wabe.dev',
     })
@@ -637,7 +637,7 @@ describe('wabe-stripe', () => {
             quantity: 1,
           },
         ],
-        paymentMode: PaymentMode.Subscription,
+        paymentMode: PaymentMode.subscription,
         successUrl: 'https://wabe.dev',
         cancelUrl: 'https://wabe.dev',
       }),

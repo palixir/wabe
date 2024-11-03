@@ -14,9 +14,10 @@ export type Address = {
   state: string
 }
 
+// Need to be in lowercase to match with Stripe types
 export enum PaymentMode {
-  Payment = 'payment',
-  Subscription = 'subscription',
+  payment = 'payment',
+  subscription = 'subscription',
 }
 
 export type PaymentMethod =

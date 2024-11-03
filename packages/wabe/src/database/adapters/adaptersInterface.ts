@@ -1,42 +1,61 @@
 import type { WabeContext } from '../../server/interface'
 import type { WabeTypes } from '../../server'
+import type { Scalars } from '../../../generated/wabe'
 
-type WhereAggregation<
-  T extends keyof WabeTypes['types'],
-  K extends keyof WabeTypes['types'][T],
-> = Record<
-  K | 'id',
-  {
-    equalTo?: any
-    notEqualTo?: any
-    greaterThan?: any
-    lessThan?: any
-    greaterThanOrEqualTo?: any
-    lessThanOrEqualTo?: any
-    in?: any[]
-    notIn?: any[]
-    contains?: any
-    notContains?: any
-  }
->
+type IsScalar<T> = T extends
+  | Scalars['String']['output']
+  | Scalars['Int']['output']
+  | Scalars['Boolean']['output']
+  | Scalars['Date']['output']
+  ? true
+  : false
 
-type WhereConditional<
-  T extends keyof WabeTypes['types'],
-  K extends keyof WabeTypes['types'][T],
-> = {
+type ExtractType<
+  T extends WabeTypes,
+  ClassName extends keyof T['types'],
+  FieldName extends keyof T['types'][ClassName],
+> = T['types'][ClassName][FieldName]
+
+type WhereScalar<T> = {
+  equalTo?: T
+  notEqualTo?: T
+  greaterThan?: T
+  lessThan?: T
+  greaterThanOrEqualTo?: T
+  lessThanOrEqualTo?: T
+  in?: T[]
+  notIn?: T[]
+  contains?: T
+  notContains?: T
+}
+
+type WhereObject<T> = {
+  [P in keyof T]: IsScalar<T[P]> extends false
+    ? WhereObject<Partial<T[P]>>
+    : WhereScalar<T[P]>
+}
+
+type WhereAggregation<T extends WabeTypes, K extends keyof T['types']> = {
+  [P in keyof T['types'][K]]: IsScalar<ExtractType<T, K, P>> extends false
+    ? WhereObject<Partial<ExtractType<T, K, P>>>
+    : WhereScalar<ExtractType<T, K, P>>
+}
+
+type WhereConditional<T extends WabeTypes, K extends keyof T['types']> = {
   OR?: Array<WhereType<T, K>>
   AND?: Array<WhereType<T, K>>
 }
 
 export type WhereType<
-  T extends keyof WabeTypes['types'],
-  K extends keyof WabeTypes['types'][T],
+  T extends WabeTypes,
+  K extends keyof T['types'],
 > = Partial<WhereAggregation<T, K>> & WhereConditional<T, K>
 
 export type OrderType<
-  T extends keyof WabeTypes['types'],
-  K extends keyof WabeTypes['types'][T],
-> = Record<K, 'ASC' | 'DESC'>
+  T extends WabeTypes,
+  K extends keyof T['types'],
+  U extends keyof T['types'][K],
+> = Record<U, 'ASC' | 'DESC'>
 
 export interface AdapterOptions {
   databaseUrl: string
@@ -44,42 +63,41 @@ export interface AdapterOptions {
 }
 
 export type MutationData<
-  T extends keyof WabeTypes['types'],
-  K extends keyof WabeTypes['types'][T],
-> = Record<K, any>
+  T extends WabeTypes,
+  K extends keyof T['types'],
+  U extends keyof T['types'][K],
+> = Record<U, any>
 
-export interface CountOptions<
-  T extends keyof WabeTypes['types'],
-  K extends keyof WabeTypes['types'][T],
-> {
-  className: T
+export interface CountOptions<T extends WabeTypes, K extends keyof T['types']> {
+  className: K
   where?: WhereType<T, K>
   context: WabeContext<any>
 }
 
 // TODO: It could be cool if fields type supports something like user.id, user.email
 export interface GetObjectOptions<
-  T extends keyof WabeTypes['types'],
-  K extends keyof WabeTypes['types'][T],
+  T extends WabeTypes,
+  K extends keyof T['types'],
+  U extends keyof T['types'][K],
 > {
-  className: T
+  className: K
   id: string
   where?: WhereType<T, K>
-  fields: Array<K | '*'>
+  fields: Array<U | '*'>
   context: WabeContext<any>
   skipHooks?: boolean
 }
 
 export interface GetObjectsOptions<
-  T extends keyof WabeTypes['types'],
-  K extends keyof WabeTypes['types'][T],
-  W extends keyof WabeTypes['types'][T],
-  X extends keyof WabeTypes['types'][T],
+  T extends WabeTypes,
+  K extends keyof T['types'],
+  U extends keyof T['types'][K],
+  W extends keyof T['types'][K],
 > {
-  className: T
-  where?: WhereType<T, W>
-  order?: OrderType<T, X>
-  fields: Array<K | '*'>
+  className: K
+  where?: WhereType<T, K>
+  order?: OrderType<T, K, U>
+  fields: Array<W | '*'>
   offset?: number
   first?: number
   context: WabeContext<any>
@@ -87,92 +105,97 @@ export interface GetObjectsOptions<
 }
 
 export interface CreateObjectOptions<
-  T extends keyof WabeTypes['types'],
-  K extends keyof WabeTypes['types'][T],
-  W extends keyof WabeTypes['types'][T],
+  T extends WabeTypes,
+  K extends keyof T['types'],
+  U extends keyof T['types'][K],
+  W extends keyof T['types'][K],
 > {
-  className: T
-  data: MutationData<T, W>
-  fields: Array<K | '*'>
+  className: K
+  data: MutationData<T, K, U>
+  fields: Array<W | '*'>
   context: WabeContext<any>
 }
 export interface CreateObjectsOptions<
-  T extends keyof WabeTypes['types'],
-  K extends keyof WabeTypes['types'][T],
-  W extends keyof WabeTypes['types'][T],
-  X extends keyof WabeTypes['types'][T],
+  T extends WabeTypes,
+  K extends keyof T['types'],
+  U extends keyof T['types'][K],
+  W extends keyof T['types'][K],
+  X extends keyof T['types'][K],
 > {
-  className: T
-  data: Array<MutationData<T, W>>
-  fields: Array<K | '*'>
+  className: K
+  data: Array<MutationData<T, K, U>>
+  fields: Array<W | '*'>
   offset?: number
   first?: number
-  order?: OrderType<T, X>
+  order?: OrderType<T, U, X>
   context: WabeContext<any>
 }
 
 export interface UpdateObjectOptions<
-  T extends keyof WabeTypes['types'],
-  K extends keyof WabeTypes['types'][T],
-  W extends keyof WabeTypes['types'][T],
+  T extends WabeTypes,
+  K extends keyof T['types'],
+  U extends keyof T['types'][K],
+  W extends keyof T['types'][K],
 > {
-  className: T
+  className: K
   id: string
-  where?: WhereType<T, W>
-  data: MutationData<T, W>
-  fields: Array<K | '*'>
+  where?: WhereType<T, K>
+  data: MutationData<T, K, U>
+  fields: Array<W | '*'>
   context: WabeContext<any>
 }
 
 export interface UpdateObjectsOptions<
-  T extends keyof WabeTypes['types'],
-  K extends keyof WabeTypes['types'][T],
-  W extends keyof WabeTypes['types'][T],
-  X extends keyof WabeTypes['types'][T],
+  T extends WabeTypes,
+  K extends keyof T['types'],
+  U extends keyof T['types'][K],
+  W extends keyof T['types'][K],
+  X extends keyof T['types'][K],
 > {
-  className: T
-  where: WhereType<T, W>
-  order?: OrderType<T, X>
-  data: MutationData<T, W>
-  fields: Array<K | '*'>
+  className: K
+  where: WhereType<T, K>
+  order?: OrderType<T, K, X>
+  data: MutationData<T, K, U>
+  fields: Array<W | '*'>
   offset?: number
   first?: number
   context: WabeContext<any>
 }
 
 export interface DeleteObjectOptions<
-  T extends keyof WabeTypes['types'],
-  K extends keyof WabeTypes['types'][T],
-  W extends keyof WabeTypes['types'][T],
+  T extends WabeTypes,
+  K extends keyof T['types'],
+  U extends keyof T['types'][K],
 > {
-  className: T
+  className: K
   id: string
-  where?: WhereType<T, W>
-  fields: Array<K | '*'>
+  where?: WhereType<T, K>
+  fields: Array<U | '*'>
   context: WabeContext<any>
 }
 
 export interface DeleteObjectsOptions<
-  T extends keyof WabeTypes['types'],
-  K extends keyof WabeTypes['types'][T],
-  W extends keyof WabeTypes['types'][T],
-  X extends keyof WabeTypes['types'][T],
+  T extends WabeTypes,
+  K extends keyof T['types'],
+  U extends keyof T['types'][K],
+  W extends keyof T['types'][K],
 > {
-  className: T
-  where: WhereType<T, W>
-  order?: OrderType<T, X>
-  fields: Array<K | '*'>
+  className: K
+  where: WhereType<T, K>
+  order?: OrderType<T, K, U>
+  fields: Array<W | '*'>
   offset?: number
   first?: number
   context: WabeContext<any>
 }
 
 export type OutputType<
-  T extends keyof WabeTypes['types'],
-  K extends keyof WabeTypes['types'][T],
-> = Pick<WabeTypes['types'][T], K> & { id: string }
+  T extends WabeTypes,
+  K extends keyof T['types'],
+  U extends keyof T['types'][K],
+> = Pick<T['types'][K], U> & { id: string }
 
-export interface DatabaseAdapter {
+export interface DatabaseAdapter<T extends WabeTypes> {
   connect(): Promise<any>
   close(): Promise<any>
 
@@ -183,55 +206,49 @@ export interface DatabaseAdapter {
 
   clearDatabase(): Promise<void>
 
-  count<
-    T extends keyof WabeTypes['types'],
-    K extends keyof WabeTypes['types'][T],
-  >(params: CountOptions<T, K>): Promise<number>
+  count<T extends WabeTypes, K extends keyof T['types']>(
+    params: CountOptions<T, K>,
+  ): Promise<number>
 
-  getObject<
-    T extends keyof WabeTypes['types'],
-    K extends keyof WabeTypes['types'][T],
-  >(params: GetObjectOptions<T, K>): Promise<OutputType<T, K>>
+  getObject<K extends keyof T['types'], U extends keyof T['types'][K]>(
+    params: GetObjectOptions<T, K, U>,
+  ): Promise<OutputType<T, K, U>>
   getObjects<
-    T extends keyof WabeTypes['types'],
-    K extends keyof WabeTypes['types'][T],
-    W extends keyof WabeTypes['types'][T],
-    X extends keyof WabeTypes['types'][T],
-  >(params: GetObjectsOptions<T, K, W, X>): Promise<OutputType<T, K>[]>
+    K extends keyof T['types'],
+    U extends keyof T['types'][K],
+    W extends keyof T['types'][K],
+  >(params: GetObjectsOptions<T, K, U, W>): Promise<OutputType<T, K, W>[]>
 
   createObject<
-    T extends keyof WabeTypes['types'],
-    K extends keyof WabeTypes['types'][T],
-    W extends keyof WabeTypes['types'][T],
-  >(params: CreateObjectOptions<T, K, W>): Promise<OutputType<T, K>>
+    K extends keyof T['types'],
+    U extends keyof T['types'][K],
+    W extends keyof T['types'][K],
+  >(params: CreateObjectOptions<T, K, U, W>): Promise<OutputType<T, K, W>>
   createObjects<
-    T extends keyof WabeTypes['types'],
-    K extends keyof WabeTypes['types'][T],
-    W extends keyof WabeTypes['types'][T],
-    X extends keyof WabeTypes['types'][T],
-  >(params: CreateObjectsOptions<T, K, W, X>): Promise<OutputType<T, K>[]>
+    K extends keyof T['types'],
+    U extends keyof T['types'][K],
+    W extends keyof T['types'][K],
+    X extends keyof T['types'][K],
+  >(params: CreateObjectsOptions<T, K, U, W, X>): Promise<OutputType<T, K, W>[]>
 
   updateObject<
-    T extends keyof WabeTypes['types'],
-    K extends keyof WabeTypes['types'][T],
-    W extends keyof WabeTypes['types'][T],
-  >(params: UpdateObjectOptions<T, K, W>): Promise<OutputType<T, K>>
+    K extends keyof T['types'],
+    U extends keyof T['types'][K],
+    W extends keyof T['types'][K],
+  >(params: UpdateObjectOptions<T, K, U, W>): Promise<OutputType<T, K, W>>
   updateObjects<
-    T extends keyof WabeTypes['types'],
-    K extends keyof WabeTypes['types'][T],
-    W extends keyof WabeTypes['types'][T],
-    X extends keyof WabeTypes['types'][T],
-  >(params: UpdateObjectsOptions<T, K, W, X>): Promise<OutputType<T, K>[]>
+    K extends keyof T['types'],
+    U extends keyof T['types'][K],
+    W extends keyof T['types'][K],
+    X extends keyof T['types'][K],
+  >(params: UpdateObjectsOptions<T, K, U, W, X>): Promise<OutputType<T, K, W>[]>
 
-  deleteObject<
-    T extends keyof WabeTypes['types'],
-    K extends keyof WabeTypes['types'][T],
-    W extends keyof WabeTypes['types'][T],
-  >(params: DeleteObjectOptions<T, K, W>): Promise<void>
+  deleteObject<K extends keyof T['types'], U extends keyof T['types'][K]>(
+    params: DeleteObjectOptions<T, K, U>,
+  ): Promise<void>
   deleteObjects<
-    T extends keyof WabeTypes['types'],
-    K extends keyof WabeTypes['types'][T],
-    W extends keyof WabeTypes['types'][T],
-    X extends keyof WabeTypes['types'][T],
-  >(params: DeleteObjectsOptions<T, K, W, X>): Promise<void>
+    K extends keyof T['types'],
+    U extends keyof T['types'][K],
+    W extends keyof T['types'][K],
+  >(params: DeleteObjectsOptions<T, K, U, W>): Promise<void>
 }

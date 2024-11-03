@@ -1,6 +1,6 @@
 import { describe, expect, it, mock, afterEach } from 'bun:test'
 import { makePaymentResolver } from './makePayment'
-import { PaymentMode } from '../../payment'
+import { PaymentMode } from '../../../generated/wabe'
 
 describe('createPaymentResolver', () => {
   const mockGetObjects = mock(() => {})
@@ -96,7 +96,7 @@ describe('createPaymentResolver', () => {
         input: {
           products: [{ name: 'product1', unitAmount: 100, quantity: 1 }],
           customerEmail: 'test@test.com',
-          paymentMode: PaymentMode.Payment,
+          paymentMode: PaymentMode.payment,
           successUrl: 'https://example.com',
           cancelUrl: 'https://example.com',
           automaticTax: true,
@@ -108,7 +108,7 @@ describe('createPaymentResolver', () => {
     expect(paymentController.createPayment).toHaveBeenCalledTimes(1)
     expect(paymentController.createPayment).toHaveBeenCalledWith({
       customerEmail: 'test@test.com',
-      paymentMode: PaymentMode.Payment,
+      paymentMode: PaymentMode.payment,
       successUrl: 'https://example.com',
       cancelUrl: 'https://example.com',
       automaticTax: true,
@@ -147,7 +147,7 @@ describe('createPaymentResolver', () => {
           input: {
             products: [{ name: 'product1', unitAmount: 100, quantity: 1 }],
             customerEmail: 'test@test.com',
-            paymentMode: PaymentMode.Payment,
+            paymentMode: PaymentMode.payment,
             successUrl: 'https://example.com',
             cancelUrl: 'https://example.com',
             automaticTax: true,
