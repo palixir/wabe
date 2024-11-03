@@ -96,7 +96,7 @@ describe('PaymentController', () => {
       customerEmail: 'john@doe.com',
       successUrl: 'https://example.com/success',
       cancelUrl: 'https://example.com/cancel',
-      paymentMode: PaymentMode.Payment,
+      paymentMode: PaymentMode.payment,
       products: [{ name: 'Product', unitAmount: 10, quantity: 1 }],
     })
 

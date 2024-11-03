@@ -1,7 +1,6 @@
-import * as wabeFile from '../../generated/wabe'
+
 import type { ClassInterface } from '../schema'
 import type { WabeTypes, WabeConfig } from '../server'
-import { getGraphqlClient } from './helper'
 
 // export const getClient = (config: WabeConfig<WabeTypes>) => {
 //   // We do this to avoid failing import when wabe.ts is not already generated

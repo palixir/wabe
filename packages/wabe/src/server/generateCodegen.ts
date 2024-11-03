@@ -1,13 +1,13 @@
 import {
-  DocumentNode,
-  EnumTypeDefinitionNode,
+  type DocumentNode,
+  type EnumTypeDefinitionNode,
   type GraphQLSchema,
-  InputObjectTypeDefinitionNode,
-  NamedTypeNode,
-  ObjectTypeDefinitionNode,
+  type InputObjectTypeDefinitionNode,
+  type NamedTypeNode,
+  type ObjectTypeDefinitionNode,
   parse,
   printSchema,
-  ScalarTypeDefinitionNode,
+  type ScalarTypeDefinitionNode,
   visit,
 } from 'graphql'
 
@@ -38,7 +38,7 @@ const getScalarsCode = () =>
   Object.keys(defaultScalars).reduce((acc, scalarName) => {
     const scalarDef = defaultScalars[scalarName]
 
-    return (acc += `  ${scalarName}: { input: ${scalarDef.input}; output: ${scalarDef.output}; };\n`)
+    return `${acc}  ${scalarName}: { input: ${scalarDef.input}; output: ${scalarDef.output}; };\n`
   }, 'export type Scalars = {\n')
 
 // Set to store all custom scalar names
@@ -65,18 +65,18 @@ const generateTypescriptFromSchema = (schema: string): string => {
       const typeName = node.name.value
       let fieldsCode = ''
 
-      node.fields?.forEach((field) => {
+      for (const field of node.fields || []) {
         const fieldName = field.name.value
         const fieldType = getFieldType(field.type, false) // Pass false to use output in ObjectType
         const isOptional = field.type.kind !== 'NonNullType'
         fieldsCode += `  ${fieldName}${isOptional ? '?' : ''}: ${fieldType};\n`
-      })
+      }
 
       typescriptCode += `\nexport type ${typeName} = {\n${fieldsCode}};\n`
 
       // Generate argument types for Mutation fields
       if (typeName === 'Mutation' || typeName === 'Query') {
-        node.fields?.forEach((field) => {
+        for (const field of node.fields || []) {
           const fieldName = field.name.value
           const args = field.arguments || []
 
@@ -89,19 +89,21 @@ const generateTypescriptFromSchema = (schema: string): string => {
           }
           // If there are multiple arguments, list them explicitly
           else if (args.length > 0) {
-            let argsCode = `\nexport type ${firstLetterUpperCase(
-              typeName,
-            )}${firstLetterUpperCase(fieldName)}Args = {\n`
-            args.forEach((arg) => {
-              const argName = arg.name.value
-              const argType = getFieldType(arg.type, true) // Use input subtype for args
-              const isOptional = arg.type.kind !== 'NonNullType'
-              argsCode += `  ${argName}${isOptional ? '?' : ''}: ${argType};\n`
-            })
-            argsCode += `};\n`
-            typescriptCode += argsCode
+            const argsCode = args.reduce(
+              (acc, arg) => {
+                const argName = arg.name.value
+                const argType = getFieldType(arg.type, true) // Use input subtype for args
+                const isOptional = arg.type.kind !== 'NonNullType'
+                return `${acc}  ${argName}${isOptional ? '?' : ''}: ${argType};\n`
+              },
+              `\nexport type ${firstLetterUpperCase(
+                typeName,
+              )}${firstLetterUpperCase(fieldName)}Args = {\n`,
+            )
+
+            typescriptCode += `${argsCode}};\n`
           }
-        })
+        }
       }
     },
 
@@ -110,12 +112,12 @@ const generateTypescriptFromSchema = (schema: string): string => {
       const inputTypeName = node.name.value
       let inputFieldsCode = ''
 
-      node.fields?.forEach((field) => {
+      for (const field of node.fields || []) {
         const fieldName = field.name.value
         const fieldType = getFieldType(field.type, true) // Pass true to use input in InputType
         const isOptional = field.type.kind !== 'NonNullType'
         inputFieldsCode += `  ${fieldName}${isOptional ? '?' : ''}: ${fieldType};\n`
-      })
+      }
 
       typescriptCode += `\nexport type ${inputTypeName} = {\n${inputFieldsCode}};\n`
     },
@@ -140,11 +142,12 @@ const getFieldType = (typeNode: any, isInputField = false): string => {
   // Check if the field type is a named type and if it corresponds to a scalar
   const getNamedType = (node: NamedTypeNode): string => {
     const typeName = node.name.value
-    if (defaultScalars[typeName]) {
+    if (defaultScalars[typeName])
       return `Scalars['${typeName}']['${isInputField ? 'input' : 'output'}']`
-    } else if (customScalars.has(typeName)) {
+
+    if (customScalars.has(typeName))
       return `Scalars['${typeName}']['${isInputField ? 'input' : 'output'}']`
-    }
+
     return typeName
   }
 
