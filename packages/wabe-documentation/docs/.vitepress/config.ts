@@ -13,7 +13,14 @@ export default defineConfig({
       'meta',
       {
         property: 'og:title',
-        content: 'Wabe - Your backend in minutes not days for Node.js / Bun',
+        content: 'Your backend in minutes not days for Node.js / Bun',
+      },
+    ],
+    [
+      'meta',
+      {
+        property: 'og:image',
+        content: 'https://wabe.dev/cover.webp',
       },
     ],
     [
@@ -42,7 +49,7 @@ export default defineConfig({
       'meta',
       {
         property: 'twitter:description',
-        content: 'Your backend in minutes not days.',
+        content: 'Your backend in minutes not days for Node.js / Bun',
       },
     ],
     [
@@ -50,6 +57,13 @@ export default defineConfig({
       {
         property: 'twitter:image',
         content: 'https://wabe.dev/cover.webp',
+      },
+    ],
+    [
+      'meta',
+      {
+        property: 'twitter:image:alt',
+        content: 'Preview of the Wabe website',
       },
     ],
     [
