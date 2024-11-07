@@ -19,13 +19,6 @@ export default defineConfig({
     [
       'meta',
       {
-        property: 'og:image',
-        content: 'https://wabe.dev/cover.webp',
-      },
-    ],
-    [
-      'meta',
-      {
         property: 'og:description',
         content:
           'Wabe simplifies backend development with essential features like Authentication, Payments, Email, and Database, enabling effortless app building and scaling.',
@@ -56,7 +49,7 @@ export default defineConfig({
       'meta',
       {
         property: 'twitter:image',
-        content: 'https://wabe.dev/cover.webp',
+        content: 'https://wabe.dev/cover2.webp',
       },
     ],
     [
