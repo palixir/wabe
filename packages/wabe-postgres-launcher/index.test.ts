@@ -6,14 +6,26 @@ import {
   beforeAll,
   afterAll,
   afterEach,
+  mock,
+  test,
+  beforeEach,
 } from 'bun:test'
-import { WabeInMemoryPostgres, testPostgresClient } from './index.ts'
+import {
+  WabeInMemoryPostgres,
+  testPostgresClient,
+  WabePostgresClient,
+} from './index.ts'
 import tcpPortUsed from 'tcp-port-used'
 import { Client as PgClient } from 'pg'
 
 let client: PgClient | undefined // Global variable to track the client
 
-describe('In-Memory PostgreSQL Setup Tests', () => {
+// Track the last created client configuration
+let lastClientConfig: any = null;
+
+describe('Wabe In-Memory PostgreSQL Setup Tests (WabeInMemoryPostgres)', () => {
+  // Mock PgClient
+
   let inMemoryClient: PgClient | undefined
 
   beforeAll(async () => {
@@ -765,7 +777,7 @@ describe('In-Memory PostgreSQL Setup Tests', () => {
     await inMemoryClient!.end()
   })
 
-  it('should inner join with multiple conditions and return correct results', async () => {
+  it('should inner join with multiple conditions and return correct results     \n', async () => {
     const inMemoryClient = await WabeInMemoryPostgres()
 
     // Create users and orders tables
@@ -823,209 +835,167 @@ describe('In-Memory PostgreSQL Setup Tests', () => {
   })
 })
 
-// describe("Actual PostgreSQL Client Tests", () => {
+describe('Actual Wabe PostgresSQL  (WabePostgresClient) ', () => {
+  mock.module('pg', () => ({
+    Client: class MockPgClient {
+      connect: () => Promise<void>
+      constructor(config: any) {
+        this.connect = mock(() => Promise.resolve())
+      }
+    },
+  }))
 
-//     it('should use default loopback address 127.0.0.1', async () => {
-//         const changedAddress = '127.0.0.1';
-//         const client = await getPostgresClient(changedAddress);
+  const originalConsole = global.console
+  beforeAll(() => {
+    global.console = {
+      ...console,
+      info: mock(() => {}),
+      error: mock(() => {}),
+    }
+  })
 
-//         expect(client).toBeDefined();
-//     });
+  afterAll(() => {
+    global.console = originalConsole
+  })
+  
+  beforeEach(() => {
+    lastClientConfig = null;
+  });
+  const testParams = {
+    db_user: 'test_user',
+    host: 'localhost',
+    database: 'test_db',
+    password: 'test_pass',
+    port: 5432,
+    connection_string:
+      'postgresql://test_user:test_pass@localhost:5432/test_db',
+  }
 
-//     it('should check if real instance PostgreSQL is running on the default port', async () => {
-//         const port = 5432; // Default PostgreSQL port
-//         const user = 'your_db_user'; // Replace with actual PostgreSQL username
-//         const host = 'localhost'; // Assuming PostgreSQL is running locally
-//         const database = 'your_database'; // Replace with actual database name
-//         const password = 'your_db_password'; // Replace with actual password
+  test('should connect using connection string when useConnectionString is true', async () => {
+    const client = await WabePostgresClient({
+      ...testParams,
+      options: { useConnectionString: true },
+    })
 
-//             // Call getPostgresClient with real PostgreSQL credentials
-//             const client = await testPostgresClient() as PgClient
+    expect(client).toBeDefined()
+    expect(console.info).toHaveBeenCalledWith(
+      'Connected to PostgreSQL using connection string',
+    )
+  })
 
-//             // Ensure the client is defined (connected successfully)
-//             expect(client).toBeDefined();
+  test('should connect using default PostgreSQL when useDefaultPostgres is true', async () => {
+    const client = await WabePostgresClient({
+      ...testParams,
+      connection_string: '', // Empty connection string to force default postgres
+      options: { useConnectionString: false, useDefaultPostgres: true },
+    })
 
-//             // Optionally, check if the client can perform a simple query
-//             const result = await client!.query('SELECT NOW();'); // Example query
-//             expect(result).toBeDefined();
+    expect(client).toBeDefined()
+    expect(console.info).toHaveBeenCalledWith(
+      'Connected to default PostgreSQL instance',
+    )
+  })
 
-//             // Clean up: close the connection
-//             await client!.end();
+  test('should fall back to in-memory PostgreSQL when both options are false', async () => {
+    const client = await WabePostgresClient({
+      ...testParams,
+      connection_string: '',
+      options: { useConnectionString: false, useDefaultPostgres: false },
+    })
 
-//     });
+    expect(client).toBeDefined()
+    expect(console.info).toHaveBeenCalledWith(
+      'Using in-memory PostgreSQL instance',
+    )
+  })
 
-//     it('should get a real PostgreSQL client in production', async () => {
-//         // process.env.NODE_ENV = 'production'; // Set environment to production
+  test('should throw error when connection fails with connection string', async () => {
+    // Mock PgClient to throw an error
+    mock.module('pg', () => ({
+      Client: class MockPgClient {
+        connect: () => Promise<void>
+        constructor(config: any) {
+          this.connect = mock(() =>
+            Promise.reject(new Error('Connection failed')),
+          )
+        }
+      },
+    }))
 
-//         // Create a more complete mockPgClient
-//         const mockPgClient = {
-//             connect: Bun.connect // Mock connect
-//             end:  Bun.connect ,
-//             query: jest.fn(), // Add any other methods you plan to use
-//             release: jest.fn(),
-//         } as unknown as PgClient; // Force type casting to PgClient
+    await expect(
+      WabePostgresClient({
+        ...testParams,
+        options: { useConnectionString: true },
+      }),
+    ).rejects.toThrow('Connection failed')
 
-//         // Mock getPostgresClient to return the mockPgClient
-//         const getPostgresClient = jest.fn().mockResolvedValue(mockPgClient);
+    expect(console.error).toHaveBeenCalledWith(
+      'Failed to connect to PostgreSQL with connection string:',
+      expect.any(Error),
+    )
+  })
 
-//         // Call the function
-//         const client = await testPostgresClient() as PgClient
+  test('should throw error when default PostgreSQL connection fails', async () => {
+    // Mock PgClient to throw an error
+    mock.module('pg', () => ({
+      Client: class MockPgClient {
+        connect: () => Promise<void>
+        constructor(config: any) {
+          this.connect = mock(() =>
+            Promise.reject(new Error('Connection failed')),
+          )
+        }
+      },
+    }))
 
-//         // Ensure client is not undefined
-//         expect(client).toBeDefined();
+    await expect(
+      WabePostgresClient({
+        ...testParams,
+        connection_string: '',
+        options: { useConnectionString: false, useDefaultPostgres: true },
+      }),
+    ).rejects.toThrow('Connection failed')
 
-//         // Debugging step: Check if client is the mockPgClient
-//         expect(client).toEqual(mockPgClient); // This ensures we're getting the mock back
+    expect(console.error).toHaveBeenCalledWith(
+      'Failed to connect to default PostgreSQL instance:',
+      expect.any(Error),
+    )
+  })
 
-//         // Manually call connect if necessary
-//         await client.connect(); // Manually trigger the connect call
+  test('should handle empty options object', async () => {
+    const client = await WabePostgresClient({
+      ...testParams,
+      connection_string: '',
+      options: {},
+    })
 
-//         // Check if the mockPgClient.connect method was called
-//         expect(mockPgClient.connect).toHaveBeenCalledTimes(1);
+    expect(client).toBeDefined()
+    expect(console.info).toHaveBeenCalledWith(
+      'Using in-memory PostgreSQL instance',
+    )
+  })
 
-//         // Cleanup
-//         jest.restoreAllMocks();
-//     });
+  test("testPostgresClient() or WabeInMemoryPostgres() should return in-memory instance", async () => {
+    const client = await testPostgresClient();
 
-//     it('should create the wabe table and retrieve the inserted wabe project using a real postgres instance', async () => {
-//         // process.env.NODE_ENV = 'production';
+    expect(client).toBeDefined();
+    expect(console.info).toHaveBeenCalledWith(
+      "Using in-memory PostgreSQL instance"
+    );
+  });
 
-//         console.log(process.env.NODE_ENV)
 
-//         const client = await testPostgresClient() as PgClient
+  test("should fall back to in-memory postgres", async () => {
+    const client = await WabePostgresClient({
+      ...testParams,
+      connection_string: "",
+      options: { 
+        useConnectionString: false,
+        useDefaultPostgres: false
+      }
+    });
+  })
 
-//         expect(client).toBeDefined();
+});
 
-//         if (client) {
-//             const createTableQuery = `
-//                 CREATE TABLE IF NOT EXISTS wabe (
-//                     id SERIAL PRIMARY KEY,
-//                     wabe_project_name VARCHAR(255) NOT NULL,
-//                     email VARCHAR(255) UNIQUE NOT NULL
-//                 );
-//             `;
-//             await client.query(createTableQuery);
 
-//             // Insert a new wabe project
-//             const insertQuery = `
-//                 INSERT INTO wabe (wabe_project_name, email)
-//                 VALUES ($1, $2)
-//                 RETURNING *;
-//             `;
-//             const values = ['Test Project', 'test2@example.com'];
-//             const insertResult = await client.query(insertQuery, values);
-
-//             // Ensure that the insert was successful
-//             expect(insertResult.rows.length).toBe(1);
-//             expect(insertResult.rows[0].wabe_project_name).toBe('Test Project');
-//             expect(insertResult.rows[0].email).toBe('test2@example.com');
-
-//             // Select the inserted project by email
-//             const selectQuery = `SELECT * FROM wabe WHERE email = $1;`;
-//             const selectValues = ['test2@example.com'];
-//             const result = await client.query(selectQuery, selectValues);
-
-//             // Ensure one row was retrieved
-//             expect(result.rows.length).toBe(1);
-
-//             // Verify the wabe_project_name and email of the retrieved row
-//             expect(result.rows[0].wabe_project_name).toBe('Test Project');
-//             expect(result.rows[0].email).toBe('test2@example.com');
-//         }
-
-//     });
-
-// //     it('should connect to PostgreSQL using a real connection string (URI)', async () => {
-// //         // Define the PostgreSQL connection string
-// //         // process.env.NODE_ENV = 'production';
-
-// //             // Call getPostgresClient with the connection string
-// //             const client = await testPostgresClient() as PgClient
-
-// //             // Ensure the client is defined (connected successfully)
-// //             expect(client).toBeDefined();
-
-// //             // Optionally, check if the client can perform a simple query
-// //             const result = await client!.query('SELECT NOW();'); // Example query
-// //             expect(result).toBeDefined();
-
-// //             // Clean up: close the connection
-// //             await client!.end();
-// //     });
-
-// //     it('should connect to PostgreSQL using a real connection string (URI) with the env', async () => {
-// //         // Define the PostgreSQL connection string
-// //         // process.env.NODE_ENV = 'production';
-
-// //             // Call getPostgresClient with the connection string
-// //             const client = await testPostgresClient() as PgClient
-
-// //             // Ensure the client is defined (connected successfully)
-// //             expect(client).toBeDefined();
-
-// //             // Optionally, check if the client can perform a simple query
-// //             const result = await client!.query('SELECT NOW();'); // Example query
-// //             expect(result).toBeDefined();
-
-// //             // Clean up: close the connection
-// //             await client!.end();
-// //     });
-
-// // });
-
-// // // describe('getPostgresClient - Environment Variables', () => {
-
-// // //     afterEach(() => {
-// // //         // Restore any environment variables that were mocked or changed
-// // //         jest.restoreAllMocks();
-// // //         delete process.env.DATABASE_URL;
-// // //         delete process.env.DB_USER;
-// // //         delete process.env.DB_HOST;
-// // //         delete process.env.DB_NAME;
-// // //         delete process.env.DB_PASSWORD;
-// // //         delete process.env.DB_PORT;
-// // //         process.env.NODE_ENV = 'test'; // Reset to default
-// // //     });
-
-// // //     it('should use DATABASE_URL  with env as staging', async () => {
-// // //                // Define the PostgreSQL connection string
-// // //                 // process.env.NODE_ENV = 'staging';
-
-// // //                     // Call getPostgresClient with the connection string
-// // //                     const client = await testPostgresClient() as PgClient
-
-// // //                     expect(client).toBeDefined();
-
-// // //                     // Optionally, check if the client can perform a simple query
-// // //                     const result = await client!.query('SELECT NOW();'); // Example query
-// // //                     expect(result).toBeDefined();
-
-// //                     // Clean up: close the connection
-// //                     await client!.end();
-// //     });
-
-// //     it('should use individual environment variables if DATABASE_URL is not set', async () => {
-// //         // Set environment variables directly in the test
-// //         // process.env.NODE_ENV = 'production'; // Set environment to production
-// //         process.env.DB_USER = 'postgres';
-// //         process.env.DB_HOST = 'localhost';
-// //         process.env.DB_NAME = 'postgres';
-// //         const user_password  =  process.env.DB_PASSWORD = 'password';
-// //         process.env.DB_PORT = '5432';
-
-// //         const mockConnect = spyOn(PgClient.prototype, 'connect').mockImplementation(async () => {});
-
-// //         const client = await getPostgresClient(); // This should now get a real PgClient
-
-// //         expect(client).toBeDefined();
-// //         expect(mockConnect).toHaveBeenCalled(); // Ensure connect was called
-// //         expect(client).toBeInstanceOf(PgClient); // Expect PgClient now
-// //         expect(client!.user).toBe('stephenawuah'); // Check against hardcoded value
-// //         expect(client!.host).toBe('localhost'); // Check against hardcoded value
-// //         expect(client!.database).toBe('stephenawuah'); // Check against hardcoded value
-// //         expect(user_password).toBe('password'); // Check against hardcoded value
-// //         expect(client!.port).toBe(5432); // Check against hardcoded value
-
-// //         await client!.end();
-// //     });
-// // });

@@ -34,7 +34,7 @@
  * ```
  */
 
-import {  Client as PgClient, type QueryResult, type QueryResultRow } from 'pg'
+import { Client as PgClient, type QueryResult, type QueryResultRow } from 'pg'
 import { WabeInMemoryPostgres } from './index'
 import type { User } from './interface/wabe-postgres-interface'
 
@@ -79,7 +79,6 @@ export const executeQuerySingle = async <T extends QueryResultRow>(
   return result.rows[0] || null
 }
 
-
 async function example() {
   const client = await WabeInMemoryPostgres()
 
@@ -118,13 +117,13 @@ const DatabaseError = {
   QUERY_ERROR: 'QUERY_ERROR',
 } as const
 
-export type DatabaseErrorType = (typeof DatabaseError)[keyof typeof DatabaseError]
+export type DatabaseErrorType =
+  (typeof DatabaseError)[keyof typeof DatabaseError]
 
 export interface DatabaseResult<T> {
   data: T | null
   error: { type: DatabaseErrorType; message: string } | null
 }
-
 
 export const executeSafeQuery = async <T extends QueryResultRow>(
   client: PgClient | undefined,

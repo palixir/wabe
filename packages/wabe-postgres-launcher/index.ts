@@ -1,12 +1,13 @@
 import { newDb } from 'pg-mem'
 import tcpPortUsed from 'tcp-port-used'
 import { Client as PgClient } from 'pg' // For real PostgreSQL in production
-import type { PostgresClientOptions, PostgresClientParams } from './interface/wabe-postgres-interface'
+import type {
+  PostgresClientOptions,
+  PostgresClientParams,
+} from './interface/wabe-postgres-interface'
 
 // Function to set up the in-memory PostgreSQL using pg-mem
-export const WabeInMemoryPostgres = async (): Promise<
-  PgClient | undefined
-> => {
+export const WabeInMemoryPostgres = async (): Promise<PgClient | undefined> => {
   const port = 5432
   const universalPort = '127.0.0.1' // Default to '127.0.0.1' if no port/loopback address is provided
 
@@ -38,13 +39,11 @@ export const WabeInMemoryPostgres = async (): Promise<
   }
 }
 
-
-
 /**
- * WabePostgresClient - A flexible PostgreSQL client initializer that can connect 
- * to a real PostgreSQL instance using either a connection string or default 
+ * WabePostgresClient - A flexible PostgreSQL client initializer that can connect
+ * to a real PostgreSQL instance using either a connection string or default
  * credentials, or fall back to an in-memory PostgreSQL instance for testing.
- * 
+ *
  * You can connect using:
  * 1. **Connection String**: Use the provided PostgreSQL connection URI string.
  * 2. **Default PostgreSQL Setup**: Use default connection settings (local PostgreSQL credentials).
@@ -60,7 +59,7 @@ export const WabeInMemoryPostgres = async (): Promise<
  *    - `useConnectionString` (default: true): Uses the provided connection string if available.
  *    - `useDefaultPostgres` (default: false): Falls back to default PostgreSQL config if true.
  *
- * @returns {Promise<PgClient | undefined>} - The connected PostgreSQL client, 
+ * @returns {Promise<PgClient | undefined>} - The connected PostgreSQL client,
  *                                            or an in-memory instance for testing.
  *
  * Example 1: **Connecting using a connection string** (overrides default settings).
@@ -111,21 +110,24 @@ export const WabePostgresClient = async ({
   password,
   port,
   connection_string,
-  options = {}
-// Default options
+  options = {},
+  // Default options
 }: PostgresClientParams): Promise<PgClient | undefined> => {
-  const { useConnectionString = true, useDefaultPostgres = false } = options;
-  
+  const { useConnectionString = true, useDefaultPostgres = false } = options
+
   // Try to use connection string if specified and enabled
   if (useConnectionString && connection_string) {
-    const client = new PgClient(connection_string);
+    const client = new PgClient(connection_string)
     try {
-      await client.connect();
-      console.info('Connected to PostgreSQL using connection string');
-      return client;
+      await client.connect()
+      console.info('Connected to PostgreSQL using connection string')
+      return client
     } catch (error) {
-      console.error('Failed to connect to PostgreSQL with connection string:', error);
-      throw error;
+      console.error(
+        'Failed to connect to PostgreSQL with connection string:',
+        error,
+      )
+      throw error
     }
   }
 
@@ -137,25 +139,23 @@ export const WabePostgresClient = async ({
       database: database,
       password: password,
       port: port || 5432,
-    });
+    })
     try {
-      await client.connect();
-      console.info('Connected to default PostgreSQL instance');
-      return client;
+      await client.connect()
+      console.info('Connected to default PostgreSQL instance')
+      return client
     } catch (error) {
-      console.error('Failed to connect to default PostgreSQL instance:', error);
-      throw error;
+      console.error('Failed to connect to default PostgreSQL instance:', error)
+      throw error
     }
   }
 
   // Fall back to in-memory PostgreSQL
-  console.info('Using in-memory PostgreSQL instance');
-  return await WabeInMemoryPostgres();
-};
-
+  console.info('Using in-memory PostgreSQL instance')
+  return await WabeInMemoryPostgres()
+}
 
 //for testing purposes
 export const testPostgresClient = async (): Promise<PgClient | undefined> => {
   return await WabeInMemoryPostgres()
 }
-
