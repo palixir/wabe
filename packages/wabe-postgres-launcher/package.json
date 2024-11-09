@@ -7,6 +7,7 @@
     "dev": "bun index.ts --watch",
     "start": "bun dist/index.js",
     "test:pg-mem": "bun test testInMemoryPostgres.ts --watch",
+    "test:util": "bun test-in-memory.utils.ts --watch",
     "ci": "bun test index.test.ts --verbose",
     "build": "bun build index.ts testInMemoryPostgres.ts --target=bun --outdir dist",
     "lint": "biome lint ./*.ts --no-errors-on-unmatched",
