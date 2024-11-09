@@ -6,6 +6,72 @@ import type {
   PostgresClientParams,
 } from './interface/wabe-postgres-interface'
 
+
+/**
+ * Sets up an in-memory PostgreSQL instance for testing and development.
+ * Uses pg-mem to create a temporary database that behaves like a real PostgreSQL instance.
+ * 
+ * Features:
+ * - Automatically checks port availability (5432)
+ * - Creates fresh database instance for each run
+ * - Returns standard PgClient for familiar API
+ * - No persistence between runs (good for tests)
+ * 
+ *  
+ *  Zero Configuration Setup
+ *    - Auto-initializes on port 5432
+ *    - No physical database installation needed
+ *    - Works out of the box for testing/development
+ * 
+ *  Development Friendly
+ *    - Standard PgClient interface
+ *    - Compatible with typical PostgreSQL queries
+ *    - Supports async/await pattern
+ *  
+ *  Limitations:
+ * - Not for production use
+ * - Data doesn't persist after restart
+ * - Limited to single port (5432)
+ * 
+ *  Common Use Cases:
+ * 1. Unit Testing
+ *    ```typescript
+ *    beforeEach(async () => {
+ *      client = await WabeInMemoryPostgres();
+ *    });
+ *    ```
+ * 
+ * 2. Development Environment
+ *    ```typescript
+ *    if (process.env.NODE_ENV === 'development') {
+ *      client = await WabeInMemoryPostgres();
+ *    }
+ *    ```
+ * 
+ * y
+ * 3. CI/CD Pipelines
+ *    - No need to set up actual database
+ *    - Consistent test environment
+ * 
+ * @see pg-mem documentation for advanced features
+ * 
+ * @returns Promise<PgClient | undefined> - PostgreSQL client if setup succeeds,
+ *                                         undefined if port is already in use
+ * 
+ * @example
+ * ```typescript
+ * const client = await WabeInMemoryPostgres();
+ * 
+ * if (client) {
+ *   // Fresh database instance
+ *   await client.query('CREATE TABLE users (id SERIAL PRIMARY KEY)');
+ * }
+ * ```
+ * 
+ * Note: Port 5432 must be available for new instances.
+ * If port is in use, assumes existing instance and returns undefined.
+ */
+
 // Function to set up the in-memory PostgreSQL using pg-mem
 export const WabeInMemoryPostgres = async (): Promise<PgClient | undefined> => {
   const port = 5432
