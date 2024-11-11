@@ -182,6 +182,18 @@ export class StripeAdapter implements PaymentAdapter {
       automatic_tax: {
         enabled: !!automaticTax,
       },
+      ...(automaticTax
+        ? {
+            customer_update: {
+              address: 'auto',
+              shipping: 'auto',
+            },
+            billing_address_collection: 'required',
+            shipping_address_collection: {
+              allowed_countries: [],
+            },
+          }
+        : {}),
     })
 
     if (!session.url) throw new Error('Error creating Stripe session')
