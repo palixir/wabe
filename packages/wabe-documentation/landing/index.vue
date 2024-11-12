@@ -53,7 +53,7 @@ onMounted(() => {
             </div>
 
             <div class="mt-8 flex justify-center space-x-4">
-                <a href="/wabe/motivations" class="bg-primary text-white px-8 py-3 rounded-lg font-medium hover:bg-secondary transition duration-150">View documentation</a>
+                <a href="/wabe/start" class="bg-primary text-white px-8 py-3 rounded-lg font-medium hover:bg-secondary transition duration-150">Get started</a>
 
                 <a href="https://github.com/palixir/wabe" rel="noopener noreferrer" class="flex items-center gap-2 bg-background-primary text-white px-8 py-3 rounded-lg font-medium hover:bg-gray-800 transition duration-150" target="_blank">
                     <img src="/github.webp" alt="GitHub" class="h-6"/>
