@@ -1,6 +1,6 @@
 {
   "name": "wabe-stripe",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "Stripe payment adapter for Wabe",
   "homepage": "https://wabe.dev",
   "author": {
