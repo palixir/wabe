@@ -8,7 +8,7 @@ import {
 import type { Wabe } from '../server'
 import { gql, type GraphQLClient } from 'graphql-request'
 
-describe('GraphQL : E2E', () => {
+describe('setEmail', () => {
   let wabe: Wabe<DevWabeTypes>
   let port: number
   let client: GraphQLClient

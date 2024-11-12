@@ -1,4 +1,4 @@
-import argon2 from 'argon2'
+import { Algorithm, hash } from '@node-rs/argon2'
 import type { WabeTypes } from '../server'
 import type { WabeContext } from '../server/interface'
 import type {
@@ -43,8 +43,7 @@ export const getAuthenticationMethod = <
   return validAuthenticationMethod as CustomAuthenticationMethods<T, U>
 }
 
-export const hashPassword = async (password: string) =>
-  // biome-ignore lint/correctness/noConstantCondition: Use to check the existence of global Bun
-  typeof Bun
-    ? await Bun.password.hash(password, 'argon2id')
-    : await argon2.hash(password)
+export const hashPassword = (password: string) =>
+  hash(password, {
+    algorithm: Algorithm.Argon2id,
+  })

@@ -18,7 +18,6 @@
   },
   "trustedDependencies": [
     "@biomejs/biome",
-    "argon2",
     "lefthook",
     "mongodb-memory-server"
   ]

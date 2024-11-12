@@ -1,4 +1,4 @@
-import argon2 from 'argon2'
+import { Algorithm, verify } from '@node-rs/argon2'
 import type {
   AuthenticationEventsOptions,
   AuthenticationEventsOptionsWithUserId,
@@ -47,14 +47,13 @@ export class EmailPassword
     if (!userDatabasePassword)
       throw new Error('Invalid authentication credentials')
 
-    // biome-ignore lint/correctness/noConstantCondition: <explanation>
-    const isPasswordEquals = typeof Bun
-      ? await Bun.password.verify(
-          input.password,
-          userDatabasePassword,
-          'argon2id',
-        )
-      : await argon2.verify(userDatabasePassword, input.password)
+    const isPasswordEquals = await verify(
+      userDatabasePassword,
+      input.password,
+      {
+        algorithm: Algorithm.Argon2id,
+      },
+    )
 
     if (
       !isPasswordEquals ||
@@ -99,7 +98,7 @@ export class EmailPassword
     input,
     context,
   }: AuthenticationEventsOptionsWithUserId<EmailPasswordInterface>) {
-    const users = await context.wabe.controllers.database.count({
+    const users = await context.wabe.controllers.database.getObjects({
       className: 'User',
       where: {
         id: {
@@ -107,14 +106,19 @@ export class EmailPassword
         },
       },
       context,
+      fields: ['authentication'],
     })
 
-    if (users === 0) throw new Error('User not found')
+    if (users.length === 0) throw new Error('User not found')
+
+    const user = users[0]
 
     return {
       authenticationDataToSave: {
-        email: input.email,
-        password: await hashPassword(input.password),
+        email: input.email ?? user.authentication?.emailPassword?.email,
+        password: input.password
+          ? await hashPassword(input.password)
+          : user.authentication?.emailPassword?.password,
       },
     }
   }
