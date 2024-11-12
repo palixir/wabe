@@ -1,4 +1,14 @@
-import { describe, expect, it, mock, spyOn, afterEach } from 'bun:test'
+import {
+  describe,
+  expect,
+  it,
+  mock,
+  spyOn,
+  afterEach,
+  afterAll,
+} from 'bun:test'
+import * as argon2 from '@node-rs/argon2'
+
 import { EmailPassword } from './EmailPassword'
 
 describe('Email password', () => {
@@ -6,8 +16,8 @@ describe('Email password', () => {
   const mockCount = mock(() => Promise.resolve(0)) as any
   const mockCreateObject = mock(() => Promise.resolve({ id: 'userId' })) as any
 
-  const spyArgonPasswordVerify = spyOn(Bun.password, 'verify')
-  const spyBunPasswordHash = spyOn(Bun.password, 'hash')
+  const spyArgonPasswordVerify = spyOn(argon2, 'verify')
+  const spyBunPasswordHash = spyOn(argon2, 'hash')
 
   const controllers = {
     controllers: {
@@ -26,6 +36,11 @@ describe('Email password', () => {
     spyBunPasswordHash.mockClear()
   })
 
+  afterAll(() => {
+    spyArgonPasswordVerify.mockRestore()
+    spyBunPasswordHash.mockRestore()
+  })
+
   const emailPassword = new EmailPassword()
 
   it('should signUp with email password', async () => {
@@ -42,7 +57,9 @@ describe('Email password', () => {
     expect(password).toBe('$argon2id$hashedPassword')
 
     expect(spyBunPasswordHash).toHaveBeenCalledTimes(1)
-    expect(spyBunPasswordHash).toHaveBeenCalledWith('password', 'argon2id')
+    expect(spyBunPasswordHash).toHaveBeenCalledWith('password', {
+      algorithm: argon2.Algorithm.Argon2id,
+    })
   })
 
   it('should signIn with email password', async () => {
@@ -77,9 +94,9 @@ describe('Email password', () => {
 
     expect(spyArgonPasswordVerify).toHaveBeenCalledTimes(1)
     expect(spyArgonPasswordVerify).toHaveBeenCalledWith(
-      'password',
       'hashedPassword',
-      'argon2id',
+      'password',
+      { algorithm: argon2.Algorithm.Argon2id },
     )
   })
 
@@ -154,8 +171,12 @@ describe('Email password', () => {
     ).rejects.toThrow('User not found')
   })
 
-  it('should  update authentication data if the userId match with an user', async () => {
-    mockCount.mockResolvedValue(1)
+  it('should update authentication data if the userId match with an user', async () => {
+    mockGetObjects.mockResolvedValue([
+      {
+        id: 'id',
+      },
+    ] as any)
 
     spyBunPasswordHash.mockResolvedValueOnce('$argon2id$hashedPassword')
 

@@ -10,7 +10,7 @@ import {
 } from '../utils/helper'
 import type { Wabe } from '../server'
 
-describe('updateAuthenticationDataResolver', () => {
+describe('authenticaiton hooks', () => {
   let wabe: Wabe<DevWabeTypes>
   let port: number
   let client: GraphQLClient
@@ -226,7 +226,7 @@ describe('updateAuthenticationDataResolver', () => {
           },
         },
       }),
-    ).rejects.toThrow('Object not found')
+    ).rejects.toThrow('User not found')
 
     expect(
       getAnonymousClient(port).request<any>(graphql.updateUser, {
@@ -242,7 +242,7 @@ describe('updateAuthenticationDataResolver', () => {
           },
         },
       }),
-    ).rejects.toThrow('Object not found')
+    ).rejects.toThrow('User not found')
 
     const res = await userClient.request<any>(graphql.signInWith, {
       input: {
