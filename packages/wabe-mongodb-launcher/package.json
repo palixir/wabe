@@ -1,6 +1,6 @@
 {
     "name": "wabe-mongodb-launcher",
-    "version": "0.5.0",
+    "version": "0.5.1",
     "license": "MIT",
     "main": "dist/index.js",
     "description": "Package to launch the mongodb for test",
