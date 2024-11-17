@@ -2,16 +2,16 @@
     "name": "wabe-mongodb-launcher",
     "version": "0.5.0",
     "license": "MIT",
-    "main": "index.ts",
+    "main": "dist/index.js",
     "description": "Package to launch the mongodb for test",
     "scripts": {
         "dev": "bun index.ts --watch",
         "start": "bun index.ts",
         "ci":"bun lint",
-        "build": "bun build --outdir dist $(pwd)/index.ts --target=node --external=* && bun generate:types",
+        "build": "bun build --outdir dist $(pwd)/src/index.ts --target=node --external=* && bun generate:types",
         "lint": "biome lint $(pwd)/*.ts --config-path=../../ --no-errors-on-unmatched",
         "format": "biome format --config-path=../../ --write .",
-        "generate:types": "dts-bundle-generator -o dist/index.d.ts $(pwd)/index.ts --no-check --external-imports=wobe"
+        "generate:types": "dts-bundle-generator -o dist/index.d.ts $(pwd)/src/index.ts --no-check --external-imports=wobe"
     },
     "dependencies": {
         "tcp-port-used": "1.0.2",
