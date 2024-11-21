@@ -43,13 +43,12 @@
     "@parcel/watcher": "2.3.0",
     "@types/bun": "1.1.8",
     "@types/jsonwebtoken": "9.0.6",
-    "@types/react": "^18.3.5",
     "@types/uuid": "9.0.6",
     "dts-bundle-generator": "9.5.1",
     "get-port": "7.1.0",
     "graphql-request": "6.1.0",
     "uuid": "10.0.0",
-    "wabe-mongodb-launcher": "workspace:*",
+    "wabe-mongodb-launcher": "0.5.1",
     "wabe-pluralize": "workspace:*"
   }
 }
