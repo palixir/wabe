@@ -11,6 +11,7 @@ import { generateCodegen } from './generateCodegen'
 import { defaultAuthenticationMethods } from '../authentication/defaultAuthentication'
 import { Wobe, cors } from 'wobe'
 import { WobeGraphqlYogaPlugin } from 'wobe-graphql-yoga'
+import type { CorsOptions } from 'wobe'
 import { Session } from '../authentication/Session'
 import { getCookieInRequestHeaders } from '../utils'
 import type { WabeContext } from './interface'
@@ -24,6 +25,8 @@ import { PaymentController } from '../payment/PaymentController'
 
 export interface WabeConfig<T extends WabeTypes> {
   port: number
+  hostname?: string
+  corsOptions?: CorsOptions
   publicUrl?: string
   schema?: SchemaInterface<T>
   database: DatabaseConfig
@@ -66,6 +69,8 @@ export class Wabe<T extends WabeTypes> {
 
   constructor({
     port,
+    hostname,
+    corsOptions,
     schema,
     database,
     authentication,
@@ -80,6 +85,8 @@ export class Wabe<T extends WabeTypes> {
   }: WabeConfig<T>) {
     this.config = {
       port,
+      hostname,
+      corsOptions,
       schema,
       database,
       codegen,
@@ -99,10 +106,13 @@ export class Wabe<T extends WabeTypes> {
       routes,
     }
 
-    this.server = new Wobe<WobeCustomContext<T>>().get('/health', (context) => {
-      context.res.status = 200
-      context.res.send('OK')
-    })
+    this.server = new Wobe<WobeCustomContext<T>>({ hostname }).get(
+      '/health',
+      (context) => {
+        context.res.status = 200
+        context.res.send('OK')
+      },
+    )
 
     const databaseAdapter = new MongoAdapter({
       databaseName: database.name,
@@ -232,20 +242,10 @@ export class Wabe<T extends WabeTypes> {
       (ctx) => {
         return ctx.res.send('OK')
       },
-      cors({
-        origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
-        // allowHeaders: ['content-type', 'Wabe-Access-Token', 'Wabe-Root-Key'],
-        credentials: true,
-      }),
+      cors(this.config.corsOptions),
     )
 
-    this.server.beforeHandler(
-      cors({
-        origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
-        // allowHeaders: ['content-type', 'Wabe-Access-Token', 'Wabe-Root-Key'],
-        credentials: true,
-      }),
-    )
+    this.server.beforeHandler(cors(this.config.corsOptions))
 
     // Set the wabe context
     this.server.beforeHandler(async (ctx) => {
@@ -309,11 +309,6 @@ export class Wabe<T extends WabeTypes> {
       WobeGraphqlYogaPlugin({
         schema,
         maskedErrors: false,
-        cors: {
-          origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
-          credentials: true,
-          // allowedHeaders: ['content-type'],
-        },
         graphqlEndpoint: '/graphql',
         context: async (ctx): Promise<WabeContext<T>> => ctx.wabe,
         graphqlMiddleware: async (resolve, res) => {
@@ -321,7 +316,6 @@ export class Wabe<T extends WabeTypes> {
 
           try {
             if (this.config.authentication?.session?.cookieSession) {
-              // TODO : Add tests for this
               const accessToken = getCookieInRequestHeaders(
                 'accessToken',
                 res.request.headers,
