@@ -25,6 +25,7 @@ import { PaymentController } from '../payment/PaymentController'
 
 export interface WabeConfig<T extends WabeTypes> {
   port: number
+  hostname?: string
   corsOptions?: CorsOptions
   publicUrl?: string
   schema?: SchemaInterface<T>
@@ -68,6 +69,7 @@ export class Wabe<T extends WabeTypes> {
 
   constructor({
     port,
+    hostname,
     corsOptions,
     schema,
     database,
@@ -83,6 +85,7 @@ export class Wabe<T extends WabeTypes> {
   }: WabeConfig<T>) {
     this.config = {
       port,
+      hostname,
       corsOptions,
       schema,
       database,
@@ -103,10 +106,13 @@ export class Wabe<T extends WabeTypes> {
       routes,
     }
 
-    this.server = new Wobe<WobeCustomContext<T>>().get('/health', (context) => {
-      context.res.status = 200
-      context.res.send('OK')
-    })
+    this.server = new Wobe<WobeCustomContext<T>>({ hostname }).get(
+      '/health',
+      (context) => {
+        context.res.status = 200
+        context.res.send('OK')
+      },
+    )
 
     const databaseAdapter = new MongoAdapter({
       databaseName: database.name,

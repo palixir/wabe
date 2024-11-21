@@ -76,6 +76,38 @@ describe('Server', () => {
     await wabe.close()
   })
 
+  it('should run server on different hostname', async () => {
+    const databaseId = uuid()
+
+    const port = await getPort()
+    const wabe = new Wabe({
+      hostname: '0.0.0.0',
+      rootKey:
+        'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+      database: {
+        type: DatabaseEnum.Mongo,
+        url: 'mongodb://127.0.0.1:27045',
+        name: databaseId,
+      },
+      port,
+      schema: {
+        classes: [
+          {
+            name: 'Collection1',
+            fields: { name: { type: 'String' } },
+          },
+        ],
+      },
+    })
+
+    await wabe.start()
+
+    const res = await fetch(`http://0.0.0.0:${port}/health`)
+
+    expect(res.status).toEqual(200)
+    await wabe.close()
+  })
+
   it('should throw an error if hook has negative value', async () => {
     const databaseId = uuid()
 

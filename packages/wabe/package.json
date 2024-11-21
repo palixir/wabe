@@ -36,7 +36,7 @@
     "jsonwebtoken": "9.0.2",
     "mongodb": "6.8.0",
     "otplib": "12.0.1",
-    "wobe": "1.1.8",
+    "wobe": "1.1.9",
     "wobe-graphql-yoga": "1.2.5"
   },
   "devDependencies": {
