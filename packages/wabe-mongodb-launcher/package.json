@@ -2,7 +2,7 @@
     "name": "wabe-mongodb-launcher",
     "version": "0.5.1",
     "license": "MIT",
-    "main": "dist/index.js",
+    "main": "index.ts",
     "description": "Package to launch the mongodb for test",
     "scripts": {
         "dev": "bun index.ts --watch",
