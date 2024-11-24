@@ -115,7 +115,6 @@ describe('Server', () => {
     expect(
       () =>
         new Wabe({
-          publicUrl: 'http://127.0.0.1',
           rootKey:
             'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
           database: {
@@ -127,7 +126,7 @@ describe('Server', () => {
           hooks: [
             {
               operationType: OperationType.BeforeCreate,
-              callback: () => {},
+              callback: () => { },
               priority: -1,
             },
           ],
@@ -137,7 +136,6 @@ describe('Server', () => {
     expect(
       () =>
         new Wabe({
-          publicUrl: 'http://127.0.0.1',
           rootKey:
             'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
           database: {
@@ -153,7 +151,6 @@ describe('Server', () => {
     expect(
       () =>
         new Wabe({
-          publicUrl: 'http://127.0.0.1',
           rootKey:
             'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
           database: {
@@ -165,7 +162,7 @@ describe('Server', () => {
           hooks: [
             {
               operationType: OperationType.BeforeCreate,
-              callback: () => {},
+              callback: () => { },
               priority: 1,
             },
           ],

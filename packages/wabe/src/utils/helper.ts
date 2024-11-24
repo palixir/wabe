@@ -19,12 +19,12 @@ type Primitive = undefined | null | boolean | string | number
 export type DeepRequired<T> = T extends Primitive
   ? NotNill<T>
   : {
-      [P in keyof T]-?: T[P] extends Array<infer U>
-        ? Array<DeepRequired<U>>
-        : T[P] extends ReadonlyArray<infer U2>
-          ? DeepRequired<U2>
-          : DeepRequired<T[P]>
-    }
+    [P in keyof T]-?: T[P] extends Array<infer U>
+    ? Array<DeepRequired<U>>
+    : T[P] extends ReadonlyArray<infer U2>
+    ? DeepRequired<U2>
+    : DeepRequired<T[P]>
+  }
 
 export interface DevWabeTypes extends WabeTypes {
   types: WabeSchemaTypes
@@ -90,7 +90,6 @@ export const setupTests = async (
       },
     },
     port,
-    publicUrl: 'http://127.0.0.1',
     email: {
       adapter: new EmailDevAdapter(),
       mainEmail: 'main.email@wabe.com',
@@ -98,8 +97,8 @@ export const setupTests = async (
     payment: {
       // @ts-expect-error
       adapter: new PaymentDevAdapter(),
-      onPaymentSucceed: async () => {},
-      onPaymentFailed: async () => {},
+      onPaymentSucceed: async () => { },
+      onPaymentFailed: async () => { },
       linkPaymentWebhook: {
         secret: 'secret',
       },
