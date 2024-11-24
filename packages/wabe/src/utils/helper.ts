@@ -11,6 +11,7 @@ import { Wabe, type WabeTypes } from '../server'
 import { PaymentDevAdapter } from '../payment/DevAdapter'
 import type { ClassInterface } from '../schema'
 import { EmailDevAdapter } from '../email/DevAdapter'
+import { Currency } from '../payment'
 
 type NotNill<T> = T extends null | undefined ? never : T
 
@@ -95,13 +96,9 @@ export const setupTests = async (
       mainEmail: 'main.email@wabe.com',
     },
     payment: {
-      // @ts-expect-error
       adapter: new PaymentDevAdapter(),
-      onPaymentSucceed: async () => { },
-      onPaymentFailed: async () => { },
-      linkPaymentWebhook: {
-        secret: 'secret',
-      },
+      currency: Currency.EUR,
+      supportedPaymentMethods: ['card', 'paypal'],
     },
     schema: {
       classes: [
