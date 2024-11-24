@@ -27,15 +27,14 @@ export interface WabeConfig<T extends WabeTypes> {
   port: number
   hostname?: string
   corsOptions?: CorsOptions
-  publicUrl?: string
   schema?: SchemaInterface<T>
   database: DatabaseConfig
   codegen?:
-    | {
-        enabled: true
-        path: string
-      }
-    | { enabled?: false }
+  | {
+    enabled: true
+    path: string
+  }
+  | { enabled?: false }
   authentication?: AuthenticationConfig<T>
   routes?: WabeRoute[]
   rootKey: string
@@ -81,7 +80,6 @@ export class Wabe<T extends WabeTypes> {
     email,
     payment,
     routes,
-    publicUrl,
   }: WabeConfig<T>) {
     this.config = {
       port,
@@ -93,13 +91,12 @@ export class Wabe<T extends WabeTypes> {
       authentication,
       rootKey,
       hooks,
-      publicUrl,
       file: {
         adapter:
           file?.adapter ||
           ((process.env.NODE_ENV !== 'production'
             ? fileDevAdapter
-            : () => {}) as any),
+            : () => { }) as any),
       },
       email,
       payment,
