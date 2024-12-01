@@ -1,6 +1,8 @@
 import type React from 'react'
 
-export type Templates = 'sendOTPCode'
+export type HtmlTemplates = {
+  sendOTPCode: (options: { otp: string }) => string | Promise<string>
+}
 
 export interface EmailSendOptions {
   from: string
@@ -29,5 +31,5 @@ export interface EmailAdapter {
 export interface EmailConfig {
   adapter: EmailAdapter
   mainEmail?: string
-  htmlTemplates?: Record<Templates, (payload: any) => string>
+  htmlTemplates?: HtmlTemplates
 }
