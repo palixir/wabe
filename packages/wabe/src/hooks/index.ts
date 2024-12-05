@@ -317,13 +317,13 @@ export const getDefaultHooks = (): Hook<any, any>[] => [
   {
     operationType: OperationType.BeforeCreate,
     // Need to be after email setup
-    priority: 2,
+    priority: 3,
     callback: defaultSearchableFieldsBeforeCreate,
   },
   {
     operationType: OperationType.BeforeUpdate,
     // Need to be after email setup
-    priority: 2,
+    priority: 3,
     callback: defaultSearchableFieldsBeforeUpdate,
   },
   {
@@ -340,13 +340,15 @@ export const getDefaultHooks = (): Hook<any, any>[] => [
   {
     className: 'User',
     operationType: OperationType.BeforeCreate,
-    priority: 1,
+    // Need to be after authentication for udpate and create user hook
+    priority: 2,
     callback: defaultSetEmail,
   },
   {
     className: 'User',
     operationType: OperationType.BeforeUpdate,
-    priority: 1,
+    // Need to be after authentication for udpate and create user hook
+    priority: 2,
     callback: defaultSetEmailOnUpdate,
   },
   {

@@ -26,6 +26,36 @@ describe('authenticaiton hooks', () => {
     await closeTests(wabe)
   })
 
+  it('should not erase other fields when updating authentication', async () => {
+    const {
+      signUpWith: { id },
+    } = await client.request<any>(graphql.signUpWith, {
+      input: {
+        authentication: {
+          emailPassword: {
+            email: 'test@test.com',
+            password: 'password',
+          },
+        },
+      },
+    })
+
+    const { updateUser } = await client.request<any>(graphql.updateUser, {
+      input: {
+        id,
+        fields: {
+          authentication: {
+            emailPassword: {
+              password: 'password2',
+            },
+          },
+        },
+      },
+    })
+
+    expect(updateUser.user.email).toBe('test@test.com')
+  })
+
   it('should create an user with createUser mutation and sign in', async () => {
     const userCreated = await client.request<any>(graphql.createUser, {
       input: {
@@ -292,6 +322,7 @@ const graphql = {
   		updateUser(input: $input){
         user {
             id
+            email
             acl {
                 users {
                     userId
