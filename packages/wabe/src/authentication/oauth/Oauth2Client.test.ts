@@ -22,7 +22,7 @@ describe('Oauth2Client', () => {
     global.fetch = originalFetch
   })
 
-  it('should create authorization URl', async () => {
+  it('should create authorization URl', () => {
     const authorizationURL = oauthClient.createAuthorizationURL()
 
     expect(authorizationURL.toString()).toEqual(

@@ -17,7 +17,7 @@ describe('Google oauth', () => {
 
   const googleOauth = new Google(config)
 
-  it('should create authorization url', async () => {
+  it('should create authorization url', () => {
     const spyOauth2ClientCreateAuthorizationUrl = spyOn(
       OAuth2Client.prototype,
       'createAuthorizationURL',
