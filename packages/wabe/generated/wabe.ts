@@ -705,7 +705,6 @@ export type Query = {
   _internalConfigs: _InternalConfigConnection;
   helloWorld?: Scalars['String']['output'];
   me?: MeOutput;
-  getInvoices: Invoice[];
 };
 
 export type QueryUserArgs = {
@@ -776,10 +775,6 @@ export type Query_internalConfigsArgs = {
 
 export type QueryHelloWorldArgs = {
   name: Scalars['String']['input'];
-};
-
-export type QueryGetInvoicesArgs = {
-  email: Scalars['Email']['input'];
 };
 
 export type UserWhereInput = {
@@ -1246,16 +1241,6 @@ export type MeOutput = {
   user?: User;
 };
 
-export type Invoice = {
-  amountDue: Scalars['Int']['output'];
-  amountPaid: Scalars['Int']['output'];
-  currency: Currency;
-  id: Scalars['String']['output'];
-  created: Scalars['Int']['output'];
-  invoiceUrl: Scalars['String']['output'];
-  isPaid: Scalars['Boolean']['output'];
-};
-
 export type Mutation = {
   createUser?: CreateUserPayload;
   createUsers: UserConnection;
@@ -1298,8 +1283,6 @@ export type Mutation = {
   secondCustomMutation?: Scalars['Int']['output'];
   resetPassword?: Scalars['Boolean']['output'];
   sendOtpCode?: Scalars['Boolean']['output'];
-  makePayment?: Scalars['String']['output'];
-  cancelSubscription?: Scalars['Boolean']['output'];
   sendEmail?: Scalars['String']['output'];
   signInWith?: SignInWithOutput;
   signUpWith?: SignUpWithOutput;
@@ -1470,14 +1453,6 @@ export type MutationResetPasswordArgs = {
 
 export type MutationSendOtpCodeArgs = {
   input: SendOtpCodeInput;
-};
-
-export type MutationMakePaymentArgs = {
-  input: MakePaymentInput;
-};
-
-export type MutationCancelSubscriptionArgs = {
-  input: CancelSubscriptionInput;
 };
 
 export type MutationSendEmailArgs = {
@@ -1998,26 +1973,6 @@ export type ResetPasswordInput = {
 };
 
 export type SendOtpCodeInput = {
-  email: Scalars['Email']['input'];
-};
-
-export type MakePaymentInput = {
-  customerEmail?: Scalars['Email']['input'];
-  paymentMode: PaymentMode;
-  successUrl: Scalars['String']['input'];
-  cancelUrl: Scalars['String']['input'];
-  products: MakePaymentProductInput[];
-  automaticTax?: Scalars['Boolean']['input'];
-  recurringInterval?: PaymentReccuringInterval;
-};
-
-export type MakePaymentProductInput = {
-  name: Scalars['String']['input'];
-  unitAmount: Scalars['Int']['input'];
-  quantity: Scalars['Int']['input'];
-};
-
-export type CancelSubscriptionInput = {
   email: Scalars['Email']['input'];
 };
 

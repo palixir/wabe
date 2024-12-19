@@ -1,11 +1,11 @@
-# Create payment
+# Make a payment
 
-With wabe, you have the ability to create payments either by using official adapters or by creating your own. You can then access it in the controllers object or create payment with the default graphql mutation `createPayment`.
+With wabe, you have the ability to create payments either by using official adapters or by creating your own. You can then access it in the controllers object.
 
 ```ts
 // With controller
 const fn = async (context: WabeContext<any>) => {
-  await context.wabe.controllers.payment.createPayment({
+  await context.wabe.controllers.payment.makePayment({
       cancelUrl: 'https://example.com/cancel',
       successUrl: 'https://example.com/success',
       customerEmail: 'john.doe@example.com',
@@ -18,28 +18,10 @@ const fn = async (context: WabeContext<any>) => {
 }
 ```
 
-```graphql
-// With graphql mutation
-input CreatePaymentInput {
-  customerEmail: Email
-  paymentMode: PaymentMode!
-  successUrl: String!
-  cancelUrl: String!
-  products: [CreatePaymentProductInput]!
-  automaticTax: Boolean
-  recurringInterval: PaymentReccuringInterval
-}
-"""
-Create a payment with the payment provider. Returns the url to redirect the user to pay
-"""
-createPayment(input: CreatePaymentInput!): String
-```
-
 ## Cancel subscription
 
-You can cancel a subscription by using the default graphql mutation `cancelSubscription`.
+You can cancel a subscription using the `cancelSubscription` method.
 
-With controller :
 ```ts
 const fn = async (context: WabeContext<any>) => {
   await context.wabe.controllers.payment.cancelSubscription({
@@ -48,23 +30,9 @@ const fn = async (context: WabeContext<any>) => {
 }
 ```
 
-With GraphQL mutation :
-
-```graphql
-input CancelSubscriptionInput {
-  email: Email!
-}
-"""
-Cancel a subscription
-"""
-cancelSubscription(input: CancelSubscriptionInput!): String
-```
-
 ## Get invoices
 
-You can get the invoices of a customer by using the default graphql query `getInvoices`.
-
-With controller :
+You can get the invoices of a customer using the `getInvoices` method.
 
 ```ts
 const fn = async (context: WabeContext<any>) => {
@@ -72,18 +40,6 @@ const fn = async (context: WabeContext<any>) => {
     email: 'john.doe@example.com',
   })
 }
-```
-
-With GraphQL query :
-
-```graphql
-input GetInvoicesInput {
-  email: Email!
-}
-"""
-Get invoices of a customer
-"""
-getInvoices(input: GetInvoicesInput!): [Invoice]!
 ```
 
 ## Webhooks
