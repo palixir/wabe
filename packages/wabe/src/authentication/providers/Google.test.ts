@@ -1,6 +1,7 @@
 // import { afterEach, describe, expect, it, mock, spyOn } from 'bun:test'
 // import { Google } from './Google'
-// import { Google as GoogleOauth } from '../oauth/Google'
+// biome-ignore lint/correctness/noUnusedImports: false
+import { Google as GoogleOauth } from '../oauth/Google'
 // import { AuthenticationProvider } from '../interface'
 
 // describe('Google oauth', () => {
