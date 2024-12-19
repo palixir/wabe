@@ -40,13 +40,13 @@ export class Google implements OAuth2ProviderWithPKCE {
     this.clientSecret = googleConfig.clientSecret
   }
 
-  async createAuthorizationURL(
+  createAuthorizationURL(
     state: string,
     codeVerifier: string,
     options?: {
       scopes?: string[]
     },
-  ): Promise<URL> {
+  ): URL {
     const scopes = options?.scopes ?? []
     const url = this.client.createAuthorizationURL({
       state,
