@@ -140,6 +140,10 @@ export default defineConfig({
             text: 'Root key',
             link: '/config/rootKey',
           },
+          {
+            text: 'Security',
+            link: '/config/security',
+          },
         ],
       },
       {

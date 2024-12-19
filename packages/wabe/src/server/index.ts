@@ -9,9 +9,9 @@ import { type WabeRoute, defaultRoutes } from './routes'
 import { type Hook, getDefaultHooks } from '../hooks'
 import { generateCodegen } from './generateCodegen'
 import { defaultAuthenticationMethods } from '../authentication/defaultAuthentication'
-import { Wobe, cors } from 'wobe'
+import { Wobe, cors, rateLimit } from 'wobe'
 import { WobeGraphqlYogaPlugin } from 'wobe-graphql-yoga'
-import type { CorsOptions } from 'wobe'
+import type { CorsOptions, RateLimitOptions } from 'wobe'
 import { Session } from '../authentication/Session'
 import { getCookieInRequestHeaders } from '../utils'
 import type { WabeContext } from './interface'
@@ -23,10 +23,15 @@ import { EmailController } from '../email/EmailController'
 import type { PaymentConfig } from '../payment/interface'
 import { PaymentController } from '../payment/PaymentController'
 
+type SecurityConfig = {
+  corsOptions?: CorsOptions
+  rateLimit?: RateLimitOptions
+}
+
 export interface WabeConfig<T extends WabeTypes> {
   port: number
   hostname?: string
-  corsOptions?: CorsOptions
+  security?: SecurityConfig
   schema?: SchemaInterface<T>
   database: DatabaseConfig
   codegen?:
@@ -69,7 +74,7 @@ export class Wabe<T extends WabeTypes> {
   constructor({
     port,
     hostname,
-    corsOptions,
+    security,
     schema,
     database,
     authentication,
@@ -84,7 +89,7 @@ export class Wabe<T extends WabeTypes> {
     this.config = {
       port,
       hostname,
-      corsOptions,
+      security,
       schema,
       database,
       codegen,
@@ -239,10 +244,14 @@ export class Wabe<T extends WabeTypes> {
       (ctx) => {
         return ctx.res.send('OK')
       },
-      cors(this.config.corsOptions),
+      cors(this.config.security?.corsOptions),
     )
 
-    this.server.beforeHandler(cors(this.config.corsOptions))
+    const rateLimitOptions = this.config.security?.rateLimit
+
+    if (rateLimitOptions) this.server.beforeHandler(rateLimit(rateLimitOptions))
+
+    this.server.beforeHandler(cors(this.config.security?.corsOptions))
 
     // Set the wabe context
     this.server.beforeHandler(async (ctx) => {
