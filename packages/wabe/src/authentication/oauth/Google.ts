@@ -40,19 +40,20 @@ export class Google implements OAuth2ProviderWithPKCE {
     this.clientSecret = googleConfig.clientSecret
   }
 
-  async createAuthorizationURL(
+  createAuthorizationURL(
     state: string,
     codeVerifier: string,
     options?: {
       scopes?: string[]
     },
-  ): Promise<URL> {
+  ): URL {
     const scopes = options?.scopes ?? []
-    const url = await this.client.createAuthorizationURL({
+    const url = this.client.createAuthorizationURL({
       state,
       codeVerifier,
       scopes: [...scopes, 'openid'],
     })
+
     url.searchParams.set('access_type', 'offline')
     url.searchParams.set('prompt', 'select_account')
 

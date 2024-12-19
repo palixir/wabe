@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, mock, spyOn } from 'bun:test'
+import { afterEach, describe, expect, it, mock, spyOn } from 'bun:test'
 import { Google } from './Google'
 import { Google as GoogleOauth } from '../oauth/Google'
 import { AuthenticationProvider } from '../interface'
@@ -7,16 +7,6 @@ describe('Google oauth', () => {
   const mockGetObjects = mock(() => Promise.resolve([]))
   const mockCount = mock(() => Promise.resolve(0)) as any
   const mockCreateObject = mock(() => Promise.resolve({ id: 'userId' })) as any
-
-  const mockValidateAuthorizationCode = spyOn(
-    GoogleOauth.prototype,
-    'validateAuthorizationCode',
-  ).mockResolvedValue({
-    idToken: 'idToken',
-    accessToken: 'accessToken',
-    refreshToken: 'refreshToken',
-    accessTokenExpiresAt: new Date(0),
-  })
 
   const mockGetUserInfo = spyOn(
     GoogleOauth.prototype,
@@ -48,15 +38,24 @@ describe('Google oauth', () => {
     },
   } as any
 
-  beforeEach(() => {
-    mockGetObjects.mockClear()
+  afterEach(() => {
+    mockGetObjects.mockRestore()
     mockCreateObject.mockClear()
     mockCount.mockClear()
-    mockValidateAuthorizationCode.mockClear()
     mockGetUserInfo.mockClear()
   })
 
   it('should sign up with Google Provider if there is no user found', async () => {
+    const mockValidateAuthorizationCode = spyOn(
+      GoogleOauth.prototype,
+      'validateAuthorizationCode',
+    ).mockResolvedValue({
+      idToken: 'idToken',
+      accessToken: 'accessToken',
+      refreshToken: 'refreshToken',
+      accessTokenExpiresAt: new Date(0),
+    })
+
     const google = new Google()
 
     await google.onSignIn({
@@ -102,9 +101,21 @@ describe('Google oauth', () => {
       context: expect.any(Object),
       fields: ['*'],
     })
+
+    mockValidateAuthorizationCode.mockRestore()
   })
 
   it('should sign in with Google Provider if there is no user found', async () => {
+    const mockValidateAuthorizationCode = spyOn(
+      GoogleOauth.prototype,
+      'validateAuthorizationCode',
+    ).mockResolvedValue({
+      idToken: 'idToken',
+      accessToken: 'accessToken',
+      refreshToken: 'refreshToken',
+      accessTokenExpiresAt: new Date(0),
+    })
+
     mockGetObjects.mockResolvedValue([
       {
         id: 'userId',
@@ -149,5 +160,7 @@ describe('Google oauth', () => {
     })
 
     expect(mockCreateObject).toHaveBeenCalledTimes(0)
+
+    mockValidateAuthorizationCode.mockRestore()
   })
 })

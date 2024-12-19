@@ -722,9 +722,6 @@ type Query {
   """Hello world description"""
   helloWorld(name: String!): String
   me: MeOutput
-
-  """Get invoices of a customer"""
-  getInvoices(email: Email!): [Invoice]!
 }
 
 """User class"""
@@ -1200,16 +1197,6 @@ type MeOutput {
   user: User
 }
 
-type Invoice {
-  amountDue: Int!
-  amountPaid: Int!
-  currency: Currency!
-  id: String!
-  created: Int!
-  invoiceUrl: String!
-  isPaid: Boolean!
-}
-
 type Mutation {
   """User class"""
   createUser(input: CreateUserInput!): CreateUserPayload
@@ -1267,12 +1254,6 @@ type Mutation {
 
   """Send an OTP code by email to the user"""
   sendOtpCode(input: SendOtpCodeInput!): Boolean
-
-  """
-  Create a payment with the payment provider. Returns the url to redirect the user to pay
-  """
-  makePayment(input: MakePaymentInput!): String
-  cancelSubscription(input: CancelSubscriptionInput!): Boolean
 
   """Send basic email with text and html, returns the id of the email"""
   sendEmail(input: SendEmailInput!): String
@@ -1782,26 +1763,6 @@ input ResetPasswordInput {
 }
 
 input SendOtpCodeInput {
-  email: Email!
-}
-
-input MakePaymentInput {
-  customerEmail: Email
-  paymentMode: PaymentMode!
-  successUrl: String!
-  cancelUrl: String!
-  products: [MakePaymentProductInput]!
-  automaticTax: Boolean
-  recurringInterval: PaymentReccuringInterval
-}
-
-input MakePaymentProductInput {
-  name: String!
-  unitAmount: Int!
-  quantity: Int!
-}
-
-input CancelSubscriptionInput {
   email: Email!
 }
 

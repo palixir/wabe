@@ -9,7 +9,7 @@ export interface Tokens {
 }
 
 export interface OAuth2ProviderWithPKCE {
-  createAuthorizationURL(state: string, codeVerifier: string): Promise<URL>
+  createAuthorizationURL(state: string, codeVerifier: string): URL
   validateAuthorizationCode(code: string, codeVerifier: string): Promise<Tokens>
   refreshAccessToken?(refreshToken: string): Promise<Tokens>
 }

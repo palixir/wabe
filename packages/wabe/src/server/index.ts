@@ -30,11 +30,11 @@ export interface WabeConfig<T extends WabeTypes> {
   schema?: SchemaInterface<T>
   database: DatabaseConfig
   codegen?:
-  | {
-    enabled: true
-    path: string
-  }
-  | { enabled?: false }
+    | {
+        enabled: true
+        path: string
+      }
+    | { enabled?: false }
   authentication?: AuthenticationConfig<T>
   routes?: WabeRoute[]
   rootKey: string
@@ -96,7 +96,7 @@ export class Wabe<T extends WabeTypes> {
           file?.adapter ||
           ((process.env.NODE_ENV !== 'production'
             ? fileDevAdapter
-            : () => { }) as any),
+            : () => {}) as any),
       },
       email,
       payment,

@@ -126,7 +126,7 @@ describe('Server', () => {
           hooks: [
             {
               operationType: OperationType.BeforeCreate,
-              callback: () => { },
+              callback: () => {},
               priority: -1,
             },
           ],
@@ -162,7 +162,7 @@ describe('Server', () => {
           hooks: [
             {
               operationType: OperationType.BeforeCreate,
-              callback: () => { },
+              callback: () => {},
               priority: 1,
             },
           ],
