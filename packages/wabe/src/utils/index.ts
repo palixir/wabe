@@ -1,4 +1,3 @@
-
 import type { ClassInterface } from '../schema'
 import type { WabeTypes, WabeConfig } from '../server'
 
