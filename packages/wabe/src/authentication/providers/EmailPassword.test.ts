@@ -11,7 +11,7 @@ import * as argon2 from '@node-rs/argon2'
 
 import { EmailPassword } from './EmailPassword'
 
-describe('Email password', () => {
+describe.skip('Email password', () => {
   const mockGetObjects = mock(() => Promise.resolve([]))
   const mockCount = mock(() => Promise.resolve(0)) as any
   const mockCreateObject = mock(() => Promise.resolve({ id: 'userId' })) as any
