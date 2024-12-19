@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, mock, spyOn } from 'bun:test'
+import { afterEach, describe, expect, it, mock, spyOn } from 'bun:test'
 import { Google } from './Google'
 import { Google as GoogleOauth } from '../oauth/Google'
 import { AuthenticationProvider } from '../interface'
@@ -48,7 +48,7 @@ describe('Google oauth', () => {
     },
   } as any
 
-  beforeEach(() => {
+  afterEach(() => {
     mockGetObjects.mockClear()
     mockCreateObject.mockClear()
     mockCount.mockClear()
