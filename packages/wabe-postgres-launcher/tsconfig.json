@@ -1,0 +1,15 @@
+{
+	"compilerOptions": {
+	  "target": "ES2022",
+	  "types": ["bun-types"],
+	  "esModuleInterop": true,
+	  "forceConsistentCasingInFileNames": true,
+	  "strict": true,
+	  "allowImportingTsExtensions": true,
+	  "skipLibCheck": true,
+	  "moduleResolution": "bundler", // Ensure this is set to 'bundler'
+	  "noEmit": true, // Use noEmit if you don't want any files generated
+	  "verbatimModuleSyntax": true // You might need this for Bun compatibility with extensions
+	}
+  }
+  
