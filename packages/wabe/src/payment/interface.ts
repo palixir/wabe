@@ -94,7 +94,7 @@ export type CreateCustomerOptions = {
 
 export type CreatePaymentOptions = {
   currency: Currency
-  customerEmail: string
+  customerEmail?: string
   products: Array<Product>
   paymentMethod: Array<PaymentMethod>
   paymentMode: PaymentMode
