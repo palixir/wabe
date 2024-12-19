@@ -23,13 +23,13 @@ describe('Oauth2Client', () => {
   })
 
   it('should create authorization URl', async () => {
-    const authorizationURL = await oauthClient.createAuthorizationURL()
+    const authorizationURL = oauthClient.createAuthorizationURL()
 
     expect(authorizationURL.toString()).toEqual(
       'https://authorizationendpoint/?response_type=code&client_id=clientId&redirect_uri=https%3A%2F%2FredirectURI',
     )
 
-    const authorizationURLWithState = await oauthClient.createAuthorizationURL({
+    const authorizationURLWithState = oauthClient.createAuthorizationURL({
       state: 'state',
     })
 
@@ -37,20 +37,19 @@ describe('Oauth2Client', () => {
       'https://authorizationendpoint/?response_type=code&client_id=clientId&state=state&redirect_uri=https%3A%2F%2FredirectURI',
     )
 
-    const authorizationURLWithScopes = await oauthClient.createAuthorizationURL(
-      {
-        scopes: ['scope1', 'scope2'],
-      },
-    )
+    const authorizationURLWithScopes = oauthClient.createAuthorizationURL({
+      scopes: ['scope1', 'scope2'],
+    })
 
     expect(authorizationURLWithScopes.toString()).toEqual(
       'https://authorizationendpoint/?response_type=code&client_id=clientId&scope=scope1+scope2&redirect_uri=https%3A%2F%2FredirectURI',
     )
 
-    const authorizationURLWithCodeVerifier =
-      await oauthClient.createAuthorizationURL({
+    const authorizationURLWithCodeVerifier = oauthClient.createAuthorizationURL(
+      {
         codeVerifier: 'codeVerifier',
-      })
+      },
+    )
 
     const codeChallenge = base64URLencode('codeVerifier')
 

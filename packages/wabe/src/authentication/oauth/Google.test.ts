@@ -23,7 +23,7 @@ describe('Google oauth', () => {
       'createAuthorizationURL',
     ).mockReturnValue(new URL('https://url') as never)
 
-    const authorizationUrl = await googleOauth.createAuthorizationURL(
+    const authorizationUrl = googleOauth.createAuthorizationURL(
       'state',
       'codeVerifier',
     )
