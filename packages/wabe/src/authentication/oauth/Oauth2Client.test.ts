@@ -10,7 +10,7 @@ const originalFetch = global.fetch
 // @ts-expect-error
 global.fetch = mockFetch
 
-describe.skip('Oauth2Client', () => {
+describe('Oauth2Client', () => {
   const oauthClient = new OAuth2Client(
     'clientId',
     'https://authorizationEndpoint',
