@@ -141,23 +141,11 @@ export type ValidateWebhookOptions = {
  * ValidateWebhookOutput
  * @property valid - Whether the webhook is valid or not
  * @property payload - The payload of the webhook
- * @property type - The type of the webhook
- * @property customerId - The customer id
- * @property createdAt - The created at timestamp in seconds
- * @property currency - The currency
- * @property amount - The amount
- * @property paymentMethod - The payment method
  */
 export type ValidateWebhookOutput = {
   isValid: boolean
-  payload: {
-    type: string
-    customerId?: string
-    createdAt?: number
-    currency?: string
-    amount?: number
-    paymentMethod?: Array<string>
-  }
+  type: string
+  payload: any | null
 }
 
 export type InitWebhookOutput = {

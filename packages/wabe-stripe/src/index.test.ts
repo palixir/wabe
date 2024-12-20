@@ -135,7 +135,7 @@ describe('wabe-stripe', () => {
     const adapter = new StripeAdapter('API_KEY')
 
     mockConstructEventAsync.mockResolvedValueOnce({
-      type: 'payment_intent.succeeded',
+      type: 'checkout.session.completed',
       created: 1679481600,
       data: {
         object: {
@@ -159,7 +159,7 @@ describe('wabe-stripe', () => {
       },
     } as never)
 
-    const { isValid, payload } = await adapter.validateWebhook({
+    const res = await adapter.validateWebhook({
       ctx: {
         request: {
           body: 'body',
@@ -172,14 +172,10 @@ describe('wabe-stripe', () => {
     })
 
     expect(mockConstructEventAsync).toHaveBeenCalledTimes(1)
-    expect(isValid).toBe(true)
-    expect(payload).toEqual({
-      type: 'payment_intent.succeeded',
-      amount: 100,
-      createdAt: 1679481600,
-      currency: 'eur',
-      customerId: 'customerId',
-      paymentMethod: ['card'],
+    expect(res).toEqual({
+      type: 'checkout.session.completed',
+      isValid: true,
+      payload: expect.any(Object),
     })
   })
 
