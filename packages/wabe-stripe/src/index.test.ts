@@ -14,6 +14,7 @@ const mockInvoicesRetrieve = mock(() => {})
 const mockSubscriptionsRetrieve = mock(() => {})
 const mockChargesRetrieve = mock(() => {})
 const mockCustomersRetrieve = mock(() => {})
+const mockListPaymentMethods = mock(() => {})
 const mockListCharges = mock(() => {})
 const mockConstructEventAsync = mock(() => {})
 
@@ -51,6 +52,10 @@ spyOn(Stripe.prototype, 'charges').mockReturnValue({
 
 spyOn(Stripe.prototype, 'webhooks').mockReturnValue({
   constructEventAsync: mockConstructEventAsync,
+} as never)
+
+spyOn(Stripe.prototype, 'paymentMethods').mockReturnValue({
+  list: mockListPaymentMethods,
 } as never)
 
 spyOn(StripeAdapter.prototype, '_streamToString').mockReturnValue(
@@ -508,6 +513,15 @@ describe('wabe-stripe', () => {
       email: 'test@wabe.dev',
     } as never)
 
+    mockListPaymentMethods.mockResolvedValue({
+      data: [
+        {
+          id: 'pm_123',
+          type: 'card',
+        },
+      ],
+    } as never)
+
     await adapter.createCustomer({
       customerEmail: 'lucas.coratger@gmail.com',
       customerName: 'Lucas',
@@ -520,6 +534,11 @@ describe('wabe-stripe', () => {
         state: 'Paris',
       },
       paymentMethod: 'card',
+    })
+
+    expect(mockListPaymentMethods).toHaveBeenCalledTimes(1)
+    expect(mockListPaymentMethods).toHaveBeenCalledWith({
+      type: 'card',
     })
 
     expect(mockCreateCustomer).toHaveBeenCalledTimes(1)
@@ -535,7 +554,7 @@ describe('wabe-stripe', () => {
       },
       name: 'Lucas',
       phone: undefined,
-      payment_method: 'card',
+      payment_method: 'pm_123',
     })
   })
 

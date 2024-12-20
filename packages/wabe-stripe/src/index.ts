@@ -105,6 +105,12 @@ export class StripeAdapter implements PaymentAdapter {
     address: { city, country, line1, line2, postalCode, state },
     paymentMethod,
   }: CreateCustomerOptions) {
+    const paymentMethods = await this.stripe.paymentMethods.list({
+      type: paymentMethod,
+    })
+
+    const paymentMethodId = paymentMethods.data?.[0]?.id
+
     const customer = await this.stripe.customers.create({
       email: customerEmail,
       address: {
@@ -117,7 +123,7 @@ export class StripeAdapter implements PaymentAdapter {
       },
       name: customerName,
       phone: customerPhone,
-      payment_method: paymentMethod,
+      payment_method: paymentMethodId,
     })
 
     if (!customer.email) throw new Error('Error creating Stripe customer')
