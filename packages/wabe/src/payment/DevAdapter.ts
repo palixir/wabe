@@ -10,7 +10,7 @@ export class PaymentDevAdapter implements PaymentAdapter {
 
   // biome-ignore lint/suspicious/useAwait: false
   async validateWebhook() {
-    return { isValid: true, payload: { type: '' } }
+    return { isValid: true, payload: {}, type: '' }
   }
 
   // biome-ignore lint/suspicious/useAwait: false

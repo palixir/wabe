@@ -73,9 +73,8 @@ export class StripeAdapter implements PaymentAdapter {
     if (!body || !stripeSignature)
       return {
         isValid: false,
-        payload: {
-          type: '',
-        },
+        type: '',
+        payload: null,
       }
 
     try {
@@ -85,25 +84,16 @@ export class StripeAdapter implements PaymentAdapter {
         endpointSecret,
       )
 
-      const object = event.data.object as any
-
       return {
         isValid: true,
-        payload: {
-          type: event.type,
-          customerId: object.customer || '',
-          createdAt: event.created,
-          currency: object.currency,
-          amount: object.amount,
-          paymentMethod: object.payment_method_types,
-        },
+        type: event.type,
+        payload: event.data.object as any,
       }
     } catch {
       return {
         isValid: false,
-        payload: {
-          type: '',
-        },
+        type: '',
+        payload: null,
       }
     }
   }
