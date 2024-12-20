@@ -173,7 +173,7 @@ export class StripeAdapter implements PaymentAdapter {
     }))
 
     const session = await this.stripe.checkout.sessions.create({
-      customer: customer?.id,
+      customer: customerEmail ? customer?.id : undefined,
       line_items: lineItems,
       payment_method_types: paymentMethod,
       mode: paymentMode,
@@ -184,10 +184,6 @@ export class StripeAdapter implements PaymentAdapter {
       },
       ...(automaticTax
         ? {
-            customer_update: {
-              address: 'auto',
-              shipping: 'auto',
-            },
             billing_address_collection: 'required',
             shipping_address_collection: {
               allowed_countries: [],
