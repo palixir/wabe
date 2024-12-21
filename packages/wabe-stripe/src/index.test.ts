@@ -621,6 +621,9 @@ describe('wabe-stripe', () => {
       automatic_tax: {
         enabled: false,
       },
+      invoice_creation: {
+        enabled: true,
+      },
     })
   })
 

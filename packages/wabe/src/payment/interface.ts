@@ -102,6 +102,7 @@ export type CreatePaymentOptions = {
   cancelUrl: string
   automaticTax?: boolean
   recurringInterval?: 'month' | 'year'
+  createInvoice?: boolean
 }
 
 export type InitWebhookOptions = {
