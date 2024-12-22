@@ -141,6 +141,8 @@ export class StripeAdapter implements PaymentAdapter {
     currency,
     automaticTax,
     recurringInterval,
+    createInvoice = true,
+    allowPromotionCode = true,
   }: CreatePaymentOptions) {
     const customersWithSameEmail = await this.stripe.customers.list({
       email: customerEmail,
@@ -178,6 +180,10 @@ export class StripeAdapter implements PaymentAdapter {
       automatic_tax: {
         enabled: !!automaticTax,
       },
+      invoice_creation: {
+        enabled: createInvoice,
+      },
+      allow_promotion_codes: allowPromotionCode,
       ...(automaticTax
         ? {
             billing_address_collection: 'required',
