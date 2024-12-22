@@ -624,6 +624,7 @@ describe('wabe-stripe', () => {
       invoice_creation: {
         enabled: true,
       },
+      allow_promotion_codes: true,
     })
   })
 
