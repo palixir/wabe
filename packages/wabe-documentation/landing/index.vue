@@ -146,9 +146,10 @@ onMounted(() => {
 
     <!-- Footer -->
     <footer class="text-gray-400">
-        <div class="flex flex-col justify-center items-center p-8">
-            <div class="text-center text-gray-400">
+        <div class="flex flex-col gap-3 justify-center items-center p-8">
+            <div class="text-center text-gray-400 flex flex-col gap-1">
                 <p>Wabe is powered by <strong><a href="https://bun.sh">Bun</a></strong> !</p>
+                <p>Wabe powered <strong><a href="https://shipmysaas.com">ShipMySaaS</a></strong> !</p>
             </div>
 
             <div class="text-center text-gray-500 text-sm">
