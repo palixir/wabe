@@ -10,10 +10,12 @@ import {
   type GetCustomerByIdOptions,
   type GetInvoicesOptions,
   type GetTotalRevenueOptions,
+  type CreateCouponOptions,
   type Invoice,
   type PaymentAdapter,
   type Transaction,
   PaymentMode,
+  type CreatePromotionCodeOptions,
 } from 'wabe'
 
 export class StripeAdapter implements PaymentAdapter {
@@ -27,6 +29,49 @@ export class StripeAdapter implements PaymentAdapter {
       },
       typescript: true,
     })
+  }
+
+  async createCoupon({
+    amountOff,
+    currency,
+    duration,
+    durationInMonths,
+    name,
+    percentOff,
+    maxRedemptions,
+  }: CreateCouponOptions) {
+    const coupon = await this.stripe.coupons.create({
+      amount_off: amountOff,
+      currency,
+      duration,
+      duration_in_months: durationInMonths,
+      max_redemptions: maxRedemptions,
+      name,
+      percent_off: percentOff,
+    })
+
+    if (!coupon.id) throw new Error('Error creating Stripe coupon')
+
+    return coupon.id
+  }
+
+  async createPromotionCode({
+    couponId,
+    code,
+    active,
+    maxRedemptions,
+  }: CreatePromotionCodeOptions) {
+    const promotionCode = await this.stripe.promotionCodes.create({
+      coupon: couponId,
+      code,
+      active,
+      max_redemptions: maxRedemptions,
+    })
+
+    if (!promotionCode.id)
+      throw new Error('Error creating Stripe promotion code')
+
+    return promotionCode.id
   }
 
   async getCustomerById({ id }: GetCustomerByIdOptions) {

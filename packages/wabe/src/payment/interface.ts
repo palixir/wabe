@@ -162,11 +162,14 @@ export type CreateCouponOptions = {
   durationInMonths?: number
   name?: string
   percentOff?: number
+  maxRedemptions?: number
 }
 
 export type CreatePromotionCodeOptions = {
   couponId: string
   code?: string
+  active?: boolean
+  maxRedemptions?: number
 }
 
 export interface PaymentAdapter {
