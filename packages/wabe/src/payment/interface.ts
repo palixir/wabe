@@ -155,7 +155,33 @@ export type InitWebhookOutput = {
   endpointSecret: string
 }
 
+export type CreateCouponOptions = {
+  amountOff?: number
+  currency?: Currency
+  duration?: 'forever' | 'once' | 'repeating'
+  durationInMonths?: number
+  name?: string
+  percentOff?: number
+}
+
+export type CreatePromotionCodeOptions = {
+  couponId: string
+  code?: string
+}
+
 export interface PaymentAdapter {
+  /**
+   * Create a coupon
+   * @param options CreateCouponOptions
+   * @returns id The coupon id
+   */
+  createCoupon: (options: CreateCouponOptions) => Promise<string>
+  /**
+   * Create a promotion code from a coupon
+   * @param options CreatePromotionCodeOptions
+   * @returns code The promotion code
+   */
+  createPromotionCode: (options: CreatePromotionCodeOptions) => Promise<string>
   /**
    * Get a customer by id
    * @param id The customer id
