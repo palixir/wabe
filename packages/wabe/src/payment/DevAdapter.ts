@@ -9,6 +9,16 @@ export class PaymentDevAdapter implements PaymentAdapter {
   }
 
   // biome-ignore lint/suspicious/useAwait: false
+  async createCoupon() {
+    return ''
+  }
+
+  // biome-ignore lint/suspicious/useAwait: false
+  async createPromotionCode() {
+    return ''
+  }
+
+  // biome-ignore lint/suspicious/useAwait: false
   async validateWebhook() {
     return { isValid: true, payload: {}, type: '' }
   }
