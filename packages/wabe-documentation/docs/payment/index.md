@@ -42,6 +42,47 @@ const fn = async (context: WabeContext<any>) => {
 }
 ```
 
+## Coupons
+
+You can create a coupon using the `createCoupon` method.
+
+```ts
+const fn = async (context: WabeContext<any>) => {
+  const couponId = await context.wabe.controllers.payment.createCoupon({
+    duration: 'repeating',
+    durationInMonths: 3,
+    name: 'MYCOUPON',
+    percentOff: 10,
+  })
+}
+```
+
+Or with fixed amount:
+
+```ts
+const fn = async (context: WabeContext<any>) => {
+  const couponId = await context.wabe.controllers.payment.createCoupon({
+    duration: 'forever',
+    currency: Currency.EUR,
+    amountOff: 100,
+    name: 'MYCOUPON',
+  })
+}
+```
+
+## Promotion Codes
+
+You can create a promotion code from a coupon using the `createPromotionCode` method.
+
+```ts
+const fn = async (context: WabeContext<any>) => {
+  const promotionCode = await context.wabe.controllers.payment.createPromotionCode({
+    couponId: 'coupon_123',
+    code: 'MYCODE',
+  })
+}
+```
+
 ## Webhooks
 
 You can create your own webhooks for payment. See below for an example of a webhook to create an object payment for each successful payment. You just need to add a route in the `routes` field of the Wabe config.

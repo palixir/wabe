@@ -34,6 +34,58 @@ describe('PaymentController', () => {
     })
   })
 
+  it("should call the adapter's createCoupon method", async () => {
+    const mockCreateCoupon = mock(() => {})
+
+    const adapter = {
+      createCoupon: mockCreateCoupon,
+    } as any
+
+    const paymentController = new PaymentController({
+      adapter,
+      currency: Currency.EUR,
+      supportedPaymentMethods: ['card'],
+    })
+
+    await paymentController.createCoupon({
+      name: 'TEST',
+      amountOff: 10,
+      currency: Currency.EUR,
+    })
+
+    expect(mockCreateCoupon).toHaveBeenCalledTimes(1)
+    expect(mockCreateCoupon).toHaveBeenCalledWith({
+      name: 'TEST',
+      amountOff: 10,
+      currency: Currency.EUR,
+    })
+  })
+
+  it("should call the adapter's createPromotionCode method", async () => {
+    const mockCreatePromotionCode = mock(() => {})
+
+    const adapter = {
+      createPromotionCode: mockCreatePromotionCode,
+    } as any
+
+    const paymentController = new PaymentController({
+      adapter,
+      currency: Currency.EUR,
+      supportedPaymentMethods: ['card'],
+    })
+
+    await paymentController.createPromotionCode({
+      code: 'TEST',
+      couponId: '123',
+    })
+
+    expect(mockCreatePromotionCode).toHaveBeenCalledTimes(1)
+    expect(mockCreatePromotionCode).toHaveBeenCalledWith({
+      code: 'TEST',
+      couponId: '123',
+    })
+  })
+
   it("should call the adapter's createCustomer method", async () => {
     const mockCreateCustomer = mock(() => {})
 
