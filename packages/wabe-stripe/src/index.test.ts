@@ -17,6 +17,8 @@ const mockCustomersRetrieve = mock(() => {})
 const mockListPaymentMethods = mock(() => {})
 const mockListCharges = mock(() => {})
 const mockConstructEventAsync = mock(() => {})
+const mockCouponsCreate = mock(() => {})
+const mockPromotionCodesCreate = mock(() => {})
 
 spyOn(Stripe.prototype, 'customers').mockReturnValue({
   create: mockCreateCustomer,
@@ -58,6 +60,14 @@ spyOn(Stripe.prototype, 'paymentMethods').mockReturnValue({
   list: mockListPaymentMethods,
 } as never)
 
+spyOn(Stripe.prototype, 'coupons').mockReturnValue({
+  create: mockCouponsCreate,
+} as never)
+
+spyOn(Stripe.prototype, 'promotionCodes').mockReturnValue({
+  create: mockPromotionCodesCreate,
+} as never)
+
 spyOn(StripeAdapter.prototype, '_streamToString').mockReturnValue(
   Promise.resolve('body'),
 )
@@ -77,6 +87,71 @@ describe('wabe-stripe', () => {
     mockCustomersRetrieve.mockClear()
     mockListCharges.mockClear()
     mockConstructEventAsync.mockClear()
+    mockCouponsCreate.mockClear()
+    mockPromotionCodesCreate.mockClear()
+  })
+
+  it('should create a coupon', async () => {
+    const adapter = new StripeAdapter('API_KEY')
+
+    mockCouponsCreate.mockResolvedValue({
+      id: 'coupon_123',
+      amount_off: 1000,
+      currency: 'eur',
+      duration: 'forever',
+      duration_in_months: undefined,
+      max_redemptions: undefined,
+      name: 'Coupon 1',
+      percent_off: undefined,
+    } as never)
+
+    const couponId = await adapter.createCoupon({
+      amountOff: 1000,
+      currency: Currency.EUR,
+      duration: 'forever',
+      durationInMonths: undefined,
+      name: 'Coupon 1',
+      percentOff: undefined,
+      maxRedemptions: undefined,
+    })
+
+    expect(mockCouponsCreate).toHaveBeenCalledTimes(1)
+    expect(mockCouponsCreate).toHaveBeenCalledWith({
+      amount_off: 1000,
+      currency: 'eur',
+      duration: 'forever',
+      duration_in_months: undefined,
+      max_redemptions: undefined,
+      name: 'Coupon 1',
+      percent_off: undefined,
+    })
+
+    expect(couponId).toEqual('coupon_123')
+  })
+
+  it('should create a promotion code', async () => {
+    const adapter = new StripeAdapter('API_KEY')
+
+    mockPromotionCodesCreate.mockResolvedValue({
+      id: 'promotion_code_123',
+    } as never)
+
+    const promotionCodeId = await adapter.createPromotionCode({
+      couponId: 'coupon_123',
+      code: 'CODE_123',
+      active: true,
+      maxRedemptions: undefined,
+    })
+
+    expect(mockPromotionCodesCreate).toHaveBeenCalledTimes(1)
+    expect(mockPromotionCodesCreate).toHaveBeenCalledWith({
+      coupon: 'coupon_123',
+      code: 'CODE_123',
+      active: true,
+      max_redemptions: undefined,
+    })
+
+    expect(promotionCodeId).toEqual('promotion_code_123')
   })
 
   it('should return isValid false if the constructEventAsync throw an error', async () => {
