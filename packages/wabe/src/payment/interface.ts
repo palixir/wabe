@@ -192,7 +192,9 @@ export interface PaymentAdapter {
    * @param options CreateCouponOptions
    * @returns id The coupon id
    */
-  createCoupon: (options: CreateCouponOptions) => Promise<string>
+  createCoupon: (
+    options: CreateCouponOptions,
+  ) => Promise<{ code: string; id: string }>
   /**
    * Disable a promotion code
    * @param options DeletePromotionCodeOptions

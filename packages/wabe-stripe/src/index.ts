@@ -62,7 +62,7 @@ export class StripeAdapter implements PaymentAdapter {
 
     if (!coupon.id) throw new Error('Error creating Stripe coupon')
 
-    return coupon.id
+    return { id: coupon.id, code: coupon.name || '' }
   }
 
   async createPromotionCode({
