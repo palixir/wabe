@@ -16,6 +16,8 @@ import {
   type Transaction,
   PaymentMode,
   type CreatePromotionCodeOptions,
+  type DeleteCouponOptions,
+  type UpdatePromotionCodeOptions,
 } from 'wabe'
 
 export class StripeAdapter implements PaymentAdapter {
@@ -29,6 +31,14 @@ export class StripeAdapter implements PaymentAdapter {
       },
       typescript: true,
     })
+  }
+
+  async deleteCoupon({ id }: DeleteCouponOptions) {
+    await this.stripe.coupons.del(id)
+  }
+
+  async updatePromotionCode({ id, active }: UpdatePromotionCodeOptions) {
+    await this.stripe.promotionCodes.update(id, { active })
   }
 
   async createCoupon({

@@ -172,13 +172,32 @@ export type CreatePromotionCodeOptions = {
   maxRedemptions?: number
 }
 
+export type DeleteCouponOptions = {
+  id: string
+}
+
+export type UpdatePromotionCodeOptions = {
+  id: string
+  active: boolean
+}
+
 export interface PaymentAdapter {
+  /**
+   * Delete a coupon
+   * @param options DeleteCouponOptions
+   */
+  deleteCoupon: (options: DeleteCouponOptions) => Promise<void>
   /**
    * Create a coupon
    * @param options CreateCouponOptions
    * @returns id The coupon id
    */
   createCoupon: (options: CreateCouponOptions) => Promise<string>
+  /**
+   * Disable a promotion code
+   * @param options DeletePromotionCodeOptions
+   */
+  updatePromotionCode: (options: UpdatePromotionCodeOptions) => Promise<void>
   /**
    * Create a promotion code from a coupon
    * @param options CreatePromotionCodeOptions

@@ -19,6 +19,8 @@ const mockListCharges = mock(() => {})
 const mockConstructEventAsync = mock(() => {})
 const mockCouponsCreate = mock(() => {})
 const mockPromotionCodesCreate = mock(() => {})
+const mockPromotionCodesUpdate = mock(() => {})
+const mockCouponsDel = mock(() => {})
 
 spyOn(Stripe.prototype, 'customers').mockReturnValue({
   create: mockCreateCustomer,
@@ -62,10 +64,12 @@ spyOn(Stripe.prototype, 'paymentMethods').mockReturnValue({
 
 spyOn(Stripe.prototype, 'coupons').mockReturnValue({
   create: mockCouponsCreate,
+  del: mockCouponsDel,
 } as never)
 
 spyOn(Stripe.prototype, 'promotionCodes').mockReturnValue({
   create: mockPromotionCodesCreate,
+  update: mockPromotionCodesUpdate,
 } as never)
 
 spyOn(StripeAdapter.prototype, '_streamToString').mockReturnValue(
@@ -89,6 +93,37 @@ describe('wabe-stripe', () => {
     mockConstructEventAsync.mockClear()
     mockCouponsCreate.mockClear()
     mockPromotionCodesCreate.mockClear()
+    mockPromotionCodesUpdate.mockClear()
+    mockCouponsDel.mockClear()
+  })
+
+  it('should delete a coupon', async () => {
+    const adapter = new StripeAdapter('API_KEY')
+
+    mockCouponsDel.mockResolvedValue(undefined as never)
+
+    await adapter.deleteCoupon({
+      id: '123',
+    })
+
+    expect(mockCouponsDel).toHaveBeenCalledTimes(1)
+    expect(mockCouponsDel).toHaveBeenCalledWith('123')
+  })
+
+  it('should update a promotion code', async () => {
+    const adapter = new StripeAdapter('API_KEY')
+
+    mockPromotionCodesUpdate.mockResolvedValue(undefined as never)
+
+    await adapter.updatePromotionCode({
+      id: '123',
+      active: true,
+    })
+
+    expect(mockPromotionCodesUpdate).toHaveBeenCalledTimes(1)
+    expect(mockPromotionCodesUpdate).toHaveBeenCalledWith('123', {
+      active: true,
+    })
   })
 
   it('should create a coupon', async () => {
