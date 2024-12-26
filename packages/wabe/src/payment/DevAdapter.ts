@@ -8,6 +8,10 @@ export class PaymentDevAdapter implements PaymentAdapter {
     }
   }
 
+  async deleteCoupon() {}
+
+  async updatePromotionCode() {}
+
   // biome-ignore lint/suspicious/useAwait: false
   async createCoupon() {
     return ''

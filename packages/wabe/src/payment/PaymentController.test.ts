@@ -34,6 +34,54 @@ describe('PaymentController', () => {
     })
   })
 
+  it("should call the adapter's deleteCoupon method", async () => {
+    const mockDeleteCoupon = mock(() => {})
+
+    const adapter = {
+      deleteCoupon: mockDeleteCoupon,
+    } as any
+
+    const paymentController = new PaymentController({
+      adapter,
+      currency: Currency.EUR,
+      supportedPaymentMethods: ['card'],
+    })
+
+    await paymentController.deleteCoupon({
+      id: '123',
+    })
+
+    expect(mockDeleteCoupon).toHaveBeenCalledTimes(1)
+    expect(mockDeleteCoupon).toHaveBeenCalledWith({
+      id: '123',
+    })
+  })
+
+  it("should call the adapter's updatePromotionCode method", async () => {
+    const mockUpdatePromotionCode = mock(() => {})
+
+    const adapter = {
+      updatePromotionCode: mockUpdatePromotionCode,
+    } as any
+
+    const paymentController = new PaymentController({
+      adapter,
+      currency: Currency.EUR,
+      supportedPaymentMethods: ['card'],
+    })
+
+    await paymentController.updatePromotionCode({
+      id: '123',
+      active: true,
+    })
+
+    expect(mockUpdatePromotionCode).toHaveBeenCalledTimes(1)
+    expect(mockUpdatePromotionCode).toHaveBeenCalledWith({
+      id: '123',
+      active: true,
+    })
+  })
+
   it("should call the adapter's createCoupon method", async () => {
     const mockCreateCoupon = mock(() => {})
 

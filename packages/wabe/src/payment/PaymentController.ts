@@ -10,6 +10,8 @@ import type {
   GetCustomerByIdOptions,
   CreateCouponOptions,
   CreatePromotionCodeOptions,
+  DeleteCouponOptions,
+  UpdatePromotionCodeOptions,
 } from './interface'
 
 export class PaymentController implements PaymentAdapter {
@@ -19,6 +21,14 @@ export class PaymentController implements PaymentAdapter {
   constructor(paymentConfig: PaymentConfig) {
     this.adapter = paymentConfig.adapter
     this.config = paymentConfig
+  }
+
+  deleteCoupon(options: DeleteCouponOptions) {
+    return this.adapter.deleteCoupon(options)
+  }
+
+  updatePromotionCode(options: UpdatePromotionCodeOptions) {
+    return this.adapter.updatePromotionCode(options)
   }
 
   createCoupon(options: CreateCouponOptions) {
