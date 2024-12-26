@@ -71,7 +71,7 @@ export class StripeAdapter implements PaymentAdapter {
     if (!promotionCode.id)
       throw new Error('Error creating Stripe promotion code')
 
-    return promotionCode.id
+    return { code: promotionCode.code, id: promotionCode.id }
   }
 
   async getCustomerById({ id }: GetCustomerByIdOptions) {

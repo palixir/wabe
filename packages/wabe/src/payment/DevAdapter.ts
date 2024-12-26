@@ -15,7 +15,7 @@ export class PaymentDevAdapter implements PaymentAdapter {
 
   // biome-ignore lint/suspicious/useAwait: false
   async createPromotionCode() {
-    return ''
+    return { code: '', id: '' }
   }
 
   // biome-ignore lint/suspicious/useAwait: false

@@ -184,7 +184,9 @@ export interface PaymentAdapter {
    * @param options CreatePromotionCodeOptions
    * @returns code The promotion code
    */
-  createPromotionCode: (options: CreatePromotionCodeOptions) => Promise<string>
+  createPromotionCode: (
+    options: CreatePromotionCodeOptions,
+  ) => Promise<{ id: string; code: string }>
   /**
    * Get a customer by id
    * @param id The customer id
