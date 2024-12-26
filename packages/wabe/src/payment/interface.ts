@@ -201,7 +201,7 @@ export interface PaymentAdapter {
   /**
    * Create a promotion code from a coupon
    * @param options CreatePromotionCodeOptions
-   * @returns code The promotion code
+   * @returns code, id The promotion code and the stripe id
    */
   createPromotionCode: (
     options: CreatePromotionCodeOptions,
