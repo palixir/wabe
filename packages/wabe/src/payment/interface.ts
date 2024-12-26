@@ -201,9 +201,11 @@ export interface PaymentAdapter {
   /**
    * Create a promotion code from a coupon
    * @param options CreatePromotionCodeOptions
-   * @returns code The promotion code
+   * @returns code, id The promotion code and the stripe id
    */
-  createPromotionCode: (options: CreatePromotionCodeOptions) => Promise<string>
+  createPromotionCode: (
+    options: CreatePromotionCodeOptions,
+  ) => Promise<{ id: string; code: string }>
   /**
    * Get a customer by id
    * @param id The customer id

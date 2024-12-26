@@ -169,9 +169,10 @@ describe('wabe-stripe', () => {
 
     mockPromotionCodesCreate.mockResolvedValue({
       id: 'promotion_code_123',
+      code: 'CODE_123',
     } as never)
 
-    const promotionCodeId = await adapter.createPromotionCode({
+    const { code, id } = await adapter.createPromotionCode({
       couponId: 'coupon_123',
       code: 'CODE_123',
       active: true,
@@ -186,7 +187,8 @@ describe('wabe-stripe', () => {
       max_redemptions: undefined,
     })
 
-    expect(promotionCodeId).toEqual('promotion_code_123')
+    expect(id).toEqual('promotion_code_123')
+    expect(code).toEqual('CODE_123')
   })
 
   it('should return isValid false if the constructEventAsync throw an error', async () => {
