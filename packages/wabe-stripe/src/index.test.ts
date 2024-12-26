@@ -140,7 +140,7 @@ describe('wabe-stripe', () => {
       percent_off: undefined,
     } as never)
 
-    const couponId = await adapter.createCoupon({
+    const { id, code } = await adapter.createCoupon({
       amountOff: 1000,
       currency: Currency.EUR,
       duration: 'forever',
@@ -161,7 +161,8 @@ describe('wabe-stripe', () => {
       percent_off: undefined,
     })
 
-    expect(couponId).toEqual('coupon_123')
+    expect(id).toEqual('coupon_123')
+    expect(code).toEqual('Coupon 1')
   })
 
   it('should create a promotion code', async () => {

@@ -48,7 +48,7 @@ You can create a coupon using the `createCoupon` method.
 
 ```ts
 const fn = async (context: WabeContext<any>) => {
-  const couponId = await context.wabe.controllers.payment.createCoupon({
+  const {code, id: stripeId} = await context.wabe.controllers.payment.createCoupon({
     duration: 'repeating',
     durationInMonths: 3,
     name: 'MYCOUPON',
@@ -61,7 +61,7 @@ Or with fixed amount:
 
 ```ts
 const fn = async (context: WabeContext<any>) => {
-  const couponId = await context.wabe.controllers.payment.createCoupon({
+  const {code, id: stripeId} = await context.wabe.controllers.payment.createCoupon({
     duration: 'forever',
     currency: Currency.EUR,
     amountOff: 100,
@@ -76,7 +76,7 @@ You can create a promotion code from a coupon using the `createPromotionCode` me
 
 ```ts
 const fn = async (context: WabeContext<any>) => {
-  const promotionCode = await context.wabe.controllers.payment.createPromotionCode({
+  const {code, id: stripeId} = await context.wabe.controllers.payment.createPromotionCode({
     couponId: 'coupon_123',
     code: 'MYCODE',
   })
