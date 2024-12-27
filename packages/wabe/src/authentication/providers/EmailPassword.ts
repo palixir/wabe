@@ -33,7 +33,7 @@ export class EmailPassword
         ...context,
         isRoot: true,
       },
-      fields: ['authentication'],
+      fields: ['id', 'authentication'],
       first: 1,
     })
 

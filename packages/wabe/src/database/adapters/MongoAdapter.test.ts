@@ -55,6 +55,88 @@ describe('Mongo adapter', () => {
       )
   })
 
+  it('should only return id on createObject if fields is empty', async () => {
+    const res = await mongoAdapter.createObject({
+      className: 'User',
+      data: {
+        name: 'John',
+        age: 20,
+      },
+      context,
+      fields: [],
+    })
+
+    expect(ObjectId.isValid(res?.id || '')).toBeTrue()
+    expect(res).toEqual({ id: expect.any(String) })
+  })
+
+  it('should only return an array of id on createObjects if fields is empty', async () => {
+    const res = await mongoAdapter.createObjects({
+      className: 'User',
+      data: [
+        {
+          name: 'John',
+          age: 20,
+        },
+      ],
+      context,
+      fields: [],
+    })
+
+    expect(ObjectId.isValid(res[0]?.id || '')).toBeTrue()
+    expect(res).toEqual([{ id: expect.any(String) }])
+  })
+
+  it('should only return id on updateObject if fields is empty', async () => {
+    const insertedObject = await mongoAdapter.createObject({
+      className: 'User',
+      data: {
+        name: 'John',
+        age: 20,
+      },
+      context,
+      fields: ['*'],
+    })
+
+    const res = await mongoAdapter.updateObject({
+      className: 'User',
+      id: insertedObject?.id || '',
+      data: { name: 'Doe' },
+      fields: [],
+      context,
+    })
+
+    expect(ObjectId.isValid(res?.id || '')).toBeTrue()
+    expect(res).toEqual({ id: expect.any(String) })
+  })
+
+  it('should only return an array of id on updateObjects if fields is empty', async () => {
+    await mongoAdapter.createObjects({
+      className: 'User',
+      data: [
+        {
+          name: 'John',
+          age: 20,
+        },
+      ],
+      context,
+      fields: ['*'],
+    })
+
+    const res = await mongoAdapter.updateObjects({
+      className: 'User',
+      where: {
+        name: { equalTo: 'John' },
+      },
+      data: { name: 'Doe' },
+      fields: [],
+      context,
+    })
+
+    expect(ObjectId.isValid(res[0]?.id || '')).toBeTrue()
+    expect(res).toEqual([{ id: expect.any(String) }])
+  })
+
   it("should order the result by the field 'name' in ascending order", async () => {
     await mongoAdapter.createObjects({
       className: 'User',
@@ -252,7 +334,7 @@ describe('Mongo adapter', () => {
           age: 18,
         },
       ],
-      fields: [],
+      fields: ['id'],
       context,
     })
 
@@ -294,7 +376,7 @@ describe('Mongo adapter', () => {
           age: 18,
         },
       ],
-      fields: [],
+      fields: ['id'],
       context,
     })
 
@@ -338,7 +420,7 @@ describe('Mongo adapter', () => {
           age: 18,
         },
       ],
-      fields: [],
+      fields: ['id'],
       context,
     })
 
@@ -378,7 +460,7 @@ describe('Mongo adapter', () => {
           age: 18,
         },
       ],
-      fields: [],
+      fields: ['id'],
       context,
     })
 
@@ -407,7 +489,7 @@ describe('Mongo adapter', () => {
           age: 18,
         },
       ],
-      fields: [],
+      fields: ['id'],
       context,
     })
 
@@ -436,7 +518,7 @@ describe('Mongo adapter', () => {
           age: 18,
         },
       ],
-      fields: [],
+      fields: ['id'],
       context,
     })
 
@@ -465,7 +547,7 @@ describe('Mongo adapter', () => {
           age: 18,
         },
       ],
-      fields: [],
+      fields: ['id'],
       context,
     })
 
@@ -509,24 +591,6 @@ describe('Mongo adapter', () => {
     )
   })
 
-  it('should return id if an empty fields is specified', async () => {
-    const insertedObjects = await mongoAdapter.createObjects({
-      className: 'User',
-      data: [
-        {
-          name: 'Lucas',
-          age: 20,
-        },
-      ],
-      fields: [],
-      context,
-    })
-
-    if (!insertedObjects) fail()
-
-    expect(insertedObjects[0]?.id).toBeDefined()
-  })
-
   it('should always return id', async () => {
     const insertedObjects = await mongoAdapter.createObjects({
       className: 'User',
@@ -537,7 +601,7 @@ describe('Mongo adapter', () => {
         },
       ],
       context,
-      fields: ['age'],
+      fields: ['age', 'id'],
     })
 
     if (!insertedObjects) fail
@@ -918,7 +982,7 @@ describe('Mongo adapter', () => {
     const field = await mongoAdapter.getObject({
       className: 'User',
       id: id.toString(),
-      fields: ['name'],
+      fields: ['name', 'id'],
       context,
     })
 

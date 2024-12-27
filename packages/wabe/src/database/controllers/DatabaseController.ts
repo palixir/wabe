@@ -634,8 +634,6 @@ export class DatabaseController<T extends WabeTypes> {
       order,
     })
 
-    const objectsId = objects.map((object) => object?.id).filter(notEmpty)
-
     const res = await Promise.all(
       hooks.map((hook) =>
         hook.runOnMultipleObjects({
@@ -650,6 +648,8 @@ export class DatabaseController<T extends WabeTypes> {
     // If there is no hook to run it returns undefined object
     if (res.filter((hook) => hook.objects.length > 0).length === 0)
       return objects
+
+    const objectsId = objects.map((object) => object?.id).filter(notEmpty)
 
     const objectsToReturn = await this.getObjects({
       className,
@@ -884,8 +884,6 @@ export class DatabaseController<T extends WabeTypes> {
         offset,
         order,
       })
-
-    if (objectsBeforeDelete.length === 0) return []
 
     const { objects } = await hook.runOnMultipleObjects({
       operationType: OperationType.BeforeDelete,

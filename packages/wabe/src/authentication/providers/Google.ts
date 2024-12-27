@@ -79,7 +79,7 @@ export class Google implements ProviderInterface<GoogleInterface> {
           ...context,
           isRoot: true,
         },
-        fields: ['*'],
+        fields: ['*', 'id'],
       })
 
       if (!createdUser) throw new Error('User not found')

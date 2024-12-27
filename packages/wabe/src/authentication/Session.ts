@@ -41,7 +41,7 @@ export class Session {
         accessToken: { equalTo: accessToken },
       },
       first: 1,
-      fields: ['user.*', 'user.role.*'],
+      fields: ['user.*', 'user.role.*', 'id'],
       context,
     })
 

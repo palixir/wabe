@@ -3,7 +3,7 @@ import { Google } from './Google'
 import { Google as GoogleOauth } from '../oauth/Google'
 import { AuthenticationProvider } from '../interface'
 
-describe('Google oauth', () => {
+describe('Google providers', () => {
   const mockGetObjects = mock(() => Promise.resolve([]))
   const mockCount = mock(() => Promise.resolve(0)) as any
   const mockCreateObject = mock(() => Promise.resolve({ id: 'userId' })) as any
@@ -99,7 +99,7 @@ describe('Google oauth', () => {
         },
       },
       context: expect.any(Object),
-      fields: ['*'],
+      fields: ['*', 'id'],
     })
 
     mockValidateAuthorizationCode.mockRestore()
