@@ -811,12 +811,15 @@ export class DatabaseController<T extends WabeTypes> {
 
     const whereWithACLCondition = this._buildWhereWithACL({}, context, 'write')
 
-    const objectBeforeDelete = await this.getObject({
-      className,
-      fields,
-      id,
-      context,
-    })
+    let objectBeforeDelete = null
+
+    if (fields.length > 0)
+      objectBeforeDelete = await this.getObject({
+        className,
+        fields,
+        id,
+        context,
+      })
 
     const { object } = await hook.runOnSingleObject({
       operationType: OperationType.BeforeDelete,
@@ -835,8 +838,6 @@ export class DatabaseController<T extends WabeTypes> {
       operationType: OperationType.AfterDelete,
       object,
     })
-
-    if (fields.length === 0) return null
 
     return objectBeforeDelete
   }
@@ -871,17 +872,20 @@ export class DatabaseController<T extends WabeTypes> {
       'write',
     )
 
-    const objectsBeforeDelete = await this.getObjects({
-      className,
-      where,
-      fields,
-      context,
-      first,
-      offset,
-      order,
-    })
+    let objectsBeforeDelete: OutputType<T, K, W>[] = []
 
-    if (objectsBeforeDelete.length === 0) return objectsBeforeDelete
+    if (fields.length > 0)
+      objectsBeforeDelete = await this.getObjects({
+        className,
+        where,
+        fields,
+        context,
+        first,
+        offset,
+        order,
+      })
+
+    if (objectsBeforeDelete.length === 0) return []
 
     const { objects } = await hook.runOnMultipleObjects({
       operationType: OperationType.BeforeDelete,
@@ -902,8 +906,6 @@ export class DatabaseController<T extends WabeTypes> {
       operationType: OperationType.AfterDelete,
       objects,
     })
-
-    if (fields.length === 0) return []
 
     return objectsBeforeDelete
   }
