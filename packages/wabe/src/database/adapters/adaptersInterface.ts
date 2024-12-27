@@ -193,7 +193,7 @@ export type OutputType<
   T extends WabeTypes,
   K extends keyof T['types'],
   U extends keyof T['types'][K],
-> = Pick<T['types'][K], U> & { id: string }
+> = (Pick<T['types'][K], U> & { id: string }) | null
 
 export interface DatabaseAdapter<T extends WabeTypes> {
   connect(): Promise<any>

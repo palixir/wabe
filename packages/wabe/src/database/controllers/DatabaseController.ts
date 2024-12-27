@@ -604,6 +604,8 @@ export class DatabaseController<T extends WabeTypes> {
       object,
     })
 
+    if (fields.length === 0) return null
+
     // If there is no hook to run it returns undefined object
     if (!res.object) return object
 

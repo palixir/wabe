@@ -99,6 +99,17 @@ describe('Database', () => {
     spyGetObjects.mockClear()
   })
 
+  it.only('should return undefined on createObject when no fields are provided', async () => {
+    const res = await wabe.controllers.database.createObject({
+      className: 'User',
+      context,
+      data: { name: 'Lucas' },
+      fields: [],
+    })
+
+    expect(res).toBeUndefined()
+  })
+
   it("should return all elements of a class when the object doesn't have ACL but the user is connected", async () => {
     const anonymousClient = getAnonymousClient(context.wabe.config.port)
 
