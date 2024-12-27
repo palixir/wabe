@@ -6,7 +6,7 @@ import type { HookObject } from './HookObject'
 export const defaultDeleteSessionOnDeleteUser = async (
   object: HookObject<DevWabeTypes, 'User'>,
 ) => {
-  const userId = object.object.id
+  const userId = object.object?.id
 
   await object.context.wabe.controllers.database.deleteObjects({
     className: '_Session',
