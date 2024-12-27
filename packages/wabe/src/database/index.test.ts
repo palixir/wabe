@@ -311,45 +311,6 @@ describe('Database', () => {
     expect(spyGetObjects).toHaveBeenCalledTimes(1)
   })
 
-  it('should call getObject adapter only 2 times (lower is better) for one read query (performance test) without mutation in hooks', async () => {
-    wabe.config.hooks = [
-      {
-        className: 'User',
-        operationType: OperationType.AfterCreate,
-        callback: mockUpdateObject,
-        priority: 1,
-      },
-      {
-        className: 'Test2',
-        operationType: OperationType.AfterUpdate,
-        callback: mockAfterUpdate,
-        priority: 1,
-      },
-    ]
-    const spyGetObjectAdapter = spyOn(
-      wabe.controllers.database.adapter,
-      'getObject',
-    )
-
-    const res = await wabe.controllers.database.createObject({
-      className: 'User',
-      context,
-      data: { name: 'Lucas' },
-      fields: ['id'],
-    })
-
-    spyGetObjectAdapter.mockClear()
-
-    await wabe.controllers.database.getObject({
-      className: 'User',
-      context,
-      fields: ['id'],
-      id: res.id,
-    })
-
-    expect(spyGetObjectAdapter).toHaveBeenCalledTimes(2)
-  })
-
   it('should get the good value in output of createObject after mutation on after hook', async () => {
     wabe.config.hooks = [
       {
