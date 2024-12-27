@@ -1,5 +1,4 @@
 import type { WabeTypes } from '../..'
-import { InMemoryCache } from '../../cache/InMemoryCache'
 import { OperationType, initializeHook } from '../../hooks'
 import type { WabeContext } from '../../server/interface'
 import { notEmpty } from '../../utils/helper'
@@ -33,11 +32,9 @@ interface PointerFields {
 
 export class DatabaseController<T extends WabeTypes> {
   public adapter: DatabaseAdapter<T>
-  public inMemoryCache: InMemoryCache<OutputType<T, any, any> | undefined>
 
   constructor(adapter: DatabaseAdapter<T>) {
     this.adapter = adapter
-    this.inMemoryCache = new InMemoryCache({ interval: 5000 })
   }
 
   connect() {
@@ -370,14 +367,6 @@ export class DatabaseController<T extends WabeTypes> {
     }
   }
 
-  _buildCacheKey<K extends keyof T['types']>(
-    className: K,
-    id: string,
-    fields: Array<string>,
-  ) {
-    return `${String(className)}-${id}-${fields.join(',')}`
-  }
-
   count<K extends keyof T['types']>(params: CountOptions<T, K>) {
     return this.adapter.count(params)
   }
@@ -437,30 +426,18 @@ export class DatabaseController<T extends WabeTypes> {
       where: whereWithACLCondition,
     })
 
-    const keyCache = this._buildCacheKey(
-      className,
-      object.id,
-      fieldsWithPointerFields,
-    )
-
-    this.inMemoryCache.set(keyCache, object)
-
     await hook?.runOnSingleObject({
       operationType: OperationType.AfterRead,
       object,
     })
 
-    const cacheObject = this.inMemoryCache.get(keyCache)
-
-    const objectToReturn = cacheObject
-      ? cacheObject
-      : await this.adapter.getObject({
-          className,
-          id,
-          context,
-          fields: fieldsWithPointerFields,
-          where: whereWithACLCondition,
-        })
+    const objectToReturn = await this.adapter.getObject({
+      className,
+      id,
+      context,
+      fields: fieldsWithPointerFields,
+      where: whereWithACLCondition,
+    })
 
     return this._getFinalObjectWithPointer(
       objectToReturn,
@@ -535,13 +512,6 @@ export class DatabaseController<T extends WabeTypes> {
       order,
     })
 
-    objects.map((object) =>
-      this.inMemoryCache.set(
-        this._buildCacheKey(className, object.id, fieldsWithPointerFields),
-        object,
-      ),
-    )
-
     await hook?.runOnMultipleObjects({
       operationType: OperationType.AfterRead,
       objects,
@@ -590,14 +560,6 @@ export class DatabaseController<T extends WabeTypes> {
       fields,
       data: newData,
     })
-
-    const keyCache = this._buildCacheKey(
-      className,
-      object.id,
-      fields as string[],
-    )
-
-    this.inMemoryCache.set(keyCache, undefined)
 
     const res = await hook.runOnSingleObject({
       operationType: OperationType.AfterCreate,
@@ -674,12 +636,6 @@ export class DatabaseController<T extends WabeTypes> {
 
     const objectsId = objects.map((object) => object.id)
 
-    for (const id of objectsId) {
-      const keyCache = this._buildCacheKey(className, id, fields as string[])
-
-      this.inMemoryCache.set(keyCache, undefined)
-    }
-
     const res = await Promise.all(
       hooks.map((hook) =>
         hook.runOnMultipleObjects({
@@ -740,14 +696,6 @@ export class DatabaseController<T extends WabeTypes> {
       data: newData,
       where: whereWithACLCondition,
     })
-
-    const keyCache = this._buildCacheKey(
-      className,
-      object.id,
-      fields as string[],
-    )
-
-    this.inMemoryCache.set(keyCache, undefined)
 
     const res = await hook.runOnSingleObject({
       operationType: OperationType.AfterUpdate,
@@ -817,12 +765,6 @@ export class DatabaseController<T extends WabeTypes> {
     })
 
     const objectsId = objects.map((object) => object.id)
-
-    for (const id of objectsId) {
-      const keyCache = this._buildCacheKey(className, id, fields as string[])
-
-      this.inMemoryCache.set(keyCache, undefined)
-    }
 
     const res = await hook.runOnMultipleObjects({
       operationType: OperationType.AfterUpdate,
