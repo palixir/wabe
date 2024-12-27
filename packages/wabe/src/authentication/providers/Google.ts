@@ -82,6 +82,8 @@ export class Google implements ProviderInterface<GoogleInterface> {
         fields: ['*'],
       })
 
+      if (!createdUser) throw new Error('User not found')
+
       return {
         user: createdUser,
         oauth: {
@@ -92,6 +94,8 @@ export class Google implements ProviderInterface<GoogleInterface> {
         },
       }
     }
+
+    if (!user[0]) throw new Error('User not found')
 
     return {
       user: user[0],

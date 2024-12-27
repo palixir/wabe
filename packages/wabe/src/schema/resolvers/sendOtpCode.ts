@@ -31,7 +31,9 @@ export const sendOtpCodeResolver = async (
   // We return true if the user doesn't exist to avoid leaking that the user exists or not
   if (user.length === 0) return true
 
-  const userId = user[0].id
+  const userId = user[0]?.id
+
+  if (!userId) return false
 
   const otpClass = new OTP(context.wabe.config.rootKey)
 

@@ -42,7 +42,7 @@ export class EmailPassword
 
     const user = users[0]
 
-    const userDatabasePassword = user.authentication?.emailPassword?.password
+    const userDatabasePassword = user?.authentication?.emailPassword?.password
 
     if (!userDatabasePassword)
       throw new Error('Invalid authentication credentials')
@@ -115,10 +115,10 @@ export class EmailPassword
 
     return {
       authenticationDataToSave: {
-        email: input.email ?? user.authentication?.emailPassword?.email,
+        email: input.email ?? user?.authentication?.emailPassword?.email,
         password: input.password
           ? await hashPassword(input.password)
-          : user.authentication?.emailPassword?.password,
+          : user?.authentication?.emailPassword?.password,
       },
     }
   }

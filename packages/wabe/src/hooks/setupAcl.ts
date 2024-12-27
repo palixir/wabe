@@ -1,4 +1,5 @@
 import type { ACLProperties } from '../schema'
+import { notEmpty } from '../utils/helper'
 import type { HookObject } from './HookObject'
 
 const isReadTrueOnUser = (aclObject: ACLProperties) =>
@@ -68,8 +69,8 @@ const setAcl = async ({
 
   const allRolesIdsWithoutDuplicate = [
     ...new Set([
-      ...idOfAllReadRoles.map((role) => role.id),
-      ...idOfAllWriteRoles.map((role) => role.id),
+      ...idOfAllReadRoles.map((role) => role?.id).filter(notEmpty),
+      ...idOfAllWriteRoles.map((role) => role?.id).filter(notEmpty),
     ]),
   ]
 
@@ -86,8 +87,8 @@ const setAcl = async ({
     roles: [
       ...allRolesIdsWithoutDuplicate.map((roleId) => ({
         roleId,
-        read: idOfAllReadRoles.some((role) => role.id === roleId),
-        write: idOfAllWriteRoles.some((role) => role.id === roleId),
+        read: idOfAllReadRoles.some((role) => role?.id === roleId),
+        write: idOfAllWriteRoles.some((role) => role?.id === roleId),
       })),
     ],
   }

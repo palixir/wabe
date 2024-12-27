@@ -48,7 +48,7 @@ describe('searchablesFields', () => {
       },
     })
 
-    expect(res[0].search).toEqual([
+    expect(res[0]?.search).toEqual([
       'a',
       'ad',
       'adm',

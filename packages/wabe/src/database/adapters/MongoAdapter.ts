@@ -429,7 +429,7 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
     })
 
     const orStatement = objectsBeforeUpdate.map((object) => ({
-      id: { equalTo: ObjectId.createFromHexString(object.id) },
+      id: { equalTo: ObjectId.createFromHexString(object?.id) },
     }))
 
     const objects = await context.wabe.controllers.database.getObjects({

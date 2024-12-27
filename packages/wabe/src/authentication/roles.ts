@@ -1,5 +1,5 @@
 import type { Wabe } from '..'
-import type { DevWabeTypes } from '../utils/helper'
+import { notEmpty, type DevWabeTypes } from '../utils/helper'
 
 export const initializeRoles = async (wabe: Wabe<DevWabeTypes>) => {
   const roles = wabe.config?.authentication?.roles || []
@@ -20,7 +20,7 @@ export const initializeRoles = async (wabe: Wabe<DevWabeTypes>) => {
     },
   })
 
-  const alreadyCreatedRoles = res.map((role) => role.name)
+  const alreadyCreatedRoles = res.map((role) => role?.name).filter(notEmpty)
 
   const objectsToCreate = roles
     .filter((role) => !alreadyCreatedRoles.includes(role))

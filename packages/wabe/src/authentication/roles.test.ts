@@ -27,7 +27,7 @@ describe('roles', () => {
     })
 
     expect(res.length).toEqual(3)
-    expect(res.map((role) => role.name)).toEqual([
+    expect(res.map((role) => role?.name)).toEqual([
       'Client',
       'Client2',
       'Client3',
@@ -47,7 +47,7 @@ describe('roles', () => {
     })
 
     expect(res.length).toEqual(3)
-    expect(res.map((role) => role.name)).toEqual([
+    expect(res.map((role) => role?.name)).toEqual([
       'Client',
       'Client2',
       'Client3',

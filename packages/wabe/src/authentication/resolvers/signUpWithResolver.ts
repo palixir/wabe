@@ -16,7 +16,7 @@ export const signUpWithResolver = async (
   context: WabeContext<any>,
 ) => {
   // Create object call the provider signUp
-  const { id: userId } = await context.wabe.controllers.database.createObject({
+  const res = await context.wabe.controllers.database.createObject({
     className: 'User',
     data: {
       authentication: input.authentication,
@@ -30,7 +30,9 @@ export const signUpWithResolver = async (
 
   const session = new Session()
 
-  const { accessToken, refreshToken } = await session.create(userId, {
+  if (!res) throw new Error('User not created')
+
+  const { accessToken, refreshToken } = await session.create(res.id, {
     ...context,
     isRoot: true,
   })
@@ -53,5 +55,5 @@ export const signUpWithResolver = async (
     })
   }
 
-  return { accessToken, refreshToken, id: userId }
+  return { accessToken, refreshToken, id: res.id }
 }

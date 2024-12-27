@@ -261,7 +261,7 @@ export class DatabaseController<T extends WabeTypes> {
         // If we don't found any object we just execute the query with the default where
         // Without any transformation for pointer or relation
         [typedWhereKey]: {
-          in: objects.map((object) => object.id),
+          in: objects.map((object) => object?.id).filter(notEmpty),
         },
       }
     }, Promise.resolve({}))
@@ -580,7 +580,7 @@ export class DatabaseController<T extends WabeTypes> {
         isRoot: true,
       },
       fields,
-      id: object.id,
+      id: res.object.id,
       skipHooks: true,
     })
 
@@ -634,7 +634,7 @@ export class DatabaseController<T extends WabeTypes> {
       order,
     })
 
-    const objectsId = objects.map((object) => object.id)
+    const objectsId = objects.map((object) => object?.id).filter(notEmpty)
 
     const res = await Promise.all(
       hooks.map((hook) =>
@@ -644,6 +644,8 @@ export class DatabaseController<T extends WabeTypes> {
         }),
       ),
     )
+
+    if (fields.length === 0) return []
 
     // If there is no hook to run it returns undefined object
     if (res.filter((hook) => hook.objects.length > 0).length === 0)
@@ -702,13 +704,15 @@ export class DatabaseController<T extends WabeTypes> {
       object,
     })
 
+    if (fields.length === 0) return null
+
     if (!res.object) return object
 
     const objectToReturn = await this.getObject({
       className,
       context,
       fields,
-      id: object.id,
+      id: res.object.id,
       skipHooks: true,
     })
 
@@ -764,12 +768,14 @@ export class DatabaseController<T extends WabeTypes> {
       order,
     })
 
-    const objectsId = objects.map((object) => object.id)
+    const objectsId = objects.map((object) => object?.id).filter(notEmpty)
 
     const res = await hook.runOnMultipleObjects({
       operationType: OperationType.AfterUpdate,
       objects,
     })
+
+    if (fields.length === 0) return []
 
     // If there is no hook to run it returns undefined object
     if (res.objects.length === 0) return objects
@@ -829,6 +835,8 @@ export class DatabaseController<T extends WabeTypes> {
       operationType: OperationType.AfterDelete,
       object,
     })
+
+    if (fields.length === 0) return null
 
     return objectBeforeDelete
   }
@@ -894,6 +902,8 @@ export class DatabaseController<T extends WabeTypes> {
       operationType: OperationType.AfterDelete,
       objects,
     })
+
+    if (fields.length === 0) return []
 
     return objectsBeforeDelete
   }
