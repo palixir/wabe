@@ -1,9 +1,56 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it, beforeAll, afterAll } from 'bun:test'
 import { HookObject } from './HookObject'
 import { OperationType } from '.'
-import type { DevWabeTypes } from '../utils/helper'
+import { closeTests, setupTests, type DevWabeTypes } from '../utils/helper'
+import type { Wabe } from '../server'
 
 describe('HookObject', () => {
+  let wabe: Wabe<DevWabeTypes>
+
+  beforeAll(async () => {
+    const setup = await setupTests()
+    wabe = setup.wabe
+  })
+
+  afterAll(async () => {
+    await closeTests(wabe)
+  })
+
+  it('should fetch all the fields of an object', async () => {
+    const res = await wabe.controllers.database.createObject({
+      className: 'User',
+      data: { age: 30, name: 'John Doe' },
+      context: {
+        wabe,
+        isRoot: true,
+      },
+      fields: ['id'],
+    })
+
+    const hookObject = new HookObject<DevWabeTypes, 'User'>({
+      className: 'User',
+      // @ts-expect-error
+      newData: { age: 30, name: 'John Doe' },
+      context: {
+        wabe,
+      } as any,
+      operationType: OperationType.BeforeCreate,
+      object: {
+        id: res?.id || 'id',
+      },
+    })
+
+    const fetchResult = await hookObject.fetch()
+
+    expect(fetchResult).toEqual(
+      expect.objectContaining({
+        id: res?.id || 'id',
+        age: 30,
+        name: 'John Doe',
+      }),
+    )
+  })
+
   it('should return correctly value depends on the update state of the field', () => {
     const userData = { name: 'John Doe' }
 
@@ -13,7 +60,9 @@ describe('HookObject', () => {
       newData: userData,
       context: {} as any,
       operationType: OperationType.BeforeUpdate,
-      object: {},
+      object: {
+        id: '1',
+      },
     })
 
     expect(hookObject.isFieldUpdate('name')).toBeTrue()
@@ -28,7 +77,9 @@ describe('HookObject', () => {
       newData: userData as any,
       operationType: OperationType.BeforeCreate,
       context: {} as any,
-      object: {},
+      object: {
+        id: '1',
+      },
     })
 
     hookObject.upsertNewData('name', 'tata')
@@ -49,7 +100,9 @@ describe('HookObject', () => {
       newData: userData as any,
       operationType: OperationType.AfterCreate,
       context: {} as any,
-      object: {},
+      object: {
+        id: '1',
+      },
     })
 
     expect(() => hookObject.upsertNewData('name', 'tata')).toThrow(

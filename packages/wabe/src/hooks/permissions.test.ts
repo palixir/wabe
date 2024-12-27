@@ -79,7 +79,9 @@ describe('Permissions', () => {
       const obj = new HookObject({
         className: 'TestClass',
         context,
-        object: {},
+        object: {
+          id: 'id',
+        },
         operationType: OperationType.BeforeRead,
       })
 
@@ -113,7 +115,9 @@ describe('Permissions', () => {
       const obj = new HookObject({
         className: 'TestClass',
         context,
-        object: {},
+        object: {
+          id: 'id',
+        },
         operationType: OperationType.BeforeRead,
       })
 
@@ -147,7 +151,7 @@ describe('Permissions', () => {
       const obj = new HookObject({
         className: 'TestClass',
         context,
-        object: {},
+        object: { id: 'id' },
         operationType: OperationType.BeforeRead,
       })
 
@@ -167,7 +171,7 @@ describe('Permissions', () => {
       const obj = new HookObject({
         className: 'TestClass',
         context,
-        object: {},
+        object: { id: 'id' },
         operationType: OperationType.BeforeRead,
       })
 

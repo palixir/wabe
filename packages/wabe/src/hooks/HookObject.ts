@@ -1,5 +1,5 @@
 import type { OperationType } from '.'
-import type { MutationData } from '../database'
+import type { MutationData, OutputType } from '../database'
 import type { WabeTypes } from '../server'
 import type { WabeContext } from '../server/interface'
 
@@ -11,7 +11,7 @@ export class HookObject<
   private newData: MutationData<T, K, keyof T['types'][K]> | undefined
   private operationType: OperationType
   public context: WabeContext<T>
-  public object: Partial<Record<keyof T['types'][K], any>>
+  public object: OutputType<T, K, any>
 
   constructor({
     newData,
@@ -24,7 +24,7 @@ export class HookObject<
     newData?: MutationData<T, K, keyof T['types'][K]>
     operationType: OperationType
     context: WabeContext<T>
-    object: Partial<Record<keyof T['types'][K], any>>
+    object: OutputType<T, K, any>
   }) {
     this.newData = newData
     this.className = className
@@ -52,5 +52,21 @@ export class HookObject<
 
   getNewData(): MutationData<T, K, keyof T['types'][K]> {
     return this.newData || ({} as any)
+  }
+
+  fetch(): Promise<OutputType<T, K, any>> {
+    const databaseController = this.context.wabe.controllers.database
+
+    if (!this.object?.id) return Promise.resolve(null)
+
+    return databaseController.getObject({
+      className: this.className,
+      id: this.object.id,
+      context: {
+        ...this.context,
+        isRoot: true,
+      },
+      fields: ['*'],
+    })
   }
 }

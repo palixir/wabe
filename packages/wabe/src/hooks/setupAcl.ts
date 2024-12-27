@@ -119,7 +119,7 @@ export const defaultSetupAclBeforeCreate = async (
 export const defaultSetupAclOnUserAfterCreate = async (
   hookObject: HookObject<any, any>,
 ) => {
-  const userId = hookObject.object.id
+  const userId = hookObject.object?.id
   if (!userId) return
 
   await setAcl({ hookObject, userId, isBeforeHook: false })

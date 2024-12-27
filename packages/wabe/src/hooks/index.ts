@@ -179,7 +179,6 @@ export const initializeHook = <
         newData,
         operationType,
         context,
-        // @ts-expect-error
         object,
       })
 
@@ -227,7 +226,6 @@ export const initializeHook = <
             newData,
             operationType,
             context,
-            // @ts-expect-error
             object,
           })
 

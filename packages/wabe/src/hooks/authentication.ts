@@ -57,6 +57,8 @@ export const defaultCallAuthenticationProviderOnBeforeUpdateUser = async (
 
   const inputOfTheGoodAuthenticationMethod = authentication[name]
 
+  if (!hookObject.object?.id) return
+
   const { authenticationDataToSave } =
     await provider.onUpdateAuthenticationData({
       context,

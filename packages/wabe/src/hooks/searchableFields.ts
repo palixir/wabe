@@ -66,7 +66,9 @@ export const defaultSearchableFieldsBeforeUpdate = (
     })
     .filter(notEmpty)
 
-  const oldExtractedSearcFieldForUpdateFields = Object.entries(object.object)
+  const oldExtractedSearcFieldForUpdateFields = Object.entries(
+    object.object || {},
+  )
     .flatMap(([key, value]) => {
       // If the data is not a searchable field or don't change
       if (
@@ -79,7 +81,7 @@ export const defaultSearchableFieldsBeforeUpdate = (
     })
     .filter(notEmpty)
 
-  const actualSearch = object.object.search as string[]
+  const actualSearch = (object.object?.search || []) as string[]
 
   // Actual search fields minus old search data for same field + new extracted data for the field
   const extractedSearchFields = [
