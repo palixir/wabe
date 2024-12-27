@@ -41,7 +41,7 @@ export class Session {
         accessToken: { equalTo: accessToken },
       },
       first: 1,
-      fields: ['user.*', 'user.role.*'],
+      fields: ['user.*', 'user.role.*', 'id'],
       context,
     })
 
@@ -73,7 +73,7 @@ export class Session {
       import.meta.env.JWT_SECRET || 'dev',
     )
 
-    const { id } = await context.wabe.controllers.database.createObject({
+    const res = await context.wabe.controllers.database.createObject({
       className: '_Session',
       context,
       data: {
@@ -89,10 +89,12 @@ export class Session {
       fields: ['id'],
     })
 
+    if (!res) throw new Error('Session not created')
+
     return {
       accessToken: this.accessToken,
       refreshToken: this.refreshToken,
-      sessionId: id,
+      sessionId: res.id,
     }
   }
 
@@ -141,6 +143,8 @@ export class Session {
         accessToken: null,
         refreshToken: null,
       }
+
+    if (!session[0]) throw new Error('Session not found')
 
     const {
       refreshTokenExpiresAt,

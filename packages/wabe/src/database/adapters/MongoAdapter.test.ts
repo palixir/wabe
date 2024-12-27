@@ -10,7 +10,12 @@ import {
 import { fail } from 'node:assert'
 import { ObjectId } from 'mongodb'
 import type { Wabe } from '../..'
-import { type DevWabeTypes, closeTests, setupTests } from '../../utils/helper'
+import {
+  type DevWabeTypes,
+  closeTests,
+  notEmpty,
+  setupTests,
+} from '../../utils/helper'
 import { type MongoAdapter, buildMongoWhereQuery } from './MongoAdapter'
 import type { WabeContext } from '../../server/interface'
 
@@ -50,6 +55,88 @@ describe('Mongo adapter', () => {
       )
   })
 
+  it('should only return id on createObject if fields is empty', async () => {
+    const res = await mongoAdapter.createObject({
+      className: 'User',
+      data: {
+        name: 'John',
+        age: 20,
+      },
+      context,
+      fields: [],
+    })
+
+    expect(ObjectId.isValid(res?.id || '')).toBeTrue()
+    expect(res).toEqual({ id: expect.any(String) })
+  })
+
+  it('should only return an array of id on createObjects if fields is empty', async () => {
+    const res = await mongoAdapter.createObjects({
+      className: 'User',
+      data: [
+        {
+          name: 'John',
+          age: 20,
+        },
+      ],
+      context,
+      fields: [],
+    })
+
+    expect(ObjectId.isValid(res[0]?.id || '')).toBeTrue()
+    expect(res).toEqual([{ id: expect.any(String) }])
+  })
+
+  it('should only return id on updateObject if fields is empty', async () => {
+    const insertedObject = await mongoAdapter.createObject({
+      className: 'User',
+      data: {
+        name: 'John',
+        age: 20,
+      },
+      context,
+      fields: ['*'],
+    })
+
+    const res = await mongoAdapter.updateObject({
+      className: 'User',
+      id: insertedObject?.id || '',
+      data: { name: 'Doe' },
+      fields: [],
+      context,
+    })
+
+    expect(ObjectId.isValid(res?.id || '')).toBeTrue()
+    expect(res).toEqual({ id: expect.any(String) })
+  })
+
+  it('should only return an array of id on updateObjects if fields is empty', async () => {
+    await mongoAdapter.createObjects({
+      className: 'User',
+      data: [
+        {
+          name: 'John',
+          age: 20,
+        },
+      ],
+      context,
+      fields: ['*'],
+    })
+
+    const res = await mongoAdapter.updateObjects({
+      className: 'User',
+      where: {
+        name: { equalTo: 'John' },
+      },
+      data: { name: 'Doe' },
+      fields: [],
+      context,
+    })
+
+    expect(ObjectId.isValid(res[0]?.id || '')).toBeTrue()
+    expect(res).toEqual([{ id: expect.any(String) }])
+  })
+
   it("should order the result by the field 'name' in ascending order", async () => {
     await mongoAdapter.createObjects({
       className: 'User',
@@ -76,7 +163,7 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    expect(res.map((user) => user.name)).toEqual(['A', 'B'])
+    expect(res.map((user) => user?.name)).toEqual(['A', 'B'])
   })
 
   it("should order the result by the field 'name' in descending order", async () => {
@@ -105,7 +192,7 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    expect(res.map((user) => user.name)).toEqual(['B', 'A'])
+    expect(res.map((user) => user?.name)).toEqual(['B', 'A'])
   })
 
   it("should order the result by the field 'age' and 'name' in descending order", async () => {
@@ -135,7 +222,7 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    expect(res.map((user) => user.name)).toEqual(['B', 'A'])
+    expect(res.map((user) => user?.name)).toEqual(['B', 'A'])
   })
 
   it('should count all elements corresponds to where condition in collection', async () => {
@@ -247,7 +334,7 @@ describe('Mongo adapter', () => {
           age: 18,
         },
       ],
-      fields: [],
+      fields: ['id'],
       context,
     })
 
@@ -257,7 +344,7 @@ describe('Mongo adapter', () => {
         where: {
           name: { equalTo: 'InvalidName' },
         },
-        id: insertedObjects[0].id,
+        id: insertedObjects[0]?.id || '',
         context,
         fields: ['*'],
       }),
@@ -268,12 +355,12 @@ describe('Mongo adapter', () => {
       where: {
         name: { equalTo: 'Lucas' },
       },
-      id: insertedObjects[0].id,
+      id: insertedObjects[0]?.id || '',
       context,
       fields: ['*'],
     })
 
-    expect(res.name).toEqual('Lucas')
+    expect(res?.name).toEqual('Lucas')
   })
 
   it('should support where on updateObject for additional check (acl for example)', async () => {
@@ -289,7 +376,7 @@ describe('Mongo adapter', () => {
           age: 18,
         },
       ],
-      fields: [],
+      fields: ['id'],
       context,
     })
 
@@ -299,7 +386,7 @@ describe('Mongo adapter', () => {
         where: {
           name: { equalTo: 'InvalidName' },
         },
-        id: insertedObjects[0].id,
+        id: insertedObjects[0]?.id || '',
         context,
         data: { name: 'Lucas2' },
         fields: ['*'],
@@ -311,13 +398,13 @@ describe('Mongo adapter', () => {
       where: {
         name: { equalTo: 'Lucas' },
       },
-      id: insertedObjects[0].id,
+      id: insertedObjects[0]?.id || '',
       context,
       data: { name: 'Lucas2' },
       fields: ['*'],
     })
 
-    expect(res.name).toEqual('Lucas2')
+    expect(res?.name).toEqual('Lucas2')
   })
 
   it('should support where on delete for additional check (acl for example)', async () => {
@@ -333,7 +420,7 @@ describe('Mongo adapter', () => {
           age: 18,
         },
       ],
-      fields: [],
+      fields: ['id'],
       context,
     })
 
@@ -343,7 +430,7 @@ describe('Mongo adapter', () => {
         where: {
           name: { equalTo: 'InvalidName' },
         },
-        id: insertedObjects[0].id,
+        id: insertedObjects[0]?.id || '',
         context,
         fields: ['*'],
       }),
@@ -354,7 +441,7 @@ describe('Mongo adapter', () => {
       where: {
         name: { equalTo: 'Lucas' },
       },
-      id: insertedObjects[0].id,
+      id: insertedObjects[0]?.id || '',
       context,
       fields: ['*'],
     })
@@ -373,14 +460,14 @@ describe('Mongo adapter', () => {
           age: 18,
         },
       ],
-      fields: [],
+      fields: ['id'],
       context,
     })
 
     const res = await mongoAdapter.getObjects({
       className: 'User',
       where: {
-        id: { notEqualTo: insertedObjects[0].id },
+        id: { notEqualTo: insertedObjects[0]?.id },
       },
       context,
       fields: ['*'],
@@ -402,14 +489,14 @@ describe('Mongo adapter', () => {
           age: 18,
         },
       ],
-      fields: [],
+      fields: ['id'],
       context,
     })
 
     const res = await mongoAdapter.getObjects({
       className: 'User',
       where: {
-        id: { equalTo: insertedObjects[0].id },
+        id: { equalTo: insertedObjects[0]?.id },
       },
       context,
       fields: ['*'],
@@ -431,14 +518,14 @@ describe('Mongo adapter', () => {
           age: 18,
         },
       ],
-      fields: [],
+      fields: ['id'],
       context,
     })
 
     const res = await mongoAdapter.getObjects({
       className: 'User',
       where: {
-        id: { in: insertedObjects.map((obj) => obj.id) },
+        id: { in: insertedObjects.map((obj) => obj?.id).filter(notEmpty) },
       },
       context,
       fields: ['*'],
@@ -460,14 +547,14 @@ describe('Mongo adapter', () => {
           age: 18,
         },
       ],
-      fields: [],
+      fields: ['id'],
       context,
     })
 
     const res = await mongoAdapter.getObjects({
       className: 'User',
       where: {
-        id: { notIn: insertedObjects.map((obj) => obj.id) },
+        id: { notIn: insertedObjects.map((obj) => obj?.id).filter(notEmpty) },
       },
       context,
       fields: ['*'],
@@ -504,24 +591,6 @@ describe('Mongo adapter', () => {
     )
   })
 
-  it('should return id if an empty fields is specified', async () => {
-    const insertedObjects = await mongoAdapter.createObjects({
-      className: 'User',
-      data: [
-        {
-          name: 'Lucas',
-          age: 20,
-        },
-      ],
-      fields: [],
-      context,
-    })
-
-    if (!insertedObjects) fail()
-
-    expect(insertedObjects[0].id).toBeDefined()
-  })
-
   it('should always return id', async () => {
     const insertedObjects = await mongoAdapter.createObjects({
       className: 'User',
@@ -532,12 +601,12 @@ describe('Mongo adapter', () => {
         },
       ],
       context,
-      fields: ['age'],
+      fields: ['age', 'id'],
     })
 
     if (!insertedObjects) fail
 
-    expect(insertedObjects[0].id).toBeDefined()
+    expect(insertedObjects[0]?.id).toBeDefined()
   })
 
   it('should return id if no fields is specified', async () => {
@@ -555,7 +624,7 @@ describe('Mongo adapter', () => {
 
     if (!insertedObjects) fail()
 
-    expect(insertedObjects[0].id).toBeDefined()
+    expect(insertedObjects[0]?.id).toBeDefined()
   })
 
   it('should getObjects using id and not _id', async () => {
@@ -582,7 +651,7 @@ describe('Mongo adapter', () => {
       where: {
         id: {
           equalTo: ObjectId.createFromHexString(
-            insertedObjects[0].id,
+            insertedObjects[0]?.id || '',
           ).toString(),
         },
       },
@@ -631,8 +700,8 @@ describe('Mongo adapter', () => {
     })
 
     expect(res.length).toEqual(2)
-    expect(res[0].name).toEqual('John2')
-    expect(res[1].name).toEqual('John3')
+    expect(res[0]?.name).toEqual('John2')
+    expect(res[1]?.name).toEqual('John3')
   })
 
   it('should get all the objects with limit', async () => {
@@ -805,8 +874,8 @@ describe('Mongo adapter', () => {
     })
 
     expect(res.length).toEqual(2)
-    expect(res[0].name).toEqual('John2')
-    expect(res[1].name).toEqual('John3')
+    expect(res[0]?.name).toEqual('John2')
+    expect(res[1]?.name).toEqual('John3')
 
     await mongoAdapter.deleteObjects({
       className: 'User',
@@ -851,13 +920,13 @@ describe('Mongo adapter', () => {
     })
 
     const res = await mongoAdapter.getObject({
-      id: insertedObject?.id.toString(),
+      id: insertedObject?.id.toString() || '',
       className: 'User',
       fields: ['id'],
       context,
     })
 
-    expect(res?.id).toEqual(insertedObject?.id)
+    expect(res?.id).toEqual(insertedObject?.id || '')
   })
 
   it('should get all fields when * is specified', async () => {
@@ -913,7 +982,7 @@ describe('Mongo adapter', () => {
     const field = await mongoAdapter.getObject({
       className: 'User',
       id: id.toString(),
-      fields: ['name'],
+      fields: ['name', 'id'],
       context,
     })
 
@@ -1639,8 +1708,10 @@ describe('Mongo adapter', () => {
     })
 
     expect(res.length).toEqual(1)
-    expect(res[0].authentication?.emailPassword?.email).toEqual('email@test.fr')
-    expect(res[0].authentication?.emailPassword?.password).toEqual('password')
+    expect(res[0]?.authentication?.emailPassword?.email).toEqual(
+      'email@test.fr',
+    )
+    expect(res[0]?.authentication?.emailPassword?.password).toEqual('password')
   })
 
   it('should request sub object in object with selection fields', async () => {
@@ -1673,7 +1744,9 @@ describe('Mongo adapter', () => {
     })
 
     expect(res.length).toEqual(1)
-    expect(res[0].authentication?.emailPassword?.email).toEqual('email@test.fr')
-    expect(res[0].authentication?.emailPassword?.password).toBeUndefined()
+    expect(res[0]?.authentication?.emailPassword?.email).toEqual(
+      'email@test.fr',
+    )
+    expect(res[0]?.authentication?.emailPassword?.password).toBeUndefined()
   })
 })

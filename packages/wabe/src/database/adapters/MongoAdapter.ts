@@ -313,14 +313,15 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
 
     const res = await collection.insertOne(data, {})
 
-    const object = await context.wabe.controllers.database.getObject({
+    // @ts-expect-error
+    if (fields.length === 0) return { id: res.insertedId.toString() }
+
+    return context.wabe.controllers.database.getObject({
       className,
       id: res.insertedId.toString(),
       context,
       fields,
     })
-
-    return object
   }
 
   async createObjects<
@@ -344,7 +345,11 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
       id: { equalTo: value },
     }))
 
-    const allObjects = await context.wabe.controllers.database.getObjects({
+    if (fields.length === 0)
+      // @ts-expect-error
+      return Object.values(res.insertedIds).map((id) => ({ id: id.toString() }))
+
+    return context.wabe.controllers.database.getObjects({
       className,
       where: { OR: orStatement } as WhereType<T, K>,
       fields,
@@ -353,8 +358,6 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
       context,
       order,
     })
-
-    return allObjects
   }
 
   async updateObject<
@@ -383,14 +386,15 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
 
     if (res.matchedCount === 0) throw new Error('Object not found')
 
-    const object = await context.wabe.controllers.database.getObject({
+    // @ts-expect-error
+    if (fields.length === 0) return { id }
+
+    return context.wabe.controllers.database.getObject({
       className,
       context,
       fields,
       id,
     })
-
-    return object
   }
 
   async updateObjects<
@@ -418,21 +422,31 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
         fields: ['id'],
         offset,
         first,
-        context,
+        context: {
+          ...context,
+          // Root because we need the id at least for hook
+          isRoot: true,
+        },
         order,
       })
 
-    if (objectsBeforeUpdate.length === 0) throw new Error('Object not found')
+    if (objectsBeforeUpdate.length === 0) return []
 
     await collection.updateMany(whereBuilded, {
       $set: data,
     })
 
     const orStatement = objectsBeforeUpdate.map((object) => ({
-      id: { equalTo: ObjectId.createFromHexString(object.id) },
+      id: { equalTo: ObjectId.createFromHexString(object?.id) },
     }))
 
-    const objects = await context.wabe.controllers.database.getObjects({
+    if (fields.length === 0)
+      // @ts-expect-error
+      return Object.values(objectsBeforeUpdate).map((object) => ({
+        id: object?.id,
+      }))
+
+    return context.wabe.controllers.database.getObjects({
       className,
       where: {
         OR: orStatement,
@@ -442,8 +456,6 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
       first,
       context,
     })
-
-    return objects
   }
 
   async deleteObject<K extends keyof T['types'], U extends keyof T['types'][K]>(

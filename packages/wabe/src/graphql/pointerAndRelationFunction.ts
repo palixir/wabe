@@ -36,7 +36,7 @@ export const createAndLink = async ({
 }) => {
   const classInSchema = getClassFromClassName(className, context.wabe.config)
 
-  const { id } = await context.wabe.controllers.database.createObject({
+  const res = await context.wabe.controllers.database.createObject({
     // @ts-expect-error
     className: classInSchema.fields[fieldName].class,
     data: createAndLink,
@@ -44,7 +44,7 @@ export const createAndLink = async ({
     context,
   })
 
-  return id
+  return res?.id
 }
 
 export const createAndAdd = async ({
@@ -102,7 +102,7 @@ export const add = async ({
       context,
     })
 
-    return [...(currentValue[fieldName] || []), ...add]
+    return [...(currentValue?.[fieldName] || []), ...add]
   }
 
   // For update many we need to get all objects that match the where and add the new value
@@ -163,7 +163,7 @@ export const remove = async ({
       context,
     })
 
-    const olderValues = currentValue[fieldName] || []
+    const olderValues = currentValue?.[fieldName] || []
 
     return olderValues.filter((olderValue: any) => !remove.includes(olderValue))
   }

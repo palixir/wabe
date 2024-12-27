@@ -99,6 +99,102 @@ describe('Database', () => {
     spyGetObjects.mockClear()
   })
 
+  it('should return null on createObject when no fields are provided', async () => {
+    const res = await wabe.controllers.database.createObject({
+      className: 'User',
+      context,
+      data: { name: 'Lucas' },
+      fields: [],
+    })
+
+    expect(res).toBeNull()
+  })
+
+  it('should return empty array on createObjects when no fields are provided', async () => {
+    const res = await wabe.controllers.database.createObjects({
+      className: 'User',
+      context,
+      data: [{ name: 'Lucas' }],
+      fields: [],
+    })
+
+    expect(res).toBeEmpty()
+  })
+
+  it('should return null on updateObject when no fields are provided', async () => {
+    const createdObject = await wabe.controllers.database.createObject({
+      className: 'User',
+      context,
+      data: { name: 'Lucas' },
+      fields: ['id'],
+    })
+
+    const res = await wabe.controllers.database.updateObject({
+      className: 'User',
+      context,
+      data: { name: 'Lucas' },
+      fields: [],
+      id: createdObject?.id || '',
+    })
+
+    expect(res).toBeNull()
+  })
+
+  it('should return empty array on updateObjects when no fields are provided', async () => {
+    await wabe.controllers.database.createObject({
+      className: 'User',
+      context,
+      data: { name: 'Lucas' },
+      fields: ['id'],
+    })
+
+    const res = await wabe.controllers.database.updateObjects({
+      className: 'User',
+      context,
+      data: { name: 'Lucas2' },
+      fields: [],
+      where: { name: { equalTo: 'Lucas' } },
+    })
+
+    expect(res).toBeEmpty()
+  })
+
+  it('should return null on deleteObject when no fields are provided', async () => {
+    const createdObject = await wabe.controllers.database.createObject({
+      className: 'User',
+      context,
+      data: { name: 'Lucas' },
+      fields: ['id'],
+    })
+
+    const res = await wabe.controllers.database.deleteObject({
+      className: 'User',
+      context,
+      fields: [],
+      id: createdObject?.id || '',
+    })
+
+    expect(res).toBeNull()
+  })
+
+  it('should return empty array on deleteObjects when no fields are provided', async () => {
+    await wabe.controllers.database.createObject({
+      className: 'User',
+      context,
+      data: { name: 'Lucas' },
+      fields: ['id'],
+    })
+
+    const res = await wabe.controllers.database.deleteObjects({
+      className: 'User',
+      context,
+      fields: [],
+      where: { name: { equalTo: 'Lucas' } },
+    })
+
+    expect(res).toBeEmpty()
+  })
+
   it("should return all elements of a class when the object doesn't have ACL but the user is connected", async () => {
     const anonymousClient = getAnonymousClient(context.wabe.config.port)
 
@@ -164,8 +260,8 @@ describe('Database', () => {
       order: { name: 'ASC' },
     })
 
-    expect(res[0].name).toBe('test1')
-    expect(res[1].name).toBe('test2')
+    expect(res[0]?.name).toBe('test1')
+    expect(res[1]?.name).toBe('test2')
   })
 
   it('should create object with subobject (hooks default call authentication before create user)', async () => {
@@ -186,7 +282,7 @@ describe('Database', () => {
       },
     })
 
-    expect(res.authentication?.google).toEqual({
+    expect(res?.authentication?.google).toEqual({
       email: 'email@test.fr',
       verifiedEmail: true,
       idToken: 'idToken',
@@ -222,7 +318,7 @@ describe('Database', () => {
   it('should not computeObject in runOnSingleObject if there is no hooks to execute on updateObject', async () => {
     wabe.config.hooks = []
 
-    const { id } = await wabe.controllers.database.createObject({
+    const res = await wabe.controllers.database.createObject({
       className: 'User',
       context,
       data: { name: 'Lucas' },
@@ -237,7 +333,7 @@ describe('Database', () => {
       // @ts-expect-error
       data: [{ name: 'Lucas' }],
       fields: ['id'],
-      id,
+      id: res?.id || '',
     })
 
     expect(spyGetObject).toHaveBeenCalledTimes(1)
@@ -246,7 +342,7 @@ describe('Database', () => {
   it('should not computeObject in runOnMultipleObject if there is no hooks to execute on updateObjects', async () => {
     wabe.config.hooks = []
 
-    const { id } = await wabe.controllers.database.createObject({
+    const res = await wabe.controllers.database.createObject({
       className: 'User',
       context,
       data: { name: 'Lucas' },
@@ -260,7 +356,7 @@ describe('Database', () => {
       context,
       data: { name: 'Lucas' },
       fields: ['id'],
-      where: { id: { equalTo: id } },
+      where: { id: { equalTo: res?.id || '' } },
     })
 
     // Mongo adapter call 2 times getObjects in updateObjects
@@ -270,7 +366,7 @@ describe('Database', () => {
   it('should not computeObject in runOnSingleObject if there is no hooks to execute on updateObject', async () => {
     wabe.config.hooks = []
 
-    const { id } = await wabe.controllers.database.createObject({
+    const res = await wabe.controllers.database.createObject({
       className: 'User',
       context,
       data: { name: 'Lucas' },
@@ -283,7 +379,7 @@ describe('Database', () => {
       className: 'User',
       context,
       fields: ['id'],
-      id,
+      id: res?.id || '',
     })
 
     expect(spyGetObject).toHaveBeenCalledTimes(1)
@@ -292,7 +388,7 @@ describe('Database', () => {
   it('should not computeObject in runOnMultipleObject if there is no hooks to execute on updateObjects', async () => {
     wabe.config.hooks = []
 
-    const { id } = await wabe.controllers.database.createObject({
+    const res = await wabe.controllers.database.createObject({
       className: 'User',
       context,
       data: { name: 'Lucas' },
@@ -305,7 +401,7 @@ describe('Database', () => {
       className: 'User',
       context,
       fields: ['id'],
-      where: { id: { equalTo: id } },
+      where: { id: { equalTo: res?.id || '' } },
     })
 
     expect(spyGetObjects).toHaveBeenCalledTimes(1)
@@ -333,7 +429,7 @@ describe('Database', () => {
       fields: ['age'],
     })
 
-    expect(res.age).toEqual(21)
+    expect(res?.age).toEqual(21)
 
     expect(mockUpdateObject).toHaveBeenCalledTimes(1)
   })
@@ -360,7 +456,7 @@ describe('Database', () => {
       fields: ['age'],
     })
 
-    expect(res[0].age).toEqual(21)
+    expect(res[0]?.age).toEqual(21)
 
     expect(mockUpdateObject).toHaveBeenCalledTimes(1)
   })
@@ -427,10 +523,10 @@ describe('Database', () => {
       context,
       fields: ['name'],
       data: { age: 20 },
-      id: res[0].id,
+      id: res[0]?.id,
     })
 
-    expect(res2.name).toEqual('test')
+    expect(res2?.name).toEqual('test')
 
     expect(mockAfterUpdate).toHaveBeenCalledTimes(1)
   })

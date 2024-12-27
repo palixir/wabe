@@ -79,8 +79,10 @@ export class Google implements ProviderInterface<GoogleInterface> {
           ...context,
           isRoot: true,
         },
-        fields: ['*'],
+        fields: ['*', 'id'],
       })
+
+      if (!createdUser) throw new Error('User not found')
 
       return {
         user: createdUser,
@@ -92,6 +94,8 @@ export class Google implements ProviderInterface<GoogleInterface> {
         },
       }
     }
+
+    if (!user[0]) throw new Error('User not found')
 
     return {
       user: user[0],
