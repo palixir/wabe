@@ -59,6 +59,42 @@ const getFieldsFromInfo = (info: GraphQLResolveInfo, className: string) => {
   return fields
 }
 
+export const getFieldsOfClassName = ({
+  fields,
+  className,
+  context,
+}: { fields: string[]; className: string; context: WabeContext<any> }): {
+  classFields: string[]
+  othersFields: string[]
+} => {
+  const classFields = context.wabe.config.schema?.classes?.find(
+    (schemaClass) => schemaClass.name === className,
+  )?.fields
+
+  if (!classFields) return { classFields: [], othersFields: fields }
+
+  const sameFieldsAsClass = fields.filter((field) => {
+    // If the field exist in the class
+    // id is automatically include in a class but not provided in fields
+    if (classFields[field] || field === 'id') return true
+
+    // If the name of the field is include in the field provided
+    // For example if a pointer field name "Role" is include in the field "role.name"
+    if (
+      Object.keys(classFields).find((classField) => field.includes(classField))
+    )
+      return true
+
+    return false
+  })
+
+  const othersFields = fields.filter(
+    (field) => !sameFieldsAsClass.includes(field),
+  )
+
+  return { classFields: sameFieldsAsClass, othersFields }
+}
+
 export const executeRelationOnFields = ({
   className,
   fields,
@@ -204,7 +240,11 @@ export const mutationToCreateObject = async (
   info: GraphQLResolveInfo,
   className: keyof WabeTypes['types'],
 ) => {
-  const fields = getFieldsFromInfo(info, className)
+  const { classFields, othersFields } = getFieldsOfClassName({
+    fields: getFieldsFromInfo(info, className),
+    className,
+    context,
+  })
 
   const updatedFieldsToCreate = await executeRelationOnFields({
     className,
@@ -217,9 +257,10 @@ export const mutationToCreateObject = async (
       await context.wabe.controllers.database.createObject({
         className,
         data: updatedFieldsToCreate,
-        fields,
+        fields: classFields,
         context,
       }),
+    ...(othersFields.includes('ok') ? { ok: true } : {}),
   }
 }
 
@@ -265,8 +306,11 @@ export const mutationToUpdateObject = async (
   info: GraphQLResolveInfo,
   className: keyof WabeTypes['types'],
 ) => {
-  const fields = getFieldsFromInfo(info, className)
-
+  const { classFields, othersFields } = getFieldsOfClassName({
+    fields: getFieldsFromInfo(info, className),
+    className,
+    context,
+  })
   const updatedFields = await executeRelationOnFields({
     className,
     fields: args.input?.fields,
@@ -281,9 +325,10 @@ export const mutationToUpdateObject = async (
         className,
         id: args.input?.id,
         data: updatedFields,
-        fields,
+        fields: classFields,
         context,
       }),
+    ...(othersFields.includes('ok') ? { ok: true } : {}),
   }
 }
 
@@ -327,16 +372,21 @@ export const mutationToDeleteObject = async (
   info: GraphQLResolveInfo,
   className: keyof WabeTypes['types'],
 ) => {
-  const fields = getFieldsFromInfo(info, className)
+  const { classFields, othersFields } = getFieldsOfClassName({
+    fields: getFieldsFromInfo(info, className),
+    className,
+    context,
+  })
 
   return {
     [firstLetterInLowerCase(className)]:
       await context.wabe.controllers.database.deleteObject({
         className,
         id: args.input?.id,
-        fields,
+        fields: classFields,
         context,
       }),
+    ...(othersFields.includes('ok') ? { ok: true } : {}),
   }
 }
 

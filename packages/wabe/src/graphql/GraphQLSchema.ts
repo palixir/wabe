@@ -9,7 +9,6 @@ import {
   GraphQLObjectType,
   type GraphQLOutputType,
   GraphQLScalarType,
-  GraphQLString,
   GraphQLBoolean,
 } from 'graphql'
 import { pluralize } from 'wabe-pluralize'
@@ -712,7 +711,7 @@ export class GraphQLSchema {
       name: `Create${className}Payload`,
       fields: () => ({
         [classNameWithFirstLetterLowerCase]: { type: object },
-        clientMutationId: { type: GraphQLString },
+        ok: { type: GraphQLBoolean },
       }),
     })
 
@@ -739,7 +738,7 @@ export class GraphQLSchema {
       name: `Update${className}Payload`,
       fields: () => ({
         [classNameWithFirstLetterLowerCase]: { type: object },
-        clientMutationId: { type: GraphQLString },
+        ok: { type: GraphQLBoolean },
       }),
     })
 
@@ -766,7 +765,7 @@ export class GraphQLSchema {
       name: `Delete${className}Payload`,
       fields: () => ({
         [classNameWithFirstLetterLowerCase]: { type: object },
-        clientMutationId: { type: GraphQLString },
+        ok: { type: GraphQLBoolean },
       }),
     })
 
