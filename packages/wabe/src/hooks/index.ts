@@ -96,19 +96,14 @@ export const initializeHook = <
 }) => {
   const computeObject = ({
     id,
-    object,
-    operationType,
   }: {
     id?: string
-    object?: OutputType<DevWabeTypes, any, any>
-    operationType: OperationType
   }): Promise<OutputType<DevWabeTypes, any, any>> => {
-    if (object) return Promise.resolve(object)
-
+    // If we don't have an id, like for example after delete, we return an empty object
+    // Hook after delete will be called but we should not have any object
+    // Same of before create
     // @ts-expect-error
-    if (operationType === OperationType.BeforeCreate) return newData
-
-    if (!id) throw new Error('Object not found')
+    if (!id) return {}
 
     return context.wabe.controllers.database.getObject({
       className,
@@ -123,26 +118,19 @@ export const initializeHook = <
   }
 
   const computeObjects = async ({
-    objects,
-    operationType,
     where,
+    ids,
   }: {
     where?: WhereType<DevWabeTypes, any>
-    objects?: OutputType<DevWabeTypes, any, any>[]
-    operationType: OperationType
+    ids: string[]
   }): Promise<OutputType<DevWabeTypes, any, any>[]> => {
-    if (objects) return objects
-
-    // @ts-expect-error
-    if (operationType === OperationType.BeforeCreate) return [newData]
-
     const res = await context.wabe.controllers.database.getObjects({
       className,
       context: {
         ...context,
         isRoot: true,
       },
-      where,
+      where: where ? where : { id: { in: ids } },
       fields: ['*'],
       skipHooks: true,
     })
@@ -156,28 +144,21 @@ export const initializeHook = <
   const hooksOrderByPriorities = _getHooksOrderByPriorities(context.wabe.config)
 
   return {
-    runOnSingleObject: async ({
-      operationType,
-      id,
-      object: inputObject,
-    }: {
+    runOnSingleObject: async (options: {
       operationType: OperationType
       id?: string
-      object?: OutputType<DevWabeTypes, any, any>
     }): Promise<MutationData<T, K, any>> => {
       if (hooksOrderByPriorities.length === 0)
         return { object: undefined, newData: {} }
 
       const object = await computeObject({
-        id,
-        operationType,
-        object: inputObject,
+        id: options.id,
       })
 
       const hookObject = new HookObject<DevWabeTypes, K>({
         className,
         newData,
-        operationType,
+        operationType: options.operationType,
         context,
         object,
       })
@@ -188,7 +169,7 @@ export const initializeHook = <
 
         const hooksToCompute = await _findHooksByPriority({
           className,
-          operationType,
+          operationType: options.operationType,
           priority,
           config: context.wabe.config,
         })
@@ -201,22 +182,17 @@ export const initializeHook = <
       return { object, newData: hookObject.getNewData() }
     },
 
-    runOnMultipleObjects: async ({
-      operationType,
-      where,
-      objects: inputObjects,
-    }: {
+    runOnMultipleObjects: async (options: {
       operationType: OperationType
       where?: WhereType<any, any>
-      objects?: OutputType<DevWabeTypes, any, any>[]
+      ids?: string[]
     }) => {
       if (hooksOrderByPriorities.length === 0)
         return { objects: [], newData: [newData || {}] }
 
       const objects = await computeObjects({
-        where,
-        operationType,
-        objects: inputObjects,
+        where: options.where,
+        ids: options.ids || [],
       })
 
       const newDataAfterHooks = await Promise.all(
@@ -224,7 +200,7 @@ export const initializeHook = <
           const hookObject = new HookObject<DevWabeTypes, K>({
             className,
             newData,
-            operationType,
+            operationType: options.operationType,
             context,
             object,
           })
@@ -235,7 +211,7 @@ export const initializeHook = <
 
             const hooksToCompute = await _findHooksByPriority({
               className,
-              operationType,
+              operationType: options.operationType,
               priority,
               config: context.wabe.config,
             })

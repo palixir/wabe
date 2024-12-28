@@ -83,7 +83,7 @@ describe('sendOtpCodeResolver', () => {
   it("should send an OTP code to the user's email as anonymous client", async () => {
     const anonymousClient = getAnonymousClient(port)
 
-    await anonymousClient.request<any>(graphql.createUser, {
+    await anonymousClient.request<any>(graphql.createUserWithAnonymous, {
       input: {
         fields: {
           authentication: {
@@ -133,6 +133,13 @@ const graphql = {
           user {
             id
           }
+        }
+      }
+    `,
+  createUserWithAnonymous: gql`
+      mutation createUser($input: CreateUserInput!) {
+        createUser(input: $input) {
+          ok
         }
       }
     `,

@@ -94,7 +94,7 @@ const setAcl = async ({
   }
 
   if (isBeforeHook) hookObject.upsertNewData('acl', aclObject)
-  else {
+  else
     await hookObject.context.wabe.controllers.database.updateObject({
       className: hookObject.className,
       context: { ...hookObject.context, isRoot: true },
@@ -104,13 +104,13 @@ const setAcl = async ({
       },
       fields: [],
     })
-  }
 }
 
 export const defaultSetupAclBeforeCreate = async (
   hookObject: HookObject<any, any>,
 ) => {
   const userId = hookObject.getUser()?.id
+
   if (hookObject.className === 'User' || !userId) return
 
   await setAcl({ hookObject, userId, isBeforeHook: true })

@@ -17,6 +17,7 @@ import type {
 } from './adaptersInterface'
 import type { WabeTypes } from '../../server'
 import type { WabeContext } from '../../server/interface'
+import { notEmpty } from '../../utils/helper'
 
 export const buildMongoOrderQuery = <
   T extends WabeTypes,
@@ -303,25 +304,17 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
     K extends keyof T['types'],
     U extends keyof T['types'][K],
     W extends keyof T['types'][K],
-  >(params: CreateObjectOptions<T, K, U, W>): Promise<OutputType<T, K, W>> {
+  >(params: CreateObjectOptions<T, K, U, W>) {
     if (!this.database)
       throw new Error('Connection to database is not established')
 
-    const { className, data, fields, context } = params
+    const { className, data, context } = params
 
     const collection = await this.createClassIfNotExist(className, context)
 
     const res = await collection.insertOne(data, {})
 
-    // @ts-expect-error
-    if (fields.length === 0) return { id: res.insertedId.toString() }
-
-    return context.wabe.controllers.database.getObject({
-      className,
-      id: res.insertedId.toString(),
-      context,
-      fields,
-    })
+    return { id: res.insertedId.toString() }
   }
 
   async createObjects<
@@ -329,46 +322,28 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
     U extends keyof T['types'][K],
     W extends keyof T['types'][K],
     X extends keyof T['types'][K],
-  >(
-    params: CreateObjectsOptions<T, K, U, W, X>,
-  ): Promise<OutputType<T, K, W>[]> {
+  >(params: CreateObjectsOptions<T, K, U, W, X>) {
     if (!this.database)
       throw new Error('Connection to database is not established')
 
-    const { className, data, fields, offset, first, context, order } = params
+    const { className, data, context } = params
 
     const collection = await this.createClassIfNotExist(className, context)
 
     const res = await collection.insertMany(data, {})
 
-    const orStatement = Object.entries(res.insertedIds).map(([, value]) => ({
-      id: { equalTo: value },
-    }))
-
-    if (fields.length === 0)
-      // @ts-expect-error
-      return Object.values(res.insertedIds).map((id) => ({ id: id.toString() }))
-
-    return context.wabe.controllers.database.getObjects({
-      className,
-      where: { OR: orStatement } as WhereType<T, K>,
-      fields,
-      offset,
-      first,
-      context,
-      order,
-    })
+    return Object.values(res.insertedIds).map((id) => ({ id: id.toString() }))
   }
 
   async updateObject<
     K extends keyof T['types'],
     U extends keyof T['types'][K],
     W extends keyof T['types'][K],
-  >(params: UpdateObjectOptions<T, K, U, W>): Promise<OutputType<T, K, W>> {
+  >(params: UpdateObjectOptions<T, K, U, W>) {
     if (!this.database)
       throw new Error('Connection to database is not established')
 
-    const { className, id, data, fields, context, where } = params
+    const { className, id, data, context, where } = params
 
     const whereBuilded = where ? buildMongoWhereQuery<T, W>(where) : {}
 
@@ -386,15 +361,7 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
 
     if (res.matchedCount === 0) throw new Error('Object not found')
 
-    // @ts-expect-error
-    if (fields.length === 0) return { id }
-
-    return context.wabe.controllers.database.getObject({
-      className,
-      context,
-      fields,
-      id,
-    })
+    return { id }
   }
 
   async updateObjects<
@@ -402,14 +369,11 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
     U extends keyof T['types'][K],
     W extends keyof T['types'][K],
     X extends keyof T['types'][K],
-  >(
-    params: UpdateObjectsOptions<T, K, U, W, X>,
-  ): Promise<OutputType<T, K, W>[]> {
+  >(params: UpdateObjectsOptions<T, K, U, W, X>) {
     if (!this.database)
       throw new Error('Connection to database is not established')
 
-    const { className, where, data, fields, offset, first, context, order } =
-      params
+    const { className, where, data, offset, first, context, order } = params
 
     const whereBuilded = buildMongoWhereQuery<T, W>(where)
 
@@ -436,26 +400,12 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
       $set: data,
     })
 
-    const orStatement = objectsBeforeUpdate.map((object) => ({
-      id: { equalTo: ObjectId.createFromHexString(object?.id) },
-    }))
-
-    if (fields.length === 0)
-      // @ts-expect-error
-      return Object.values(objectsBeforeUpdate).map((object) => ({
-        id: object?.id,
+    return Object.values(objectsBeforeUpdate)
+      .filter(notEmpty)
+      .map((object) => ({
+        // The fallback will never be called, just an miss type
+        id: object?.id || '',
       }))
-
-    return context.wabe.controllers.database.getObjects({
-      className,
-      where: {
-        OR: orStatement,
-      } as WhereType<T, K>,
-      fields,
-      offset,
-      first,
-      context,
-    })
   }
 
   async deleteObject<K extends keyof T['types'], U extends keyof T['types'][K]>(
