@@ -498,7 +498,7 @@ export class GraphQLSchema {
 					)
 						return graphqlParserWithInput.getGraphqlType({
 							field: currentMutation,
-						})
+						}) as GraphQLOutputType
 
 					if (currentMutation.type === 'Object') {
 						const objectGraphqlParser = graphqlParser({
@@ -519,6 +519,8 @@ export class GraphQLSchema {
 				}
 
 				const outputType = getGraphqlOutputType()
+
+				if (!outputType) throw new Error('Invalid mutation output type')
 
 				const graphqlInput = new GraphQLInputObjectType({
 					name: `${currentKeyWithFirstLetterUpperCase}Input`,
