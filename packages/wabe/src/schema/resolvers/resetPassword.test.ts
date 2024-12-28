@@ -36,9 +36,7 @@ describe('resetPasswordResolver', () => {
 
     const anonymousClient = getAnonymousClient(port)
 
-    const {
-      createUser: { user },
-    } = await anonymousClient.request<any>(graphql.createUser, {
+    await anonymousClient.request<any>(graphql.createUser, {
       input: {
         fields: {
           authentication: {
@@ -51,7 +49,21 @@ describe('resetPasswordResolver', () => {
       },
     })
 
-    const userId = user.id
+    const {
+      users: { edges },
+    } = await getGraphqlClient(port).request<any>(gql`
+        query users {
+          users (where: {email: {equalTo: "toto@toto.fr"}}) {
+            edges {
+              node {
+                id
+              }
+            }
+          }
+        }
+    `)
+
+    const userId = edges[0].node.id
 
     const secret = wabe.config.rootKey
 
@@ -91,7 +103,7 @@ describe('resetPasswordResolver', () => {
 
     const {
       createUser: { user },
-    } = await client.request<any>(graphql.createUser, {
+    } = await client.request<any>(graphql.createUserWithRoot, {
       input: {
         fields: {
           authentication: {
@@ -144,7 +156,7 @@ describe('resetPasswordResolver', () => {
 
     const {
       createUser: { user },
-    } = await client.request<any>(graphql.createUser, {
+    } = await client.request<any>(graphql.createUserWithRoot, {
       input: {
         fields: {
           authentication: {
@@ -195,7 +207,7 @@ describe('resetPasswordResolver', () => {
 
     const {
       createUser: { user },
-    } = await client.request<any>(graphql.createUser, {
+    } = await client.request<any>(graphql.createUserWithRoot, {
       input: {
         fields: {
           authentication: {
@@ -251,7 +263,7 @@ describe('resetPasswordResolver', () => {
   it('should not reset password of an user if the OTP code is invalid', async () => {
     process.env.NODE_ENV = 'production'
 
-    await client.request<any>(graphql.createUser, {
+    await client.request<any>(graphql.createUserWithRoot, {
       input: {
         fields: {
           authentication: {
@@ -288,6 +300,13 @@ const graphql = {
       }
     `,
   createUser: gql`
+      mutation createUser($input: CreateUserInput!) {
+        createUser(input: $input) {
+          ok
+        }
+      }
+    `,
+  createUserWithRoot: gql`
       mutation createUser($input: CreateUserInput!) {
         createUser(input: $input) {
           user {

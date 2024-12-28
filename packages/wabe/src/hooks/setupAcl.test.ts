@@ -240,8 +240,9 @@ describe('setupAcl', () => {
     await rootClient.request<any>(graphql.deleteUsers)
   })
 
-  it('should setup acl on user creation (user can be created with anonymous client)', async () => {
-    const res = await anonymousClient.request<any>(gql`
+  it('should not access to an object created with anonymous client when only user that create the object can access to it with ACL', async () => {
+    expect(
+      anonymousClient.request<any>(gql`
         mutation createUser {
           createUser(input:{fields:{name: "test" }}){
             user{
@@ -254,9 +255,27 @@ describe('setupAcl', () => {
             }
           }
         }
-    `)
+    `),
+    ).rejects.toThrow('Object not found')
 
-    expect(res.createUser.user.acl).not.toBeNull()
+    const res = await rootClient.request<any>(gql`
+        query users {
+            users (where: {name: {equalTo: "test"}}) {
+              edges {
+                node {
+                  id
+                  acl {
+                    users {
+                      userId
+                    }
+                  }
+                }
+              }
+            }
+        }
+      `)
+
+    expect(res.users.edges[0].node.acl).not.toBeNull()
   })
 
   it('should update acl object if self is precised and user (with role client2) is authenticated (on read)', async () => {

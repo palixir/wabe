@@ -24,7 +24,7 @@ describe('DatabaseController', () => {
   const mockClearDatabase = mock(() => {})
   const mockCount = mock(() => {})
 
-  const mockRunOnSingleObject = mock(() => {})
+  const mockRunOnSingleObject = mock(() => ({ newData: {} }) as never)
   const mockRunOnMultipleObject = mock(() => {})
 
   const mockInitializeHook = spyOn(hooks, 'initializeHook').mockReturnValue({
@@ -368,7 +368,7 @@ describe('DatabaseController', () => {
     })
     expect(mockRunOnSingleObject).toHaveBeenNthCalledWith(2, {
       operationType: hooks.OperationType.AfterRead,
-      object: {},
+      id: 'id',
     })
   })
 
@@ -401,7 +401,7 @@ describe('DatabaseController', () => {
     })
     expect(mockRunOnMultipleObject).toHaveBeenNthCalledWith(2, {
       operationType: hooks.OperationType.AfterRead,
-      objects: [],
+      where: { id: { equalTo: 'id' } },
     })
   })
 
@@ -440,7 +440,7 @@ describe('DatabaseController', () => {
     })
     expect(mockRunOnSingleObject).toHaveBeenNthCalledWith(2, {
       operationType: hooks.OperationType.AfterUpdate,
-      object: { id: 'id' },
+      id: 'id',
     })
   })
 
@@ -479,7 +479,7 @@ describe('DatabaseController', () => {
     })
     expect(mockRunOnMultipleObject).toHaveBeenNthCalledWith(2, {
       operationType: hooks.OperationType.AfterUpdate,
-      objects: [],
+      ids: [],
     })
   })
 
@@ -512,9 +512,7 @@ describe('DatabaseController', () => {
     })
     expect(mockRunOnSingleObject).toHaveBeenNthCalledWith(2, {
       operationType: hooks.OperationType.AfterCreate,
-      object: {
-        id: 'id',
-      },
+      id: 'id',
     })
   })
 
@@ -552,7 +550,7 @@ describe('DatabaseController', () => {
     })
     expect(mockRunOnMultipleObject).toHaveBeenNthCalledWith(2, {
       operationType: hooks.OperationType.AfterCreate,
-      objects: [{ id: 'id' }],
+      ids: ['id'],
     })
 
     mockRunOnMultipleObject.mockClear()
@@ -621,6 +619,9 @@ describe('DatabaseController', () => {
     })
     expect(mockRunOnMultipleObject).toHaveBeenNthCalledWith(4, {
       operationType: hooks.OperationType.AfterDelete,
+      where: {
+        id: { equalTo: 'id' },
+      },
     })
 
     mockRunOnMultipleObject.mockClear()

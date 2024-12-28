@@ -37,18 +37,6 @@ export class DatabaseController<T extends WabeTypes> {
     this.adapter = adapter
   }
 
-  connect() {
-    return this.adapter.connect()
-  }
-
-  close() {
-    return this.adapter.close()
-  }
-
-  createClassIfNotExist(className: string, context: WabeContext<T>) {
-    return this.adapter.createClassIfNotExist(className, context)
-  }
-
   _getPointerObject(
     className: keyof T['types'],
     fields: string[],
@@ -367,11 +355,28 @@ export class DatabaseController<T extends WabeTypes> {
     }
   }
 
-  count<K extends keyof T['types']>(params: CountOptions<T, K>) {
+  connect(): Promise<any> {
+    return this.adapter.connect()
+  }
+
+  close(): Promise<any> {
+    return this.adapter.close()
+  }
+
+  createClassIfNotExist(
+    className: string,
+    context: WabeContext<T>,
+  ): Promise<any> {
+    return this.adapter.createClassIfNotExist(className, context)
+  }
+
+  count<K extends keyof T['types']>(
+    params: CountOptions<T, K>,
+  ): Promise<number> {
     return this.adapter.count(params)
   }
 
-  async clearDatabase() {
+  async clearDatabase(): Promise<void> {
     await this.adapter.clearDatabase()
   }
 
@@ -418,17 +423,14 @@ export class DatabaseController<T extends WabeTypes> {
       ...(pointersFieldsId || []),
     ]
 
-    const object = await this.adapter.getObject({
-      className,
-      context,
-      id,
-      fields: fieldsWithPointerFields,
-      where: whereWithACLCondition,
-    })
-
+    // For read operation we don't need to get all the objects between, because the data is not mutated
+    // We should only run before and after hooks, and then get the data with request to only return after
+    // possible mutated data in the hooks
+    // A little tricky but logic
+    //
     await hook?.runOnSingleObject({
       operationType: OperationType.AfterRead,
-      object,
+      id,
     })
 
     const objectToReturn = await this.adapter.getObject({
@@ -502,19 +504,14 @@ export class DatabaseController<T extends WabeTypes> {
       ...(pointersFieldsId || []),
     ]
 
-    const objects = await this.adapter.getObjects({
-      className,
-      context,
-      first,
-      offset,
-      where: whereWithACLCondition,
-      fields: fieldsWithPointerFields,
-      order,
-    })
+    // For read operation we don't need to get all the objects between, because the data is not mutated
+    // We should only run before and after hooks, and then get the data with request to only return after
+    // possible mutated data in the hooks
+    // A little tricky but logic
 
     await hook?.runOnMultipleObjects({
       operationType: OperationType.AfterRead,
-      objects,
+      where: whereWithACLCondition,
     })
 
     const objectsToReturn = await this.adapter.getObjects({
@@ -554,37 +551,27 @@ export class DatabaseController<T extends WabeTypes> {
       operationType: OperationType.BeforeCreate,
     })
 
-    const object = await this.adapter.createObject({
+    const { id } = await this.adapter.createObject({
       className,
       context,
       fields,
       data: newData,
     })
 
-    const res = await hook.runOnSingleObject({
+    await hook.runOnSingleObject({
       operationType: OperationType.AfterCreate,
-      object,
+      id,
     })
 
     if (fields.length === 0) return null
 
-    // If there is no hook to run it returns undefined object
-    if (!res.object) return object
-
-    const objectToReturn = await this.getObject({
+    return this.getObject({
       className,
-      context: {
-        ...context,
-        // Because if you create an object like an user, it will add the user to the ACL
-        // but if you have right to create the object you can read it during the creation
-        isRoot: true,
-      },
+      context,
       fields,
-      id: res.object.id,
+      id,
       skipHooks: true,
     })
-
-    return objectToReturn
   }
 
   async createObjects<
@@ -624,7 +611,7 @@ export class DatabaseController<T extends WabeTypes> {
       ),
     )
 
-    const objects = await this.adapter.createObjects({
+    const listOfIds = await this.adapter.createObjects({
       className,
       fields,
       context,
@@ -634,36 +621,30 @@ export class DatabaseController<T extends WabeTypes> {
       order,
     })
 
-    const res = await Promise.all(
+    const ids = listOfIds.map(({ id }) => id)
+
+    await Promise.all(
       hooks.map((hook) =>
         hook.runOnMultipleObjects({
           operationType: OperationType.AfterCreate,
-          objects,
+          ids,
         }),
       ),
     )
 
     if (fields.length === 0) return []
 
-    // If there is no hook to run it returns undefined object
-    if (res.filter((hook) => hook.objects.length > 0).length === 0)
-      return objects
-
-    const objectsId = objects.map((object) => object?.id).filter(notEmpty)
-
-    const objectsToReturn = await this.getObjects({
+    return this.getObjects({
       className,
       context,
       fields,
       // @ts-expect-error
-      where: { id: { in: objectsId } },
+      where: { id: { in: ids } },
       skipHooks: true,
       first,
       offset,
       order,
     })
-
-    return objectsToReturn
   }
 
   async updateObject<
@@ -690,7 +671,7 @@ export class DatabaseController<T extends WabeTypes> {
 
     const whereWithACLCondition = this._buildWhereWithACL({}, context, 'write')
 
-    const object = await this.adapter.updateObject({
+    await this.adapter.updateObject({
       className,
       fields,
       id,
@@ -699,24 +680,20 @@ export class DatabaseController<T extends WabeTypes> {
       where: whereWithACLCondition,
     })
 
-    const res = await hook.runOnSingleObject({
+    await hook.runOnSingleObject({
       operationType: OperationType.AfterUpdate,
-      object,
+      id,
     })
 
     if (fields.length === 0) return null
 
-    if (!res.object) return object
-
-    const objectToReturn = await this.getObject({
+    return this.getObject({
       className,
       context,
       fields,
-      id: res.object.id,
+      id,
       skipHooks: true,
     })
-
-    return objectToReturn
   }
 
   async updateObjects<
@@ -770,17 +747,14 @@ export class DatabaseController<T extends WabeTypes> {
 
     const objectsId = objects.map((object) => object?.id).filter(notEmpty)
 
-    const res = await hook.runOnMultipleObjects({
+    await hook.runOnMultipleObjects({
       operationType: OperationType.AfterUpdate,
-      objects,
+      ids: objectsId,
     })
 
     if (fields.length === 0) return []
 
-    // If there is no hook to run it returns undefined object
-    if (res.objects.length === 0) return objects
-
-    const objectsToReturn = await this.getObjects({
+    return this.getObjects({
       className,
       context,
       fields,
@@ -791,8 +765,6 @@ export class DatabaseController<T extends WabeTypes> {
       offset,
       order,
     })
-
-    return objectsToReturn
   }
 
   async deleteObject<
@@ -821,7 +793,7 @@ export class DatabaseController<T extends WabeTypes> {
         context,
       })
 
-    const { object } = await hook.runOnSingleObject({
+    await hook.runOnSingleObject({
       operationType: OperationType.BeforeDelete,
       id,
     })
@@ -836,7 +808,6 @@ export class DatabaseController<T extends WabeTypes> {
 
     await hook.runOnSingleObject({
       operationType: OperationType.AfterDelete,
-      object,
     })
 
     return objectBeforeDelete
@@ -885,7 +856,7 @@ export class DatabaseController<T extends WabeTypes> {
         order,
       })
 
-    const { objects } = await hook.runOnMultipleObjects({
+    await hook.runOnMultipleObjects({
       operationType: OperationType.BeforeDelete,
       where: whereWithACLCondition,
     })
@@ -902,7 +873,7 @@ export class DatabaseController<T extends WabeTypes> {
 
     await hook.runOnMultipleObjects({
       operationType: OperationType.AfterDelete,
-      objects,
+      where: whereWithACLCondition,
     })
 
     return objectsBeforeDelete

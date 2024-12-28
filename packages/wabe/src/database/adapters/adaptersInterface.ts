@@ -223,25 +223,25 @@ export interface DatabaseAdapter<T extends WabeTypes> {
     K extends keyof T['types'],
     U extends keyof T['types'][K],
     W extends keyof T['types'][K],
-  >(params: CreateObjectOptions<T, K, U, W>): Promise<OutputType<T, K, W>>
+  >(params: CreateObjectOptions<T, K, U, W>): Promise<{ id: string }>
   createObjects<
     K extends keyof T['types'],
     U extends keyof T['types'][K],
     W extends keyof T['types'][K],
     X extends keyof T['types'][K],
-  >(params: CreateObjectsOptions<T, K, U, W, X>): Promise<OutputType<T, K, W>[]>
+  >(params: CreateObjectsOptions<T, K, U, W, X>): Promise<Array<{ id: string }>>
 
   updateObject<
     K extends keyof T['types'],
     U extends keyof T['types'][K],
     W extends keyof T['types'][K],
-  >(params: UpdateObjectOptions<T, K, U, W>): Promise<OutputType<T, K, W>>
+  >(params: UpdateObjectOptions<T, K, U, W>): Promise<{ id: string }>
   updateObjects<
     K extends keyof T['types'],
     U extends keyof T['types'][K],
     W extends keyof T['types'][K],
     X extends keyof T['types'][K],
-  >(params: UpdateObjectsOptions<T, K, U, W, X>): Promise<OutputType<T, K, W>[]>
+  >(params: UpdateObjectsOptions<T, K, U, W, X>): Promise<Array<{ id: string }>>
 
   deleteObject<K extends keyof T['types'], U extends keyof T['types'][K]>(
     params: DeleteObjectOptions<T, K, U>,
