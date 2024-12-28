@@ -1477,7 +1477,7 @@ export type MutationVerifyChallengeArgs = {
 
 export type CreateUserPayload = {
   user?: User;
-  clientMutationId?: Scalars['String']['output'];
+  ok?: Scalars['Boolean']['output'];
 };
 
 export type CreateUserInput = {
@@ -1493,7 +1493,7 @@ export type CreateUsersInput = {
 
 export type UpdateUserPayload = {
   user?: User;
-  clientMutationId?: Scalars['String']['output'];
+  ok?: Scalars['Boolean']['output'];
 };
 
 export type UpdateUserInput = {
@@ -1560,7 +1560,7 @@ export type UpdateUsersInput = {
 
 export type DeleteUserPayload = {
   user?: User;
-  clientMutationId?: Scalars['String']['output'];
+  ok?: Scalars['Boolean']['output'];
 };
 
 export type DeleteUserInput = {
@@ -1574,7 +1574,7 @@ export type DeleteUsersInput = {
 
 export type CreatePostPayload = {
   post?: Post;
-  clientMutationId?: Scalars['String']['output'];
+  ok?: Scalars['Boolean']['output'];
 };
 
 export type CreatePostInput = {
@@ -1590,7 +1590,7 @@ export type CreatePostsInput = {
 
 export type UpdatePostPayload = {
   post?: Post;
-  clientMutationId?: Scalars['String']['output'];
+  ok?: Scalars['Boolean']['output'];
 };
 
 export type UpdatePostInput = {
@@ -1634,7 +1634,7 @@ export type UpdatePostsInput = {
 
 export type DeletePostPayload = {
   post?: Post;
-  clientMutationId?: Scalars['String']['output'];
+  ok?: Scalars['Boolean']['output'];
 };
 
 export type DeletePostInput = {
@@ -1648,7 +1648,7 @@ export type DeletePostsInput = {
 
 export type Create_SessionPayload = {
   _session?: _Session;
-  clientMutationId?: Scalars['String']['output'];
+  ok?: Scalars['Boolean']['output'];
 };
 
 export type Create_SessionInput = {
@@ -1664,7 +1664,7 @@ export type Create_SessionsInput = {
 
 export type Update_SessionPayload = {
   _session?: _Session;
-  clientMutationId?: Scalars['String']['output'];
+  ok?: Scalars['Boolean']['output'];
 };
 
 export type Update_SessionInput = {
@@ -1711,7 +1711,7 @@ export type Update_SessionsInput = {
 
 export type Delete_SessionPayload = {
   _session?: _Session;
-  clientMutationId?: Scalars['String']['output'];
+  ok?: Scalars['Boolean']['output'];
 };
 
 export type Delete_SessionInput = {
@@ -1725,7 +1725,7 @@ export type Delete_SessionsInput = {
 
 export type CreateRolePayload = {
   role?: Role;
-  clientMutationId?: Scalars['String']['output'];
+  ok?: Scalars['Boolean']['output'];
 };
 
 export type CreateRoleInput = {
@@ -1741,7 +1741,7 @@ export type CreateRolesInput = {
 
 export type UpdateRolePayload = {
   role?: Role;
-  clientMutationId?: Scalars['String']['output'];
+  ok?: Scalars['Boolean']['output'];
 };
 
 export type UpdateRoleInput = {
@@ -1785,7 +1785,7 @@ export type UpdateRolesInput = {
 
 export type DeleteRolePayload = {
   role?: Role;
-  clientMutationId?: Scalars['String']['output'];
+  ok?: Scalars['Boolean']['output'];
 };
 
 export type DeleteRoleInput = {
@@ -1799,7 +1799,7 @@ export type DeleteRolesInput = {
 
 export type CreatePaymentPayload = {
   payment?: Payment;
-  clientMutationId?: Scalars['String']['output'];
+  ok?: Scalars['Boolean']['output'];
 };
 
 export type CreatePaymentInput = {
@@ -1815,7 +1815,7 @@ export type CreatePaymentsInput = {
 
 export type UpdatePaymentPayload = {
   payment?: Payment;
-  clientMutationId?: Scalars['String']['output'];
+  ok?: Scalars['Boolean']['output'];
 };
 
 export type UpdatePaymentInput = {
@@ -1860,7 +1860,7 @@ export type UpdatePaymentsInput = {
 
 export type DeletePaymentPayload = {
   payment?: Payment;
-  clientMutationId?: Scalars['String']['output'];
+  ok?: Scalars['Boolean']['output'];
 };
 
 export type DeletePaymentInput = {
@@ -1874,7 +1874,7 @@ export type DeletePaymentsInput = {
 
 export type Create_InternalConfigPayload = {
   _internalConfig?: _InternalConfig;
-  clientMutationId?: Scalars['String']['output'];
+  ok?: Scalars['Boolean']['output'];
 };
 
 export type Create_InternalConfigInput = {
@@ -1890,7 +1890,7 @@ export type Create_InternalConfigsInput = {
 
 export type Update_InternalConfigPayload = {
   _internalConfig?: _InternalConfig;
-  clientMutationId?: Scalars['String']['output'];
+  ok?: Scalars['Boolean']['output'];
 };
 
 export type Update_InternalConfigInput = {
@@ -1935,7 +1935,7 @@ export type Update_InternalConfigsInput = {
 
 export type Delete_InternalConfigPayload = {
   _internalConfig?: _InternalConfig;
-  clientMutationId?: Scalars['String']['output'];
+  ok?: Scalars['Boolean']['output'];
 };
 
 export type Delete_InternalConfigInput = {

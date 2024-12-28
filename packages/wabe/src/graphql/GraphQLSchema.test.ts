@@ -6,7 +6,11 @@ import { v4 as uuid } from 'uuid'
 import { DatabaseEnum } from '../database'
 import { Schema, type SchemaInterface } from '../schema'
 import { Wabe } from '../server'
-import { type DevWabeTypes, getGraphqlClient } from '../utils/helper'
+import {
+  type DevWabeTypes,
+  getAnonymousClient,
+  getGraphqlClient,
+} from '../utils/helper'
 import { GraphQLSchema as WabeGraphQLSchema } from './GraphQLSchema'
 import { getTypeFromGraphQLSchema } from './parseGraphqlSchema'
 
@@ -218,6 +222,177 @@ describe('GraphqlSchema', () => {
       }),
       types: [...types.scalars, ...types.enums, ...types.objects],
     })
+  })
+
+  // It is usefull when we have the permission to create but not to read the data
+  // We should be able to create a new object without return any data
+  // Just use the "ok" field
+  it('should be able to create a new object with mutation without return any data', async () => {
+    const { wabe } = await createWabe({
+      classes: [
+        {
+          name: 'TestClass',
+          fields: {
+            name: {
+              type: 'String',
+            },
+          },
+          permissions: {
+            // Anyone can create a new object
+            create: {
+              requireAuthentication: false,
+            },
+            // No one can read the data
+            read: {
+              authorizedRoles: [],
+              requireAuthentication: true,
+            },
+          },
+        },
+      ],
+    })
+
+    const anonymousClient = getAnonymousClient(wabe.config.port)
+
+    const res = await anonymousClient.request<any>(
+      gql`
+          mutation createTestClass {
+            createTestClass(
+              input: {
+                fields: { name: "A" },
+              }
+            ) {
+              ok
+            }
+          }
+        `,
+      {},
+    )
+
+    expect(res.createTestClass.ok).toBe(true)
+
+    await wabe.close()
+  })
+
+  it('should b able to update an object with mutation without return any data', async () => {
+    const { client, wabe } = await createWabe({
+      classes: [
+        {
+          name: 'TestClass',
+          fields: {
+            name: {
+              type: 'String',
+            },
+          },
+          permissions: {
+            // Anyone can create a new object
+            create: {
+              requireAuthentication: false,
+            },
+            update: {
+              requireAuthentication: false,
+            },
+            // No one can read the data
+            read: {
+              authorizedRoles: [],
+              requireAuthentication: true,
+            },
+          },
+        },
+      ],
+    })
+
+    const res = await client.request<any>(
+      gql`
+          mutation createTestClass {
+            createTestClass(
+              input: {
+                fields: { name: "A" },
+              }
+            ) {
+              testClass{
+                  id
+              }
+            }
+          }
+        `,
+      {},
+    )
+
+    const anonymousClient = getAnonymousClient(wabe.config.port)
+
+    const res2 = await anonymousClient.request<any>(
+      gql`
+          mutation updateTestClass {
+              updateTestClass(
+              input: {
+                fields: { name: "A" },
+                id: "${res.createTestClass.testClass.id}"
+              }
+            ) {
+              ok
+            }
+          }
+        `,
+      {},
+    )
+
+    expect(res2.updateTestClass.ok).toBe(true)
+
+    await wabe.close()
+  })
+
+  it('should be able to delete an object with mutation without return any data', async () => {
+    const { client, wabe } = await createWabe({
+      classes: [
+        {
+          name: 'TestClass',
+          fields: {
+            name: {
+              type: 'String',
+            },
+          },
+        },
+      ],
+    })
+
+    const res = await client.request<any>(
+      gql`
+          mutation createTestClass {
+            createTestClass(
+              input: {
+                fields: { name: "A" },
+              }
+            ) {
+              testClass{
+                  id
+              }
+            }
+          }
+        `,
+      {},
+    )
+
+    const anonymousClient = getAnonymousClient(wabe.config.port)
+
+    const res2 = await anonymousClient.request<any>(
+      gql`
+          mutation deleteTestClass {
+              deleteTestClass(
+              input: {
+                id: "${res.createTestClass.testClass.id}"
+              }
+            ) {
+              ok
+            }
+          }
+        `,
+      {},
+    )
+
+    expect(res2.deleteTestClass.ok).toBe(true)
+
+    await wabe.close()
   })
 
   it('should order the element in the query by name and age ASC using order enum', async () => {
@@ -1107,7 +1282,7 @@ describe('GraphqlSchema', () => {
         name: 'CreateTestClassPayload',
       }).input,
     ).toEqual({
-      clientMutationId: 'String',
+      ok: 'Boolean',
       testClass: 'TestClass',
     })
   })

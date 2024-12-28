@@ -1,6 +1,11 @@
 import { describe, expect, it, mock, beforeEach } from 'bun:test'
 import type { GraphQLResolveInfo } from 'graphql'
-import { executeRelationOnFields, extractFieldsFromSetNode } from './resolvers'
+import {
+  executeRelationOnFields,
+  extractFieldsFromSetNode,
+  getFieldsOfClassName,
+} from './resolvers'
+import type { WabeContext } from '../server/interface'
 
 describe('Resolver', () => {
   const mockUpdateObject = mock(() => {})
@@ -65,6 +70,98 @@ describe('Resolver', () => {
     mockGetObject.mockClear()
     mockCreateObject.mockClear()
     mockCreateObjects.mockClear()
+  })
+
+  describe('getFieldsOfClassName', () => {
+    it('should return the fields of the class in classfields and the others in othersfields', () => {
+      const fields = ['name', 'age', 'field1', 'field2', 'ok']
+      const className = 'TestClass'
+
+      // @ts-expect-error
+      const context: WabeContext<any> = {
+        wabe: {
+          config: {
+            schema: {
+              classes: [
+                {
+                  name: 'TestClass',
+                  fields: {
+                    name: {
+                      type: 'String',
+                    },
+                    age: {
+                      type: 'Int',
+                    },
+                    field1: {
+                      type: 'String',
+                    },
+                    field2: {
+                      type: 'String',
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        } as any,
+      }
+
+      expect(getFieldsOfClassName({ fields, className, context })).toEqual({
+        classFields: ['name', 'age', 'field1', 'field2'],
+        othersFields: ['ok'],
+      })
+    })
+
+    it('should return the fields of the class in classfields and the others in othersfields with pointer', () => {
+      const fields = ['name', 'pointer.pointer2.age', 'ok']
+      const className = 'TestClass'
+
+      // @ts-expect-error
+      const context: WabeContext<any> = {
+        wabe: {
+          config: {
+            schema: {
+              classes: [
+                {
+                  name: 'OtherClass2',
+                  fields: {
+                    age: {
+                      type: 'Int',
+                    },
+                  },
+                },
+                {
+                  name: 'OtherClass',
+                  fields: {
+                    pointer2: {
+                      type: 'Pointer',
+                      class: 'OtherClass2',
+                    },
+                  },
+                },
+                {
+                  name: 'TestClass',
+                  fields: {
+                    name: {
+                      type: 'String',
+                    },
+                    pointer: {
+                      type: 'Pointer',
+                      class: 'OtherClass',
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        } as any,
+      }
+
+      expect(getFieldsOfClassName({ fields, className, context })).toEqual({
+        classFields: ['name', 'pointer.pointer2.age'],
+        othersFields: ['ok'],
+      })
+    })
   })
 
   describe('getFieldsFromInfo', () => {

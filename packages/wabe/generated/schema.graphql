@@ -1266,7 +1266,7 @@ type Mutation {
 
 type CreateUserPayload {
   user: User
-  clientMutationId: String
+  ok: Boolean
 }
 
 input CreateUserInput {
@@ -1282,7 +1282,7 @@ input CreateUsersInput {
 
 type UpdateUserPayload {
   user: User
-  clientMutationId: String
+  ok: Boolean
 }
 
 input UpdateUserInput {
@@ -1350,7 +1350,7 @@ input UpdateUsersInput {
 
 type DeleteUserPayload {
   user: User
-  clientMutationId: String
+  ok: Boolean
 }
 
 input DeleteUserInput {
@@ -1364,7 +1364,7 @@ input DeleteUsersInput {
 
 type CreatePostPayload {
   post: Post
-  clientMutationId: String
+  ok: Boolean
 }
 
 input CreatePostInput {
@@ -1380,7 +1380,7 @@ input CreatePostsInput {
 
 type UpdatePostPayload {
   post: Post
-  clientMutationId: String
+  ok: Boolean
 }
 
 input UpdatePostInput {
@@ -1424,7 +1424,7 @@ input UpdatePostsInput {
 
 type DeletePostPayload {
   post: Post
-  clientMutationId: String
+  ok: Boolean
 }
 
 input DeletePostInput {
@@ -1438,7 +1438,7 @@ input DeletePostsInput {
 
 type Create_SessionPayload {
   _session: _Session
-  clientMutationId: String
+  ok: Boolean
 }
 
 input Create_SessionInput {
@@ -1454,7 +1454,7 @@ input Create_SessionsInput {
 
 type Update_SessionPayload {
   _session: _Session
-  clientMutationId: String
+  ok: Boolean
 }
 
 input Update_SessionInput {
@@ -1501,7 +1501,7 @@ input Update_SessionsInput {
 
 type Delete_SessionPayload {
   _session: _Session
-  clientMutationId: String
+  ok: Boolean
 }
 
 input Delete_SessionInput {
@@ -1515,7 +1515,7 @@ input Delete_SessionsInput {
 
 type CreateRolePayload {
   role: Role
-  clientMutationId: String
+  ok: Boolean
 }
 
 input CreateRoleInput {
@@ -1531,7 +1531,7 @@ input CreateRolesInput {
 
 type UpdateRolePayload {
   role: Role
-  clientMutationId: String
+  ok: Boolean
 }
 
 input UpdateRoleInput {
@@ -1575,7 +1575,7 @@ input UpdateRolesInput {
 
 type DeleteRolePayload {
   role: Role
-  clientMutationId: String
+  ok: Boolean
 }
 
 input DeleteRoleInput {
@@ -1589,7 +1589,7 @@ input DeleteRolesInput {
 
 type CreatePaymentPayload {
   payment: Payment
-  clientMutationId: String
+  ok: Boolean
 }
 
 input CreatePaymentInput {
@@ -1605,7 +1605,7 @@ input CreatePaymentsInput {
 
 type UpdatePaymentPayload {
   payment: Payment
-  clientMutationId: String
+  ok: Boolean
 }
 
 input UpdatePaymentInput {
@@ -1650,7 +1650,7 @@ input UpdatePaymentsInput {
 
 type DeletePaymentPayload {
   payment: Payment
-  clientMutationId: String
+  ok: Boolean
 }
 
 input DeletePaymentInput {
@@ -1664,7 +1664,7 @@ input DeletePaymentsInput {
 
 type Create_InternalConfigPayload {
   _internalConfig: _InternalConfig
-  clientMutationId: String
+  ok: Boolean
 }
 
 input Create_InternalConfigInput {
@@ -1680,7 +1680,7 @@ input Create_InternalConfigsInput {
 
 type Update_InternalConfigPayload {
   _internalConfig: _InternalConfig
-  clientMutationId: String
+  ok: Boolean
 }
 
 input Update_InternalConfigInput {
@@ -1725,7 +1725,7 @@ input Update_InternalConfigsInput {
 
 type Delete_InternalConfigPayload {
   _internalConfig: _InternalConfig
-  clientMutationId: String
+  ok: Boolean
 }
 
 input Delete_InternalConfigInput {
