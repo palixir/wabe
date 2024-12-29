@@ -65,8 +65,8 @@ describe('HookObject', () => {
       },
     })
 
-    expect(hookObject.isFieldUpdate('name')).toBeTrue()
-    expect(hookObject.isFieldUpdate('age')).toBeFalse()
+    expect(hookObject.isFieldUpdated('name')).toBeTrue()
+    expect(hookObject.isFieldUpdated('age')).toBeFalse()
   })
 
   it('should create a clone of the data', () => {

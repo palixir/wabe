@@ -19,7 +19,7 @@ const updateEmail = (object: HookObject<DevWabeTypes, 'User'>) => {
 // This hook works for official authentication provider that store email in "email" field
 // Maybe need custom hook for custom authentication provider
 export const defaultSetEmail = (object: HookObject<DevWabeTypes, 'User'>) => {
-  if (object.isFieldUpdate('email')) return
+  if (object.isFieldUpdated('email')) return
 
   updateEmail(object)
 }
@@ -27,7 +27,7 @@ export const defaultSetEmail = (object: HookObject<DevWabeTypes, 'User'>) => {
 export const defaultSetEmailOnUpdate = (
   object: HookObject<DevWabeTypes, 'User'>,
 ) => {
-  if (object.isFieldUpdate('email')) return
+  if (object.isFieldUpdated('email')) return
 
   updateEmail(object)
 }

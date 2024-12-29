@@ -28,7 +28,7 @@ const setAcl = async ({
 
   const { acl } = schemaPermissionsObject
 
-  if (hookObject.isFieldUpdate('acl') || !acl) return
+  if (hookObject.isFieldUpdated('acl') || !acl) return
 
   // @ts-expect-error
   if (acl.callback) {
