@@ -99,6 +99,171 @@ describe('Database', () => {
     spyGetObjects.mockClear()
   })
 
+  it('should get all the objects with limit', async () => {
+    const res = await wabe.controllers.database.createObjects({
+      className: 'User',
+      data: [
+        {
+          name: 'John',
+          age: 20,
+        },
+        {
+          name: 'John1',
+          age: 20,
+        },
+        {
+          name: 'John2',
+          age: 20,
+        },
+        {
+          name: 'John3',
+          age: 20,
+        },
+        {
+          name: 'John4',
+          age: 20,
+        },
+      ],
+      fields: ['name', 'id'],
+      first: 2,
+      context,
+    })
+
+    expect(res.length).toEqual(2)
+  })
+
+  // For the moment we keep the mongodb behavior for the negative value (for limit)
+  // https://www.mongodb.com/docs/manual/reference/method/cursor.limit/#negative-values
+  it('should get all the objects with negative limit and offset', async () => {
+    const res = await wabe.controllers.database.createObjects({
+      className: 'User',
+      data: [
+        {
+          name: 'John',
+          age: 20,
+        },
+        {
+          name: 'John1',
+          age: 20,
+        },
+        {
+          name: 'John2',
+          age: 20,
+        },
+        {
+          name: 'John3',
+          age: 20,
+        },
+        {
+          name: 'John4',
+          age: 20,
+        },
+      ],
+      fields: ['name', 'id'],
+      first: -2,
+      context,
+    })
+
+    expect(res.length).toEqual(2)
+
+    expect(
+      wabe.controllers.database.createObjects({
+        className: 'User',
+        data: [
+          {
+            name: 'John',
+            age: 20,
+          },
+          {
+            name: 'John1',
+            age: 20,
+          },
+          {
+            name: 'John2',
+            age: 20,
+          },
+          {
+            name: 'John3',
+            age: 20,
+          },
+          {
+            name: 'John4',
+            age: 20,
+          },
+        ],
+        fields: ['name', 'id'],
+        offset: -2,
+        context,
+      }),
+    ).rejects.toThrow("BSON field 'skip' value must be >= 0, actual value '-2'")
+  })
+
+  it('should createObjects and deleteObjects with offset and limit', async () => {
+    const res = await wabe.controllers.database.createObjects({
+      className: 'User',
+      data: [
+        {
+          name: 'John',
+          age: 20,
+        },
+        {
+          name: 'John1',
+          age: 20,
+        },
+        {
+          name: 'John2',
+          age: 20,
+        },
+        {
+          name: 'John3',
+          age: 20,
+        },
+        {
+          name: 'John4',
+          age: 20,
+        },
+      ],
+      fields: ['name', 'id'],
+      first: 2,
+      offset: 2,
+      context,
+    })
+
+    expect(res.length).toEqual(2)
+    expect(res[0]?.name).toEqual('John2')
+    expect(res[1]?.name).toEqual('John3')
+
+    await wabe.controllers.database.deleteObjects({
+      className: 'User',
+      where: {
+        OR: [
+          { name: { equalTo: 'John2' } },
+          { name: { equalTo: 'John3' } },
+          { name: { equalTo: 'John4' } },
+        ],
+      },
+      fields: ['name'],
+      first: 2,
+      offset: 1,
+      context,
+    })
+
+    const res2 = await wabe.controllers.database.getObjects({
+      className: 'User',
+      where: {
+        OR: [
+          { name: { equalTo: 'John2' } },
+          { name: { equalTo: 'John3' } },
+          { name: { equalTo: 'John4' } },
+        ],
+      },
+      context,
+      fields: ['*'],
+    })
+
+    expect(res2.length).toEqual(0)
+  })
+
   it('should return null on createObject when no fields are provided', async () => {
     const res = await wabe.controllers.database.createObject({
       className: 'User',
