@@ -480,6 +480,7 @@ describe('DatabaseController', () => {
     expect(mockRunOnMultipleObject).toHaveBeenNthCalledWith(2, {
       operationType: hooks.OperationType.AfterUpdate,
       ids: [],
+      originalObjects: [],
     })
   })
 
@@ -619,9 +620,6 @@ describe('DatabaseController', () => {
     })
     expect(mockRunOnMultipleObject).toHaveBeenNthCalledWith(4, {
       operationType: hooks.OperationType.AfterDelete,
-      where: {
-        id: { equalTo: 'id' },
-      },
     })
 
     mockRunOnMultipleObject.mockClear()

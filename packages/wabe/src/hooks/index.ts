@@ -124,6 +124,9 @@ export const initializeHook = <
     where?: WhereType<DevWabeTypes, any>
     ids: string[]
   }): Promise<OutputType<DevWabeTypes, any, any>[]> => {
+    // @ts-expect-error
+    if (!where && ids.length === 0) return [{}] // Because we have a map below, so we need to have at least one turn
+
     const res = await context.wabe.controllers.database.getObjects({
       className,
       context: {
@@ -136,7 +139,7 @@ export const initializeHook = <
     })
 
     // @ts-expect-error
-    if (res.length === 0) return [{}]
+    if (res.length === 0) return [{}] // Because we have a map below, so we need to have at least one turn
 
     return res
   }
@@ -147,6 +150,7 @@ export const initializeHook = <
     runOnSingleObject: async (options: {
       operationType: OperationType
       id?: string
+      originalObject?: OutputType<DevWabeTypes, any, any>
     }): Promise<MutationData<T, K, any>> => {
       if (hooksOrderByPriorities.length === 0)
         return { object: undefined, newData: {} }
@@ -161,6 +165,7 @@ export const initializeHook = <
         operationType: options.operationType,
         context,
         object,
+        originalObject: options.originalObject,
       })
 
       // We need to keep the order of the data but we need to execute the hooks in parallel
@@ -186,6 +191,7 @@ export const initializeHook = <
       operationType: OperationType
       where?: WhereType<any, any>
       ids?: string[]
+      originalObjects?: OutputType<DevWabeTypes, any, any>[]
     }) => {
       if (hooksOrderByPriorities.length === 0)
         return { objects: [], newData: [newData || {}] }
@@ -195,14 +201,24 @@ export const initializeHook = <
         ids: options.ids || [],
       })
 
+      const objectsToUseInMap =
+        (options.operationType === OperationType.AfterDelete
+          ? options.originalObjects
+          : objects) || []
+
       const newDataAfterHooks = await Promise.all(
-        objects.map(async (object) => {
+        objectsToUseInMap.map(async (object) => {
+          const originalObjectToUse = (options.originalObjects || []).find(
+            (originalObject) => originalObject?.id === object?.id,
+          )
+
           const hookObject = new HookObject<DevWabeTypes, K>({
             className,
             newData,
             operationType: options.operationType,
             context,
             object,
+            originalObject: originalObjectToUse,
           })
 
           // We need to keep the order of the data but we need to execute the hooks in parallel

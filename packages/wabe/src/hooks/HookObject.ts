@@ -12,6 +12,8 @@ export class HookObject<
   private operationType: OperationType
   public context: WabeContext<T>
   public object: OutputType<T, K, any>
+  // Object before any mutation, for example before delete
+  public originalObject: OutputType<T, K, any> | undefined
 
   constructor({
     newData,
@@ -19,18 +21,21 @@ export class HookObject<
     operationType,
     context,
     object,
+    originalObject,
   }: {
     className: K
     newData?: MutationData<T, K, keyof T['types'][K]>
     operationType: OperationType
     context: WabeContext<T>
     object: OutputType<T, K, any>
+    originalObject?: OutputType<T, K, any>
   }) {
     this.newData = newData
     this.className = className
     this.operationType = operationType
     this.context = context
     this.object = object
+    this.originalObject = originalObject
   }
 
   getUser() {
