@@ -37,7 +37,7 @@ export class HookObject<
     return this.context.user
   }
 
-  isFieldUpdate(field: keyof T['types'][K]) {
+  isFieldUpdated(field: keyof T['types'][K]) {
     return this.newData && !!this.newData[field]
   }
 

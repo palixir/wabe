@@ -6,7 +6,7 @@ export const defaultCallAuthenticationProviderOnBeforeCreateUser = async (
   hookObject: HookObject<any, any>,
 ) => {
   if (
-    !hookObject.isFieldUpdate('authentication') ||
+    !hookObject.isFieldUpdated('authentication') ||
     hookObject.getNewData().isOauth
   )
     return
@@ -39,7 +39,7 @@ export const defaultCallAuthenticationProviderOnBeforeUpdateUser = async (
   hookObject: HookObject<any, any>,
 ) => {
   if (
-    !hookObject.isFieldUpdate('authentication') ||
+    !hookObject.isFieldUpdated('authentication') ||
     hookObject.getNewData().isOauth
   )
     return
