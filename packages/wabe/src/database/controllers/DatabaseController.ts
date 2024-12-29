@@ -664,7 +664,7 @@ export class DatabaseController<T extends WabeTypes> {
       newData: data,
     })
 
-    const { newData } = await hook.runOnSingleObject({
+    const { newData, object } = await hook.runOnSingleObject({
       operationType: OperationType.BeforeUpdate,
       id,
     })
@@ -683,6 +683,7 @@ export class DatabaseController<T extends WabeTypes> {
     await hook.runOnSingleObject({
       operationType: OperationType.AfterUpdate,
       id,
+      originalObject: object,
     })
 
     if (fields.length === 0) return null
@@ -729,10 +730,11 @@ export class DatabaseController<T extends WabeTypes> {
       'write',
     )
 
-    const { newData } = await hook.runOnMultipleObjects({
-      operationType: OperationType.BeforeUpdate,
-      where: whereWithACLCondition,
-    })
+    const { newData, objects: objectsAfterBeforeUpdate } =
+      await hook.runOnMultipleObjects({
+        operationType: OperationType.BeforeUpdate,
+        where: whereWithACLCondition,
+      })
 
     const objects = await this.adapter.updateObjects({
       className,
@@ -750,6 +752,7 @@ export class DatabaseController<T extends WabeTypes> {
     await hook.runOnMultipleObjects({
       operationType: OperationType.AfterUpdate,
       ids: objectsId,
+      originalObjects: objectsAfterBeforeUpdate,
     })
 
     if (fields.length === 0) return []
@@ -793,7 +796,7 @@ export class DatabaseController<T extends WabeTypes> {
         context,
       })
 
-    await hook.runOnSingleObject({
+    const resultOfBeforeDelete = await hook.runOnSingleObject({
       operationType: OperationType.BeforeDelete,
       id,
     })
@@ -808,6 +811,7 @@ export class DatabaseController<T extends WabeTypes> {
 
     await hook.runOnSingleObject({
       operationType: OperationType.AfterDelete,
+      originalObject: resultOfBeforeDelete.object,
     })
 
     return objectBeforeDelete
@@ -856,7 +860,7 @@ export class DatabaseController<T extends WabeTypes> {
         order,
       })
 
-    await hook.runOnMultipleObjects({
+    const resultOfBeforeDelete = await hook.runOnMultipleObjects({
       operationType: OperationType.BeforeDelete,
       where: whereWithACLCondition,
     })
@@ -873,7 +877,7 @@ export class DatabaseController<T extends WabeTypes> {
 
     await hook.runOnMultipleObjects({
       operationType: OperationType.AfterDelete,
-      where: whereWithACLCondition,
+      originalObjects: resultOfBeforeDelete.objects,
     })
 
     return objectsBeforeDelete

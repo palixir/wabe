@@ -99,6 +99,168 @@ describe('Database', () => {
     spyGetObjects.mockClear()
   })
 
+  it('should have access to original object in afterDelete hook with deleteObject', async () => {
+    const mockInsideCallback = mock(() => {})
+    wabe.config.hooks = [
+      {
+        className: 'User',
+        operationType: OperationType.AfterDelete,
+        priority: 1,
+        callback: (hookObject) => {
+          mockInsideCallback()
+
+          expect(hookObject.originalObject).toEqual(
+            expect.objectContaining({
+              name: 'John',
+              age: 20,
+            }),
+          )
+        },
+      },
+    ]
+
+    const object = await wabe.controllers.database.createObject({
+      className: 'User',
+      data: {
+        name: 'John',
+        age: 20,
+      },
+      fields: ['id'],
+      context,
+    })
+
+    await wabe.controllers.database.deleteObject({
+      className: 'User',
+      context,
+      fields: ['id'],
+      id: object?.id || '',
+    })
+
+    expect(mockInsideCallback).toHaveBeenCalledTimes(1)
+  })
+
+  it('should have access to original object in afterDelete hook with deleteObjects', async () => {
+    const mockInsideCallback = mock(() => {})
+    wabe.config.hooks = [
+      {
+        className: 'User',
+        operationType: OperationType.AfterDelete,
+        priority: 1,
+        callback: (hookObject) => {
+          mockInsideCallback()
+
+          expect(hookObject.originalObject).toEqual(
+            expect.objectContaining({
+              name: 'John',
+              age: 20,
+            }),
+          )
+        },
+      },
+    ]
+
+    const object = await wabe.controllers.database.createObject({
+      className: 'User',
+      data: {
+        name: 'John',
+        age: 20,
+      },
+      fields: ['id'],
+      context,
+    })
+
+    await wabe.controllers.database.deleteObjects({
+      className: 'User',
+      context,
+      fields: ['id'],
+      where: { id: { equalTo: object?.id || '' } },
+    })
+
+    expect(mockInsideCallback).toHaveBeenCalledTimes(1)
+  })
+
+  it('should have access to original object in afterUpdate hook with updateObject', async () => {
+    const mockInsideCallback = mock(() => {})
+    wabe.config.hooks = [
+      {
+        className: 'User',
+        operationType: OperationType.AfterUpdate,
+        priority: 1,
+        callback: (hookObject) => {
+          mockInsideCallback()
+
+          expect(hookObject.originalObject).toEqual(
+            expect.objectContaining({
+              name: 'John',
+              age: 20,
+            }),
+          )
+        },
+      },
+    ]
+
+    const object = await wabe.controllers.database.createObject({
+      className: 'User',
+      data: {
+        name: 'John',
+        age: 20,
+      },
+      fields: ['id'],
+      context,
+    })
+
+    await wabe.controllers.database.updateObject({
+      className: 'User',
+      context,
+      fields: ['id'],
+      data: { name: 'John2' },
+      id: object?.id || '',
+    })
+
+    expect(mockInsideCallback).toHaveBeenCalledTimes(1)
+  })
+
+  it('should have access to original object in afterUpdate hook with updateObjects', async () => {
+    const mockInsideCallback = mock(() => {})
+    wabe.config.hooks = [
+      {
+        className: 'User',
+        operationType: OperationType.AfterUpdate,
+        priority: 1,
+        callback: (hookObject) => {
+          mockInsideCallback()
+
+          expect(hookObject.originalObject).toEqual(
+            expect.objectContaining({
+              name: 'John',
+              age: 20,
+            }),
+          )
+        },
+      },
+    ]
+
+    const object = await wabe.controllers.database.createObject({
+      className: 'User',
+      data: {
+        name: 'John',
+        age: 20,
+      },
+      fields: ['id'],
+      context,
+    })
+
+    await wabe.controllers.database.updateObjects({
+      className: 'User',
+      context,
+      fields: ['id'],
+      data: { name: 'John2' },
+      where: { id: { equalTo: object?.id || '' } },
+    })
+
+    expect(mockInsideCallback).toHaveBeenCalledTimes(1)
+  })
+
   it('should get all the objects with limit', async () => {
     const res = await wabe.controllers.database.createObjects({
       className: 'User',
