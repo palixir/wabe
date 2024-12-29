@@ -11,9 +11,9 @@ export class HookObject<
   private newData: MutationData<T, K, keyof T['types'][K]> | undefined
   private operationType: OperationType
   public context: WabeContext<T>
-  public object: OutputType<T, K, any>
+  public object: OutputType<T, K, keyof T['types'][K]>
   // Object before any mutation, for example before delete
-  public originalObject: OutputType<T, K, any> | undefined
+  public originalObject: OutputType<T, K, keyof T['types'][K]> | undefined
 
   constructor({
     newData,
@@ -27,8 +27,8 @@ export class HookObject<
     newData?: MutationData<T, K, keyof T['types'][K]>
     operationType: OperationType
     context: WabeContext<T>
-    object: OutputType<T, K, any>
-    originalObject?: OutputType<T, K, any>
+    object: OutputType<T, K, keyof T['types'][K]>
+    originalObject?: OutputType<T, K, keyof T['types'][K]>
   }) {
     this.newData = newData
     this.className = className
@@ -59,7 +59,7 @@ export class HookObject<
     return this.newData || ({} as any)
   }
 
-  fetch(): Promise<OutputType<T, K, any>> {
+  fetch(): Promise<OutputType<T, K, keyof T['types'][K]>> {
     const databaseController = this.context.wabe.controllers.database
 
     if (!this.object?.id) return Promise.resolve(null)
