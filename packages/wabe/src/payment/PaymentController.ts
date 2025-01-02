@@ -15,7 +15,7 @@ import type {
 } from './interface'
 
 export class PaymentController implements PaymentAdapter {
-  private adapter: PaymentAdapter
+  public adapter: PaymentAdapter
   private config: PaymentConfig
 
   constructor(paymentConfig: PaymentConfig) {

@@ -21,7 +21,7 @@ import {
 } from 'wabe'
 
 export class StripeAdapter implements PaymentAdapter {
-  private stripe: Stripe
+  public stripe: Stripe
 
   constructor(apiKey: string) {
     this.stripe = new Stripe(apiKey, {
