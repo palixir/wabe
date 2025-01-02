@@ -105,6 +105,7 @@ export type CreatePaymentOptions = {
   createInvoice?: boolean
   allowPromotionCode?: boolean
   promotionCodeId?: string
+  couponCodeId?: string
 }
 
 export type InitWebhookOptions = {

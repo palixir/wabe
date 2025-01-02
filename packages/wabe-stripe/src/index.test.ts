@@ -741,6 +741,75 @@ describe('wabe-stripe', () => {
     })
   })
 
+  it('should not provide allo_promotion_codes and discounts in the same request', async () => {
+    const adapter = new StripeAdapter('API_KEY')
+
+    mockListCustomers.mockResolvedValue({
+      data: [
+        {
+          id: 'cus_123',
+          email: 'test@wabe.dev',
+        },
+      ],
+    } as never)
+
+    mockCreatePayment.mockResolvedValue({
+      url: 'https://test.com',
+    } as never)
+
+    await adapter.createPayment({
+      customerEmail: 'lucas.coratger@gmail.com',
+      currency: Currency.EUR,
+      paymentMethod: ['card'],
+      products: [
+        {
+          name: 'Product 1',
+          unitAmount: 1000,
+          quantity: 1,
+        },
+      ],
+      paymentMode: PaymentMode.subscription,
+      successUrl: 'https://wabe.dev',
+      cancelUrl: 'https://wabe.dev',
+      promotionCodeId: 'PROMO_123',
+    })
+
+    expect(mockCreatePayment).toHaveBeenCalledTimes(1)
+    expect(mockCreatePayment).toHaveBeenCalledWith({
+      customer: 'cus_123',
+      line_items: [
+        {
+          price_data: {
+            currency: 'eur',
+            product_data: {
+              name: 'Product 1',
+            },
+            unit_amount: 1000,
+            recurring: {
+              interval: 'month',
+            },
+          },
+          quantity: 1,
+        },
+      ],
+      payment_method_types: ['card'],
+      mode: 'subscription',
+      success_url: 'https://wabe.dev',
+      cancel_url: 'https://wabe.dev',
+      automatic_tax: {
+        enabled: false,
+      },
+      invoice_creation: {
+        enabled: true,
+      },
+      discounts: [
+        {
+          promotion_code: 'PROMO_123',
+        },
+      ],
+    })
+  })
+
   it('should throw an error if the session url is not returned by Stripewhen creating a payment', () => {
     const adapter = new StripeAdapter('API_KEY')
 
