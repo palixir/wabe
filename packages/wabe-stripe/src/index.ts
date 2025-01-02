@@ -199,6 +199,7 @@ export class StripeAdapter implements PaymentAdapter {
     createInvoice = true,
     allowPromotionCode = true,
     promotionCodeId,
+    couponCodeId,
   }: CreatePaymentOptions) {
     const customersWithSameEmail = await this.stripe.customers.list({
       email: customerEmail,
@@ -239,7 +240,9 @@ export class StripeAdapter implements PaymentAdapter {
       invoice_creation: {
         enabled: createInvoice,
       },
-      allow_promotion_codes: allowPromotionCode,
+      ...(!promotionCodeId && !couponCodeId
+        ? { allow_promotion_codes: allowPromotionCode }
+        : {}),
       ...(automaticTax
         ? {
             billing_address_collection: 'required',
@@ -252,7 +255,16 @@ export class StripeAdapter implements PaymentAdapter {
         ? {
             discounts: [
               {
-                coupon: promotionCodeId,
+                promotion_code: promotionCodeId,
+              },
+            ],
+          }
+        : {}),
+      ...(couponCodeId
+        ? {
+            discounts: [
+              {
+                coupon: couponCodeId,
               },
             ],
           }
