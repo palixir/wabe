@@ -104,6 +104,7 @@ export type CreatePaymentOptions = {
   recurringInterval?: 'month' | 'year'
   createInvoice?: boolean
   allowPromotionCode?: boolean
+  promotionCodeId?: string
 }
 
 export type InitWebhookOptions = {

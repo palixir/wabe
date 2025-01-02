@@ -198,6 +198,7 @@ export class StripeAdapter implements PaymentAdapter {
     recurringInterval,
     createInvoice = true,
     allowPromotionCode = true,
+    promotionCodeId,
   }: CreatePaymentOptions) {
     const customersWithSameEmail = await this.stripe.customers.list({
       email: customerEmail,
@@ -245,6 +246,15 @@ export class StripeAdapter implements PaymentAdapter {
             shipping_address_collection: {
               allowed_countries: [],
             },
+          }
+        : {}),
+      ...(promotionCodeId
+        ? {
+            discounts: [
+              {
+                coupon: promotionCodeId,
+              },
+            ],
           }
         : {}),
     })

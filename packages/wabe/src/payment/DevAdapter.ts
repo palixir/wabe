@@ -1,6 +1,7 @@
 import type { PaymentAdapter } from './interface'
 
 export class PaymentDevAdapter implements PaymentAdapter {
+  adapter = {}
   // biome-ignore lint/suspicious/useAwait: false
   async getCustomerById() {
     return {
