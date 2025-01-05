@@ -72,29 +72,25 @@ describe('SignUpWith', () => {
     mockOnSignUp.mockClear()
   })
 
-  it('should block the signUpWith if the user creation is blocked for anonymous (the creation is done with root to avoid ACL issues)', async () => {
-    const res = await signUpWithResolver(
-      {},
-      {
-        input: {
-          authentication: {
-            emailPassword: {
-              email: 'email@test.fr',
-              password: 'password',
+  it('should block the signUpWith if the user creation is blocked for anonymous (the creation is done with root to avoid ACL issues)', () => {
+    expect(
+      signUpWithResolver(
+        {},
+        {
+          input: {
+            authentication: {
+              emailPassword: {
+                email: 'email@test.fr',
+                password: 'password',
+              },
             },
           },
         },
-      },
-      {
-        ...context,
-      } as any,
-    )
-
-    expect(res).toEqual({
-      accessToken: null,
-      refreshToken: null,
-      id: null,
-    })
+        {
+          ...context,
+        } as any,
+      ),
+    ).rejects.toThrow('Permission denied to create class User')
 
     config.schema.classes[0].permissions.create.requireAuthentication = false
   })

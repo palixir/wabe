@@ -23,11 +23,7 @@ export const signUpWithResolver = async (
   // Fix to allow anonymous user to create user but not when user creation is blocked for anonymous
   // Because here the createObject is done with root to avoid ACL issues
   if (userSchema?.permissions?.create?.requireAuthentication === true)
-    return {
-      accessToken: null,
-      refreshToken: null,
-      id: null,
-    }
+    throw new Error('Permission denied to create class User')
 
   // Create object call the provider signUp
   const res = await context.wabe.controllers.database.createObject({
