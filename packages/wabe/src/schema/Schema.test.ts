@@ -406,7 +406,6 @@ describe('Schema', () => {
     expect(userClass?.permissions).toEqual({
       // Default permissions
       create: {
-        authorizedRoles: [],
         requireAuthentication: false,
       },
       delete: {
