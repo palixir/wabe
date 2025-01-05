@@ -44,16 +44,59 @@ describe('SignUpWith', () => {
         },
       ],
     },
+    schema: {
+      classes: [
+        {
+          name: 'User',
+          fields: {},
+          permissions: {
+            create: {
+              requireAuthentication: true,
+            },
+          },
+        },
+      ],
+    },
   }
 
   const context = {
-    wabe: { config, controllers: { database: mockDatabaseController } },
+    wabe: {
+      config,
+      controllers: { database: mockDatabaseController },
+    },
   } as any
 
   beforeEach(() => {
     mockCreateObject.mockClear()
     mockOnLogin.mockClear()
     mockOnSignUp.mockClear()
+  })
+
+  it('should block the signUpWith if the user creation is blocked for anonymous (the creation is done with root to avoid ACL issues)', async () => {
+    const res = await signUpWithResolver(
+      {},
+      {
+        input: {
+          authentication: {
+            emailPassword: {
+              email: 'email@test.fr',
+              password: 'password',
+            },
+          },
+        },
+      },
+      {
+        ...context,
+      } as any,
+    )
+
+    expect(res).toEqual({
+      accessToken: null,
+      refreshToken: null,
+      id: null,
+    })
+
+    config.schema.classes[0].permissions.create.requireAuthentication = false
   })
 
   it('should signUpWith email and password when the user not exist', async () => {

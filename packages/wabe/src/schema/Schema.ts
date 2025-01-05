@@ -633,7 +633,6 @@ export class Schema<T extends WabeTypes> {
           requireAuthentication: true,
         },
         create: {
-          authorizedRoles: [],
           requireAuthentication: false,
         },
         read: {
