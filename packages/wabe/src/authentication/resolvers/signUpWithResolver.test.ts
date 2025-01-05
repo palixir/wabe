@@ -95,6 +95,30 @@ describe('SignUpWith', () => {
     config.schema.classes[0].permissions.create.requireAuthentication = false
   })
 
+  it('should not block the signUpWith if the user creation is blocked for root', () => {
+    expect(
+      signUpWithResolver(
+        {},
+        {
+          input: {
+            authentication: {
+              emailPassword: {
+                email: 'email@test.fr',
+                password: 'password',
+              },
+            },
+          },
+        },
+        {
+          ...context,
+          isRoot: true,
+        } as any,
+      ),
+    ).resolves.not.toThrow('Permission denied to create class User')
+
+    config.schema.classes[0].permissions.create.requireAuthentication = false
+  })
+
   it('should signUpWith email and password when the user not exist', async () => {
     const mockCreateSession = spyOn(
       Session.prototype,
