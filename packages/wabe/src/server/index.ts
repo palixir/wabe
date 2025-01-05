@@ -1,7 +1,7 @@
 import type { DatabaseConfig } from '../database'
 import { DatabaseController } from '../database/controllers/DatabaseController'
 import { MongoAdapter } from '../database/adapters/MongoAdapter'
-import { Schema, type SchemaInterface } from '../schema/Schema'
+import { EnumInterface, Schema, type SchemaInterface } from '../schema/Schema'
 import { GraphQLObjectType, GraphQLSchema } from 'graphql'
 import { GraphQLSchema as WabeGraphQLSchema } from '../graphql'
 import type { AuthenticationConfig } from '../authentication/interface'
@@ -138,11 +138,11 @@ export class Wabe<T extends WabeTypes> {
 
     if (roles.length === 0) return
 
-    const roleEnum = {
+    const roleEnum: EnumInterface = {
       name: 'RoleEnum',
       values: roles.reduce(
         (acc, currentRole) => {
-          acc[currentRole] = { value: currentRole }
+          acc[currentRole] = currentRole
           return acc
         },
         {} as Record<string, any>,

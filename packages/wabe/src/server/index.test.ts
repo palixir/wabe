@@ -234,4 +234,46 @@ describe('Server', () => {
 
     await wabe.close()
   })
+
+  it('should load RoleEnum correctly', async () => {
+    const databaseId = uuid()
+
+    const port = await getPort()
+
+    const wabe = new Wabe({
+      rootKey:
+        'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+      database: {
+        type: DatabaseEnum.Mongo,
+        url: 'mongodb://127.0.0.1:27045',
+        name: databaseId,
+      },
+      port,
+      schema: {
+        classes: [
+          {
+            name: 'Collection1',
+            fields: { name: { type: 'String' } },
+          },
+        ],
+      },
+      authentication: {
+        roles: ['Admin', 'Client'],
+      },
+    })
+
+    await wabe.start()
+
+    const roleEnum = wabe.config.schema?.enums?.find(
+      (schemaEnum) => schemaEnum.name === 'RoleEnum',
+    )
+
+    expect(roleEnum).not.toBeUndefined()
+    expect(roleEnum?.values).toEqual({
+      Admin: 'Admin',
+      Client: 'Client',
+    })
+
+    await wabe.close()
+  })
 })
