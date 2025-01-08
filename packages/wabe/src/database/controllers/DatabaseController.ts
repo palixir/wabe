@@ -541,6 +541,7 @@ export class DatabaseController<T extends WabeTypes> {
     data,
     fields,
   }: CreateObjectOptions<T, K, U, W>): Promise<OutputType<T, K, W>> {
+    // Here data.file is null
     const hook = initializeHook({
       className,
       context,
