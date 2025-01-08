@@ -1,12 +1,13 @@
 name: ci checks
 
 on:
-    pull_request:
-        branches:
-            - '**'
-        types: [opened, synchronize, reopened, unlabeled]
-        paths:
+  workflow_dispatch:
+  pull_request:
+      branches:
           - '**'
+      types: [opened, synchronize, reopened, unlabeled]
+      paths:
+        - '**'
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
