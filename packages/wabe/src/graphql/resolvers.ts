@@ -116,7 +116,9 @@ export const executeRelationOnFields = ({
     async (acc, [fieldName, value]) => {
       const newAcc = await acc
 
-      if (typeof value === 'object' && value?.createAndLink) {
+      if (value instanceof File) {
+        newAcc[fieldName] = value
+      } else if (typeof value === 'object' && value?.createAndLink) {
         newAcc[fieldName] = await createAndLink({
           createAndLink: value.createAndLink,
           fieldName,
