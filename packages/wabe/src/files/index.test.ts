@@ -43,7 +43,7 @@ describe('File upload', () => {
     spyFileDevAdapter.mockClear()
   })
 
-  it.only('should upload a file on request on type File on create request', async () => {
+  it('should upload a file on request on type File on create request', async () => {
     const formData = new FormData()
 
     formData.append(

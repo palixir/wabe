@@ -1,7 +1,11 @@
 import type { DatabaseConfig } from '../database'
 import { DatabaseController } from '../database/controllers/DatabaseController'
 import { MongoAdapter } from '../database/adapters/MongoAdapter'
-import { type EnumInterface, Schema, type SchemaInterface } from '../schema/Schema'
+import {
+  type EnumInterface,
+  Schema,
+  type SchemaInterface,
+} from '../schema/Schema'
 import { GraphQLObjectType, GraphQLSchema } from 'graphql'
 import { GraphQLSchema as WabeGraphQLSchema } from '../graphql'
 import type { AuthenticationConfig } from '../authentication/interface'
@@ -363,8 +367,7 @@ export class Wabe<T extends WabeTypes> {
                   })
               }
             }
-          } catch (e) {
-            console.error(e)
+          } catch {
             return response
           }
 
