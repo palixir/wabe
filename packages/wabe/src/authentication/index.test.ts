@@ -23,11 +23,13 @@ const createUserAndUpdateRole = async ({
   roleName: string
   email?: string
 }) => {
+  const random = Math.random().toString(36).substring(2)
+
   const res = await anonymousClient.request<any>(graphql.signUpWith, {
     input: {
       authentication: {
         emailPassword: {
-          email: email || 'email@test.fr',
+          email: email || `email${random}@test.fr`,
           password: 'password',
         },
       },
@@ -140,6 +142,22 @@ describe('Authentication', () => {
           },
         },
       },
+      {
+        name: 'Test4',
+        fields: {
+          name: { type: 'String' },
+        },
+        permissions: {
+          create: {
+            requireAuthentication: true,
+            authorizedRoles: ['Client'],
+          },
+          read: {
+            requireAuthentication: true,
+            authorizedRoles: ['Client', 'Client2'],
+          },
+        },
+      },
     ])
     wabe = setup.wabe
     port = setup.port
@@ -154,6 +172,48 @@ describe('Authentication', () => {
   afterEach(async () => {
     await rootClient.request<any>(graphql.deleteUsers)
     await rootClient.request<any>(graphql.deleteTests)
+  })
+
+  it('should access to an object created by another without ACL', async () => {
+    const { userClient } = await createUserAndUpdateRole({
+      anonymousClient: client,
+      port,
+      roleName: 'Client',
+      rootClient,
+    })
+
+    const { userClient: userClient2 } = await createUserAndUpdateRole({
+      anonymousClient: client,
+      port,
+      roleName: 'Client2',
+      rootClient,
+    })
+
+    await userClient.request<any>(gql`
+    	mutation createTest4{
+    		createTest4(input:{fields:{name: "test"}}){
+    			test4{
+    				id
+    			}
+    		}
+    	}
+    `)
+
+    const res = await userClient2.request<any>(gql`
+          query test4s{
+            test4s {
+              edges {
+                node {
+                  id
+                  name
+                }
+              }
+            }
+          }
+        `)
+
+    expect(res.test4s.edges.length).toEqual(1)
+    expect(res.test4s.edges[0].node.name).toEqual('test')
   })
 
   it('should authorize user to access to created object with self acl but not an other user', async () => {
