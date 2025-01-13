@@ -130,15 +130,14 @@ describe('Authentication', () => {
           name: { type: 'String' },
         },
         permissions: {
-          acl: {
-            authorizedUsers: {
-              read: ['self'],
-              write: ['self'],
-            },
-            authorizedRoles: {
-              read: [],
-              write: [],
-            },
+          acl: async (hookObject) => {
+            await hookObject.addACL('users', {
+              userId: hookObject.context.user?.id || '',
+              read: true,
+              write: true,
+            })
+
+            await hookObject.addACL('roles', null)
           },
         },
       },

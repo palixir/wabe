@@ -68,6 +68,7 @@ To define an `access control list` you can use the default configuration that Wa
 
 ```ts
 import { Wabe } from "wabe";
+import { RoleEnum } from "../generated/wabe";
 
 const run = async () => {
   const wabe = new Wabe({
@@ -105,23 +106,22 @@ const run = async () => {
               requireAuthentication: true,
               authorizedRoles: ["Admin"],
             },
-            acl: {
-              authorizedUsers: {
-                // Only the user that created the object can read / write it
-                read: ['self'],
-                write: ['self'],
-              },
-              // Above we set the authorizedRole 'Admin' to read on the class but here the configuration overwrites it
-              // Only the client role can read / write it. It can be more granular
-              authorizedRoles: {
-                read: ['Client'],
-                write: ['Client'],
-              },
-              // If you have a specific use case and authorizedUsers and authorizedRoles are not enough,
-              // you can use the callback to define your own logic
-              callback: async (hookObject: HookObject<any, any>) => {
-               // Some custom logic here
-              }
+            acl: async (hookObject) => {
+              // The user that creataed the company is authorized to read and write it
+              await hookObject.addACL('users', {
+                userId: hookObject.context.user?.id,
+                read: true,
+                write: true,
+              })
+
+              // No roles are authorized to read or write the company
+              await hookObject.addACL('roles', null)
+              // Or you can specify a role
+              await hookObject.addACL('roles', {
+                role: RoleEnum.Admin,
+                read: true,
+                write: true,
+              })
             },
           },
         },

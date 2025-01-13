@@ -109,15 +109,19 @@ describe('setupAcl', () => {
           },
         },
         permissions: {
-          acl: {
-            authorizedUsers: {
-              read: ['self'],
-              write: ['self'],
-            },
-            authorizedRoles: {
-              read: ['Client'],
-              write: ['Client'],
-            },
+          acl: async (hookObject) => {
+            await hookObject.addACL('users', {
+              userId: hookObject.context.user?.id || '',
+              read: true,
+              write: true,
+            })
+
+            await hookObject.addACL('roles', {
+              // @ts-expect-error
+              role: 'Client',
+              read: true,
+              write: true,
+            })
           },
         },
       },
@@ -138,15 +142,9 @@ describe('setupAcl', () => {
           },
         },
         permissions: {
-          acl: {
-            authorizedUsers: {
-              read: [],
-              write: [],
-            },
-            authorizedRoles: {
-              read: [],
-              write: [],
-            },
+          acl: async (hookObject) => {
+            await hookObject.addACL('users', null)
+            await hookObject.addACL('roles', null)
           },
         },
       },
@@ -158,9 +156,7 @@ describe('setupAcl', () => {
           },
         },
         permissions: {
-          acl: {
-            callback: mockCallback,
-          },
+          acl: mockCallback,
         },
       },
       {
@@ -171,15 +167,22 @@ describe('setupAcl', () => {
           },
         },
         permissions: {
-          acl: {
-            authorizedUsers: {
-              read: [],
-              write: [],
-            },
-            authorizedRoles: {
-              read: ['Client'],
-              write: ['Client2'],
-            },
+          acl: async (hookObject) => {
+            await hookObject.addACL('users', null)
+
+            await hookObject.addACL('roles', {
+              // @ts-expect-error
+              role: 'Client',
+              read: true,
+              write: false,
+            })
+
+            await hookObject.addACL('roles', {
+              // @ts-expect-error
+              role: 'Client2',
+              read: false,
+              write: true,
+            })
           },
         },
       },
@@ -191,15 +194,19 @@ describe('setupAcl', () => {
           },
         },
         permissions: {
-          acl: {
-            authorizedUsers: {
-              read: ['self'],
-              write: ['self'],
-            },
-            authorizedRoles: {
-              read: ['Client'],
-              write: ['Client'],
-            },
+          acl: async (hookObject) => {
+            await hookObject.addACL('users', {
+              userId: hookObject.context.user?.id || '',
+              read: true,
+              write: true,
+            })
+
+            await hookObject.addACL('roles', {
+              // @ts-expect-error
+              role: 'Client',
+              read: true,
+              write: true,
+            })
           },
         },
       },
@@ -211,15 +218,19 @@ describe('setupAcl', () => {
           },
         },
         permissions: {
-          acl: {
-            authorizedUsers: {
-              read: ['self'],
-              write: ['self'],
-            },
-            authorizedRoles: {
-              read: ['Client'],
-              write: ['Client'],
-            },
+          acl: async (hookObject) => {
+            await hookObject.addACL('users', {
+              userId: hookObject.context.user?.id || '',
+              read: true,
+              write: true,
+            })
+
+            await hookObject.addACL('roles', {
+              // @ts-expect-error
+              role: 'Client',
+              read: true,
+              write: true,
+            })
           },
         },
       },
@@ -278,7 +289,7 @@ describe('setupAcl', () => {
     expect(res.users.edges[0].node.acl).not.toBeNull()
   })
 
-  it('should update acl object if self is precised and user (with role client2) is authenticated (on read)', async () => {
+  it('should add acl object with to owner (with role client2) is authenticated (on read)', async () => {
     const { userClient, userId } = await createUserAndUpdateRole({
       anonymousClient,
       port,
@@ -324,7 +335,7 @@ describe('setupAcl', () => {
     expect(res.createSetupACL.setupACL.acl.roles[0].write).toEqual(true)
   })
 
-  it('should not update acl object if the acl object is not present in permissions in the class', async () => {
+  it('should not update acl object if the acl function is not present in permissions in the class', async () => {
     const { userClient } = await createUserAndUpdateRole({
       anonymousClient,
       port,
@@ -357,7 +368,7 @@ describe('setupAcl', () => {
     expect(res.createSetupACL2.setupACL2.acl).toBeNull()
   })
 
-  it('should set read and write to false if the array is empty', async () => {
+  it('should set read and write to false if the null value is provided for users and roles', async () => {
     const { userClient } = await createUserAndUpdateRole({
       anonymousClient,
       port,
@@ -409,7 +420,7 @@ describe('setupAcl', () => {
     expect(res.setupACL3s.edges[0].node.acl.roles).toHaveLength(0)
   })
 
-  it('should call callback function if provided', async () => {
+  it('should call acl function if provided', async () => {
     const { userClient } = await createUserAndUpdateRole({
       anonymousClient,
       port,
@@ -430,7 +441,7 @@ describe('setupAcl', () => {
     expect(mockCallback).toHaveBeenCalledTimes(1)
   })
 
-  it('should get different role id for read and write if authorizedRoles are different', async () => {
+  it('should get different role id for read and write if roles are different', async () => {
     const { userClient } = await createUserAndUpdateRole({
       anonymousClient,
       port,
@@ -539,32 +550,6 @@ describe('setupAcl', () => {
       users: [{ userId: 'test', read: true, write: true }],
       roles: [{ roleId: 'test', read: true, write: true }],
     })
-  })
-
-  it('should not setup acl if the user is anonmymous', async () => {
-    const res = await anonymousClient.request<any>(gql`
-        mutation createSetupACL7 {
-          createSetupACL7(input: {fields: {test: "test"}}) {
-            setupACL7 {
-              id
-              acl {
-                users {
-                  userId
-                  read
-                  write
-                }
-                roles {
-                  roleId
-                  read
-                  write
-                }
-              }
-            }
-          }
-        }
-    `)
-
-    expect(res.createSetupACL7.setupACL7.acl).toBeNull()
   })
 })
 
