@@ -58,15 +58,6 @@ const run = async () => {
               type: 'Int',
             },
           },
-          permissions: {
-            // acl: (hookObject: HookObject) => {
-            //   hookObject.addACL('users', {
-            //     read: true,
-            //     write: true,
-            //     userId: 'userId',
-            //   })
-            // },
-          },
         },
         {
           name: 'Post',
