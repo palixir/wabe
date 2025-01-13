@@ -160,29 +160,12 @@ export interface PermissionProperties {
 
 /**
  * ACL properties
- * Automatically create ACL object before insert of the object in the database
- * Allow you to specify which user can read or write the object
- * You can specify "self" to allow only the user that created the object to read or write it
- * You can specify "all" to allow all users to read or write the object
- * For some custom use cases, you can specify a callback function that will be called before
- * inserting the object in the database.
- * Authorized roles is more restristive that at the class level. You can have a role access on all the class
- * except one object.
- * If the array of authorized users is empty, no user is authorized
- * If the array of authorized users is undefined, everyone is authorized
+ * Callback to define the ACL object before insert of the object in the database
+ * Can be done with a beforeCreate hook but for simplicity we can define it here
  */
-export type ACLProperties =
-  | {
-      authorizedUsers: {
-        read: Array<'self'>
-        write: Array<'self'>
-      }
-      authorizedRoles: {
-        read: Array<string>
-        write: Array<string>
-      }
-    }
-  | { callback?: (hookObject: HookObject<any, any>) => void | Promise<void> }
+export type ACLProperties = (
+  hookObject: HookObject<any, any>,
+) => void | Promise<void>
 
 export type ClassPermissions = Partial<
   Record<PermissionsOperations, PermissionProperties> & { acl: ACLProperties }

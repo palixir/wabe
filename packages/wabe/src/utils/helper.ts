@@ -127,15 +127,14 @@ export const setupTests = async (
             read: {
               requireAuthentication: false,
             },
-            acl: {
-              authorizedUsers: {
-                read: ['self'],
-                write: ['self'],
-              },
-              authorizedRoles: {
-                read: [],
-                write: [],
-              },
+            acl: async (hookObject) => {
+              await hookObject.addACL('users', {
+                userId: hookObject.object?.id,
+                read: true,
+                write: true,
+              })
+
+              await hookObject.addACL('roles', null)
             },
           },
         },

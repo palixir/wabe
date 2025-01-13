@@ -1,7 +1,15 @@
 import type { OperationType } from '.'
+import type { RoleEnum, UserACLObject } from '../../generated/wabe'
 import type { MutationData, OutputType } from '../database'
 import type { WabeTypes } from '../server'
 import type { WabeContext } from '../server/interface'
+
+type AddACLOpptions = {
+  userId?: string
+  role?: RoleEnum
+  read: boolean
+  write: boolean
+} | null
 
 export class HookObject<
   T extends WabeTypes,
@@ -72,6 +80,91 @@ export class HookObject<
         isRoot: true,
       },
       fields: ['*'],
+    })
+  }
+
+  async addACL(type: 'users' | 'roles', options: AddACLOpptions) {
+    const updateACL = async (newACLObject: any) => {
+      if (this.className === 'User') {
+        const currentUserId = this.object?.id
+
+        if (currentUserId)
+          await this.context.wabe.controllers.database.updateObject({
+            className: this.className,
+            context: { ...this.context, isRoot: true },
+            id: currentUserId,
+            data: {
+              // @ts-expect-error
+              acl: newACLObject,
+            },
+            fields: [],
+          })
+        return
+      }
+
+      // @ts-expect-error
+      this.upsertNewData('acl', newACLObject)
+    }
+
+    const result =
+      this.className === 'User'
+        ? await this.context.wabe.controllers.database.getObject({
+            className: 'User',
+            fields: ['acl'],
+            // @ts-expect-error
+            id: this.object?.id,
+            context: {
+              ...this.context,
+              isRoot: true,
+            },
+          })
+        : // @ts-expect-error
+          { acl: this.getNewData().acl }
+
+    const currentACL: UserACLObject = result?.acl || {}
+
+    if (options === null) {
+      await updateACL({
+        ...currentACL,
+        [type]: [],
+      })
+      return
+    }
+
+    const { userId, role, read, write } = options
+
+    if (userId && role) throw new Error('Cannot specify both userId and role')
+
+    if (role) {
+      const result = await this.context.wabe.controllers.database.getObjects({
+        className: 'Role',
+        fields: ['id'],
+        // @ts-expect-error
+        where: {
+          name: {
+            equalTo: role,
+          },
+        },
+        context: {
+          ...this.context,
+          isRoot: true,
+        },
+      })
+
+      const roleId = result[0]?.id
+
+      await updateACL({
+        ...currentACL,
+        [type]: [...(currentACL?.[type] || []), { roleId, read, write }],
+      })
+
+      return
+    }
+
+    // User ACL
+    await updateACL({
+      ...currentACL,
+      [type]: [...(currentACL?.[type] || []), { userId, read, write }],
     })
   }
 }

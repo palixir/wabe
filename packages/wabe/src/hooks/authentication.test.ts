@@ -213,7 +213,7 @@ describe('authenticaiton hooks', () => {
     ).rejects.toThrow('Invalid authentication credentials')
   })
 
-  it('should not update the authentication of an if the user is not the owner of the object', async () => {
+  it('should not update the authentication of an user if the user is not the owner of the object', async () => {
     const {
       signUpWith: { id },
     } = await client.request<any>(graphql.signUpWith, {
