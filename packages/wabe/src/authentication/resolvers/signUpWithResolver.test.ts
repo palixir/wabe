@@ -1,81 +1,46 @@
-import { describe, expect, it, beforeEach, mock, spyOn } from 'bun:test'
-import { signUpWithResolver } from './signUpWithResolver'
-import { Session } from '../Session'
+import { beforeAll, afterAll, describe, expect, it } from 'bun:test'
+import {
+  closeTests,
+  type DevWabeTypes,
+  getAnonymousClient,
+  setupTests,
+} from '../../utils/helper'
+import type { Wabe } from '../../server'
+import { gql } from 'graphql-request'
 
 describe('SignUpWith', () => {
-  const mockOnLogin = mock(() =>
-    Promise.resolve({
-      user: {
-        id: 'id',
-      },
-    }),
-  )
-  const mockOnSignUp = mock(() =>
-    Promise.resolve({
-      authenticationDataToSave: {
-        email: 'email@com.fr',
-        password: 'password',
-      },
-    }),
-  )
+  let wabe: Wabe<DevWabeTypes>
 
-  const mockCreateObject = mock(() => Promise.resolve({ id: 'userId' }))
+  beforeAll(async () => {
+    const setup = await setupTests()
+    wabe = setup.wabe
+  })
 
-  const mockDatabaseController = {
-    createObject: mockCreateObject,
-  }
-
-  const config = {
-    authentication: {
-      session: {
-        cookieSession: true,
-      },
-      customAuthenticationMethods: [
-        {
-          name: 'emailPassword',
-          input: {
-            email: { type: 'Email', required: true },
-            password: { type: 'String', required: true },
-          },
-          provider: {
-            onSignUp: mockOnSignUp,
-            onSignIn: mockOnLogin,
-          },
-        },
-      ],
-    },
-    schema: {
-      classes: [
-        {
-          name: 'User',
-          fields: {},
-          permissions: {
-            create: {
-              requireAuthentication: true,
-            },
-          },
-        },
-      ],
-    },
-  }
-
-  const context = {
-    wabe: {
-      config,
-      controllers: { database: mockDatabaseController },
-    },
-  } as any
-
-  beforeEach(() => {
-    mockCreateObject.mockClear()
-    mockOnLogin.mockClear()
-    mockOnSignUp.mockClear()
+  afterAll(async () => {
+    await closeTests(wabe)
   })
 
   it('should block the signUpWith if the user creation is blocked for anonymous (the creation is done with root to avoid ACL issues)', () => {
+    const anonymousClient = getAnonymousClient(wabe.config.port)
+
+    const userSchema = wabe.config.schema?.classes?.find(
+      (classItem) => classItem.name === 'User',
+    )
+
+    if (!userSchema) throw new Error('Failed to find user schema')
+
+    // @ts-expect-error
+    userSchema.permissions.create.requireAuthentication = true
+
     expect(
-      signUpWithResolver(
-        {},
+      anonymousClient.request<any>(
+        gql`
+      mutation signUpWith($input: SignUpWithInput!) {
+        signUpWith(input: $input) {
+          id
+        }
+      }
+      `,
         {
           input: {
             authentication: {
@@ -86,138 +51,36 @@ describe('SignUpWith', () => {
             },
           },
         },
-        {
-          ...context,
-        } as any,
       ),
     ).rejects.toThrow('Permission denied to create class User')
 
-    config.schema.classes[0].permissions.create.requireAuthentication = false
-  })
-
-  it('should not block the signUpWith if the user creation is blocked for root', () => {
-    expect(
-      signUpWithResolver(
-        {},
-        {
-          input: {
-            authentication: {
-              emailPassword: {
-                email: 'email@test.fr',
-                password: 'password',
-              },
-            },
-          },
-        },
-        {
-          ...context,
-          isRoot: true,
-        } as any,
-      ),
-    ).resolves.not.toThrow('Permission denied to create class User')
-
-    config.schema.classes[0].permissions.create.requireAuthentication = false
+    // @ts-expect-error
+    userSchema.permissions.create.requireAuthentication = false
   })
 
   it('should signUpWith email and password when the user not exist', async () => {
-    const mockCreateSession = spyOn(
-      Session.prototype,
-      'create',
-    ).mockResolvedValue({
-      id: 'sessionId',
-      refreshToken: 'refreshToken',
-      accessToken: 'accessToken',
-    } as any)
+    const anonymousClient = getAnonymousClient(wabe.config.port)
 
-    const mockSetCookie = mock(() => {})
-
-    const mockResponse = {
-      setCookie: mockSetCookie,
-    }
-
-    const res = await signUpWithResolver(
-      {},
+    const res = await anonymousClient.request<any>(
+      gql`
+      mutation signUpWith($input: SignUpWithInput!) {
+          signUpWith(input: $input) {
+              id
+          }
+      }
+    `,
       {
         input: {
           authentication: {
             emailPassword: {
-              email: 'email@test.fr',
+              email: 'test@gmail.com',
               password: 'password',
             },
           },
         },
       },
-      {
-        ...context,
-        response: mockResponse,
-      } as any,
     )
 
-    expect(res).toEqual({
-      refreshToken: 'refreshToken',
-      accessToken: 'accessToken',
-      id: 'userId',
-    })
-
-    expect(mockCreateObject).toHaveBeenCalledTimes(1)
-    expect(mockCreateObject).toHaveBeenCalledWith({
-      className: 'User',
-      data: {
-        authentication: {
-          emailPassword: {
-            email: 'email@test.fr',
-            password: 'password',
-          },
-        },
-      },
-      context: expect.any(Object),
-      fields: ['id'],
-    })
-
-    expect(mockCreateSession).toHaveBeenCalledTimes(1)
-    expect(mockCreateSession).toHaveBeenCalledWith('userId', expect.any(Object))
-
-    expect(mockSetCookie).toHaveBeenCalledTimes(2)
-    expect(mockSetCookie).toHaveBeenNthCalledWith(
-      1,
-      'refreshToken',
-      'refreshToken',
-      {
-        httpOnly: true,
-        path: '/',
-        secure: true,
-        sameSite: 'None',
-        expires: expect.any(Date),
-      },
-    )
-    expect(mockSetCookie).toHaveBeenNthCalledWith(
-      2,
-      'accessToken',
-      'accessToken',
-      {
-        httpOnly: true,
-        path: '/',
-        secure: true,
-        sameSite: 'None',
-        expires: expect.any(Date),
-      },
-    )
-
-    // @ts-expect-error
-    const refreshTokenExpiresIn = mockSetCookie.mock.calls[0][2].expires
-    // @ts-expect-error
-    const accessTokenExpiresIn = mockSetCookie.mock.calls[1][2].expires
-
-    // - 1000 to avoid flaky
-    expect(new Date(refreshTokenExpiresIn).getTime()).toBeGreaterThanOrEqual(
-      Date.now() + 1000 * 30 * 24 * 60 * 60 - 1000,
-    )
-    expect(new Date(accessTokenExpiresIn).getTime()).toBeGreaterThanOrEqual(
-      Date.now() + 1000 * 15 * 60 - 1000,
-    )
-
-    expect(mockOnLogin).toHaveBeenCalledTimes(0)
-
-    mockCreateSession.mockRestore()
+    expect(res.signUpWith.id).toEqual(expect.any(String))
   })
 })

@@ -334,6 +334,7 @@ export class Schema<T extends WabeTypes> {
         },
         required: true,
       },
+      required: true,
     }
 
     const challengeInputObject: TypeFieldObject<T> = {

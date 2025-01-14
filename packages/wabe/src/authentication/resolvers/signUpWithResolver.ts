@@ -15,37 +15,23 @@ export const signUpWithResolver = async (
   },
   context: WabeContext<any>,
 ) => {
-  const userSchema = context.wabe.config.schema?.classes?.find(
-    (classItem) => classItem.name === 'User',
-  )
-
-  // TODO: improve this maybe need a refactor of ACL interface
-  // Fix to allow anonymous user to create user but not when user creation is blocked for anonymous
-  // Because here the createObject is done with root to avoid ACL issues
-  if (
-    userSchema?.permissions?.create?.requireAuthentication === true &&
-    !context.isRoot
-  )
-    throw new Error('Permission denied to create class User')
-
   // Create object call the provider signUp
   const res = await context.wabe.controllers.database.createObject({
     className: 'User',
     data: {
       authentication: input.authentication,
     },
-    context: {
-      ...context,
-      isRoot: true,
-    },
+    context,
     fields: ['id'],
   })
 
+  const createdUserId = res?.id
+
   const session = new Session()
 
-  if (!res) throw new Error('User not created')
+  if (!createdUserId) throw new Error('User not created')
 
-  const { accessToken, refreshToken } = await session.create(res.id, {
+  const { accessToken, refreshToken } = await session.create(createdUserId, {
     ...context,
     isRoot: true,
   })
@@ -68,5 +54,5 @@ export const signUpWithResolver = async (
     })
   }
 
-  return { accessToken, refreshToken, id: res.id }
+  return { accessToken, refreshToken, id: createdUserId }
 }
