@@ -26,11 +26,12 @@ describe('roles', () => {
       fields: ['name'],
     })
 
-    expect(res.length).toEqual(3)
+    expect(res.length).toEqual(4)
     expect(res.map((role) => role?.name)).toEqual([
       'Client',
       'Client2',
       'Client3',
+      'Admin',
     ])
   })
 
@@ -46,11 +47,12 @@ describe('roles', () => {
       fields: ['name'],
     })
 
-    expect(res.length).toEqual(3)
+    expect(res.length).toEqual(4)
     expect(res.map((role) => role?.name)).toEqual([
       'Client',
       'Client2',
       'Client3',
+      'Admin',
     ])
   })
 })

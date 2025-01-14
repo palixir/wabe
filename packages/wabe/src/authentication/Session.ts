@@ -75,7 +75,10 @@ export class Session {
 
     const res = await context.wabe.controllers.database.createObject({
       className: '_Session',
-      context,
+      context: {
+        ...context,
+        isRoot: true,
+      },
       data: {
         accessToken: this.accessToken,
         accessTokenExpiresAt: this.getAccessTokenExpireAt(context.wabe.config),
@@ -103,7 +106,10 @@ export class Session {
 
     await context.wabe.controllers.database.deleteObject({
       className: '_Session',
-      context,
+      context: {
+        ...context,
+        isRoot: true,
+      },
       id: context.sessionId,
       fields: [],
     })

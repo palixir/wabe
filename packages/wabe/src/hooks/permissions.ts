@@ -54,13 +54,29 @@ export const _checkCLP = async (
     context: object.context,
   })
 
-  if (!permissionProperties) return
+  // If no permission is defined by default we throw an error, Zero trust principle
+  if (!permissionProperties)
+    throw new Error(
+      `Permission denied to ${permissionOperation} class ${object.className}`,
+    )
 
   const sessionId = object.context.sessionId
 
   if (!permissionProperties.requireAuthentication) return
 
-  if (!sessionId)
+  // User is not corrected but requireAuthentication is on true
+  if (!sessionId || !object.getUser())
+    throw new Error(
+      `Permission denied to ${permissionOperation} class ${object.className}`,
+    )
+
+  if (permissionProperties.authorizedRoles?.includes('everyone')) return
+
+  // authorizedRoles is empty
+  if (
+    permissionProperties.authorizedRoles?.length === 0 ||
+    !permissionProperties
+  )
     throw new Error(
       `Permission denied to ${permissionOperation} class ${object.className}`,
     )
@@ -76,11 +92,13 @@ export const _checkCLP = async (
     },
   })
 
+  // No session found
   if (!res)
     throw new Error(
       `Permission denied to ${permissionOperation} class ${object.className}`,
     )
 
+  // User in the context is not the user found in the session
   // @ts-expect-error
   if (object.context.user?.id !== res.user.id)
     throw new Error(
@@ -89,11 +107,13 @@ export const _checkCLP = async (
 
   const roleName = object.context.user?.role?.name
 
+  // No role name found
   if (!roleName)
     throw new Error(
       `Permission denied to ${permissionOperation} class ${object.className}`,
     )
 
+  // The role of the user is not included in the authorizedRoles
   if (!permissionProperties.authorizedRoles?.includes(roleName))
     throw new Error(
       `Permission denied to ${permissionOperation} class ${object.className}`,

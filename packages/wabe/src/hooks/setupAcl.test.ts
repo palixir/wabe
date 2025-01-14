@@ -109,6 +109,9 @@ describe('setupAcl', () => {
           },
         },
         permissions: {
+          create: {
+            requireAuthentication: false,
+          },
           acl: async (hookObject) => {
             await hookObject.addACL('users', {
               userId: hookObject.context.user?.id || '',
@@ -132,7 +135,11 @@ describe('setupAcl', () => {
             type: 'String',
           },
         },
-        permissions: {},
+        permissions: {
+          create: {
+            requireAuthentication: false,
+          },
+        },
       },
       {
         name: 'SetupACL3',
@@ -142,6 +149,9 @@ describe('setupAcl', () => {
           },
         },
         permissions: {
+          create: {
+            requireAuthentication: false,
+          },
           acl: async (hookObject) => {
             await hookObject.addACL('users', null)
             await hookObject.addACL('roles', null)
@@ -156,6 +166,9 @@ describe('setupAcl', () => {
           },
         },
         permissions: {
+          create: {
+            requireAuthentication: false,
+          },
           acl: mockCallback,
         },
       },
@@ -167,6 +180,9 @@ describe('setupAcl', () => {
           },
         },
         permissions: {
+          create: {
+            requireAuthentication: false,
+          },
           acl: async (hookObject) => {
             await hookObject.addACL('users', null)
 
@@ -194,6 +210,9 @@ describe('setupAcl', () => {
           },
         },
         permissions: {
+          create: {
+            requireAuthentication: false,
+          },
           acl: async (hookObject) => {
             await hookObject.addACL('users', {
               userId: hookObject.context.user?.id || '',
@@ -218,6 +237,9 @@ describe('setupAcl', () => {
           },
         },
         permissions: {
+          create: {
+            requireAuthentication: false,
+          },
           acl: async (hookObject) => {
             await hookObject.addACL('users', {
               userId: hookObject.context.user?.id || '',

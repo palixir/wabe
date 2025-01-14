@@ -1,10 +1,11 @@
 import getPort from 'get-port'
-import { GraphQLClient } from 'graphql-request'
+import { gql, GraphQLClient } from 'graphql-request'
 import { v4 as uuid } from 'uuid'
-import type {
-  WabeSchemaEnums,
-  WabeSchemaScalars,
-  WabeSchemaTypes,
+import {
+  RoleEnum,
+  type WabeSchemaEnums,
+  type WabeSchemaScalars,
+  type WabeSchemaTypes,
 } from '../../generated/wabe'
 import { DatabaseEnum } from '../database'
 import { Wabe, type WabeTypes } from '../server'
@@ -69,6 +70,73 @@ export const getUserClient = (
   return { ...client, request: client.request<any> } as GraphQLClient
 }
 
+export const getAdminUserClient = async (
+  port: number,
+  wabe: Wabe<DevWabeTypes>,
+  { email, password }: { email: string; password: string },
+): Promise<GraphQLClient> => {
+  const roles = await wabe.controllers.database.getObjects({
+    className: 'Role',
+    context: {
+      isRoot: true,
+      wabe,
+    } as any,
+    fields: ['id'],
+    where: {
+      name: { equalTo: RoleEnum.Admin },
+    },
+  })
+
+  const adminRoleId = roles[0]?.id
+
+  const res = await getGraphqlClient(port).request<any>(
+    gql`
+      mutation signUpWith($input: SignUpWithInput!) {
+        signUpWith(input: $input) {
+          id
+          accessToken
+        }
+      }
+    `,
+    {
+      input: {
+        authentication: {
+          emailPassword: {
+            email,
+            password,
+          },
+        },
+      },
+    },
+  )
+
+  const accessToken = res.signUpWith.accessToken
+  const userId = res.signUpWith.id
+
+  await wabe.controllers.database.updateObjects({
+    className: 'User',
+    context: {
+      isRoot: true,
+      wabe,
+    } as any,
+    data: {
+      role: adminRoleId,
+    },
+    fields: [],
+    where: {
+      id: { equalTo: userId },
+    },
+  })
+
+  const client = new GraphQLClient(`http://127.0.0.1:${port}/graphql`, {
+    headers: {
+      'Wabe-Access-Token': accessToken,
+    },
+  })
+
+  return { ...client, request: client.request<any> } as GraphQLClient
+}
+
 export const setupTests = async (
   additionalClasses: ClassInterface<any>[] = [],
 ) => {
@@ -85,7 +153,7 @@ export const setupTests = async (
       name: databaseId,
     },
     authentication: {
-      roles: ['Client', 'Client2', 'Client3'],
+      roles: ['Client', 'Client2', 'Client3', 'Admin'],
       session: {
         cookieSession: true,
       },
@@ -121,6 +189,12 @@ export const setupTests = async (
           },
           searchableFields: ['email'],
           permissions: {
+            create: {
+              requireAuthentication: false,
+            },
+            delete: {
+              requireAuthentication: true,
+            },
             update: {
               requireAuthentication: false,
             },

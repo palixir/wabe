@@ -41,11 +41,108 @@ describe('Permissions', () => {
               field2: { type: 'String' },
             },
           },
+          {
+            name: 'TestClass3',
+            fields: {
+              field2: { type: 'String' },
+            },
+            permissions: {
+              read: {
+                requireAuthentication: true,
+                authorizedRoles: ['everyone'],
+              },
+            },
+          },
+          {
+            name: 'TestClass4',
+            fields: {
+              field2: { type: 'String' },
+            },
+            permissions: {
+              read: {
+                requireAuthentication: true,
+                authorizedRoles: [],
+              },
+            },
+          },
+          {
+            name: 'TestClass5',
+            fields: {
+              field2: { type: 'String' },
+            },
+            permissions: {},
+          },
         ],
       },
     } as any
 
     const context = { wabe: { config } } as any
+
+    it('should throw an error if authorized roles is empty and the user is not root', () => {
+      mockGetObject.mockResolvedValue({
+        id: 'sessionId',
+        user: { id: 'userId' },
+      } as never)
+
+      const context: WabeContext<any> = {
+        sessionId: 'sessionId',
+        user: {
+          id: 'userId',
+          role: {
+            id: 'roleId',
+            name: 'Admin',
+          },
+        },
+        isRoot: false,
+        wabe: { controllers, config } as any,
+      }
+
+      const obj = new HookObject({
+        className: 'TestClass4',
+        context,
+        object: {
+          id: 'id',
+        },
+        operationType: OperationType.BeforeRead,
+      })
+
+      expect(_checkCLP(obj, OperationType.BeforeRead)).rejects.toThrow(
+        'Permission denied to read class TestClass4',
+      )
+    })
+
+    it('should throw an error if operation is undefined and user is not root', () => {
+      mockGetObject.mockResolvedValue({
+        id: 'sessionId',
+        user: { id: 'userId' },
+      } as never)
+
+      const context: WabeContext<any> = {
+        sessionId: 'sessionId',
+        user: {
+          id: 'userId',
+          role: {
+            id: 'roleId',
+            name: 'Admin',
+          },
+        },
+        isRoot: false,
+        wabe: { controllers, config } as any,
+      }
+
+      const obj = new HookObject({
+        className: 'TestClass5',
+        context,
+        object: {
+          id: 'id',
+        },
+        operationType: OperationType.BeforeRead,
+      })
+
+      expect(_checkCLP(obj, OperationType.BeforeRead)).rejects.toThrow(
+        'Permission denied to read class TestClass5',
+      )
+    })
 
     it('should get the permission for a given className', async () => {
       const permission = await _getPermissionPropertiesOfAClass({
@@ -88,6 +185,70 @@ describe('Permissions', () => {
 
       expect(_checkCLP(obj, OperationType.BeforeRead)).rejects.toThrow(
         'Permission denied to read class TestClass',
+      )
+    })
+
+    it('should not throw permission denied if authorized roles is everyone', () => {
+      mockGetObject.mockResolvedValue({
+        id: 'sessionId',
+        user: { id: 'userId' },
+      } as never)
+
+      const context: WabeContext<any> = {
+        sessionId: 'sessionId',
+        user: {
+          id: 'userId',
+          role: {
+            id: 'roleId',
+            name: 'Role',
+          } as any,
+        } as any,
+        isRoot: false,
+        wabe: {
+          controllers,
+          config,
+        } as any,
+      }
+
+      const obj = new HookObject({
+        className: 'TestClass3',
+        context,
+        object: {
+          id: 'id',
+        },
+        operationType: OperationType.BeforeRead,
+      })
+
+      expect(_checkCLP(obj, OperationType.BeforeRead)).resolves
+    })
+
+    it('should throw permission denied if authorized roles is everyone but requireAuthentication is true and client is anonymous', () => {
+      mockGetObject.mockResolvedValue({
+        id: 'sessionId',
+        user: { id: 'userId' },
+      } as never)
+
+      const context: WabeContext<any> = {
+        sessionId: undefined,
+        user: undefined,
+        isRoot: false,
+        wabe: {
+          controllers,
+          config,
+        } as any,
+      }
+
+      const obj = new HookObject({
+        className: 'TestClass3',
+        context,
+        object: {
+          id: 'id',
+        },
+        operationType: OperationType.BeforeRead,
+      })
+
+      expect(_checkCLP(obj, OperationType.BeforeRead)).rejects.toThrow(
+        'Permission denied to read class TestClass3',
       )
     })
 

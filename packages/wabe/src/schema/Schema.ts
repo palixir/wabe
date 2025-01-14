@@ -10,6 +10,7 @@ import type { WabeConfig, WabeTypes } from '../server'
 import { Currency, PaymentMode, PaymentReccuringInterval } from '../payment'
 import { defaultMutations, defaultQueries } from './defaultResolvers'
 import type { HookObject } from '../hooks/HookObject'
+import { RoleEnum } from '../../generated/wabe'
 
 export type WabePrimaryTypes =
   | 'String'
@@ -151,11 +152,10 @@ export type PermissionsOperations = 'create' | 'read' | 'update' | 'delete'
 
 export interface PermissionProperties<T extends WabeTypes> {
   requireAuthentication?: boolean
-  // TODO : Use RoleEnum instead of string
   /**
    * An empty array means that none role is authorized (except root client)
    */
-  authorizedRoles?: Array<T['enums']['RoleEnum']>
+  authorizedRoles?: Array<T['enums']['RoleEnum'] | 'everyone'>
 }
 
 /**
@@ -493,6 +493,23 @@ export class Schema<T extends WabeTypes> {
           required: true,
         },
       },
+      permissions: {
+        read: {
+          // @ts-expect-error
+          authorizedRoles: [RoleEnum.Admin],
+          requireAuthentication: true,
+        },
+        delete: {
+          // @ts-expect-error
+          authorizedRoles: [RoleEnum.Admin],
+          requireAuthentication: true,
+        },
+        update: {
+          // @ts-expect-error
+          authorizedRoles: [RoleEnum.Admin],
+          requireAuthentication: true,
+        },
+      },
     }
   }
 
@@ -507,6 +524,24 @@ export class Schema<T extends WabeTypes> {
         users: {
           type: 'Relation',
           class: 'User',
+        },
+      },
+      permissions: {
+        create: {
+          authorizedRoles: [],
+          requireAuthentication: true,
+        },
+        read: {
+          authorizedRoles: ['everyone'],
+          requireAuthentication: true,
+        },
+        update: {
+          authorizedRoles: [],
+          requireAuthentication: true,
+        },
+        delete: {
+          authorizedRoles: [],
+          requireAuthentication: true,
         },
       },
     }

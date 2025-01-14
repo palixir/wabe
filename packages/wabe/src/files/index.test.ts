@@ -22,6 +22,14 @@ describe('File upload', () => {
         fields: {
           file: { type: 'File' },
         },
+        permissions: {
+          create: {
+            requireAuthentication: false,
+          },
+          update: {
+            requireAuthentication: false,
+          },
+        },
       },
     ])
     wabe = setup.wabe
