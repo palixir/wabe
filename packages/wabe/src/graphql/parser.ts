@@ -358,7 +358,7 @@ export const GraphqlParser: GraphqlParserConstructor =
       type:
         | WabePrimaryTypes
         | 'Array'
-        | WabeTypes['enums']
+        | keyof WabeTypes['enums']
         | WabeTypes['scalars']
       typeValue?: WabePrimaryTypes
       requiredValue?: boolean

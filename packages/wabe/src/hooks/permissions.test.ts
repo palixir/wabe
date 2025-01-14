@@ -4,6 +4,7 @@ import { HookObject } from './HookObject'
 import { OperationType } from '.'
 import type { WabeContext } from '../server/interface'
 import * as permissions from './permissions'
+import { RoleEnum } from '../../generated/wabe'
 
 describe('Permissions', () => {
   describe('Class Level Permissions', () => {
@@ -30,7 +31,7 @@ describe('Permissions', () => {
             permissions: {
               read: {
                 requireAuthentication: true,
-                authorizedRoles: ['Admin'],
+                authorizedRoles: [RoleEnum.Admin],
               },
             },
           },
@@ -55,7 +56,7 @@ describe('Permissions', () => {
 
       expect(permission).toEqual({
         requireAuthentication: true,
-        authorizedRoles: ['Admin'],
+        authorizedRoles: [RoleEnum.Admin],
       })
 
       const permission2 = await _getPermissionPropertiesOfAClass({

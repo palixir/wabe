@@ -1,9 +1,10 @@
 import { runDatabase } from 'wabe-mongodb-launcher'
 import { DatabaseEnum, Wabe } from '../src'
-import type {
-  WabeSchemaEnums,
-  WabeSchemaScalars,
-  WabeSchemaTypes,
+import {
+  RoleEnum,
+  type WabeSchemaEnums,
+  type WabeSchemaScalars,
+  type WabeSchemaTypes,
 } from '../generated/wabe'
 
 const run = async () => {
@@ -64,11 +65,12 @@ const run = async () => {
           fields: {
             name: { type: 'String', required: true },
             test: { type: 'File' },
+            test2: { type: 'RoleEnum' },
           },
           permissions: {
             create: {
               requireAuthentication: true,
-              authorizedRoles: ['Admin'],
+              authorizedRoles: [RoleEnum.Admin],
             },
           },
         },

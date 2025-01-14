@@ -182,11 +182,11 @@ export const generateAdditionalTypes = ({
 
   // Enums
   const wabeEnumsGlobalTypes =
-    enums?.map((wabeEnum) => `"${wabeEnum.name}"`) || []
+    enums?.map((wabeEnum) => `${wabeEnum.name}: ${wabeEnum.name}`) || []
 
   const wabeEnumsGlobalTypesString =
     wabeEnumsGlobalTypes.length > 0
-      ? `export type WabeSchemaEnums = ${wabeEnumsGlobalTypes.join(' | ')}`
+      ? `export type WabeSchemaEnums = {\n\t${wabeEnumsGlobalTypes.join(',\n\t')}\n}`
       : ''
 
   // Classes
