@@ -12,6 +12,7 @@ Here is an exempla of permissions settings for `Company` classes.
 
 ```ts
 import { Wabe } from "wabe";
+import { RoleEnum } from "../generated/wabe";
 
 const run = async () => {
   const wabe = new Wabe({
@@ -34,7 +35,7 @@ const run = async () => {
           },
           permissions: {
             create: {
-              authorizedRoles: ["Admin"],
+              authorizedRoles: [RoleEnum.Admin],
               requireAuthentication: true,
             },
             read: {
@@ -42,11 +43,11 @@ const run = async () => {
             },
             update: {
               requireAuthentication: true,
-              authorizedRoles: ["Admin"],
+              authorizedRoles: [RoleEnum.Admin],
             },
             delete: {
               requireAuthentication: true,
-              authorizedRoles: ["Admin"],
+              authorizedRoles: [RoleEnum.Admin],
             },
           },
         },
@@ -91,20 +92,20 @@ const run = async () => {
           },
           permissions: {
             create: {
-              authorizedRoles: ["Admin"],
+              authorizedRoles: [RoleEnum.Admin],
               requireAuthentication: true,
             },
             read: {
-              authorizedRoles: ["Admin"],
+              authorizedRoles: [RoleEnum.Admin],
               requireAuthentication: false,
             },
             update: {
               requireAuthentication: true,
-              authorizedRoles: ["Admin"],
+              authorizedRoles: [RoleEnum.Admin],
             },
             delete: {
               requireAuthentication: true,
-              authorizedRoles: ["Admin"],
+              authorizedRoles: [RoleEnum.Admin],
             },
             acl: async (hookObject) => {
               // The user that creataed the company is authorized to read and write it

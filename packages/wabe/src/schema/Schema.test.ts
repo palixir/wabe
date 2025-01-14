@@ -433,19 +433,19 @@ describe('Schema', () => {
             fields: {},
             permissions: {
               read: {
-                authorizedRoles: ['Admin'],
+                authorizedRoles: [RoleEnum.Admin],
                 requireAuthentication: true,
               },
               update: {
-                authorizedRoles: ['Admin'],
+                authorizedRoles: [RoleEnum.Admin],
                 requireAuthentication: true,
               },
               delete: {
-                authorizedRoles: ['Admin'],
+                authorizedRoles: [RoleEnum.Admin],
                 requireAuthentication: true,
               },
               create: {
-                authorizedRoles: ['Admin'],
+                authorizedRoles: [RoleEnum.Admin],
                 requireAuthentication: true,
               },
             },
