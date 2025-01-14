@@ -91,7 +91,7 @@ type TypeFieldCustomScalars<T extends WabeTypes> = {
 }
 
 type TypeFieldCustomEnums<T extends WabeTypes> = {
-  type: T['enums']
+  type: keyof T['enums']
   required?: boolean
   description?: string
   defaultValue?: any
@@ -149,13 +149,13 @@ export type TypeResolver<T extends WabeTypes> = {
 
 export type PermissionsOperations = 'create' | 'read' | 'update' | 'delete'
 
-export interface PermissionProperties {
+export interface PermissionProperties<T extends WabeTypes> {
   requireAuthentication?: boolean
   // TODO : Use RoleEnum instead of string
   /**
    * An empty array means that none role is authorized (except root client)
    */
-  authorizedRoles?: Array<string>
+  authorizedRoles?: Array<T['enums']['RoleEnum']>
 }
 
 /**
@@ -167,8 +167,10 @@ export type ACLProperties = (
   hookObject: HookObject<any, any>,
 ) => void | Promise<void>
 
-export type ClassPermissions = Partial<
-  Record<PermissionsOperations, PermissionProperties> & { acl: ACLProperties }
+export type ClassPermissions<T extends WabeTypes> = Partial<
+  Record<PermissionsOperations, PermissionProperties<T>> & {
+    acl: ACLProperties
+  }
 >
 
 export type SearchableFields = Array<string>
@@ -183,7 +185,7 @@ export interface ClassInterface<T extends WabeTypes> {
   name: string
   fields: SchemaFields<T>
   description?: string
-  permissions?: ClassPermissions
+  permissions?: ClassPermissions<T>
   searchableFields?: SearchableFields
   indexes?: ClassIndexes
 }

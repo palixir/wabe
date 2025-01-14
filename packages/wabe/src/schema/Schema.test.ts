@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'bun:test'
 import { Schema } from './Schema'
+import { RoleEnum } from '../../generated/wabe'
+import type { DevWabeTypes } from '../utils/helper'
 
 describe('Schema', () => {
   it('should merge default class with custom class', () => {
-    const schema = new Schema({
+    const schema = new Schema<DevWabeTypes>({
       schema: {
         classes: [
           {
@@ -423,7 +425,7 @@ describe('Schema', () => {
   })
 
   it('should merge default class with permissions', () => {
-    const schema = new Schema({
+    const schema = new Schema<DevWabeTypes>({
       schema: {
         classes: [
           {
@@ -467,19 +469,19 @@ describe('Schema', () => {
       }),
       permissions: {
         read: {
-          authorizedRoles: ['Admin'],
+          authorizedRoles: [RoleEnum.Admin],
           requireAuthentication: true,
         },
         update: {
-          authorizedRoles: ['Admin'],
+          authorizedRoles: [RoleEnum.Admin],
           requireAuthentication: true,
         },
         delete: {
-          authorizedRoles: ['Admin'],
+          authorizedRoles: [RoleEnum.Admin],
           requireAuthentication: true,
         },
         create: {
-          authorizedRoles: ['Admin'],
+          authorizedRoles: [RoleEnum.Admin],
           requireAuthentication: true,
         },
       },

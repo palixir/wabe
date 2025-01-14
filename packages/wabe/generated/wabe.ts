@@ -215,6 +215,7 @@ export type Post = {
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
   test?: Scalars['File']['output'];
+  test2?: RoleEnum;
   acl?: PostACLObject;
   createdAt?: Scalars['Date']['output'];
   updatedAt?: Scalars['Date']['output'];
@@ -241,6 +242,7 @@ export type PostACLObjectRolesACL = {
 export type PostInput = {
   name: Scalars['String']['input'];
   test?: Scalars['File']['input'];
+  test2?: RoleEnum;
   acl?: PostACLObjectInput;
   createdAt?: Scalars['Date']['input'];
   updatedAt?: Scalars['Date']['input'];
@@ -273,6 +275,7 @@ export type PostPointerInput = {
 export type PostCreateFieldsInput = {
   name?: Scalars['String']['input'];
   test?: Scalars['File']['input'];
+  test2?: RoleEnum;
   acl?: PostACLObjectCreateFieldsInput;
   createdAt?: Scalars['Date']['input'];
   updatedAt?: Scalars['Date']['input'];
@@ -1015,6 +1018,7 @@ export type PostWhereInput = {
   id?: IdWhereInput;
   name?: StringWhereInput;
   test?: FileWhereInput;
+  test2?: AnyWhereInput;
   acl?: PostACLObjectWhereInput;
   createdAt?: DateWhereInput;
   updatedAt?: DateWhereInput;
@@ -1058,6 +1062,8 @@ export enum PostOrder {
   name_DESC = "name_DESC",
   test_ASC = "test_ASC",
   test_DESC = "test_DESC",
+  test2_ASC = "test2_ASC",
+  test2_DESC = "test2_DESC",
   acl_ASC = "acl_ASC",
   acl_DESC = "acl_DESC",
   createdAt_ASC = "createdAt_ASC",
@@ -1601,6 +1607,7 @@ export type UpdatePostInput = {
 export type PostUpdateFieldsInput = {
   name?: Scalars['String']['input'];
   test?: Scalars['File']['input'];
+  test2?: RoleEnum;
   acl?: PostACLObjectUpdateFieldsInput;
   createdAt?: Scalars['Date']['input'];
   updatedAt?: Scalars['Date']['input'];
@@ -2071,7 +2078,14 @@ export type VerifyChallengeFactorOtpInput = {
 
 export type WabeSchemaScalars = "Phone"
 
-export type WabeSchemaEnums = "RoleEnum" | "AuthenticationProvider" | "SecondaryFactor" | "PaymentMode" | "PaymentReccuringInterval" | "Currency"
+export type WabeSchemaEnums = {
+	RoleEnum: RoleEnum,
+	AuthenticationProvider: AuthenticationProvider,
+	SecondaryFactor: SecondaryFactor,
+	PaymentMode: PaymentMode,
+	PaymentReccuringInterval: PaymentReccuringInterval,
+	Currency: Currency
+}
 
 export type WabeSchemaTypes = {
 	User: User,
