@@ -352,6 +352,14 @@ describe('GraphqlSchema', () => {
               type: 'String',
             },
           },
+          permissions: {
+            create: {
+              requireAuthentication: false,
+            },
+            delete: {
+              requireAuthentication: false,
+            },
+          },
         },
       ],
     })

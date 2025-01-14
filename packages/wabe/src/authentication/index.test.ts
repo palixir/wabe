@@ -130,6 +130,12 @@ describe('Authentication', () => {
           name: { type: 'String' },
         },
         permissions: {
+          create: {
+            requireAuthentication: false,
+          },
+          read: {
+            requireAuthentication: false,
+          },
           acl: async (hookObject) => {
             await hookObject.addACL('users', {
               userId: hookObject.context.user?.id || '',

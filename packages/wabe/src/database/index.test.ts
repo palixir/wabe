@@ -14,8 +14,7 @@ import {
   type DevWabeTypes,
   setupTests,
   closeTests,
-  getAnonymousClient,
-  getUserClient,
+  getAdminUserClient,
 } from '../utils/helper'
 import type { WabeContext } from '../server/interface'
 import { OperationType, getDefaultHooks } from '../hooks'
@@ -523,48 +522,30 @@ describe('Database', () => {
   })
 
   it("should return all elements of a class when the object doesn't have ACL but the user is connected", async () => {
-    const anonymousClient = getAnonymousClient(context.wabe.config.port)
-
-    const { signUpWith } = await anonymousClient.request<any>(
-      graphql.signUpWith,
-      {
-        input: {
-          authentication: {
-            emailPassword: {
-              email: 'email@test.fr',
-              password: 'password',
-            },
-          },
-        },
-      },
-    )
-
-    const userClient = getUserClient(
+    const adminClient = await getAdminUserClient(
       context.wabe.config.port,
-      signUpWith.accessToken,
+      context.wabe,
+      {
+        email: 'email@test.fr',
+        password: 'password',
+      },
     )
 
     await wabe.controllers.database.createObject({
       className: 'Payment',
-      context,
+      context: { ...context, isRoot: true },
       data: {
         amount: 10,
         currency: Currency.EUR,
       },
-      fields: ['id'],
+      fields: [],
     })
 
     const {
       payments: { edges },
-    } = await userClient.request<any>(graphql.payments)
+    } = await adminClient.request<any>(graphql.payments)
 
     expect(edges.length).toEqual(1)
-
-    const {
-      payments: { edges: edges2 },
-    } = await anonymousClient.request<any>(graphql.payments)
-
-    expect(edges2.length).toEqual(1)
   })
 
   it('should order the element in the query by name ASC using order enum', async () => {

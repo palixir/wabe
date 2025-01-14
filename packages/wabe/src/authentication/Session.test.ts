@@ -150,6 +150,7 @@ describe('_Session', () => {
       context: {
         sessionId: 'sessionId',
         wabe: { controllers },
+        isRoot: true,
       },
       id: 'sessionId',
       fields: [],
