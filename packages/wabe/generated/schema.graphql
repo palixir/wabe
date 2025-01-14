@@ -1788,7 +1788,7 @@ type SignInWithOutput {
 }
 
 input SignInWithInput {
-  authentication: SignInWithAuthenticationInput
+  authentication: SignInWithAuthenticationInput!
 }
 
 input SignInWithAuthenticationInput {
@@ -1819,7 +1819,7 @@ type SignUpWithOutput {
 }
 
 input SignUpWithInput {
-  authentication: SignUpWithAuthenticationInput
+  authentication: SignUpWithAuthenticationInput!
 }
 
 input SignUpWithAuthenticationInput {

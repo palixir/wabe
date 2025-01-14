@@ -568,7 +568,11 @@ export class DatabaseController<T extends WabeTypes> {
 
     return this.getObject({
       className,
-      context,
+      context: {
+        ...context,
+        // Because if you create an object, exceptionnaly you can read it after creation
+        isRoot: true,
+      },
       fields,
       id,
       skipHooks: true,

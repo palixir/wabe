@@ -1998,7 +1998,7 @@ export type SignInWithOutput = {
 };
 
 export type SignInWithInput = {
-  authentication?: SignInWithAuthenticationInput;
+  authentication: SignInWithAuthenticationInput;
 };
 
 export type SignInWithAuthenticationInput = {
@@ -2029,7 +2029,7 @@ export type SignUpWithOutput = {
 };
 
 export type SignUpWithInput = {
-  authentication?: SignUpWithAuthenticationInput;
+  authentication: SignUpWithAuthenticationInput;
 };
 
 export type SignUpWithAuthenticationInput = {

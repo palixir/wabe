@@ -274,8 +274,7 @@ describe('setupAcl', () => {
   })
 
   it('should not access to an object created with anonymous client when only user that create the object can access to it with ACL', async () => {
-    expect(
-      anonymousClient.request<any>(gql`
+    await anonymousClient.request<any>(gql`
         mutation createUser {
           createUser(input:{fields:{name: "test" }}){
             user{
@@ -288,8 +287,7 @@ describe('setupAcl', () => {
             }
           }
         }
-    `),
-    ).rejects.toThrow('Object not found')
+    `)
 
     const res = await rootClient.request<any>(gql`
         query users {
@@ -398,8 +396,7 @@ describe('setupAcl', () => {
       rootClient,
     })
 
-    expect(
-      userClient.request<any>(gql`
+    await userClient.request<any>(gql`
         mutation createSetupACL3 {
           createSetupACL3(input: {fields: {test: "test"}}) {
             setupACL3 {
@@ -407,9 +404,7 @@ describe('setupAcl', () => {
             }
           }
         }
-    `),
-      // The object is create but the user doesn't have right to read it LOL
-    ).rejects.toThrow('Object not found')
+    `)
 
     const res = await rootClient.request<any>(gql`
         query setupACL3s {
@@ -519,8 +514,7 @@ describe('setupAcl', () => {
       rootClient,
     })
 
-    expect(
-      userClient.request<any>(gql`
+    await userClient.request<any>(gql`
         mutation createSetupACL6 {
           createSetupACL6(input: {fields: {test: "test", acl: {users: [{userId: "test", read: true, write: true}], roles: [{roleId: "test", read: true, write: true}]}}}) {
             setupACL6 {
@@ -540,9 +534,7 @@ describe('setupAcl', () => {
             }
           }
         }
-    `),
-      // Error because the id provided is not valid
-    ).rejects.toThrow('Object not found')
+    `)
 
     const res = await rootClient.request<any>(gql`
         query setupACLs {
