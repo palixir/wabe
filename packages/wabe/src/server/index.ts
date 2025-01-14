@@ -26,6 +26,7 @@ import type { EmailConfig } from '../email'
 import { EmailController } from '../email/EmailController'
 import type { PaymentConfig } from '../payment/interface'
 import { PaymentController } from '../payment/PaymentController'
+import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection'
 
 type SecurityConfig = {
   corsOptions?: CorsOptions
@@ -320,6 +321,9 @@ export class Wabe<T extends WabeTypes> {
         schema,
         maskedErrors: false,
         graphqlEndpoint: '/graphql',
+        plugins: [
+          process.env.NODE_ENV === 'production' && useDisableIntrospection(),
+        ],
         context: async (ctx): Promise<WabeContext<T>> => ctx.wabe,
         graphqlMiddleware: async (resolve, res) => {
           const response = await resolve()
