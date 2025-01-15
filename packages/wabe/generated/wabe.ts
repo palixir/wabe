@@ -27,21 +27,6 @@ export enum SecondaryFactor {
   EmailOTP = "EmailOTP",
 }
 
-export enum PaymentMode {
-  payment = "payment",
-  subscription = "subscription",
-}
-
-export enum PaymentReccuringInterval {
-  month = "month",
-  year = "year",
-}
-
-export enum Currency {
-  eur = "eur",
-  usd = "usd",
-}
-
 export type User = {
   id: Scalars['ID']['output'];
   name?: Scalars['String']['output'];
@@ -505,100 +490,6 @@ export type RoleRelationInput = {
   createAndAdd?: RoleCreateFieldsInput[];
 };
 
-export type Payment = {
-  id: Scalars['ID']['output'];
-  user?: User;
-  amount: Scalars['Int']['output'];
-  currency: Currency;
-  acl?: PaymentACLObject;
-  createdAt?: Scalars['Date']['output'];
-  updatedAt?: Scalars['Date']['output'];
-  search?: Scalars['String']['output'][];
-};
-
-export type PaymentACLObject = {
-  users?: PaymentACLObjectUsersACL[];
-  roles?: PaymentACLObjectRolesACL[];
-};
-
-export type PaymentACLObjectUsersACL = {
-  userId: Scalars['String']['output'];
-  read: Scalars['Boolean']['output'];
-  write: Scalars['Boolean']['output'];
-};
-
-export type PaymentACLObjectRolesACL = {
-  roleId: Scalars['String']['output'];
-  read: Scalars['Boolean']['output'];
-  write: Scalars['Boolean']['output'];
-};
-
-export type PaymentInput = {
-  user?: UserPointerInput;
-  amount: Scalars['Int']['input'];
-  currency: Currency;
-  acl?: PaymentACLObjectInput;
-  createdAt?: Scalars['Date']['input'];
-  updatedAt?: Scalars['Date']['input'];
-  search?: Scalars['String']['input'][];
-};
-
-export type PaymentACLObjectInput = {
-  users?: PaymentACLObjectUsersACLInput[];
-  roles?: PaymentACLObjectRolesACLInput[];
-};
-
-export type PaymentACLObjectUsersACLInput = {
-  userId: Scalars['String']['input'];
-  read: Scalars['Boolean']['input'];
-  write: Scalars['Boolean']['input'];
-};
-
-export type PaymentACLObjectRolesACLInput = {
-  roleId: Scalars['String']['input'];
-  read: Scalars['Boolean']['input'];
-  write: Scalars['Boolean']['input'];
-};
-
-export type PaymentPointerInput = {
-  unlink?: Scalars['Boolean']['input'];
-  link?: Scalars['ID']['input'];
-  createAndLink?: PaymentCreateFieldsInput;
-};
-
-export type PaymentCreateFieldsInput = {
-  user?: UserPointerInput;
-  amount?: Scalars['Int']['input'];
-  currency?: Currency;
-  acl?: PaymentACLObjectCreateFieldsInput;
-  createdAt?: Scalars['Date']['input'];
-  updatedAt?: Scalars['Date']['input'];
-  search?: Scalars['String']['input'][];
-};
-
-export type PaymentACLObjectCreateFieldsInput = {
-  users?: PaymentACLObjectUsersACLCreateFieldsInput[];
-  roles?: PaymentACLObjectRolesACLCreateFieldsInput[];
-};
-
-export type PaymentACLObjectUsersACLCreateFieldsInput = {
-  userId?: Scalars['String']['input'];
-  read?: Scalars['Boolean']['input'];
-  write?: Scalars['Boolean']['input'];
-};
-
-export type PaymentACLObjectRolesACLCreateFieldsInput = {
-  roleId?: Scalars['String']['input'];
-  read?: Scalars['Boolean']['input'];
-  write?: Scalars['Boolean']['input'];
-};
-
-export type PaymentRelationInput = {
-  add?: Scalars['ID']['input'][];
-  remove?: Scalars['ID']['input'][];
-  createAndAdd?: PaymentCreateFieldsInput[];
-};
-
 export type _InternalConfig = {
   id: Scalars['ID']['output'];
   configKey: Scalars['String']['output'];
@@ -702,8 +593,6 @@ export type Query = {
   _sessions: _SessionConnection;
   role?: Role;
   roles: RoleConnection;
-  payment?: Payment;
-  payments: PaymentConnection;
   _internalConfig?: _InternalConfig;
   _internalConfigs: _InternalConfigConnection;
   helloWorld?: Scalars['String']['output'];
@@ -752,17 +641,6 @@ export type QueryRolesArgs = {
   offset?: Scalars['Int']['input'];
   first?: Scalars['Int']['input'];
   order?: RoleOrder[];
-};
-
-export type QueryPaymentArgs = {
-  id?: Scalars['ID']['input'];
-};
-
-export type QueryPaymentsArgs = {
-  where?: PaymentWhereInput;
-  offset?: Scalars['Int']['input'];
-  first?: Scalars['Int']['input'];
-  order?: PaymentOrder[];
 };
 
 export type Query_internalConfigArgs = {
@@ -1119,68 +997,6 @@ export enum RoleOrder {
   search_DESC = "search_DESC",
 }
 
-export type PaymentConnection = {
-  totalCount?: Scalars['Int']['output'];
-  edges?: PaymentEdge[];
-};
-
-export type PaymentEdge = {
-  node: Payment;
-};
-
-export type PaymentWhereInput = {
-  id?: IdWhereInput;
-  user?: UserWhereInput;
-  amount?: IntWhereInput;
-  currency?: AnyWhereInput;
-  acl?: PaymentACLObjectWhereInput;
-  createdAt?: DateWhereInput;
-  updatedAt?: DateWhereInput;
-  search?: SearchWhereInput;
-  OR?: PaymentWhereInput[];
-  AND?: PaymentWhereInput[];
-};
-
-export type PaymentACLObjectWhereInput = {
-  users?: PaymentACLObjectUsersACLWhereInput[];
-  roles?: PaymentACLObjectRolesACLWhereInput[];
-  OR?: PaymentACLObjectWhereInput[];
-  AND?: PaymentACLObjectWhereInput[];
-};
-
-export type PaymentACLObjectUsersACLWhereInput = {
-  userId?: StringWhereInput;
-  read?: BooleanWhereInput;
-  write?: BooleanWhereInput;
-  OR?: PaymentACLObjectUsersACLWhereInput[];
-  AND?: PaymentACLObjectUsersACLWhereInput[];
-};
-
-export type PaymentACLObjectRolesACLWhereInput = {
-  roleId?: StringWhereInput;
-  read?: BooleanWhereInput;
-  write?: BooleanWhereInput;
-  OR?: PaymentACLObjectRolesACLWhereInput[];
-  AND?: PaymentACLObjectRolesACLWhereInput[];
-};
-
-export enum PaymentOrder {
-  user_ASC = "user_ASC",
-  user_DESC = "user_DESC",
-  amount_ASC = "amount_ASC",
-  amount_DESC = "amount_DESC",
-  currency_ASC = "currency_ASC",
-  currency_DESC = "currency_DESC",
-  acl_ASC = "acl_ASC",
-  acl_DESC = "acl_DESC",
-  createdAt_ASC = "createdAt_ASC",
-  createdAt_DESC = "createdAt_DESC",
-  updatedAt_ASC = "updatedAt_ASC",
-  updatedAt_DESC = "updatedAt_DESC",
-  search_ASC = "search_ASC",
-  search_DESC = "search_DESC",
-}
-
 export type _InternalConfigConnection = {
   totalCount?: Scalars['Int']['output'];
   edges?: _InternalConfigEdge[];
@@ -1272,12 +1088,6 @@ export type Mutation = {
   updateRoles: RoleConnection;
   deleteRole?: DeleteRolePayload;
   deleteRoles: RoleConnection;
-  createPayment?: CreatePaymentPayload;
-  createPayments: PaymentConnection;
-  updatePayment?: UpdatePaymentPayload;
-  updatePayments: PaymentConnection;
-  deletePayment?: DeletePaymentPayload;
-  deletePayments: PaymentConnection;
   create_InternalConfig?: Create_InternalConfigPayload;
   create_InternalConfigs: _InternalConfigConnection;
   update_InternalConfig?: Update_InternalConfigPayload;
@@ -1391,30 +1201,6 @@ export type MutationDeleteRoleArgs = {
 
 export type MutationDeleteRolesArgs = {
   input: DeleteRolesInput;
-};
-
-export type MutationCreatePaymentArgs = {
-  input: CreatePaymentInput;
-};
-
-export type MutationCreatePaymentsArgs = {
-  input: CreatePaymentsInput;
-};
-
-export type MutationUpdatePaymentArgs = {
-  input: UpdatePaymentInput;
-};
-
-export type MutationUpdatePaymentsArgs = {
-  input: UpdatePaymentsInput;
-};
-
-export type MutationDeletePaymentArgs = {
-  input: DeletePaymentInput;
-};
-
-export type MutationDeletePaymentsArgs = {
-  input: DeletePaymentsInput;
 };
 
 export type MutationCreate_InternalConfigArgs = {
@@ -1804,81 +1590,6 @@ export type DeleteRolesInput = {
   order?: RoleOrder[];
 };
 
-export type CreatePaymentPayload = {
-  payment?: Payment;
-  ok?: Scalars['Boolean']['output'];
-};
-
-export type CreatePaymentInput = {
-  fields?: PaymentCreateFieldsInput;
-};
-
-export type CreatePaymentsInput = {
-  fields: PaymentCreateFieldsInput[];
-  offset?: Scalars['Int']['input'];
-  first?: Scalars['Int']['input'];
-  order?: PaymentOrder[];
-};
-
-export type UpdatePaymentPayload = {
-  payment?: Payment;
-  ok?: Scalars['Boolean']['output'];
-};
-
-export type UpdatePaymentInput = {
-  id?: Scalars['ID']['input'];
-  fields?: PaymentUpdateFieldsInput;
-};
-
-export type PaymentUpdateFieldsInput = {
-  user?: UserPointerInput;
-  amount?: Scalars['Int']['input'];
-  currency?: Currency;
-  acl?: PaymentACLObjectUpdateFieldsInput;
-  createdAt?: Scalars['Date']['input'];
-  updatedAt?: Scalars['Date']['input'];
-  search?: Scalars['String']['input'][];
-};
-
-export type PaymentACLObjectUpdateFieldsInput = {
-  users?: PaymentACLObjectUsersACLUpdateFieldsInput[];
-  roles?: PaymentACLObjectRolesACLUpdateFieldsInput[];
-};
-
-export type PaymentACLObjectUsersACLUpdateFieldsInput = {
-  userId?: Scalars['String']['input'];
-  read?: Scalars['Boolean']['input'];
-  write?: Scalars['Boolean']['input'];
-};
-
-export type PaymentACLObjectRolesACLUpdateFieldsInput = {
-  roleId?: Scalars['String']['input'];
-  read?: Scalars['Boolean']['input'];
-  write?: Scalars['Boolean']['input'];
-};
-
-export type UpdatePaymentsInput = {
-  fields?: PaymentUpdateFieldsInput;
-  where?: PaymentWhereInput;
-  offset?: Scalars['Int']['input'];
-  first?: Scalars['Int']['input'];
-  order?: PaymentOrder[];
-};
-
-export type DeletePaymentPayload = {
-  payment?: Payment;
-  ok?: Scalars['Boolean']['output'];
-};
-
-export type DeletePaymentInput = {
-  id?: Scalars['ID']['input'];
-};
-
-export type DeletePaymentsInput = {
-  where?: PaymentWhereInput;
-  order?: PaymentOrder[];
-};
-
 export type Create_InternalConfigPayload = {
   _internalConfig?: _InternalConfig;
   ok?: Scalars['Boolean']['output'];
@@ -2081,10 +1792,7 @@ export type WabeSchemaScalars = "Phone"
 export type WabeSchemaEnums = {
 	RoleEnum: RoleEnum,
 	AuthenticationProvider: AuthenticationProvider,
-	SecondaryFactor: SecondaryFactor,
-	PaymentMode: PaymentMode,
-	PaymentReccuringInterval: PaymentReccuringInterval,
-	Currency: Currency
+	SecondaryFactor: SecondaryFactor
 }
 
 export type WabeSchemaTypes = {
@@ -2092,6 +1800,5 @@ export type WabeSchemaTypes = {
 	Post: Post,
 	_Session: _Session,
 	Role: Role,
-	Payment: Payment,
 	_InternalConfig: _InternalConfig
 }

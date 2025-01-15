@@ -429,7 +429,7 @@ describe('Schema', () => {
       schema: {
         classes: [
           {
-            name: 'Payment',
+            name: '_Session',
             fields: {},
             permissions: {
               read: {
@@ -454,19 +454,13 @@ describe('Schema', () => {
       },
     } as any)
 
-    const paymenClass = schema.schema?.classes?.find(
-      (schemaClass) => schemaClass.name === 'Payment',
+    const _sessionClass = schema.schema?.classes?.find(
+      (schemaClass) => schemaClass.name === '_Session',
     )
 
-    expect(paymenClass).toEqual({
-      name: 'Payment',
-      fields: expect.objectContaining({
-        amount: {
-          type: 'Int',
-          required: true,
-          description: 'Amount in cents',
-        },
-      }),
+    expect(_sessionClass).toEqual({
+      name: '_Session',
+      fields: expect.anything(),
       permissions: {
         read: {
           authorizedRoles: [RoleEnum.Admin],

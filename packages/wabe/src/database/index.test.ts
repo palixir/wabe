@@ -19,7 +19,6 @@ import {
 import type { WabeContext } from '../server/interface'
 import { OperationType, getDefaultHooks } from '../hooks'
 import { gql } from 'graphql-request'
-import { Currency } from '../payment'
 
 describe('Database', () => {
   let wabe: Wabe<DevWabeTypes>
@@ -532,18 +531,17 @@ describe('Database', () => {
     )
 
     await wabe.controllers.database.createObject({
-      className: 'Payment',
+      className: 'User',
       context: { ...context, isRoot: true },
       data: {
-        amount: 10,
-        currency: Currency.EUR,
+        name: 'Doe',
       },
       fields: [],
     })
 
     const {
-      payments: { edges },
-    } = await adminClient.request<any>(graphql.payments)
+      users: { edges },
+    } = await adminClient.request<any>(graphql.users)
 
     expect(edges.length).toEqual(1)
   })
@@ -850,19 +848,12 @@ const graphql = {
         }
       }
     `,
-  payments: gql`
-    query payments {
-      payments {
+  users: gql`
+    query users {
+      users {
         edges {
             node {
-            id
-            amount
-            acl{
-                users{
-                    userId
-                }
-
-            }
+               id
             }
         }
       }

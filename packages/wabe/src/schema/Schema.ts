@@ -7,7 +7,6 @@ import { refreshResolver } from '../authentication/resolvers/refreshResolver'
 import { signOutResolver } from '../authentication/resolvers/signOutResolver'
 import { verifyChallengeResolver } from '../authentication/resolvers/verifyChallenge'
 import type { WabeConfig, WabeTypes } from '../server'
-import { Currency, PaymentMode, PaymentReccuringInterval } from '../payment'
 import { defaultMutations, defaultQueries } from './defaultResolvers'
 import type { HookObject } from '../hooks/HookObject'
 import { RoleEnum } from '../../generated/wabe'
@@ -240,24 +239,6 @@ export class Schema<T extends WabeTypes> {
           EmailOTP: 'emailOTP',
         },
       },
-      {
-        name: 'PaymentMode',
-        values: Object.fromEntries(
-          Object.values(PaymentMode).map((key) => [key, key]),
-        ),
-      },
-      {
-        name: 'PaymentReccuringInterval',
-        values: Object.fromEntries(
-          Object.values(PaymentReccuringInterval).map((key) => [key, key]),
-        ),
-      },
-      {
-        name: 'Currency',
-        values: Object.fromEntries(
-          Object.values(Currency).map((key) => [key, key]),
-        ),
-      },
     ]
   }
 
@@ -475,44 +456,44 @@ export class Schema<T extends WabeTypes> {
     }
   }
 
-  paymentClass(): ClassInterface<T> {
-    return {
-      name: 'Payment',
-      fields: {
-        user: {
-          type: 'Pointer',
-          class: 'User',
-          required: true,
-        },
-        amount: {
-          type: 'Int',
-          required: true,
-          description: 'Amount in cents',
-        },
-        currency: {
-          type: 'Currency',
-          required: true,
-        },
-      },
-      permissions: {
-        read: {
-          // @ts-expect-error
-          authorizedRoles: [RoleEnum.Admin],
-          requireAuthentication: true,
-        },
-        delete: {
-          // @ts-expect-error
-          authorizedRoles: [RoleEnum.Admin],
-          requireAuthentication: true,
-        },
-        update: {
-          // @ts-expect-error
-          authorizedRoles: [RoleEnum.Admin],
-          requireAuthentication: true,
-        },
-      },
-    }
-  }
+  // paymentClass(): ClassInterface<T> {
+  //   return {
+  //     name: 'Payment',
+  //     fields: {
+  //       user: {
+  //         type: 'Pointer',
+  //         class: 'User',
+  //         required: true,
+  //       },
+  //       amount: {
+  //         type: 'Int',
+  //         required: true,
+  //         description: 'Amount in cents',
+  //       },
+  //       currency: {
+  //         type: 'Currency',
+  //         required: true,
+  //       },
+  //     },
+  //     permissions: {
+  //       read: {
+  //         // @ts-expect-error
+  //         authorizedRoles: [RoleEnum.Admin],
+  //         requireAuthentication: true,
+  //       },
+  //       delete: {
+  //         // @ts-expect-error
+  //         authorizedRoles: [RoleEnum.Admin],
+  //         requireAuthentication: true,
+  //       },
+  //       update: {
+  //         // @ts-expect-error
+  //         authorizedRoles: [RoleEnum.Admin],
+  //         requireAuthentication: true,
+  //       },
+  //     },
+  //   }
+  // }
 
   roleClass(): ClassInterface<T> {
     return {
@@ -772,7 +753,7 @@ export class Schema<T extends WabeTypes> {
       this.userClass(),
       this.sessionClass(),
       this.roleClass(),
-      this.paymentClass(),
+      // this.paymentClass(),
       this.internalConfigClass(),
     ])
   }
