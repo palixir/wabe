@@ -9,7 +9,6 @@ import { verifyChallengeResolver } from '../authentication/resolvers/verifyChall
 import type { WabeConfig, WabeTypes } from '../server'
 import { defaultMutations, defaultQueries } from './defaultResolvers'
 import type { HookObject } from '../hooks/HookObject'
-import { RoleEnum } from '../../generated/wabe'
 
 export type WabePrimaryTypes =
   | 'String'
