@@ -21,7 +21,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "bun build --outdir dist $(pwd)/src/index.ts --target=node --external=* && bun generate:types",
-    "generate:types": "dts-bundle-generator -o dist/index.d.ts src/index.ts --no-check --external-imports=wobe",
+    "generate:types": "dts-bundle-generator -o dist/index.d.ts src/index.ts --no-check",
     "check": "tsc --project $(pwd)/tsconfig.json",
     "lint": "biome lint . --no-errors-on-unmatched --config-path=../../",
     "ci": "bun check && bun lint $(pwd) && bun test src",
@@ -31,7 +31,6 @@
     "stripe": "16.10.0"
   },
   "devDependencies": {
-    "wobe": "1.1.8",
     "@types/bun": "1.1.8",
     "wabe": "workspace:*"
   }
