@@ -455,45 +455,6 @@ export class Schema<T extends WabeTypes> {
     }
   }
 
-  // paymentClass(): ClassInterface<T> {
-  //   return {
-  //     name: 'Payment',
-  //     fields: {
-  //       user: {
-  //         type: 'Pointer',
-  //         class: 'User',
-  //         required: true,
-  //       },
-  //       amount: {
-  //         type: 'Int',
-  //         required: true,
-  //         description: 'Amount in cents',
-  //       },
-  //       currency: {
-  //         type: 'Currency',
-  //         required: true,
-  //       },
-  //     },
-  //     permissions: {
-  //       read: {
-  //         // @ts-expect-error
-  //         authorizedRoles: [RoleEnum.Admin],
-  //         requireAuthentication: true,
-  //       },
-  //       delete: {
-  //         // @ts-expect-error
-  //         authorizedRoles: [RoleEnum.Admin],
-  //         requireAuthentication: true,
-  //       },
-  //       update: {
-  //         // @ts-expect-error
-  //         authorizedRoles: [RoleEnum.Admin],
-  //         requireAuthentication: true,
-  //       },
-  //     },
-  //   }
-  // }
-
   roleClass(): ClassInterface<T> {
     return {
       name: 'Role',
@@ -752,7 +713,6 @@ export class Schema<T extends WabeTypes> {
       this.userClass(),
       this.sessionClass(),
       this.roleClass(),
-      // this.paymentClass(),
       this.internalConfigClass(),
     ])
   }
