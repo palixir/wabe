@@ -7,11 +7,11 @@
     "scripts": {
         "build": "tsc --project tsconfig.json",
         "ci":"bun lint && bun test",
-        "lint": "biome lint $(pwd)/*.ts --config-path=../../ --no-errors-on-unmatched",        
+        "lint": "biome lint $(pwd)/*.ts --config-path=../../ --no-errors-on-unmatched",
         "format": "biome format --write . --config-path=../../"
     },
     "dependencies": {},
     "devDependencies": {
-        "@types/bun": "1.0.0"
+        "@types/bun": "latest"
     }
 }

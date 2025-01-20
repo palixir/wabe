@@ -1,7 +1,7 @@
 {
   "name": "wabe-stripe",
   "version": "0.5.14",
-  "description": "Stripe payment adapter for Wabe",
+  "description": "Stripe payment adapter for Wabe (official)",
   "homepage": "https://wabe.dev",
   "author": {
     "name": "coratgerl",
@@ -31,7 +31,8 @@
     "stripe": "16.10.0"
   },
   "devDependencies": {
-    "@types/bun": "1.1.8",
-    "wabe": "workspace:*"
+    "@types/bun": "latest",
+    "wabe": "workspace:*",
+    "dts-bundle-generator": "9.5.1"
   }
 }

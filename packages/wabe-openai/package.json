@@ -1,7 +1,7 @@
 {
-  "name": "wabe-resend",
+  "name": "wabe-openai",
   "version": "0.5.0",
-  "description": "Resend email adapter for Wabe (official)",
+  "description": "OpenAI adapter for Wabe (official)",
   "homepage": "https://wabe.dev",
   "author": {
     "name": "coratgerl",
@@ -12,7 +12,8 @@
     "backend",
     "wabe",
     "graphql",
-    "baas"
+    "baas",
+    "openai"
   ],
   "repository": {
     "type": "git",
@@ -21,19 +22,17 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "bun build --outdir dist $(pwd)/src/index.ts --target=node --external=* && bun generate:types",
-    "generate:types": "dts-bundle-generator -o dist/index.d.ts src/index.ts --no-check",
+    "generate:types": "tsc --emitDeclarationOnly --declaration --declarationDir dist",
     "check": "tsc --project $(pwd)/tsconfig.json",
     "lint": "biome lint . --no-errors-on-unmatched --config-path=../../",
     "ci": "bun check && bun lint $(pwd) && bun test src",
     "format": "biome format --write . --config-path=../../"
   },
   "dependencies": {
-    "resend": "4.0.0"
+    "openai": "4.79.1"
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "@types/react": "18.3.5",
     "wabe": "workspace:*",
-    "dts-bundle-generator": "9.5.1"
   }
 }
