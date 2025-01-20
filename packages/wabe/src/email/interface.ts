@@ -1,5 +1,3 @@
-import type React from 'react'
-
 export type HtmlTemplates = {
   sendOTPCode: (options: { otp: string }) => string | Promise<string>
 }

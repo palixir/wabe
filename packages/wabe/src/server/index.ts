@@ -27,6 +27,7 @@ import { EmailController } from '../email/EmailController'
 import type { PaymentConfig } from '../payment/interface'
 import { PaymentController } from '../payment/PaymentController'
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection'
+import type { AIConfig } from '../ai'
 
 type SecurityConfig = {
   corsOptions?: CorsOptions
@@ -51,6 +52,7 @@ export interface WabeConfig<T extends WabeTypes> {
   hooks?: Hook<T, any>[]
   email?: EmailConfig
   payment?: PaymentConfig
+  ai?: AIConfig
   file?: FileConfig
 }
 
