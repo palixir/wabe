@@ -1,4 +1,5 @@
 import type { UserAuthenticationGoogle } from '../../../generated/wabe'
+import { contextWithRoot } from '../../utils/export'
 import {
   AuthenticationProvider,
   type AuthenticationEventsOptions,
@@ -51,10 +52,7 @@ export class Google implements ProviderInterface<GoogleInterface> {
           },
         },
       },
-      context: {
-        ...context,
-        isRoot: true,
-      },
+      context: contextWithRoot(context),
       first: 1,
       fields: ['id'],
     })
@@ -75,10 +73,7 @@ export class Google implements ProviderInterface<GoogleInterface> {
             google: authenticationDataToSave,
           },
         },
-        context: {
-          ...context,
-          isRoot: true,
-        },
+        context: contextWithRoot(context),
         fields: ['*', 'id'],
       })
 

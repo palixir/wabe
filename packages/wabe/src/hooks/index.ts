@@ -5,6 +5,7 @@ import {
 } from '../files/hookUploadFile'
 import type { WabeConfig, WabeTypes } from '../server'
 import type { WabeContext } from '../server/interface'
+import { contextWithRoot } from '../utils/export'
 import type { DevWabeTypes } from '../utils/helper'
 import { HookObject } from './HookObject'
 import {
@@ -107,10 +108,7 @@ export const initializeHook = <
 
     return context.wabe.controllers.database.getObject({
       className,
-      context: {
-        ...context,
-        isRoot: true,
-      },
+      context: contextWithRoot(context),
       id,
       skipHooks: true,
       fields: ['*'],
@@ -129,10 +127,7 @@ export const initializeHook = <
 
     const res = await context.wabe.controllers.database.getObjects({
       className,
-      context: {
-        ...context,
-        isRoot: true,
-      },
+      context: contextWithRoot(context),,
       where: where ? where : { id: { in: ids } },
       fields: ['*'],
       skipHooks: true,

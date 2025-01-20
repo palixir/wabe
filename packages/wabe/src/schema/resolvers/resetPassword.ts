@@ -1,6 +1,7 @@
 import type { MutationResetPasswordArgs } from '../../../generated/wabe'
 import { OTP } from '../../authentication/OTP'
 import type { WabeContext } from '../../server/interface'
+import { contextWithRoot } from '../../utils/export'
 import type { DevWabeTypes } from '../../utils/helper'
 
 export const resetPasswordResolver = async (
@@ -17,10 +18,7 @@ export const resetPasswordResolver = async (
     },
     fields: ['id'],
     first: 1,
-    context: {
-      ...context,
-      isRoot: true,
-    },
+    context: contextWithRoot(context),
   })
 
   // We return true if the user doesn't exist to avoid leaking that the user exists or not
@@ -53,10 +51,7 @@ export const resetPasswordResolver = async (
       },
     },
     fields: [],
-    context: {
-      ...context,
-      isRoot: true,
-    },
+    context: contextWithRoot(context),
   })
 
   return true

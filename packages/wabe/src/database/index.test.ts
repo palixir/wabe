@@ -19,6 +19,7 @@ import {
 import type { WabeContext } from '../server/interface'
 import { OperationType, getDefaultHooks } from '../hooks'
 import { gql } from 'graphql-request'
+import { contextWithRoot } from '../utils/export'
 
 describe('Database', () => {
   let wabe: Wabe<DevWabeTypes>
@@ -532,7 +533,7 @@ describe('Database', () => {
 
     await wabe.controllers.database.createObject({
       className: 'User',
-      context: { ...context, isRoot: true },
+      context: contextWithRoot(context),
       data: {
         name: 'Doe',
       },
