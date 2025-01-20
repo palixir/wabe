@@ -18,7 +18,7 @@
         "mongodb-memory-server": "10.1.2"
     },
     "devDependencies": {
-        "@types/bun": "1.0.0",
+        "@types/bun": "latest",
         "@types/tcp-port-used": "1.0.4"
     }
 }

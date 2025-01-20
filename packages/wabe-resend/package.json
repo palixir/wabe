@@ -1,7 +1,7 @@
 {
   "name": "wabe-resend",
   "version": "0.5.0",
-  "description": "Resend email adapter for Wabe",
+  "description": "Resend email adapter for Wabe (official)",
   "homepage": "https://wabe.dev",
   "author": {
     "name": "coratgerl",
@@ -31,7 +31,7 @@
     "resend": "4.0.0"
   },
   "devDependencies": {
-    "@types/bun": "1.1.8",
+    "@types/bun": "latest",
     "@types/react": "18.3.5",
     "wabe": "workspace:*"
   }

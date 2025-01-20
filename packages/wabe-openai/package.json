@@ -1,7 +1,7 @@
 {
-  "name": "wabe-stripe",
-  "version": "0.5.14",
-  "description": "Stripe payment adapter for Wabe (official)",
+  "name": "wabe-openai",
+  "version": "0.5.0",
+  "description": "OpenAI adapter for Wabe (official)",
   "homepage": "https://wabe.dev",
   "author": {
     "name": "coratgerl",
@@ -28,7 +28,7 @@
     "format": "biome format --write . --config-path=../../"
   },
   "dependencies": {
-    "stripe": "16.10.0"
+    "openai": "4.79.1"
   },
   "devDependencies": {
     "@types/bun": "latest",
