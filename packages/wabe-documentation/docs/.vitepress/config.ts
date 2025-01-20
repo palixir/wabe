@@ -170,21 +170,15 @@ export default defineConfig({
       },
       {
         text: 'Email',
-        items: [
-          {
-            text: 'Send emails',
-            link: '/email/index.md',
-          },
-        ],
+        link: '/email/index.md',
       },
       {
         text: 'Payment',
-        items: [
-          {
-            text: 'Create payment',
-            link: '/payment/index.md',
-          },
-        ],
+        link: '/payment/index.md',
+      },
+      {
+        text: 'AI',
+        link: '/ai/openai.md',
       },
     ],
     socialLinks: [

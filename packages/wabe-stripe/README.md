@@ -23,7 +23,7 @@ npm install wabe-stripe # On npm
 yarn add wabe-stripe # On yarn
 ```
 
-## Basic example of wabe-resend usage
+## Basic example of wabe-stripe usage
 
 ```ts
 import { DatabaseEnum, Wabe, PaymentMode, Currency } from "wabe";

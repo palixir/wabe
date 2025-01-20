@@ -1,6 +1,41 @@
-# Make a payment
+# Use payments provider
 
 With wabe, you have the ability to create payments either by using official adapters or by creating your own. You can then access it in the controllers object.
+
+## Initialize payment adapter
+
+
+```ts
+import { DatabaseEnum, Wabe, PaymentMode, Currency } from "wabe";
+import { StripeAdapter } from "wabe-stripe";
+
+const run = async () => {
+  // Ensure your database is running before run the file
+
+  const wabe = new Wabe({
+    // Root key example (must be long minimal 64 characters, you can generate it online)
+    rootKey:
+      "0uwFvUxM$ceFuF1aEtTtZMa7DUN2NZudqgY5ve5W*QCyb58cwMj9JeoaV@d#%29v&aJzswuudVU1%nAT+rxS0Bh&OkgBYc0PH18*",
+    database: {
+      type: DatabaseEnum.Mongo,
+      url: "mongodb://127.0.0.1:27045",
+      name: "WabeApp",
+    },
+    payment: {
+      adapter: new StripeAdapter('YOU_STRIPE_SECRET_KEY'),
+      currency: Currency.USD,
+      supportedPaymentMethods: ['card', 'paypal'],
+    },
+    port: 3000,
+  });
+
+  await wabe.start();
+};
+
+await run();
+```
+
+## Use payments with controller
 
 ```ts
 // With controller
@@ -216,60 +251,4 @@ await run();
 
 ## Create your own adapter
 
-You can create your own adapter (for other payment providers) implementing the interface `PaymentAdapter` :
-
-```ts
-export type CreateCustomerOptions = {
-  customerName?: string
-  customerEmail: string
-  customerPhone?: string
-  address: Address
-  paymentMethod: PaymentMethod
-}
-
-export type CreatePaymentOptions = {
-  currency: Currency
-  customerEmail: string
-  products: Array<Product>
-  paymentMethod: Array<PaymentMethod>
-  paymentMode: PaymentMode
-  successUrl: string
-  cancelUrl: string
-  automaticTax?: boolean
-  recurringInterval?: 'month' | 'year'
-}
-
-export type CancelSubscriptionOptions = {
-  email: string
-}
-
-export type GetInvoicesOptions = {
-  email: string
-}
-
-export interface PaymentAdapter {
-  /**
-   * Create a customer
-   * @param options CreateCustomerOptions
-   * @returns The customer email
-   */
-  createCustomer: (options: CreateCustomerOptions) => Promise<string>
-  /**
-   * Create a payment
-   * @param options CreatePaymentOptions
-   * @returns The payment url
-   */
-  createPayment: (options: CreatePaymentOptions) => Promise<string>
-  /**
-   * Cancel a subscription
-   * @param options The customer email to cancel the subscription
-   */
-  cancelSubscription: (options: CancelSubscriptionOptions) => Promise<void>
-  /**
-   * Get invoices
-   * @param options The customer email to get the invoices
-   * @returns The invoices of a customer
-   */
-  getInvoices: (options: GetInvoicesOptions) => Promise<Invoice[]>
-}
-```
+You can create your own adapter (for other payment providers) implementing the interface `PaymentAdapter` [here](https://github.com/palixir/wabe/blob/main/packages/wabe/src/payment/interface.ts)
