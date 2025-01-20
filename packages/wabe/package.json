@@ -31,8 +31,6 @@
   },
   "dependencies": {
     "@graphql-yoga/plugin-disable-introspection": "2.10.9",
-    "@graphql-tools/graphql-file-loader": "8.0.1",
-    "@graphql-tools/load": "8.0.2",
     "@node-rs/argon2": "2.0.0",
     "jsonwebtoken": "9.0.2",
     "mongodb": "6.8.0",
