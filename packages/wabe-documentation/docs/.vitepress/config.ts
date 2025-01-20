@@ -178,7 +178,7 @@ export default defineConfig({
       },
       {
         text: 'AI',
-        link: '/ai/openai.md',
+        link: '/ai/index.md',
       },
     ],
     socialLinks: [
