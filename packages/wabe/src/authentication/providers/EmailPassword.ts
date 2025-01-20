@@ -5,6 +5,7 @@ import type {
   ProviderInterface,
 } from '../interface'
 import { hashPassword } from '../utils'
+import { contextWithRoot } from '../../utils/export'
 
 type EmailPasswordInterface = {
   password: string
@@ -29,10 +30,7 @@ export class EmailPassword
           },
         },
       },
-      context: {
-        ...context,
-        isRoot: true,
-      },
+      context: contextWithRoot(context),
       fields: ['id', 'authentication'],
       first: 1,
     })

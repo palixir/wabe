@@ -18,6 +18,7 @@ import type {
 import type { WabeTypes } from '../../server'
 import type { WabeContext } from '../../server/interface'
 import { notEmpty } from '../../utils/helper'
+import { contextWithRoot } from '../../utils/export'
 
 export const buildMongoOrderQuery = <
   T extends WabeTypes,
@@ -386,11 +387,8 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
         fields: ['id'],
         offset,
         first,
-        context: {
-          ...context,
-          // Root because we need the id at least for hook
-          isRoot: true,
-        },
+        // Root because we need the id at least for hook
+        context: contextWithRoot(context),
         order,
       })
 

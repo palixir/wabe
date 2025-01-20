@@ -1,20 +1,6 @@
 import type { ClassInterface } from '../schema'
 import type { WabeTypes, WabeConfig } from '../server'
 
-// export const getClient = (config: WabeConfig<WabeTypes>) => {
-//   // We do this to avoid failing import when wabe.ts is not already generated
-//   // @ts-ignore
-//   const getSdk = wabeFile.getSdk
-
-//   if (!getSdk) return
-
-//   if (!config.port) throw new Error('config.port is not defined')
-
-//   const client = getGraphqlClient(config.port)
-
-//   return getSdk(client)
-// }
-
 export const firstLetterInUpperCase = (str: string) => {
   const indexOfFirstLetter = str.search(/[a-z]/i)
 

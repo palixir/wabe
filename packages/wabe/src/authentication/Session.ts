@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken'
 import type { WabeContext } from '../server/interface'
 import type { User } from '../../generated/wabe'
 import type { WabeConfig } from '../server'
+import { contextWithRoot } from '../utils/export'
 
 export class Session {
   private accessToken: string | undefined = undefined
@@ -75,10 +76,7 @@ export class Session {
 
     const res = await context.wabe.controllers.database.createObject({
       className: '_Session',
-      context: {
-        ...context,
-        isRoot: true,
-      },
+      context: contextWithRoot(context),
       data: {
         accessToken: this.accessToken,
         accessTokenExpiresAt: this.getAccessTokenExpireAt(context.wabe.config),
@@ -106,10 +104,7 @@ export class Session {
 
     await context.wabe.controllers.database.deleteObject({
       className: '_Session',
-      context: {
-        ...context,
-        isRoot: true,
-      },
+      context: contextWithRoot(context),
       id: context.sessionId,
       fields: [],
     })
@@ -138,10 +133,7 @@ export class Session {
         accessToken: { equalTo: accessToken },
       },
       fields: ['id', 'user', 'refreshToken', 'refreshTokenExpiresAt'],
-      context: {
-        ...context,
-        isRoot: true,
-      },
+      context: contextWithRoot(context),
     })
 
     if (!session.length)
@@ -202,10 +194,7 @@ export class Session {
 
     await context.wabe.controllers.database.updateObject({
       className: '_Session',
-      context: {
-        ...context,
-        isRoot: true,
-      },
+      context: contextWithRoot(context),
       id,
       data: {
         accessToken: newAccessToken,

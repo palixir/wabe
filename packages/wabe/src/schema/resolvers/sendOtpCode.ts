@@ -3,6 +3,7 @@ import type { WabeContext } from '../../server/interface'
 import type { DevWabeTypes } from '../../utils/helper'
 import { sendOtpCodeTemplate } from '../../email/templates/sendOtpCode'
 import { OTP } from '../../authentication/OTP'
+import { contextWithRoot } from '../../utils/export'
 
 export const sendOtpCodeResolver = async (
   _: any,
@@ -22,10 +23,7 @@ export const sendOtpCodeResolver = async (
     },
     fields: ['id'],
     first: 1,
-    context: {
-      ...context,
-      isRoot: true,
-    },
+    context: contextWithRoot(context),
   })
 
   // We return true if the user doesn't exist to avoid leaking that the user exists or not
