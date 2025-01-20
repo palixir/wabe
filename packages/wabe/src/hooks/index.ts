@@ -127,7 +127,7 @@ export const initializeHook = <
 
     const res = await context.wabe.controllers.database.getObjects({
       className,
-      context: contextWithRoot(context),,
+      context: contextWithRoot(context),
       where: where ? where : { id: { in: ids } },
       fields: ['*'],
       skipHooks: true,
