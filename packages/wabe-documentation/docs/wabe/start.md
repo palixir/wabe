@@ -26,6 +26,18 @@ Now you should have a basic project with an `index.ts` file.
 
 ## Create your first Wabe app
 
+Let's first add the necessary wabe dependency.
+
+```sh
+bun add wabe
+```
+
+Let's also start a MongoDB database if one isn't already running:
+
+```sh
+docker run -p "27045:27017" mongodb/mongodb-community-server
+```
+
 Open the `index.ts` file and past the following code.
 
 ```ts
