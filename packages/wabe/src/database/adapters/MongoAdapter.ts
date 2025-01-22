@@ -1,4 +1,5 @@
 import { type Db, type Filter, MongoClient, ObjectId } from 'mongodb'
+import pRetry from 'p-retry'
 import type {
   AdapterOptions,
   DatabaseAdapter,
@@ -139,7 +140,7 @@ export const buildMongoWhereQuery = <
 export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
   public options: AdapterOptions
   public database?: Db
-  private client: MongoClient
+  public client: MongoClient
 
   constructor(options: AdapterOptions) {
     this.options = options
@@ -147,7 +148,12 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
   }
 
   async connect() {
-    const client = await this.client.connect()
+    const client = await pRetry(() => this.client.connect(), {
+      retries: 5,
+      minTimeout: process.env.NODE_ENV === 'production' ? 1000 : 100,
+      factor: 2,
+    })
+
     this.database = client.db(this.options.databaseName)
     return client
   }
