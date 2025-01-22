@@ -27,7 +27,7 @@ export type ProviderInterface<T = any> = {
   onSignIn: (options: AuthenticationEventsOptions<T>) => Promise<{
     user: Partial<User>
     oauth?: {
-      refreshToken: string
+      refreshToken?: string
       accessToken: string
       accessTokenExpiresAt: Date
       refreshTokenExpiresAt: Date

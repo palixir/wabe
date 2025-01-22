@@ -33,8 +33,6 @@ export class Google implements ProviderInterface<GoogleInterface> {
       codeVerifier,
     )
 
-    if (!refreshToken) throw new Error('Access_type must be offline')
-
     if (!idToken) throw new Error('Authentication failed')
 
     const { email, verifiedEmail } = await googleOauth.getUserInfo(
@@ -82,7 +80,7 @@ export class Google implements ProviderInterface<GoogleInterface> {
       return {
         user: createdUser,
         oauth: {
-          refreshToken,
+          refreshToken: refreshToken ?? undefined,
           accessToken,
           accessTokenExpiresAt: accessTokenExpiresAt || new Date(),
           refreshTokenExpiresAt: refreshTokenExpiresAt || new Date(),
@@ -95,7 +93,7 @@ export class Google implements ProviderInterface<GoogleInterface> {
     return {
       user: user[0],
       oauth: {
-        refreshToken,
+        refreshToken: refreshToken ?? undefined,
         accessToken,
         accessTokenExpiresAt: accessTokenExpiresAt || new Date(),
         refreshTokenExpiresAt: refreshTokenExpiresAt || new Date(),
