@@ -22,16 +22,11 @@ export class Google implements ProviderInterface<GoogleInterface> {
 
     const googleOauth = new GoogleOauth(context.wabe.config)
 
-    const {
-      accessToken,
-      refreshToken,
-      idToken,
-      accessTokenExpiresAt,
-      refreshTokenExpiresAt,
-    } = await googleOauth.validateAuthorizationCode(
-      authorizationCode,
-      codeVerifier,
-    )
+    const { accessToken, idToken } =
+      await googleOauth.validateAuthorizationCode(
+        authorizationCode,
+        codeVerifier,
+      )
 
     if (!idToken) throw new Error('Authentication failed')
 
@@ -79,12 +74,6 @@ export class Google implements ProviderInterface<GoogleInterface> {
 
       return {
         user: createdUser,
-        oauth: {
-          refreshToken: refreshToken ?? undefined,
-          accessToken,
-          accessTokenExpiresAt: accessTokenExpiresAt || new Date(),
-          refreshTokenExpiresAt: refreshTokenExpiresAt || new Date(),
-        },
       }
     }
 
@@ -92,12 +81,6 @@ export class Google implements ProviderInterface<GoogleInterface> {
 
     return {
       user: user[0],
-      oauth: {
-        refreshToken: refreshToken ?? undefined,
-        accessToken,
-        accessTokenExpiresAt: accessTokenExpiresAt || new Date(),
-        refreshTokenExpiresAt: refreshTokenExpiresAt || new Date(),
-      },
     }
   }
 
