@@ -55,6 +55,22 @@ describe('Mongo adapter', () => {
       )
   })
 
+  it('should retry on connection error', async () => {
+    const spyMongoClientConnect = spyOn(
+      mongoAdapter.client,
+      'connect',
+    ).mockImplementationOnce(() => {
+      throw new Error('Connection error')
+    })
+
+    await mongoAdapter.connect()
+
+    expect(spyMongoClientConnect).toHaveBeenCalledTimes(2)
+
+    spyMongoClientConnect.mockRestore()
+    spyMongoClientConnect.mockClear()
+  })
+
   it('should only return id on createObject if fields is empty', async () => {
     const res = await mongoAdapter.createObject({
       className: 'User',
