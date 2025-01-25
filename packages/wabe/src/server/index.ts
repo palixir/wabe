@@ -36,6 +36,7 @@ type SecurityConfig = {
 
 export interface WabeConfig<T extends WabeTypes> {
   port: number
+  isProduction?: boolean
   hostname?: string
   security?: SecurityConfig
   schema?: SchemaInterface<T>
@@ -79,6 +80,7 @@ export class Wabe<T extends WabeTypes> {
   public controllers: WabeControllers<T>
 
   constructor({
+    isProduction,
     port,
     hostname,
     security,
@@ -94,6 +96,7 @@ export class Wabe<T extends WabeTypes> {
     routes,
   }: WabeConfig<T>) {
     this.config = {
+      isProduction,
       port,
       hostname,
       security,
@@ -323,9 +326,7 @@ export class Wabe<T extends WabeTypes> {
         schema,
         maskedErrors: false,
         graphqlEndpoint: '/graphql',
-        plugins: [
-          process.env.NODE_ENV === 'production' && useDisableIntrospection(),
-        ],
+        plugins: this.config.isProduction ? [useDisableIntrospection()] : [],
         context: async (ctx): Promise<WabeContext<T>> => ctx.wabe,
         graphqlMiddleware: async (resolve, res) => {
           const response = await resolve()
