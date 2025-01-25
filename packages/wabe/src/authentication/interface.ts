@@ -75,6 +75,8 @@ export interface AuthenticationConfig<T extends WabeTypes> {
   roles?: RoleConfig
   successRedirectPath?: string
   failureRedirectPath?: string
+  frontDomain?: string
+  backDomain?: string
   providers?: Partial<Record<ProviderEnum, ProviderConfig>>
   customAuthenticationMethods?: CustomAuthenticationMethods<T>[]
 }

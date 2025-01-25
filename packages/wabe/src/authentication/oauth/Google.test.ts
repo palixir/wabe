@@ -6,6 +6,7 @@ describe('Google oauth', () => {
   const config = {
     port: 3000,
     authentication: {
+      backDomain: 'api.shipmysaas.com',
       providers: {
         google: {
           clientId: 'clientId',
