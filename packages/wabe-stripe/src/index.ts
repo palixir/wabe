@@ -237,9 +237,7 @@ export class StripeAdapter implements PaymentAdapter {
       automatic_tax: {
         enabled: !!automaticTax,
       },
-      invoice_creation: {
-        enabled: createInvoice,
-      },
+      ...(createInvoice ? { invoice_creation: { enabled: true } } : {}),
       ...(!promotionCodeId && !couponCodeId
         ? { allow_promotion_codes: allowPromotionCode }
         : {}),
