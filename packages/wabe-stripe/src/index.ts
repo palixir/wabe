@@ -25,7 +25,7 @@ export class StripeAdapter implements PaymentAdapter {
 
   constructor(apiKey: string) {
     this.stripe = new Stripe(apiKey, {
-      apiVersion: '2024-06-20',
+      apiVersion: '2024-12-18.acacia',
       appInfo: {
         name: 'wabe',
       },
