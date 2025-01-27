@@ -16,6 +16,7 @@ export type WabePrimaryTypes =
   | 'Float'
   | 'Boolean'
   | 'Email'
+  | 'Phone'
   | 'Date'
   | 'File'
 
