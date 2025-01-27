@@ -58,6 +58,10 @@ const run = async () => {
             age: {
               type: 'Int',
             },
+            email: {
+              type: 'Email',
+              required: true,
+            },
           },
         },
         {
@@ -73,12 +77,6 @@ const run = async () => {
               authorizedRoles: [RoleEnum.Admin],
             },
           },
-        },
-      ],
-      scalars: [
-        {
-          name: 'Phone',
-          description: 'Phone custom scalar type',
         },
       ],
       resolvers: {

@@ -1,6 +1,3 @@
-"""Phone custom scalar type"""
-scalar Phone
-
 enum RoleEnum {
   Admin
   Client
@@ -20,6 +17,7 @@ type User {
   id: ID!
   name: String
   age: Int
+  email: Email
   acl: UserACLObject
   createdAt: Date
   updatedAt: Date
@@ -27,11 +25,13 @@ type User {
   authentication: UserAuthentication
   provider: AuthenticationProvider
   isOauth: Boolean
-  email: Email
   verifiedEmail: Boolean
   role: Role
   sessions: _SessionConnection
 }
+
+"""Email scalar type"""
+scalar Email
 
 type UserACLObject {
   users: [UserACLObjectUsersACL]
@@ -63,9 +63,6 @@ type UserAuthenticationEmailPassword {
   password: String!
 }
 
-"""Email scalar type"""
-scalar Email
-
 type UserAuthenticationGoogle {
   email: Email!
   verifiedEmail: Boolean!
@@ -85,6 +82,7 @@ type _SessionEdge {
 input UserInput {
   name: String
   age: Int
+  email: Email
   acl: UserACLObjectInput
   createdAt: Date
   updatedAt: Date
@@ -92,7 +90,6 @@ input UserInput {
   authentication: UserAuthenticationInput
   provider: AuthenticationProvider
   isOauth: Boolean
-  email: Email
   verifiedEmail: Boolean
   role: RolePointerInput
   sessions: _SessionRelationInput
@@ -142,6 +139,7 @@ input UserPointerInput {
 input UserCreateFieldsInput {
   name: String
   age: Int
+  email: Email
   acl: UserACLObjectCreateFieldsInput
   createdAt: Date
   updatedAt: Date
@@ -149,7 +147,6 @@ input UserCreateFieldsInput {
   authentication: UserAuthenticationCreateFieldsInput
   provider: AuthenticationProvider
   isOauth: Boolean
-  email: Email
   verifiedEmail: Boolean
   role: RolePointerInput
   sessions: _SessionRelationInput
@@ -619,6 +616,7 @@ input UserWhereInput {
   id: IdWhereInput
   name: StringWhereInput
   age: IntWhereInput
+  email: EmailWhereInput
   acl: UserACLObjectWhereInput
   createdAt: DateWhereInput
   updatedAt: DateWhereInput
@@ -626,7 +624,6 @@ input UserWhereInput {
   authentication: UserAuthenticationWhereInput
   provider: AnyWhereInput
   isOauth: BooleanWhereInput
-  email: EmailWhereInput
   verifiedEmail: BooleanWhereInput
   role: RoleWhereInput
   sessions: _SessionWhereInput
@@ -657,6 +654,13 @@ input IntWhereInput {
   greaterThanOrEqualTo: Int
   in: [Int]
   notIn: [Int]
+}
+
+input EmailWhereInput {
+  equalTo: Email
+  notEqualTo: Email
+  in: [Email]
+  notIn: [Email]
 }
 
 input UserACLObjectWhereInput {
@@ -719,13 +723,6 @@ input UserAuthenticationEmailPasswordWhereInput {
   password: StringWhereInput
   OR: [UserAuthenticationEmailPasswordWhereInput]
   AND: [UserAuthenticationEmailPasswordWhereInput]
-}
-
-input EmailWhereInput {
-  equalTo: Email
-  notEqualTo: Email
-  in: [Email]
-  notIn: [Email]
 }
 
 input UserAuthenticationGoogleWhereInput {
@@ -824,6 +821,8 @@ enum UserOrder {
   name_DESC
   age_ASC
   age_DESC
+  email_ASC
+  email_DESC
   acl_ASC
   acl_DESC
   createdAt_ASC
@@ -838,8 +837,6 @@ enum UserOrder {
   provider_DESC
   isOauth_ASC
   isOauth_DESC
-  email_ASC
-  email_DESC
   verifiedEmail_ASC
   verifiedEmail_DESC
   role_ASC
@@ -1119,6 +1116,7 @@ input UpdateUserInput {
 input UserUpdateFieldsInput {
   name: String
   age: Int
+  email: Email
   acl: UserACLObjectUpdateFieldsInput
   createdAt: Date
   updatedAt: Date
@@ -1126,7 +1124,6 @@ input UserUpdateFieldsInput {
   authentication: UserAuthenticationUpdateFieldsInput
   provider: AuthenticationProvider
   isOauth: Boolean
-  email: Email
   verifiedEmail: Boolean
   role: RolePointerInput
   sessions: _SessionRelationInput

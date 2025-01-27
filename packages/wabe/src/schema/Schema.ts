@@ -104,6 +104,7 @@ export type TypeField<T extends WabeTypes> =
   | TypeFieldBase<boolean, 'Boolean'>
   | TypeFieldBase<Date, 'Date'>
   | TypeFieldBase<string, 'Email'>
+  | TypeFieldBase<string, 'Phone'>
   | TypeFieldArray<T>
   | TypeFieldObject<T>
   | TypeFieldPointer<T>

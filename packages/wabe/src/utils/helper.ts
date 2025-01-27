@@ -183,9 +183,6 @@ export const setupTests = async (
               type: 'Array',
               typeValue: 'String',
             },
-            phone: {
-              type: 'Phone',
-            },
           },
           searchableFields: ['email'],
           permissions: {
@@ -211,12 +208,6 @@ export const setupTests = async (
               await hookObject.addACL('roles', null)
             },
           },
-        },
-      ],
-      scalars: [
-        {
-          name: 'Phone',
-          description: 'Phone scalar',
         },
       ],
     },
