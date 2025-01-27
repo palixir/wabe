@@ -224,6 +224,47 @@ describe('GraphqlSchema', () => {
     })
   })
 
+  it('should be able to create an array in an object', async () => {
+    const { wabe } = await createWabe({
+      classes: [
+        {
+          name: 'TestClass',
+          fields: {
+            field1: {
+              type: 'Array',
+              typeValue: 'Object',
+              object: {
+                name: 'SubOject',
+                fields: {
+                  field2: {
+                    type: 'Array',
+                    typeValue: 'String',
+                    required: true,
+                    requiredValue: false,
+                  },
+                  field3: { type: 'Int' },
+                },
+              },
+            },
+          },
+        },
+      ],
+    })
+
+    expect(
+      getTypeFromGraphQLSchema({
+        schema: wabe.config.graphqlSchema || ({} as any),
+        type: 'Type',
+        name: 'TestClassSubOject',
+      }).input,
+    ).toEqual({
+      field2: '[String]!',
+      field3: 'Int',
+    })
+
+    await wabe.close()
+  })
+
   // It is usefull when we have the permission to create but not to read the data
   // We should be able to create a new object without return any data
   // Just use the "ok" field

@@ -162,6 +162,27 @@ export const GraphqlParser: GraphqlParserConstructor =
               }
             }
 
+            if (
+              currentField.typeValue &&
+              // @ts-expect-error
+              templateScalarType[currentField.typeValue]
+            ) {
+              const graphqlType = getGraphqlType({
+                type: currentField.type,
+                // @ts-expect-error
+                typeValue: currentField.typeValue,
+                isWhereType: false,
+                requiredValue: currentField.requiredValue,
+              })
+
+              acc[key] = {
+                type:
+                  currentField.required && !forceRequiredToFalse
+                    ? new GraphQLNonNull(graphqlType)
+                    : graphqlType,
+              }
+            }
+
             return acc
           }
 
