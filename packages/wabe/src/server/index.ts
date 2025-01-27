@@ -40,6 +40,7 @@ export interface WabeConfig<T extends WabeTypes> {
   hostname?: string
   security?: SecurityConfig
   schema?: SchemaInterface<T>
+  graphqlSchema?: GraphQLSchema
   database: DatabaseConfig
   codegen?:
     | {
@@ -219,7 +220,7 @@ export class Wabe<T extends WabeTypes> {
 
     const types = graphqlSchema.createSchema()
 
-    const schema = new GraphQLSchema({
+    this.config.graphqlSchema = new GraphQLSchema({
       query: new GraphQLObjectType({
         name: 'Query',
         fields: types.queries,
@@ -241,7 +242,7 @@ export class Wabe<T extends WabeTypes> {
       await generateCodegen({
         path: this.config.codegen.path,
         schema: wabeSchema.schema,
-        graphqlSchema: schema,
+        graphqlSchema: this.config.graphqlSchema,
       })
 
       // If we just want codegen we exit before server created.
@@ -323,7 +324,7 @@ export class Wabe<T extends WabeTypes> {
 
     this.server.usePlugin(
       WobeGraphqlYogaPlugin({
-        schema,
+        schema: this.config.graphqlSchema,
         maskedErrors: false,
         graphqlEndpoint: '/graphql',
         plugins: this.config.isProduction ? [useDisableIntrospection()] : [],
