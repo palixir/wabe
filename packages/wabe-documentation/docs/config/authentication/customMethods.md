@@ -89,7 +89,6 @@ export class EmailPassword
     input,
     context,
   }: AuthenticationEventsOptions<EmailPasswordInterface>) {
-    // TODO : Use first here but need to refactor in graphql and mongoadapter to have first and not limit
     const users = await context.wabe.controllers.database.getObjects({
       className: "User",
       where: {

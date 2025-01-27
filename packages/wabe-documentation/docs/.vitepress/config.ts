@@ -108,8 +108,16 @@ export default defineConfig({
             text: 'Authentication',
             items: [
               {
-                text: 'Sign In / Up',
+                text: 'Sign In / Up / Out',
                 link: '/config/authentication/interact',
+              },
+              {
+                text: 'Default auth methods',
+                link: '/config/authentication/defaultMethods',
+              },
+              {
+                text: 'Social login (OAuth)',
+                link: '/config/authentication/oauth',
               },
               {
                 text: 'Reset password',
@@ -123,12 +131,9 @@ export default defineConfig({
                 text: 'Roles',
                 link: '/config/authentication/roles',
               },
+
               {
-                text: 'OAuth',
-                link: '/config/authentication/oauth',
-              },
-              {
-                text: 'Custom methods',
+                text: 'Create custom methods',
                 link: '/config/authentication/customMethods',
               },
             ],

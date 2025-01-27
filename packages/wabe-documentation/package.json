@@ -2,10 +2,10 @@
   "name": "wabe-documentation",
   "type": "module",
   "scripts": {
-    "release": "bun docs:build && vercel docs/.vitepress/dist --prod",
-    "docs:dev": "vitepress dev docs",
-    "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs"
+    "release": "bun run build && vercel docs/.vitepress/dist --prod",
+    "dev": "vitepress dev docs",
+    "build": "vitepress build docs",
+    "preview": "vitepress preview docs"
   },
   "devDependencies": {
     "vitepress": "1.5.0",
