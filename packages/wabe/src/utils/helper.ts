@@ -183,6 +183,7 @@ export const setupTests = async (
               type: 'Array',
               typeValue: 'String',
             },
+            test: { type: 'TestScalar' },
           },
           searchableFields: ['email'],
           permissions: {
@@ -208,6 +209,12 @@ export const setupTests = async (
               await hookObject.addACL('roles', null)
             },
           },
+        },
+      ],
+      scalars: [
+        {
+          name: 'TestScalar',
+          description: 'Test scalar',
         },
       ],
     },

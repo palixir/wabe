@@ -178,7 +178,7 @@ export const generateAdditionalTypes = ({
   const wabeScalarType =
     listOfScalars.length > 0
       ? `export type WabeSchemaScalars = ${listOfScalars.join(' | ')}`
-      : ''
+      : 'export type WabeSchemaScalars = ""'
 
   // Enums
   const wabeEnumsGlobalTypes =

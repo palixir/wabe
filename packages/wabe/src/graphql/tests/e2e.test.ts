@@ -100,7 +100,7 @@ describe('GraphQL : E2E', () => {
           fields: [
             {
               name: 'Jack',
-              phone: '+33577223355',
+              test: '+33577223355',
             },
           ],
         },
@@ -108,7 +108,7 @@ describe('GraphQL : E2E', () => {
 
       const { users } = await client.request<any>(graphql.users, {
         where: {
-          phone: {
+          test: {
             equalTo: '+33577223355',
           },
         },
@@ -119,7 +119,7 @@ describe('GraphQL : E2E', () => {
 
       const { users: users2 } = await client.request<any>(graphql.users, {
         where: {
-          phone: {
+          test: {
             notEqualTo: '+33577223355',
           },
         },

@@ -1787,7 +1787,7 @@ export type VerifyChallengeFactorOtpInput = {
 };
 
 
-
+export type WabeSchemaScalars = ""
 
 export type WabeSchemaEnums = {
 	RoleEnum: RoleEnum,
