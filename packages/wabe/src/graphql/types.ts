@@ -8,6 +8,7 @@ import {
   GraphQLString,
   GraphQLID,
 } from 'graphql'
+import { isValidPhoneNumber } from 'libphonenumber-js'
 import { tokenize } from '../utils'
 
 export const AnyScalarType = new GraphQLScalarType({
@@ -41,6 +42,18 @@ export const EmailScalarType = new GraphQLScalarType({
 
     if (!value.match(/^[^@\s]+@[^@\s]+\.[^@\s]+$/))
       throw new Error('Invalid email')
+
+    return value
+  },
+})
+
+export const PhoneScalarType = new GraphQLScalarType({
+  name: 'Phone',
+  description: 'Phone scalar type',
+  parseValue(value: any): string {
+    if (typeof value !== 'string') throw new Error('Invalid phone')
+
+    if (!isValidPhoneNumber(value)) throw new Error('Invalid phone number')
 
     return value
   },
@@ -132,6 +145,16 @@ export const EmailWhereInput = new GraphQLInputObjectType({
     notEqualTo: { type: EmailScalarType },
     in: { type: new GraphQLList(EmailScalarType) },
     notIn: { type: new GraphQLList(EmailScalarType) },
+  },
+})
+
+export const PhoneWhereInput = new GraphQLInputObjectType({
+  name: 'PhoneWhereInput',
+  fields: {
+    equalTo: { type: PhoneScalarType },
+    notEqualTo: { type: PhoneScalarType },
+    in: { type: new GraphQLList(PhoneScalarType) },
+    notIn: { type: new GraphQLList(PhoneScalarType) },
   },
 })
 

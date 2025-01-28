@@ -224,6 +224,95 @@ describe('GraphqlSchema', () => {
     })
   })
 
+  it('should be able to create a phone field that check correctly if the phone is valid across the world', async () => {
+    const { client, wabe } = await createWabe({
+      classes: [
+        {
+          name: 'TestClass',
+          fields: {
+            phone: {
+              type: 'Phone',
+            },
+          },
+        },
+      ],
+    })
+
+    // French mobile valid
+    await client.request<any>(gql`
+			mutation createTestClass {
+				createTestClass(input: { fields: { phone: "+33612345678" } }) {
+					testClass {
+						phone
+					}
+				}
+			}
+		`)
+
+    // USA californian valid
+    await client.request<any>(gql`
+			mutation createTestClass {
+				createTestClass(input: { fields: { phone: "+14155552671" } }) {
+					testClass {
+						phone
+					}
+				}
+			}
+		`)
+
+    // Brasil mobile valid
+    await client.request<any>(gql`
+			mutation createTestClass {
+				createTestClass(input: { fields: { phone: "+5511998765432" } }) {
+					testClass {
+						phone
+					}
+				}
+			}
+		`)
+
+    // French mobile not valid
+    expect(
+      client.request<any>(gql`
+			mutation createTestClass {
+				createTestClass(input: { fields: { phone: "+3361234578" } }) {
+					testClass {
+						phone
+					}
+				}
+			}
+		`),
+    ).rejects.toThrow('Expected value of type "Phone", found "+3361234578"')
+
+    // USA californian not valid
+    expect(
+      client.request<any>(gql`
+    	mutation createTestClass {
+    		createTestClass(input: { fields: { phone: "+1415555267" } }) {
+    			testClass {
+    				phone
+    			}
+    		}
+    	}
+    `),
+    ).rejects.toThrow('Expected value of type "Phone", found "+1415555267"')
+
+    // Brasil mobile not valid
+    expect(
+      client.request<any>(gql`
+    	mutation createTestClass {
+    		createTestClass(input: { fields: { phone: "+5511234567" } }) {
+    			testClass {
+    				phone
+    			}
+    		}
+    	}
+    `),
+    ).rejects.toThrow('Expected value of type "Phone", found "+5511234567"')
+
+    await wabe.close()
+  })
+
   it('should be able to create an array in an object', async () => {
     const { wabe } = await createWabe({
       classes: [

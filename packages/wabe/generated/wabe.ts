@@ -31,6 +31,7 @@ export type User = {
   id: Scalars['ID']['output'];
   name?: Scalars['String']['output'];
   age?: Scalars['Int']['output'];
+  email?: Scalars['Email']['output'];
   acl?: UserACLObject;
   createdAt?: Scalars['Date']['output'];
   updatedAt?: Scalars['Date']['output'];
@@ -38,7 +39,6 @@ export type User = {
   authentication?: UserAuthentication;
   provider?: AuthenticationProvider;
   isOauth?: Scalars['Boolean']['output'];
-  email?: Scalars['Email']['output'];
   verifiedEmail?: Scalars['Boolean']['output'];
   role?: Role;
   sessions?: _SessionConnection;
@@ -89,6 +89,7 @@ export type _SessionEdge = {
 export type UserInput = {
   name?: Scalars['String']['input'];
   age?: Scalars['Int']['input'];
+  email?: Scalars['Email']['input'];
   acl?: UserACLObjectInput;
   createdAt?: Scalars['Date']['input'];
   updatedAt?: Scalars['Date']['input'];
@@ -96,7 +97,6 @@ export type UserInput = {
   authentication?: UserAuthenticationInput;
   provider?: AuthenticationProvider;
   isOauth?: Scalars['Boolean']['input'];
-  email?: Scalars['Email']['input'];
   verifiedEmail?: Scalars['Boolean']['input'];
   role?: RolePointerInput;
   sessions?: _SessionRelationInput;
@@ -144,6 +144,7 @@ export type UserPointerInput = {
 export type UserCreateFieldsInput = {
   name?: Scalars['String']['input'];
   age?: Scalars['Int']['input'];
+  email?: Scalars['Email']['input'];
   acl?: UserACLObjectCreateFieldsInput;
   createdAt?: Scalars['Date']['input'];
   updatedAt?: Scalars['Date']['input'];
@@ -151,7 +152,6 @@ export type UserCreateFieldsInput = {
   authentication?: UserAuthenticationCreateFieldsInput;
   provider?: AuthenticationProvider;
   isOauth?: Scalars['Boolean']['input'];
-  email?: Scalars['Email']['input'];
   verifiedEmail?: Scalars['Boolean']['input'];
   role?: RolePointerInput;
   sessions?: _SessionRelationInput;
@@ -662,6 +662,7 @@ export type UserWhereInput = {
   id?: IdWhereInput;
   name?: StringWhereInput;
   age?: IntWhereInput;
+  email?: EmailWhereInput;
   acl?: UserACLObjectWhereInput;
   createdAt?: DateWhereInput;
   updatedAt?: DateWhereInput;
@@ -669,7 +670,6 @@ export type UserWhereInput = {
   authentication?: UserAuthenticationWhereInput;
   provider?: AnyWhereInput;
   isOauth?: BooleanWhereInput;
-  email?: EmailWhereInput;
   verifiedEmail?: BooleanWhereInput;
   role?: RoleWhereInput;
   sessions?: _SessionWhereInput;
@@ -700,6 +700,13 @@ export type IntWhereInput = {
   greaterThanOrEqualTo?: Scalars['Int']['input'];
   in?: Scalars['Int']['input'][];
   notIn?: Scalars['Int']['input'][];
+};
+
+export type EmailWhereInput = {
+  equalTo?: Scalars['Email']['input'];
+  notEqualTo?: Scalars['Email']['input'];
+  in?: Scalars['Email']['input'][];
+  notIn?: Scalars['Email']['input'][];
 };
 
 export type UserACLObjectWhereInput = {
@@ -759,13 +766,6 @@ export type UserAuthenticationEmailPasswordWhereInput = {
   password?: StringWhereInput;
   OR?: UserAuthenticationEmailPasswordWhereInput[];
   AND?: UserAuthenticationEmailPasswordWhereInput[];
-};
-
-export type EmailWhereInput = {
-  equalTo?: Scalars['Email']['input'];
-  notEqualTo?: Scalars['Email']['input'];
-  in?: Scalars['Email']['input'][];
-  notIn?: Scalars['Email']['input'][];
 };
 
 export type UserAuthenticationGoogleWhereInput = {
@@ -859,6 +859,8 @@ export enum UserOrder {
   name_DESC = "name_DESC",
   age_ASC = "age_ASC",
   age_DESC = "age_DESC",
+  email_ASC = "email_ASC",
+  email_DESC = "email_DESC",
   acl_ASC = "acl_ASC",
   acl_DESC = "acl_DESC",
   createdAt_ASC = "createdAt_ASC",
@@ -873,8 +875,6 @@ export enum UserOrder {
   provider_DESC = "provider_DESC",
   isOauth_ASC = "isOauth_ASC",
   isOauth_DESC = "isOauth_DESC",
-  email_ASC = "email_ASC",
-  email_DESC = "email_DESC",
   verifiedEmail_ASC = "verifiedEmail_ASC",
   verifiedEmail_DESC = "verifiedEmail_DESC",
   role_ASC = "role_ASC",
@@ -1296,6 +1296,7 @@ export type UpdateUserInput = {
 export type UserUpdateFieldsInput = {
   name?: Scalars['String']['input'];
   age?: Scalars['Int']['input'];
+  email?: Scalars['Email']['input'];
   acl?: UserACLObjectUpdateFieldsInput;
   createdAt?: Scalars['Date']['input'];
   updatedAt?: Scalars['Date']['input'];
@@ -1303,7 +1304,6 @@ export type UserUpdateFieldsInput = {
   authentication?: UserAuthenticationUpdateFieldsInput;
   provider?: AuthenticationProvider;
   isOauth?: Scalars['Boolean']['input'];
-  email?: Scalars['Email']['input'];
   verifiedEmail?: Scalars['Boolean']['input'];
   role?: RolePointerInput;
   sessions?: _SessionRelationInput;
@@ -1787,7 +1787,7 @@ export type VerifyChallengeFactorOtpInput = {
 };
 
 
-export type WabeSchemaScalars = "Phone"
+export type WabeSchemaScalars = ""
 
 export type WabeSchemaEnums = {
 	RoleEnum: RoleEnum,

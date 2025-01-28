@@ -24,6 +24,8 @@ import {
   FileWhereInput,
   FloatWhereInput,
   IntWhereInput,
+  PhoneScalarType,
+  PhoneWhereInput,
   StringWhereInput,
 } from '../graphql'
 import type { ClassInterface, SchemaFields, WabePrimaryTypes } from '../schema'
@@ -54,6 +56,7 @@ export const templateScalarType: Record<WabePrimaryTypes, GraphQLScalarType> = {
   Date: DateScalarType,
   Email: EmailScalarType,
   File: FileScalarType,
+  Phone: PhoneScalarType,
 }
 
 export const templateWhereInput: Record<
@@ -66,6 +69,7 @@ export const templateWhereInput: Record<
   Boolean: BooleanWhereInput,
   Date: DateWhereInput,
   Email: EmailWhereInput,
+  Phone: PhoneWhereInput,
   Array: ArrayWhereInput,
   File: FileWhereInput,
 }

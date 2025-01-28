@@ -183,9 +183,7 @@ export const setupTests = async (
               type: 'Array',
               typeValue: 'String',
             },
-            phone: {
-              type: 'Phone',
-            },
+            test: { type: 'TestScalar' },
           },
           searchableFields: ['email'],
           permissions: {
@@ -215,8 +213,8 @@ export const setupTests = async (
       ],
       scalars: [
         {
-          name: 'Phone',
-          description: 'Phone scalar',
+          name: 'TestScalar',
+          description: 'Test scalar',
         },
       ],
     },
