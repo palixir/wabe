@@ -7,6 +7,7 @@ enum RoleEnum {
 }
 
 enum AuthenticationProvider {
+  github
   google
   emailPassword
 }
@@ -56,6 +57,7 @@ scalar Date
 type UserAuthentication {
   emailPassword: UserAuthenticationEmailPassword
   google: UserAuthenticationGoogle
+  github: UserAuthenticationGithub
 }
 
 type UserAuthenticationEmailPassword {
@@ -69,7 +71,12 @@ scalar Email
 type UserAuthenticationGoogle {
   email: Email!
   verifiedEmail: Boolean!
-  idToken: String!
+}
+
+type UserAuthenticationGithub {
+  email: Email!
+  avatarUrl: String!
+  username: String!
 }
 
 type _SessionConnection {
@@ -118,6 +125,7 @@ input UserACLObjectRolesACLInput {
 input UserAuthenticationInput {
   emailPassword: UserAuthenticationEmailPasswordInput
   google: UserAuthenticationGoogleInput
+  github: UserAuthenticationGithubInput
 }
 
 input UserAuthenticationEmailPasswordInput {
@@ -128,7 +136,12 @@ input UserAuthenticationEmailPasswordInput {
 input UserAuthenticationGoogleInput {
   email: Email!
   verifiedEmail: Boolean!
-  idToken: String!
+}
+
+input UserAuthenticationGithubInput {
+  email: Email!
+  avatarUrl: String!
+  username: String!
 }
 
 """Input to link an object to a pointer User"""
@@ -175,6 +188,7 @@ input UserACLObjectRolesACLCreateFieldsInput {
 input UserAuthenticationCreateFieldsInput {
   emailPassword: UserAuthenticationEmailPasswordCreateFieldsInput
   google: UserAuthenticationGoogleCreateFieldsInput
+  github: UserAuthenticationGithubCreateFieldsInput
 }
 
 input UserAuthenticationEmailPasswordCreateFieldsInput {
@@ -185,7 +199,12 @@ input UserAuthenticationEmailPasswordCreateFieldsInput {
 input UserAuthenticationGoogleCreateFieldsInput {
   email: Email
   verifiedEmail: Boolean
-  idToken: String
+}
+
+input UserAuthenticationGithubCreateFieldsInput {
+  email: Email
+  avatarUrl: String
+  username: String
 }
 
 """Input to add a relation to the class User"""
@@ -710,6 +729,7 @@ scalar Search
 input UserAuthenticationWhereInput {
   emailPassword: UserAuthenticationEmailPasswordWhereInput
   google: UserAuthenticationGoogleWhereInput
+  github: UserAuthenticationGithubWhereInput
   OR: [UserAuthenticationWhereInput]
   AND: [UserAuthenticationWhereInput]
 }
@@ -731,9 +751,16 @@ input EmailWhereInput {
 input UserAuthenticationGoogleWhereInput {
   email: EmailWhereInput
   verifiedEmail: BooleanWhereInput
-  idToken: StringWhereInput
   OR: [UserAuthenticationGoogleWhereInput]
   AND: [UserAuthenticationGoogleWhereInput]
+}
+
+input UserAuthenticationGithubWhereInput {
+  email: EmailWhereInput
+  avatarUrl: StringWhereInput
+  username: StringWhereInput
+  OR: [UserAuthenticationGithubWhereInput]
+  AND: [UserAuthenticationGithubWhereInput]
 }
 
 input AnyWhereInput {
@@ -1152,6 +1179,7 @@ input UserACLObjectRolesACLUpdateFieldsInput {
 input UserAuthenticationUpdateFieldsInput {
   emailPassword: UserAuthenticationEmailPasswordUpdateFieldsInput
   google: UserAuthenticationGoogleUpdateFieldsInput
+  github: UserAuthenticationGithubUpdateFieldsInput
 }
 
 input UserAuthenticationEmailPasswordUpdateFieldsInput {
@@ -1162,7 +1190,12 @@ input UserAuthenticationEmailPasswordUpdateFieldsInput {
 input UserAuthenticationGoogleUpdateFieldsInput {
   email: Email
   verifiedEmail: Boolean
-  idToken: String
+}
+
+input UserAuthenticationGithubUpdateFieldsInput {
+  email: Email
+  avatarUrl: String
+  username: String
 }
 
 input UpdateUsersInput {
@@ -1538,6 +1571,7 @@ input SignInWithInput {
 input SignInWithAuthenticationInput {
   emailPassword: SignInWithAuthenticationEmailPasswordInput
   google: SignInWithAuthenticationGoogleInput
+  github: SignInWithAuthenticationGithubInput
   otp: SignInWithAuthenticationOtpInput
   secondaryFactor: SecondaryFactor
 }
@@ -1548,6 +1582,11 @@ input SignInWithAuthenticationEmailPasswordInput {
 }
 
 input SignInWithAuthenticationGoogleInput {
+  authorizationCode: String!
+  codeVerifier: String!
+}
+
+input SignInWithAuthenticationGithubInput {
   authorizationCode: String!
   codeVerifier: String!
 }
@@ -1569,6 +1608,7 @@ input SignUpWithInput {
 input SignUpWithAuthenticationInput {
   emailPassword: SignUpWithAuthenticationEmailPasswordInput
   google: SignUpWithAuthenticationGoogleInput
+  github: SignUpWithAuthenticationGithubInput
   otp: SignUpWithAuthenticationOtpInput
   secondaryFactor: SecondaryFactor
 }
@@ -1579,6 +1619,11 @@ input SignUpWithAuthenticationEmailPasswordInput {
 }
 
 input SignUpWithAuthenticationGoogleInput {
+  authorizationCode: String!
+  codeVerifier: String!
+}
+
+input SignUpWithAuthenticationGithubInput {
   authorizationCode: String!
   codeVerifier: String!
 }

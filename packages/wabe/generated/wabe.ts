@@ -19,6 +19,7 @@ export enum RoleEnum {
 }
 
 export enum AuthenticationProvider {
+  github = "github",
   google = "google",
   emailPassword = "emailPassword",
 }
@@ -64,6 +65,7 @@ export type UserACLObjectRolesACL = {
 export type UserAuthentication = {
   emailPassword?: UserAuthenticationEmailPassword;
   google?: UserAuthenticationGoogle;
+  github?: UserAuthenticationGithub;
 };
 
 export type UserAuthenticationEmailPassword = {
@@ -74,7 +76,12 @@ export type UserAuthenticationEmailPassword = {
 export type UserAuthenticationGoogle = {
   email: Scalars['Email']['output'];
   verifiedEmail: Scalars['Boolean']['output'];
-  idToken: Scalars['String']['output'];
+};
+
+export type UserAuthenticationGithub = {
+  email: Scalars['Email']['output'];
+  avatarUrl: Scalars['String']['output'];
+  username: Scalars['String']['output'];
 };
 
 export type _SessionConnection = {
@@ -122,6 +129,7 @@ export type UserACLObjectRolesACLInput = {
 export type UserAuthenticationInput = {
   emailPassword?: UserAuthenticationEmailPasswordInput;
   google?: UserAuthenticationGoogleInput;
+  github?: UserAuthenticationGithubInput;
 };
 
 export type UserAuthenticationEmailPasswordInput = {
@@ -132,7 +140,12 @@ export type UserAuthenticationEmailPasswordInput = {
 export type UserAuthenticationGoogleInput = {
   email: Scalars['Email']['input'];
   verifiedEmail: Scalars['Boolean']['input'];
-  idToken: Scalars['String']['input'];
+};
+
+export type UserAuthenticationGithubInput = {
+  email: Scalars['Email']['input'];
+  avatarUrl: Scalars['String']['input'];
+  username: Scalars['String']['input'];
 };
 
 export type UserPointerInput = {
@@ -177,6 +190,7 @@ export type UserACLObjectRolesACLCreateFieldsInput = {
 export type UserAuthenticationCreateFieldsInput = {
   emailPassword?: UserAuthenticationEmailPasswordCreateFieldsInput;
   google?: UserAuthenticationGoogleCreateFieldsInput;
+  github?: UserAuthenticationGithubCreateFieldsInput;
 };
 
 export type UserAuthenticationEmailPasswordCreateFieldsInput = {
@@ -187,7 +201,12 @@ export type UserAuthenticationEmailPasswordCreateFieldsInput = {
 export type UserAuthenticationGoogleCreateFieldsInput = {
   email?: Scalars['Email']['input'];
   verifiedEmail?: Scalars['Boolean']['input'];
-  idToken?: Scalars['String']['input'];
+};
+
+export type UserAuthenticationGithubCreateFieldsInput = {
+  email?: Scalars['Email']['input'];
+  avatarUrl?: Scalars['String']['input'];
+  username?: Scalars['String']['input'];
 };
 
 export type UserRelationInput = {
@@ -750,6 +769,7 @@ export type SearchWhereInput = {
 export type UserAuthenticationWhereInput = {
   emailPassword?: UserAuthenticationEmailPasswordWhereInput;
   google?: UserAuthenticationGoogleWhereInput;
+  github?: UserAuthenticationGithubWhereInput;
   OR?: UserAuthenticationWhereInput[];
   AND?: UserAuthenticationWhereInput[];
 };
@@ -771,9 +791,16 @@ export type EmailWhereInput = {
 export type UserAuthenticationGoogleWhereInput = {
   email?: EmailWhereInput;
   verifiedEmail?: BooleanWhereInput;
-  idToken?: StringWhereInput;
   OR?: UserAuthenticationGoogleWhereInput[];
   AND?: UserAuthenticationGoogleWhereInput[];
+};
+
+export type UserAuthenticationGithubWhereInput = {
+  email?: EmailWhereInput;
+  avatarUrl?: StringWhereInput;
+  username?: StringWhereInput;
+  OR?: UserAuthenticationGithubWhereInput[];
+  AND?: UserAuthenticationGithubWhereInput[];
 };
 
 export type AnyWhereInput = {
@@ -1329,6 +1356,7 @@ export type UserACLObjectRolesACLUpdateFieldsInput = {
 export type UserAuthenticationUpdateFieldsInput = {
   emailPassword?: UserAuthenticationEmailPasswordUpdateFieldsInput;
   google?: UserAuthenticationGoogleUpdateFieldsInput;
+  github?: UserAuthenticationGithubUpdateFieldsInput;
 };
 
 export type UserAuthenticationEmailPasswordUpdateFieldsInput = {
@@ -1339,7 +1367,12 @@ export type UserAuthenticationEmailPasswordUpdateFieldsInput = {
 export type UserAuthenticationGoogleUpdateFieldsInput = {
   email?: Scalars['Email']['input'];
   verifiedEmail?: Scalars['Boolean']['input'];
-  idToken?: Scalars['String']['input'];
+};
+
+export type UserAuthenticationGithubUpdateFieldsInput = {
+  email?: Scalars['Email']['input'];
+  avatarUrl?: Scalars['String']['input'];
+  username?: Scalars['String']['input'];
 };
 
 export type UpdateUsersInput = {
@@ -1715,6 +1748,7 @@ export type SignInWithInput = {
 export type SignInWithAuthenticationInput = {
   emailPassword?: SignInWithAuthenticationEmailPasswordInput;
   google?: SignInWithAuthenticationGoogleInput;
+  github?: SignInWithAuthenticationGithubInput;
   otp?: SignInWithAuthenticationOtpInput;
   secondaryFactor?: SecondaryFactor;
 };
@@ -1725,6 +1759,11 @@ export type SignInWithAuthenticationEmailPasswordInput = {
 };
 
 export type SignInWithAuthenticationGoogleInput = {
+  authorizationCode: Scalars['String']['input'];
+  codeVerifier: Scalars['String']['input'];
+};
+
+export type SignInWithAuthenticationGithubInput = {
   authorizationCode: Scalars['String']['input'];
   codeVerifier: Scalars['String']['input'];
 };
@@ -1746,6 +1785,7 @@ export type SignUpWithInput = {
 export type SignUpWithAuthenticationInput = {
   emailPassword?: SignUpWithAuthenticationEmailPasswordInput;
   google?: SignUpWithAuthenticationGoogleInput;
+  github?: SignUpWithAuthenticationGithubInput;
   otp?: SignUpWithAuthenticationOtpInput;
   secondaryFactor?: SecondaryFactor;
 };
@@ -1756,6 +1796,11 @@ export type SignUpWithAuthenticationEmailPasswordInput = {
 };
 
 export type SignUpWithAuthenticationGoogleInput = {
+  authorizationCode: Scalars['String']['input'];
+  codeVerifier: Scalars['String']['input'];
+};
+
+export type SignUpWithAuthenticationGithubInput = {
   authorizationCode: Scalars['String']['input'];
   codeVerifier: Scalars['String']['input'];
 };
