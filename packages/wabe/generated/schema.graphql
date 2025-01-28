@@ -7,6 +7,7 @@ enum AuthenticationProvider {
   github
   google
   emailPassword
+  phonePassword
 }
 
 enum SecondaryFactor {
@@ -55,10 +56,19 @@ type UserACLObjectRolesACL {
 scalar Date
 
 type UserAuthentication {
+  phonePassword: UserAuthenticationPhonePassword
   emailPassword: UserAuthenticationEmailPassword
   google: UserAuthenticationGoogle
   github: UserAuthenticationGithub
 }
+
+type UserAuthenticationPhonePassword {
+  phone: Phone!
+  password: String!
+}
+
+"""Phone scalar type"""
+scalar Phone
 
 type UserAuthenticationEmailPassword {
   email: Email!
@@ -120,9 +130,15 @@ input UserACLObjectRolesACLInput {
 }
 
 input UserAuthenticationInput {
+  phonePassword: UserAuthenticationPhonePasswordInput
   emailPassword: UserAuthenticationEmailPasswordInput
   google: UserAuthenticationGoogleInput
   github: UserAuthenticationGithubInput
+}
+
+input UserAuthenticationPhonePasswordInput {
+  phone: Phone!
+  password: String!
 }
 
 input UserAuthenticationEmailPasswordInput {
@@ -183,9 +199,15 @@ input UserACLObjectRolesACLCreateFieldsInput {
 }
 
 input UserAuthenticationCreateFieldsInput {
+  phonePassword: UserAuthenticationPhonePasswordCreateFieldsInput
   emailPassword: UserAuthenticationEmailPasswordCreateFieldsInput
   google: UserAuthenticationGoogleCreateFieldsInput
   github: UserAuthenticationGithubCreateFieldsInput
+}
+
+input UserAuthenticationPhonePasswordCreateFieldsInput {
+  phone: Phone
+  password: String
 }
 
 input UserAuthenticationEmailPasswordCreateFieldsInput {
@@ -731,11 +753,26 @@ input SearchWhereInput {
 scalar Search
 
 input UserAuthenticationWhereInput {
+  phonePassword: UserAuthenticationPhonePasswordWhereInput
   emailPassword: UserAuthenticationEmailPasswordWhereInput
   google: UserAuthenticationGoogleWhereInput
   github: UserAuthenticationGithubWhereInput
   OR: [UserAuthenticationWhereInput]
   AND: [UserAuthenticationWhereInput]
+}
+
+input UserAuthenticationPhonePasswordWhereInput {
+  phone: PhoneWhereInput
+  password: StringWhereInput
+  OR: [UserAuthenticationPhonePasswordWhereInput]
+  AND: [UserAuthenticationPhonePasswordWhereInput]
+}
+
+input PhoneWhereInput {
+  equalTo: Phone
+  notEqualTo: Phone
+  in: [Phone]
+  notIn: [Phone]
 }
 
 input UserAuthenticationEmailPasswordWhereInput {
@@ -1174,9 +1211,15 @@ input UserACLObjectRolesACLUpdateFieldsInput {
 }
 
 input UserAuthenticationUpdateFieldsInput {
+  phonePassword: UserAuthenticationPhonePasswordUpdateFieldsInput
   emailPassword: UserAuthenticationEmailPasswordUpdateFieldsInput
   google: UserAuthenticationGoogleUpdateFieldsInput
   github: UserAuthenticationGithubUpdateFieldsInput
+}
+
+input UserAuthenticationPhonePasswordUpdateFieldsInput {
+  phone: Phone
+  password: String
 }
 
 input UserAuthenticationEmailPasswordUpdateFieldsInput {
@@ -1566,11 +1609,17 @@ input SignInWithInput {
 }
 
 input SignInWithAuthenticationInput {
+  phonePassword: SignInWithAuthenticationPhonePasswordInput
   emailPassword: SignInWithAuthenticationEmailPasswordInput
   google: SignInWithAuthenticationGoogleInput
   github: SignInWithAuthenticationGithubInput
   otp: SignInWithAuthenticationOtpInput
   secondaryFactor: SecondaryFactor
+}
+
+input SignInWithAuthenticationPhonePasswordInput {
+  phone: Phone!
+  password: String!
 }
 
 input SignInWithAuthenticationEmailPasswordInput {
@@ -1603,11 +1652,17 @@ input SignUpWithInput {
 }
 
 input SignUpWithAuthenticationInput {
+  phonePassword: SignUpWithAuthenticationPhonePasswordInput
   emailPassword: SignUpWithAuthenticationEmailPasswordInput
   google: SignUpWithAuthenticationGoogleInput
   github: SignUpWithAuthenticationGithubInput
   otp: SignUpWithAuthenticationOtpInput
   secondaryFactor: SecondaryFactor
+}
+
+input SignUpWithAuthenticationPhonePasswordInput {
+  phone: Phone!
+  password: String!
 }
 
 input SignUpWithAuthenticationEmailPasswordInput {

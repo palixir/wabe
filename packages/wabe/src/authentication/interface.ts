@@ -102,4 +102,5 @@ export enum AuthenticationProvider {
   GitHub = 'github',
   Google = 'google',
   EmailPassword = 'emailPassword',
+  PhonePassword = 'phonePassword',
 }

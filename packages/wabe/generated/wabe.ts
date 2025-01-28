@@ -22,6 +22,7 @@ export enum AuthenticationProvider {
   github = "github",
   google = "google",
   emailPassword = "emailPassword",
+  phonePassword = "phonePassword",
 }
 
 export enum SecondaryFactor {
@@ -63,9 +64,15 @@ export type UserACLObjectRolesACL = {
 };
 
 export type UserAuthentication = {
+  phonePassword?: UserAuthenticationPhonePassword;
   emailPassword?: UserAuthenticationEmailPassword;
   google?: UserAuthenticationGoogle;
   github?: UserAuthenticationGithub;
+};
+
+export type UserAuthenticationPhonePassword = {
+  phone: Scalars['Phone']['output'];
+  password: Scalars['String']['output'];
 };
 
 export type UserAuthenticationEmailPassword = {
@@ -127,9 +134,15 @@ export type UserACLObjectRolesACLInput = {
 };
 
 export type UserAuthenticationInput = {
+  phonePassword?: UserAuthenticationPhonePasswordInput;
   emailPassword?: UserAuthenticationEmailPasswordInput;
   google?: UserAuthenticationGoogleInput;
   github?: UserAuthenticationGithubInput;
+};
+
+export type UserAuthenticationPhonePasswordInput = {
+  phone: Scalars['Phone']['input'];
+  password: Scalars['String']['input'];
 };
 
 export type UserAuthenticationEmailPasswordInput = {
@@ -188,9 +201,15 @@ export type UserACLObjectRolesACLCreateFieldsInput = {
 };
 
 export type UserAuthenticationCreateFieldsInput = {
+  phonePassword?: UserAuthenticationPhonePasswordCreateFieldsInput;
   emailPassword?: UserAuthenticationEmailPasswordCreateFieldsInput;
   google?: UserAuthenticationGoogleCreateFieldsInput;
   github?: UserAuthenticationGithubCreateFieldsInput;
+};
+
+export type UserAuthenticationPhonePasswordCreateFieldsInput = {
+  phone?: Scalars['Phone']['input'];
+  password?: Scalars['String']['input'];
 };
 
 export type UserAuthenticationEmailPasswordCreateFieldsInput = {
@@ -774,11 +793,26 @@ export type SearchWhereInput = {
 };
 
 export type UserAuthenticationWhereInput = {
+  phonePassword?: UserAuthenticationPhonePasswordWhereInput;
   emailPassword?: UserAuthenticationEmailPasswordWhereInput;
   google?: UserAuthenticationGoogleWhereInput;
   github?: UserAuthenticationGithubWhereInput;
   OR?: UserAuthenticationWhereInput[];
   AND?: UserAuthenticationWhereInput[];
+};
+
+export type UserAuthenticationPhonePasswordWhereInput = {
+  phone?: PhoneWhereInput;
+  password?: StringWhereInput;
+  OR?: UserAuthenticationPhonePasswordWhereInput[];
+  AND?: UserAuthenticationPhonePasswordWhereInput[];
+};
+
+export type PhoneWhereInput = {
+  equalTo?: Scalars['Phone']['input'];
+  notEqualTo?: Scalars['Phone']['input'];
+  in?: Scalars['Phone']['input'][];
+  notIn?: Scalars['Phone']['input'][];
 };
 
 export type UserAuthenticationEmailPasswordWhereInput = {
@@ -1354,9 +1388,15 @@ export type UserACLObjectRolesACLUpdateFieldsInput = {
 };
 
 export type UserAuthenticationUpdateFieldsInput = {
+  phonePassword?: UserAuthenticationPhonePasswordUpdateFieldsInput;
   emailPassword?: UserAuthenticationEmailPasswordUpdateFieldsInput;
   google?: UserAuthenticationGoogleUpdateFieldsInput;
   github?: UserAuthenticationGithubUpdateFieldsInput;
+};
+
+export type UserAuthenticationPhonePasswordUpdateFieldsInput = {
+  phone?: Scalars['Phone']['input'];
+  password?: Scalars['String']['input'];
 };
 
 export type UserAuthenticationEmailPasswordUpdateFieldsInput = {
@@ -1746,11 +1786,17 @@ export type SignInWithInput = {
 };
 
 export type SignInWithAuthenticationInput = {
+  phonePassword?: SignInWithAuthenticationPhonePasswordInput;
   emailPassword?: SignInWithAuthenticationEmailPasswordInput;
   google?: SignInWithAuthenticationGoogleInput;
   github?: SignInWithAuthenticationGithubInput;
   otp?: SignInWithAuthenticationOtpInput;
   secondaryFactor?: SecondaryFactor;
+};
+
+export type SignInWithAuthenticationPhonePasswordInput = {
+  phone: Scalars['Phone']['input'];
+  password: Scalars['String']['input'];
 };
 
 export type SignInWithAuthenticationEmailPasswordInput = {
@@ -1783,11 +1829,17 @@ export type SignUpWithInput = {
 };
 
 export type SignUpWithAuthenticationInput = {
+  phonePassword?: SignUpWithAuthenticationPhonePasswordInput;
   emailPassword?: SignUpWithAuthenticationEmailPasswordInput;
   google?: SignUpWithAuthenticationGoogleInput;
   github?: SignUpWithAuthenticationGithubInput;
   otp?: SignUpWithAuthenticationOtpInput;
   secondaryFactor?: SecondaryFactor;
+};
+
+export type SignUpWithAuthenticationPhonePasswordInput = {
+  phone: Scalars['Phone']['input'];
+  password: Scalars['String']['input'];
 };
 
 export type SignUpWithAuthenticationEmailPasswordInput = {

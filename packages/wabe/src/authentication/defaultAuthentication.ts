@@ -3,10 +3,35 @@ import type { CustomAuthenticationMethods } from './interface'
 import { GitHub } from './providers'
 import { Google } from './providers'
 import { EmailPassword } from './providers/EmailPassword'
+import { PhonePassword } from './providers/PhonePassword'
 
 export const defaultAuthenticationMethods = <
   T extends WabeTypes,
 >(): CustomAuthenticationMethods<T>[] => [
+  {
+    name: 'phonePassword',
+    input: {
+      phone: {
+        type: 'Phone',
+        required: true,
+      },
+      password: {
+        type: 'String',
+        required: true,
+      },
+    },
+    dataToStore: {
+      phone: {
+        type: 'Phone',
+        required: true,
+      },
+      password: {
+        type: 'String',
+        required: true,
+      },
+    },
+    provider: new PhonePassword(),
+  },
   {
     name: 'emailPassword',
     input: {

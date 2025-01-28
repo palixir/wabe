@@ -11,8 +11,21 @@ const run = async () => {
   const wabe = new Wabe({
     // ... others config fields
     authentication: {
-      successRedirectPath: "https://myapp.com/dashboard",
-      failureRedirectPath: "https://myapp.com/login",
+      session: {
+        cookieSession: true,
+        accessTokenExpiresInMs: 1000 * 60 * 15, // 15 minutes
+        refreshTokenExpiresInMs: 1000 * 60 * 60 * 24 * 7, // 7 days
+      },
+      backDomain: process.env.BACK_DOMAIN,
+      successRedirectPath: 'https://app.com/dashboard',
+      failureRedirectPath: 'https://app.com/signin',
+      roles: ['Admin', 'Client'],
+      providers: {
+        google: {
+          clientId: process.env.GOOGLE_CLIENT_ID || '',
+          clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
+        },
+      },
     },
   });
 
