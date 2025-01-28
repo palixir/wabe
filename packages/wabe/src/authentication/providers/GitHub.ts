@@ -1,46 +1,41 @@
-import type { UserAuthenticationGoogle } from '../../../generated/wabe'
+import type { UserAuthenticationGithub } from '../../../generated/wabe'
 import { contextWithRoot } from '../../utils/export'
 import {
   AuthenticationProvider,
   type AuthenticationEventsOptions,
   type ProviderInterface,
 } from '../interface'
-import { Google as GoogleOauth } from '../oauth/Google'
+import { GitHub as GitHubOauth } from '../oauth/GitHub'
 
-type GoogleInterface = {
+type GitHubInterface = {
   authorizationCode: string
   codeVerifier: string
 }
 
-export class Google implements ProviderInterface<GoogleInterface> {
-  name = 'google'
-  async _googleAuthentication({
+export class GitHub implements ProviderInterface<GitHubInterface> {
+  name = 'github'
+  async _githubAuthentication({
     context,
     input,
-  }: AuthenticationEventsOptions<GoogleInterface>) {
+  }: AuthenticationEventsOptions<GitHubInterface>) {
     const { authorizationCode, codeVerifier } = input
 
-    const googleOauth = new GoogleOauth(context.wabe.config)
+    const githubOauth = new GitHubOauth(context.wabe.config)
 
-    const { accessToken, idToken } =
-      await googleOauth.validateAuthorizationCode(
-        authorizationCode,
-        codeVerifier,
-      )
-
-    if (!idToken) throw new Error('Authentication failed')
-
-    const { email, verifiedEmail } = await googleOauth.getUserInfo(
-      accessToken,
-      idToken,
+    const { accessToken } = await githubOauth.validateAuthorizationCode(
+      authorizationCode,
+      codeVerifier,
     )
+
+    const { email, avatarUrl, username } =
+      await githubOauth.getUserInfo(accessToken)
 
     const user = await context.wabe.controllers.database.getObjects({
       className: 'User',
       where: {
         authentication: {
           // @ts-expect-error
-          google: {
+          github: {
             email: { equalTo: email },
           },
         },
@@ -50,19 +45,20 @@ export class Google implements ProviderInterface<GoogleInterface> {
       fields: ['id'],
     })
 
-    const authenticationDataToSave: UserAuthenticationGoogle = {
+    const authenticationDataToSave: UserAuthenticationGithub = {
       email,
-      verifiedEmail,
+      username,
+      avatarUrl,
     }
 
     if (user.length === 0) {
       const createdUser = await context.wabe.controllers.database.createObject({
         className: 'User',
         data: {
-          provider: AuthenticationProvider.Google,
+          provider: AuthenticationProvider.GitHub,
           isOauth: true,
           authentication: {
-            google: authenticationDataToSave,
+            github: authenticationDataToSave,
           },
         },
         context: contextWithRoot(context),
@@ -83,8 +79,8 @@ export class Google implements ProviderInterface<GoogleInterface> {
     }
   }
 
-  onSignIn(options: AuthenticationEventsOptions<GoogleInterface>) {
-    return this._googleAuthentication(options)
+  onSignIn(options: AuthenticationEventsOptions<GitHubInterface>) {
+    return this._githubAuthentication(options)
   }
 
   // @ts-expect-error

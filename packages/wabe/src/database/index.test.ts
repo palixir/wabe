@@ -583,7 +583,6 @@ describe('Database', () => {
           google: {
             email: 'email@test.fr',
             verifiedEmail: true,
-            idToken: 'idToken',
           },
         },
       },
@@ -592,7 +591,6 @@ describe('Database', () => {
     expect(res?.authentication?.google).toEqual({
       email: 'email@test.fr',
       verifiedEmail: true,
-      idToken: 'idToken',
     })
   })
 

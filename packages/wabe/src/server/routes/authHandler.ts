@@ -5,6 +5,7 @@ import { getGraphqlClient } from '../../utils/helper'
 import { gql } from 'graphql-request'
 import { Google } from '../../authentication/oauth'
 import { generateRandomValues } from '../../authentication/oauth/utils'
+import { GitHub } from '../../authentication/oauth/GitHub'
 
 /*
 - Generate code verifier (back)
@@ -102,7 +103,7 @@ export const oauthHandlerCallback = async (
   }
 }
 
-export const authHandler = async (
+export const authHandler = (
   context: Context,
   wabeContext: WabeContext<any>,
   provider: ProviderEnum,
@@ -137,7 +138,39 @@ export const authHandler = async (
         secure: true,
       })
 
-      const authorizationURL = await googleOauth.createAuthorizationURL(
+      const authorizationURL = googleOauth.createAuthorizationURL(
+        state,
+        codeVerifier,
+        {
+          scopes: ['email'],
+        },
+      )
+
+      context.redirect(authorizationURL.toString())
+
+      break
+    }
+    case ProviderEnum.github: {
+      const githubOauth = new GitHub(wabeContext.wabe.config)
+
+      const state = generateRandomValues()
+      const codeVerifier = generateRandomValues()
+
+      context.res.setCookie('code_verifier', codeVerifier, {
+        httpOnly: true,
+        path: '/',
+        maxAge: 60 * 5, // 5 minutes
+        secure: true,
+      })
+
+      context.res.setCookie('state', state, {
+        httpOnly: true,
+        path: '/',
+        maxAge: 60 * 5, // 5 minutes
+        secure: true,
+      })
+
+      const authorizationURL = githubOauth.createAuthorizationURL(
         state,
         codeVerifier,
         {

@@ -1,5 +1,6 @@
 import type { WabeTypes } from '..'
 import type { CustomAuthenticationMethods } from './interface'
+import { GitHub } from './providers'
 import { Google } from './providers'
 import { EmailPassword } from './providers/EmailPassword'
 import { PhonePassword } from './providers/PhonePassword'
@@ -76,13 +77,39 @@ export const defaultAuthenticationMethods = <
         type: 'Boolean',
         required: true,
       },
-      idToken: {
+    },
+    // There is no signUp method for Google provider
+    // @ts-expect-error
+    provider: new Google(),
+  },
+  {
+    name: 'github',
+    input: {
+      authorizationCode: {
+        type: 'String',
+        required: true,
+      },
+      codeVerifier: {
+        type: 'String',
+        required: true,
+      },
+    },
+    dataToStore: {
+      email: {
+        type: 'Email',
+        required: true,
+      },
+      avatarUrl: {
+        type: 'String',
+        required: true,
+      },
+      username: {
         type: 'String',
         required: true,
       },
     },
     // There is no signUp method for Google provider
     // @ts-expect-error
-    provider: new Google(),
+    provider: new GitHub(),
   },
 ]

@@ -4,6 +4,7 @@ enum RoleEnum {
 }
 
 enum AuthenticationProvider {
+  github
   google
   emailPassword
   phonePassword
@@ -58,6 +59,7 @@ type UserAuthentication {
   phonePassword: UserAuthenticationPhonePassword
   emailPassword: UserAuthenticationEmailPassword
   google: UserAuthenticationGoogle
+  github: UserAuthenticationGithub
 }
 
 type UserAuthenticationPhonePassword {
@@ -76,7 +78,12 @@ type UserAuthenticationEmailPassword {
 type UserAuthenticationGoogle {
   email: Email!
   verifiedEmail: Boolean!
-  idToken: String!
+}
+
+type UserAuthenticationGithub {
+  email: Email!
+  avatarUrl: String!
+  username: String!
 }
 
 type _SessionConnection {
@@ -126,6 +133,7 @@ input UserAuthenticationInput {
   phonePassword: UserAuthenticationPhonePasswordInput
   emailPassword: UserAuthenticationEmailPasswordInput
   google: UserAuthenticationGoogleInput
+  github: UserAuthenticationGithubInput
 }
 
 input UserAuthenticationPhonePasswordInput {
@@ -141,7 +149,12 @@ input UserAuthenticationEmailPasswordInput {
 input UserAuthenticationGoogleInput {
   email: Email!
   verifiedEmail: Boolean!
-  idToken: String!
+}
+
+input UserAuthenticationGithubInput {
+  email: Email!
+  avatarUrl: String!
+  username: String!
 }
 
 """Input to link an object to a pointer User"""
@@ -189,6 +202,7 @@ input UserAuthenticationCreateFieldsInput {
   phonePassword: UserAuthenticationPhonePasswordCreateFieldsInput
   emailPassword: UserAuthenticationEmailPasswordCreateFieldsInput
   google: UserAuthenticationGoogleCreateFieldsInput
+  github: UserAuthenticationGithubCreateFieldsInput
 }
 
 input UserAuthenticationPhonePasswordCreateFieldsInput {
@@ -204,7 +218,12 @@ input UserAuthenticationEmailPasswordCreateFieldsInput {
 input UserAuthenticationGoogleCreateFieldsInput {
   email: Email
   verifiedEmail: Boolean
-  idToken: String
+}
+
+input UserAuthenticationGithubCreateFieldsInput {
+  email: Email
+  avatarUrl: String
+  username: String
 }
 
 """Input to add a relation to the class User"""
@@ -737,6 +756,7 @@ input UserAuthenticationWhereInput {
   phonePassword: UserAuthenticationPhonePasswordWhereInput
   emailPassword: UserAuthenticationEmailPasswordWhereInput
   google: UserAuthenticationGoogleWhereInput
+  github: UserAuthenticationGithubWhereInput
   OR: [UserAuthenticationWhereInput]
   AND: [UserAuthenticationWhereInput]
 }
@@ -765,9 +785,16 @@ input UserAuthenticationEmailPasswordWhereInput {
 input UserAuthenticationGoogleWhereInput {
   email: EmailWhereInput
   verifiedEmail: BooleanWhereInput
-  idToken: StringWhereInput
   OR: [UserAuthenticationGoogleWhereInput]
   AND: [UserAuthenticationGoogleWhereInput]
+}
+
+input UserAuthenticationGithubWhereInput {
+  email: EmailWhereInput
+  avatarUrl: StringWhereInput
+  username: StringWhereInput
+  OR: [UserAuthenticationGithubWhereInput]
+  AND: [UserAuthenticationGithubWhereInput]
 }
 
 input AnyWhereInput {
@@ -1187,6 +1214,7 @@ input UserAuthenticationUpdateFieldsInput {
   phonePassword: UserAuthenticationPhonePasswordUpdateFieldsInput
   emailPassword: UserAuthenticationEmailPasswordUpdateFieldsInput
   google: UserAuthenticationGoogleUpdateFieldsInput
+  github: UserAuthenticationGithubUpdateFieldsInput
 }
 
 input UserAuthenticationPhonePasswordUpdateFieldsInput {
@@ -1202,7 +1230,12 @@ input UserAuthenticationEmailPasswordUpdateFieldsInput {
 input UserAuthenticationGoogleUpdateFieldsInput {
   email: Email
   verifiedEmail: Boolean
-  idToken: String
+}
+
+input UserAuthenticationGithubUpdateFieldsInput {
+  email: Email
+  avatarUrl: String
+  username: String
 }
 
 input UpdateUsersInput {
@@ -1579,6 +1612,7 @@ input SignInWithAuthenticationInput {
   phonePassword: SignInWithAuthenticationPhonePasswordInput
   emailPassword: SignInWithAuthenticationEmailPasswordInput
   google: SignInWithAuthenticationGoogleInput
+  github: SignInWithAuthenticationGithubInput
   otp: SignInWithAuthenticationOtpInput
   secondaryFactor: SecondaryFactor
 }
@@ -1594,6 +1628,11 @@ input SignInWithAuthenticationEmailPasswordInput {
 }
 
 input SignInWithAuthenticationGoogleInput {
+  authorizationCode: String!
+  codeVerifier: String!
+}
+
+input SignInWithAuthenticationGithubInput {
   authorizationCode: String!
   codeVerifier: String!
 }
@@ -1616,6 +1655,7 @@ input SignUpWithAuthenticationInput {
   phonePassword: SignUpWithAuthenticationPhonePasswordInput
   emailPassword: SignUpWithAuthenticationEmailPasswordInput
   google: SignUpWithAuthenticationGoogleInput
+  github: SignUpWithAuthenticationGithubInput
   otp: SignUpWithAuthenticationOtpInput
   secondaryFactor: SecondaryFactor
 }
@@ -1631,6 +1671,11 @@ input SignUpWithAuthenticationEmailPasswordInput {
 }
 
 input SignUpWithAuthenticationGoogleInput {
+  authorizationCode: String!
+  codeVerifier: String!
+}
+
+input SignUpWithAuthenticationGithubInput {
   authorizationCode: String!
   codeVerifier: String!
 }
