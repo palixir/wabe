@@ -1,19 +1,21 @@
 import { afterEach, describe, expect, it, mock, spyOn } from 'bun:test'
-import { Google } from './Google'
-import { Google as GoogleOauth } from '../oauth/Google'
+import { GitHub } from './GitHub'
+import { GitHub as GitHubOauth } from '../oauth/GitHub'
 import { AuthenticationProvider } from '../interface'
 
-describe('Google providers', () => {
+describe('GitHub providers', () => {
   const mockGetObjects = mock(() => Promise.resolve([]))
   const mockCount = mock(() => Promise.resolve(0)) as any
   const mockCreateObject = mock(() => Promise.resolve({ id: 'userId' })) as any
 
   const mockGetUserInfo = spyOn(
-    GoogleOauth.prototype,
+    GitHubOauth.prototype,
     'getUserInfo',
   ).mockResolvedValue({
     email: 'email@test.fr',
-    verifiedEmail: true,
+    avatarUrl: 'avatarUrl',
+    username: 'username',
+    name: 'name',
   })
 
   const context = {
@@ -28,7 +30,7 @@ describe('Google providers', () => {
       config: {
         authentication: {
           providers: {
-            google: {
+            github: {
               clientId: 'clientId',
               clientSecret: 'clientSecret',
             },
@@ -47,18 +49,17 @@ describe('Google providers', () => {
 
   it('should sign up with Google Provider if there is no user found', async () => {
     const mockValidateAuthorizationCode = spyOn(
-      GoogleOauth.prototype,
+      GitHubOauth.prototype,
       'validateAuthorizationCode',
     ).mockResolvedValue({
-      idToken: 'idToken',
       accessToken: 'accessToken',
       refreshToken: 'refreshToken',
       accessTokenExpiresAt: new Date(0),
     })
 
-    const google = new Google()
+    const github = new GitHub()
 
-    await google.onSignIn({
+    await github.onSignIn({
       context,
       input: {
         authorizationCode: 'authorizationCode',
@@ -74,7 +75,7 @@ describe('Google providers', () => {
       className: 'User',
       where: {
         authentication: {
-          google: {
+          github: {
             email: { equalTo: 'email@test.fr' },
           },
         },
@@ -88,12 +89,13 @@ describe('Google providers', () => {
     expect(mockCreateObject).toHaveBeenCalledWith({
       className: 'User',
       data: {
-        provider: AuthenticationProvider.Google,
+        provider: AuthenticationProvider.GitHub,
         isOauth: true,
         authentication: {
-          google: {
+          github: {
             email: 'email@test.fr',
-            verifiedEmail: true,
+            username: 'username',
+            avatarUrl: 'avatarUrl',
           },
         },
       },
@@ -106,10 +108,9 @@ describe('Google providers', () => {
 
   it('should sign in with Google Provider if there is no user found', async () => {
     const mockValidateAuthorizationCode = spyOn(
-      GoogleOauth.prototype,
+      GitHubOauth.prototype,
       'validateAuthorizationCode',
     ).mockResolvedValue({
-      idToken: 'idToken',
       accessToken: 'accessToken',
       refreshToken: 'refreshToken',
       accessTokenExpiresAt: new Date(0),
@@ -119,7 +120,7 @@ describe('Google providers', () => {
       {
         id: 'userId',
         authentication: {
-          google: {
+          github: {
             email: 'email@test.fr',
             verifiedEmail: true,
             idToken: 'idToken',
@@ -130,9 +131,9 @@ describe('Google providers', () => {
       } as any,
     ] as never)
 
-    const google = new Google()
+    const github = new GitHub()
 
-    await google.onSignIn({
+    await github.onSignIn({
       context,
       input: {
         authorizationCode: 'authorizationCode',
@@ -148,7 +149,7 @@ describe('Google providers', () => {
       className: 'User',
       where: {
         authentication: {
-          google: {
+          github: {
             email: { equalTo: 'email@test.fr' },
           },
         },

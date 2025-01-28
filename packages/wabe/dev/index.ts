@@ -25,8 +25,8 @@ const run = async () => {
         cookieSession: true,
       },
       roles: ['Admin', 'Client'],
-      successRedirectPath: 'http://localhost:3000/auth/oauth?provider=google',
-      failureRedirectPath: 'http://localhost:3000/auth/oauth?provider=google',
+      successRedirectPath: 'http://shipmysaas.com',
+      failureRedirectPath: 'https://shipmysaas.com',
       customAuthenticationMethods: [
         {
           name: 'otp',

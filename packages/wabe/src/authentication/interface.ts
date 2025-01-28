@@ -5,7 +5,7 @@ import type { WabeTypes } from '../server'
 
 export enum ProviderEnum {
   google = 'google',
-  x = 'x',
+  github = 'github',
 }
 
 export interface ProviderConfig {
@@ -99,6 +99,7 @@ export interface Provider {
 }
 
 export enum AuthenticationProvider {
+  GitHub = 'github',
   Google = 'google',
   EmailPassword = 'emailPassword',
 }
