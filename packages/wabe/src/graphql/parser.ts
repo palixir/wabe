@@ -468,6 +468,17 @@ export const GraphqlParser: GraphqlParserConstructor =
             return acc
           }
 
+          // We don't want to put FileInfo for other type than Object
+          if (currentField.type === 'File' && graphqlObjectType === 'Object') {
+            acc[key] = {
+              type: currentField.required
+                ? new GraphQLNonNull(allObjects.FileInfo.object)
+                : allObjects.FileInfo.object,
+            }
+
+            return acc
+          }
+
           if (currentField.type === 'Object') {
             acc[key] = {
               type: callback({

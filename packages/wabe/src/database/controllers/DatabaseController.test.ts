@@ -359,6 +359,7 @@ describe('DatabaseController', () => {
         wabe: { config },
         isRoot: true,
       },
+      fields: ['id'],
     })
 
     expect(mockRunOnSingleObject).toHaveBeenCalledTimes(2)
@@ -392,6 +393,7 @@ describe('DatabaseController', () => {
         wabe: { config },
         isRoot: true,
       },
+      fields: ['id'],
     })
 
     expect(mockRunOnMultipleObject).toHaveBeenCalledTimes(2)
@@ -431,6 +433,7 @@ describe('DatabaseController', () => {
         isRoot: true,
       },
       newData: { name: 'test' },
+      fields: ['id'],
     })
 
     expect(mockRunOnSingleObject).toHaveBeenCalledTimes(2)
@@ -470,6 +473,7 @@ describe('DatabaseController', () => {
         isRoot: true,
       },
       newData: { name: 'test' },
+      fields: ['id'],
     })
 
     expect(mockRunOnMultipleObject).toHaveBeenCalledTimes(2)
@@ -505,6 +509,7 @@ describe('DatabaseController', () => {
         isRoot: true,
       },
       newData: { name: 'test' },
+      fields: ['id'],
     })
 
     expect(mockRunOnSingleObject).toHaveBeenCalledTimes(2)
@@ -543,6 +548,7 @@ describe('DatabaseController', () => {
         isRoot: true,
       },
       newData: { name: 'test' },
+      fields: ['id'],
     })
 
     expect(mockRunOnMultipleObject).toHaveBeenCalledTimes(2)
@@ -575,6 +581,7 @@ describe('DatabaseController', () => {
         wabe: { config },
         isRoot: true,
       },
+      fields: ['id'],
     })
 
     // 4 because we have a getObject before the delete
@@ -610,6 +617,7 @@ describe('DatabaseController', () => {
         wabe: { config },
         isRoot: true,
       },
+      fields: ['id'],
     })
 
     // 4 because we have a getObject before the delete

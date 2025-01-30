@@ -62,13 +62,15 @@ const run = async () => {
               type: 'Email',
               required: true,
             },
+            tata: {
+              type: 'File',
+            },
           },
         },
         {
           name: 'Post',
           fields: {
             name: { type: 'String', required: true },
-            test: { type: 'File' },
             test2: { type: 'RoleEnum' },
           },
           permissions: {

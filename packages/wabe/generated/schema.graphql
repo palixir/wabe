@@ -14,12 +14,23 @@ enum SecondaryFactor {
   EmailOTP
 }
 
+"""Object containing information about the file"""
+type FileInfo {
+  name: String!
+  url: String
+  urlGeneratedAt: Date
+}
+
+"""Date scalar type"""
+scalar Date
+
 """User class"""
 type User {
   id: ID!
   name: String
   age: Int
   email: Email
+  tata: FileInfo
   acl: UserACLObject
   createdAt: Date
   updatedAt: Date
@@ -51,9 +62,6 @@ type UserACLObjectRolesACL {
   read: Boolean!
   write: Boolean!
 }
-
-"""Date scalar type"""
-scalar Date
 
 type UserAuthentication {
   phonePassword: UserAuthenticationPhonePassword
@@ -100,6 +108,7 @@ input UserInput {
   name: String
   age: Int
   email: Email
+  tata: File
   acl: UserACLObjectInput
   createdAt: Date
   updatedAt: Date
@@ -111,6 +120,9 @@ input UserInput {
   role: RolePointerInput
   sessions: _SessionRelationInput
 }
+
+"""File scalar type"""
+scalar File
 
 input UserACLObjectInput {
   users: [UserACLObjectUsersACLInput]
@@ -169,6 +181,7 @@ input UserCreateFieldsInput {
   name: String
   age: Int
   email: Email
+  tata: File
   acl: UserACLObjectCreateFieldsInput
   createdAt: Date
   updatedAt: Date
@@ -236,16 +249,12 @@ input UserRelationInput {
 type Post {
   id: ID!
   name: String!
-  test: File
   test2: RoleEnum
   acl: PostACLObject
   createdAt: Date
   updatedAt: Date
   search: [String]
 }
-
-"""File scalar type"""
-scalar File
 
 type PostACLObject {
   users: [PostACLObjectUsersACL]
@@ -266,7 +275,6 @@ type PostACLObjectRolesACL {
 
 input PostInput {
   name: String!
-  test: File
   test2: RoleEnum
   acl: PostACLObjectInput
   createdAt: Date
@@ -300,7 +308,6 @@ input PostPointerInput {
 
 input PostCreateFieldsInput {
   name: String
-  test: File
   test2: RoleEnum
   acl: PostACLObjectCreateFieldsInput
   createdAt: Date
@@ -658,6 +665,7 @@ input UserWhereInput {
   name: StringWhereInput
   age: IntWhereInput
   email: EmailWhereInput
+  tata: FileWhereInput
   acl: UserACLObjectWhereInput
   createdAt: DateWhereInput
   updatedAt: DateWhereInput
@@ -702,6 +710,13 @@ input EmailWhereInput {
   notEqualTo: Email
   in: [Email]
   notIn: [Email]
+}
+
+input FileWhereInput {
+  equalTo: File
+  notEqualTo: File
+  in: [File]
+  notInt: [File]
 }
 
 input UserACLObjectWhereInput {
@@ -887,6 +902,8 @@ enum UserOrder {
   age_DESC
   email_ASC
   email_DESC
+  tata_ASC
+  tata_DESC
   acl_ASC
   acl_DESC
   createdAt_ASC
@@ -921,7 +938,6 @@ type PostEdge {
 input PostWhereInput {
   id: IdWhereInput
   name: StringWhereInput
-  test: FileWhereInput
   test2: AnyWhereInput
   acl: PostACLObjectWhereInput
   createdAt: DateWhereInput
@@ -929,13 +945,6 @@ input PostWhereInput {
   search: SearchWhereInput
   OR: [PostWhereInput]
   AND: [PostWhereInput]
-}
-
-input FileWhereInput {
-  equalTo: File
-  notEqualTo: File
-  in: [File]
-  notInt: [File]
 }
 
 input PostACLObjectWhereInput {
@@ -964,8 +973,6 @@ input PostACLObjectRolesACLWhereInput {
 enum PostOrder {
   name_ASC
   name_DESC
-  test_ASC
-  test_DESC
   test2_ASC
   test2_DESC
   acl_ASC
@@ -1181,6 +1188,7 @@ input UserUpdateFieldsInput {
   name: String
   age: Int
   email: Email
+  tata: File
   acl: UserACLObjectUpdateFieldsInput
   createdAt: Date
   updatedAt: Date
@@ -1288,7 +1296,6 @@ input UpdatePostInput {
 
 input PostUpdateFieldsInput {
   name: String
-  test: File
   test2: RoleEnum
   acl: PostACLObjectUpdateFieldsInput
   createdAt: Date

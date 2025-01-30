@@ -27,7 +27,7 @@ describe('HookObject', () => {
       fields: ['id'],
     })
 
-    const hookObject = new HookObject<DevWabeTypes, 'User'>({
+    const hookObject = new HookObject<DevWabeTypes, 'User', 'User'>({
       className: 'User',
       // @ts-expect-error
       newData: { age: 30, name: 'John Doe' },
@@ -54,7 +54,7 @@ describe('HookObject', () => {
   it('should return correctly value depends on the update state of the field', () => {
     const userData = { name: 'John Doe' }
 
-    const hookObject = new HookObject<DevWabeTypes, 'User'>({
+    const hookObject = new HookObject<DevWabeTypes, 'User', 'User'>({
       className: 'User',
       // @ts-expect-error
       newData: userData,
@@ -72,7 +72,7 @@ describe('HookObject', () => {
   it('should create a clone of the data', () => {
     const userData = { name: 'John Doe', age: 30 }
 
-    const hookObject = new HookObject<DevWabeTypes, 'User'>({
+    const hookObject = new HookObject<DevWabeTypes, 'User', 'User'>({
       className: 'User',
       newData: userData as any,
       operationType: OperationType.BeforeCreate,
@@ -80,6 +80,7 @@ describe('HookObject', () => {
       object: {
         id: '1',
       },
+      fields: [],
     })
 
     hookObject.upsertNewData('name', 'tata')
@@ -103,6 +104,7 @@ describe('HookObject', () => {
       object: {
         id: '1',
       },
+      fields: [],
     })
 
     expect(() => hookObject.upsertNewData('name', 'tata')).toThrow(

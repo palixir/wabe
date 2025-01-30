@@ -224,6 +224,32 @@ describe('GraphqlSchema', () => {
     })
   })
 
+  it('should have FileInfo object on the wabe object when we use a File field', async () => {
+    const { wabe } = await createWabe({
+      classes: [
+        {
+          name: 'TestClass',
+          fields: {
+            file: {
+              type: 'File',
+              required: true,
+            },
+          },
+        },
+      ],
+    })
+
+    expect(
+      getTypeFromGraphQLSchema({
+        schema: wabe.config.graphqlSchema || ({} as any),
+        type: 'Type',
+        name: 'TestClass',
+      }).input.file,
+    ).toEqual('FileInfo!')
+
+    await wabe.close()
+  })
+
   it('should be able to create a phone field that check correctly if the phone is valid across the world', async () => {
     const { client, wabe } = await createWabe({
       classes: [
@@ -909,16 +935,6 @@ describe('GraphqlSchema', () => {
         name: 'mutationWithCustomTypes',
       }).output,
     ).toEqual('[TestMutation!]!')
-  })
-
-  it('should support file type', () => {
-    expect(
-      getTypeFromGraphQLSchema({
-        schema,
-        type: 'Type',
-        name: 'TestClassFile',
-      }).input.file,
-    ).toEqual('File!')
   })
 
   it('should have required field on object fields', () => {
