@@ -70,7 +70,7 @@ const hours = [
 ]
 
 const view = () => (
-  <section id="hours" className="py-16 ">
+  <section id="features" className="py-16 ">
     <div className="max-w-screen-xl mx-auto px-6">
       <div className="text-center space-y-4">
         <h2 className="text-4xl md:text-5xl font-extrabold">

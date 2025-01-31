@@ -68,7 +68,7 @@ export default function Hero() {
             <Image
               alt="Wabe schema"
               className="w-full object-cover rounded-lg shadow-lg"
-              src={computePublicPath('/assets/schema.png')}
+              src={computePublicPath('/assets/schema.webp')}
             />
           </div>
         </div>

@@ -6,6 +6,7 @@ import { Presentation } from '../components/landing/presentation'
 import { BlogHeader } from './blog/header'
 import { ListBlogArticles } from './blog/listBlogArticles'
 import { HeroUIProvider } from '@heroui/react'
+import { Example } from './landing/example'
 
 const view = () => (
   <HeroUIProvider>
@@ -19,7 +20,11 @@ const view = () => (
 
         <Divider />
 
+        <Example />
+
         <Presentation />
+
+        <Divider />
 
         <div className="text-center text-gray-600 flex flex-col gap-1">
           <p>
