@@ -1,7 +1,7 @@
 import { Image } from '@heroui/image'
 import { CallToAction } from './callToAction'
 import { computePublicPath } from '../utils'
-import { Button } from '@heroui/react'
+import { Button, Link } from '@heroui/react'
 import InformationCircleIcon from '@heroicons/react/24/outline/InformationCircleIcon'
 
 export default function Hero() {
@@ -40,6 +40,7 @@ export default function Hero() {
 
             <div className="flex items-center justify-center flex-col sm:flex-row gap-2 w-full max-w-5xl">
               <Button
+                as={Link}
                 color="default"
                 variant="bordered"
                 size="lg"
