@@ -74,7 +74,7 @@ const view = () => (
     <div className="max-w-screen-xl mx-auto px-6">
       <div className="text-center space-y-4">
         <h2 className="text-4xl md:text-5xl font-extrabold">
-          All you need in a single place
+          Everything in a single place
         </h2>
         <p className="text-lg text-gray-600">
           Focus on what matters. Let us handle the essentials.

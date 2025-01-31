@@ -61,7 +61,7 @@ export default function Hero() {
       <section id="schema">
         <div className="flex flex-col gap-6 mx-auto max-w-7xl justify-center items-center my-10">
           <h4 className="text-4xl font-light text-center">
-            All you need to build a robust backend easily !
+            Build a robust backend easily !
           </h4>
 
           <div className="transition-transform duration-500 hover:scale-105">
