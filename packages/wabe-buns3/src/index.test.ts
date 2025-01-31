@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, spyOn } from 'bun:test'
-import { WabeBuns3Adapter } from './index'
+import { Buns3Adapter } from './index'
 import { S3FileTest, S3Test } from './utils'
 
 const spyS3ClientExist = spyOn(S3Test.prototype, 'exists')
@@ -20,7 +20,7 @@ describe('Wabe Buns3 adapter', () => {
   })
 
   it('should upload a file', async () => {
-    const adapter = new WabeBuns3Adapter({
+    const adapter = new Buns3Adapter({
       accessKeyId: 'accessKeyId',
       secretAccessKey: 'secretAccessKey',
       bucket: 'test',
@@ -40,7 +40,7 @@ describe('Wabe Buns3 adapter', () => {
   it('should read a file and return a presigned url', async () => {
     spyS3ClientExist.mockResolvedValue(true as never)
 
-    const adapter = new WabeBuns3Adapter({
+    const adapter = new Buns3Adapter({
       accessKeyId: 'accessKeyId',
       secretAccessKey: 'secretAccessKey',
       bucket: 'test',
@@ -60,7 +60,7 @@ describe('Wabe Buns3 adapter', () => {
   it("should return null if a file doesn't exist", async () => {
     spyS3ClientExist.mockResolvedValue(false as never)
 
-    const adapter = new WabeBuns3Adapter({
+    const adapter = new Buns3Adapter({
       accessKeyId: 'accessKeyId',
       secretAccessKey: 'secretAccessKey',
       bucket: 'test',
@@ -77,7 +77,7 @@ describe('Wabe Buns3 adapter', () => {
   })
 
   it('should delete a file', async () => {
-    const adapter = new WabeBuns3Adapter({
+    const adapter = new Buns3Adapter({
       accessKeyId: 'accessKeyId',
       secretAccessKey: 'secretAccessKey',
       bucket: 'test',

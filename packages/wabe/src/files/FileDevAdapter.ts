@@ -1,7 +1,7 @@
 import { writeFile, mkdir, rm, access, constants } from 'node:fs/promises'
-import type { WabeFileAdapter } from '.'
+import type { FileAdapter } from '.'
 
-export class FileDevAdapter implements WabeFileAdapter {
+export class FileDevAdapter implements FileAdapter {
   private basePath: string
 
   constructor(basePath: string) {

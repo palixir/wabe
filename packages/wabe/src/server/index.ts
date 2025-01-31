@@ -27,6 +27,7 @@ import type { PaymentConfig } from '../payment/interface'
 import { PaymentController } from '../payment/PaymentController'
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection'
 import type { AIConfig } from '../ai'
+import { FileController } from '../files/FileController'
 
 type SecurityConfig = {
   corsOptions?: CorsOptions
@@ -71,6 +72,7 @@ type WabeControllers<T extends WabeTypes> = {
   database: DatabaseController<T>
   email?: EmailController
   payment?: PaymentController
+  file?: FileController
 }
 
 export class Wabe<T extends WabeTypes> {
@@ -129,6 +131,7 @@ export class Wabe<T extends WabeTypes> {
       database: new DatabaseController<T>(databaseAdapter),
       email: email?.adapter ? new EmailController(email.adapter) : undefined,
       payment: payment?.adapter ? new PaymentController(payment) : undefined,
+      file: file?.adapter ? new FileController(file.adapter) : undefined,
     }
 
     this.loadRoleEnum()

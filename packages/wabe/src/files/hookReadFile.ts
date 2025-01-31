@@ -1,6 +1,8 @@
 import type { HookObject } from '../hooks/HookObject'
 
 const getFile = async (hookObject: HookObject<any, any>) => {
+  if (!hookObject.context.wabe.controllers.file) return
+
   const schema = hookObject.context.wabe.config.schema?.classes?.find(
     (currentClass) => currentClass.name === hookObject.className,
   )
@@ -18,7 +20,7 @@ const getFile = async (hookObject: HookObject<any, any>) => {
         if (!fileName) return
 
         const fileUrl =
-          await hookObject.context.wabe.config.file?.adapter.readFile(fileName)
+          await hookObject.context.wabe.controllers.file?.readFile(fileName)
 
         return hookObject.context.wabe.controllers.database.updateObject({
           className: hookObject.className,

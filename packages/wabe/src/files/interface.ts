@@ -2,10 +2,10 @@
  * The file config contains the adapter to use to upload file
  */
 export interface FileConfig {
-  adapter: WabeFileAdapter
+  adapter: FileAdapter
 }
 
-export interface WabeFileAdapter {
+export interface FileAdapter {
   /**
    * Upload a file and returns the url of the file
    * @param file: File

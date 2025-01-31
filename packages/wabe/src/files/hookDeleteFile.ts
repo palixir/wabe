@@ -1,6 +1,8 @@
 import type { HookObject } from '../hooks/HookObject'
 
 const deleteFile = async (hookObject: HookObject<any, any>) => {
+  if (!hookObject.context.wabe.controllers.file) return
+
   const schema = hookObject.context.wabe.config.schema?.classes?.find(
     (currentClass) => currentClass.name === hookObject.className,
   )
@@ -14,8 +16,7 @@ const deleteFile = async (hookObject: HookObject<any, any>) => {
 
       if (!fileName) return
 
-      if (hookObject.context.wabe.config.file?.adapter)
-        await hookObject.context.wabe.config.file.adapter.deleteFile(fileName)
+      await hookObject.context.wabe.controllers.file?.deleteFile(fileName)
     })
 }
 

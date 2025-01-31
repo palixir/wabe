@@ -1,5 +1,5 @@
 import type { S3Client, S3Options } from 'bun'
-import type { WabeFileAdapter } from 'wabe'
+import type { FileAdapter } from 'wabe'
 import { getS3Client } from './utils'
 
 export type Acl =
@@ -12,7 +12,7 @@ export type Acl =
   | 'bucket-owner-full-control'
   | 'log-delivery-write'
 
-export class WabeBuns3Adapter implements WabeFileAdapter {
+export class Buns3Adapter implements FileAdapter {
   private s3Client: S3Client
   private urlExpiresIn: number
   private aclForUrl: Acl
