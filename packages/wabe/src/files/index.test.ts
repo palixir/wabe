@@ -57,9 +57,20 @@ describe('File upload', () => {
     await closeTests(wabe)
   })
 
-  afterEach(() => {
+  afterEach(async () => {
     spyFileDevAdapterUploadFile.mockClear()
     spyFileDevAdaapterReadFile.mockClear()
+
+    await wabe.controllers.database.deleteObjects({
+      // @ts-expect-error
+      className: 'Test3',
+      context: {
+        isRoot: true,
+        wabe,
+      },
+      where: {},
+      fields: [],
+    })
   })
 
   it('should upload a file on request on type File on create request', async () => {
