@@ -198,7 +198,7 @@ describe('File upload', () => {
     expect(new Date(test3s.edges[0].node.file.urlGeneratedAt)).toBeDate()
   })
 
-  it.only('should delete the file on the bucket after delete the object', async () => {
+  it('should delete the file on the bucket after delete the object', async () => {
     const formData = new FormData()
 
     formData.append(
