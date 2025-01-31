@@ -27,7 +27,7 @@ describe('HookObject', () => {
       fields: ['id'],
     })
 
-    const hookObject = new HookObject<DevWabeTypes, 'User', 'User'>({
+    const hookObject = new HookObject<DevWabeTypes, 'User'>({
       className: 'User',
       // @ts-expect-error
       newData: { age: 30, name: 'John Doe' },
@@ -38,6 +38,7 @@ describe('HookObject', () => {
       object: {
         id: res?.id || 'id',
       },
+      fields: [],
     })
 
     const fetchResult = await hookObject.fetch()
@@ -54,7 +55,7 @@ describe('HookObject', () => {
   it('should return correctly value depends on the update state of the field', () => {
     const userData = { name: 'John Doe' }
 
-    const hookObject = new HookObject<DevWabeTypes, 'User', 'User'>({
+    const hookObject = new HookObject<DevWabeTypes, 'User'>({
       className: 'User',
       // @ts-expect-error
       newData: userData,
@@ -63,6 +64,7 @@ describe('HookObject', () => {
       object: {
         id: '1',
       },
+      fields: [],
     })
 
     expect(hookObject.isFieldUpdated('name')).toBeTrue()
@@ -72,7 +74,7 @@ describe('HookObject', () => {
   it('should create a clone of the data', () => {
     const userData = { name: 'John Doe', age: 30 }
 
-    const hookObject = new HookObject<DevWabeTypes, 'User', 'User'>({
+    const hookObject = new HookObject<DevWabeTypes, 'User'>({
       className: 'User',
       newData: userData as any,
       operationType: OperationType.BeforeCreate,

@@ -68,6 +68,7 @@ describe('Hooks', () => {
         wabe: { controllers, config } as any,
       },
       newData: { name: 'test' },
+      fields: [],
     })
 
     await hooks.runOnSingleObject({
@@ -89,6 +90,7 @@ describe('Hooks', () => {
         wabe: { controllers, config } as any,
       },
       newData: { name: 'test' },
+      fields: [],
     })
 
     await hooks.runOnSingleObject({
@@ -132,6 +134,7 @@ describe('Hooks', () => {
         wabe: { controllers, config } as any,
       },
       newData: { name: 'test' },
+      fields: [],
     })
 
     await hooks.runOnSingleObject({
@@ -164,6 +167,7 @@ describe('Hooks', () => {
         wabe: { controllers, config } as any,
       },
       newData: { name: 'test' },
+      fields: [],
     })
 
     await hooks.runOnSingleObject({
@@ -185,6 +189,7 @@ describe('Hooks', () => {
         wabe: { controllers, config } as any,
       },
       newData: { name: 'test' },
+      fields: [],
     })
 
     await hooks.runOnSingleObject({

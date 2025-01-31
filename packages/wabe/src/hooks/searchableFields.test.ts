@@ -108,6 +108,7 @@ describe('searchablesFields', () => {
         },
       } as any,
       object: {} as any,
+      fields: [],
     })
 
     defaultSearchableFieldsBeforeCreate(hookObject)
@@ -148,6 +149,7 @@ describe('searchablesFields', () => {
         name: 'test',
         search: ['t', 'te', 'tes', 'test'],
       } as any,
+      fields: [],
     })
 
     defaultSearchableFieldsBeforeUpdate(hookObject)
