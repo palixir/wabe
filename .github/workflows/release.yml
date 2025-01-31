@@ -12,6 +12,7 @@ on:
                     - 'wabe-resend'
                     - 'wabe-stripe'
                     - 'wabe-openai'
+                    - 'wabe-buns3'
                     - 'wabe-mongodb-launcher'
 
 jobs:
