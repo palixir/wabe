@@ -62,9 +62,6 @@ const run = async () => {
               type: 'Email',
               required: true,
             },
-            tata: {
-              type: 'File',
-            },
           },
         },
         {

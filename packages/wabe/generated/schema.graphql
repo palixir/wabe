@@ -30,7 +30,6 @@ type User {
   name: String
   age: Int
   email: Email
-  tata: FileInfo
   acl: UserACLObject
   createdAt: Date
   updatedAt: Date
@@ -108,7 +107,6 @@ input UserInput {
   name: String
   age: Int
   email: Email
-  tata: File
   acl: UserACLObjectInput
   createdAt: Date
   updatedAt: Date
@@ -120,9 +118,6 @@ input UserInput {
   role: RolePointerInput
   sessions: _SessionRelationInput
 }
-
-"""File scalar type"""
-scalar File
 
 input UserACLObjectInput {
   users: [UserACLObjectUsersACLInput]
@@ -181,7 +176,6 @@ input UserCreateFieldsInput {
   name: String
   age: Int
   email: Email
-  tata: File
   acl: UserACLObjectCreateFieldsInput
   createdAt: Date
   updatedAt: Date
@@ -665,7 +659,6 @@ input UserWhereInput {
   name: StringWhereInput
   age: IntWhereInput
   email: EmailWhereInput
-  tata: FileWhereInput
   acl: UserACLObjectWhereInput
   createdAt: DateWhereInput
   updatedAt: DateWhereInput
@@ -710,13 +703,6 @@ input EmailWhereInput {
   notEqualTo: Email
   in: [Email]
   notIn: [Email]
-}
-
-input FileWhereInput {
-  equalTo: File
-  notEqualTo: File
-  in: [File]
-  notInt: [File]
 }
 
 input UserACLObjectWhereInput {
@@ -902,8 +888,6 @@ enum UserOrder {
   age_DESC
   email_ASC
   email_DESC
-  tata_ASC
-  tata_DESC
   acl_ASC
   acl_DESC
   createdAt_ASC
@@ -1188,7 +1172,6 @@ input UserUpdateFieldsInput {
   name: String
   age: Int
   email: Email
-  tata: File
   acl: UserACLObjectUpdateFieldsInput
   createdAt: Date
   updatedAt: Date

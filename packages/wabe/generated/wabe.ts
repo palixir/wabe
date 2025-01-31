@@ -40,7 +40,6 @@ export type User = {
   name?: Scalars['String']['output'];
   age?: Scalars['Int']['output'];
   email?: Scalars['Email']['output'];
-  tata?: FileInfo;
   acl?: UserACLObject;
   createdAt?: Scalars['Date']['output'];
   updatedAt?: Scalars['Date']['output'];
@@ -111,7 +110,6 @@ export type UserInput = {
   name?: Scalars['String']['input'];
   age?: Scalars['Int']['input'];
   email?: Scalars['Email']['input'];
-  tata?: Scalars['File']['input'];
   acl?: UserACLObjectInput;
   createdAt?: Scalars['Date']['input'];
   updatedAt?: Scalars['Date']['input'];
@@ -179,7 +177,6 @@ export type UserCreateFieldsInput = {
   name?: Scalars['String']['input'];
   age?: Scalars['Int']['input'];
   email?: Scalars['Email']['input'];
-  tata?: Scalars['File']['input'];
   acl?: UserACLObjectCreateFieldsInput;
   createdAt?: Scalars['Date']['input'];
   updatedAt?: Scalars['Date']['input'];
@@ -707,7 +704,6 @@ export type UserWhereInput = {
   name?: StringWhereInput;
   age?: IntWhereInput;
   email?: EmailWhereInput;
-  tata?: FileWhereInput;
   acl?: UserACLObjectWhereInput;
   createdAt?: DateWhereInput;
   updatedAt?: DateWhereInput;
@@ -752,13 +748,6 @@ export type EmailWhereInput = {
   notEqualTo?: Scalars['Email']['input'];
   in?: Scalars['Email']['input'][];
   notIn?: Scalars['Email']['input'][];
-};
-
-export type FileWhereInput = {
-  equalTo?: Scalars['File']['input'];
-  notEqualTo?: Scalars['File']['input'];
-  in?: Scalars['File']['input'][];
-  notInt?: Scalars['File']['input'][];
 };
 
 export type UserACLObjectWhereInput = {
@@ -936,8 +925,6 @@ export enum UserOrder {
   age_DESC = "age_DESC",
   email_ASC = "email_ASC",
   email_DESC = "email_DESC",
-  tata_ASC = "tata_ASC",
-  tata_DESC = "tata_DESC",
   acl_ASC = "acl_ASC",
   acl_DESC = "acl_DESC",
   createdAt_ASC = "createdAt_ASC",
@@ -1364,7 +1351,6 @@ export type UserUpdateFieldsInput = {
   name?: Scalars['String']['input'];
   age?: Scalars['Int']['input'];
   email?: Scalars['Email']['input'];
-  tata?: Scalars['File']['input'];
   acl?: UserACLObjectUpdateFieldsInput;
   createdAt?: Scalars['Date']['input'];
   updatedAt?: Scalars['Date']['input'];

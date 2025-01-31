@@ -13,7 +13,7 @@ export type Acl =
   | 'log-delivery-write'
 
 export class Buns3Adapter implements FileAdapter {
-  private s3Client: S3Client
+  public s3Client: S3Client
   private urlExpiresIn: number
   private aclForUrl: Acl
 
