@@ -22,7 +22,7 @@ export default defineConfig({
     '<meta property="twitter:card" content="summary_large_image">',
     '<meta property="twitter:title" content="Wabe">',
     '<meta property="twitter:description" content="Your backend in minutes not days for Node.js / Bun">',
-    '<meta property="twitter:image" content="https://wabe.dev/cover2.webp">',
+    '<meta property="twitter:image" content="https://wabe.dev/assets/cover.png">',
     '<meta property="twitter:image:alt" content="Preview of the Wabe website">',
     '<meta property="twitter:site" content="@coratgerl">',
   ],
