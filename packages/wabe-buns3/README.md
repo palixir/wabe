@@ -27,7 +27,7 @@ yarn add wabe-buns3 # On yarn
 
 ```ts
 import { DatabaseEnum, Wabe } from "wabe";
-import { ResendAdapter } from "wabe-resend";
+import { Buns3Adapter } from "wabe-buns3";
 
 const run = async () => {
   // Ensure your database is running before run the file
@@ -41,20 +41,23 @@ const run = async () => {
       url: "mongodb://127.0.0.1:27045",
       name: "WabeApp",
     },
-    email: {
-      adapter : new ResendAdapter("YOUR_RESEND_API_KEY"),
+    file: {
+      adapter : new Buns3Adapter({
+        accessKeyId: 'accessKeyId',
+         secretAccessKey: 'secretAccessKey',
+         bucket: 'bucketName',
+         endpoint: 'endpoint',
+      }),
     }
     port: 3000,
   });
 
   await wabe.start();
 
-  await wabe.controllers.email.send({
-    from : "test@test.com",
-    to: ["target@gmail.com"],
-    subject: "Test",
-    text: "Test",
-  });
+  // The upload file and the read file is automatically managed in the GraphQL API
+  await wabe.controllers.file.uploadFile(new File(['test'], 'test.txt'));
+
+  const url = await wabe.controllers.file.readFile('test.txt');
 };
 
 await run();
