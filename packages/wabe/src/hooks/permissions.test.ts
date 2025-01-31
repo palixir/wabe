@@ -104,6 +104,7 @@ describe('Permissions', () => {
           id: 'id',
         },
         operationType: OperationType.BeforeRead,
+        fields: [],
       })
 
       expect(_checkCLP(obj, OperationType.BeforeRead)).rejects.toThrow(
@@ -137,6 +138,7 @@ describe('Permissions', () => {
           id: 'id',
         },
         operationType: OperationType.BeforeRead,
+        fields: [],
       })
 
       expect(_checkCLP(obj, OperationType.BeforeRead)).rejects.toThrow(
@@ -181,6 +183,7 @@ describe('Permissions', () => {
           id: 'id',
         },
         operationType: OperationType.BeforeRead,
+        fields: [],
       })
 
       expect(_checkCLP(obj, OperationType.BeforeRead)).rejects.toThrow(
@@ -217,6 +220,7 @@ describe('Permissions', () => {
           id: 'id',
         },
         operationType: OperationType.BeforeRead,
+        fields: [],
       })
 
       expect(_checkCLP(obj, OperationType.BeforeRead)).resolves
@@ -245,6 +249,7 @@ describe('Permissions', () => {
           id: 'id',
         },
         operationType: OperationType.BeforeRead,
+        fields: [],
       })
 
       expect(_checkCLP(obj, OperationType.BeforeRead)).rejects.toThrow(
@@ -281,6 +286,7 @@ describe('Permissions', () => {
           id: 'id',
         },
         operationType: OperationType.BeforeRead,
+        fields: [],
       })
 
       expect(_checkCLP(obj, OperationType.BeforeRead)).rejects.toThrow(
@@ -315,6 +321,7 @@ describe('Permissions', () => {
         context,
         object: { id: 'id' },
         operationType: OperationType.BeforeRead,
+        fields: [],
       })
 
       expect(_checkCLP(obj, OperationType.BeforeRead)).resolves
@@ -335,6 +342,7 @@ describe('Permissions', () => {
         context,
         object: { id: 'id' },
         operationType: OperationType.BeforeRead,
+        fields: [],
       })
 
       expect(_checkCLP(obj, OperationType.BeforeRead)).resolves

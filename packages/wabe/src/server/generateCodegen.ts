@@ -223,11 +223,17 @@ export const generateCodegen = async ({
   const wabeTsContent = `${typescriptCode}\n\n${wabeOutput}`
 
   try {
-    const contentOfWabeFile = (await readFile(`${path}/wabe.ts`)).toString()
+    const contentOfGraphqlSchema = (
+      await readFile(`${path}/schema.graphql`)
+    ).toString()
 
     // We will need to find a better way to avoid infinite loop of loading
-    // Better solution will be that bun implements watch ignores
-    if (!process.env.CODEGEN && contentOfWabeFile === wabeTsContent) return
+    // Better solution will be that bun implements watch ignores)
+    if (
+      !process.env.CODEGEN &&
+      contentOfGraphqlSchema === graphqlSchemaContent.toString()
+    )
+      return
   } catch {}
 
   await writeFile(`${path}/wabe.ts`, wabeTsContent)

@@ -339,19 +339,3 @@ const res = await fetch("http://127.0.0.1:3000/graphql", {
   body: formData,
 });
 ```
-
-Example of adapter implementation in schema :
-
-```ts
-new Wabe({
-  // ... others config fields
-  file: {
-    adapter: async (file) => {
-      // ... Upload the file on a bucket
-
-      // return the url of the file for example (this url will be store in the database)
-      return "http://bucket.storage/123456/logo.webp";
-    },
-  },
-});
-```

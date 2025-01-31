@@ -10,6 +10,7 @@ import {
   type GraphQLOutputType,
   GraphQLScalarType,
   GraphQLBoolean,
+  GraphQLString,
 } from 'graphql'
 import { pluralize } from 'wabe-pluralize'
 import type { WabeTypes } from '..'
@@ -33,7 +34,7 @@ import {
   queryForMultipleObject,
   queryForOneObject,
 } from './resolvers'
-import { IdWhereInput, SearchWhereInput } from './types'
+import { DateScalarType, IdWhereInput, SearchWhereInput } from './types'
 
 type AllPossibleObject =
   | 'object'
@@ -46,7 +47,7 @@ type AllPossibleObject =
   | 'createInputObject'
   | 'orderEnumType'
 
-export type AllObjects = Record<string, Record<AllPossibleObject, any>>
+export type AllObjects = Record<string, Partial<Record<AllPossibleObject, any>>>
 
 export class GraphQLSchema {
   private schemas: Schema<DevWabeTypes>
@@ -132,7 +133,11 @@ export class GraphQLSchema {
 
         return acc
       },
-      { queries: {}, mutations: {}, objects: [] } as {
+      {
+        queries: {},
+        mutations: {},
+        objects: [...this.createUtilsObject()],
+      } as {
         queries: Record<string, GraphQLFieldConfig<any, any, any>>
         mutations: Record<string, GraphQLFieldConfig<any, any, any>>
         objects: Array<GraphQLObjectType | GraphQLInputObjectType>
@@ -169,6 +174,26 @@ export class GraphQLSchema {
       enums,
       objects: queriesMutationAndObjects.objects,
     }
+  }
+
+  createUtilsObject() {
+    const fileInfoObject = new GraphQLObjectType({
+      name: 'FileInfo',
+      description: 'Object containing information about the file',
+      fields: () => ({
+        name: { type: new GraphQLNonNull(GraphQLString) },
+        url: { type: GraphQLString },
+        urlGeneratedAt: {
+          type: DateScalarType,
+        },
+      }),
+    })
+
+    this.allObjects.FileInfo = {
+      object: fileInfoObject,
+    }
+
+    return [fileInfoObject]
   }
 
   createScalars() {

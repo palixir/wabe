@@ -174,6 +174,10 @@ export default defineConfig({
         ],
       },
       {
+        text: 'File',
+        link: '/file/index.md',
+      },
+      {
         text: 'Email',
         link: '/email/index.md',
       },

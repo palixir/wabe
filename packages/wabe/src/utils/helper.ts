@@ -13,6 +13,7 @@ import { PaymentDevAdapter } from '../payment/DevAdapter'
 import type { ClassInterface } from '../schema'
 import { EmailDevAdapter } from '../email/DevAdapter'
 import { Currency } from '../payment'
+import { FileDevAdapter } from '../files/FileDevAdapter'
 
 type NotNill<T> = T extends null | undefined ? never : T
 
@@ -167,6 +168,9 @@ export const setupTests = async (
       adapter: new PaymentDevAdapter(),
       currency: Currency.EUR,
       supportedPaymentMethods: ['card', 'paypal'],
+    },
+    file: {
+      adapter: new FileDevAdapter('bucket'),
     },
     schema: {
       classes: [

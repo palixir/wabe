@@ -38,6 +38,7 @@ describe('HookObject', () => {
       object: {
         id: res?.id || 'id',
       },
+      fields: [],
     })
 
     const fetchResult = await hookObject.fetch()
@@ -63,6 +64,7 @@ describe('HookObject', () => {
       object: {
         id: '1',
       },
+      fields: [],
     })
 
     expect(hookObject.isFieldUpdated('name')).toBeTrue()
@@ -80,6 +82,7 @@ describe('HookObject', () => {
       object: {
         id: '1',
       },
+      fields: [],
     })
 
     hookObject.upsertNewData('name', 'tata')
@@ -103,6 +106,7 @@ describe('HookObject', () => {
       object: {
         id: '1',
       },
+      fields: [],
     })
 
     expect(() => hookObject.upsertNewData('name', 'tata')).toThrow(

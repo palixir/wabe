@@ -401,6 +401,8 @@ export class DatabaseController<T extends WabeTypes> {
       ? initializeHook({
           className,
           context,
+          // @ts-expect-error
+          fields,
         })
       : undefined
 
@@ -440,6 +442,7 @@ export class DatabaseController<T extends WabeTypes> {
       context,
       fields: fieldsWithPointerFields,
       where: whereWithACLCondition,
+      skipHooks: true,
     })
 
     return this._getFinalObjectWithPointer(
@@ -491,6 +494,8 @@ export class DatabaseController<T extends WabeTypes> {
     const hook = !skipHooks
       ? initializeHook({
           className,
+          // @ts-expect-error
+          fields,
           context,
         })
       : undefined
@@ -523,6 +528,7 @@ export class DatabaseController<T extends WabeTypes> {
       where: whereWithACLCondition,
       fields: fieldsWithPointerFields,
       order,
+      skipHooks: true,
     })
 
     return Promise.all(
@@ -547,6 +553,8 @@ export class DatabaseController<T extends WabeTypes> {
       className,
       context,
       newData: data,
+      // @ts-expect-error
+      fields,
     })
 
     const { newData } = await hook.runOnSingleObject({
@@ -599,6 +607,8 @@ export class DatabaseController<T extends WabeTypes> {
           className,
           context,
           newData,
+          // @ts-expect-error
+          fields,
         }),
       ),
     )
@@ -665,6 +675,8 @@ export class DatabaseController<T extends WabeTypes> {
       className,
       context,
       newData: data,
+      // @ts-expect-error
+      fields,
     })
 
     const { newData, object } = await hook.runOnSingleObject({
@@ -725,6 +737,8 @@ export class DatabaseController<T extends WabeTypes> {
       className,
       context,
       newData: data,
+      // @ts-expect-error
+      fields,
     })
 
     const whereWithACLCondition = this._buildWhereWithACL(
@@ -785,6 +799,8 @@ export class DatabaseController<T extends WabeTypes> {
     const hook = initializeHook({
       className,
       context,
+      // @ts-expect-error
+      fields,
     })
 
     const whereWithACLCondition = this._buildWhereWithACL({}, context, 'write')
@@ -842,6 +858,8 @@ export class DatabaseController<T extends WabeTypes> {
     const hook = initializeHook({
       className,
       context,
+      // @ts-expect-error
+      fields,
     })
 
     const whereWithACLCondition = this._buildWhereWithACL(

@@ -1,4 +1,6 @@
 import type { MutationData, OutputType, WhereType } from '../database'
+import { defaultAfterDeleteFile } from '../files/hookDeleteFile'
+import { defaultAfterReadFile } from '../files/hookReadFile'
 import {
   defaultBeforeCreateUpload,
   defaultBeforeUpdateUpload,
@@ -90,9 +92,11 @@ export const initializeHook = <
   className,
   newData,
   context,
+  fields,
 }: {
   className: K
   newData?: MutationData<DevWabeTypes, any, any>
+  fields: string[]
   context: WabeContext<any>
 }) => {
   const computeObject = ({
@@ -161,6 +165,8 @@ export const initializeHook = <
         context,
         object,
         originalObject: options.originalObject,
+        // @ts-expect-error
+        fields,
       })
 
       // We need to keep the order of the data but we need to execute the hooks in parallel
@@ -214,6 +220,8 @@ export const initializeHook = <
             context,
             object,
             originalObject: originalObjectToUse,
+            // @ts-expect-error
+            fields,
           })
 
           // We need to keep the order of the data but we need to execute the hooks in parallel
@@ -286,6 +294,16 @@ export const getDefaultHooks = (): Hook<any, any>[] => [
     operationType: OperationType.BeforeUpdate,
     priority: 1,
     callback: defaultBeforeUpdateUpload,
+  },
+  {
+    operationType: OperationType.AfterRead,
+    priority: 1,
+    callback: defaultAfterReadFile,
+  },
+  {
+    operationType: OperationType.AfterDelete,
+    priority: 1,
+    callback: defaultAfterDeleteFile,
   },
   {
     className: 'User',

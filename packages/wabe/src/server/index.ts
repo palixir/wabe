@@ -21,13 +21,13 @@ import { getCookieInRequestHeaders } from '../utils'
 import type { WabeContext } from './interface'
 import { initializeRoles } from '../authentication/roles'
 import type { FileConfig } from '../files'
-import { fileDevAdapter } from '../files/devAdapter'
 import type { EmailConfig } from '../email'
 import { EmailController } from '../email/EmailController'
 import type { PaymentConfig } from '../payment/interface'
 import { PaymentController } from '../payment/PaymentController'
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection'
 import type { AIConfig } from '../ai'
+import { FileController } from '../files/FileController'
 
 type SecurityConfig = {
   corsOptions?: CorsOptions
@@ -72,6 +72,7 @@ type WabeControllers<T extends WabeTypes> = {
   database: DatabaseController<T>
   email?: EmailController
   payment?: PaymentController
+  file?: FileController
 }
 
 export class Wabe<T extends WabeTypes> {
@@ -107,16 +108,10 @@ export class Wabe<T extends WabeTypes> {
       authentication,
       rootKey,
       hooks,
-      file: {
-        adapter:
-          file?.adapter ||
-          ((process.env.NODE_ENV !== 'production'
-            ? fileDevAdapter
-            : () => {}) as any),
-      },
       email,
       payment,
       routes,
+      file,
     }
 
     this.server = new Wobe<WobeCustomContext<T>>({ hostname }).get(
@@ -136,6 +131,7 @@ export class Wabe<T extends WabeTypes> {
       database: new DatabaseController<T>(databaseAdapter),
       email: email?.adapter ? new EmailController(email.adapter) : undefined,
       payment: payment?.adapter ? new PaymentController(payment) : undefined,
+      file: file?.adapter ? new FileController(file.adapter) : undefined,
     }
 
     this.loadRoleEnum()
@@ -233,7 +229,7 @@ export class Wabe<T extends WabeTypes> {
     })
 
     if (
-      process.env.NODE_ENV !== 'production' &&
+      !this.config.isProduction &&
       process.env.NODE_ENV !== 'test' &&
       this.config.codegen &&
       this.config.codegen.enabled &&

@@ -1,6 +1,8 @@
 import type { HookObject } from '../hooks/HookObject'
 
 const handleFile = async (hookObject: HookObject<any, any>) => {
+  if (!hookObject.context.wabe.controllers.file) return
+
   const newData = hookObject.getNewData()
 
   const schema = hookObject.context.wabe.config.schema?.classes?.find(
@@ -11,13 +13,18 @@ const handleFile = async (hookObject: HookObject<any, any>) => {
 
   await Promise.all(
     Object.keys(newData).map(async (keyName) => {
-      if (schema.fields[keyName].type !== 'File') return
+      if (
+        schema.fields[keyName].type !== 'File' ||
+        !(newData[keyName] instanceof File)
+      )
+        return
 
-      if (hookObject.context.wabe.config.file?.adapter !== undefined)
-        hookObject.upsertNewData(
-          keyName,
-          await hookObject.context.wabe.config.file.adapter(newData[keyName]),
-        )
+      // We upload the file and set the name of the file in the newData
+      await hookObject.context.wabe.controllers.file?.uploadFile(
+        newData[keyName],
+      )
+
+      hookObject.upsertNewData(keyName, { name: newData[keyName].name })
     }),
   )
 }

@@ -29,6 +29,12 @@ export enum SecondaryFactor {
   EmailOTP = "EmailOTP",
 }
 
+export type FileInfo = {
+  name: Scalars['String']['output'];
+  url?: Scalars['String']['output'];
+  urlGeneratedAt?: Scalars['Date']['output'];
+};
+
 export type User = {
   id: Scalars['ID']['output'];
   name?: Scalars['String']['output'];
@@ -237,7 +243,6 @@ export type UserRelationInput = {
 export type Post = {
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
-  test?: Scalars['File']['output'];
   test2?: RoleEnum;
   acl?: PostACLObject;
   createdAt?: Scalars['Date']['output'];
@@ -264,7 +269,6 @@ export type PostACLObjectRolesACL = {
 
 export type PostInput = {
   name: Scalars['String']['input'];
-  test?: Scalars['File']['input'];
   test2?: RoleEnum;
   acl?: PostACLObjectInput;
   createdAt?: Scalars['Date']['input'];
@@ -297,7 +301,6 @@ export type PostPointerInput = {
 
 export type PostCreateFieldsInput = {
   name?: Scalars['String']['input'];
-  test?: Scalars['File']['input'];
   test2?: RoleEnum;
   acl?: PostACLObjectCreateFieldsInput;
   createdAt?: Scalars['Date']['input'];
@@ -956,7 +959,6 @@ export type PostEdge = {
 export type PostWhereInput = {
   id?: IdWhereInput;
   name?: StringWhereInput;
-  test?: FileWhereInput;
   test2?: AnyWhereInput;
   acl?: PostACLObjectWhereInput;
   createdAt?: DateWhereInput;
@@ -964,13 +966,6 @@ export type PostWhereInput = {
   search?: SearchWhereInput;
   OR?: PostWhereInput[];
   AND?: PostWhereInput[];
-};
-
-export type FileWhereInput = {
-  equalTo?: Scalars['File']['input'];
-  notEqualTo?: Scalars['File']['input'];
-  in?: Scalars['File']['input'][];
-  notInt?: Scalars['File']['input'][];
 };
 
 export type PostACLObjectWhereInput = {
@@ -999,8 +994,6 @@ export type PostACLObjectRolesACLWhereInput = {
 export enum PostOrder {
   name_ASC = "name_ASC",
   name_DESC = "name_DESC",
-  test_ASC = "test_ASC",
-  test_DESC = "test_DESC",
   test2_ASC = "test2_ASC",
   test2_DESC = "test2_DESC",
   acl_ASC = "acl_ASC",
@@ -1465,7 +1458,6 @@ export type UpdatePostInput = {
 
 export type PostUpdateFieldsInput = {
   name?: Scalars['String']['input'];
-  test?: Scalars['File']['input'];
   test2?: RoleEnum;
   acl?: PostACLObjectUpdateFieldsInput;
   createdAt?: Scalars['Date']['input'];

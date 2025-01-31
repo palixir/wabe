@@ -12,7 +12,7 @@ describe('Default fields', () => {
   const now = new Date()
 
   describe('CreatedAt and UpdatedAt', () => {
-    it('should add createdAt and updatedAt value on insert operation type', async () => {
+    it('should add createdAt and updatedAt value on insert operation type', () => {
       const hookObject = new HookObject<DevWabeTypes, 'User'>({
         className: 'User',
         operationType: OperationType.BeforeCreate,
@@ -21,11 +21,12 @@ describe('Default fields', () => {
         } as any,
         context: {} as any,
         object: {} as any,
+        fields: [],
       })
 
       const spyHookObjectUpsertNewData = spyOn(hookObject, 'upsertNewData')
 
-      await defaultBeforeCreateForCreatedAt(hookObject)
+      defaultBeforeCreateForCreatedAt(hookObject)
 
       expect(spyHookObjectUpsertNewData).toHaveBeenCalledTimes(2)
       expect(spyHookObjectUpsertNewData).toHaveBeenNthCalledWith(
@@ -51,7 +52,7 @@ describe('Default fields', () => {
       expect(updatedAt.getFullYear()).toEqual(now.getFullYear())
     })
 
-    it('shoud add updatedAt value on update operation type', async () => {
+    it('shoud add updatedAt value on update operation type', () => {
       const hookObject = new HookObject<DevWabeTypes, 'User'>({
         className: 'User',
         operationType: OperationType.BeforeUpdate,
@@ -60,11 +61,12 @@ describe('Default fields', () => {
         } as any,
         context: {} as any,
         object: {} as any,
+        fields: [],
       })
 
       const spyHookObjectUpsertNewData = spyOn(hookObject, 'upsertNewData')
 
-      await defaultBeforeUpdateForUpdatedAt(hookObject)
+      defaultBeforeUpdateForUpdatedAt(hookObject)
       expect(spyHookObjectUpsertNewData).toHaveBeenCalledTimes(1)
       expect(spyHookObjectUpsertNewData).toHaveBeenCalledWith(
         'updatedAt',
@@ -79,7 +81,7 @@ describe('Default fields', () => {
       expect(updatedAt.getFullYear()).toEqual(now.getFullYear())
     })
 
-    it('should not overwrite if the createdAt field is already set', async () => {
+    it('should not overwrite if the createdAt field is already set', () => {
       const hookObject = new HookObject<DevWabeTypes, 'User'>({
         className: 'User',
         operationType: OperationType.BeforeCreate,
@@ -89,11 +91,12 @@ describe('Default fields', () => {
         } as any,
         context: {} as any,
         object: {} as any,
+        fields: [],
       })
 
       const spyHookObjectUpsertNewData = spyOn(hookObject, 'upsertNewData')
 
-      await defaultBeforeCreateForCreatedAt(hookObject)
+      defaultBeforeCreateForCreatedAt(hookObject)
 
       expect(spyHookObjectUpsertNewData).toHaveBeenCalledTimes(1)
     })
@@ -108,6 +111,7 @@ describe('Default fields', () => {
         } as any,
         context: {} as any,
         object: {} as any,
+        fields: [],
       })
 
       const spyHookObjectUpsertNewData = spyOn(hookObject, 'upsertNewData')
@@ -149,6 +153,7 @@ describe('Default fields', () => {
         } as any,
         context,
         object: {} as any,
+        fields: [],
       })
 
       const spyHookObjectUpsertNewData = spyOn(hookObject, 'upsertNewData')
@@ -169,6 +174,7 @@ describe('Default fields', () => {
         } as any,
         context,
         object: {} as any,
+        fields: [],
       })
 
       const spyHookObjectUpsertNewData = spyOn(hookObject, 'upsertNewData')

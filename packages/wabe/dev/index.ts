@@ -68,7 +68,6 @@ const run = async () => {
           name: 'Post',
           fields: {
             name: { type: 'String', required: true },
-            test: { type: 'File' },
             test2: { type: 'RoleEnum' },
           },
           permissions: {

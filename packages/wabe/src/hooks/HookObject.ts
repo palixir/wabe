@@ -22,6 +22,7 @@ export class HookObject<
   public object: OutputType<T, K, keyof T['types'][K]>
   // Object before any mutation, for example before delete
   public originalObject: OutputType<T, K, keyof T['types'][K]> | undefined
+  public fields: Array<keyof T['types'][K]>
 
   constructor({
     newData,
@@ -30,6 +31,7 @@ export class HookObject<
     context,
     object,
     originalObject,
+    fields,
   }: {
     className: K
     newData?: MutationData<T, K, keyof T['types'][K]>
@@ -37,6 +39,7 @@ export class HookObject<
     context: WabeContext<T>
     object: OutputType<T, K, keyof T['types'][K]>
     originalObject?: OutputType<T, K, keyof T['types'][K]>
+    fields: Array<keyof T['types'][K]>
   }) {
     this.newData = newData
     this.className = className
@@ -44,6 +47,7 @@ export class HookObject<
     this.context = context
     this.object = object
     this.originalObject = originalObject
+    this.fields = fields
   }
 
   getUser() {
