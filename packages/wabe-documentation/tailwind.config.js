@@ -1,20 +1,36 @@
-/** @type {import('tailwindcss').Config} */
+const { heroui } = require('@heroui/react')
+
 module.exports = {
-	preflight: false,
-	content: [
-		'landing/**/*.vue',
-		'docs/**/*.md',
-		'docs/.vitepress/theme/*.vue',
-	],
-	darkMode: 'class',
-	theme: {
-		extend: {
-			colors: {
-				'background-primary': '#081525',
-				'background-secondary': '#0D3348',
-				primary: '#49C78B',
-				secondary: '#8BB7C4',
-			},
-		},
-	},
+  content: [
+    './components/**/*.tsx',
+    './docs/**/*.mdx',
+    '../../node_modules/@heroui/**/*.{js,ts,jsx,tsx,mjs}',
+    './node_modules/@heroui/**/*.{js,ts,jsx,tsx,mjs}',
+  ],
+  theme: {
+    extend: {},
+  },
+  darkMode: 'class',
+  plugins: [
+    heroui({
+      defaultTheme: 'light',
+      addCommonColors: true,
+      themes: {
+        dark: {
+          colors: {
+            background: '#121212',
+            'background-secondary': '#18181b',
+            'muted-foreground': '#ABA9A3',
+            foreground: '#EEEEEC',
+          },
+        },
+        ligth: {
+          colors: {
+            background: '#ffffff',
+            'background-secondary': '#f8f9fa',
+          },
+        },
+      },
+    }),
+  ],
 }

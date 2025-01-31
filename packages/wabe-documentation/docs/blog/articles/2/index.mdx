@@ -1,0 +1,197 @@
+import { Image, Link } from '@heroui/react'
+import { FooterArticle } from '../../../../components/blog/footerArticle'
+import { computePublicPath } from '../../../../components/utils'
+
+<div className="pb-4">
+    <Link href="/blog" className="flex flex-row gap-2 text-white">
+        <p>←</p>
+        <p>Back</p>
+    </Link>
+</div>
+
+# How to write better software ?
+
+<div className="flex flex-row justify-center">
+    <Image
+        alt="Clean Code Illustration"
+        className="z-0 w-full h-full object-cover"
+        src={computePublicPath('/assets/blogs/2.png')}
+        width={600}
+        height={300}
+        radius="lg"
+    />
+</div>
+
+Building scalable and maintainable software requires more than just writing code that works. It demands writing **high-quality code** code that is clean, tested, and structured for growth. This article explores the core practices that lead to sustainable and efficient software development.
+
+## 1. Write clean and readable code
+
+The first step to quality is writing code that's easy to **read**, **understand**, and **maintain**. Following **Clean Code** principles ensures that your codebase remains accessible to others and to your future self.
+
+### Key clean code practices
+- **Meaningful Naming**: Use descriptive variable and function names.
+
+**Example**:
+  ```typescript
+  // Bad Naming
+  const d = 5;
+
+  // Good Naming
+  const daysInWeek = 7;
+  ```
+
+- **Small Functions**: Keep functions focused on a single responsibility.
+
+**Example**:
+```typescript
+// Bad Function: Does multiple things
+function processUserData(user: User) {
+  const formattedName = formatName(user);
+  const age = calculateAge(user.dateOfBirth);
+  saveUser(user);
+  return `${formattedName}, ${age} years old`;
+}
+
+// Good Function: Single responsibility
+function formatUserName(user: User): string {
+  return `${user.firstName} ${user.lastName}`;
+}
+
+function calculateUserAge(dob: Date): number {
+  const today = new Date();
+  return today.getFullYear() - dob.getFullYear();
+}
+```
+
+- **Consistent Formatting**: Tools like **Prettier** and **ESLint** help enforce style consistency.
+
+## 2. Test, test, test and test again
+
+Testing is not optional for high-quality code; it is absolutely essential. By integrating tests early in the development process, we not only prevent bugs but also ensure long-term stability. Well-written tests act as a safety net, allowing developers to make changes, refactor code, and update versions with confidence, knowing that any unintended issues will be caught before reaching production. This proactive approach to testing ensures that the system remains stable, reduces the risk of bugs in production, and helps deliver reliable software that users can trust.
+
+- **Unit Tests**: Test individual components in isolation.
+**Example**:
+  ```typescript
+  import { add } from './math';
+
+  test('adds two numbers correctly', () => {
+    expect(add(1, 2)).toBe(3);
+  });
+  ```
+
+- **Integration Tests**: Test how components interact together.
+
+**Example**:
+```typescript
+import { userService } from './userService';
+import { database } from './database';
+
+test('should fetch user from the database', async () => {
+  const user = await userService.getUserById(1);
+  expect(user).toHaveProperty('id', 1);
+});
+```
+
+- **End-to-End (E2E) Tests**: Simulate real user behavior.
+
+**Example with Cypress**:
+```javascript
+describe('Login Flow', () => {
+  it('should allow a user to login', () => {
+    cy.visit('/login');
+    cy.get('input[name="username"]').type('user1');
+    cy.get('input[name="password"]').type('password123');
+    cy.get('button[type="submit"]').click();
+    cy.url().should('include', '/dashboard');
+  });
+});
+```
+
+## 3. Enforce code quality with ESLint
+
+Linting automates code quality checks, preventing stylistic and functional errors.
+
+1. Install ESLint
+2. Configure rules to match your coding standards
+3. Combine with **Prettier** for formatting consistency
+
+## 4. Apply clean architecture principles
+
+**Clean Architecture** emphasizes separation of concerns, making your code scalable and maintainable.
+
+### Core layers
+- **Domain**: Business logic, entities, use cases.
+- **Application**: Interfaces and services.
+- **Infrastructure**: Frameworks, databases, APIs.
+- **Presentation**: UI and frontend logic.
+
+### Benefits
+- Easier to test and maintain.
+- Flexibility to swap technologies.
+- Clear separation between business logic and implementation.
+
+## 5. Embrace hexagonal architecture (Controllers and Adapters)
+
+The **Hexagonal Architecture** (also known as **Ports and Adapters**) isolates your core logic from external services.
+
+### Key Components
+- **Core**: Pure business logic.
+- **Controllers**: Interfaces that define operations.
+- **Adapters**: Implementations (e.g., REST APIs, databases).
+
+**Example**:
+```
+src/
+└── database/
+    ├── DatabaseController.ts
+    └── adapters/
+        └── MongoAdapter.ts
+        └── PostgresAdapter.ts
+```
+
+## 6. Automate with CI/CD Pipelines
+
+Continuous Integration and Deployment (CI/CD) ensures code quality and fast delivery.
+
+### Tools
+- **GitHub Actions**, **GitLab CI/CD** for automation.
+- **Docker** for consistent environments.
+
+**Note:** Avoid using Docker for local testing when possible, as building and managing Docker images can consume valuable time and resources. Instead, leverage an in-memory database for faster test execution. In-memory databases provide quicker setup and teardown, ensuring that tests run more efficiently without the overhead of containerization. This approach helps focus on test accuracy and speed, especially during development phases.
+
+**Example**:
+```js
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install modules
+        run: bun install
+      - name: Run lint
+        run: bun lint
+      - name: Run tests
+        run: bun test
+```
+
+## Conclusion: quality is a mindset
+
+High-quality code isn't just about clean syntax or passing tests it's about creating systems that are **scalable**, **maintainable**, and **reliable**. By embracing:
+
+- **Clean Code** for readability,
+- **Comprehensive testing** for stability,
+- **ESLint** for consistency,
+- **Clean and Hexagonal Architecture** for scalability,
+
+Whether you're starting a side project or scaling a SaaS, adopting these practices will help you deliver software that not only works but thrives.
+
+Let’s build better software, together.
+
+<FooterArticle />

@@ -1,0 +1,75 @@
+import { Image, Link } from '@heroui/react'
+import { FooterArticle} from '../../../../components/blog/footerArticle'
+import { computePublicPath } from '../../../../components/utils'
+
+<div className="pb-4">
+    <Link href="/blog" className="flex flex-row gap-2 text-white">
+        <p>←</p>
+        <p>Back</p>
+    </Link>
+</div>
+
+# The story behind ShipMySaaS: building quality from the ground up
+
+<div className="flex flex-row justify-center">
+    <Image
+        alt="Card background"
+        className="z-0 w-full h-full object-cover"
+        src={computePublicPath('/assets/blogs/1.png')}
+        width={600}
+        height={300}
+        radius="lg"
+    />
+</div>
+
+Every great product starts with a story. For ShipMySaaS, that story began in **September 2023**, when I was working as a **full-stack developer**. My job exposed me to an advanced tech stack—powerful (NextJS, TypeScript, Parse Server, GraphQL, etc.) but not without its shortcomings. Around that time, I decided to embark on a **side project** to create a SaaS, and that’s when I hit my first roadblock: **starting from scratch is hard**—even for an experienced developer.
+
+## The problem: starting from zero
+
+Initially, I explored popular tools like **Supabase**. While these platforms are fantastic for prototyping, I was wary of the challenges faced by **large-scale applications** with complex business logic. Scaling with tools like Supabase often meant hitting bottlenecks. This realization pushed me to take on a bold challenge: **create a backend-as-a-service (BaaS)** that could provide everything needed to quickly build robust, scalable applications.
+
+### Wabe: a foundation for fast development
+
+A year later, in **September 2024**, I launched **[Wabe](https://wabe.dev)**, an open-source BaaS designed to simplify application development. Wabe offered features like:
+- **Authentication**
+- **Database management**
+- **Auto-generated GraphQL CRUD APIs**
+- **File storage**
+- **Payment integrations**
+- **Email handling**
+- **And more!**
+
+The impact was immediate. I realized how much time and effort [Wabe](https://wabe.dev) could save developers, including myself. But the real test of its power came when I decided to put it to work.
+
+## From experiments to a vision
+
+To test [Wabe](https://wabe.dev) in real-world conditions, I quickly built two small applications with Wabe for the backend and NextJS for the frontend. These experiments validated [Wabe](https://wabe.dev)'s efficiency and sparked a bigger idea: what if I could create a **general-purpose boilerplate** for SaaS applications ? Something that could let developers skip the grunt work and focus on innovation.
+
+This idea wasn’t just about saving time. It was about **setting new standards** for SaaS solutions:
+- **Open-source at its core**: Unlike existing boilerplates or starter kits, ShipMySaaS is built entirely on open-source technologies.
+- **Professional-grade quality**: Many boilerplates are rushed to market, often lacking maintenance, security updates, or professional-grade coding practices. I wanted ShipMySaaS to be different—built to last, with regular updates and an unwavering focus on quality.
+
+## Why build another SaaS boilerplate ?
+
+It’s a valid question: **Why create another SaaS boilerplate when there are plenty out there?** Why not just pay $200 for an existing one and save a year of work ?
+
+Here’s my perspective:
+1. **Open source matters**: Open-source fosters innovation and transparency. No existing boilerplate fully embraces this ethos. This allow you to contribute, reporting bugs, suggesting features and improving the codebase.
+2. **Quality over quantity**: Too many boilerplates are rushed, prioritizing speed to market over durability and scalability. ShipMySaaS reflects my belief in **meticulous craftsmanship** a product that developers can trust to handle their production workloads.
+3. **Long-term value**: A poorly designed boilerplate can lead to bugs, technical debt, and expensive production issues. ShipMySaaS emphasizes **reliability**, ensuring your application is as solid as your vision.
+
+## The heart of ShipMySaaS
+
+Developing ShipMySaaS wasn’t just a technical endeavor, it was an hard work. I poured countless hours into every line of code to ensure that it meets the highest standards. From robust testing to seamless integrations, ShipMySaaS is built to give you a **real edge** in building your SaaS applications. And because no one is infallible, if you encountera bug, you can hope it will be fixed soon.
+
+When you use ShipMySaaS and [Wabe](https://wabe.dev) as its backbone, you’re not just adopting tools—you’re embracing a philosophy of **quality-first development**. A philosophy that prioritizes doing things right the first time, so you can avoid costly mistakes later.
+
+
+## A product I’m proud of
+
+After over a year of hard work, I’m proud to deliver ShipMySaaS a SaaS template using NextJS for the frontend and Wabe for the backend. It is also a product that embodies my commitment to quality and innovation. Whether you're building your first SaaS or your tenth, I hope ShipMySaaS helps you work smarter, iterate faster, and deliver the kind of applications your users deserve.
+
+Let’s build something amazing, together.
+
+
+<FooterArticle />

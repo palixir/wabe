@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://wabe.dev"><img src="https://www.wabe.dev/logo.webp" alt="Wabe logo" height=170></a>
+  <a href="https://wabe.dev"><img src="https://wabe.dev/assets/logo.png" alt="Wabe logo" height=170></a>
 </p>
 <h1 align="center">Wabe</h1>
 

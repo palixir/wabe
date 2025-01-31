@@ -1,20 +1,21 @@
 {
-  "name": "wabe-documentation",
-  "type": "module",
+  "name": "shipmysaas-landing",
+  "version": "1.0.0",
+  "private": true,
   "scripts": {
-    "release": "bun run build && vercel docs/.vitepress/dist --prod",
-    "dev": "vitepress dev docs",
-    "build": "vitepress build docs",
-    "preview": "vitepress preview docs"
-  },
-  "devDependencies": {
-    "vitepress": "1.5.0",
-    "vue": "3.4.38"
+    "release": "bun run build && vercel doc_build --prod",
+    "dev": "rspress dev",
+    "build": "rspress build",
+    "preview": "rspress preview"
   },
   "dependencies": {
-    "autoprefixer": "10.4.20",
-    "postcss": "8.4.41",
-    "postcss-nesting": "13.0.0",
-    "tailwindcss": "3.4.10"
+    "rspress": "1.40.2",
+    "@heroui/react": "2.6.13",
+    "@heroicons/react": "2.2.0"
+  },
+  "devDependencies": {
+    "postcss": "8.4.49",
+    "tailwindcss": "3.4.16",
+    "typescript": "5.5.2"
   }
 }
