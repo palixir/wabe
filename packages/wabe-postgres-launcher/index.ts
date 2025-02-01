@@ -1,38 +1,34 @@
-import { newDb } from 'pg-mem'
+import { newDb, type nil } from 'pg-mem'
 import tcpPortUsed from 'tcp-port-used'
-import { Client as PgClient } from 'pg' // For real PostgreSQL in production
-import type {
-  PostgresClientOptions,
-  PostgresClientParams,
-} from './interface/wabe-postgres-interface'
-
+import { Client } from 'pg' // For real PostgreSQL in production
+import type { PostgresClientParams } from './interface/wabe-postgres-interface'
 
 /**
  * Sets up an in-memory PostgreSQL instance for testing and development.
  * Uses pg-mem to create a temporary database that behaves like a real PostgreSQL instance.
- * 
+ *
  * Features:
  * - Automatically checks port availability (5432)
  * - Creates fresh database instance for each run
  * - Returns standard PgClient for familiar API
  * - No persistence between runs (good for tests)
- * 
- *  
+ *
+ *
  *  Zero Configuration Setup
  *    - Auto-initializes on port 5432
  *    - No physical database installation needed
  *    - Works out of the box for testing/development
- * 
+ *
  *  Development Friendly
  *    - Standard PgClient interface
  *    - Compatible with typical PostgreSQL queries
  *    - Supports async/await pattern
- *  
+ *
  *  Limitations:
  * - Not for production use
  * - Data doesn't persist after restart
  * - Limited to single port (5432)
- * 
+ *
  *  Common Use Cases:
  * 1. Unit Testing
  *    ```typescript
@@ -40,65 +36,64 @@ import type {
  *      client = await WabeInMemoryPostgres();
  *    });
  *    ```
- * 
+ *
  * 2. Development Environment
  *    ```typescript
  *    if (process.env.NODE_ENV === 'development') {
  *      client = await WabeInMemoryPostgres();
  *    }
  *    ```
- * 
+ *
  * y
  * 3. CI/CD Pipelines
  *    - No need to set up actual database
  *    - Consistent test environment
- * 
+ *
  * @see pg-mem documentation for advanced features
- * 
+ *
  * @returns Promise<PgClient | undefined> - PostgreSQL client if setup succeeds,
  *                                         undefined if port is already in use
- * 
+ *
  * @example
  * ```typescript
  * const client = await WabeInMemoryPostgres();
- * 
+ *
  * if (client) {
  *   // Fresh database instance
  *   await client.query('CREATE TABLE users (id SERIAL PRIMARY KEY)');
  * }
  * ```
- * 
+ *
  * Note: Port 5432 must be available for new instances.
  * If port is in use, assumes existing instance and returns undefined.
  */
 
 // Function to set up the in-memory PostgreSQL using pg-mem
-export const WabeInMemoryPostgres = async (): Promise<PgClient | undefined> => {
+export const WabeInMemoryPostgres = async (): Promise<Client | nil> => {
   const port = 5432
-  const universalPort = '127.0.0.1' // Default to '127.0.0.1' if no port/loopback address is provided
+  const universalPort = '127.0.0.1'
 
   const isPortInUse = await tcpPortUsed.check(port, universalPort)
 
   if (isPortInUse) {
     console.info(
-      `Wabe IN-MEMORY: In-mem Postgres initialize and is active and ready to accept data on port ${port} \n`,
+      `PostgreSQL is already running on port ${port}. Using the existing instance.`,
     )
-    return
+    return // You can return an existing real client here if needed
   }
+
   try {
-    const db = await newDb()
+    const db = newDb() // Create a new in-memory database instance
     const adapters = db.adapters
 
-    // Bind the server to the in-memory database
-    await adapters.bindServer()
+    // Bind the in-memory database to a PostgreSQL client
+    await adapters.bindServer() // This binds the server, preparing it for connections
 
-    // Get a connected PostgreSQL client using the 'createPg' method
-    const { Client } = adapters.createPg()
-    const client = new Client()
-    await client.connect()
-    await client.query('SELECT NOW();')
+    console.info('In-memory PostgreSQL database created successfully')
 
-    return client
+    // Return the pg-mem client (using createPg to get both Pool and Client)
+    const { Client: pgClient } = adapters.createPg()
+    return new pgClient()
   } catch (error) {
     console.error('Error setting up in-memory PostgreSQL:', error)
     throw error
@@ -178,12 +173,12 @@ export const WabePostgresClient = async ({
   connection_string,
   options = {},
   // Default options
-}: PostgresClientParams): Promise<PgClient | undefined> => {
+}: PostgresClientParams): Promise<Client | nil> => {
   const { useConnectionString = true, useDefaultPostgres = false } = options
 
   // Try to use connection string if specified and enabled
   if (useConnectionString && connection_string) {
-    const client = new PgClient(connection_string)
+    const client = new Client(connection_string)
     try {
       await client.connect()
       console.info('Connected to PostgreSQL using connection string')
@@ -199,7 +194,7 @@ export const WabePostgresClient = async ({
 
   // Use default PostgreSQL connection if enabled
   if (useDefaultPostgres) {
-    const client = new PgClient({
+    const client = new Client({
       user: db_user,
       host: host,
       database: database,
@@ -218,10 +213,5 @@ export const WabePostgresClient = async ({
 
   // Fall back to in-memory PostgreSQL
   console.info('Using in-memory PostgreSQL instance')
-  return await WabeInMemoryPostgres()
-}
-
-//for testing purposes
-export const testPostgresClient = async (): Promise<PgClient | undefined> => {
   return await WabeInMemoryPostgres()
 }

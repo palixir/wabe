@@ -6,24 +6,24 @@
   "scripts": {
     "dev": "bun index.ts --watch",
     "start": "bun dist/index.js",
-    "test:pg-mem": "bun test testInMemoryPostgres.ts --watch",
+    "test:pg-mem": "bun test test index.test.ts --watch",
     "test:util": "bun test-in-memory.utils.ts --watch",
     "ci": "bun test index.test.ts --verbose",
-    "build": "bun build index.ts testInMemoryPostgres.ts --target=bun --outdir dist",
-    "lint": "biome lint ./*.ts --no-errors-on-unmatched",
+    "build": "bun build index.ts --target=bun --outdir dist",
+    "lint": " biome lint . --no-errors-on-unmatched --config-path=../../ --verbose",
     "format": "biome format --write .",
     "test": "bun test index.test.ts"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "pg": "^8.13.0",
-    "pg-mem": "^3.0.3",
-    "tcp-port-used": "^1.0.2"
+    "pg": "8.13.0",
+    "pg-mem": "3.0.3",
+    "tcp-port-used": "1.0.2"
   },
   "devDependencies": {
     "@types/bun": "1.0.0",
     "@types/tcp-port-used": "1.0.4",
-    "@types/pg": "^8.11.10"
+    "@types/pg": "8.11.10"
   }
 }
