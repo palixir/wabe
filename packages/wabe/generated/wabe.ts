@@ -30,7 +30,7 @@ export enum SecondaryFactor {
 }
 
 export type FileInfo = {
-  name: Scalars['String']['output'];
+  name?: Scalars['String']['output'];
   url?: Scalars['String']['output'];
   urlGeneratedAt?: Scalars['Date']['output'];
 };

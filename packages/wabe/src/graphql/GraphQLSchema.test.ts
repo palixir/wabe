@@ -224,6 +224,40 @@ describe('GraphqlSchema', () => {
     })
   })
 
+  it('should have FileInput input on Create and Update fields input when we use a File field', async () => {
+    const { wabe } = await createWabe({
+      classes: [
+        {
+          name: 'TestClass',
+          fields: {
+            file: {
+              type: 'File',
+              required: true,
+            },
+          },
+        },
+      ],
+    })
+
+    expect(
+      getTypeFromGraphQLSchema({
+        schema: wabe.config.graphqlSchema || ({} as any),
+        type: 'Type',
+        name: 'TestClassCreateFieldsInput',
+      }).input.file,
+    ).toEqual('FileInput!')
+
+    expect(
+      getTypeFromGraphQLSchema({
+        schema: wabe.config.graphqlSchema || ({} as any),
+        type: 'Type',
+        name: 'TestClassUpdateFieldsInput',
+      }).input.file,
+    ).toEqual('FileInput!')
+
+    await wabe.close()
+  })
+
   it('should have FileInfo object on the wabe object when we use a File field', async () => {
     const { wabe } = await createWabe({
       classes: [

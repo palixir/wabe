@@ -138,8 +138,6 @@ describe('Delete session on delete user', () => {
       },
     })
 
-    // console.log('second')
-
     // Delete the user
     await client.request<any>(graphql.deleteUser, {
       input: {

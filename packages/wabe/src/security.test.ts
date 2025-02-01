@@ -134,7 +134,7 @@ describe('Security tests', () => {
         }
       }
     `),
-    ).rejects.toThrowError('Permission denied to read class _Session')
+    ).rejects.toThrowError('Permission denied to delete class _Session')
 
     const sessionAfterDelete = await wabe.controllers.database.getObject({
       className: '_Session',

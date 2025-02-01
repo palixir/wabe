@@ -13,18 +13,21 @@ const handleFile = async (hookObject: HookObject<any, any>) => {
 
   await Promise.all(
     Object.keys(newData).map(async (keyName) => {
-      if (
-        schema.fields[keyName].type !== 'File' ||
-        !(newData[keyName] instanceof File)
-      )
+      const file = newData[keyName].file as File
+      const url = newData[keyName].url as string
+
+      if (url) {
+        hookObject.upsertNewData(keyName, { url })
+        return
+      }
+
+      if (schema.fields[keyName].type !== 'File' || !(file instanceof File))
         return
 
       // We upload the file and set the name of the file in the newData
-      await hookObject.context.wabe.controllers.file?.uploadFile(
-        newData[keyName],
-      )
+      await hookObject.context.wabe.controllers.file?.uploadFile(file)
 
-      hookObject.upsertNewData(keyName, { name: newData[keyName].name })
+      hookObject.upsertNewData(keyName, { name: file.name })
     }),
   )
 }
