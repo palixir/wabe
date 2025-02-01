@@ -80,7 +80,7 @@ describe('File upload', () => {
       'operations',
       JSON.stringify({
         query:
-          'mutation ($file: File!) {createTest3(input: {fields: {file: $file}}){test3{id, file {name}}}}',
+          'mutation ($file: File!) {createTest3(input: {fields: {file: {file:$file}}}){test3{id, file {name}}}}',
         variables: { file: null },
       }),
     )
@@ -112,7 +112,7 @@ describe('File upload', () => {
       'operations',
       JSON.stringify({
         query:
-          'mutation ($file: File!) {createTest3(input: {fields: {file: $file}}){test3{id, file { name }}}}',
+          'mutation ($file: File!) {createTest3(input: {fields: {file: {file:$file}}}){test3{id, file { name }}}}',
         variables: { file: null },
       }),
     )
@@ -135,7 +135,7 @@ describe('File upload', () => {
     formData2.append(
       'operations',
       JSON.stringify({
-        query: `mutation ($file: File!) {updateTest3(input: {id: "${idOfCreatedObject}",fields: {file: $file}}){test3{id, file { name }}}}`,
+        query: `mutation ($file: File!) {updateTest3(input: {id: "${idOfCreatedObject}",fields: {file: {file:$file}}}){test3{id, file { name }}}}`,
         variables: { file: null },
       }),
     )
@@ -169,7 +169,7 @@ describe('File upload', () => {
       'operations',
       JSON.stringify({
         query:
-          'mutation ($file: File!) {createTest3(input: {fields: {file: $file}}){test3{id, file { name}}}}',
+          'mutation ($file: File!) {createTest3(input: {fields: {file: {file:$file}}}){test3{id, file { name}}}}',
         variables: { file: null },
       }),
     )
@@ -216,7 +216,7 @@ describe('File upload', () => {
       'operations',
       JSON.stringify({
         query:
-          'mutation ($file: File!) {createTest3(input: {fields: {file: $file}}){test3{id, file { name}}}}',
+          'mutation ($file: File!) {createTest3(input: {fields: {file: {file:$file}}}){test3{id, file { name}}}}',
         variables: { file: null },
       }),
     )
@@ -274,5 +274,49 @@ describe('File upload', () => {
 
     const url2 = await wabe.config.file?.adapter.readFile('a.text')
     expect(url2).toBeNull()
+  })
+
+  it('should upload a file providing an url without File scalar', async () => {
+    const anonymousClient = getAnonymousClient(port)
+
+    await anonymousClient.request<any>(
+      gql`
+        mutation {
+          createTest3(input: {fields: {file: {url: "https://wabe.dev/assets/logo.png"}}}) {
+            test3 {
+              id
+              file {
+                name
+                url
+                urlGeneratedAt
+              }
+            }
+          }
+        }
+      `,
+    )
+
+    const { test3s } = await anonymousClient.request<any>(
+      gql`
+        query {
+          test3s {
+            edges {
+              node {
+                id
+                file {
+                  name
+                  url
+                  urlGeneratedAt
+                }
+              }
+            }
+          }
+        }
+      `,
+    )
+
+    expect(test3s.edges[0].node.file.url).toEqual(
+      'https://wabe.dev/assets/logo.png',
+    )
   })
 })

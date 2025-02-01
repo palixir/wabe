@@ -573,7 +573,7 @@ describe('DatabaseController', () => {
       id: 'id',
     })
 
-    expect(mockInitializeHook).toHaveBeenCalledTimes(2)
+    expect(mockInitializeHook).toHaveBeenCalledTimes(1)
     expect(mockInitializeHook).toHaveBeenCalledWith({
       className: 'TestClass',
       context: {
@@ -585,12 +585,12 @@ describe('DatabaseController', () => {
     })
 
     // 4 because we have a getObject before the delete
-    expect(mockRunOnSingleObject).toHaveBeenCalledTimes(4)
-    expect(mockRunOnSingleObject).toHaveBeenNthCalledWith(3, {
+    expect(mockRunOnSingleObject).toHaveBeenCalledTimes(2)
+    expect(mockRunOnSingleObject).toHaveBeenNthCalledWith(1, {
       operationType: hooks.OperationType.BeforeDelete,
       id: 'id',
     })
-    expect(mockRunOnSingleObject).toHaveBeenNthCalledWith(4, {
+    expect(mockRunOnSingleObject).toHaveBeenNthCalledWith(2, {
       operationType: hooks.OperationType.AfterDelete,
       object: undefined, // Because we don't mock deleteObject in databaseController
     })
@@ -609,7 +609,7 @@ describe('DatabaseController', () => {
       fields: ['id'],
     })
 
-    expect(mockInitializeHook).toHaveBeenCalledTimes(2)
+    expect(mockInitializeHook).toHaveBeenCalledTimes(1)
     expect(mockInitializeHook).toHaveBeenCalledWith({
       className: 'TestClass',
       context: {
@@ -621,12 +621,12 @@ describe('DatabaseController', () => {
     })
 
     // 4 because we have a getObject before the delete
-    expect(mockRunOnMultipleObject).toHaveBeenCalledTimes(4)
-    expect(mockRunOnMultipleObject).toHaveBeenNthCalledWith(3, {
+    expect(mockRunOnMultipleObject).toHaveBeenCalledTimes(2)
+    expect(mockRunOnMultipleObject).toHaveBeenNthCalledWith(1, {
       operationType: hooks.OperationType.BeforeDelete,
       where: { id: { equalTo: 'id' } },
     })
-    expect(mockRunOnMultipleObject).toHaveBeenNthCalledWith(4, {
+    expect(mockRunOnMultipleObject).toHaveBeenNthCalledWith(2, {
       operationType: hooks.OperationType.AfterDelete,
     })
 

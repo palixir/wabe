@@ -16,7 +16,7 @@ enum SecondaryFactor {
 
 """Object containing information about the file"""
 type FileInfo {
-  name: String!
+  name: String
   url: String
   urlGeneratedAt: Date
 }

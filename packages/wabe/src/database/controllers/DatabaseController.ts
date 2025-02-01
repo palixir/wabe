@@ -514,7 +514,6 @@ export class DatabaseController<T extends WabeTypes> {
     // We should only run before and after hooks, and then get the data with request to only return after
     // possible mutated data in the hooks
     // A little tricky but logic
-
     await hook?.runOnMultipleObjects({
       operationType: OperationType.AfterRead,
       where: whereWithACLCondition,
@@ -670,16 +669,19 @@ export class DatabaseController<T extends WabeTypes> {
     context,
     data,
     fields,
+    skipHooks,
   }: UpdateObjectOptions<T, K, U, W>): Promise<OutputType<T, K, W>> {
-    const hook = initializeHook({
-      className,
-      context,
-      newData: data,
-      // @ts-expect-error
-      fields,
-    })
+    const hook = !skipHooks
+      ? initializeHook({
+          className,
+          context,
+          newData: data,
+          // @ts-expect-error
+          fields,
+        })
+      : undefined
 
-    const { newData, object } = await hook.runOnSingleObject({
+    const resultsAfterBeforeUpdate = await hook?.runOnSingleObject({
       operationType: OperationType.BeforeUpdate,
       id,
     })
@@ -691,14 +693,14 @@ export class DatabaseController<T extends WabeTypes> {
       fields,
       id,
       context,
-      data: newData,
+      data: resultsAfterBeforeUpdate?.newData || data,
       where: whereWithACLCondition,
     })
 
-    await hook.runOnSingleObject({
+    await hook?.runOnSingleObject({
       operationType: OperationType.AfterUpdate,
       id,
-      originalObject: object,
+      originalObject: resultsAfterBeforeUpdate?.object,
     })
 
     if (fields.length === 0) return null
@@ -726,6 +728,7 @@ export class DatabaseController<T extends WabeTypes> {
     first,
     offset,
     order,
+    skipHooks,
   }: UpdateObjectsOptions<T, K, U, W, X>): Promise<OutputType<T, K, W>[]> {
     const whereObject = await this._getWhereObjectWithPointerOrRelation(
       className,
@@ -733,13 +736,15 @@ export class DatabaseController<T extends WabeTypes> {
       context,
     )
 
-    const hook = initializeHook({
-      className,
-      context,
-      newData: data,
-      // @ts-expect-error
-      fields,
-    })
+    const hook = !skipHooks
+      ? initializeHook({
+          className,
+          context,
+          newData: data,
+          // @ts-expect-error
+          fields,
+        })
+      : undefined
 
     const whereWithACLCondition = this._buildWhereWithACL(
       whereObject,
@@ -747,17 +752,16 @@ export class DatabaseController<T extends WabeTypes> {
       'write',
     )
 
-    const { newData, objects: objectsAfterBeforeUpdate } =
-      await hook.runOnMultipleObjects({
-        operationType: OperationType.BeforeUpdate,
-        where: whereWithACLCondition,
-      })
+    const resultsAfterBeforeUpdate = await hook?.runOnMultipleObjects({
+      operationType: OperationType.BeforeUpdate,
+      where: whereWithACLCondition,
+    })
 
     const objects = await this.adapter.updateObjects({
       className,
       context,
       fields,
-      data: newData[0],
+      data: resultsAfterBeforeUpdate?.newData[0] || data,
       where: whereWithACLCondition,
       first,
       offset,
@@ -766,10 +770,10 @@ export class DatabaseController<T extends WabeTypes> {
 
     const objectsId = objects.map((object) => object?.id).filter(notEmpty)
 
-    await hook.runOnMultipleObjects({
+    await hook?.runOnMultipleObjects({
       operationType: OperationType.AfterUpdate,
       ids: objectsId,
-      originalObjects: objectsAfterBeforeUpdate,
+      originalObjects: resultsAfterBeforeUpdate?.objects || [],
     })
 
     if (fields.length === 0) return []
@@ -813,6 +817,7 @@ export class DatabaseController<T extends WabeTypes> {
         fields,
         id,
         context,
+        skipHooks: true,
       })
 
     const resultOfBeforeDelete = await hook.runOnSingleObject({
@@ -879,6 +884,7 @@ export class DatabaseController<T extends WabeTypes> {
         first,
         offset,
         order,
+        skipHooks: true,
       })
 
     const resultOfBeforeDelete = await hook.runOnMultipleObjects({

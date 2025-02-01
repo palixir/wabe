@@ -143,6 +143,7 @@ export interface UpdateObjectOptions<
   data: MutationData<T, K, U>
   fields: Array<W | '*'>
   context: WabeContext<any>
+  skipHooks?: boolean
 }
 
 export interface UpdateObjectsOptions<
@@ -160,6 +161,7 @@ export interface UpdateObjectsOptions<
   offset?: number
   first?: number
   context: WabeContext<any>
+  skipHooks?: boolean
 }
 
 export interface DeleteObjectOptions<

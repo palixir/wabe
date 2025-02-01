@@ -34,7 +34,12 @@ import {
   queryForMultipleObject,
   queryForOneObject,
 } from './resolvers'
-import { DateScalarType, IdWhereInput, SearchWhereInput } from './types'
+import {
+  DateScalarType,
+  FileScalarType,
+  IdWhereInput,
+  SearchWhereInput,
+} from './types'
 
 type AllPossibleObject =
   | 'object'
@@ -136,7 +141,7 @@ export class GraphQLSchema {
       {
         queries: {},
         mutations: {},
-        objects: [...this.createUtilsObject()],
+        objects: [...this.createFileObjects()],
       } as {
         queries: Record<string, GraphQLFieldConfig<any, any, any>>
         mutations: Record<string, GraphQLFieldConfig<any, any, any>>
@@ -176,12 +181,12 @@ export class GraphQLSchema {
     }
   }
 
-  createUtilsObject() {
+  createFileObjects() {
     const fileInfoObject = new GraphQLObjectType({
       name: 'FileInfo',
       description: 'Object containing information about the file',
       fields: () => ({
-        name: { type: new GraphQLNonNull(GraphQLString) },
+        name: { type: GraphQLString },
         url: { type: GraphQLString },
         urlGeneratedAt: {
           type: DateScalarType,
@@ -189,8 +194,18 @@ export class GraphQLSchema {
       }),
     })
 
+    const fileInputObject = new GraphQLInputObjectType({
+      name: 'FileInput',
+      description: 'Input to create a file',
+      fields: () => ({
+        file: { type: FileScalarType },
+        url: { type: GraphQLString },
+      }),
+    })
+
     this.allObjects.FileInfo = {
       object: fileInfoObject,
+      inputObject: fileInputObject,
     }
 
     return [fileInfoObject]

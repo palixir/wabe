@@ -15,12 +15,15 @@ const getFile = async (hookObject: HookObject<any, any>) => {
     Object.entries(schema.fields)
       .filter(([_, value]) => value.type === 'File')
       .map(async ([fieldName]) => {
-        const fileName = hookObject.object?.[fieldName]?.name as string
+        const fileInfo = hookObject.object?.[fieldName]
 
-        if (!fileName) return
+        if (!fileInfo) return
 
-        const fileUrl =
-          await hookObject.context.wabe.controllers.file?.readFile(fileName)
+        const fileName = fileInfo.name as string
+
+        const fileUrl = fileName
+          ? await hookObject.context.wabe.controllers.file?.readFile(fileName)
+          : fileInfo.url
 
         return hookObject.context.wabe.controllers.database.updateObject({
           className: hookObject.className,
@@ -28,12 +31,13 @@ const getFile = async (hookObject: HookObject<any, any>) => {
           id: hookObject.object?.id || '',
           data: {
             [fieldName]: {
-              ...hookObject.object?.[fieldName],
+              ...fileInfo,
               urlGeneratedAt: new Date(),
               url: fileUrl,
             },
           },
-          fields: [],
+          fields: ['*'],
+          skipHooks: true,
         })
       }),
   )
