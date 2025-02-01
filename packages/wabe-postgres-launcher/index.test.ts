@@ -23,7 +23,7 @@ describe('Wabe In-Memory PostgreSQL Setup Tests (WabeInMemoryPostgres)', () => {
   let inMemoryClient: PgClient | nil
 
   beforeAll(async () => {
-    // Initialize the client only once
+
     if (!client) {
       client = await WabeInMemoryPostgres()
     }
@@ -57,7 +57,6 @@ describe('Wabe In-Memory PostgreSQL Setup Tests (WabeInMemoryPostgres)', () => {
     // Ensure the client is defined (it should be if PostgreSQL isn't running)
     expect(inMemoryClient).toBeDefined()
 
-    // Test query to ensure the in-memory database is working
     const result = await inMemoryClient?.query('SELECT 1')
     expect(result?.rows).toEqual([{ column: 1 }])
 
@@ -85,12 +84,11 @@ describe('Wabe In-Memory PostgreSQL Setup Tests (WabeInMemoryPostgres)', () => {
             ('Alice Johnson')
         `)
 
-    // Retrieve records with a WHERE clause
     const result = await inMemoryClient?.query(
       `SELECT name FROM users WHERE name = 'Jane Doe'`,
     )
 
-    // Verify the result
+  
     expect(result?.rows.length).toBe(1) // Should return exactly 1 record
     expect(result?.rows[0].name).toBe('Jane Doe')
 
@@ -149,11 +147,11 @@ describe('Wabe In-Memory PostgreSQL Setup Tests (WabeInMemoryPostgres)', () => {
   })
 
   it('should insert and retrieve data into/from the wabe table in the in-memory database', async () => {
-    // Setup the in-memory Postgres database
+
     const inMemoryClient = await WabeInMemoryPostgres() // Assume this sets up the schema
     expect(inMemoryClient).toBeDefined()
 
-    // Define the table schema in the in-memory database
+
     await inMemoryClient?.query(`
             CREATE TABLE wabe (
                 id SERIAL PRIMARY KEY,
@@ -336,7 +334,7 @@ describe('Wabe In-Memory PostgreSQL Setup Tests (WabeInMemoryPostgres)', () => {
     )
     expect(result?.rows[0].CaseSensitiveName).toBe('Test Value')
 
-    // This query should fail because it uses the wrong case
+
     await expect(
       inMemoryClient?.query(`SELECT casesensitivename FROM case_test`),
     ).rejects.toThrow()
@@ -379,7 +377,7 @@ describe('Wabe In-Memory PostgreSQL Setup Tests (WabeInMemoryPostgres)', () => {
       `INSERT INTO items (name) VALUES ('Item 1'), ('Item 2'), ('Item 3')`,
     )
 
-    // Retrieve and verify the rows
+
     const result = await inMemoryClient?.query(`SELECT * FROM items`)
     expect(result?.rows.length).toBe(3)
     expect(result?.rows[0].name).toBe('Item 1')
