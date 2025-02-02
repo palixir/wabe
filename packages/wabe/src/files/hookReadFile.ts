@@ -9,6 +9,9 @@ const getFile = async (hookObject: HookObject<any, any>) => {
 
   if (!schema) return
 
+  const urlCacheInSeconds =
+    hookObject.context.wabe.config.file?.urlCacheInSeconds || 3600 * 24
+
   // After read we get the file URL and we update the field url with an URL.
   // For security purpose we recommend to use a presigned URL
   await Promise.all(
@@ -21,9 +24,17 @@ const getFile = async (hookObject: HookObject<any, any>) => {
 
         const fileName = fileInfo.name as string
 
-        const fileUrl = fileName
-          ? await hookObject.context.wabe.controllers.file?.readFile(fileName)
-          : fileInfo.url
+        const fileUrlGeneratedAt = fileInfo.urlGeneratedAt as Date
+
+        if (
+          fileUrlGeneratedAt &&
+          fileUrlGeneratedAt.getTime() + urlCacheInSeconds * 1000 >
+            new Date().getTime()
+        )
+          return
+
+        const fileUrlFromBucket =
+          await hookObject.context.wabe.controllers.file?.readFile(fileName)
 
         return hookObject.context.wabe.controllers.database.updateObject({
           className: hookObject.className,
@@ -33,7 +44,7 @@ const getFile = async (hookObject: HookObject<any, any>) => {
             [fieldName]: {
               ...fileInfo,
               urlGeneratedAt: new Date(),
-              url: fileUrl,
+              url: fileUrlFromBucket || fileInfo.url,
             },
           },
           fields: ['*'],

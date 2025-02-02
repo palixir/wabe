@@ -171,6 +171,8 @@ export const setupTests = async (
     },
     file: {
       adapter: new FileDevAdapter('bucket'),
+      // 12 hours of cache
+      urlCacheInSeconds: 3600 * 12,
     },
     schema: {
       classes: [

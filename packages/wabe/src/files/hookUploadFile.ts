@@ -17,7 +17,7 @@ const handleFile = async (hookObject: HookObject<any, any>) => {
       const url = newData[keyName].url as string
 
       if (url) {
-        hookObject.upsertNewData(keyName, { url })
+        hookObject.upsertNewData(keyName, { url, isPresignedUrl: false })
         return
       }
 
@@ -27,7 +27,10 @@ const handleFile = async (hookObject: HookObject<any, any>) => {
       // We upload the file and set the name of the file in the newData
       await hookObject.context.wabe.controllers.file?.uploadFile(file)
 
-      hookObject.upsertNewData(keyName, { name: file.name })
+      hookObject.upsertNewData(keyName, {
+        name: file.name,
+        isPresignedUrl: true,
+      })
     }),
   )
 }

@@ -191,6 +191,7 @@ export class GraphQLSchema {
         urlGeneratedAt: {
           type: DateScalarType,
         },
+        isPresignedUrl: { type: GraphQLBoolean },
       }),
     })
 
