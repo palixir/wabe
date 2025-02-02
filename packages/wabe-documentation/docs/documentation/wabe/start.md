@@ -30,21 +30,17 @@ Let's first add the necessary wabe dependency.
 
 ```sh
 bun add wabe
-```
-
-Let's also start a MongoDB database if one isn't already running:
-
-```sh
-docker run -p "27045:27017" mongodb/mongodb-community-server
+bun add --dev wabe-mongodb-launcher
 ```
 
 Open the `index.ts` file and past the following code.
 
 ```ts
 import { DatabaseEnum, Wabe } from "wabe";
+import { runDatabase } from 'wabe-mongodb-launcher'
 
 const run = async () => {
-  // Ensure your database is running before run the file
+  await runDatabase()
 
   const wabe = new Wabe({
     // Root key example (must be long minimal 64 characters, you can generate it online)
