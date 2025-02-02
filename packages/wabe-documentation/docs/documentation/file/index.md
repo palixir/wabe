@@ -29,13 +29,13 @@ const run = async () => {
          bucket: 'bucketName',
          endpoint: 'endpoint',
       }),
+      urlCacheInSeconds: 3600 * 24, // 24 hours
     }
     port: 3000,
   });
 
   await wabe.start();
 
-  // The upload file and the read file is automatically managed in the GraphQL API
   await wabe.controllers.file.uploadFile(new File(['test'], 'test.txt'));
 
   const url = await wabe.controllers.file.readFile('test.txt');
@@ -64,7 +64,7 @@ query users {
 }
 ```
 
-Example to create a file :
+Example to create a file providing a File object :
 
 ```ts
 const formData = new FormData();
@@ -94,4 +94,19 @@ const res = await fetch("http://127.0.0.1:3000/graphql", {
   method: "POST",
   body: formData,
 });
+```
+
+Example to create a file providing an url :
+
+```graphql
+mutation createUser ($avatarUrl: String!) {
+  createUser(input: { fields: {avatar: {url: $avatarUrl}}}) {
+    user {
+      id
+      avatar {
+        url
+      }
+    }
+  }
+}
 ```
