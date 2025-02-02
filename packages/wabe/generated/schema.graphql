@@ -19,6 +19,7 @@ type FileInfo {
   name: String
   url: String
   urlGeneratedAt: Date
+  isPresignedUrl: Boolean
 }
 
 """Date scalar type"""

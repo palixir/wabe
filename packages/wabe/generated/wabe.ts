@@ -33,6 +33,7 @@ export type FileInfo = {
   name?: Scalars['String']['output'];
   url?: Scalars['String']['output'];
   urlGeneratedAt?: Scalars['Date']['output'];
+  isPresignedUrl?: Scalars['Boolean']['output'];
 };
 
 export type User = {

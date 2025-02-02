@@ -1,5 +1,5 @@
 import type { S3Client, S3Options } from 'bun'
-import type { FileAdapter } from 'wabe'
+import type { FileAdapter, ReadFileOptions } from 'wabe'
 import { getS3Client } from './utils'
 
 export type Acl =
@@ -14,13 +14,11 @@ export type Acl =
 
 export class Buns3Adapter implements FileAdapter {
   public s3Client: S3Client
-  private urlExpiresIn: number
   private aclForUrl: Acl
 
-  constructor(options: S3Options & { urlExpiresIn?: number; aclForUrl?: Acl }) {
+  constructor(options: S3Options & { aclForUrl?: Acl }) {
     this.s3Client = getS3Client(options)
 
-    this.urlExpiresIn = options.urlExpiresIn || 3600 * 24
     this.aclForUrl = options.aclForUrl || 'private'
   }
 
@@ -28,13 +26,13 @@ export class Buns3Adapter implements FileAdapter {
     await this.s3Client.write(file.name, file)
   }
 
-  async readFile(fileName: string) {
+  async readFile(fileName: string, options?: ReadFileOptions) {
     if (!(await this.s3Client.exists(fileName))) return null
 
     const s3file = this.s3Client.file(fileName)
 
     return s3file.presign({
-      expiresIn: this.urlExpiresIn,
+      expiresIn: options?.urlExpiresIn || 3600 * 24,
       acl: this.aclForUrl,
     })
   }
