@@ -93,7 +93,6 @@ export default defineConfig({
             {
               text: 'Authentication',
               collapsible: true,
-
               items: [
                 {
                   text: 'Sign In / Up / Out',
@@ -129,7 +128,6 @@ export default defineConfig({
             { text: 'Routes', link: '/documentation/config/routes' },
             { text: 'Codegen', link: '/documentation/config/codegen' },
             { text: 'Root key', link: '/documentation/config/rootKey' },
-            { text: 'Security', link: '/documentation/config/security' },
           ],
         },
         {
@@ -142,10 +140,7 @@ export default defineConfig({
         },
         {
           text: 'Security',
-          collapsible: true,
-          items: [
-            { text: 'Permissions', link: '/documentation/security/index' },
-          ],
+          link: '/documentation/security/index',
         },
         { text: 'File', link: '/documentation/file/index' },
         { text: 'Email', link: '/documentation/email/index' },
