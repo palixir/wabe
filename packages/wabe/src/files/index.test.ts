@@ -74,6 +74,36 @@ describe('File upload', () => {
     })
   })
 
+  it('should throw an error if no fil ter is provided', async () => {
+    const previousFileController = wabe.controllers.file
+    // @ts-expect-error
+    wabe.controllers.file = null
+
+    const formData = new FormData()
+
+    formData.append(
+      'operations',
+      JSON.stringify({
+        query:
+          'mutation ($file: File!) {createTest3(input: {fields: {file: {file:$file}}}){test3{id, file {name, isPresignedUrl}}}}',
+        variables: { file: null },
+      }),
+    )
+
+    formData.append('map', JSON.stringify({ 0: ['variables.file'] }))
+
+    formData.append('0', new File(['a'], 'a.text', { type: 'text/plain' }))
+
+    const res = await fetch(`http://127.0.0.1:${port}/graphql`, {
+      method: 'POST',
+      body: formData,
+    })
+
+    expect(await res.text()).toContain('No file adapter found')
+
+    wabe.controllers.file = previousFileController
+  })
+
   it("should upload a file with the database controller's method", async () => {
     await wabe.controllers.database.createObject({
       // @ts-expect-error
