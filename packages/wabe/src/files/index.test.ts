@@ -7,6 +7,7 @@ import {
   it,
   spyOn,
 } from 'bun:test'
+import { isAbsolute } from 'node:path'
 import { FileDevAdapter, type Wabe } from '..'
 import {
   type DevWabeTypes,
@@ -105,7 +106,9 @@ describe('File upload', () => {
     // @ts-expect-error
     expect(result[0].file.name).toEqual('a.text')
     // @ts-expect-error
-    expect(result[0].file.url).toEqual('bucket/a.text')
+    expect(result[0].file.url).toContain('bucket/a.text')
+    // @ts-expect-error
+    expect(isAbsolute(result[0].file.url)).toBeTrue()
 
     const res = await wabe.controllers.database.updateObject({
       // @ts-expect-error
@@ -304,7 +307,8 @@ describe('File upload', () => {
     )
 
     expect(test3s.edges[0].node.file.name).toEqual('a.text')
-    expect(test3s.edges[0].node.file.url).toEqual('bucket/a.text')
+    expect(test3s.edges[0].node.file.url).toContain('bucket/a.text')
+    expect(isAbsolute(test3s.edges[0].node.file.url)).toBeTrue()
     expect(new Date(test3s.edges[0].node.file.urlGeneratedAt)).toBeDate()
   })
 
@@ -351,7 +355,8 @@ describe('File upload', () => {
     )
 
     expect(test3s.edges[0].node.file.name).toEqual('a.text')
-    expect(test3s.edges[0].node.file.url).toEqual('bucket/a.text')
+    expect(test3s.edges[0].node.file.url).toContain('bucket/a.text')
+    expect(isAbsolute(test3s.edges[0].node.file.url)).toBeTrue()
     expect(new Date(test3s.edges[0].node.file.urlGeneratedAt)).toBeDate()
 
     expect(spyFileDevAdaapterReadFile).toHaveBeenCalledTimes(1)
@@ -422,7 +427,8 @@ describe('File upload', () => {
     )
 
     expect(test3s.edges[0].node.file.name).toEqual('a.text')
-    expect(test3s.edges[0].node.file.url).toEqual('bucket/a.text')
+    expect(test3s.edges[0].node.file.url).toContain('bucket/a.text')
+    expect(isAbsolute(test3s.edges[0].node.file.url)).toBeTrue()
     expect(new Date(test3s.edges[0].node.file.urlGeneratedAt)).toBeDate()
 
     expect(spyFileDevAdaapterReadFile).toHaveBeenCalledTimes(1)
@@ -515,7 +521,8 @@ describe('File upload', () => {
     )
 
     expect(test3s.edges[0].node.file.name).toEqual('a.text')
-    expect(test3s.edges[0].node.file.url).toEqual('bucket/a.text')
+    expect(test3s.edges[0].node.file.url).toContain('bucket/a.text')
+    expect(isAbsolute(test3s.edges[0].node.file.url)).toBeTrue()
     expect(new Date(test3s.edges[0].node.file.urlGeneratedAt)).toBeDate()
 
     expect(spyFileDevAdaapterReadFile).toHaveBeenCalledTimes(1)
@@ -560,8 +567,7 @@ describe('File upload', () => {
       `,
     )
 
-    // Again once because the url was updated
-    expect(spyFileDevAdaapterReadFile).toHaveBeenCalledTimes(2)
+    expect(spyFileDevAdaapterReadFile).toHaveBeenCalledTimes(1)
   })
 
   it('should delete the file on the bucket after delete the object', async () => {
