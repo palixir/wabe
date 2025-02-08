@@ -224,6 +224,61 @@ describe('GraphqlSchema', () => {
     })
   })
 
+  it('should request relation object on single object query', async () => {
+    const { wabe } = await createWabe({
+      classes: [
+        {
+          name: 'TestClass1',
+          fields: {
+            field1: {
+              type: 'Relation',
+              // @ts-expect-error
+              class: 'TestClass2',
+            },
+          },
+        },
+        {
+          name: 'TestClass2',
+          fields: {
+            field2: {
+              type: 'String',
+            },
+          },
+        },
+      ],
+    })
+
+    const rootClient = getGraphqlClient(wabe.config.port)
+
+    const result1 = await rootClient.request<any>(gql`
+			mutation createTestClass1 {
+				createTestClass1(input: { fields: { field1: { createAndAdd: [{ field2: "field2" }] } } }) {
+					testClass1 {
+						id
+					}
+				}
+			}
+		`)
+
+    const result2 = await rootClient.request<any>(gql`
+      query testClass1 {
+          testClass1(id: "${result1.createTestClass1.testClass1.id}") {
+            field1 {
+            edges {
+                node {
+                field2
+                }
+             }
+            }
+          }
+      }
+      `)
+
+    expect(result2.testClass1.field1.edges[0].node.field2).toBe('field2')
+
+    await wabe.close()
+  })
+
   it('should have FileInput input on Create and Update fields input when we use a File field', async () => {
     const { wabe } = await createWabe({
       classes: [
