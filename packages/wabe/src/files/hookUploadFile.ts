@@ -1,7 +1,8 @@
 import type { HookObject } from '../hooks/HookObject'
 
 const handleFile = async (hookObject: HookObject<any, any>) => {
-  if (!hookObject.context.wabe.controllers.file) return
+  if (!hookObject.context.wabe.controllers.file)
+    throw new Error('No file adapter found')
 
   const newData = hookObject.getNewData()
 
