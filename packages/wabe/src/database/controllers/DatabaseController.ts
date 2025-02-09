@@ -179,6 +179,7 @@ export class DatabaseController<T extends WabeTypes> {
           return {
             ...acc,
             [pointerField]: {
+              totalCount: relationObjects.length,
               edges: relationObjects.map((object: any) => ({
                 node: object,
               })),
@@ -188,9 +189,7 @@ export class DatabaseController<T extends WabeTypes> {
 
         return acc
       },
-      Promise.resolve({
-        ...objectData,
-      } as Record<any, any>),
+      Promise.resolve(objectData as Record<any, any>),
     )
   }
 
