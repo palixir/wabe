@@ -130,7 +130,7 @@ describe('_Session', () => {
         refreshTokenExpiresAt: expect.any(Date),
         user: 'userId',
       },
-      fields: ['id'],
+      select: { id: true },
     })
   })
 
@@ -153,7 +153,7 @@ describe('_Session', () => {
         isRoot: true,
       },
       id: 'sessionId',
-      fields: [],
+      select: {},
     })
   })
 
@@ -202,7 +202,7 @@ describe('_Session', () => {
         refreshToken: expect.any(String),
         refreshTokenExpiresAt: expect.any(Date),
       },
-      fields: [],
+      select: {},
     })
 
     const accessTokenExpiresAt = mockUpdateObject.mock.calls[0][0].data

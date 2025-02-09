@@ -42,14 +42,13 @@ export class Session {
         accessToken: { equalTo: accessToken },
       },
       first: 1,
-      fields: ['user.*', 'user.role.*', 'id'],
       context,
     })
 
     if (sessions.length === 0) return { sessionId: null, user: null }
 
     const session = sessions[0]
-    // @ts-expect-error
+
     const user = session?.user
 
     return { sessionId: session?.id ?? null, user: user ?? null }
@@ -87,7 +86,7 @@ export class Session {
         ),
         user: userId,
       },
-      fields: ['id'],
+      select: { id: true },
     })
 
     if (!res) throw new Error('Session not created')
@@ -106,7 +105,7 @@ export class Session {
       className: '_Session',
       context: contextWithRoot(context),
       id: context.sessionId,
-      fields: [],
+      select: {},
     })
   }
 
@@ -132,7 +131,12 @@ export class Session {
       where: {
         accessToken: { equalTo: accessToken },
       },
-      fields: ['id', 'user', 'refreshToken', 'refreshTokenExpiresAt'],
+      select: {
+        id: true,
+        user: true,
+        refreshToken: true,
+        refreshTokenExpiresAt: true,
+      },
       context: contextWithRoot(context),
     })
 
@@ -204,7 +208,7 @@ export class Session {
           context.wabe.config,
         ),
       },
-      fields: [],
+      select: {},
     })
 
     return {

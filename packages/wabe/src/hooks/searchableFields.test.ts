@@ -36,12 +36,12 @@ describe('searchablesFields', () => {
           },
         },
       },
-      fields: [],
+      select: {},
     })
 
     const res = await wabe.controllers.database.getObjects({
       className: 'User',
-      fields: ['search'],
+      select: { search: true },
       context: {
         isRoot: true,
         wabe,
@@ -108,7 +108,7 @@ describe('searchablesFields', () => {
         },
       } as any,
       object: {} as any,
-      fields: [],
+      select: {},
     })
 
     defaultSearchableFieldsBeforeCreate(hookObject)
@@ -149,7 +149,7 @@ describe('searchablesFields', () => {
         name: 'test',
         search: ['t', 'te', 'tes', 'test'],
       } as any,
-      fields: [],
+      select: {},
     })
 
     defaultSearchableFieldsBeforeUpdate(hookObject)

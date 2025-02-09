@@ -18,18 +18,8 @@ import type {
   WhereType,
 } from '../adapters/adaptersInterface'
 
-type PointerObject = Record<
-  string,
-  {
-    pointerClass?: string
-    fieldsOfPointerClass: Array<string>
-  }
->
-
-interface PointerFields {
-  pointersFieldsId: string[]
-  pointers: PointerObject
-}
+export type Select = Record<string, boolean>
+type SelectWithObject = Record<string, object | boolean>
 
 export class DatabaseController<T extends WabeTypes> {
   public adapter: DatabaseAdapter<T>
@@ -38,11 +28,19 @@ export class DatabaseController<T extends WabeTypes> {
     this.adapter = adapter
   }
 
-  _getPointerObject(
-    className: keyof T['types'],
-    fields: string[],
-    context: WabeContext<T>,
-  ): PointerFields {
+  _getSelectMinusPointersAndRelations({
+    className,
+    context,
+    select,
+  }: {
+    className: keyof T['types']
+    context: WabeContext<T>
+    select?: SelectWithObject
+  }): {
+    // We associated the fieldName with a className and a select object
+    pointers: Record<string, { className: string; select: Select }>
+    selectWithoutPointers: Select
+  } {
     const realClass = context.wabe.config.schema?.classes?.find(
       // @ts-expect-error
       (c) => c.name.toLowerCase() === className.toLowerCase(),
@@ -50,41 +48,47 @@ export class DatabaseController<T extends WabeTypes> {
 
     if (!realClass) throw new Error('Class not found in schema')
 
-    return fields.reduce(
-      (acc, field) => {
-        const splittedField = field.split('.')
-        if (splittedField.length === 1) return acc
+    // If select is not provided we return all fields except pointer and relation
+    // If select is undefined and in project on adapter we should get all fields
+    // This is the default behavior for MongoAdapter
+    if (!select) return { pointers: {}, selectWithoutPointers: {} }
 
-        const pointerField = splittedField[0]
-
-        // @ts-expect-error
-        const pointerClass = realClass.fields[pointerField].class
-
-        const pointerFields = splittedField.slice(1).join('.')
-
-        return {
-          pointers: {
-            ...acc.pointers,
-            [pointerField]: {
-              ...(acc.pointers?.[pointerField] || []),
-              pointerClass,
-              fieldsOfPointerClass: [
-                ...(acc.pointers?.[pointerField]?.fieldsOfPointerClass || []),
-                pointerFields,
-              ],
+    return Object.entries(select).reduce(
+      (acc, [fieldName, value]) => {
+        if (value === true) {
+          return {
+            ...acc,
+            selectWithoutPointers: {
+              ...acc.selectWithoutPointers,
+              [fieldName]: true,
             },
-          },
-          pointersFieldsId: acc.pointersFieldsId?.includes(pointerField)
-            ? acc.pointersFieldsId
-            : [...(acc.pointersFieldsId || []), pointerField],
+          }
         }
+
+        if (typeof value === 'object') {
+          // @ts-expect-error
+          const classOfPointerOrRelation = realClass.fields[fieldName].class
+
+          return {
+            ...acc,
+            pointers: {
+              ...acc.pointers,
+              [fieldName]: {
+                className: classOfPointerOrRelation,
+                select: value,
+              },
+            },
+          }
+        }
+
+        return acc
       },
-      { pointers: {} } as PointerFields,
+      { pointers: {}, selectWithoutPointers: {} },
     )
   }
 
-  _isRelationField<K extends keyof T['types']>(
-    originClassName: K,
+  _isRelationField(
+    originClassName: string,
     context: WabeContext<T>,
     pointerClassName?: string,
   ) {
@@ -92,7 +96,6 @@ export class DatabaseController<T extends WabeTypes> {
 
     return context.wabe.config.schema?.classes?.some(
       (c) =>
-        // @ts-expect-error
         c.name.toLowerCase() === originClassName.toLowerCase() &&
         Object.values(c.fields).find(
           (field) =>
@@ -103,8 +106,8 @@ export class DatabaseController<T extends WabeTypes> {
     )
   }
 
-  _isPointerField<K extends keyof T['types']>(
-    originClassName: K,
+  _isPointerField(
+    originClassName: string,
     context: WabeContext<T>,
     pointerClassName?: string,
   ) {
@@ -112,7 +115,6 @@ export class DatabaseController<T extends WabeTypes> {
 
     return context.wabe.config.schema?.classes?.some(
       (c) =>
-        // @ts-expect-error
         c.name.toLowerCase() === originClassName.toLowerCase() &&
         Object.values(c.fields).find(
           (field) =>
@@ -120,76 +122,6 @@ export class DatabaseController<T extends WabeTypes> {
             // @ts-expect-error
             field.class.toLowerCase() === pointerClassName.toLowerCase(),
         ),
-    )
-  }
-
-  async _getFinalObjectWithPointer<
-    K extends keyof T['types'],
-    U extends keyof T['types'][K],
-  >(
-    objectData: OutputType<T, K, U> | null,
-    pointersObject: PointerObject,
-    originClassName: K,
-    context: WabeContext<T>,
-  ): Promise<Record<any, any>> {
-    return Object.entries(pointersObject).reduce(
-      async (
-        accPromise,
-        [pointerField, { fieldsOfPointerClass, pointerClass }],
-      ) => {
-        const acc = await accPromise
-
-        const isPointer = this._isPointerField(
-          originClassName,
-          context,
-          pointerClass,
-        )
-
-        // @ts-expect-error
-        if (isPointer && pointerClass && objectData?.[pointerField]) {
-          const pointerObject = await this.getObject({
-            className: pointerClass,
-            fields: fieldsOfPointerClass,
-            // @ts-expect-error
-            id: objectData[pointerField],
-            context,
-          })
-
-          return {
-            ...acc,
-            [pointerField]: pointerObject,
-          }
-        }
-
-        const isRelation = this._isRelationField(
-          originClassName,
-          context,
-          pointerClass,
-        )
-
-        if (isRelation && pointerClass) {
-          const relationObjects = await this.getObjects({
-            className: pointerClass,
-            fields: fieldsOfPointerClass,
-            // @ts-expect-error
-            where: { id: { in: objectData[pointerField] } },
-            context,
-          })
-
-          return {
-            ...acc,
-            [pointerField]: {
-              totalCount: relationObjects.length,
-              edges: relationObjects.map((object: any) => ({
-                node: object,
-              })),
-            },
-          }
-        }
-
-        return acc
-      },
-      Promise.resolve(objectData as Record<any, any>),
     )
   }
 
@@ -238,7 +170,7 @@ export class DatabaseController<T extends WabeTypes> {
 
       const objects = await this.getObjects({
         className: fieldTargetClass,
-        fields: ['id'],
+        select: { id: true },
         // @ts-expect-error
         where: defaultWhere,
         context,
@@ -355,6 +287,79 @@ export class DatabaseController<T extends WabeTypes> {
     }
   }
 
+  async _getFinalObjectWithPointerAndRelation({
+    pointers,
+    context,
+    originClassName,
+    object,
+  }: {
+    originClassName: string
+    pointers: Record<string, { className: string; select: Select }>
+    context: WabeContext<any>
+    object: Record<string, any>
+  }) {
+    return Object.entries(pointers).reduce(
+      async (
+        acc,
+        [pointerField, { className: currentClassName, select: currentSelect }],
+      ) => {
+        const accObject = await acc
+
+        const isPointer = this._isPointerField(
+          originClassName,
+          context,
+          pointerField,
+        )
+
+        if (isPointer) {
+          const objectOfPointerClass = await this.getObject({
+            className: currentClassName,
+            id: object[pointerField],
+            context,
+            // @ts-expect-error
+            select: currentSelect,
+            skipHooks: true,
+          })
+
+          return {
+            ...accObject,
+            [pointerField]: objectOfPointerClass,
+          }
+        }
+
+        const isRelation = this._isRelationField(
+          originClassName,
+          context,
+          pointerField,
+        )
+
+        if (isRelation) {
+          const relationObjects = await this.getObjects({
+            className: currentClassName,
+            // @ts-expect-error
+            select: currentSelect,
+            // @ts-expect-error
+            where: { id: { in: object[pointerField] } },
+            context,
+          })
+
+          return {
+            ...acc,
+            [pointerField]: {
+              totalCount: relationObjects.length,
+              edges: relationObjects.map((object: any) => ({
+                node: object,
+              })),
+            },
+          }
+        }
+
+        return accObject
+      },
+      Promise.resolve({} as Record<string, any>),
+    )
+  }
+
   connect(): Promise<any> {
     return this.adapter.connect()
   }
@@ -381,27 +386,25 @@ export class DatabaseController<T extends WabeTypes> {
   }
 
   async getObject<K extends keyof T['types'], U extends keyof T['types'][K]>({
-    fields,
+    select,
     className,
     context,
     skipHooks,
     id,
     where,
   }: GetObjectOptions<T, K, U>): Promise<OutputType<T, K, U>> {
-    const typedFields = fields as string[]
-
-    const { pointersFieldsId, pointers } = this._getPointerObject(
-      className,
-      typedFields,
-      context,
-    )
+    const { pointers, selectWithoutPointers } =
+      this._getSelectMinusPointersAndRelations({
+        className,
+        context,
+        select: select as SelectWithObject,
+      })
 
     const hook = !skipHooks
       ? initializeHook({
           className,
           context,
-          // @ts-expect-error
-          fields,
+          select: selectWithoutPointers,
         })
       : undefined
 
@@ -416,20 +419,19 @@ export class DatabaseController<T extends WabeTypes> {
       'read',
     )
 
-    const fieldsWithoutPointers = typedFields.filter(
-      (field) => !field.includes('.'),
-    )
+    const selectWithPointersAndRelationsToGetId = Object.keys(pointers).reduce(
+      (acc, fieldName) => {
+        acc[fieldName] = true
 
-    const fieldsWithPointerFields = [
-      ...fieldsWithoutPointers,
-      ...(pointersFieldsId || []),
-    ]
+        return acc
+      },
+      selectWithoutPointers,
+    )
 
     // For read operation we don't need to get all the objects between, because the data is not mutated
     // We should only run before and after hooks, and then get the data with request to only return after
     // possible mutated data in the hooks
     // A little tricky but logic
-    //
     await hook?.runOnSingleObject({
       operationType: OperationType.AfterRead,
       id,
@@ -439,17 +441,24 @@ export class DatabaseController<T extends WabeTypes> {
       className,
       id,
       context,
-      fields: fieldsWithPointerFields,
+      // @ts-expect-error
+      select: !select ? undefined : selectWithPointersAndRelationsToGetId,
       where: whereWithACLCondition,
       skipHooks: true,
     })
 
-    return this._getFinalObjectWithPointer(
-      objectToReturn,
-      pointers,
-      className,
-      context,
-    ) as any
+    // @ts-expect-error
+    return {
+      ...objectToReturn,
+      ...this._getFinalObjectWithPointerAndRelation({
+        context,
+        // @ts-expect-error
+        originClassName: className,
+        pointers,
+        // @ts-expect-error
+        object: objectToReturn,
+      }),
+    }
   }
 
   async getObjects<
@@ -458,7 +467,7 @@ export class DatabaseController<T extends WabeTypes> {
     W extends keyof T['types'][K],
   >({
     className,
-    fields,
+    select,
     context,
     where,
     skipHooks,
@@ -466,35 +475,38 @@ export class DatabaseController<T extends WabeTypes> {
     offset,
     order,
   }: GetObjectsOptions<T, K, U, W>): Promise<OutputType<T, K, W>[]> {
-    const typedFields = fields as string[]
+    const { pointers, selectWithoutPointers } =
+      this._getSelectMinusPointersAndRelations({
+        className,
+        context,
+        select: select as SelectWithObject,
+      })
 
-    const { pointersFieldsId, pointers } = this._getPointerObject(
-      className,
-      typedFields,
-      context,
-    )
-
-    const fieldsWithoutPointers = typedFields.filter(
-      (field) => !field.includes('.'),
-    )
-
-    const whereWithPointer = await this._getWhereObjectWithPointerOrRelation(
-      className,
-      where || {},
-      context,
-    )
+    // const whereWithPointer = await this._getWhereObjectWithPointerOrRelation(
+    //   className,
+    //   where || {},
+    //   context,
+    // )
 
     const whereWithACLCondition = this._buildWhereWithACL(
-      whereWithPointer,
+      where || {},
       context,
       'read',
+    )
+
+    const selectWithPointersAndRelationsToGetId = Object.keys(pointers).reduce(
+      (acc, fieldName) => {
+        acc[fieldName] = true
+
+        return acc
+      },
+      selectWithoutPointers,
     )
 
     const hook = !skipHooks
       ? initializeHook({
           className,
-          // @ts-expect-error
-          fields,
+          select: selectWithoutPointers,
           context,
         })
       : undefined
@@ -503,11 +515,6 @@ export class DatabaseController<T extends WabeTypes> {
       operationType: OperationType.BeforeRead,
       where: whereWithACLCondition,
     })
-
-    const fieldsWithPointerFields = [
-      ...fieldsWithoutPointers,
-      ...(pointersFieldsId || []),
-    ]
 
     // For read operation we don't need to get all the objects between, because the data is not mutated
     // We should only run before and after hooks, and then get the data with request to only return after
@@ -524,15 +531,24 @@ export class DatabaseController<T extends WabeTypes> {
       first,
       offset,
       where: whereWithACLCondition,
-      fields: fieldsWithPointerFields,
+      // @ts-expect-error
+      select: !select ? undefined : selectWithPointersAndRelationsToGetId,
       order,
       skipHooks: true,
     })
 
     return Promise.all(
-      objectsToReturn.map((object) =>
-        this._getFinalObjectWithPointer(object, pointers, className, context),
-      ),
+      objectsToReturn.map((object) => ({
+        ...object,
+        ...this._getFinalObjectWithPointerAndRelation({
+          // @ts-expect-error
+          object,
+          context,
+          // @ts-expect-error
+          originClassName: className,
+          pointers,
+        }),
+      })),
     ) as Promise<OutputType<T, K, W>[]>
   }
 
@@ -544,7 +560,7 @@ export class DatabaseController<T extends WabeTypes> {
     className,
     context,
     data,
-    fields,
+    select,
   }: CreateObjectOptions<T, K, U, W>): Promise<OutputType<T, K, W>> {
     // Here data.file is null but should not be
     const hook = initializeHook({
@@ -552,7 +568,7 @@ export class DatabaseController<T extends WabeTypes> {
       context,
       newData: data,
       // @ts-expect-error
-      fields,
+      select,
     })
 
     const { newData } = await hook.runOnSingleObject({
@@ -562,7 +578,7 @@ export class DatabaseController<T extends WabeTypes> {
     const { id } = await this.adapter.createObject({
       className,
       context,
-      fields,
+      select,
       data: newData,
     })
 
@@ -571,13 +587,13 @@ export class DatabaseController<T extends WabeTypes> {
       id,
     })
 
-    if (fields.length === 0) return null
+    if (select && Object.keys(select).length === 0) return null
 
     return this.getObject({
       className,
       // Because if you create an object, exceptionnaly you can read it after creatio
       context: contextWithRoot(context),
-      fields,
+      select,
       id,
       skipHooks: true,
     })
@@ -590,7 +606,7 @@ export class DatabaseController<T extends WabeTypes> {
     X extends keyof T['types'][K],
   >({
     data,
-    fields,
+    select,
     className,
     context,
     first,
@@ -606,7 +622,7 @@ export class DatabaseController<T extends WabeTypes> {
           context,
           newData,
           // @ts-expect-error
-          fields,
+          select,
         }),
       ),
     )
@@ -624,7 +640,7 @@ export class DatabaseController<T extends WabeTypes> {
 
     const listOfIds = await this.adapter.createObjects({
       className,
-      fields,
+      select,
       context,
       data: arrayOfComputedData,
       first,
@@ -643,12 +659,12 @@ export class DatabaseController<T extends WabeTypes> {
       ),
     )
 
-    if (fields.length === 0) return []
+    if (select && Object.keys(select).length === 0) return []
 
     return this.getObjects({
       className,
       context,
-      fields,
+      select,
       // @ts-expect-error
       where: { id: { in: ids } },
       skipHooks: true,
@@ -667,7 +683,7 @@ export class DatabaseController<T extends WabeTypes> {
     className,
     context,
     data,
-    fields,
+    select,
     skipHooks,
   }: UpdateObjectOptions<T, K, U, W>): Promise<OutputType<T, K, W>> {
     const hook = !skipHooks
@@ -676,7 +692,7 @@ export class DatabaseController<T extends WabeTypes> {
           context,
           newData: data,
           // @ts-expect-error
-          fields,
+          select,
         })
       : undefined
 
@@ -689,7 +705,7 @@ export class DatabaseController<T extends WabeTypes> {
 
     await this.adapter.updateObject({
       className,
-      fields,
+      select,
       id,
       context,
       data: resultsAfterBeforeUpdate?.newData || data,
@@ -702,12 +718,12 @@ export class DatabaseController<T extends WabeTypes> {
       originalObject: resultsAfterBeforeUpdate?.object,
     })
 
-    if (fields.length === 0) return null
+    if (select && Object.keys(select).length === 0) return null
 
     return this.getObject({
       className,
       context,
-      fields,
+      select,
       id,
       skipHooks: true,
     })
@@ -722,7 +738,7 @@ export class DatabaseController<T extends WabeTypes> {
     className,
     where,
     context,
-    fields,
+    select,
     data,
     first,
     offset,
@@ -741,7 +757,7 @@ export class DatabaseController<T extends WabeTypes> {
           context,
           newData: data,
           // @ts-expect-error
-          fields,
+          select,
         })
       : undefined
 
@@ -759,7 +775,7 @@ export class DatabaseController<T extends WabeTypes> {
     const objects = await this.adapter.updateObjects({
       className,
       context,
-      fields,
+      select,
       data: resultsAfterBeforeUpdate?.newData[0] || data,
       where: whereWithACLCondition,
       first,
@@ -775,12 +791,12 @@ export class DatabaseController<T extends WabeTypes> {
       originalObjects: resultsAfterBeforeUpdate?.objects || [],
     })
 
-    if (fields.length === 0) return []
+    if (select && Object.keys(select).length === 0) return []
 
     return this.getObjects({
       className,
       context,
-      fields,
+      select,
       // @ts-expect-error
       where: { id: { in: objectsId } },
       skipHooks: true,
@@ -797,23 +813,23 @@ export class DatabaseController<T extends WabeTypes> {
     context,
     className,
     id,
-    fields,
+    select,
   }: DeleteObjectOptions<T, K, U>): Promise<OutputType<T, K, U>> {
     const hook = initializeHook({
       className,
       context,
       // @ts-expect-error
-      fields,
+      select,
     })
 
     const whereWithACLCondition = this._buildWhereWithACL({}, context, 'write')
 
     let objectBeforeDelete = null
 
-    if (fields.length > 0)
+    if (select && Object.keys(select).length > 0)
       objectBeforeDelete = await this.getObject({
         className,
-        fields,
+        select,
         id,
         context,
         skipHooks: true,
@@ -827,7 +843,7 @@ export class DatabaseController<T extends WabeTypes> {
     await this.adapter.deleteObject({
       className,
       context,
-      fields,
+      select,
       id,
       where: whereWithACLCondition,
     })
@@ -847,7 +863,7 @@ export class DatabaseController<T extends WabeTypes> {
   >({
     className,
     context,
-    fields,
+    select,
     where,
     first,
     offset,
@@ -863,7 +879,7 @@ export class DatabaseController<T extends WabeTypes> {
       className,
       context,
       // @ts-expect-error
-      fields,
+      select,
     })
 
     const whereWithACLCondition = this._buildWhereWithACL(
@@ -874,11 +890,11 @@ export class DatabaseController<T extends WabeTypes> {
 
     let objectsBeforeDelete: OutputType<T, K, W>[] = []
 
-    if (fields.length > 0)
+    if (select && Object.keys(select).length > 0)
       objectsBeforeDelete = await this.getObjects({
         className,
         where,
-        fields,
+        select,
         context,
         first,
         offset,
@@ -894,7 +910,7 @@ export class DatabaseController<T extends WabeTypes> {
     await this.adapter.deleteObjects({
       className,
       context,
-      fields,
+      select,
       first,
       offset,
       where: whereWithACLCondition,

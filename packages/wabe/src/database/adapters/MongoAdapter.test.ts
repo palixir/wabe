@@ -79,7 +79,7 @@ describe('Mongo adapter', () => {
         age: 20,
       },
       context,
-      fields: [],
+      select: {},
     })
 
     expect(ObjectId.isValid(res?.id || '')).toBeTrue()
@@ -96,7 +96,7 @@ describe('Mongo adapter', () => {
         },
       ],
       context,
-      fields: [],
+      select: {},
     })
 
     expect(ObjectId.isValid(res[0]?.id || '')).toBeTrue()
@@ -111,14 +111,13 @@ describe('Mongo adapter', () => {
         age: 20,
       },
       context,
-      fields: ['*'],
     })
 
     const res = await mongoAdapter.updateObject({
       className: 'User',
       id: insertedObject?.id || '',
       data: { name: 'Doe' },
-      fields: [],
+      select: {},
       context,
     })
 
@@ -136,7 +135,6 @@ describe('Mongo adapter', () => {
         },
       ],
       context,
-      fields: ['*'],
     })
 
     const res = await mongoAdapter.updateObjects({
@@ -145,7 +143,7 @@ describe('Mongo adapter', () => {
         name: { equalTo: 'John' },
       },
       data: { name: 'Doe' },
-      fields: [],
+      select: {},
       context,
     })
 
@@ -166,13 +164,13 @@ describe('Mongo adapter', () => {
           age: 18,
         },
       ],
-      fields: [],
+      select: {},
       context,
     })
 
     const res = await mongoAdapter.getObjects({
       className: 'User',
-      fields: ['name'],
+      select: { name: true },
       order: {
         name: 'ASC',
       },
@@ -195,13 +193,13 @@ describe('Mongo adapter', () => {
           age: 18,
         },
       ],
-      fields: [],
+      select: {},
       context,
     })
 
     const res = await mongoAdapter.getObjects({
       className: 'User',
-      fields: ['name'],
+      select: { name: true },
       order: {
         name: 'DESC',
       },
@@ -224,13 +222,13 @@ describe('Mongo adapter', () => {
           age: 18,
         },
       ],
-      fields: [],
+      select: {},
       context,
     })
 
     const res = await mongoAdapter.getObjects({
       className: 'User',
-      fields: ['name'],
+      select: { name: true },
       order: {
         age: 'ASC',
         name: 'DESC',
@@ -261,7 +259,7 @@ describe('Mongo adapter', () => {
           age: 18,
         },
       ],
-      fields: [],
+      select: {},
       context,
     })
 
@@ -294,7 +292,7 @@ describe('Mongo adapter', () => {
           age: 18,
         },
       ],
-      fields: [],
+      select: {},
       context,
     })
 
@@ -308,7 +306,7 @@ describe('Mongo adapter', () => {
           refreshToken: 'refreshToken',
         },
       ],
-      fields: [],
+      select: {},
       context,
     })
 
@@ -316,19 +314,19 @@ describe('Mongo adapter', () => {
 
     const res = await mongoAdapter.getObjects({
       className: 'User',
-      fields: [],
+      select: {},
       context,
     })
 
     const res2 = await mongoAdapter.getObjects({
       className: '_Session',
-      fields: [],
+      select: {},
       context,
     })
 
     const res3 = await mongoAdapter.getObjects({
       className: 'Role',
-      fields: ['id'],
+      select: { id: true },
       context,
     })
 
@@ -350,7 +348,7 @@ describe('Mongo adapter', () => {
           age: 18,
         },
       ],
-      fields: ['id'],
+      select: { id: true },
       context,
     })
 
@@ -362,7 +360,6 @@ describe('Mongo adapter', () => {
         },
         id: insertedObjects[0]?.id || '',
         context,
-        fields: ['*'],
       }),
     ).rejects.toThrow('Object not found')
 
@@ -373,7 +370,6 @@ describe('Mongo adapter', () => {
       },
       id: insertedObjects[0]?.id || '',
       context,
-      fields: ['*'],
     })
 
     expect(res?.name).toEqual('Lucas')
@@ -392,7 +388,7 @@ describe('Mongo adapter', () => {
           age: 18,
         },
       ],
-      fields: ['id'],
+      select: { id: true },
       context,
     })
 
@@ -405,7 +401,6 @@ describe('Mongo adapter', () => {
         id: insertedObjects[0]?.id || '',
         context,
         data: { name: 'Lucas2' },
-        fields: ['*'],
       }),
     ).rejects.toThrow('Object not found')
 
@@ -417,13 +412,12 @@ describe('Mongo adapter', () => {
       id: insertedObjects[0]?.id || '',
       context,
       data: { name: 'Lucas2' },
-      fields: ['*'],
     })
 
     const updatedObject = await mongoAdapter.getObject({
       className: 'User',
       id,
-      fields: ['id', 'name'],
+      select: { id: true, name: true },
       context,
     })
 
@@ -443,7 +437,7 @@ describe('Mongo adapter', () => {
           age: 18,
         },
       ],
-      fields: ['id'],
+      select: { id: true },
       context,
     })
 
@@ -455,7 +449,6 @@ describe('Mongo adapter', () => {
         },
         id: insertedObjects[0]?.id || '',
         context,
-        fields: ['*'],
       }),
     ).rejects.toThrow('Object not found')
 
@@ -466,7 +459,6 @@ describe('Mongo adapter', () => {
       },
       id: insertedObjects[0]?.id || '',
       context,
-      fields: ['*'],
     })
   })
 
@@ -483,7 +475,7 @@ describe('Mongo adapter', () => {
           age: 18,
         },
       ],
-      fields: ['id'],
+      select: { id: true },
       context,
     })
 
@@ -493,7 +485,6 @@ describe('Mongo adapter', () => {
         id: { notEqualTo: insertedObjects[0]?.id },
       },
       context,
-      fields: ['*'],
     })
 
     expect(res.length).toEqual(1)
@@ -512,7 +503,7 @@ describe('Mongo adapter', () => {
           age: 18,
         },
       ],
-      fields: ['id'],
+      select: { id: true },
       context,
     })
 
@@ -522,7 +513,6 @@ describe('Mongo adapter', () => {
         id: { equalTo: insertedObjects[0]?.id },
       },
       context,
-      fields: ['*'],
     })
 
     expect(res.length).toEqual(1)
@@ -541,7 +531,7 @@ describe('Mongo adapter', () => {
           age: 18,
         },
       ],
-      fields: ['id'],
+      select: { id: true },
       context,
     })
 
@@ -551,7 +541,6 @@ describe('Mongo adapter', () => {
         id: { in: insertedObjects.map((obj) => obj?.id).filter(notEmpty) },
       },
       context,
-      fields: ['*'],
     })
 
     expect(res.length).toEqual(2)
@@ -570,7 +559,7 @@ describe('Mongo adapter', () => {
           age: 18,
         },
       ],
-      fields: ['id'],
+      select: { id: true },
       context,
     })
 
@@ -580,7 +569,6 @@ describe('Mongo adapter', () => {
         id: { notIn: insertedObjects.map((obj) => obj?.id).filter(notEmpty) },
       },
       context,
-      fields: ['*'],
     })
 
     expect(res.length).toEqual(0)
@@ -624,7 +612,7 @@ describe('Mongo adapter', () => {
         },
       ],
       context,
-      fields: ['age', 'id'],
+      select: { age: true, id: true },
     })
 
     if (!insertedObjects) fail
@@ -642,7 +630,6 @@ describe('Mongo adapter', () => {
         },
       ],
       context,
-      fields: ['*'],
     })
 
     if (!insertedObjects) fail()
@@ -663,7 +650,7 @@ describe('Mongo adapter', () => {
           age: 20,
         },
       ],
-      fields: ['name', 'id'],
+      select: { name: true, id: true },
       context,
     })
 
@@ -679,7 +666,6 @@ describe('Mongo adapter', () => {
         },
       },
       context,
-      fields: ['*'],
     })
 
     expect(res.length).toEqual(1)
@@ -710,13 +696,13 @@ describe('Mongo adapter', () => {
           age: 20,
         },
       ],
-      fields: ['name', 'id'],
+      select: { name: true, id: true },
       context,
     })
 
     const res = await mongoAdapter.getObjects({
       className: 'User',
-      fields: ['name'],
+      select: { name: true },
       first: 2,
       offset: 2,
       context,
@@ -752,13 +738,13 @@ describe('Mongo adapter', () => {
           age: 20,
         },
       ],
-      fields: ['name', 'id'],
+      select: { name: true, id: true },
       context,
     })
 
     const res = await mongoAdapter.getObjects({
       className: 'User',
-      fields: ['name'],
+      select: { name: true },
       context,
       where: {},
     })
@@ -773,14 +759,14 @@ describe('Mongo adapter', () => {
         name: 'John',
         age: 20,
       },
-      fields: ['name', 'id'],
+      select: { name: true, id: true },
       context,
     })
 
     const res = await mongoAdapter.getObject({
       id: insertedObject?.id.toString() || '',
       className: 'User',
-      fields: ['id'],
+      select: { id: true },
       context,
     })
 
@@ -794,7 +780,7 @@ describe('Mongo adapter', () => {
         name: 'John',
         age: 20,
       },
-      fields: ['name', 'id'],
+      select: { name: true, id: true },
       context,
     })
 
@@ -807,7 +793,7 @@ describe('Mongo adapter', () => {
     const res = await mongoAdapter.getObject({
       className: 'User',
       id: id.toString(),
-      fields: ['*'],
+
       context,
     })
 
@@ -827,7 +813,7 @@ describe('Mongo adapter', () => {
         name: 'John',
         age: 20,
       },
-      fields: ['name', 'id'],
+      select: { name: true, id: true },
       context,
     })
 
@@ -840,7 +826,7 @@ describe('Mongo adapter', () => {
     const field = await mongoAdapter.getObject({
       className: 'User',
       id: id.toString(),
-      fields: ['name', 'id'],
+      select: { name: true, id: true },
       context,
     })
 
@@ -853,7 +839,7 @@ describe('Mongo adapter', () => {
   it('should get all object with specific field and * fields', async () => {
     const objects = await mongoAdapter.getObjects({
       className: 'User',
-      fields: ['name'],
+      select: { name: true },
       context,
     })
 
@@ -865,7 +851,7 @@ describe('Mongo adapter', () => {
         name: 'John1',
         age: 20,
       },
-      fields: ['name'],
+      select: { name: true },
       context,
     })
 
@@ -875,13 +861,13 @@ describe('Mongo adapter', () => {
         name: 'John2',
         age: 20,
       },
-      fields: ['name'],
+      select: { name: true },
       context,
     })
 
     const objects2 = await mongoAdapter.getObjects({
       className: 'User',
-      fields: ['name', 'id'],
+      select: { name: true, id: true },
       context,
     })
 
@@ -899,7 +885,7 @@ describe('Mongo adapter', () => {
 
     const objects3 = await mongoAdapter.getObjects({
       className: 'User',
-      fields: ['name', 'id', 'age'],
+      select: { name: true, id: true, age: true },
       context,
     })
 
@@ -925,7 +911,7 @@ describe('Mongo adapter', () => {
         name: 'John1',
         age: 20,
       },
-      fields: ['name'],
+      select: { name: true },
       context,
     })
 
@@ -935,7 +921,7 @@ describe('Mongo adapter', () => {
         name: 'John2',
         age: 20,
       },
-      fields: ['name'],
+      select: { name: true },
       context,
     })
 
@@ -953,7 +939,7 @@ describe('Mongo adapter', () => {
             },
           ],
         },
-        fields: ['name', 'id', 'age'],
+        select: { name: true, id: true, age: true },
         context,
       }),
     ).toEqual([
@@ -982,7 +968,7 @@ describe('Mongo adapter', () => {
             },
           ],
         },
-        fields: ['name', 'id', 'age'],
+        select: { name: true, id: true, age: true },
         context,
       }),
     ).toEqual([
@@ -1007,7 +993,7 @@ describe('Mongo adapter', () => {
             },
           ],
         },
-        fields: ['name', 'id', 'age'],
+        select: { name: true, id: true, age: true },
         context,
       }),
     ).toEqual([
@@ -1032,7 +1018,6 @@ describe('Mongo adapter', () => {
           ],
         },
         context,
-        fields: ['*'],
       }),
     ).toEqual([])
 
@@ -1043,7 +1028,7 @@ describe('Mongo adapter', () => {
         where: {
           name: { equalTo: 'John1' },
         },
-        fields: ['name', 'id', 'age'],
+        select: { name: true, id: true, age: true },
         context,
       }),
     ).toEqual([
@@ -1061,7 +1046,6 @@ describe('Mongo adapter', () => {
           age: { greaterThan: 21 },
         },
         context,
-        fields: ['*'],
       }),
     ).toEqual([])
 
@@ -1072,7 +1056,7 @@ describe('Mongo adapter', () => {
         where: {
           name: { notEqualTo: 'John1' },
         },
-        fields: ['name', 'id', 'age'],
+        select: { name: true, id: true, age: true },
         context,
       }),
     ).toEqual([
@@ -1091,7 +1075,6 @@ describe('Mongo adapter', () => {
           name: { lessThan: 'John1' },
         },
         context,
-        fields: ['*'],
       }),
     ).toEqual([])
 
@@ -1102,7 +1085,7 @@ describe('Mongo adapter', () => {
         where: {
           age: { lessThan: 30 },
         },
-        fields: ['name', 'id', 'age'],
+        select: { name: true, id: true, age: true },
         context,
       }),
     ).toEqual([
@@ -1125,7 +1108,7 @@ describe('Mongo adapter', () => {
         where: {
           age: { equalTo: 20 },
         },
-        fields: ['name', 'id', 'age'],
+        select: { name: true, id: true, age: true },
         context,
       }),
     ).toEqual([
@@ -1147,7 +1130,7 @@ describe('Mongo adapter', () => {
       mongoAdapter.getObject({
         className: 'User',
         id: '5f9b3b3b3b3b3b3b3b3b3b3b',
-        fields: ['name'],
+        select: { name: true },
         context,
       }),
     ).rejects.toThrow('Object not found')
@@ -1160,14 +1143,14 @@ describe('Mongo adapter', () => {
         name: 'Lucas',
         age: 23,
       },
-      fields: ['age', 'id'],
+      select: { age: true, id: true },
       context,
     })
 
     const insertedObject = await mongoAdapter.getObject({
       className: 'User',
       id,
-      fields: ['id', 'age'],
+      select: { age: true, id: true },
       context,
     })
 
@@ -1179,14 +1162,14 @@ describe('Mongo adapter', () => {
         name: 'Lucas2',
         age: 24,
       },
-      fields: ['name', 'id', 'age'],
+      select: { name: true, id: true, age: true },
       context,
     })
 
     const insertedObject2 = await mongoAdapter.getObject({
       className: 'User',
       id: id2,
-      fields: ['name', 'id', 'age'],
+      select: { name: true, id: true, age: true },
       context,
     })
 
@@ -1210,14 +1193,14 @@ describe('Mongo adapter', () => {
           age: 24,
         },
       ],
-      fields: ['name', 'id'],
+      select: { name: true, id: true },
       context,
     })
 
     const insertedObjects = await mongoAdapter.getObjects({
       className: 'User',
       where: {},
-      fields: ['name', 'id'],
+      select: { name: true, id: true },
       context,
     })
 
@@ -1246,14 +1229,14 @@ describe('Mongo adapter', () => {
           age: 24,
         },
       ],
-      fields: ['name', 'id', 'age'],
+      select: { name: true, id: true, age: true },
       context,
     })
 
     const insertedObjects = await mongoAdapter.getObjects({
       className: 'User',
       where: {},
-      fields: ['name', 'id', 'age'],
+      select: { name: true, id: true, age: true },
       context,
     })
 
@@ -1279,7 +1262,6 @@ describe('Mongo adapter', () => {
         age: 20,
       },
       context,
-      fields: ['*'],
     })
 
     if (!insertedObject) fail()
@@ -1290,14 +1272,14 @@ describe('Mongo adapter', () => {
       className: 'User',
       id: id.toString(),
       data: { name: 'Doe' },
-      fields: ['name', 'id'],
+      select: { name: true, id: true },
       context,
     })
 
     const updatedObject = await mongoAdapter.getObject({
       className: 'User',
       id: id.toString(),
-      fields: ['name', 'id'],
+      select: { name: true, id: true },
       context,
     })
 
@@ -1310,14 +1292,14 @@ describe('Mongo adapter', () => {
       className: 'User',
       id: id.toString(),
       data: { name: 'Doe' },
-      fields: ['name', 'id', 'age'],
+      select: { name: true, id: true, age: true },
       context,
     })
 
     const updatedObject2 = await mongoAdapter.getObject({
       className: 'User',
       id: id.toString(),
-      fields: ['name', 'age', 'id'],
+      select: { name: true, age: true, id: true },
       context,
     })
 
@@ -1342,7 +1324,6 @@ describe('Mongo adapter', () => {
         },
       ],
       context,
-      fields: ['*'],
     })
 
     if (!insertedObjects) fail()
@@ -1353,7 +1334,7 @@ describe('Mongo adapter', () => {
         name: { equalTo: 'Lucas' },
       },
       data: { name: 'Doe' },
-      fields: ['name', 'id'],
+      select: { name: true, id: true },
       context,
     })
 
@@ -1364,7 +1345,7 @@ describe('Mongo adapter', () => {
           equalTo: 'Doe',
         },
       },
-      fields: ['name', 'id'],
+      select: { name: true, id: true },
       context,
     })
 
@@ -1381,7 +1362,7 @@ describe('Mongo adapter', () => {
         age: { greaterThanOrEqualTo: 20 },
       },
       data: { age: 23 },
-      fields: ['name', 'id', 'age'],
+      select: { name: true, id: true, age: true },
       context,
     })
 
@@ -1392,7 +1373,7 @@ describe('Mongo adapter', () => {
           greaterThanOrEqualTo: 23,
         },
       },
-      fields: ['age', 'name', 'id'],
+      select: { age: true, name: true, id: true },
       context,
     })
 
@@ -1418,7 +1399,6 @@ describe('Mongo adapter', () => {
         age: 20,
       },
       context,
-      fields: ['*'],
     })
 
     if (!insertedObject) fail()
@@ -1431,7 +1411,7 @@ describe('Mongo adapter', () => {
           equalTo: 'John',
         },
       },
-      fields: [],
+      select: {},
       context,
     })
 
@@ -1442,7 +1422,7 @@ describe('Mongo adapter', () => {
           equalTo: 'Doe',
         },
       },
-      fields: ['age', 'id'],
+      select: { age: true, id: true },
       context,
     })
 
@@ -1462,7 +1442,6 @@ describe('Mongo adapter', () => {
         age: 20,
       },
       context,
-      fields: ['*'],
     })
 
     if (!insertedObject) fail()
@@ -1472,7 +1451,7 @@ describe('Mongo adapter', () => {
     await mongoAdapter.deleteObject({
       className: 'User',
       id: id.toString(),
-      fields: ['name', 'id', 'age'],
+      select: { name: true, id: true, age: true },
       context,
     })
 
@@ -1481,7 +1460,6 @@ describe('Mongo adapter', () => {
         className: 'User',
         id: id.toString(),
         context,
-        fields: ['*'],
       }),
     ).rejects.toThrow('Object not found')
   })
@@ -1494,7 +1472,6 @@ describe('Mongo adapter', () => {
         age: 18,
       },
       context,
-      fields: ['*'],
     })
 
     await mongoAdapter.createObject({
@@ -1504,13 +1481,12 @@ describe('Mongo adapter', () => {
         age: 18,
       },
       context,
-      fields: ['*'],
     })
 
     await mongoAdapter.deleteObjects({
       className: 'User',
       where: { age: { equalTo: 18 } },
-      fields: ['name', 'id', 'age'],
+      select: { name: true, id: true, age: true },
       context,
     })
 
@@ -1518,7 +1494,6 @@ describe('Mongo adapter', () => {
       className: 'User',
       where: { age: { equalTo: 18 } },
       context,
-      fields: ['*'],
     })
 
     expect(resAfterDelete.length).toEqual(0)
@@ -1620,7 +1595,6 @@ describe('Mongo adapter', () => {
           },
         },
       },
-      fields: ['*'],
     })
 
     const res = await mongoAdapter.getObjects({
@@ -1633,7 +1607,7 @@ describe('Mongo adapter', () => {
         },
       },
       context,
-      fields: ['authentication'],
+      select: { authentication: true },
     })
 
     expect(res.length).toEqual(1)
@@ -1655,7 +1629,6 @@ describe('Mongo adapter', () => {
           },
         },
       },
-      fields: ['*'],
     })
 
     const res = await mongoAdapter.getObjects({
@@ -1669,7 +1642,7 @@ describe('Mongo adapter', () => {
       },
       context,
       // @ts-expect-error
-      fields: ['authentication.emailPassword.email'],
+      select: { authentication: { emailPassword: { email: true } } },
     })
 
     expect(res.length).toEqual(1)

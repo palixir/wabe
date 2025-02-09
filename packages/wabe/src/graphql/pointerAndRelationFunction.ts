@@ -40,7 +40,7 @@ export const createAndLink = async ({
     // @ts-expect-error
     className: classInSchema.fields[fieldName].class,
     data: createAndLink,
-    fields: ['id'],
+    select: { id: true },
     context,
   })
 
@@ -64,7 +64,7 @@ export const createAndAdd = async ({
     // @ts-expect-error
     className: classInSchema.fields[fieldName].class,
     data: createAndAdd,
-    fields: ['id'],
+    select: { id: true },
     context,
   })
 
@@ -98,7 +98,7 @@ export const add = async ({
     const currentValue = await context.wabe.controllers.database.getObject({
       className,
       id,
-      fields: [fieldName],
+      select: { [fieldName]: true },
       context,
     })
 
@@ -113,7 +113,7 @@ export const add = async ({
         // @ts-expect-error
         className: fieldInClass.class,
         where,
-        fields: [fieldName],
+        select: { [fieldName]: true },
         context,
       })
 
@@ -129,7 +129,7 @@ export const add = async ({
             [fieldName]: [...(currentValue || []), ...add],
           },
           context,
-          fields: [],
+          select: {},
         })
       }),
     )
@@ -159,7 +159,7 @@ export const remove = async ({
     const currentValue = await context.wabe.controllers.database.getObject({
       className,
       id,
-      fields: [fieldName],
+      select: { [fieldName]: true },
       context,
     })
 
@@ -173,7 +173,7 @@ export const remove = async ({
       await context.wabe.controllers.database.getObjects({
         className,
         where,
-        fields: ['id'],
+        select: { id: true },
         context,
       })
 
@@ -190,7 +190,7 @@ export const remove = async ({
             ),
           },
           context,
-          fields: [],
+          select: {},
         })
       }),
     )

@@ -23,7 +23,7 @@ export const signUpWithResolver = async (
       authentication: input.authentication,
     },
     context,
-    fields: ['id'],
+    select: {id :true},
   })
 
   const createdUserId = res?.id

@@ -42,7 +42,7 @@ export class GitHub implements ProviderInterface<GitHubInterface> {
       },
       context: contextWithRoot(context),
       first: 1,
-      fields: ['id'],
+      select: { id: true },
     })
 
     const authenticationDataToSave: UserAuthenticationGithub = {
@@ -62,7 +62,6 @@ export class GitHub implements ProviderInterface<GitHubInterface> {
           },
         },
         context: contextWithRoot(context),
-        fields: ['*', 'id'],
       })
 
       if (!createdUser) throw new Error('User not found')

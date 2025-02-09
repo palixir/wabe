@@ -1,4 +1,4 @@
-import type { MutationData, OutputType, WhereType } from '../database'
+import type { MutationData, OutputType, Select, WhereType } from '../database'
 import { defaultAfterDeleteFile } from '../files/hookDeleteFile'
 import { defaultAfterReadFile } from '../files/hookReadFile'
 import {
@@ -92,11 +92,11 @@ export const initializeHook = <
   className,
   newData,
   context,
-  fields,
+  select,
 }: {
   className: K
   newData?: MutationData<DevWabeTypes, any, any>
-  fields: string[]
+  select: Select
   context: WabeContext<any>
 }) => {
   const computeObject = ({
@@ -115,7 +115,6 @@ export const initializeHook = <
       context: contextWithRoot(context),
       id,
       skipHooks: true,
-      fields: ['*'],
     })
   }
 
@@ -133,7 +132,6 @@ export const initializeHook = <
       className,
       context: contextWithRoot(context),
       where: where ? where : { id: { in: ids } },
-      fields: ['*'],
       skipHooks: true,
     })
 
@@ -165,8 +163,7 @@ export const initializeHook = <
         context,
         object,
         originalObject: options.originalObject,
-        // @ts-expect-error
-        fields,
+        select,
       })
 
       // We need to keep the order of the data but we need to execute the hooks in parallel
@@ -220,8 +217,7 @@ export const initializeHook = <
             context,
             object,
             originalObject: originalObjectToUse,
-            // @ts-expect-error
-            fields,
+            select,
           })
 
           // We need to keep the order of the data but we need to execute the hooks in parallel

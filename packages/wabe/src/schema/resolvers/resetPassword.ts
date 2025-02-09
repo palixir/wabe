@@ -16,7 +16,7 @@ export const resetPasswordResolver = async (
         equalTo: email,
       },
     },
-    fields: ['id'],
+    select: {id :true},
     first: 1,
     context: contextWithRoot(context),
   })
@@ -50,7 +50,7 @@ export const resetPasswordResolver = async (
         },
       },
     },
-    fields: [],
+    select: {},
     context: contextWithRoot(context),
   })
 

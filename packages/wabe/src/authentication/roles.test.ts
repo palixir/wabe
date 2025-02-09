@@ -23,7 +23,7 @@ describe('roles', () => {
     const res = await wabe.controllers.database.getObjects({
       className: 'Role',
       context: { isRoot: true, wabe: wabe },
-      fields: ['name'],
+      select: { name: true },
     })
 
     expect(res.length).toEqual(4)
@@ -44,7 +44,7 @@ describe('roles', () => {
     const res = await wabe.controllers.database.getObjects({
       className: 'Role',
       context: { isRoot: true, wabe: wabe },
-      fields: ['name'],
+      select: { name: true },
     })
 
     expect(res.length).toEqual(4)

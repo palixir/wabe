@@ -47,7 +47,7 @@ export class Google implements ProviderInterface<GoogleInterface> {
       },
       context: contextWithRoot(context),
       first: 1,
-      fields: ['id'],
+      select: { id: true },
     })
 
     const authenticationDataToSave: UserAuthenticationGoogle = {
@@ -66,7 +66,6 @@ export class Google implements ProviderInterface<GoogleInterface> {
           },
         },
         context: contextWithRoot(context),
-        fields: ['*', 'id'],
       })
 
       if (!createdUser) throw new Error('User not found')

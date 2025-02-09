@@ -152,6 +152,22 @@ const run = async () => {
   })
 
   await wabe.start()
+
+  const res = await wabe.controllers.database.getObject({
+    className: 'User',
+    context: {} as any,
+    id: 'id',
+    where: {},
+    select: {
+      name: true,
+      acl: true,
+      search: true,
+      role: {
+        search: true,
+        name: true,
+      },
+    },
+  })
 }
 
 run().catch((err) => {

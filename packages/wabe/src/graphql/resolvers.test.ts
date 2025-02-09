@@ -358,7 +358,7 @@ describe('Resolver', () => {
     expect(mockCreateObjects).toHaveBeenCalledWith({
       className: 'TestClass',
       data: [{ field1: 'test' }],
-      fields: ['id'],
+      select: { id: true },
       context,
     })
 
@@ -425,7 +425,7 @@ describe('Resolver', () => {
     expect(mockCreateObjects).toHaveBeenCalledWith({
       className: 'TestClass',
       data: [{ field1: 'test' }],
-      fields: ['id'],
+      select: { id: true },
       context,
     })
 
@@ -454,7 +454,7 @@ describe('Resolver', () => {
     expect(mockGetObject).toHaveBeenCalledTimes(1)
     expect(mockGetObject).toHaveBeenCalledWith({
       className: 'TestClass2',
-      fields: ['field2'],
+      select: { field2: true },
       id: 'id',
       context,
     })
@@ -484,7 +484,7 @@ describe('Resolver', () => {
     expect(mockGetObject).toHaveBeenCalledTimes(1)
     expect(mockGetObject).toHaveBeenCalledWith({
       className: 'TestClass2',
-      fields: ['field2'],
+      select: { field2: true },
       id: 'id',
       context,
     })
@@ -514,7 +514,7 @@ describe('Resolver', () => {
     expect(mockCreateObjects).toHaveBeenCalledWith({
       className: 'TestClass',
       data: [{ field1: 'test' }],
-      fields: ['id'],
+      select: { id: true },
       context,
     })
 
@@ -547,7 +547,7 @@ describe('Resolver', () => {
     expect(mockGetObjects).toHaveBeenCalledTimes(1)
     expect(mockGetObjects).toHaveBeenCalledWith({
       className: 'TestClass',
-      fields: ['field2'],
+      select: { field2: true },
       where: {
         id: { equalTo: 'id' },
       },
@@ -560,7 +560,7 @@ describe('Resolver', () => {
       data: { field2: ['olderId', 'idToAdd'] },
       id: 'objectId',
       context,
-      fields: [],
+      select: {},
     })
 
     expect(updatedFields).toEqual({
@@ -591,7 +591,7 @@ describe('Resolver', () => {
     expect(mockGetObjects).toHaveBeenCalledTimes(1)
     expect(mockGetObjects).toHaveBeenCalledWith({
       className: 'TestClass2',
-      fields: ['id'],
+      select: { id: true },
       where: {
         id: { equalTo: 'id' },
       },
@@ -604,7 +604,7 @@ describe('Resolver', () => {
       data: { field2: [] },
       id: 'objectId',
       context,
-      fields: [],
+      select: {},
     })
 
     expect(updatedFields).toEqual({
@@ -630,7 +630,7 @@ describe('Resolver', () => {
     expect(mockCreateObject).toHaveBeenCalledWith({
       className: 'TestClass',
       data: { field1: 'test' },
-      fields: ['id'],
+      select: { id: true },
       context,
     })
 

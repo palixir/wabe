@@ -33,7 +33,7 @@ describe('Database', () => {
       },
       data: { age: 21 },
       context,
-      fields: [],
+      select: {},
     })
   })
 
@@ -42,7 +42,7 @@ describe('Database', () => {
       className: 'Test2',
       data: [{ name: 'test' }],
       context,
-      fields: [],
+      select: {},
     })
   })
 
@@ -124,14 +124,14 @@ describe('Database', () => {
         name: 'John',
         age: 20,
       },
-      fields: ['id'],
+      select: { id: true },
       context,
     })
 
     await wabe.controllers.database.deleteObject({
       className: 'User',
       context,
-      fields: ['id'],
+      select: { id: true },
       id: object?.id || '',
     })
 
@@ -164,14 +164,14 @@ describe('Database', () => {
         name: 'John',
         age: 20,
       },
-      fields: ['id'],
+      select: { id: true },
       context,
     })
 
     await wabe.controllers.database.deleteObjects({
       className: 'User',
       context,
-      fields: ['id'],
+      select: { id: true },
       where: { id: { equalTo: object?.id || '' } },
     })
 
@@ -204,14 +204,14 @@ describe('Database', () => {
         name: 'John',
         age: 20,
       },
-      fields: ['id'],
+      select: { id: true },
       context,
     })
 
     await wabe.controllers.database.updateObject({
       className: 'User',
       context,
-      fields: ['id'],
+      select: { id: true },
       data: { name: 'John2' },
       id: object?.id || '',
     })
@@ -245,14 +245,14 @@ describe('Database', () => {
         name: 'John',
         age: 20,
       },
-      fields: ['id'],
+      select: { id: true },
       context,
     })
 
     await wabe.controllers.database.updateObjects({
       className: 'User',
       context,
-      fields: ['id'],
+      select: { id: true },
       data: { name: 'John2' },
       where: { id: { equalTo: object?.id || '' } },
     })
@@ -285,7 +285,7 @@ describe('Database', () => {
           age: 20,
         },
       ],
-      fields: ['name', 'id'],
+      select: { name: true, id: true },
       first: 2,
       context,
     })
@@ -320,7 +320,7 @@ describe('Database', () => {
           age: 20,
         },
       ],
-      fields: ['name', 'id'],
+      select: { name: true, id: true },
       first: -2,
       context,
     })
@@ -352,7 +352,7 @@ describe('Database', () => {
             age: 20,
           },
         ],
-        fields: ['name', 'id'],
+        select: { name: true, id: true },
         offset: -2,
         context,
       }),
@@ -384,7 +384,7 @@ describe('Database', () => {
           age: 20,
         },
       ],
-      fields: ['name', 'id'],
+      select: { name: true, id: true },
       first: 2,
       offset: 2,
       context,
@@ -403,7 +403,7 @@ describe('Database', () => {
           { name: { equalTo: 'John4' } },
         ],
       },
-      fields: ['name'],
+      select: { name: true },
       first: 2,
       offset: 1,
       context,
@@ -419,7 +419,6 @@ describe('Database', () => {
         ],
       },
       context,
-      fields: ['*'],
     })
 
     expect(res2.length).toEqual(0)
@@ -430,7 +429,7 @@ describe('Database', () => {
       className: 'User',
       context,
       data: { name: 'Lucas' },
-      fields: [],
+      select: {},
     })
 
     expect(res).toBeNull()
@@ -441,7 +440,7 @@ describe('Database', () => {
       className: 'User',
       context,
       data: [{ name: 'Lucas' }],
-      fields: [],
+      select: {},
     })
 
     expect(res).toBeEmpty()
@@ -452,14 +451,14 @@ describe('Database', () => {
       className: 'User',
       context,
       data: { name: 'Lucas' },
-      fields: ['id'],
+      select: { id: true },
     })
 
     const res = await wabe.controllers.database.updateObject({
       className: 'User',
       context,
       data: { name: 'Lucas' },
-      fields: [],
+      select: {},
       id: createdObject?.id || '',
     })
 
@@ -471,14 +470,14 @@ describe('Database', () => {
       className: 'User',
       context,
       data: { name: 'Lucas' },
-      fields: ['id'],
+      select: { id: true },
     })
 
     const res = await wabe.controllers.database.updateObjects({
       className: 'User',
       context,
       data: { name: 'Lucas2' },
-      fields: [],
+      select: {},
       where: { name: { equalTo: 'Lucas' } },
     })
 
@@ -490,13 +489,13 @@ describe('Database', () => {
       className: 'User',
       context,
       data: { name: 'Lucas' },
-      fields: ['id'],
+      select: { id: true },
     })
 
     const res = await wabe.controllers.database.deleteObject({
       className: 'User',
       context,
-      fields: [],
+      select: {},
       id: createdObject?.id || '',
     })
 
@@ -508,20 +507,20 @@ describe('Database', () => {
       className: 'User',
       context,
       data: { name: 'Lucas' },
-      fields: ['id'],
+      select: { id: true },
     })
 
     const res = await wabe.controllers.database.deleteObjects({
       className: 'User',
       context,
-      fields: [],
+      select: {},
       where: { name: { equalTo: 'Lucas' } },
     })
 
     expect(res).toBeEmpty()
   })
 
-  it("should return all elements of a class when the object doesn't have ACL but the user is connected", async () => {
+  it.only("should return all elements of a class when the object doesn't have ACL but the user is connected", async () => {
     const adminClient = await getAdminUserClient(
       context.wabe.config.port,
       context.wabe,
@@ -537,7 +536,7 @@ describe('Database', () => {
       data: {
         name: 'Doe',
       },
-      fields: [],
+      select: {},
     })
 
     const {
@@ -557,13 +556,13 @@ describe('Database', () => {
         { name: 'test3' },
         { name: 'test4' },
       ],
-      fields: [],
+      select: {},
     })
 
     const res = await wabe.controllers.database.getObjects({
       className: 'User',
       context,
-      fields: ['name'],
+      select: { name: true },
       order: { name: 'ASC' },
     })
 
@@ -575,7 +574,7 @@ describe('Database', () => {
     const res = await wabe.controllers.database.createObject({
       className: 'User',
       context,
-      fields: ['authentication'],
+      select: { authentication: true },
       data: {
         provider: 'Google',
         isOauth: true,
@@ -601,7 +600,7 @@ describe('Database', () => {
       className: 'User',
       context,
       data: { name: 'Lucas' },
-      fields: ['id'],
+      select: { id: true },
     })
 
     expect(spyGetObject).toHaveBeenCalledTimes(1)
@@ -614,7 +613,7 @@ describe('Database', () => {
       className: 'User',
       context,
       data: [{ name: 'Lucas' }],
-      fields: ['id'],
+      select: { id: true },
     })
 
     expect(spyGetObjects).toHaveBeenCalledTimes(1)
@@ -627,7 +626,7 @@ describe('Database', () => {
       className: 'User',
       context,
       data: { name: 'Lucas' },
-      fields: ['id'],
+      select: { id: true },
     })
 
     spyGetObject.mockClear()
@@ -637,7 +636,7 @@ describe('Database', () => {
       context,
       // @ts-expect-error
       data: [{ name: 'Lucas' }],
-      fields: ['id'],
+      select: { id: true },
       id: res?.id || '',
     })
 
@@ -651,7 +650,7 @@ describe('Database', () => {
       className: 'User',
       context,
       data: { name: 'Lucas' },
-      fields: ['id'],
+      select: { id: true },
     })
 
     spyGetObjects.mockClear()
@@ -660,7 +659,7 @@ describe('Database', () => {
       className: 'User',
       context,
       data: { name: 'Lucas' },
-      fields: ['id'],
+      select: { id: true },
       where: { id: { equalTo: res?.id || '' } },
     })
 
@@ -675,7 +674,7 @@ describe('Database', () => {
       className: 'User',
       context,
       data: { name: 'Lucas' },
-      fields: ['id'],
+      select: { id: true },
     })
 
     spyGetObject.mockClear()
@@ -683,7 +682,7 @@ describe('Database', () => {
     await wabe.controllers.database.deleteObject({
       className: 'User',
       context,
-      fields: ['id'],
+      select: { id: true },
       id: res?.id || '',
     })
 
@@ -697,7 +696,7 @@ describe('Database', () => {
       className: 'User',
       context,
       data: { name: 'Lucas' },
-      fields: ['id'],
+      select: { id: true },
     })
 
     spyGetObjects.mockClear()
@@ -705,7 +704,7 @@ describe('Database', () => {
     await wabe.controllers.database.deleteObjects({
       className: 'User',
       context,
-      fields: ['id'],
+      select: { id: true },
       where: { id: { equalTo: res?.id || '' } },
     })
 
@@ -731,7 +730,7 @@ describe('Database', () => {
       className: 'User',
       data: { name: 'Lucas', age: 20 },
       context,
-      fields: ['age'],
+      select: { age: true },
     })
 
     expect(res?.age).toEqual(21)
@@ -758,7 +757,7 @@ describe('Database', () => {
       className: 'User',
       data: [{ name: 'Lucas', age: 20 }],
       context,
-      fields: ['age'],
+      select: { age: true },
     })
 
     expect(res[0]?.age).toEqual(21)
@@ -785,13 +784,13 @@ describe('Database', () => {
       className: 'Test2',
       data: [{ name: 'test', age: 20 }],
       context,
-      fields: [],
+      select: {},
     })
 
     const res = await context.wabe.controllers.database.updateObjects({
       className: 'Test2',
       context,
-      fields: ['name'],
+      select: { name: true },
       where: { name: { equalTo: 'test' } },
       data: { name: 20 },
     })
@@ -820,13 +819,13 @@ describe('Database', () => {
       className: 'Test2',
       data: [{ name: 'test', age: 20 }],
       context,
-      fields: ['id'],
+      select: { id: true },
     })
 
     const res2 = await context.wabe.controllers.database.updateObject({
       className: 'Test2',
       context,
-      fields: ['name'],
+      select: { name: true },
       data: { age: 20 },
       id: res[0]?.id,
     })

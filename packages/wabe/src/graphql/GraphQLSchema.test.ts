@@ -839,7 +839,7 @@ describe('GraphqlSchema', () => {
               type: 'Int',
             },
           },
-          searchableFields: ['name'],
+          searchableselect: { name: true },
         },
       ],
     })

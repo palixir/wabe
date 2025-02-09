@@ -334,7 +334,6 @@ describe('DatabaseController', () => {
       className: 'TestClass',
       context,
       data: [],
-      fields: ['*'],
     })
 
     expect(mockCreateObjects).toHaveBeenCalledTimes(0)
@@ -348,7 +347,7 @@ describe('DatabaseController', () => {
       className: 'TestClass',
       context,
       id: 'id',
-      fields: ['id'],
+      select: { id: true },
     })
 
     expect(mockInitializeHook).toHaveBeenCalledTimes(1)
@@ -359,7 +358,7 @@ describe('DatabaseController', () => {
         wabe: { config },
         isRoot: true,
       },
-      fields: ['id'],
+      select: { id: true },
     })
 
     expect(mockRunOnSingleObject).toHaveBeenCalledTimes(2)
@@ -382,7 +381,7 @@ describe('DatabaseController', () => {
       className: 'TestClass',
       context,
       where: { id: { equalTo: 'id' } },
-      fields: ['id'],
+      select: { id: true },
     })
 
     expect(mockInitializeHook).toHaveBeenCalledTimes(1)
@@ -393,7 +392,7 @@ describe('DatabaseController', () => {
         wabe: { config },
         isRoot: true,
       },
-      fields: ['id'],
+      select: { id: true },
     })
 
     expect(mockRunOnMultipleObject).toHaveBeenCalledTimes(2)
@@ -421,7 +420,7 @@ describe('DatabaseController', () => {
       context,
       id: 'id',
       data: { name: 'test' },
-      fields: ['id'],
+      select: { id: true },
     })
 
     expect(mockInitializeHook).toHaveBeenCalledTimes(1)
@@ -433,7 +432,7 @@ describe('DatabaseController', () => {
         isRoot: true,
       },
       newData: { name: 'test' },
-      fields: ['id'],
+      select: { id: true },
     })
 
     expect(mockRunOnSingleObject).toHaveBeenCalledTimes(2)
@@ -461,7 +460,7 @@ describe('DatabaseController', () => {
       context,
       where: { id: { equalTo: 'id' } },
       data: { name: 'test' },
-      fields: ['id'],
+      select: { id: true },
     })
 
     expect(mockInitializeHook).toHaveBeenCalledTimes(1)
@@ -473,7 +472,7 @@ describe('DatabaseController', () => {
         isRoot: true,
       },
       newData: { name: 'test' },
-      fields: ['id'],
+      select: { id: true },
     })
 
     expect(mockRunOnMultipleObject).toHaveBeenCalledTimes(2)
@@ -497,7 +496,7 @@ describe('DatabaseController', () => {
       className: 'TestClass',
       context,
       data: { name: 'test' },
-      fields: ['id'],
+      select: { id: true },
     })
 
     expect(mockInitializeHook).toHaveBeenCalledTimes(1)
@@ -509,7 +508,7 @@ describe('DatabaseController', () => {
         isRoot: true,
       },
       newData: { name: 'test' },
-      fields: ['id'],
+      select: { id: true },
     })
 
     expect(mockRunOnSingleObject).toHaveBeenCalledTimes(2)
@@ -536,7 +535,7 @@ describe('DatabaseController', () => {
       className: 'TestClass',
       context,
       data: [{ name: 'test' }],
-      fields: ['id'],
+      select: { id: true },
     })
 
     expect(mockInitializeHook).toHaveBeenCalledTimes(1)
@@ -548,7 +547,7 @@ describe('DatabaseController', () => {
         isRoot: true,
       },
       newData: { name: 'test' },
-      fields: ['id'],
+      select: { id: true },
     })
 
     expect(mockRunOnMultipleObject).toHaveBeenCalledTimes(2)
@@ -569,7 +568,7 @@ describe('DatabaseController', () => {
     await databaseController.deleteObject({
       className: 'TestClass',
       context,
-      fields: ['id'],
+      select: { id: true },
       id: 'id',
     })
 
@@ -581,7 +580,7 @@ describe('DatabaseController', () => {
         wabe: { config },
         isRoot: true,
       },
-      fields: ['id'],
+      select: { id: true },
     })
 
     // 4 because we have a getObject before the delete
@@ -606,7 +605,7 @@ describe('DatabaseController', () => {
       className: 'TestClass',
       context,
       where: { id: { equalTo: 'id' } },
-      fields: ['id'],
+      select: { id: true },
     })
 
     expect(mockInitializeHook).toHaveBeenCalledTimes(1)
@@ -617,7 +616,7 @@ describe('DatabaseController', () => {
         wabe: { config },
         isRoot: true,
       },
-      fields: ['id'],
+      select: { id: true },
     })
 
     // 4 because we have a getObject before the delete

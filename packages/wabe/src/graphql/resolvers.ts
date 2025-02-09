@@ -14,13 +14,13 @@ import {
 export const extractFieldsFromSetNode = (
   selectionSet: SelectionSetNode,
   className: string,
-): Array<any> => {
+): Record<string, any> => {
   const ignoredFields = ['edges', 'node']
 
   if (className) ignoredFields.push(firstLetterInLowerCase(className))
 
-  return selectionSet.selections
-    ?.flatMap((selection) => {
+  return selectionSet.selections?.reduce(
+    (acc, selection) => {
       //@ts-expect-error
       const currentValue = selection.name.value
 
@@ -36,15 +36,20 @@ export const extractFieldsFromSetNode = (
           className,
         )
 
-        if (ignoredFields.indexOf(currentValue) === -1)
-          return res.map((field) => `${currentValue}.${field}`)
-
-        return res
+        // if (ignoredFields.indexOf(currentValue) === -1)
+        return {
+          ...acc,
+          ...res,
+        }
       }
 
-      return currentValue
-    })
-    .filter((value) => ignoredFields.indexOf(value) === -1)
+      acc[currentValue] = true
+
+      return acc
+    },
+    {} as Record<string, any>,
+  )
+  // .filter((value) => ignoredFields.indexOf(value) === -1)
 }
 
 const getFieldsFromInfo = (info: GraphQLResolveInfo, className: string) => {
@@ -71,7 +76,7 @@ export const getFieldsOfClassName = ({
     (schemaClass) => schemaClass.name === className,
   )?.fields
 
-  if (!classFields) return { classFields: [], othersFields: fields }
+  if (!classFields) return { classselect: {}, othersFields: fields }
 
   const sameFieldsAsClass = fields.filter((field) => {
     // If the field exist in the class
@@ -192,12 +197,12 @@ export const queryForOneObject = (
   info: GraphQLResolveInfo,
   className: keyof WabeTypes['types'],
 ) => {
-  const fields = getFieldsFromInfo(info, className)
+  const select = getFieldsFromInfo(info, className)
 
   return context.wabe.controllers.database.getObject({
     className,
     id,
-    fields,
+    select,
     context,
   })
 }
@@ -209,12 +214,12 @@ export const queryForMultipleObject = async (
   info: GraphQLResolveInfo,
   className: keyof WabeTypes['types'],
 ) => {
-  const fields = getFieldsFromInfo(info, className)
+  const select = getFieldsFromInfo(info, className)
 
   const objects = await context.wabe.controllers.database.getObjects({
     className,
     where,
-    fields,
+    select,
     offset,
     first,
     context,
@@ -222,7 +227,7 @@ export const queryForMultipleObject = async (
   })
 
   return {
-    totalCount: fields.includes('totalCount')
+    totalCount: select.totalCount
       ? await context.wabe.controllers.database.count({
           className,
           where,

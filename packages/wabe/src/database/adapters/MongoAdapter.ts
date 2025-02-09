@@ -222,33 +222,20 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
     if (!this.database)
       throw new Error('Connection to database is not established')
 
-    const { className, id, fields, where, context } = params
+    const { className, id, select, where, context } = params
 
     const whereBuilded = buildMongoWhereQuery<T, K>(where)
-
-    const objectOfFieldsToGet = fields?.reduce(
-      (acc, prev) => {
-        acc[prev] = 1
-        return acc
-      },
-      {} as Record<any, number>,
-    )
 
     const collection = await this.createClassIfNotExist(className, context)
 
     const res = await collection.findOne(
       { _id: new ObjectId(id), ...whereBuilded } as Filter<any>,
       {
-        projection:
-          fields && fields.length > 0 && !fields.includes('*')
-            ? { ...objectOfFieldsToGet, _id: 1 }
-            : {},
+        projection: select ? { ...select, _id: 1 } : undefined,
       },
     )
 
-    if (!res) {
-      throw new Error('Object not found')
-    }
+    if (!res) throw new Error('Object not found')
 
     const { _id, ...resultWithout_Id } = res
 
@@ -266,31 +253,16 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
     if (!this.database)
       throw new Error('Connection to database is not established')
 
-    const { className, fields, where, offset, first, context, order } = params
+    const { className, select, where, offset, first, context, order } = params
 
     const whereBuilded = buildMongoWhereQuery(where)
     const orderBuilded = buildMongoOrderQuery(order)
-
-    const objectOfFieldsToGet = fields?.reduce(
-      (acc, prev) => {
-        acc[prev] = 1
-
-        return acc
-      },
-      {} as Record<any, number>,
-    )
 
     const collection = await this.createClassIfNotExist(className, context)
 
     const res = await collection
       .find(whereBuilded, {
-        projection:
-          fields && fields.length > 0 && !fields.includes('*')
-            ? {
-                ...objectOfFieldsToGet,
-                _id: 1,
-              }
-            : {},
+        projection: select ? { ...select, _id: 1 } : undefined,
       })
       .limit(first || 0)
       .skip(offset || 0)
@@ -390,7 +362,7 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
       await context.wabe.controllers.database.getObjects({
         className,
         where,
-        fields: ['id'],
+        select: { id: true },
         offset,
         first,
         // Root because we need the id at least for hook

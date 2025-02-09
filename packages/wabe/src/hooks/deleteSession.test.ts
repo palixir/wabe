@@ -128,7 +128,7 @@ describe('Delete session on delete user', () => {
         wabe,
         isRoot: true,
       },
-      fields: [],
+      select: {},
       where: {
         user: {
           id: {

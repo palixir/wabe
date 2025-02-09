@@ -31,7 +31,7 @@ export class PhonePassword
         },
       },
       context: contextWithRoot(context),
-      fields: ['id', 'authentication'],
+      select: { id: true, authentication: true },
       first: 1,
     })
 
@@ -104,7 +104,7 @@ export class PhonePassword
         },
       },
       context,
-      fields: ['authentication'],
+      select: { authentication: true },
     })
 
     if (users.length === 0) throw new Error('User not found')
