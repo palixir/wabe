@@ -53,9 +53,16 @@ export class DatabaseController<T extends WabeTypes> {
     // This is the default behavior for MongoAdapter
     if (!select) return { pointers: {}, selectWithoutPointers: {} }
 
+    const pointerOrRelationFields = Object.keys(realClass.fields).filter(
+      (fieldName) =>
+        realClass.fields[fieldName].type === 'Pointer' ||
+        realClass.fields[fieldName].type === 'Relation',
+    )
+
     return Object.entries(select).reduce(
       (acc, [fieldName, value]) => {
-        if (value === true) {
+        // If not pointer or relation
+        if (!pointerOrRelationFields.includes(fieldName))
           return {
             ...acc,
             selectWithoutPointers: {
@@ -63,25 +70,23 @@ export class DatabaseController<T extends WabeTypes> {
               [fieldName]: true,
             },
           }
-        }
 
-        if (typeof value === 'object') {
-          // @ts-expect-error
-          const classOfPointerOrRelation = realClass.fields[fieldName].class
+        // @ts-expect-error
+        const classOfPointerOrRelation = realClass.fields[fieldName].class
 
-          return {
-            ...acc,
-            pointers: {
-              ...acc.pointers,
-              [fieldName]: {
-                className: classOfPointerOrRelation,
-                select: value,
-              },
+        // Pointer or relation
+        return {
+          ...acc,
+          pointers: {
+            ...acc.pointers,
+            [fieldName]: {
+              className: classOfPointerOrRelation,
+              // If we set value to true we want all the fields of the pointer if we
+              // set an object we just want some fields
+              select: value === true ? undefined : value,
             },
-          }
+          },
         }
-
-        return acc
       },
       { pointers: {}, selectWithoutPointers: {} },
     )
@@ -308,15 +313,21 @@ export class DatabaseController<T extends WabeTypes> {
         const isPointer = this._isPointerField(
           originClassName,
           context,
-          pointerField,
+          currentClassName,
         )
 
         if (isPointer) {
+          if (!object[pointerField]) {
+            return {
+              ...accObject,
+              [pointerField]: null,
+            }
+          }
+
           const objectOfPointerClass = await this.getObject({
             className: currentClassName,
             id: object[pointerField],
             context,
-            // @ts-expect-error
             select: currentSelect,
             skipHooks: true,
           })
@@ -330,13 +341,12 @@ export class DatabaseController<T extends WabeTypes> {
         const isRelation = this._isRelationField(
           originClassName,
           context,
-          pointerField,
+          currentClassName,
         )
 
         if (isRelation) {
           const relationObjects = await this.getObjects({
             className: currentClassName,
-            // @ts-expect-error
             select: currentSelect,
             // @ts-expect-error
             where: { id: { in: object[pointerField] } },
@@ -441,23 +451,28 @@ export class DatabaseController<T extends WabeTypes> {
       className,
       id,
       context,
-      // @ts-expect-error
       select: !select ? undefined : selectWithPointersAndRelationsToGetId,
       where: whereWithACLCondition,
       skipHooks: true,
     })
 
+    // if (className === 'TestClass2')
+    //   console.log({
+    //     objectToReturn,
+    //     select,
+    //   })
+
     // @ts-expect-error
     return {
       ...objectToReturn,
-      ...this._getFinalObjectWithPointerAndRelation({
+      ...(await this._getFinalObjectWithPointerAndRelation({
         context,
         // @ts-expect-error
         originClassName: className,
         pointers,
         // @ts-expect-error
         object: objectToReturn,
-      }),
+      })),
     }
   }
 
@@ -482,14 +497,14 @@ export class DatabaseController<T extends WabeTypes> {
         select: select as SelectWithObject,
       })
 
-    // const whereWithPointer = await this._getWhereObjectWithPointerOrRelation(
-    //   className,
-    //   where || {},
-    //   context,
-    // )
+    const whereWithPointer = await this._getWhereObjectWithPointerOrRelation(
+      className,
+      where || {},
+      context,
+    )
 
     const whereWithACLCondition = this._buildWhereWithACL(
-      where || {},
+      whereWithPointer || {},
       context,
       'read',
     )
@@ -531,23 +546,22 @@ export class DatabaseController<T extends WabeTypes> {
       first,
       offset,
       where: whereWithACLCondition,
-      // @ts-expect-error
       select: !select ? undefined : selectWithPointersAndRelationsToGetId,
       order,
       skipHooks: true,
     })
 
     return Promise.all(
-      objectsToReturn.map((object) => ({
+      objectsToReturn.map(async (object) => ({
         ...object,
-        ...this._getFinalObjectWithPointerAndRelation({
+        ...(await this._getFinalObjectWithPointerAndRelation({
           // @ts-expect-error
           object,
           context,
           // @ts-expect-error
           originClassName: className,
           pointers,
-        }),
+        })),
       })),
     ) as Promise<OutputType<T, K, W>[]>
   }

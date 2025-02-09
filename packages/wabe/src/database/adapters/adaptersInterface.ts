@@ -64,7 +64,7 @@ type SelectObject<T, K extends WabeTypes> = {
     | IsScalar<T[P]>
     | IsArray<T[P]>
     | IsObject<T[P], K> extends false
-    ? SelectObject<Partial<T[P]>, K>
+    ? SelectObject<Partial<T[P]>, K> | boolean
     : boolean
 }
 
@@ -77,7 +77,7 @@ export type SelectType<
     | IsScalar<ExtractType<T, K, P>>
     | IsArray<ExtractType<T, K, P>>
     | IsObject<ExtractType<T, K, P>, T> extends false
-    ? SelectObject<Partial<ExtractType<T, K, P>>, T>
+    ? SelectObject<Partial<ExtractType<T, K, P>>, T> | boolean
     : boolean
 }>
 

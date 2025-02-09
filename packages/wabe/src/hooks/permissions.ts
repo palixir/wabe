@@ -100,7 +100,6 @@ export const _checkCLP = async (
     )
 
   // User in the context is not the user found in the session
-  // @ts-expect-error
   if (object.context.user?.id !== res.user.id)
     throw new Error(
       `Permission denied to ${permissionOperation} class ${object.className}`,

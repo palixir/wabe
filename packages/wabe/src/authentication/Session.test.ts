@@ -48,7 +48,10 @@ describe('_Session', () => {
         accessToken: { equalTo: 'accessToken' },
       },
       first: 1,
-      fields: ['user.*', 'user.role.*', 'id'],
+      select: {
+        id: true,
+        user: true,
+      },
       context: { isRoot: true, wabe: { controllers } },
     })
   })
@@ -80,7 +83,10 @@ describe('_Session', () => {
         accessToken: { equalTo: 'accessToken' },
       },
       first: 1,
-      fields: ['user.*', 'user.role.*', 'id'],
+      select: {
+        id: true,
+        user: true,
+      },
       context: expect.any(Object),
     })
 
@@ -187,7 +193,18 @@ describe('_Session', () => {
       where: {
         accessToken: { equalTo: 'accessToken' },
       },
-      fields: ['id', 'user', 'refreshToken', 'refreshTokenExpiresAt'],
+      select: {
+        id: true,
+        user: {
+          id: true,
+          role: {
+            id: true,
+            name: true,
+          },
+        },
+        refreshToken: true,
+        refreshTokenExpiresAt: true,
+      },
       context: expect.any(Object),
     })
 
@@ -268,7 +285,18 @@ describe('_Session', () => {
       where: {
         accessToken: { equalTo: 'accessToken' },
       },
-      fields: ['id', 'user', 'refreshToken', 'refreshTokenExpiresAt'],
+      select: {
+        id: true,
+        user: {
+          id: true,
+          role: {
+            id: true,
+            name: true,
+          },
+        },
+        refreshToken: true,
+        refreshTokenExpiresAt: true,
+      },
       context: expect.any(Object),
     })
   })

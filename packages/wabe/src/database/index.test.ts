@@ -15,6 +15,7 @@ import {
   setupTests,
   closeTests,
   getAdminUserClient,
+  getGraphqlClient,
 } from '../utils/helper'
 import type { WabeContext } from '../server/interface'
 import { OperationType, getDefaultHooks } from '../hooks'
@@ -96,6 +97,53 @@ describe('Database', () => {
     mockAfterUpdate.mockClear()
     spyGetObject.mockClear()
     spyGetObjects.mockClear()
+  })
+
+  it("should return null on a pointer if the pointer doesn't exist", async () => {
+    await getGraphqlClient(wabe.config.port).request<any>(graphql.signUpWith, {
+      input: {
+        authentication: {
+          emailPassword: {
+            email: 'email@test.com',
+            password: 'password,',
+          },
+        },
+      },
+    })
+
+    const res = await wabe.controllers.database.getObjects({
+      className: 'User',
+      context,
+      select: {
+        id: true,
+        role: true,
+      },
+    })
+
+    expect(res[0]?.role).toBeNull()
+  })
+
+  it('should return all the pointer data when we set the relation class to true in select', async () => {
+    await getAdminUserClient(context.wabe.config.port, context.wabe, {
+      email: 'email@test.fr',
+      password: 'password',
+    })
+
+    const res = await wabe.controllers.database.getObjects({
+      className: 'User',
+      context,
+      select: {
+        id: true,
+        role: true,
+      },
+    })
+
+    expect(res[0]?.role).toEqual(
+      expect.objectContaining({
+        name: 'Admin',
+        id: expect.any(String),
+      }),
+    )
   })
 
   it('should have access to original object in afterDelete hook with deleteObject', async () => {
@@ -520,7 +568,7 @@ describe('Database', () => {
     expect(res).toBeEmpty()
   })
 
-  it.only("should return all elements of a class when the object doesn't have ACL but the user is connected", async () => {
+  it("should return all elements of a class when the object doesn't have ACL but the user is connected", async () => {
     const adminClient = await getAdminUserClient(
       context.wabe.config.port,
       context.wabe,
@@ -544,6 +592,8 @@ describe('Database', () => {
     } = await adminClient.request<any>(graphql.users)
 
     expect(edges.length).toEqual(1)
+    expect(edges[0]?.node?.email).toEqual('email@test.fr')
+    expect(edges[0]?.node?.role?.name).toEqual('Admin')
   })
 
   it('should order the element in the query by name ASC using order enum', async () => {
@@ -852,6 +902,11 @@ const graphql = {
         edges {
             node {
                id
+               email
+               role {
+                 id
+                 name
+               }
             }
         }
       }

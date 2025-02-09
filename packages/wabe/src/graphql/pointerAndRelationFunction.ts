@@ -98,11 +98,11 @@ export const add = async ({
     const currentValue = await context.wabe.controllers.database.getObject({
       className,
       id,
-      select: { [fieldName]: true },
+      select: { id: true },
       context,
     })
 
-    return [...(currentValue?.[fieldName] || []), ...add]
+    return [currentValue?.id, ...add]
   }
 
   // For update many we need to get all objects that match the where and add the new value
@@ -159,11 +159,11 @@ export const remove = async ({
     const currentValue = await context.wabe.controllers.database.getObject({
       className,
       id,
-      select: { [fieldName]: true },
+      select: { id: true },
       context,
     })
 
-    const olderValues = currentValue?.[fieldName] || []
+    const olderValues = [currentValue?.id || '']
 
     return olderValues.filter((olderValue: any) => !remove.includes(olderValue))
   }
