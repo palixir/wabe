@@ -57,6 +57,7 @@ describe('Database', () => {
         fields: {
           name: { type: 'String' },
           age: { type: 'Int' },
+          userTest: { type: 'Relation', class: 'User' },
         },
         permissions: {
           read: {
@@ -97,6 +98,41 @@ describe('Database', () => {
     mockAfterUpdate.mockClear()
     spyGetObject.mockClear()
     spyGetObjects.mockClear()
+  })
+
+  it('should return correct data and type for relation with databaseController', async () => {
+    const createdUserObject = await wabe.controllers.database.createObject({
+      className: 'User',
+      context,
+      data: {
+        name: 'test',
+      },
+    })
+
+    await wabe.controllers.database.createObject({
+      // @ts-expect-error
+      className: 'Test2',
+      select: {},
+      context,
+      data: {
+        // @ts-expect-error
+        testUser: [createdUserObject?.id],
+      },
+    })
+
+    const res = await wabe.controllers.database.getObjects({
+      // @ts-expect-error
+      className: 'Test2',
+      context,
+      select: {
+        id: true,
+        // @ts-expect-error
+        testUser: true,
+      },
+    })
+
+    // @ts-expect-error
+    expect(res[0].testUser).toEqual(expect.any(Array<string>))
   })
 
   it("should return null on a pointer if the pointer doesn't exist", async () => {
