@@ -292,16 +292,18 @@ export class DatabaseController<T extends WabeTypes> {
     }
   }
 
-  async _getFinalObjectWithPointerAndRelation({
+  _getFinalObjectWithPointerAndRelation({
     pointers,
     context,
     originClassName,
     object,
+    isGraphQLCall,
   }: {
     originClassName: string
     pointers: Record<string, { className: string; select: Select }>
     context: WabeContext<any>
     object: Record<string, any>
+    isGraphQLCall?: boolean
   }) {
     return Object.entries(pointers).reduce(
       async (
@@ -355,12 +357,14 @@ export class DatabaseController<T extends WabeTypes> {
 
           return {
             ...acc,
-            [pointerField]: {
-              totalCount: relationObjects.length,
-              edges: relationObjects.map((object: any) => ({
-                node: object,
-              })),
-            },
+            [pointerField]: isGraphQLCall
+              ? {
+                  totalCount: relationObjects.length,
+                  edges: relationObjects.map((object: any) => ({
+                    node: object,
+                  })),
+                }
+              : relationObjects,
           }
         }
 
@@ -402,6 +406,7 @@ export class DatabaseController<T extends WabeTypes> {
     skipHooks,
     id,
     where,
+    isGraphQLCall = false,
   }: GetObjectOptions<T, K, U>): Promise<OutputType<T, K, U>> {
     const { pointers, selectWithoutPointers } =
       this._getSelectMinusPointersAndRelations({
@@ -456,12 +461,6 @@ export class DatabaseController<T extends WabeTypes> {
       skipHooks: true,
     })
 
-    // if (className === 'TestClass2')
-    //   console.log({
-    //     objectToReturn,
-    //     select,
-    //   })
-
     // @ts-expect-error
     return {
       ...objectToReturn,
@@ -472,6 +471,7 @@ export class DatabaseController<T extends WabeTypes> {
         pointers,
         // @ts-expect-error
         object: objectToReturn,
+        isGraphQLCall,
       })),
     }
   }
@@ -489,6 +489,7 @@ export class DatabaseController<T extends WabeTypes> {
     first,
     offset,
     order,
+    isGraphQLCall = false,
   }: GetObjectsOptions<T, K, U, W>): Promise<OutputType<T, K, W>[]> {
     const { pointers, selectWithoutPointers } =
       this._getSelectMinusPointersAndRelations({
@@ -561,6 +562,7 @@ export class DatabaseController<T extends WabeTypes> {
           // @ts-expect-error
           originClassName: className,
           pointers,
+          isGraphQLCall,
         })),
       })),
     ) as Promise<OutputType<T, K, W>[]>
@@ -575,6 +577,7 @@ export class DatabaseController<T extends WabeTypes> {
     context,
     data,
     select,
+    isGraphQLCall = false,
   }: CreateObjectOptions<T, K, U, W>): Promise<OutputType<T, K, W>> {
     // Here data.file is null but should not be
     const hook = initializeHook({
@@ -610,6 +613,7 @@ export class DatabaseController<T extends WabeTypes> {
       select,
       id,
       skipHooks: true,
+      isGraphQLCall,
     })
   }
 
@@ -626,6 +630,7 @@ export class DatabaseController<T extends WabeTypes> {
     first,
     offset,
     order,
+    isGraphQLCall = false,
   }: CreateObjectsOptions<T, K, U, W, X>): Promise<OutputType<T, K, W>[]> {
     if (data.length === 0) return []
 
@@ -685,6 +690,7 @@ export class DatabaseController<T extends WabeTypes> {
       first,
       offset,
       order,
+      isGraphQLCall,
     })
   }
 
@@ -699,6 +705,7 @@ export class DatabaseController<T extends WabeTypes> {
     data,
     select,
     skipHooks,
+    isGraphQLCall = false,
   }: UpdateObjectOptions<T, K, U, W>): Promise<OutputType<T, K, W>> {
     const hook = !skipHooks
       ? initializeHook({
@@ -740,6 +747,7 @@ export class DatabaseController<T extends WabeTypes> {
       select,
       id,
       skipHooks: true,
+      isGraphQLCall,
     })
   }
 
@@ -758,6 +766,7 @@ export class DatabaseController<T extends WabeTypes> {
     offset,
     order,
     skipHooks,
+    isGraphQLCall = false,
   }: UpdateObjectsOptions<T, K, U, W, X>): Promise<OutputType<T, K, W>[]> {
     const whereObject = await this._getWhereObjectWithPointerOrRelation(
       className,
@@ -817,6 +826,7 @@ export class DatabaseController<T extends WabeTypes> {
       first,
       offset,
       order,
+      isGraphQLCall,
     })
   }
 
@@ -828,6 +838,7 @@ export class DatabaseController<T extends WabeTypes> {
     className,
     id,
     select,
+    isGraphQLCall = false,
   }: DeleteObjectOptions<T, K, U>): Promise<OutputType<T, K, U>> {
     const hook = initializeHook({
       className,
@@ -847,6 +858,7 @@ export class DatabaseController<T extends WabeTypes> {
         id,
         context,
         skipHooks: true,
+        isGraphQLCall,
       })
 
     const resultOfBeforeDelete = await hook.runOnSingleObject({
@@ -882,6 +894,7 @@ export class DatabaseController<T extends WabeTypes> {
     first,
     offset,
     order,
+    isGraphQLCall = false,
   }: DeleteObjectsOptions<T, K, U, W>): Promise<OutputType<T, K, W>[]> {
     const whereObject = await this._getWhereObjectWithPointerOrRelation(
       className,
@@ -914,6 +927,7 @@ export class DatabaseController<T extends WabeTypes> {
         offset,
         order,
         skipHooks: true,
+        isGraphQLCall,
       })
 
     const resultOfBeforeDelete = await hook.runOnMultipleObjects({

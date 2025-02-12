@@ -209,6 +209,7 @@ export const queryForOneObject = (
     id,
     select,
     context,
+    isGraphQLCall: true,
   })
 }
 
@@ -229,6 +230,7 @@ export const queryForMultipleObject = async (
     first,
     context,
     order: transformOrder(order),
+    isGraphQLCall: true,
   })
 
   return {
@@ -267,6 +269,7 @@ export const mutationToCreateObject = async (
         data: updatedFieldsToCreate,
         select,
         context,
+        isGraphQLCall: true,
       }),
     ...(select.ok ? { ok: true } : {}),
   }
@@ -300,6 +303,7 @@ export const mutationToCreateMultipleObjects = async (
     first,
     context,
     order: transformOrder(order),
+    isGraphQLCall: true,
   })
 
   return {
@@ -332,6 +336,7 @@ export const mutationToUpdateObject = async (
         data: updatedFields,
         select,
         context,
+        isGraphQLCall: true,
       }),
     ...(select.ok ? { ok: true } : {}),
   }
@@ -363,6 +368,7 @@ export const mutationToUpdateMultipleObjects = async (
     first,
     context,
     order,
+    isGraphQLCall: true,
   })
 
   return {
@@ -386,6 +392,7 @@ export const mutationToDeleteObject = async (
         id: args.input?.id,
         select,
         context,
+        isGraphQLCall: true,
       }),
     ...(select.ok ? { ok: true } : {}),
   }
@@ -408,6 +415,7 @@ export const mutationToDeleteMultipleObjects = async (
     first,
     context,
     order,
+    isGraphQLCall: true,
   })
 
   return {
