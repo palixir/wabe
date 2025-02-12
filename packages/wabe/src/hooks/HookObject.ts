@@ -1,6 +1,6 @@
 import type { OperationType } from '.'
-import type { RoleEnum, UserACLObject } from '../../generated/wabe'
-import type { MutationData, OutputType } from '../database'
+import type { RoleEnum, ACLObject } from '../../generated/wabe'
+import type { MutationData, OutputType, Select } from '../database'
 import type { WabeTypes } from '../server'
 import type { WabeContext } from '../server/interface'
 
@@ -22,7 +22,7 @@ export class HookObject<
   public object: OutputType<T, K, keyof T['types'][K]>
   // Object before any mutation, for example before delete
   public originalObject: OutputType<T, K, keyof T['types'][K]> | undefined
-  public fields: Array<keyof T['types'][K]>
+  public select: Array<keyof T['types'][K]>
 
   constructor({
     newData,
@@ -31,7 +31,7 @@ export class HookObject<
     context,
     object,
     originalObject,
-    fields,
+    select,
   }: {
     className: K
     newData?: MutationData<T, K, keyof T['types'][K]>
@@ -39,7 +39,7 @@ export class HookObject<
     context: WabeContext<T>
     object: OutputType<T, K, keyof T['types'][K]>
     originalObject?: OutputType<T, K, keyof T['types'][K]>
-    fields: Array<keyof T['types'][K]>
+    select: Select
   }) {
     this.newData = newData
     this.className = className
@@ -47,7 +47,8 @@ export class HookObject<
     this.context = context
     this.object = object
     this.originalObject = originalObject
-    this.fields = fields
+    // @ts-expect-error
+    this.select = Object.keys(select || {})
   }
 
   getUser() {
@@ -83,7 +84,6 @@ export class HookObject<
         ...this.context,
         isRoot: true,
       },
-      fields: ['*'],
     })
   }
 
@@ -101,7 +101,7 @@ export class HookObject<
               // @ts-expect-error
               acl: newACLObject,
             },
-            fields: [],
+            select: {},
           })
         return
       }
@@ -114,7 +114,7 @@ export class HookObject<
       this.className === 'User'
         ? await this.context.wabe.controllers.database.getObject({
             className: 'User',
-            fields: ['acl'],
+            select: { acl: true },
             // @ts-expect-error
             id: this.object?.id,
             context: {
@@ -125,7 +125,7 @@ export class HookObject<
         : // @ts-expect-error
           { acl: this.getNewData().acl }
 
-    const currentACL: UserACLObject = result?.acl || {}
+    const currentACL: ACLObject = result?.acl || {}
 
     if (options === null) {
       await updateACL({
@@ -142,7 +142,7 @@ export class HookObject<
     if (role) {
       const result = await this.context.wabe.controllers.database.getObjects({
         className: 'Role',
-        fields: ['id'],
+        select: { id: true },
         // @ts-expect-error
         where: {
           name: {

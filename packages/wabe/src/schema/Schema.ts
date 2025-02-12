@@ -26,7 +26,7 @@ export type WabeRelationTypes = 'Pointer' | 'Relation'
 
 type WabeFieldTypes = WabeCustomTypes | WabePrimaryTypes | WabeRelationTypes
 
-type WabeObject<T extends WabeTypes> = {
+export type WabeObject<T extends WabeTypes> = {
   name: string
   fields: SchemaFields<T>
   description?: string

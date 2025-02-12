@@ -733,7 +733,7 @@ describe('Authentication', () => {
     ).rejects.toThrow('Permission denied to create class Test2')
   })
 
-  it('should not authorize an user to read an object on another class with pointer when the user do not have access to read the other class with (CLP)', async () => {
+  it('should not authorized an user to read an object on another class with pointer when the user do not have ACL to read the other class', async () => {
     const { userClient, userId } = await createUserAndUpdateRole({
       anonymousClient: client,
       port,
@@ -805,7 +805,7 @@ describe('Authentication', () => {
 					}
 				}
 			`),
-    ).rejects.toThrow('Permission denied to read class Test2')
+    ).rejects.toThrow('Object not found')
   })
 
   it('should authorize a connected user to access to a protected resource', async () => {

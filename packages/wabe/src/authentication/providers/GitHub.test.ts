@@ -82,7 +82,7 @@ describe('GitHub providers', () => {
       },
       first: 1,
       context: expect.any(Object),
-      fields: ['id'],
+      select: { id: true },
     })
 
     expect(mockCreateObject).toHaveBeenCalledTimes(1)
@@ -100,7 +100,6 @@ describe('GitHub providers', () => {
         },
       },
       context: expect.any(Object),
-      fields: ['*', 'id'],
     })
 
     mockValidateAuthorizationCode.mockRestore()
@@ -156,7 +155,7 @@ describe('GitHub providers', () => {
       },
       first: 1,
       context: expect.any(Object),
-      fields: ['id'],
+      select: { id: true },
     })
 
     expect(mockCreateObject).toHaveBeenCalledTimes(0)

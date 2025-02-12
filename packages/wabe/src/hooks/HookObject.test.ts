@@ -24,7 +24,7 @@ describe('HookObject', () => {
         wabe,
         isRoot: true,
       },
-      fields: ['id'],
+      select: { id: true },
     })
 
     const hookObject = new HookObject<DevWabeTypes, 'User'>({
@@ -38,7 +38,7 @@ describe('HookObject', () => {
       object: {
         id: res?.id || 'id',
       },
-      fields: [],
+      select: {},
     })
 
     const fetchResult = await hookObject.fetch()
@@ -64,7 +64,7 @@ describe('HookObject', () => {
       object: {
         id: '1',
       },
-      fields: [],
+      select: {},
     })
 
     expect(hookObject.isFieldUpdated('name')).toBeTrue()
@@ -82,7 +82,7 @@ describe('HookObject', () => {
       object: {
         id: '1',
       },
-      fields: [],
+      select: {},
     })
 
     hookObject.upsertNewData('name', 'tata')
@@ -106,7 +106,7 @@ describe('HookObject', () => {
       object: {
         id: '1',
       },
-      fields: [],
+      select: {},
     })
 
     expect(() => hookObject.upsertNewData('name', 'tata')).toThrow(

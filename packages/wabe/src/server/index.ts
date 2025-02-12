@@ -128,6 +128,7 @@ export class Wabe<T extends WabeTypes> {
     })
 
     this.controllers = {
+      // @ts-expect-error
       database: new DatabaseController<T>(databaseAdapter),
       email: email?.adapter ? new EmailController(email.adapter) : undefined,
       payment: payment?.adapter ? new PaymentController(payment) : undefined,
@@ -306,6 +307,7 @@ export class Wabe<T extends WabeTypes> {
 
       const { user, sessionId } = await session.meFromAccessToken(accessToken, {
         isRoot: true,
+        // @ts-expect-error
         wabe: this,
       })
 
@@ -346,6 +348,7 @@ export class Wabe<T extends WabeTypes> {
                   accessToken: newAccessToken,
                   refreshToken: newRefreshToken,
                 } = await session.refresh(accessToken, refreshToken, {
+                  // @ts-expect-error
                   wabe: this,
                   isRoot: true,
                 })
@@ -356,6 +359,7 @@ export class Wabe<T extends WabeTypes> {
                   res.setCookie('accessToken', newAccessToken, {
                     httpOnly: true,
                     path: '/',
+                    // @ts-expect-error
                     expires: session.getAccessTokenExpireAt(this.config),
                     sameSite: 'None',
                     secure: true,
@@ -365,6 +369,7 @@ export class Wabe<T extends WabeTypes> {
                   res.setCookie('refreshToken', newRefreshToken, {
                     httpOnly: true,
                     path: '/',
+                    // @ts-expect-error
                     expires: session.getRefreshTokenExpireAt(this.config),
                     sameSite: 'None',
                     secure: true,

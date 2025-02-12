@@ -2,23 +2,18 @@ import { describe, beforeAll, afterAll, it, expect } from 'bun:test'
 import type { Wabe } from '../../server'
 import {
   closeTests,
-  getAnonymousClient,
-  getUserClient,
+  getAdminUserClient,
   setupTests,
   type DevWabeTypes,
 } from '../../utils/helper'
-import { gql, type GraphQLClient } from 'graphql-request'
+import { gql } from 'graphql-request'
 
 describe('me', () => {
   let wabe: Wabe<DevWabeTypes>
-  let port: number
-  let client: GraphQLClient
 
   beforeAll(async () => {
     const setup = await setupTests()
     wabe = setup.wabe
-    port = setup.port
-    client = getAnonymousClient(port)
   })
 
   afterAll(async () => {
@@ -26,24 +21,18 @@ describe('me', () => {
   })
 
   it('should return information about current user', async () => {
-    const res = await client.request<any>(graphql.signUpWith, {
-      input: {
-        authentication: {
-          emailPassword: {
-            email: 'email@test.com',
-            password: 'password,',
-          },
-        },
-      },
+    const adminClient = await getAdminUserClient(wabe.config.port, wabe, {
+      email: 'admin@wabe.dev',
+      password: 'admin',
     })
-
-    const userClient = getUserClient(port, res.signUpWith.accessToken)
 
     const {
       me: { user },
-    } = await userClient.request<any>(graphql.me)
+    } = await adminClient.request<any>(graphql.me)
 
-    expect(user.authentication.emailPassword.email).toBe('email@test.com')
+    expect(user.role.name).toBe('Admin')
+
+    expect(user.authentication.emailPassword.email).toBe('admin@wabe.dev')
   })
 })
 
@@ -66,6 +55,9 @@ const graphql = {
                emailPassword{
                    email
                }
+           }
+           role {
+               name
            }
        }
       }

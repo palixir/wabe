@@ -2631,7 +2631,7 @@ describe('GraphqlSchema', () => {
 
     const res2 = await client.request<any>(
       gql`
-				mutation updateTestClass {
+				mutation updateTestClass2 {
 					updateTestClass2(input: {
   					id: "${res.createTestClass2.testClass2.id}"
   					fields: {

@@ -14,7 +14,7 @@ You have the ability to retrieve one or multiple objects that match specific sel
 const { id } = await context.wabe.controllers.database.getObject({
   className: "User",
   context,
-  fields: ["id"],
+  select: { id: true},
   id: "userId",
 });
 ```
@@ -25,7 +25,7 @@ const { id } = await context.wabe.controllers.database.getObject({
 const res = await context.wabe.controllers.database.getObjects({
   className: "User",
   context,
-  fields: ["id", "name"],
+  select: { id: true, name: true },
   where: { id: { equalTo: "userId" } },
 });
 
@@ -53,7 +53,7 @@ const { id } = await wabe.controllers.database.createObject({
   className: "User",
   context,
   data: { name: "Lucas" },
-  fields: ["id"],
+  select: { id: true },
 });
 ```
 
@@ -64,7 +64,7 @@ const res = await wabe.controllers.database.createObjects({
   className: "User",
   context,
   data: [{ name: "Lucas" }],
-  fields: ["id"],
+  select: { id: true },
 });
 ```
 
@@ -74,7 +74,7 @@ const res = await wabe.controllers.database.createObjects({
 const { name } = await context.wabe.controllers.database.updateObject({
   className: "User",
   context,
-  fields: ["name"],
+  select: { name: true },
   id: "userId",
   data: { age: 20 },
 });
@@ -86,7 +86,7 @@ const { name } = await context.wabe.controllers.database.updateObject({
 await context.wabe.controllers.database.updateObjects({
   className: "User",
   context,
-  fields: ["name"],
+  select: { name: true },
   where: { name: { equalTo: "test" } },
   data: { age: 20 },
 });
@@ -99,7 +99,7 @@ await wabe.controllers.database.deleteObject({
   className: "User",
   id: "userId",
   context,
-  fields: [],
+  select: {},
 });
 ```
 
@@ -110,6 +110,6 @@ await wabe.controllers.database.deleteObjects({
   className: "User",
   where: { name: { equalTo: "Lucas" } },
   context,
-  fields: [],
+  select: {},
 });
 ```

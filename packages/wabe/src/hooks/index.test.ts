@@ -68,7 +68,7 @@ describe('Hooks', () => {
         wabe: { controllers, config } as any,
       },
       newData: { name: 'test' },
-      fields: [],
+      select: {},
     })
 
     await hooks.runOnSingleObject({
@@ -90,7 +90,7 @@ describe('Hooks', () => {
         wabe: { controllers, config } as any,
       },
       newData: { name: 'test' },
-      fields: [],
+      select: {},
     })
 
     await hooks.runOnSingleObject({
@@ -104,7 +104,6 @@ describe('Hooks', () => {
       context: { isRoot: true, wabe: { controllers, config } },
       id: 'id',
       skipHooks: true,
-      fields: ['*'],
     })
 
     expect(mockCallback1).toHaveBeenCalledTimes(1)
@@ -134,7 +133,7 @@ describe('Hooks', () => {
         wabe: { controllers, config } as any,
       },
       newData: { name: 'test' },
-      fields: [],
+      select: {},
     })
 
     await hooks.runOnSingleObject({
@@ -167,7 +166,7 @@ describe('Hooks', () => {
         wabe: { controllers, config } as any,
       },
       newData: { name: 'test' },
-      fields: [],
+      select: {},
     })
 
     await hooks.runOnSingleObject({
@@ -189,7 +188,7 @@ describe('Hooks', () => {
         wabe: { controllers, config } as any,
       },
       newData: { name: 'test' },
-      fields: [],
+      select: {},
     })
 
     await hooks.runOnSingleObject({

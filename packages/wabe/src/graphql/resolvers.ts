@@ -14,13 +14,13 @@ import {
 export const extractFieldsFromSetNode = (
   selectionSet: SelectionSetNode,
   className: string,
-): Array<any> => {
+): Record<string, any> => {
   const ignoredFields = ['edges', 'node']
 
   if (className) ignoredFields.push(firstLetterInLowerCase(className))
 
-  return selectionSet.selections
-    ?.flatMap((selection) => {
+  return selectionSet.selections?.reduce(
+    (acc, selection) => {
       //@ts-expect-error
       const currentValue = selection.name.value
 
@@ -37,14 +37,24 @@ export const extractFieldsFromSetNode = (
         )
 
         if (ignoredFields.indexOf(currentValue) === -1)
-          return res.map((field) => `${currentValue}.${field}`)
+          return {
+            ...acc,
+            [currentValue]: res,
+          }
 
-        return res
+        return {
+          ...acc,
+          ...res,
+        }
       }
 
-      return currentValue
-    })
-    .filter((value) => ignoredFields.indexOf(value) === -1)
+      acc[currentValue] = true
+
+      return acc
+    },
+    {} as Record<string, any>,
+  )
+  // .filter((value) => ignoredFields.indexOf(value) === -1)
 }
 
 const getFieldsFromInfo = (info: GraphQLResolveInfo, className: string) => {
@@ -192,12 +202,12 @@ export const queryForOneObject = (
   info: GraphQLResolveInfo,
   className: keyof WabeTypes['types'],
 ) => {
-  const fields = getFieldsFromInfo(info, className)
+  const select = getFieldsFromInfo(info, className)
 
   return context.wabe.controllers.database.getObject({
     className,
     id,
-    fields,
+    select,
     context,
   })
 }
@@ -209,12 +219,12 @@ export const queryForMultipleObject = async (
   info: GraphQLResolveInfo,
   className: keyof WabeTypes['types'],
 ) => {
-  const fields = getFieldsFromInfo(info, className)
+  const select = getFieldsFromInfo(info, className)
 
   const objects = await context.wabe.controllers.database.getObjects({
     className,
     where,
-    fields,
+    select,
     offset,
     first,
     context,
@@ -222,7 +232,7 @@ export const queryForMultipleObject = async (
   })
 
   return {
-    totalCount: fields.includes('totalCount')
+    totalCount: select.totalCount
       ? await context.wabe.controllers.database.count({
           className,
           where,
@@ -242,11 +252,7 @@ export const mutationToCreateObject = async (
   info: GraphQLResolveInfo,
   className: keyof WabeTypes['types'],
 ) => {
-  const { classFields, othersFields } = getFieldsOfClassName({
-    fields: getFieldsFromInfo(info, className),
-    className,
-    context,
-  })
+  const select = getFieldsFromInfo(info, className)
 
   const updatedFieldsToCreate = await executeRelationOnFields({
     className,
@@ -259,10 +265,10 @@ export const mutationToCreateObject = async (
       await context.wabe.controllers.database.createObject({
         className,
         data: updatedFieldsToCreate,
-        fields: classFields,
+        select,
         context,
       }),
-    ...(othersFields.includes('ok') ? { ok: true } : {}),
+    ...(select.ok ? { ok: true } : {}),
   }
 }
 
@@ -273,7 +279,7 @@ export const mutationToCreateMultipleObjects = async (
   info: GraphQLResolveInfo,
   className: keyof WabeTypes['types'],
 ) => {
-  const outputFields = getFieldsFromInfo(info, className)
+  const select = getFieldsFromInfo(info, className)
   const inputFields = fields as Array<any>
 
   const updatedFieldsToCreate = await Promise.all(
@@ -289,7 +295,7 @@ export const mutationToCreateMultipleObjects = async (
   const objects = await context.wabe.controllers.database.createObjects({
     className,
     data: updatedFieldsToCreate,
-    fields: outputFields,
+    select,
     offset,
     first,
     context,
@@ -308,11 +314,8 @@ export const mutationToUpdateObject = async (
   info: GraphQLResolveInfo,
   className: keyof WabeTypes['types'],
 ) => {
-  const { classFields, othersFields } = getFieldsOfClassName({
-    fields: getFieldsFromInfo(info, className),
-    className,
-    context,
-  })
+  const select = getFieldsFromInfo(info, className)
+
   const updatedFields = await executeRelationOnFields({
     className,
     fields: args.input?.fields,
@@ -327,10 +330,10 @@ export const mutationToUpdateObject = async (
         className,
         id: args.input?.id,
         data: updatedFields,
-        fields: classFields,
+        select,
         context,
       }),
-    ...(othersFields.includes('ok') ? { ok: true } : {}),
+    ...(select.ok ? { ok: true } : {}),
   }
 }
 
@@ -341,7 +344,7 @@ export const mutationToUpdateMultipleObjects = async (
   info: GraphQLResolveInfo,
   className: keyof WabeTypes['types'],
 ) => {
-  const outputFields = getFieldsFromInfo(info, className)
+  const select = getFieldsFromInfo(info, className)
 
   const updatedFields = await executeRelationOnFields({
     className,
@@ -355,7 +358,7 @@ export const mutationToUpdateMultipleObjects = async (
     className,
     where,
     data: updatedFields,
-    fields: outputFields,
+    select,
     offset,
     first,
     context,
@@ -374,21 +377,17 @@ export const mutationToDeleteObject = async (
   info: GraphQLResolveInfo,
   className: keyof WabeTypes['types'],
 ) => {
-  const { classFields, othersFields } = getFieldsOfClassName({
-    fields: getFieldsFromInfo(info, className),
-    className,
-    context,
-  })
+  const select = getFieldsFromInfo(info, className)
 
   return {
     [firstLetterInLowerCase(className)]:
       await context.wabe.controllers.database.deleteObject({
         className,
         id: args.input?.id,
-        fields: classFields,
+        select,
         context,
       }),
-    ...(othersFields.includes('ok') ? { ok: true } : {}),
+    ...(select.ok ? { ok: true } : {}),
   }
 }
 
@@ -399,12 +398,12 @@ export const mutationToDeleteMultipleObjects = async (
   info: GraphQLResolveInfo,
   className: keyof WabeTypes['types'],
 ) => {
-  const outputFields = getFieldsFromInfo(info, className)
+  const select = getFieldsFromInfo(info, className)
 
   const objects = await context.wabe.controllers.database.deleteObjects({
     className,
     where,
-    fields: outputFields,
+    select,
     offset,
     first,
     context,

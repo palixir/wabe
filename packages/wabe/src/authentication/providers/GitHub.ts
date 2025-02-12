@@ -1,4 +1,4 @@
-import type { UserAuthenticationGithub } from '../../../generated/wabe'
+import type { AuthenticationGithub } from '../../../generated/wabe'
 import { contextWithRoot } from '../../utils/export'
 import {
   AuthenticationProvider,
@@ -42,10 +42,10 @@ export class GitHub implements ProviderInterface<GitHubInterface> {
       },
       context: contextWithRoot(context),
       first: 1,
-      fields: ['id'],
+      select: { id: true },
     })
 
-    const authenticationDataToSave: UserAuthenticationGithub = {
+    const authenticationDataToSave: AuthenticationGithub = {
       email,
       username,
       avatarUrl,
@@ -62,7 +62,6 @@ export class GitHub implements ProviderInterface<GitHubInterface> {
           },
         },
         context: contextWithRoot(context),
-        fields: ['*', 'id'],
       })
 
       if (!createdUser) throw new Error('User not found')

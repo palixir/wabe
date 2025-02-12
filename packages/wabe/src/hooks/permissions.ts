@@ -84,7 +84,8 @@ export const _checkCLP = async (
   const res = await object.context.wabe.controllers.database.getObject({
     className: '_Session',
     id: sessionId,
-    fields: ['id', 'user.id'],
+    // @ts-expect-error
+    select: { id: true, user: { id: true } },
     // We need to set isRoot to true to avoid infinite loop
     context: {
       ...object.context,
@@ -99,7 +100,6 @@ export const _checkCLP = async (
     )
 
   // User in the context is not the user found in the session
-  // @ts-expect-error
   if (object.context.user?.id !== res.user.id)
     throw new Error(
       `Permission denied to ${permissionOperation} class ${object.className}`,

@@ -103,7 +103,7 @@ export class EmailPassword
         ...context,
         isRoot: true,
       },
-      fields: ["authentication"],
+      select: { authentication: true},
     });
 
     if (users.length === 0) {
@@ -151,7 +151,7 @@ export class EmailPassword
         },
       },
       context,
-      fields: [],
+      select: {},
     });
 
     if (users.length > 0) throw new Error("User already exists");

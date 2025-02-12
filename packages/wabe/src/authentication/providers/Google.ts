@@ -1,4 +1,4 @@
-import type { UserAuthenticationGoogle } from '../../../generated/wabe'
+import type { AuthenticationGoogle } from '../../../generated/wabe'
 import { contextWithRoot } from '../../utils/export'
 import {
   AuthenticationProvider,
@@ -47,10 +47,10 @@ export class Google implements ProviderInterface<GoogleInterface> {
       },
       context: contextWithRoot(context),
       first: 1,
-      fields: ['id'],
+      select: { id: true },
     })
 
-    const authenticationDataToSave: UserAuthenticationGoogle = {
+    const authenticationDataToSave: AuthenticationGoogle = {
       email,
       verifiedEmail,
     }
@@ -66,7 +66,6 @@ export class Google implements ProviderInterface<GoogleInterface> {
           },
         },
         context: contextWithRoot(context),
-        fields: ['*', 'id'],
       })
 
       if (!createdUser) throw new Error('User not found')

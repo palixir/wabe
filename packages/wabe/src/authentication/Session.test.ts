@@ -48,7 +48,10 @@ describe('_Session', () => {
         accessToken: { equalTo: 'accessToken' },
       },
       first: 1,
-      fields: ['user.*', 'user.role.*', 'id'],
+      select: {
+        id: true,
+        user: true,
+      },
       context: { isRoot: true, wabe: { controllers } },
     })
   })
@@ -80,7 +83,10 @@ describe('_Session', () => {
         accessToken: { equalTo: 'accessToken' },
       },
       first: 1,
-      fields: ['user.*', 'user.role.*', 'id'],
+      select: {
+        id: true,
+        user: true,
+      },
       context: expect.any(Object),
     })
 
@@ -130,7 +136,7 @@ describe('_Session', () => {
         refreshTokenExpiresAt: expect.any(Date),
         user: 'userId',
       },
-      fields: ['id'],
+      select: { id: true },
     })
   })
 
@@ -153,7 +159,7 @@ describe('_Session', () => {
         isRoot: true,
       },
       id: 'sessionId',
-      fields: [],
+      select: {},
     })
   })
 
@@ -187,7 +193,18 @@ describe('_Session', () => {
       where: {
         accessToken: { equalTo: 'accessToken' },
       },
-      fields: ['id', 'user', 'refreshToken', 'refreshTokenExpiresAt'],
+      select: {
+        id: true,
+        user: {
+          id: true,
+          role: {
+            id: true,
+            name: true,
+          },
+        },
+        refreshToken: true,
+        refreshTokenExpiresAt: true,
+      },
       context: expect.any(Object),
     })
 
@@ -202,7 +219,7 @@ describe('_Session', () => {
         refreshToken: expect.any(String),
         refreshTokenExpiresAt: expect.any(Date),
       },
-      fields: [],
+      select: {},
     })
 
     const accessTokenExpiresAt = mockUpdateObject.mock.calls[0][0].data
@@ -268,7 +285,18 @@ describe('_Session', () => {
       where: {
         accessToken: { equalTo: 'accessToken' },
       },
-      fields: ['id', 'user', 'refreshToken', 'refreshTokenExpiresAt'],
+      select: {
+        id: true,
+        user: {
+          id: true,
+          role: {
+            id: true,
+            name: true,
+          },
+        },
+        refreshToken: true,
+        refreshTokenExpiresAt: true,
+      },
       context: expect.any(Object),
     })
   })

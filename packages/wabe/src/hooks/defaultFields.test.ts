@@ -21,7 +21,7 @@ describe('Default fields', () => {
         } as any,
         context: {} as any,
         object: {} as any,
-        fields: [],
+        select: {},
       })
 
       const spyHookObjectUpsertNewData = spyOn(hookObject, 'upsertNewData')
@@ -61,7 +61,7 @@ describe('Default fields', () => {
         } as any,
         context: {} as any,
         object: {} as any,
-        fields: [],
+        select: {},
       })
 
       const spyHookObjectUpsertNewData = spyOn(hookObject, 'upsertNewData')
@@ -91,7 +91,7 @@ describe('Default fields', () => {
         } as any,
         context: {} as any,
         object: {} as any,
-        fields: [],
+        select: {},
       })
 
       const spyHookObjectUpsertNewData = spyOn(hookObject, 'upsertNewData')
@@ -111,7 +111,7 @@ describe('Default fields', () => {
         } as any,
         context: {} as any,
         object: {} as any,
-        fields: [],
+        select: {},
       })
 
       const spyHookObjectUpsertNewData = spyOn(hookObject, 'upsertNewData')
@@ -153,7 +153,7 @@ describe('Default fields', () => {
         } as any,
         context,
         object: {} as any,
-        fields: [],
+        select: {},
       })
 
       const spyHookObjectUpsertNewData = spyOn(hookObject, 'upsertNewData')
@@ -174,7 +174,7 @@ describe('Default fields', () => {
         } as any,
         context,
         object: {} as any,
-        fields: [],
+        select: {},
       })
 
       const spyHookObjectUpsertNewData = spyOn(hookObject, 'upsertNewData')

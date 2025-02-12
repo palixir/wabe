@@ -12,7 +12,7 @@ export const initializeRoles = async (wabe: Wabe<DevWabeTypes>) => {
       isRoot: true,
       wabe,
     },
-    fields: ['name'],
+    select: { name: true },
     where: {
       name: {
         in: roles,
@@ -35,6 +35,6 @@ export const initializeRoles = async (wabe: Wabe<DevWabeTypes>) => {
       wabe,
     },
     data: objectsToCreate,
-    fields: [],
+    select: {},
   })
 }

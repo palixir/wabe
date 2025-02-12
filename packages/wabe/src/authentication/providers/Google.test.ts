@@ -81,7 +81,7 @@ describe('Google providers', () => {
       },
       first: 1,
       context: expect.any(Object),
-      fields: ['id'],
+      select: { id: true },
     })
 
     expect(mockCreateObject).toHaveBeenCalledTimes(1)
@@ -98,7 +98,6 @@ describe('Google providers', () => {
         },
       },
       context: expect.any(Object),
-      fields: ['*', 'id'],
     })
 
     mockValidateAuthorizationCode.mockRestore()
@@ -155,7 +154,7 @@ describe('Google providers', () => {
       },
       first: 1,
       context: expect.any(Object),
-      fields: ['id'],
+      select: { id: true },
     })
 
     expect(mockCreateObject).toHaveBeenCalledTimes(0)

@@ -17,6 +17,6 @@ export const defaultDeleteSessionOnDeleteUser = async (
     where: {
       user: { id: { equalTo: userId } },
     },
-    fields: [],
+    select: {},
   })
 }

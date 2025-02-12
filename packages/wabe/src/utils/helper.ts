@@ -82,7 +82,7 @@ export const getAdminUserClient = async (
       isRoot: true,
       wabe,
     } as any,
-    fields: ['id'],
+    select: { id: true },
     where: {
       name: { equalTo: RoleEnum.Admin },
     },
@@ -123,7 +123,7 @@ export const getAdminUserClient = async (
     data: {
       role: adminRoleId,
     },
-    fields: [],
+    select: {},
     where: {
       id: { equalTo: userId },
     },

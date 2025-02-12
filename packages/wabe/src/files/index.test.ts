@@ -70,7 +70,7 @@ describe('File upload', () => {
         wabe,
       },
       where: {},
-      fields: [],
+      select: {},
     })
   })
 
@@ -118,7 +118,7 @@ describe('File upload', () => {
           file: new File(['a'], 'a.text', { type: 'text/plain' }),
         },
       },
-      fields: [],
+      select: {},
     })
 
     const result = await wabe.controllers.database.getObjects({
@@ -130,7 +130,7 @@ describe('File upload', () => {
       },
       where: {},
       // @ts-expect-error
-      fields: ['id', 'file'],
+      select: { file: true, id: true },
     })
 
     // @ts-expect-error
@@ -149,7 +149,7 @@ describe('File upload', () => {
       },
       where: {},
       // @ts-expect-error
-      fields: ['id', 'file'],
+      select: { file: true, id: true },
       data: {
         // @ts-expect-error
         file: {
@@ -568,7 +568,7 @@ describe('File upload', () => {
       },
       where: {},
       // @ts-expect-error
-      fields: ['id', 'file'],
+      select: { file: true, id: true },
       data: {
         // @ts-expect-error
         file: {

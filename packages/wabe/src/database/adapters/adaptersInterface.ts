@@ -1,13 +1,14 @@
 import type { WabeContext } from '../../server/interface'
 import type { WabeTypes } from '../../server'
-import type { Scalars } from '../../../generated/wabe'
 
-type IsScalar<T> = T extends
-  | Scalars['String']['output']
-  | Scalars['Int']['output']
-  | Scalars['Boolean']['output']
-  | Scalars['Date']['output']
-  ? true
+type IsScalar<T> = T extends string | number | boolean ? true : false
+
+type IsArray<T> = T extends Array<any> ? true : false
+
+type IsObject<T, K extends WabeTypes> = T extends object
+  ? T extends K['types'][keyof K['types']]
+    ? false
+    : true
   : false
 
 type ExtractType<
@@ -51,11 +52,39 @@ export type WhereType<
   K extends keyof T['types'],
 > = Partial<WhereAggregation<T, K>> & WhereConditional<T, K>
 
+type SelectObject<T, K extends WabeTypes> = {
+  [P in keyof T]:
+    | IsScalar<T[P]>
+    | IsArray<T[P]>
+    | IsObject<T[P], K> extends false
+    ? SelectObject<Partial<T[P]>, K> | boolean
+    : boolean
+}
+
+export type SelectType<
+  T extends WabeTypes,
+  K extends keyof T['types'],
+  U extends keyof T['types'][K],
+> = Partial<{
+  [P in U]:
+    | IsScalar<ExtractType<T, K, P>>
+    | IsArray<ExtractType<T, K, P>>
+    | IsObject<ExtractType<T, K, P>, T> extends false
+    ? SelectObject<Partial<ExtractType<T, K, P>>, T> | boolean
+    : boolean
+}>
+
 export type OrderType<
   T extends WabeTypes,
   K extends keyof T['types'],
   U extends keyof T['types'][K],
 > = Record<U, 'ASC' | 'DESC'>
+
+export type OutputType<
+  T extends WabeTypes,
+  K extends keyof T['types'],
+  U extends keyof T['types'][K],
+> = (Pick<T['types'][K], U> & { id: string }) | null
 
 export interface AdapterOptions {
   databaseUrl: string
@@ -74,7 +103,6 @@ export interface CountOptions<T extends WabeTypes, K extends keyof T['types']> {
   context: WabeContext<any>
 }
 
-// TODO: It could be cool if fields type supports something like user.id, user.email
 export interface GetObjectOptions<
   T extends WabeTypes,
   K extends keyof T['types'],
@@ -83,9 +111,9 @@ export interface GetObjectOptions<
   className: K
   id: string
   where?: WhereType<T, K>
-  fields: Array<U | '*'>
   context: WabeContext<any>
   skipHooks?: boolean
+  select?: SelectType<T, K, U>
 }
 
 export interface GetObjectsOptions<
@@ -97,11 +125,11 @@ export interface GetObjectsOptions<
   className: K
   where?: WhereType<T, K>
   order?: OrderType<T, K, U>
-  fields: Array<W | '*'>
   offset?: number
   first?: number
   context: WabeContext<any>
   skipHooks?: boolean
+  select?: SelectType<T, K, W>
 }
 
 export interface CreateObjectOptions<
@@ -112,8 +140,8 @@ export interface CreateObjectOptions<
 > {
   className: K
   data: MutationData<T, K, U>
-  fields: Array<W | '*'>
   context: WabeContext<any>
+  select?: SelectType<T, K, W>
 }
 export interface CreateObjectsOptions<
   T extends WabeTypes,
@@ -124,11 +152,11 @@ export interface CreateObjectsOptions<
 > {
   className: K
   data: Array<MutationData<T, K, U>>
-  fields: Array<W | '*'>
   offset?: number
   first?: number
   order?: OrderType<T, U, X>
   context: WabeContext<any>
+  select?: SelectType<T, K, W>
 }
 
 export interface UpdateObjectOptions<
@@ -141,9 +169,9 @@ export interface UpdateObjectOptions<
   id: string
   where?: WhereType<T, K>
   data: MutationData<T, K, U>
-  fields: Array<W | '*'>
   context: WabeContext<any>
   skipHooks?: boolean
+  select?: SelectType<T, K, W>
 }
 
 export interface UpdateObjectsOptions<
@@ -157,11 +185,11 @@ export interface UpdateObjectsOptions<
   where: WhereType<T, K>
   order?: OrderType<T, K, X>
   data: MutationData<T, K, U>
-  fields: Array<W | '*'>
   offset?: number
   first?: number
   context: WabeContext<any>
   skipHooks?: boolean
+  select?: SelectType<T, K, W>
 }
 
 export interface DeleteObjectOptions<
@@ -172,8 +200,8 @@ export interface DeleteObjectOptions<
   className: K
   id: string
   where?: WhereType<T, K>
-  fields: Array<U | '*'>
   context: WabeContext<any>
+  select?: SelectType<T, K, U>
 }
 
 export interface DeleteObjectsOptions<
@@ -185,17 +213,11 @@ export interface DeleteObjectsOptions<
   className: K
   where: WhereType<T, K>
   order?: OrderType<T, K, U>
-  fields: Array<W | '*'>
   offset?: number
   first?: number
   context: WabeContext<any>
+  select?: SelectType<T, K, W>
 }
-
-export type OutputType<
-  T extends WabeTypes,
-  K extends keyof T['types'],
-  U extends keyof T['types'][K],
-> = (Pick<T['types'][K], U> & { id: string }) | null
 
 export interface DatabaseAdapter<T extends WabeTypes> {
   connect(): Promise<any>

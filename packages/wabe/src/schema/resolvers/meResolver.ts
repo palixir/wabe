@@ -6,6 +6,8 @@ export const meResolver = (
   __: any,
   context: WabeContext<DevWabeTypes>,
 ) => {
+  if (!context.user?.id) return { user: undefined }
+
   return {
     user: context.user,
   }

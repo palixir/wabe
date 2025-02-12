@@ -141,7 +141,7 @@ export const linkPayment = async ({
       ...context,
       isRoot: true,
     },
-    fields: ['id'],
+    select: {id :true},
     where: {
       email: {
         equalTo: email,
@@ -165,7 +165,7 @@ export const linkPayment = async ({
       amount,
       currency,
     },
-    fields: [],
+    select: {},
   })
 }
 
