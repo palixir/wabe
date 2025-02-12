@@ -80,7 +80,6 @@ export type Post = {
 	id: string,
 	name: string,
 	test2?: RoleEnum,
-	test3?: Array<string>,
 	acl?: ACLObject,
 	createdAt?: Date,
 	updatedAt?: Date,

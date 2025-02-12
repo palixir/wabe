@@ -245,20 +245,10 @@ type Post {
   id: ID!
   name: String!
   test2: RoleEnum
-  test3: UserConnection
   acl: PostACLObject
   createdAt: Date
   updatedAt: Date
   search: [String]
-}
-
-type UserConnection {
-  totalCount: Int
-  edges: [UserEdge]
-}
-
-type UserEdge {
-  node: User!
 }
 
 type PostACLObject {
@@ -281,7 +271,6 @@ type PostACLObjectRolesACL {
 input PostInput {
   name: String!
   test2: RoleEnum
-  test3: UserRelationInput
   acl: PostACLObjectInput
   createdAt: Date
   updatedAt: Date
@@ -315,7 +304,6 @@ input PostPointerInput {
 input PostCreateFieldsInput {
   name: String
   test2: RoleEnum
-  test3: UserRelationInput
   acl: PostACLObjectCreateFieldsInput
   createdAt: Date
   updatedAt: Date
@@ -456,6 +444,15 @@ type Role {
   createdAt: Date
   updatedAt: Date
   search: [String]
+}
+
+type UserConnection {
+  totalCount: Int
+  edges: [UserEdge]
+}
+
+type UserEdge {
+  node: User!
 }
 
 type RoleACLObject {
@@ -710,23 +707,34 @@ input EmailWhereInput {
 }
 
 input UserACLObjectWhereInput {
-  users: ArrayWhereInput
-  roles: ArrayWhereInput
+  users: [UserACLObjectUsersACLWhereInput]
+  roles: [UserACLObjectRolesACLWhereInput]
   OR: [UserACLObjectWhereInput]
   AND: [UserACLObjectWhereInput]
 }
 
-input ArrayWhereInput {
-  equalTo: Any
-  notEqualTo: Any
-  contains: Any
-  notContains: Any
+input UserACLObjectUsersACLWhereInput {
+  userId: StringWhereInput
+  read: BooleanWhereInput
+  write: BooleanWhereInput
+  OR: [UserACLObjectUsersACLWhereInput]
+  AND: [UserACLObjectUsersACLWhereInput]
 }
 
-"""
-The Any scalar type is used in operations and types that involve any type of value.
-"""
-scalar Any
+input BooleanWhereInput {
+  equalTo: Boolean
+  notEqualTo: Boolean
+  in: [Boolean]
+  notIn: [Boolean]
+}
+
+input UserACLObjectRolesACLWhereInput {
+  roleId: StringWhereInput
+  read: BooleanWhereInput
+  write: BooleanWhereInput
+  OR: [UserACLObjectRolesACLWhereInput]
+  AND: [UserACLObjectRolesACLWhereInput]
+}
 
 input DateWhereInput {
   equalTo: Date
@@ -783,13 +791,6 @@ input UserAuthenticationGoogleWhereInput {
   AND: [UserAuthenticationGoogleWhereInput]
 }
 
-input BooleanWhereInput {
-  equalTo: Boolean
-  notEqualTo: Boolean
-  in: [Boolean]
-  notIn: [Boolean]
-}
-
 input UserAuthenticationGithubWhereInput {
   email: EmailWhereInput
   avatarUrl: StringWhereInput
@@ -802,6 +803,11 @@ input AnyWhereInput {
   equalTo: Any
   notEqualTo: Any
 }
+
+"""
+The Any scalar type is used in operations and types that involve any type of value.
+"""
+scalar Any
 
 input RoleWhereInput {
   id: IdWhereInput
@@ -816,10 +822,26 @@ input RoleWhereInput {
 }
 
 input RoleACLObjectWhereInput {
-  users: ArrayWhereInput
-  roles: ArrayWhereInput
+  users: [RoleACLObjectUsersACLWhereInput]
+  roles: [RoleACLObjectRolesACLWhereInput]
   OR: [RoleACLObjectWhereInput]
   AND: [RoleACLObjectWhereInput]
+}
+
+input RoleACLObjectUsersACLWhereInput {
+  userId: StringWhereInput
+  read: BooleanWhereInput
+  write: BooleanWhereInput
+  OR: [RoleACLObjectUsersACLWhereInput]
+  AND: [RoleACLObjectUsersACLWhereInput]
+}
+
+input RoleACLObjectRolesACLWhereInput {
+  roleId: StringWhereInput
+  read: BooleanWhereInput
+  write: BooleanWhereInput
+  OR: [RoleACLObjectRolesACLWhereInput]
+  AND: [RoleACLObjectRolesACLWhereInput]
 }
 
 input _SessionWhereInput {
@@ -838,10 +860,26 @@ input _SessionWhereInput {
 }
 
 input _SessionACLObjectWhereInput {
-  users: ArrayWhereInput
-  roles: ArrayWhereInput
+  users: [_SessionACLObjectUsersACLWhereInput]
+  roles: [_SessionACLObjectRolesACLWhereInput]
   OR: [_SessionACLObjectWhereInput]
   AND: [_SessionACLObjectWhereInput]
+}
+
+input _SessionACLObjectUsersACLWhereInput {
+  userId: StringWhereInput
+  read: BooleanWhereInput
+  write: BooleanWhereInput
+  OR: [_SessionACLObjectUsersACLWhereInput]
+  AND: [_SessionACLObjectUsersACLWhereInput]
+}
+
+input _SessionACLObjectRolesACLWhereInput {
+  roleId: StringWhereInput
+  read: BooleanWhereInput
+  write: BooleanWhereInput
+  OR: [_SessionACLObjectRolesACLWhereInput]
+  AND: [_SessionACLObjectRolesACLWhereInput]
 }
 
 enum UserOrder {
@@ -886,7 +924,6 @@ input PostWhereInput {
   id: IdWhereInput
   name: StringWhereInput
   test2: AnyWhereInput
-  test3: UserWhereInput
   acl: PostACLObjectWhereInput
   createdAt: DateWhereInput
   updatedAt: DateWhereInput
@@ -896,10 +933,26 @@ input PostWhereInput {
 }
 
 input PostACLObjectWhereInput {
-  users: ArrayWhereInput
-  roles: ArrayWhereInput
+  users: [PostACLObjectUsersACLWhereInput]
+  roles: [PostACLObjectRolesACLWhereInput]
   OR: [PostACLObjectWhereInput]
   AND: [PostACLObjectWhereInput]
+}
+
+input PostACLObjectUsersACLWhereInput {
+  userId: StringWhereInput
+  read: BooleanWhereInput
+  write: BooleanWhereInput
+  OR: [PostACLObjectUsersACLWhereInput]
+  AND: [PostACLObjectUsersACLWhereInput]
+}
+
+input PostACLObjectRolesACLWhereInput {
+  roleId: StringWhereInput
+  read: BooleanWhereInput
+  write: BooleanWhereInput
+  OR: [PostACLObjectRolesACLWhereInput]
+  AND: [PostACLObjectRolesACLWhereInput]
 }
 
 enum PostOrder {
@@ -907,8 +960,6 @@ enum PostOrder {
   name_DESC
   test2_ASC
   test2_DESC
-  test3_ASC
-  test3_DESC
   acl_ASC
   acl_DESC
   createdAt_ASC
@@ -987,10 +1038,26 @@ input _InternalConfigWhereInput {
 }
 
 input _InternalConfigACLObjectWhereInput {
-  users: ArrayWhereInput
-  roles: ArrayWhereInput
+  users: [_InternalConfigACLObjectUsersACLWhereInput]
+  roles: [_InternalConfigACLObjectRolesACLWhereInput]
   OR: [_InternalConfigACLObjectWhereInput]
   AND: [_InternalConfigACLObjectWhereInput]
+}
+
+input _InternalConfigACLObjectUsersACLWhereInput {
+  userId: StringWhereInput
+  read: BooleanWhereInput
+  write: BooleanWhereInput
+  OR: [_InternalConfigACLObjectUsersACLWhereInput]
+  AND: [_InternalConfigACLObjectUsersACLWhereInput]
+}
+
+input _InternalConfigACLObjectRolesACLWhereInput {
+  roleId: StringWhereInput
+  read: BooleanWhereInput
+  write: BooleanWhereInput
+  OR: [_InternalConfigACLObjectRolesACLWhereInput]
+  AND: [_InternalConfigACLObjectRolesACLWhereInput]
 }
 
 enum _InternalConfigOrder {
@@ -1214,7 +1281,6 @@ input UpdatePostInput {
 input PostUpdateFieldsInput {
   name: String
   test2: RoleEnum
-  test3: UserRelationInput
   acl: PostACLObjectUpdateFieldsInput
   createdAt: Date
   updatedAt: Date
