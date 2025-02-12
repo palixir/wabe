@@ -53,12 +53,15 @@ export type WhereType<
 > = Partial<WhereAggregation<T, K>> & WhereConditional<T, K>
 
 type SelectObject<T, K extends WabeTypes> = {
-  [P in keyof T]:
-    | IsScalar<T[P]>
-    | IsArray<T[P]>
-    | IsObject<T[P], K> extends false
-    ? SelectObject<Partial<T[P]>, K> | boolean
-    : boolean
+  [P in keyof T]: IsScalar<T[P]> extends true
+    ? boolean
+    : IsArray<T[P]> extends true
+      ? T[P] extends Array<infer Item>
+        ? SelectObject<Partial<Item>, K> | boolean
+        : boolean
+      : IsObject<[P], K> extends true
+        ? SelectObject<Partial<T[P]>, K> | boolean
+        : boolean
 }
 
 export type SelectType<
@@ -66,12 +69,15 @@ export type SelectType<
   K extends keyof T['types'],
   U extends keyof T['types'][K],
 > = Partial<{
-  [P in U]:
-    | IsScalar<ExtractType<T, K, P>>
-    | IsArray<ExtractType<T, K, P>>
-    | IsObject<ExtractType<T, K, P>, T> extends false
-    ? SelectObject<Partial<ExtractType<T, K, P>>, T> | boolean
-    : boolean
+  [P in U]: IsScalar<ExtractType<T, K, P>> extends true
+    ? boolean
+    : IsArray<ExtractType<T, K, P>> extends true
+      ? ExtractType<T, K, P> extends Array<infer Item>
+        ? SelectObject<Partial<Item>, T> | boolean
+        : boolean
+      : ExtractType<T, K, P> extends object
+        ? SelectObject<Partial<ExtractType<T, K, P>>, T> | boolean
+        : boolean
 }>
 
 export type OrderType<

@@ -128,7 +128,6 @@ export class Wabe<T extends WabeTypes> {
     })
 
     this.controllers = {
-      // @ts-expect-error
       database: new DatabaseController<T>(databaseAdapter),
       email: email?.adapter ? new EmailController(email.adapter) : undefined,
       payment: payment?.adapter ? new PaymentController(payment) : undefined,

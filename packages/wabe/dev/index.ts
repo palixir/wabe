@@ -69,6 +69,8 @@ const run = async () => {
           fields: {
             name: { type: 'String', required: true },
             test2: { type: 'RoleEnum' },
+            test3: { type: 'Relation', class: 'User', required: true },
+            test4: { type: 'Pointer', class: 'User', required: true },
           },
           permissions: {
             create: {
@@ -150,6 +152,24 @@ const run = async () => {
       },
     },
   })
+
+  // For select test
+  //  await wabe.controllers.database.getObjects({
+  //   className: 'Post',
+  //   context: {} as any,
+  //   select: {
+  //     name: true,
+  //     test3: {
+  //       age: true,
+  //       role: {
+  //         id: true,
+  //       },
+  //     },
+  //     test4: {
+  //       name: true,
+  //     },
+  //   },
+  // })
 
   await wabe.start()
 }
