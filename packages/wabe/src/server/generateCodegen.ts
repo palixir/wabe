@@ -218,11 +218,18 @@ const generateWabeMutationOrQueryInput = (
   }, {})
 
   return {
-    [`${firstLetterInUpperCase(mutationOrQueryName)}Input`]: mutationObject,
+    ...(isMutation
+      ? {
+          [`${firstLetterInUpperCase(mutationOrQueryName)}Input`]:
+            mutationObject,
+        }
+      : {}),
     [`${isMutation ? 'Mutation' : 'Query'}${firstLetterInUpperCase(mutationOrQueryName)}Args`]:
-      {
-        input: `${firstLetterInUpperCase(mutationOrQueryName)}Input`,
-      },
+      isMutation
+        ? {
+            input: `${firstLetterInUpperCase(mutationOrQueryName)}Input`,
+          }
+        : mutationObject,
     ...objects,
   }
 }
