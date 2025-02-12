@@ -43,7 +43,7 @@ const wabeTypesToTypescriptTypes = (field: TypeField<DevWabeTypes>) => {
     case 'Pointer':
       return field.class
     case 'Relation':
-      return 'Array<string>' // Because we return an array of id
+      return `Array<${field.class}>`
     case 'Object':
       return `${field.object.name}`
     default:

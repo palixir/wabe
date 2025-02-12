@@ -84,7 +84,6 @@ export const _checkCLP = async (
   const res = await object.context.wabe.controllers.database.getObject({
     className: '_Session',
     id: sessionId,
-    // @ts-expect-error
     select: { id: true, user: { id: true } },
     // We need to set isRoot to true to avoid infinite loop
     context: {

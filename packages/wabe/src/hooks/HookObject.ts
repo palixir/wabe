@@ -114,6 +114,7 @@ export class HookObject<
       this.className === 'User'
         ? await this.context.wabe.controllers.database.getObject({
             className: 'User',
+            // @ts-expect-error
             select: { acl: true },
             // @ts-expect-error
             id: this.object?.id,
@@ -142,6 +143,7 @@ export class HookObject<
     if (role) {
       const result = await this.context.wabe.controllers.database.getObjects({
         className: 'Role',
+        // @ts-expect-error
         select: { id: true },
         // @ts-expect-error
         where: {

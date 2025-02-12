@@ -127,12 +127,14 @@ describe('Database', () => {
       select: {
         id: true,
         // @ts-expect-error
-        userTest: true,
+        userTest: {
+          name: true,
+        },
       },
     })
 
     // @ts-expect-error
-    expect(res[0].userTest).toEqual(expect.any(Array<string>))
+    expect(res[0].userTest).toEqual([{ name: 'test', id: expect.any(String) }])
   })
 
   it("should return null on a pointer if the pointer doesn't exist", async () => {

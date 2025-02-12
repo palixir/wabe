@@ -175,6 +175,7 @@ export class DatabaseController<T extends WabeTypes> {
 
       const objects = await this.getObjects({
         className: fieldTargetClass,
+        // @ts-expect-error
         select: { id: true },
         // @ts-expect-error
         where: defaultWhere,
@@ -330,6 +331,7 @@ export class DatabaseController<T extends WabeTypes> {
             className: currentClassName,
             id: object[pointerField],
             context,
+            // @ts-expect-error
             select: currentSelect,
             skipHooks: true,
           })
@@ -349,6 +351,7 @@ export class DatabaseController<T extends WabeTypes> {
         if (isRelation) {
           const relationObjects = await this.getObjects({
             className: currentClassName,
+            // @ts-expect-error
             select: currentSelect,
             // @ts-expect-error
             where: { id: { in: object[pointerField] } },
@@ -456,6 +459,7 @@ export class DatabaseController<T extends WabeTypes> {
       className,
       id,
       context,
+      // @ts-expect-error
       select: !select ? undefined : selectWithPointersAndRelationsToGetId,
       where: whereWithACLCondition,
       skipHooks: true,
@@ -547,6 +551,7 @@ export class DatabaseController<T extends WabeTypes> {
       first,
       offset,
       where: whereWithACLCondition,
+      // @ts-expect-error
       select: !select ? undefined : selectWithPointersAndRelationsToGetId,
       order,
       skipHooks: true,

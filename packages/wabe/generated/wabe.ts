@@ -73,13 +73,15 @@ export type User = {
 	isOauth?: boolean,
 	verifiedEmail?: boolean,
 	role?: Role,
-	sessions?: Array<string>
+	sessions?: Array<_Session>
 }
 
 export type Post = {
 	id: string,
 	name: string,
 	test2?: RoleEnum,
+	test3: Array<User>,
+	test4: User,
 	acl?: ACLObject,
 	createdAt?: Date,
 	updatedAt?: Date,
@@ -102,7 +104,7 @@ export type _Session = {
 export type Role = {
 	id: string,
 	name: string,
-	users?: Array<string>,
+	users?: Array<User>,
 	acl?: ACLObject,
 	createdAt?: Date,
 	updatedAt?: Date,
