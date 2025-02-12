@@ -710,34 +710,23 @@ input EmailWhereInput {
 }
 
 input UserACLObjectWhereInput {
-  users: [UserACLObjectUsersACLWhereInput]
-  roles: [UserACLObjectRolesACLWhereInput]
+  users: ArrayWhereInput
+  roles: ArrayWhereInput
   OR: [UserACLObjectWhereInput]
   AND: [UserACLObjectWhereInput]
 }
 
-input UserACLObjectUsersACLWhereInput {
-  userId: StringWhereInput
-  read: BooleanWhereInput
-  write: BooleanWhereInput
-  OR: [UserACLObjectUsersACLWhereInput]
-  AND: [UserACLObjectUsersACLWhereInput]
+input ArrayWhereInput {
+  equalTo: Any
+  notEqualTo: Any
+  contains: Any
+  notContains: Any
 }
 
-input BooleanWhereInput {
-  equalTo: Boolean
-  notEqualTo: Boolean
-  in: [Boolean]
-  notIn: [Boolean]
-}
-
-input UserACLObjectRolesACLWhereInput {
-  roleId: StringWhereInput
-  read: BooleanWhereInput
-  write: BooleanWhereInput
-  OR: [UserACLObjectRolesACLWhereInput]
-  AND: [UserACLObjectRolesACLWhereInput]
-}
+"""
+The Any scalar type is used in operations and types that involve any type of value.
+"""
+scalar Any
 
 input DateWhereInput {
   equalTo: Date
@@ -794,6 +783,13 @@ input UserAuthenticationGoogleWhereInput {
   AND: [UserAuthenticationGoogleWhereInput]
 }
 
+input BooleanWhereInput {
+  equalTo: Boolean
+  notEqualTo: Boolean
+  in: [Boolean]
+  notIn: [Boolean]
+}
+
 input UserAuthenticationGithubWhereInput {
   email: EmailWhereInput
   avatarUrl: StringWhereInput
@@ -806,11 +802,6 @@ input AnyWhereInput {
   equalTo: Any
   notEqualTo: Any
 }
-
-"""
-The Any scalar type is used in operations and types that involve any type of value.
-"""
-scalar Any
 
 input RoleWhereInput {
   id: IdWhereInput
@@ -825,26 +816,10 @@ input RoleWhereInput {
 }
 
 input RoleACLObjectWhereInput {
-  users: [RoleACLObjectUsersACLWhereInput]
-  roles: [RoleACLObjectRolesACLWhereInput]
+  users: ArrayWhereInput
+  roles: ArrayWhereInput
   OR: [RoleACLObjectWhereInput]
   AND: [RoleACLObjectWhereInput]
-}
-
-input RoleACLObjectUsersACLWhereInput {
-  userId: StringWhereInput
-  read: BooleanWhereInput
-  write: BooleanWhereInput
-  OR: [RoleACLObjectUsersACLWhereInput]
-  AND: [RoleACLObjectUsersACLWhereInput]
-}
-
-input RoleACLObjectRolesACLWhereInput {
-  roleId: StringWhereInput
-  read: BooleanWhereInput
-  write: BooleanWhereInput
-  OR: [RoleACLObjectRolesACLWhereInput]
-  AND: [RoleACLObjectRolesACLWhereInput]
 }
 
 input _SessionWhereInput {
@@ -863,26 +838,10 @@ input _SessionWhereInput {
 }
 
 input _SessionACLObjectWhereInput {
-  users: [_SessionACLObjectUsersACLWhereInput]
-  roles: [_SessionACLObjectRolesACLWhereInput]
+  users: ArrayWhereInput
+  roles: ArrayWhereInput
   OR: [_SessionACLObjectWhereInput]
   AND: [_SessionACLObjectWhereInput]
-}
-
-input _SessionACLObjectUsersACLWhereInput {
-  userId: StringWhereInput
-  read: BooleanWhereInput
-  write: BooleanWhereInput
-  OR: [_SessionACLObjectUsersACLWhereInput]
-  AND: [_SessionACLObjectUsersACLWhereInput]
-}
-
-input _SessionACLObjectRolesACLWhereInput {
-  roleId: StringWhereInput
-  read: BooleanWhereInput
-  write: BooleanWhereInput
-  OR: [_SessionACLObjectRolesACLWhereInput]
-  AND: [_SessionACLObjectRolesACLWhereInput]
 }
 
 enum UserOrder {
@@ -937,26 +896,10 @@ input PostWhereInput {
 }
 
 input PostACLObjectWhereInput {
-  users: [PostACLObjectUsersACLWhereInput]
-  roles: [PostACLObjectRolesACLWhereInput]
+  users: ArrayWhereInput
+  roles: ArrayWhereInput
   OR: [PostACLObjectWhereInput]
   AND: [PostACLObjectWhereInput]
-}
-
-input PostACLObjectUsersACLWhereInput {
-  userId: StringWhereInput
-  read: BooleanWhereInput
-  write: BooleanWhereInput
-  OR: [PostACLObjectUsersACLWhereInput]
-  AND: [PostACLObjectUsersACLWhereInput]
-}
-
-input PostACLObjectRolesACLWhereInput {
-  roleId: StringWhereInput
-  read: BooleanWhereInput
-  write: BooleanWhereInput
-  OR: [PostACLObjectRolesACLWhereInput]
-  AND: [PostACLObjectRolesACLWhereInput]
 }
 
 enum PostOrder {
@@ -1044,26 +987,10 @@ input _InternalConfigWhereInput {
 }
 
 input _InternalConfigACLObjectWhereInput {
-  users: [_InternalConfigACLObjectUsersACLWhereInput]
-  roles: [_InternalConfigACLObjectRolesACLWhereInput]
+  users: ArrayWhereInput
+  roles: ArrayWhereInput
   OR: [_InternalConfigACLObjectWhereInput]
   AND: [_InternalConfigACLObjectWhereInput]
-}
-
-input _InternalConfigACLObjectUsersACLWhereInput {
-  userId: StringWhereInput
-  read: BooleanWhereInput
-  write: BooleanWhereInput
-  OR: [_InternalConfigACLObjectUsersACLWhereInput]
-  AND: [_InternalConfigACLObjectUsersACLWhereInput]
-}
-
-input _InternalConfigACLObjectRolesACLWhereInput {
-  roleId: StringWhereInput
-  read: BooleanWhereInput
-  write: BooleanWhereInput
-  OR: [_InternalConfigACLObjectRolesACLWhereInput]
-  AND: [_InternalConfigACLObjectRolesACLWhereInput]
 }
 
 enum _InternalConfigOrder {

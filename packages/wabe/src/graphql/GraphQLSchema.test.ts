@@ -224,6 +224,93 @@ describe('GraphqlSchema', () => {
     })
   })
 
+  it('should set correctly the where input on array field', async () => {
+    const { wabe } = await createWabe({
+      classes: [
+        {
+          name: 'TestClassOnly',
+          fields: {
+            field1: {
+              type: 'Object',
+              object: {
+                name: 'TestObject',
+                required: true,
+                fields: {
+                  field1: {
+                    type: 'Array',
+                    typeValue: 'String',
+                    required: true,
+                    requiredValue: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      ],
+    })
+
+    expect(
+      getTypeFromGraphQLSchema({
+        schema: wabe.config.graphqlSchema || ({} as any),
+        type: 'Type',
+        name: 'TestClassOnlyTestObjectWhereInput',
+      }).input.field1,
+    ).toEqual('ArrayWhereInput')
+
+    await wabe.close()
+  })
+
+  it('should set correctly the where input on object field', async () => {
+    const { wabe } = await createWabe({
+      classes: [
+        {
+          name: 'TestClassOnly',
+          fields: {
+            field1: {
+              type: 'Object',
+              object: {
+                name: 'TestObject',
+                required: true,
+                fields: {
+                  field1: {
+                    type: 'Object',
+                    object: {
+                      name: 'TestTata',
+                      fields: {
+                        field2: {
+                          type: 'String',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      ],
+    })
+
+    expect(
+      getTypeFromGraphQLSchema({
+        schema: wabe.config.graphqlSchema || ({} as any),
+        type: 'Type',
+        name: 'TestClassOnlyTestObjectWhereInput',
+      }).input.field1,
+    ).toEqual('TestClassOnlyTestObjectField1WhereInput')
+
+    expect(
+      getTypeFromGraphQLSchema({
+        schema: wabe.config.graphqlSchema || ({} as any),
+        type: 'Type',
+        name: 'TestClassOnlyTestObjectField1WhereInput',
+      }).input.field2,
+    ).toEqual('StringWhereInput')
+
+    await wabe.close()
+  })
+
   it('should request totalCount on relation', async () => {
     const { wabe } = await createWabe({
       classes: [

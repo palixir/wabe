@@ -175,7 +175,7 @@ export const GraphqlParser: GraphqlParserConstructor =
                 type: currentField.type,
                 // @ts-expect-error
                 typeValue: currentField.typeValue,
-                isWhereType: false,
+                isWhereType,
                 requiredValue: currentField.requiredValue,
               })
 
