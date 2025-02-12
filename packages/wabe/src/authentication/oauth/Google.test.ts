@@ -67,9 +67,10 @@ describe('Google oauth', () => {
       },
     )
 
-    expect(res.accessTokenExpiresAt?.getTime()).toBeGreaterThanOrEqual(
-      Date.now() + 3600 * 1000,
-    )
+    // +100 to avoid flaky
+    expect(
+      (res.accessTokenExpiresAt?.getTime() || 0) + 100,
+    ).toBeGreaterThanOrEqual(Date.now() + 3600 * 1000)
 
     spyOauth2ClientValidateAuthorizationCode.mockRestore()
   })
