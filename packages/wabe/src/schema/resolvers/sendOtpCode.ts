@@ -21,7 +21,7 @@ export const sendOtpCodeResolver = async (
         equalTo: input.email,
       },
     },
-    select: {id :true},
+    select: { id: true },
     first: 1,
     context: contextWithRoot(context),
   })

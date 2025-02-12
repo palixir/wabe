@@ -1,5 +1,5 @@
 import type { OperationType } from '.'
-import type { RoleEnum, UserACLObject } from '../../generated/wabe'
+import type { RoleEnum, ACLObject } from '../../generated/wabe'
 import type { MutationData, OutputType, Select } from '../database'
 import type { WabeTypes } from '../server'
 import type { WabeContext } from '../server/interface'
@@ -125,7 +125,7 @@ export class HookObject<
         : // @ts-expect-error
           { acl: this.getNewData().acl }
 
-    const currentACL: UserACLObject = result?.acl || {}
+    const currentACL: ACLObject = result?.acl || {}
 
     if (options === null) {
       await updateACL({

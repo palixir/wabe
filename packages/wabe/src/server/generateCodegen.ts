@@ -1,169 +1,289 @@
-import {
-  type DocumentNode,
-  type EnumTypeDefinitionNode,
-  type GraphQLSchema,
-  type InputObjectTypeDefinitionNode,
-  type NamedTypeNode,
-  type ObjectTypeDefinitionNode,
-  parse,
-  printSchema,
-  type ScalarTypeDefinitionNode,
-  visit,
-} from 'graphql'
-
+import { type GraphQLSchema, printSchema } from 'graphql'
 import { writeFile, readFile } from 'node:fs/promises'
 import type {
   ClassInterface,
   EnumInterface,
+  MutationResolver,
+  QueryResolver,
   ScalarInterface,
   SchemaInterface,
+  TypeField,
+  TypeResolver,
+  WabeObject,
+  WabePrimaryTypes,
 } from '../schema'
 import { firstLetterUpperCase, type DevWabeTypes } from '../utils/helper'
+import { firstLetterInUpperCase } from '../utils'
 
-const defaultScalars: Record<string, { input: string; output: string }> = {
-  ID: { input: 'string', output: 'string' },
-  String: { input: 'string', output: 'string' },
-  Boolean: { input: 'boolean', output: 'boolean' },
-  Int: { input: 'number', output: 'number' },
-  Float: { input: 'number', output: 'number' },
-  Email: { input: 'string', output: 'string' },
-  Phone: { input: 'string', output: 'string' },
-  Date: { input: 'Date', output: 'string' },
-  Search: { input: 'any', output: 'any' },
-  Any: { input: 'any', output: 'any' },
-  File: { input: 'any', output: 'any' },
+const wabePrimaryTypesToTypescriptTypes: Record<WabePrimaryTypes, string> = {
+  Boolean: 'boolean',
+  Int: 'number',
+  Float: 'number',
+  String: 'string',
+  Email: 'string',
+  Phone: 'string',
+  Date: 'Date',
+  File: '{url: string, name: string}',
 }
 
-const getScalarsCode = () =>
-  Object.keys(defaultScalars).reduce((acc, scalarName) => {
-    const scalarDef = defaultScalars[scalarName]
+const wabeTypesToTypescriptTypes = (field: TypeField<DevWabeTypes>) => {
+  switch (field.type) {
+    case 'Boolean':
+    case 'Int':
+    case 'Float':
+    case 'String':
+    case 'Email':
+    case 'Phone':
+    case 'Date':
+    case 'File':
+      return wabePrimaryTypesToTypescriptTypes[field.type]
+    case 'Array':
+      if (field.typeValue === 'Object') return `Array<${field.object.name}>`
+      return `Array<${wabePrimaryTypesToTypescriptTypes[field.typeValue]}>`
+    case 'Pointer':
+      return field.class
+    case 'Relation':
+      return 'Array<string>' // Because we return an array of id
+    case 'Object':
+      return `${field.object.name}`
+    default:
+      return field.type
+  }
+}
 
-    return `${acc}  ${scalarName}: { input: ${scalarDef.input}; output: ${scalarDef.output}; };\n`
-  }, 'export type Scalars = {\n')
+const generateWabeObject = (
+  object: WabeObject<DevWabeTypes>,
+  prefix = '',
+): Record<string, Record<string, string>> => {
+  const objectName = object.name
 
-// Set to store all custom scalar names
-const customScalars = new Set<string>()
+  return Object.entries(object.fields).reduce(
+    (acc, [fieldName, field]) => {
+      const type = wabeTypesToTypescriptTypes(field)
 
-const generateTypescriptFromSchema = (schema: string): string => {
-  const documentNode: DocumentNode = parse(schema)
+      const objectNameWithPrefix = `${prefix}${firstLetterUpperCase(objectName)}`
 
-  // Generate the Scalars type with input/output structure
-  const scalarsCode = getScalarsCode()
+      if (
+        field.type === 'Object' ||
+        (field.type === 'Array' && field.typeValue === 'Object')
+      ) {
+        const subObject = generateWabeObject(field.object, objectNameWithPrefix)
 
-  let typescriptCode = scalarsCode + '};\n\n'
+        const isArray = field.type === 'Array'
 
-  // Visit each definition in the schema
-  visit(documentNode, {
-    ScalarTypeDefinition(node: ScalarTypeDefinitionNode) {
-      const typeName = node.name.value
-      if (!defaultScalars[typeName]) {
-        typescriptCode += `type ${typeName} = Scalars['${typeName}']; // Custom Scalar\n`
-      }
-    },
-
-    ObjectTypeDefinition(node: ObjectTypeDefinitionNode) {
-      const typeName = node.name.value
-      let fieldsCode = ''
-
-      for (const field of node.fields || []) {
-        const fieldName = field.name.value
-        const fieldType = getFieldType(field.type, false) // Pass false to use output in ObjectType
-        const isOptional = field.type.kind !== 'NonNullType'
-        fieldsCode += `  ${fieldName}${isOptional ? '?' : ''}: ${fieldType};\n`
-      }
-
-      typescriptCode += `\nexport type ${typeName} = {\n${fieldsCode}};\n`
-
-      // Generate argument types for Mutation fields
-      if (typeName === 'Mutation' || typeName === 'Query') {
-        for (const field of node.fields || []) {
-          const fieldName = field.name.value
-          const args = field.arguments || []
-
-          // If the query or mutation takes a single input argument, generate an Args type
-          if (args.length === 1 && args[0].name.value === 'input') {
-            const inputType = getFieldType(args[0].type, true) // Use input subtype for args
-            typescriptCode += `\nexport type ${firstLetterUpperCase(
-              typeName,
-            )}${firstLetterUpperCase(fieldName)}Args = {\n  input: ${inputType};\n};\n`
-          }
-          // If there are multiple arguments, list them explicitly
-          else if (args.length > 0) {
-            const argsCode = args.reduce(
-              (acc, arg) => {
-                const argName = arg.name.value
-                const argType = getFieldType(arg.type, true) // Use input subtype for args
-                const isOptional = arg.type.kind !== 'NonNullType'
-                return `${acc}  ${argName}${isOptional ? '?' : ''}: ${argType};\n`
-              },
-              `\nexport type ${firstLetterUpperCase(
-                typeName,
-              )}${firstLetterUpperCase(fieldName)}Args = {\n`,
-            )
-
-            typescriptCode += `${argsCode}};\n`
-          }
+        return {
+          ...acc,
+          ...subObject,
+          ...{
+            [objectNameWithPrefix]: {
+              ...acc[objectNameWithPrefix],
+              [`${fieldName}${field.required ? '' : 'undefined'}`]: `${isArray ? 'Array<' : ''}${objectNameWithPrefix}${firstLetterUpperCase(field.object.name)}${isArray ? '>' : ''}`,
+            },
+          },
         }
       }
+
+      return {
+        ...acc,
+        ...{
+          [objectNameWithPrefix]: {
+            ...acc[objectNameWithPrefix],
+            [`${fieldName}${field.required ? '' : 'undefined'}`]: `${type}`,
+          },
+        },
+      }
     },
+    {} as Record<string, Record<string, string>>,
+  )
+}
 
-    // Input Object Type
-    InputObjectTypeDefinition(node: InputObjectTypeDefinitionNode) {
-      const inputTypeName = node.name.value
-      let inputFieldsCode = ''
+const generateWabeTypes = (classes: ClassInterface<DevWabeTypes>[]) => {
+  const wabeTypes = classes.reduce(
+    (acc, classType) => {
+      const { name, fields } = classType
 
-      for (const field of node.fields || []) {
-        const fieldName = field.name.value
-        const fieldType = getFieldType(field.type, true) // Pass true to use input in InputType
-        const isOptional = field.type.kind !== 'NonNullType'
-        inputFieldsCode += `  ${fieldName}${isOptional ? '?' : ''}: ${fieldType};\n`
+      const objectsToLoad: Array<Record<string, Record<string, string>>> = []
+
+      const currentClass = Object.entries(fields).reduce(
+        (acc2, [name, field]) => {
+          const type = wabeTypesToTypescriptTypes(field)
+
+          if (field.type === 'Object') {
+            const wabeObject = generateWabeObject(field.object)
+
+            objectsToLoad.push(wabeObject)
+          }
+
+          return {
+            ...acc2,
+            [`${name}${field.required ? '' : 'undefined'}`]: type,
+          }
+        },
+        {} as Record<string, string>,
+      )
+
+      const objects = objectsToLoad.reduce((acc2, object) => {
+        return {
+          ...acc2,
+          ...object,
+        }
+      }, {})
+
+      return {
+        ...acc,
+        ...objects,
+        [name]: { id: 'string', ...currentClass },
+      }
+    },
+    {} as Record<string, Record<string, string>>,
+  )
+
+  return wabeTypes
+}
+
+const generateWabeEnumTypes = (enums: EnumInterface[]) => {
+  return Object.values(enums).reduce(
+    (acc, { name, values }) => {
+      return {
+        ...acc,
+        [name]: values,
+      }
+    },
+    {} as Record<string, Record<string, string>>,
+  )
+}
+
+const generateWabeScalarTypes = (scalars: ScalarInterface[]) => {
+  return Object.values(scalars).reduce(
+    (acc, { name }) => {
+      return {
+        ...acc,
+        // For the moment we will just use string as the type
+        // Suppose all scalars are string
+        [name]: 'string',
+      }
+    },
+    {} as Record<string, string>,
+  )
+}
+
+const generateWabeMutationOrQueryInput = (
+  mutationOrQueryName: string,
+  resolver: MutationResolver<any> | QueryResolver<any>,
+  isMutation: boolean,
+) => {
+  const objectsToLoad: Array<Record<string, Record<string, string>>> = []
+
+  const mutationNameWithFirstLetterUpperCase =
+    firstLetterUpperCase(mutationOrQueryName)
+
+  const mutationObject = Object.entries(
+    (isMutation ? resolver.args?.input : resolver.args) || {},
+  ).reduce(
+    (acc, [name, field]) => {
+      let type = wabeTypesToTypescriptTypes(field)
+
+      if (field.type === 'Object') {
+        type = firstLetterInUpperCase(name)
+
+        const wabeObject = generateWabeObject(
+          {
+            ...field.object,
+            name: type,
+          },
+          mutationNameWithFirstLetterUpperCase,
+        )
+
+        objectsToLoad.push(wabeObject)
+
+        return {
+          ...acc,
+          [`${name}${field.required ? '' : 'undefined'}`]: `${mutationNameWithFirstLetterUpperCase}${type}`,
+        }
       }
 
-      typescriptCode += `\nexport type ${inputTypeName} = {\n${inputFieldsCode}};\n`
+      return {
+        ...acc,
+        [`${name}${field.required ? '' : 'undefined'}`]: type,
+      }
     },
+    {} as Record<string, string>,
+  )
 
-    // Enum Type - Generate TypeScript enums instead of union types
-    EnumTypeDefinition(node: EnumTypeDefinitionNode) {
-      const enumName = node.name.value
-      const values =
-        node.values
-          ?.map((value) => `  ${value.name.value} = "${value.name.value}",`)
-          .join('\n') || ''
+  const objects = objectsToLoad.reduce((acc2, object) => {
+    return {
+      ...acc2,
+      ...object,
+    }
+  }, {})
 
-      typescriptCode += `\nexport enum ${enumName} {\n${values}\n}\n`
-    },
-  })
-
-  return typescriptCode
-}
-
-// Helper function to get the TypeScript type from GraphQL field type
-const getFieldType = (typeNode: any, isInputField = false): string => {
-  // Check if the field type is a named type and if it corresponds to a scalar
-  const getNamedType = (node: NamedTypeNode): string => {
-    const typeName = node.name.value
-    if (defaultScalars[typeName])
-      return `Scalars['${typeName}']['${isInputField ? 'input' : 'output'}']`
-
-    if (customScalars.has(typeName))
-      return `Scalars['${typeName}']['${isInputField ? 'input' : 'output'}']`
-
-    return typeName
-  }
-
-  switch (typeNode.kind) {
-    case 'NamedType':
-      return getNamedType(typeNode)
-    case 'NonNullType':
-      return getFieldType(typeNode.type, isInputField)
-    case 'ListType':
-      return `${getFieldType(typeNode.type, isInputField)}[]`
-    default:
-      return 'any'
+  return {
+    [`${firstLetterInUpperCase(mutationOrQueryName)}Input`]: mutationObject,
+    [`${isMutation ? 'Mutation' : 'Query'}${firstLetterInUpperCase(mutationOrQueryName)}Args`]:
+      {
+        input: `${firstLetterInUpperCase(mutationOrQueryName)}Input`,
+      },
+    ...objects,
   }
 }
 
-export const generateAdditionalTypes = ({
+const generateWabeMutationsAndQueriesTypes = (resolver: TypeResolver<any>) => {
+  const mutationsObject = Object.entries(resolver.mutations || {}).reduce(
+    (acc, [mutationName, mutation]) => {
+      return {
+        ...acc,
+        ...generateWabeMutationOrQueryInput(mutationName, mutation, true),
+      }
+    },
+    {},
+  )
+
+  const queriesObject = Object.entries(resolver.queries || {}).reduce(
+    (acc, [queryName, query]) => {
+      return {
+        ...acc,
+        ...generateWabeMutationOrQueryInput(queryName, query, false),
+      }
+    },
+    {},
+  )
+
+  return {
+    ...mutationsObject,
+    ...queriesObject,
+  }
+}
+
+const wabeClassRecordToString = (
+  wabeClass: Record<string, Record<string, string>>,
+) => {
+  return Object.entries(wabeClass).reduce((acc, [className, fields]) => {
+    return `${acc}export type ${className} = {\n${Object.entries(fields)
+      .map(
+        ([fieldName, fieldType]) =>
+          `\t${fieldName.replace('undefined', '?')}: ${fieldType}`,
+      )
+      .join(',\n')}\n}\n\n`
+  }, '')
+}
+
+const wabeEnumRecordToString = (
+  wabeEnum: Record<string, Record<string, string>>,
+) => {
+  return Object.entries(wabeEnum).reduce((acc, [enumName, values]) => {
+    return `${acc}export enum ${enumName} {\n${Object.entries(values)
+      .map(([valueName, value]) => `\t${valueName} = "${value}"`)
+      .join(',\n')}\n}\n\n`
+  }, '')
+}
+
+const wabeScalarRecordToString = (wabeScalar: Record<string, string>) => {
+  return Object.entries(wabeScalar).reduce((acc, [scalarName, scalarType]) => {
+    return `${acc}export type ${scalarName} = ${scalarType}\n\n`
+  }, '')
+}
+
+const generateWabeDevTypes = ({
   scalars,
   enums,
   classes,
@@ -212,15 +332,29 @@ export const generateCodegen = async ({
 }) => {
   const graphqlSchemaContent = printSchema(graphqlSchema)
 
-  const typescriptCode = generateTypescriptFromSchema(graphqlSchemaContent)
+  const wabeClasses = generateWabeTypes(schema.classes || [])
+  const mutationsAndQueries = generateWabeMutationsAndQueriesTypes(
+    schema.resolvers || {},
+  )
 
-  const wabeOutput = generateAdditionalTypes({
+  const wabeEnumsInString = wabeEnumRecordToString(
+    generateWabeEnumTypes(schema.enums || []),
+  )
+  const wabeScalarsInString = wabeScalarRecordToString(
+    generateWabeScalarTypes(schema.scalars || []),
+  )
+  const wabeObjectsInString = wabeClassRecordToString({
+    ...wabeClasses,
+    ...mutationsAndQueries,
+  })
+
+  const wabeDevTypes = generateWabeDevTypes({
     scalars: schema.scalars,
     enums: schema.enums,
     classes: schema.classes || [],
   })
 
-  const wabeTsContent = `${typescriptCode}\n\n${wabeOutput}`
+  const wabeTsContent = `${wabeEnumsInString}${wabeScalarsInString}${wabeObjectsInString}${wabeDevTypes}`
 
   try {
     const contentOfGraphqlSchema = (
