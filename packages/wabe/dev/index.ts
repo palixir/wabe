@@ -69,7 +69,6 @@ const run = async () => {
           fields: {
             name: { type: 'String', required: true },
             test2: { type: 'RoleEnum' },
-            test3: { type: 'Relation', class: 'User' },
           },
           permissions: {
             create: {

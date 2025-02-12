@@ -245,20 +245,10 @@ type Post {
   id: ID!
   name: String!
   test2: RoleEnum
-  test3: UserConnection
   acl: PostACLObject
   createdAt: Date
   updatedAt: Date
   search: [String]
-}
-
-type UserConnection {
-  totalCount: Int
-  edges: [UserEdge]
-}
-
-type UserEdge {
-  node: User!
 }
 
 type PostACLObject {
@@ -281,7 +271,6 @@ type PostACLObjectRolesACL {
 input PostInput {
   name: String!
   test2: RoleEnum
-  test3: UserRelationInput
   acl: PostACLObjectInput
   createdAt: Date
   updatedAt: Date
@@ -315,7 +304,6 @@ input PostPointerInput {
 input PostCreateFieldsInput {
   name: String
   test2: RoleEnum
-  test3: UserRelationInput
   acl: PostACLObjectCreateFieldsInput
   createdAt: Date
   updatedAt: Date
@@ -456,6 +444,15 @@ type Role {
   createdAt: Date
   updatedAt: Date
   search: [String]
+}
+
+type UserConnection {
+  totalCount: Int
+  edges: [UserEdge]
+}
+
+type UserEdge {
+  node: User!
 }
 
 type RoleACLObject {
@@ -927,7 +924,6 @@ input PostWhereInput {
   id: IdWhereInput
   name: StringWhereInput
   test2: AnyWhereInput
-  test3: UserWhereInput
   acl: PostACLObjectWhereInput
   createdAt: DateWhereInput
   updatedAt: DateWhereInput
@@ -964,8 +960,6 @@ enum PostOrder {
   name_DESC
   test2_ASC
   test2_DESC
-  test3_ASC
-  test3_DESC
   acl_ASC
   acl_DESC
   createdAt_ASC
@@ -1287,7 +1281,6 @@ input UpdatePostInput {
 input PostUpdateFieldsInput {
   name: String
   test2: RoleEnum
-  test3: UserRelationInput
   acl: PostACLObjectUpdateFieldsInput
   createdAt: Date
   updatedAt: Date
