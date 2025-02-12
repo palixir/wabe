@@ -296,20 +296,12 @@ export type VerifyChallengeFactor = {
 	otp?: VerifyChallengeFactorOtp
 }
 
-export type HelloWorldInput = {
+export type QueryHelloWorldArgs = {
 	name: string
 }
 
-export type QueryHelloWorldArgs = {
-	input: HelloWorldInput
-}
-
-export type MeInput = {
-
-}
-
 export type QueryMeArgs = {
-	input: MeInput
+
 }
 
 export type WabeSchemaScalars = ""
