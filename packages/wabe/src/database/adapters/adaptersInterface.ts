@@ -1,14 +1,7 @@
 import type { WabeContext } from '../../server/interface'
 import type { WabeTypes } from '../../server'
-import type { Scalars } from '../../../generated/wabe'
 
-type IsScalar<T> = T extends
-  | Scalars['String']['output']
-  | Scalars['Int']['output']
-  | Scalars['Boolean']['output']
-  | Scalars['Date']['output']
-  ? true
-  : false
+type IsScalar<T> = T extends string | number | boolean ? true : false
 
 type IsArray<T> = T extends Array<any> ? true : false
 

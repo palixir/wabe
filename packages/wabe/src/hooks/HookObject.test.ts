@@ -24,7 +24,7 @@ describe('HookObject', () => {
         wabe,
         isRoot: true,
       },
-      select: {id :true},
+      select: { id: true },
     })
 
     const hookObject = new HookObject<DevWabeTypes, 'User'>({

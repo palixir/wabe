@@ -1,4 +1,4 @@
-import type { UserAuthenticationGithub } from '../../../generated/wabe'
+import type { AuthenticationGithub } from '../../../generated/wabe'
 import { contextWithRoot } from '../../utils/export'
 import {
   AuthenticationProvider,
@@ -45,7 +45,7 @@ export class GitHub implements ProviderInterface<GitHubInterface> {
       select: { id: true },
     })
 
-    const authenticationDataToSave: UserAuthenticationGithub = {
+    const authenticationDataToSave: AuthenticationGithub = {
       email,
       username,
       avatarUrl,

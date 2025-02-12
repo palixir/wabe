@@ -1,4 +1,4 @@
-import type { UserAuthenticationGoogle } from '../../../generated/wabe'
+import type { AuthenticationGoogle } from '../../../generated/wabe'
 import { contextWithRoot } from '../../utils/export'
 import {
   AuthenticationProvider,
@@ -50,7 +50,7 @@ export class Google implements ProviderInterface<GoogleInterface> {
       select: { id: true },
     })
 
-    const authenticationDataToSave: UserAuthenticationGoogle = {
+    const authenticationDataToSave: AuthenticationGoogle = {
       email,
       verifiedEmail,
     }

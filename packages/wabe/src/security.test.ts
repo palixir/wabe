@@ -27,7 +27,7 @@ describe('Security tests', () => {
         name: { equalTo: 'Admin' },
       },
       first: 1,
-      select: {id :true},
+      select: { id: true },
       context: {
         wabe,
         isRoot: true,
@@ -105,7 +105,7 @@ describe('Security tests', () => {
       data: {
         accessToken: 'token',
       },
-      select: {id :true},
+      select: { id: true },
     })
 
     const sessionId = session?.id
@@ -143,7 +143,7 @@ describe('Security tests', () => {
         wabe,
         isRoot: true,
       },
-      select: {id :true},
+      select: { id: true },
     })
 
     expect(sessionAfterDelete?.id).toEqual(sessionId)

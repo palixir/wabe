@@ -16,7 +16,7 @@ export const resetPasswordResolver = async (
         equalTo: email,
       },
     },
-    select: {id :true},
+    select: { id: true },
     first: 1,
     context: contextWithRoot(context),
   })
