@@ -65,8 +65,8 @@ export type User = {
 	age?: number,
 	email?: string,
 	acl?: ACLObject,
-	createdAt?: Date,
-	updatedAt?: Date,
+	createdAt?: string,
+	updatedAt?: string,
 	search?: Array<string>,
 	authentication?: Authentication,
 	provider?: AuthenticationProvider,
@@ -76,15 +76,24 @@ export type User = {
 	sessions?: Array<_Session>
 }
 
+export type Experience = {
+	jobTitle: string,
+	companyName: string,
+	startDate: string,
+	endDate: string,
+	achievements?: Array<string>
+}
+
 export type Post = {
 	id: string,
 	name: string,
 	test2?: RoleEnum,
 	test3: Array<User>,
 	test4: User,
+	experiences?: Array<Experience>,
 	acl?: ACLObject,
-	createdAt?: Date,
-	updatedAt?: Date,
+	createdAt?: string,
+	updatedAt?: string,
 	search?: Array<string>
 }
 
@@ -92,12 +101,12 @@ export type _Session = {
 	id: string,
 	user: User,
 	accessToken: string,
-	accessTokenExpiresAt: Date,
+	accessTokenExpiresAt: string,
 	refreshToken?: string,
-	refreshTokenExpiresAt: Date,
+	refreshTokenExpiresAt: string,
 	acl?: ACLObject,
-	createdAt?: Date,
-	updatedAt?: Date,
+	createdAt?: string,
+	updatedAt?: string,
 	search?: Array<string>
 }
 
@@ -106,8 +115,8 @@ export type Role = {
 	name: string,
 	users?: Array<User>,
 	acl?: ACLObject,
-	createdAt?: Date,
-	updatedAt?: Date,
+	createdAt?: string,
+	updatedAt?: string,
 	search?: Array<string>
 }
 
@@ -117,8 +126,8 @@ export type _InternalConfig = {
 	configValue: string,
 	description?: string,
 	acl?: ACLObject,
-	createdAt?: Date,
-	updatedAt?: Date,
+	createdAt?: string,
+	updatedAt?: string,
 	search?: Array<string>
 }
 

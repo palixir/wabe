@@ -71,6 +71,36 @@ const run = async () => {
             test2: { type: 'RoleEnum' },
             test3: { type: 'Relation', class: 'User', required: true },
             test4: { type: 'Pointer', class: 'User', required: true },
+            experiences: {
+              type: 'Array',
+              typeValue: 'Object',
+              object: {
+                name: 'Experience',
+                required: true,
+                fields: {
+                  jobTitle: {
+                    type: 'String',
+                    required: true,
+                  },
+                  companyName: {
+                    type: 'String',
+                    required: true,
+                  },
+                  startDate: {
+                    type: 'String',
+                    required: true,
+                  },
+                  endDate: {
+                    type: 'String',
+                    required: true,
+                  },
+                  achievements: {
+                    type: 'Array',
+                    typeValue: 'String',
+                  },
+                },
+              },
+            },
           },
           permissions: {
             create: {
@@ -154,7 +184,7 @@ const run = async () => {
   })
 
   // For select test
-  //  await wabe.controllers.database.getObjects({
+  // const res = await wabe.controllers.database.getObjects({
   //   className: 'Post',
   //   context: {} as any,
   //   select: {
@@ -170,6 +200,8 @@ const run = async () => {
   //     },
   //   },
   // })
+
+  // res[0]?.test3[0].role.id
 
   await wabe.start()
 }

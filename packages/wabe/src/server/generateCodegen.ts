@@ -26,15 +26,23 @@ const wabePrimaryTypesToTypescriptTypes: Record<WabePrimaryTypes, string> = {
   File: '{url: string, name: string}',
 }
 
-const wabeTypesToTypescriptTypes = (field: TypeField<DevWabeTypes>) => {
+const wabeTypesToTypescriptTypes = ({
+  field,
+  isInput = false,
+}: {
+  field: TypeField<DevWabeTypes>
+  isInput?: boolean
+}) => {
   switch (field.type) {
+    case 'Date':
+      if (isInput) return 'Date'
+      return 'string'
     case 'Boolean':
     case 'Int':
     case 'Float':
     case 'String':
     case 'Email':
     case 'Phone':
-    case 'Date':
     case 'File':
       return wabePrimaryTypesToTypescriptTypes[field.type]
     case 'Array':
@@ -59,7 +67,7 @@ const generateWabeObject = (
 
   return Object.entries(object.fields).reduce(
     (acc, [fieldName, field]) => {
-      const type = wabeTypesToTypescriptTypes(field)
+      const type = wabeTypesToTypescriptTypes({ field })
 
       const objectNameWithPrefix = `${prefix}${firstLetterUpperCase(objectName)}`
 
@@ -106,9 +114,12 @@ const generateWabeTypes = (classes: ClassInterface<DevWabeTypes>[]) => {
 
       const currentClass = Object.entries(fields).reduce(
         (acc2, [name, field]) => {
-          const type = wabeTypesToTypescriptTypes(field)
+          const type = wabeTypesToTypescriptTypes({ field })
 
-          if (field.type === 'Object') {
+          if (
+            field.type === 'Object' ||
+            (field.type === 'Array' && field.typeValue === 'Object')
+          ) {
             const wabeObject = generateWabeObject(field.object)
 
             objectsToLoad.push(wabeObject)
@@ -181,7 +192,7 @@ const generateWabeMutationOrQueryInput = (
     (isMutation ? resolver.args?.input : resolver.args) || {},
   ).reduce(
     (acc, [name, field]) => {
-      let type = wabeTypesToTypescriptTypes(field)
+      let type = wabeTypesToTypescriptTypes({ field, isInput: true })
 
       if (field.type === 'Object') {
         type = firstLetterInUpperCase(name)
