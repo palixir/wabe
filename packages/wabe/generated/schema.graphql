@@ -247,6 +247,7 @@ type Post {
   test2: RoleEnum
   test3: UserConnection
   test4: User
+  experiences: [PostExperience!]
   acl: PostACLObject
   createdAt: Date
   updatedAt: Date
@@ -260,6 +261,14 @@ type UserConnection {
 
 type UserEdge {
   node: User!
+}
+
+type PostExperience {
+  jobTitle: String!
+  companyName: String!
+  startDate: String!
+  endDate: String!
+  achievements: [String]
 }
 
 type PostACLObject {
@@ -284,10 +293,19 @@ input PostInput {
   test2: RoleEnum
   test3: UserRelationInput
   test4: UserPointerInput
+  experiences: [PostExperienceInput!]
   acl: PostACLObjectInput
   createdAt: Date
   updatedAt: Date
   search: [String]
+}
+
+input PostExperienceInput {
+  jobTitle: String!
+  companyName: String!
+  startDate: String!
+  endDate: String!
+  achievements: [String]
 }
 
 input PostACLObjectInput {
@@ -319,10 +337,19 @@ input PostCreateFieldsInput {
   test2: RoleEnum
   test3: UserRelationInput
   test4: UserPointerInput
+  experiences: [PostExperienceCreateFieldsInput!]
   acl: PostACLObjectCreateFieldsInput
   createdAt: Date
   updatedAt: Date
   search: [String]
+}
+
+input PostExperienceCreateFieldsInput {
+  jobTitle: String
+  companyName: String
+  startDate: String
+  endDate: String
+  achievements: [String]
 }
 
 input PostACLObjectCreateFieldsInput {
@@ -932,12 +959,30 @@ input PostWhereInput {
   test2: AnyWhereInput
   test3: UserWhereInput
   test4: UserWhereInput
+  experiences: [PostExperienceWhereInput!]
   acl: PostACLObjectWhereInput
   createdAt: DateWhereInput
   updatedAt: DateWhereInput
   search: SearchWhereInput
   OR: [PostWhereInput]
   AND: [PostWhereInput]
+}
+
+input PostExperienceWhereInput {
+  jobTitle: StringWhereInput
+  companyName: StringWhereInput
+  startDate: StringWhereInput
+  endDate: StringWhereInput
+  achievements: ArrayWhereInput
+  OR: [PostExperienceWhereInput]
+  AND: [PostExperienceWhereInput]
+}
+
+input ArrayWhereInput {
+  equalTo: Any
+  notEqualTo: Any
+  contains: Any
+  notContains: Any
 }
 
 input PostACLObjectWhereInput {
@@ -972,6 +1017,8 @@ enum PostOrder {
   test3_DESC
   test4_ASC
   test4_DESC
+  experiences_ASC
+  experiences_DESC
   acl_ASC
   acl_DESC
   createdAt_ASC
@@ -1295,10 +1342,19 @@ input PostUpdateFieldsInput {
   test2: RoleEnum
   test3: UserRelationInput
   test4: UserPointerInput
+  experiences: [PostExperienceUpdateFieldsInput!]
   acl: PostACLObjectUpdateFieldsInput
   createdAt: Date
   updatedAt: Date
   search: [String]
+}
+
+input PostExperienceUpdateFieldsInput {
+  jobTitle: String
+  companyName: String
+  startDate: String
+  endDate: String
+  achievements: [String]
 }
 
 input PostACLObjectUpdateFieldsInput {
