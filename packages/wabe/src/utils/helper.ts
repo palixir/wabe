@@ -170,7 +170,7 @@ export const setupTests = async (
       supportedPaymentMethods: ['card', 'paypal'],
     },
     file: {
-      adapter: new FileDevAdapter('bucket'),
+      adapter: new FileDevAdapter(),
       // 12 hours of cache
       urlCacheInSeconds: 3600 * 12,
     },

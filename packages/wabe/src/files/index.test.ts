@@ -7,7 +7,6 @@ import {
   it,
   spyOn,
 } from 'bun:test'
-import { isAbsolute } from 'node:path'
 import { FileDevAdapter, type Wabe } from '..'
 import {
   type DevWabeTypes,
@@ -25,7 +24,7 @@ describe('File upload', () => {
     FileDevAdapter.prototype,
     'uploadFile',
   )
-  const spyFileDevAdaapterReadFile = spyOn(FileDevAdapter.prototype, 'readFile')
+  const spyFileDevAdapterReadFile = spyOn(FileDevAdapter.prototype, 'readFile')
 
   beforeAll(async () => {
     const setup = await setupTests([
@@ -52,6 +51,9 @@ describe('File upload', () => {
     ])
     wabe = setup.wabe
     port = setup.port
+
+    spyFileDevAdapterReadFile.mockClear()
+    spyFileDevAdapterUploadFile.mockClear()
   })
 
   afterAll(async () => {
@@ -60,7 +62,7 @@ describe('File upload', () => {
 
   afterEach(async () => {
     spyFileDevAdapterUploadFile.mockClear()
-    spyFileDevAdaapterReadFile.mockClear()
+    spyFileDevAdapterReadFile.mockClear()
 
     await wabe.controllers.database.deleteObjects({
       // @ts-expect-error
@@ -136,9 +138,7 @@ describe('File upload', () => {
     // @ts-expect-error
     expect(result[0].file.name).toEqual('a.text')
     // @ts-expect-error
-    expect(result[0].file.url).toContain('bucket/a.text')
-    // @ts-expect-error
-    expect(isAbsolute(result[0].file.url)).toBeTrue()
+    expect(result[0].file.url).toEqual(`http://127.0.0.1:${port}/bucket/a.text`)
 
     const res = await wabe.controllers.database.updateObject({
       // @ts-expect-error
@@ -337,8 +337,9 @@ describe('File upload', () => {
     )
 
     expect(test3s.edges[0].node.file.name).toEqual('a.text')
-    expect(test3s.edges[0].node.file.url).toContain('bucket/a.text')
-    expect(isAbsolute(test3s.edges[0].node.file.url)).toBeTrue()
+    expect(test3s.edges[0].node.file.url).toEqual(
+      `http://127.0.0.1:${port}/bucket/a.text`,
+    )
     expect(new Date(test3s.edges[0].node.file.urlGeneratedAt)).toBeDate()
   })
 
@@ -385,11 +386,12 @@ describe('File upload', () => {
     )
 
     expect(test3s.edges[0].node.file.name).toEqual('a.text')
-    expect(test3s.edges[0].node.file.url).toContain('bucket/a.text')
-    expect(isAbsolute(test3s.edges[0].node.file.url)).toBeTrue()
+    expect(test3s.edges[0].node.file.url).toEqual(
+      `http://127.0.0.1:${port}/bucket/a.text`,
+    )
     expect(new Date(test3s.edges[0].node.file.urlGeneratedAt)).toBeDate()
 
-    expect(spyFileDevAdaapterReadFile).toHaveBeenCalledTimes(1)
+    expect(spyFileDevAdapterReadFile).toHaveBeenCalledTimes(1)
 
     await anonymousClient.request<any>(
       gql`
@@ -411,7 +413,7 @@ describe('File upload', () => {
     )
 
     // Again once because the cache is not expired
-    expect(spyFileDevAdaapterReadFile).toHaveBeenCalledTimes(1)
+    expect(spyFileDevAdapterReadFile).toHaveBeenCalledTimes(1)
   })
 
   it('should reset the cache if the file is updated', async () => {
@@ -457,11 +459,12 @@ describe('File upload', () => {
     )
 
     expect(test3s.edges[0].node.file.name).toEqual('a.text')
-    expect(test3s.edges[0].node.file.url).toContain('bucket/a.text')
-    expect(isAbsolute(test3s.edges[0].node.file.url)).toBeTrue()
+    expect(test3s.edges[0].node.file.url).toEqual(
+      `http://127.0.0.1:${port}/bucket/a.text`,
+    )
     expect(new Date(test3s.edges[0].node.file.urlGeneratedAt)).toBeDate()
 
-    expect(spyFileDevAdaapterReadFile).toHaveBeenCalledTimes(1)
+    expect(spyFileDevAdapterReadFile).toHaveBeenCalledTimes(1)
 
     const idOfCreatedObject = test3s.edges[0].node.id
 
@@ -505,7 +508,7 @@ describe('File upload', () => {
     )
 
     // Again once because the file was updated
-    expect(spyFileDevAdaapterReadFile).toHaveBeenCalledTimes(2)
+    expect(spyFileDevAdapterReadFile).toHaveBeenCalledTimes(2)
   })
 
   it('should reset the cache if the url is updated', async () => {
@@ -551,11 +554,12 @@ describe('File upload', () => {
     )
 
     expect(test3s.edges[0].node.file.name).toEqual('a.text')
-    expect(test3s.edges[0].node.file.url).toContain('bucket/a.text')
-    expect(isAbsolute(test3s.edges[0].node.file.url)).toBeTrue()
+    expect(test3s.edges[0].node.file.url).toEqual(
+      `http://127.0.0.1:${port}/bucket/a.text`,
+    )
     expect(new Date(test3s.edges[0].node.file.urlGeneratedAt)).toBeDate()
 
-    expect(spyFileDevAdaapterReadFile).toHaveBeenCalledTimes(1)
+    expect(spyFileDevAdapterReadFile).toHaveBeenCalledTimes(1)
 
     const idOfCreatedObject = test3s.edges[0].node.id
 
@@ -597,7 +601,7 @@ describe('File upload', () => {
       `,
     )
 
-    expect(spyFileDevAdaapterReadFile).toHaveBeenCalledTimes(1)
+    expect(spyFileDevAdapterReadFile).toHaveBeenCalledTimes(1)
   })
 
   it('should delete the file on the bucket after delete the object', async () => {
@@ -709,5 +713,49 @@ describe('File upload', () => {
     expect(test3s.edges[0].node.file.url).toEqual(
       'https://wabe.dev/assets/logo.png',
     )
+  })
+
+  it('should upload a file and access to it with the local url provided by upload directory', async () => {
+    await wabe.controllers.database.createObject({
+      // @ts-expect-error
+      className: 'Test3',
+      context: {
+        isRoot: true,
+        wabe,
+      },
+      data: {
+        // @ts-expect-error
+        file: {
+          file: new File(['this is the content'], 'a.txt', {
+            type: 'text/plain',
+          }),
+        },
+      },
+      select: {},
+    })
+
+    const result = await wabe.controllers.database.getObjects({
+      // @ts-expect-error
+      className: 'Test3',
+      context: {
+        isRoot: true,
+        wabe,
+      },
+      where: {},
+      // @ts-expect-error
+      select: { file: true, id: true },
+    })
+
+    // @ts-expect-error
+    expect(result[0].file.name).toEqual('a.txt')
+    // @ts-expect-error
+    expect(result[0].file.url).toEqual(`http://127.0.0.1:${port}/bucket/a.txt`)
+
+    // @ts-expect-error
+    const url = result?.[0]?.file?.url
+
+    const res = await fetch(url)
+
+    expect(await res.text()).toEqual('this is the content')
   })
 })

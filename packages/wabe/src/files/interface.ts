@@ -10,6 +10,7 @@ export interface FileConfig {
 
 export interface ReadFileOptions {
   urlExpiresIn?: number
+  port?: number
 }
 
 export interface FileAdapter {
