@@ -11,7 +11,19 @@ export class FileDevAdapter implements FileAdapter {
 
     await mkdir(fullPath, { recursive: true })
 
-    await writeFile(path.join(fullPath, file.name), await file.text())
+    const fileType = file.type
+
+    let fileContent: Buffer
+
+    if (fileType.startsWith('text') || fileType.includes('json')) {
+      const textContent = await file.text()
+      fileContent = Buffer.from(textContent, 'utf-8')
+    } else {
+      const arrayBuffer = await file.arrayBuffer()
+      fileContent = Buffer.from(arrayBuffer)
+    }
+
+    await writeFile(path.join(fullPath, file.name), fileContent)
   }
 
   async readFile(

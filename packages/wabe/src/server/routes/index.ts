@@ -9,7 +9,7 @@ export interface WabeRoute {
   handler: WobeHandler<WobeCustomContext<any>>
 }
 
-export const defaultRoutes = (): WabeRoute[] => {
+export const defaultRoutes = (devDirectory: string): WabeRoute[] => {
   const routes: WabeRoute[] = [
     {
       method: 'GET',
@@ -32,7 +32,7 @@ export const defaultRoutes = (): WabeRoute[] => {
     {
       method: 'GET',
       path: '/bucket/:filename',
-      handler: uploadDirectory({ directory: `${__dirname}/../../../bucket` }),
+      handler: uploadDirectory({ directory: devDirectory }),
     },
   ]
 

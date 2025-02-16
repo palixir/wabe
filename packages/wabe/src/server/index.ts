@@ -180,8 +180,12 @@ export class Wabe<T extends WabeTypes> {
   }
 
   loadRoutes() {
-    // @ts-expect-error
-    const wabeRoutes = [...defaultRoutes(this), ...(this.config.routes || [])]
+    const wabeRoutes = [
+      ...defaultRoutes(
+        this.config.file?.devDirectory || `${__dirname}/../../bucket`,
+      ),
+      ...(this.config.routes || []),
+    ]
 
     wabeRoutes.map((route) => {
       const { method } = route
