@@ -1,4 +1,4 @@
-import type { WobeHandler } from 'wobe'
+import { type WobeHandler, uploadDirectory } from 'wobe'
 import type { ProviderEnum } from '../../authentication/interface'
 import { authHandler, oauthHandlerCallback } from './authHandler'
 import type { WobeCustomContext } from '..'
@@ -28,6 +28,11 @@ export const defaultRoutes = (): WabeRoute[] => {
       method: 'GET',
       path: '/auth/oauth/callback',
       handler: (context) => oauthHandlerCallback(context, context.wabe),
+    },
+    {
+      method: 'GET',
+      path: '/bucket/:filename',
+      handler: uploadDirectory({ directory: `${__dirname}/../../../bucket` }),
     },
   ]
 

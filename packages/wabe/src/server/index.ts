@@ -131,7 +131,7 @@ export class Wabe<T extends WabeTypes> {
       database: new DatabaseController<T>(databaseAdapter),
       email: email?.adapter ? new EmailController(email.adapter) : undefined,
       payment: payment?.adapter ? new PaymentController(payment) : undefined,
-      file: file?.adapter ? new FileController(file.adapter) : undefined,
+      file: file?.adapter ? new FileController(file.adapter, this) : undefined,
     }
 
     this.loadRoleEnum()

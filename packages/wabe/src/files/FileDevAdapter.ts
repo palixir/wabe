@@ -1,15 +1,10 @@
 import { writeFile, mkdir, rm, access, constants } from 'node:fs/promises'
 import path from 'node:path'
-import type { FileAdapter } from '.'
+import type { FileAdapter, ReadFileOptions } from '.'
 
 export class FileDevAdapter implements FileAdapter {
-  private basePath: string
-
-  public rootPath = process.cwd()
-
-  constructor(basePath: string) {
-    this.basePath = basePath
-  }
+  private basePath = 'bucket'
+  private rootPath = process.cwd()
 
   async uploadFile(file: File | Blob): Promise<void> {
     const fullPath = path.join(this.rootPath, this.basePath)
@@ -19,12 +14,15 @@ export class FileDevAdapter implements FileAdapter {
     await writeFile(path.join(fullPath, file.name), await file.text())
   }
 
-  async readFile(fileName: string): Promise<string | null> {
+  async readFile(
+    fileName: string,
+    options?: ReadFileOptions,
+  ): Promise<string | null> {
     const filePath = path.join(this.rootPath, this.basePath, fileName)
 
     try {
       await access(filePath, constants.F_OK)
-      return filePath
+      return `http://127.0.0.1:${options?.port || 3000}/${this.basePath}/${fileName}`
     } catch {
       return null
     }
