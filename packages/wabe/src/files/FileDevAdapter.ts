@@ -41,6 +41,14 @@ export class FileDevAdapter implements FileAdapter {
   }
 
   async deleteFile(fileName: string): Promise<void> {
-    await rm(path.join(this.rootPath, this.basePath, fileName))
+    const filePath = path.join(this.rootPath, this.basePath, fileName)
+
+    try {
+      await access(filePath, constants.F_OK)
+
+      await rm(filePath)
+    } catch {
+      // Do nothing
+    }
   }
 }
