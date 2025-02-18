@@ -671,6 +671,53 @@ describe('File upload', () => {
     expect(url2).toBeNull()
   })
 
+  it('should not delete a file if the file not exists', async () => {
+    const formData = new FormData()
+
+    formData.append(
+      'operations',
+      JSON.stringify({
+        query:
+          'mutation ($file: File!) {createTest3(input: {fields: {file: {file:$file}}}){test3{id, file { name}}}}',
+        variables: { file: null },
+      }),
+    )
+
+    formData.append('map', JSON.stringify({ 0: ['variables.file'] }))
+
+    formData.append('0', new File(['a'], 'a.text', { type: 'text/plain' }))
+
+    const res = await fetch(`http://127.0.0.1:${port}/graphql`, {
+      method: 'POST',
+      body: formData,
+    })
+
+    const jsonRes = await res.json()
+
+    const id = jsonRes.data.createTest3.test3.id
+
+    const url = await wabe.config.file?.adapter.readFile('a.text')
+    expect(url).not.toBeNull()
+
+    await wabe.config.file?.adapter.deleteFile('a.text')
+
+    const anonymousClient = getAnonymousClient(port)
+
+    expect(
+      anonymousClient.request<any>(
+        gql`
+        mutation {
+          deleteTest3(input: {id: "${id}"}) {
+            test3 {
+              id
+            }
+          }
+        }
+      `,
+      ),
+    ).resolves.toEqual(expect.anything())
+  })
+
   it('should upload a file providing an url without File scalar', async () => {
     const anonymousClient = getAnonymousClient(port)
 

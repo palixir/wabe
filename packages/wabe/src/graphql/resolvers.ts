@@ -54,7 +54,6 @@ export const extractFieldsFromSetNode = (
     },
     {} as Record<string, any>,
   )
-  // .filter((value) => ignoredFields.indexOf(value) === -1)
 }
 
 const getFieldsFromInfo = (info: GraphQLResolveInfo, className: string) => {
