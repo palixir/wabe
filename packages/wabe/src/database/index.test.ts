@@ -100,6 +100,66 @@ describe('Database', () => {
     spyGetObjects.mockClear()
   })
 
+  it.only('should not add at all objects a relation with createAndAdd', async () => {
+    const rootClient = getGraphqlClient(wabe.config.port)
+
+    await rootClient.request<any>(gql`
+        mutation createTest2{
+            createTest2(input: {fields : {age: 20}}) {
+                test2{
+                    id
+                    userTest{
+                        edges {
+                            node {
+                                name
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    `)
+
+    await rootClient.request<any>(gql`
+        mutation createTest2{
+            createTest2(input: {fields : {userTest: {createAndAdd: [{name: "test"}]}}}) {
+                test2{
+                    id
+                    userTest{
+                        edges {
+                            node {
+                                name
+                            }
+                        }
+                    }
+                }
+            }
+        }
+      `)
+
+    const res = await rootClient.request<any>(gql`
+      query test2s{
+        test2s{
+          edges {
+              node {
+                id
+                userTest{
+                edges {
+                    node {
+                    name
+                    }
+                }
+                }
+              }
+          }
+        }
+      }
+    `)
+
+    expect(res.test2s.edges[0].node.userTest.edges.length).toEqual(0)
+    expect(res.test2s.edges[1].node.userTest.edges.length).toEqual(1)
+  })
+
   it('should return correct data and type for relation with databaseController with created object', async () => {
     const createdUserObject = await wabe.controllers.database.createObject({
       className: 'User',

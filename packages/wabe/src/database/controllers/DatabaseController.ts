@@ -738,6 +738,8 @@ export class DatabaseController<T extends WabeTypes> {
       where: whereWithACLCondition,
     })
 
+    console.log('here ?', className, data)
+
     await hook?.runOnSingleObject({
       operationType: OperationType.AfterUpdate,
       id,
