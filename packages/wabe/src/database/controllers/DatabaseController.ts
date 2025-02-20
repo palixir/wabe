@@ -92,40 +92,54 @@ export class DatabaseController<T extends WabeTypes> {
     )
   }
 
-  _isRelationField(
-    originClassName: string,
-    context: WabeContext<T>,
-    pointerClassName?: string,
-  ) {
-    if (!pointerClassName) return false
+  _isRelationField({
+    pointerField,
+    currentClassName,
+    context,
+    originClassName,
+  }: {
+    pointerField: string
+    originClassName: string
+    context: WabeContext<T>
+    currentClassName?: string
+  }) {
+    if (!currentClassName) return false
 
     return context.wabe.config.schema?.classes?.some(
       (c) =>
         c.name.toLowerCase() === originClassName.toLowerCase() &&
-        Object.values(c.fields).find(
-          (field) =>
+        Object.entries(c.fields).find(
+          ([fieldName, field]) =>
+            fieldName === pointerField &&
             field.type === 'Relation' &&
             // @ts-expect-error
-            field.class.toLowerCase() === pointerClassName.toLowerCase(),
+            field.class.toLowerCase() === currentClassName.toLowerCase(),
         ),
     )
   }
 
-  _isPointerField(
-    originClassName: string,
-    context: WabeContext<T>,
-    pointerClassName?: string,
-  ) {
-    if (!pointerClassName) return false
+  _isPointerField({
+    pointerField,
+    currentClassName,
+    context,
+    originClassName,
+  }: {
+    originClassName: string
+    context: WabeContext<T>
+    pointerField: string
+    currentClassName?: string
+  }) {
+    if (!currentClassName) return false
 
     return context.wabe.config.schema?.classes?.some(
       (c) =>
         c.name.toLowerCase() === originClassName.toLowerCase() &&
-        Object.values(c.fields).find(
-          (field) =>
+        Object.entries(c.fields).find(
+          ([fieldName, field]) =>
+            fieldName === pointerField &&
             field.type === 'Pointer' &&
             // @ts-expect-error
-            field.class.toLowerCase() === pointerClassName.toLowerCase(),
+            field.class.toLowerCase() === currentClassName.toLowerCase(),
         ),
     )
   }
@@ -313,11 +327,12 @@ export class DatabaseController<T extends WabeTypes> {
       ) => {
         const accObject = await acc
 
-        const isPointer = this._isPointerField(
+        const isPointer = this._isPointerField({
           originClassName,
           context,
           currentClassName,
-        )
+          pointerField,
+        })
 
         if (isPointer) {
           if (!object[pointerField]) {
@@ -342,13 +357,14 @@ export class DatabaseController<T extends WabeTypes> {
           }
         }
 
-        const isRelation = this._isRelationField(
+        const isRelation = this._isRelationField({
           originClassName,
           context,
           currentClassName,
-        )
+          pointerField,
+        })
 
-        if (isRelation) {
+        if (isRelation && object[pointerField]) {
           const relationObjects = await this.getObjects({
             className: currentClassName,
             // @ts-expect-error
@@ -737,8 +753,6 @@ export class DatabaseController<T extends WabeTypes> {
       data: resultsAfterBeforeUpdate?.newData || data,
       where: whereWithACLCondition,
     })
-
-    console.log('here ?', className, data)
 
     await hook?.runOnSingleObject({
       operationType: OperationType.AfterUpdate,

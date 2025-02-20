@@ -58,6 +58,7 @@ describe('Database', () => {
           name: { type: 'String' },
           age: { type: 'Int' },
           userTest: { type: 'Relation', class: 'User' },
+          userTest2: { type: 'Pointer', class: 'User' },
         },
         permissions: {
           read: {
@@ -100,7 +101,90 @@ describe('Database', () => {
     spyGetObjects.mockClear()
   })
 
-  it.only('should not add at all objects a relation with createAndAdd', async () => {
+  it('should be able to create an object with a relation and a pointer', async () => {
+    const rootClient = getGraphqlClient(wabe.config.port)
+
+    const res = await rootClient.request<any>(gql`
+        mutation createTest2{
+            createTest2(input: {fields : {userTest: {createAndAdd: [{name: "test"}]}}}) {
+                test2{
+                    id
+                    userTest{
+                        edges {
+                            node {
+                                name
+                            }
+                        }
+                    }
+                }
+            }
+        }
+      `)
+
+    expect(res.createTest2.test2.userTest.edges[0].node.name).toEqual('test')
+
+    const res2 = await rootClient.request<any>(gql`
+        mutation createTest2{
+            createTest2(input: {fields : {userTest2: {createAndLink: {name: "test"}}}}) {
+                test2{
+                    id
+                    userTest2{
+                        name
+                    }
+                }
+            }
+        }
+      `)
+
+    expect(res2.createTest2.test2.userTest2.name).toEqual('test')
+  })
+
+  it('should not return point data whe no pointer is present on the object', async () => {
+    const rootClient = getGraphqlClient(wabe.config.port)
+
+    await rootClient.request<any>(gql`
+        mutation createTest2{
+            createTest2(input: {fields : {age: 20}}) {
+                test2{
+                    id
+                    userTest2{
+                        id
+                    }
+                }
+            }
+        }
+    `)
+
+    await rootClient.request<any>(gql`
+        mutation createTest2{
+            createTest2(input: {fields : {userTest2: {createAndLink: {name: "test"}}}}) {
+                test2{
+                    id
+                }
+            }
+        }
+      `)
+
+    const res = await rootClient.request<any>(gql`
+      query test2s{
+        test2s{
+          edges {
+              node {
+                id
+                userTest2{
+                    id
+                }
+              }
+          }
+        }
+      }
+    `)
+
+    expect(res.test2s.edges[0].node.userTest2).toBeNull()
+    expect(res.test2s.edges[1].node.userTest2.id).toBeDefined()
+  })
+
+  it('should not return all relation when no array of id is present on the object', async () => {
     const rootClient = getGraphqlClient(wabe.config.port)
 
     await rootClient.request<any>(gql`
@@ -156,7 +240,7 @@ describe('Database', () => {
       }
     `)
 
-    expect(res.test2s.edges[0].node.userTest.edges.length).toEqual(0)
+    expect(res.test2s.edges[0].node.userTest).toBeNull()
     expect(res.test2s.edges[1].node.userTest.edges.length).toEqual(1)
   })
 

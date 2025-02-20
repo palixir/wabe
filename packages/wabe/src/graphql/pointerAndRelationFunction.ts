@@ -90,10 +90,6 @@ export const add = async ({
 }) => {
   if (typeOfExecution === 'create') return add
 
-  const classInSchema = getClassFromClassName(className, context.wabe.config)
-
-  const fieldInClass = classInSchema.fields[fieldName]
-
   if (typeOfExecution === 'update' && id) {
     const currentValue = await context.wabe.controllers.database.getObject({
       className,
@@ -110,27 +106,17 @@ export const add = async ({
   if (typeOfExecution === 'updateMany' && where) {
     const allObjectsMatchedWithWhere =
       await context.wabe.controllers.database.getObjects({
-        // @ts-expect-error
-        className: fieldInClass.class,
+        className,
         where,
         select: { [fieldName]: true },
         context,
       })
 
-    await Promise.all(
-      allObjectsMatchedWithWhere.map((object: any) => {
+    return Promise.all(
+      allObjectsMatchedWithWhere.flatMap((object: any) => {
         const currentValue = object[fieldName]
 
-        return context.wabe.controllers.database.updateObject({
-          // @ts-expect-error
-          className: classInSchema.fields[fieldName].class,
-          id: object.id,
-          data: {
-            [fieldName]: [...(currentValue || []), ...add],
-          },
-          context,
-          select: {},
-        })
+        return [...(currentValue || []), ...add]
       }),
     )
   }
@@ -155,6 +141,8 @@ export const remove = async ({
 }) => {
   if (typeOfExecution === 'create') return []
 
+  const classInSchema = getClassFromClassName(className, context.wabe.config)
+
   if (typeOfExecution === 'update' && id) {
     const currentValue = await context.wabe.controllers.database.getObject({
       className,
@@ -164,6 +152,14 @@ export const remove = async ({
     })
 
     const olderValues = [currentValue?.id || '']
+
+    await context.wabe.controllers.database.deleteObjects({
+      // @ts-expect-error
+      className: classInSchema.fields[fieldName].class,
+      where: { id: { in: remove } },
+      context,
+      select: {},
+    })
 
     return olderValues.filter((olderValue: any) => !remove.includes(olderValue))
   }
@@ -177,21 +173,21 @@ export const remove = async ({
         context,
       })
 
-    await Promise.all(
-      allObjectsMatchedWithWhere.map(async (object: any) => {
+    await context.wabe.controllers.database.deleteObjects({
+      // @ts-expect-error
+      className: classInSchema.fields[fieldName].class,
+      where: { id: { in: remove } },
+      context,
+      select: {},
+    })
+
+    return Promise.all(
+      allObjectsMatchedWithWhere.flatMap((object: any) => {
         const olderValues = object[fieldName]?.[fieldName] || []
 
-        return context.wabe.controllers.database.updateObject({
-          className,
-          id: object.id,
-          data: {
-            [fieldName]: olderValues.filter(
-              (olderValue: any) => !remove.includes(olderValue),
-            ),
-          },
-          context,
-          select: {},
-        })
+        return olderValues.filter(
+          (olderValue: any) => !remove.includes(olderValue),
+        )
       }),
     )
   }
