@@ -3643,10 +3643,24 @@ describe('GraphqlSchema', () => {
       resAfterUpdate.updateTestClass2s.edges[0].node.field2.edges.length,
     ).toBe(0)
 
+    const resAfterRemove = await client.request<any>(gql`
+        query testClasses {
+          testClasses{
+            edges {
+              node {
+                field1
+              }
+            }
+          }
+        }
+      `)
+
+    expect(resAfterRemove.testClasses.edges.length).toBe(0)
+
     await wabe.close()
   })
 
-  it('should remove an object on a relation field (on updateMany)', async () => {
+  it('should remove an object on a relation field (on update)', async () => {
     const { client, wabe } = await createWabe({
       classes: [
         {
@@ -3700,36 +3714,48 @@ describe('GraphqlSchema', () => {
 		`)
 
     const resAfterUpdate = await client.request<any>(gql`
-			mutation updateTestClass2s {
-				updateTestClass2s(
+			mutation updateTestClass2 {
+				updateTestClass2(
 					input: {
-						where: {id: {equalTo: "${resAfterAdd.createTestClass2.testClass2.id}"}}
+            id: "${resAfterAdd.createTestClass2.testClass2.id}"
 						fields: {
 							field2: { remove: ["${resAfterAdd.createTestClass2.testClass2.field2.edges[0].node.id}"] }
 						}
 					}
 				) {
-					edges {
-						node {
-							id
-							name
-							field2 {
-								edges {
-									node {
-										field1
-									}
-								}
-							}
-						}
+					testClass2{
+    					id
+    					name
+    					field2 {
+    						edges {
+    							node {
+    								field1
+    							}
+    						}
+    					}
 					}
 				}
 			}
 		`)
 
-    expect(resAfterUpdate.updateTestClass2s.edges[0].node.name).toBe('name')
-    expect(
-      resAfterUpdate.updateTestClass2s.edges[0].node.field2.edges.length,
-    ).toBe(0)
+    expect(resAfterUpdate.updateTestClass2.testClass2.name).toBe('name')
+    expect(resAfterUpdate.updateTestClass2.testClass2.field2.edges.length).toBe(
+      0,
+    )
+
+    const resAfterRemove = await client.request<any>(gql`
+        query testClasses {
+          testClasses{
+            edges {
+              node {
+                field1
+              }
+            }
+          }
+        }
+      `)
+
+    expect(resAfterRemove.testClasses.edges.length).toBe(0)
 
     await wabe.close()
   })
