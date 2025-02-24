@@ -371,7 +371,10 @@ export class DatabaseController<T extends WabeTypes> {
             select: currentSelect,
             // @ts-expect-error
             where: { id: { in: object[pointerField] } },
-            context,
+            context: {
+              ...context,
+              isRoot: true,
+            },
           })
 
           return {
