@@ -59,6 +59,24 @@ describe('Database', () => {
           age: { type: 'Int' },
           userTest: { type: 'Relation', class: 'User' },
           userTest2: { type: 'Pointer', class: 'User' },
+          test3: { type: 'Relation', class: 'Test3' },
+        },
+        permissions: {
+          read: {
+            authorizedRoles: ['Client2'],
+            requireAuthentication: true,
+          },
+          create: {
+            authorizedRoles: [],
+            requireAuthentication: true,
+          },
+        },
+      },
+      {
+        name: 'Test3',
+        fields: {
+          name: { type: 'String' },
+          test2: { type: 'Pointer', class: 'Test2' },
         },
         permissions: {
           read: {
@@ -99,6 +117,47 @@ describe('Database', () => {
     mockAfterUpdate.mockClear()
     spyGetObject.mockClear()
     spyGetObjects.mockClear()
+  })
+
+  it('should return id of a relation if set to true in select on getObject', async () => {
+    const rootClient = getGraphqlClient(wabe.config.port)
+
+    const createdObject = await rootClient.request<any>(gql`
+        mutation createTest2{
+            createTest2(input: {fields : {test3: {createAndAdd: [{name: "test"}]}}}) {
+                test2{
+                    id
+                    test3{
+                        edges {
+                            node {
+                                name
+                            }
+                        }
+                    }
+                }
+            }
+        }
+      `)
+
+    const res = await wabe.controllers.database.getObject({
+      // @ts-expect-error
+      className: 'Test2',
+      context,
+      id: createdObject.createTest2.test2.id,
+      select: {
+        id: true,
+        // @ts-expect-error
+        test3: true,
+      },
+    })
+
+    // @ts-expect-error
+    expect(res.test3[0]).toEqual(
+      expect.objectContaining({
+        name: 'test',
+        id: expect.any(String),
+      }),
+    )
   })
 
   it('should be able to create an object with a relation and a pointer', async () => {

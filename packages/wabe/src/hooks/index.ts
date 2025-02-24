@@ -30,6 +30,7 @@ import {
   defaultSearchableFieldsBeforeCreate,
   defaultSearchableFieldsBeforeUpdate,
 } from './searchableFields'
+import { defaultAfterCreateSession, defaultAfterDeleteSession } from './session'
 import { defaultSetEmail, defaultSetEmailOnUpdate } from './setEmail'
 import {
   defaultSetupAclBeforeCreate,
@@ -357,5 +358,17 @@ export const getDefaultHooks = (): Hook<any, any>[] => [
     operationType: OperationType.BeforeDelete,
     priority: 1,
     callback: defaultDeleteSessionOnDeleteUser,
+  },
+  {
+    className: '_Session',
+    operationType: OperationType.AfterCreate,
+    priority: 1,
+    callback: defaultAfterCreateSession,
+  },
+  {
+    className: '_Session',
+    operationType: OperationType.AfterDelete,
+    priority: 1,
+    callback: defaultAfterDeleteSession,
   },
 ]

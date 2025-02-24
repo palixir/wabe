@@ -179,6 +179,81 @@ describe('Authentication', () => {
     await rootClient.request<any>(graphql.deleteTests)
   })
 
+  it('should have access to the session of an user, in user object', async () => {
+    const { userClient } = await createUserAndUpdateRole({
+      anonymousClient: client,
+      port,
+      roleName: 'Client',
+      rootClient,
+      email: 'email@test.fr',
+    })
+
+    const res = await wabe.controllers.database.getObjects({
+      className: 'User',
+      context: {
+        wabe,
+        isRoot: true,
+      },
+    })
+
+    const sessions = await wabe.controllers.database.getObjects({
+      className: '_Session',
+      context: {
+        wabe,
+        isRoot: true,
+      },
+      select: {},
+    })
+
+    expect(sessions.length).toEqual(1)
+    expect(res[0]?.sessions?.length).toEqual(1)
+
+    await userClient.request<any>(graphql.signInWith, {
+      input: {
+        authentication: {
+          emailPassword: {
+            email: 'email@test.fr',
+            password: 'password',
+          },
+        },
+      },
+    })
+
+    const res2 = await wabe.controllers.database.getObjects({
+      className: 'User',
+      context: {
+        wabe,
+        isRoot: true,
+      },
+      select: {
+        sessions: true,
+      },
+    })
+
+    expect(res2[0]?.sessions?.length).toBe(2)
+
+    await wabe.controllers.database.deleteObjects({
+      className: '_Session',
+      where: {
+        id: { equalTo: res2[0]?.sessions?.[0].id },
+      },
+      context: {
+        wabe,
+        isRoot: true,
+      },
+    })
+
+    const res3 = await wabe.controllers.database.getObjects({
+      className: 'User',
+      context: {
+        wabe,
+        isRoot: true,
+      },
+    })
+
+    expect(res3[0]?.sessions?.length).toEqual(1)
+  })
+
   it('should access to an object created by another without ACL', async () => {
     const { userClient } = await createUserAndUpdateRole({
       anonymousClient: client,
