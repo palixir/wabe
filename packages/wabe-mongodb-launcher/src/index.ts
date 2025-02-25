@@ -6,7 +6,7 @@ export const runDatabase = async () => {
 
   await MongoMemoryServer.create({
     binary: {
-      version: '7.0.11',
+      version: '8.0.5',
     },
     instance: {
       port: 27045,

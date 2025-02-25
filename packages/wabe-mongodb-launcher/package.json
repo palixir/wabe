@@ -1,12 +1,10 @@
 {
     "name": "wabe-mongodb-launcher",
-    "version": "0.5.1",
+    "version": "0.5.2",
     "license": "MIT",
     "main": "dist/index.js",
     "description": "Package to launch the mongodb for test",
     "scripts": {
-        "dev": "bun index.ts --watch",
-        "start": "bun index.ts",
         "ci":"bun lint",
         "build": "bun build --outdir dist $(pwd)/src/index.ts --target=node --external=* && bun generate:types",
         "lint": "biome lint . --config-path=../../ --no-errors-on-unmatched",
@@ -15,7 +13,7 @@
     },
     "dependencies": {
         "tcp-port-used": "1.0.2",
-        "mongodb-memory-server": "10.1.2"
+        "mongodb-memory-server": "10.1.4"
     },
     "devDependencies": {
         "@types/bun": "latest",
