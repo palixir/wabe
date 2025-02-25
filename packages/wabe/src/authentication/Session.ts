@@ -48,11 +48,9 @@ export class Session {
         accessToken: { equalTo: accessToken },
         OR: [
           {
-            // @ts-expect-error
             accessTokenExpiresAt: { greaterThanOrEqualTo: new Date() },
           },
           {
-            // @ts-expect-error
             refreshTokenExpiresAt: { greaterThanOrEqualTo: new Date() },
           },
         ],

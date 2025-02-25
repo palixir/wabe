@@ -3,6 +3,7 @@ import { gql, GraphQLClient } from 'graphql-request'
 import { v4 as uuid } from 'uuid'
 import {
   RoleEnum,
+  type WabeSchemaWhereTypes,
   type WabeSchemaEnums,
   type WabeSchemaScalars,
   type WabeSchemaTypes,
@@ -15,24 +16,11 @@ import { EmailDevAdapter } from '../email/DevAdapter'
 import { Currency } from '../payment'
 import { FileDevAdapter } from '../files/FileDevAdapter'
 
-type NotNill<T> = T extends null | undefined ? never : T
-
-type Primitive = undefined | null | boolean | string | number
-
-export type DeepRequired<T> = T extends Primitive
-  ? NotNill<T>
-  : {
-      [P in keyof T]-?: T[P] extends Array<infer U>
-        ? Array<DeepRequired<U>>
-        : T[P] extends ReadonlyArray<infer U2>
-          ? DeepRequired<U2>
-          : DeepRequired<T[P]>
-    }
-
 export interface DevWabeTypes extends WabeTypes {
   types: WabeSchemaTypes
   scalars: WabeSchemaScalars
   enums: WabeSchemaEnums
+  where: WabeSchemaWhereTypes
 }
 
 export const firstLetterUpperCase = (str: string): string =>

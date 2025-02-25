@@ -2,6 +2,7 @@ import { runDatabase } from 'wabe-mongodb-launcher'
 import { DatabaseEnum, Wabe } from '../src'
 import {
   RoleEnum,
+  type WabeSchemaWhereTypes,
   type WabeSchemaEnums,
   type WabeSchemaScalars,
   type WabeSchemaTypes,
@@ -14,6 +15,7 @@ const run = async () => {
     types: WabeSchemaTypes
     scalars: WabeSchemaScalars
     enums: WabeSchemaEnums
+    where: WabeSchemaWhereTypes
   }>({
     codegen: {
       enabled: true,
@@ -199,9 +201,14 @@ const run = async () => {
   //       name: true,
   //     },
   //   },
+  //   where: {
+  //     name: {
+  //       equalTo: 'test',
+  //     },
+  //   },
   // })
 
-  // res[0]?.test3[0].role.id
+  // res[0]?.test3[0].role?.id
 
   await wabe.start()
 }

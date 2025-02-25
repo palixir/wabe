@@ -131,6 +131,70 @@ export type _InternalConfig = {
 	search?: Array<string>
 }
 
+export type WhereUser = {
+	id: string,
+	name?: string,
+	age?: number,
+	email?: string,
+	acl?: ACLObject,
+	createdAt?: Date,
+	updatedAt?: Date,
+	search?: Array<string>,
+	authentication?: Authentication,
+	provider?: AuthenticationProvider,
+	isOauth?: boolean,
+	verifiedEmail?: boolean,
+	role?: Role,
+	sessions?: Array<_Session>
+}
+
+export type WherePost = {
+	id: string,
+	name: string,
+	test2?: RoleEnum,
+	test3: Array<User>,
+	test4: User,
+	experiences?: Array<Experience>,
+	acl?: ACLObject,
+	createdAt?: Date,
+	updatedAt?: Date,
+	search?: Array<string>
+}
+
+export type Where_Session = {
+	id: string,
+	user: User,
+	accessToken: string,
+	accessTokenExpiresAt: Date,
+	refreshToken?: string,
+	refreshTokenExpiresAt: Date,
+	acl?: ACLObject,
+	createdAt?: Date,
+	updatedAt?: Date,
+	search?: Array<string>
+}
+
+export type WhereRole = {
+	id: string,
+	name: string,
+	users?: Array<User>,
+	acl?: ACLObject,
+	createdAt?: Date,
+	updatedAt?: Date,
+	search?: Array<string>
+}
+
+export type Where_InternalConfig = {
+	id: string,
+	configKey: string,
+	configValue: string,
+	description?: string,
+	acl?: ACLObject,
+	createdAt?: Date,
+	updatedAt?: Date,
+	search?: Array<string>
+}
+
 export type CreateMutationInput = {
 	name: number
 }
@@ -329,4 +393,12 @@ export type WabeSchemaTypes = {
 	_Session: _Session,
 	Role: Role,
 	_InternalConfig: _InternalConfig
+}
+
+export type WabeSchemaWhereTypes = {
+	User: WhereUser,
+	Post: WherePost,
+	_Session: Where_Session,
+	Role: WhereRole,
+	_InternalConfig: Where_InternalConfig
 }
