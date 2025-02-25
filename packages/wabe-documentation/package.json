@@ -5,7 +5,7 @@
   "scripts": {
     "release": "bun run build && vercel doc_build --prod",
     "dev": "rspress dev",
-    "build": "rspress build",
+    "build": "if [ -z \"$CI_BUILD\" ]; then rspress build; else echo \"CI_BUILD is defined, skipping build\"; fi",
     "preview": "rspress preview"
   },
   "dependencies": {
