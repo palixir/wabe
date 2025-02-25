@@ -14,10 +14,10 @@
       "version": "0.6.4",
       "dependencies": {
         "@graphql-yoga/plugin-disable-introspection": "2.10.9",
-        "@node-rs/argon2": "2.0.0",
+        "@node-rs/argon2": "2.0.2",
         "jsonwebtoken": "9.0.2",
         "libphonenumber-js": "1.11.18",
-        "mongodb": "6.8.0",
+        "mongodb": "6.13.1",
         "otplib": "12.0.1",
         "p-retry": "6.2.1",
         "wobe": "1.1.10",
@@ -384,35 +384,35 @@
 
     "@napi-rs/wasm-runtime": ["@napi-rs/wasm-runtime@0.2.5", "", { "dependencies": { "@emnapi/core": "^1.1.0", "@emnapi/runtime": "^1.1.0", "@tybys/wasm-util": "^0.9.0" } }, "sha512-kwUxR7J9WLutBbulqg1dfOrMTwhMdXLdcGUhcbCcGwnPLt3gz19uHVdwH1syKVDbE022ZS2vZxOWflFLS0YTjw=="],
 
-    "@node-rs/argon2": ["@node-rs/argon2@2.0.0", "", { "optionalDependencies": { "@node-rs/argon2-android-arm-eabi": "2.0.0", "@node-rs/argon2-android-arm64": "2.0.0", "@node-rs/argon2-darwin-arm64": "2.0.0", "@node-rs/argon2-darwin-x64": "2.0.0", "@node-rs/argon2-freebsd-x64": "2.0.0", "@node-rs/argon2-linux-arm-gnueabihf": "2.0.0", "@node-rs/argon2-linux-arm64-gnu": "2.0.0", "@node-rs/argon2-linux-arm64-musl": "2.0.0", "@node-rs/argon2-linux-x64-gnu": "2.0.0", "@node-rs/argon2-linux-x64-musl": "2.0.0", "@node-rs/argon2-wasm32-wasi": "2.0.0", "@node-rs/argon2-win32-arm64-msvc": "2.0.0", "@node-rs/argon2-win32-ia32-msvc": "2.0.0", "@node-rs/argon2-win32-x64-msvc": "2.0.0" } }, "sha512-19DVNk87JRT0f5R9CucMM06cQg6PAoRBEfvmKXdrD0uFAWUmaf58IXTyCLdVLJW0IXwfV7I0FCldTiOilh1rZA=="],
+    "@node-rs/argon2": ["@node-rs/argon2@2.0.2", "", { "optionalDependencies": { "@node-rs/argon2-android-arm-eabi": "2.0.2", "@node-rs/argon2-android-arm64": "2.0.2", "@node-rs/argon2-darwin-arm64": "2.0.2", "@node-rs/argon2-darwin-x64": "2.0.2", "@node-rs/argon2-freebsd-x64": "2.0.2", "@node-rs/argon2-linux-arm-gnueabihf": "2.0.2", "@node-rs/argon2-linux-arm64-gnu": "2.0.2", "@node-rs/argon2-linux-arm64-musl": "2.0.2", "@node-rs/argon2-linux-x64-gnu": "2.0.2", "@node-rs/argon2-linux-x64-musl": "2.0.2", "@node-rs/argon2-wasm32-wasi": "2.0.2", "@node-rs/argon2-win32-arm64-msvc": "2.0.2", "@node-rs/argon2-win32-ia32-msvc": "2.0.2", "@node-rs/argon2-win32-x64-msvc": "2.0.2" } }, "sha512-t64wIsPEtNd4aUPuTAyeL2ubxATCBGmeluaKXEMAFk/8w6AJIVVkeLKMBpgLW6LU2t5cQxT+env/c6jxbtTQBg=="],
 
-    "@node-rs/argon2-android-arm-eabi": ["@node-rs/argon2-android-arm-eabi@2.0.0", "", { "os": "android", "cpu": "arm" }, "sha512-PbnBBiHg/boaj9EyQ1+Y53OQrvxJh1knrPZmzr6wRTR+DyCSHnwHpBANVhXV/T4Z9MJywy1SHFeCpuUMxN6HTw=="],
+    "@node-rs/argon2-android-arm-eabi": ["@node-rs/argon2-android-arm-eabi@2.0.2", "", { "os": "android", "cpu": "arm" }, "sha512-DV/H8p/jt40lrao5z5g6nM9dPNPGEHL+aK6Iy/og+dbL503Uj0AHLqj1Hk9aVUSCNnsDdUEKp4TVMi0YakDYKw=="],
 
-    "@node-rs/argon2-android-arm64": ["@node-rs/argon2-android-arm64@2.0.0", "", { "os": "android", "cpu": "arm64" }, "sha512-o3L+m7E2TnVRFRCAlJm3TF8ZR+WyMykakCSopOYaAcAtjwlhOOiaQsV+iw2WS3ju3AuvJ/0Qu7A4ecdHAWQ4aA=="],
+    "@node-rs/argon2-android-arm64": ["@node-rs/argon2-android-arm64@2.0.2", "", { "os": "android", "cpu": "arm64" }, "sha512-1LKwskau+8O1ktKx7TbK7jx1oMOMt4YEXZOdSNIar1TQKxm6isZ0cRXgHLibPHEcNHgYRsJWDE9zvDGBB17QDg=="],
 
-    "@node-rs/argon2-darwin-arm64": ["@node-rs/argon2-darwin-arm64@2.0.0", "", { "os": "darwin", "cpu": "arm64" }, "sha512-ad5qpXGxDwIS4/kH18LNe0G4m/4tm0z7gI4DmlTU4r3/LnrbMBW7XTHHNjUGpmtgAEn+4g/WQj1fIGtJZNFerw=="],
+    "@node-rs/argon2-darwin-arm64": ["@node-rs/argon2-darwin-arm64@2.0.2", "", { "os": "darwin", "cpu": "arm64" }, "sha512-3TTNL/7wbcpNju5YcqUrCgXnXUSbD7ogeAKatzBVHsbpjZQbNb1NDxDjqqrWoTt6XL3z9mJUMGwbAk7zQltHtA=="],
 
-    "@node-rs/argon2-darwin-x64": ["@node-rs/argon2-darwin-x64@2.0.0", "", { "os": "darwin", "cpu": "x64" }, "sha512-DhWHTjO3XNf8g9CflXZHeHbPFsRxvgsqC52S15Adj0lKSrWFzxvE9+z27jAP5KE/GmfDa4Ln5Dc4qQIQEblZAA=="],
+    "@node-rs/argon2-darwin-x64": ["@node-rs/argon2-darwin-x64@2.0.2", "", { "os": "darwin", "cpu": "x64" }, "sha512-vNPfkLj5Ij5111UTiYuwgxMqE7DRbOS2y58O2DIySzSHbcnu+nipmRKg+P0doRq6eKIJStyBK8dQi5Ic8pFyDw=="],
 
-    "@node-rs/argon2-freebsd-x64": ["@node-rs/argon2-freebsd-x64@2.0.0", "", { "os": "freebsd", "cpu": "x64" }, "sha512-FdLOudD9D9aL/0XB4QJl5OY48+XfZZbrPrVhcpbHgskZmo/ISWTn2z/TEyjraE7Zy9D/4X8d3/WMJiXueoyZPw=="],
+    "@node-rs/argon2-freebsd-x64": ["@node-rs/argon2-freebsd-x64@2.0.2", "", { "os": "freebsd", "cpu": "x64" }, "sha512-M8vQZk01qojQfCqQU0/O1j1a4zPPrz93zc9fSINY7Q/6RhQRBCYwDw7ltDCZXg5JRGlSaeS8cUXWyhPGar3cGg=="],
 
-    "@node-rs/argon2-linux-arm-gnueabihf": ["@node-rs/argon2-linux-arm-gnueabihf@2.0.0", "", { "os": "linux", "cpu": "arm" }, "sha512-Qtp0bsVv+/dnZsLl1O7CWVqp1ijb3r2YMvQnkK3z06pH6fajMH9LWQCGdZslnidNfRudwxj51Xiym+nD8POuYw=="],
+    "@node-rs/argon2-linux-arm-gnueabihf": ["@node-rs/argon2-linux-arm-gnueabihf@2.0.2", "", { "os": "linux", "cpu": "arm" }, "sha512-7EmmEPHLzcu0G2GDh30L6G48CH38roFC2dqlQJmtRCxs6no3tTE/pvgBGatTp/o2n2oyOJcfmgndVFcUpwMnww=="],
 
-    "@node-rs/argon2-linux-arm64-gnu": ["@node-rs/argon2-linux-arm64-gnu@2.0.0", "", { "os": "linux", "cpu": "arm64" }, "sha512-1maxs5vFcn3q6jgWuG92oT7uZxcPEHTCu3IIOEVaQCJzVSAfyL7h6o0hWaHj7Ga3/5rhiaDgSwX1MTW7Crl2QQ=="],
+    "@node-rs/argon2-linux-arm64-gnu": ["@node-rs/argon2-linux-arm64-gnu@2.0.2", "", { "os": "linux", "cpu": "arm64" }, "sha512-6lsYh3Ftbk+HAIZ7wNuRF4SZDtxtFTfK+HYFAQQyW7Ig3LHqasqwfUKRXVSV5tJ+xTnxjqgKzvZSUJCAyIfHew=="],
 
-    "@node-rs/argon2-linux-arm64-musl": ["@node-rs/argon2-linux-arm64-musl@2.0.0", "", { "os": "linux", "cpu": "arm64" }, "sha512-Wju44r1YDhQXDWxGNkfft0iHvoXcmxJ5NJSoqSMpNuHiGOkqW2heWtBlaXZk71F8rfFLZ8hES+t1uouXYV1mNw=="],
+    "@node-rs/argon2-linux-arm64-musl": ["@node-rs/argon2-linux-arm64-musl@2.0.2", "", { "os": "linux", "cpu": "arm64" }, "sha512-p3YqVMNT/4DNR67tIHTYGbedYmXxW9QlFmF39SkXyEbGQwpgSf6pH457/fyXBIYznTU/smnG9EH+C1uzT5j4hA=="],
 
-    "@node-rs/argon2-linux-x64-gnu": ["@node-rs/argon2-linux-x64-gnu@2.0.0", "", { "os": "linux", "cpu": "x64" }, "sha512-udCXRjNR9RU03n4NeUcrsgsVVDzWatI5RvRPererR8mCiljDzNB89hZokXtEVtVTHDey+0WVa5lL13wJdkQOAQ=="],
+    "@node-rs/argon2-linux-x64-gnu": ["@node-rs/argon2-linux-x64-gnu@2.0.2", "", { "os": "linux", "cpu": "x64" }, "sha512-ZM3jrHuJ0dKOhvA80gKJqBpBRmTJTFSo2+xVZR+phQcbAKRlDMSZMFDiKbSTnctkfwNFtjgDdh5g1vaEV04AvA=="],
 
-    "@node-rs/argon2-linux-x64-musl": ["@node-rs/argon2-linux-x64-musl@2.0.0", "", { "os": "linux", "cpu": "x64" }, "sha512-RZGpd82OzYkGg4ZCLgCqwZ68m5qizPUBCDRwTquaUi4JV1Wly4iJnMlQuXsvgwvX8AKbCWKRB2HfXfOxnYRCOA=="],
+    "@node-rs/argon2-linux-x64-musl": ["@node-rs/argon2-linux-x64-musl@2.0.2", "", { "os": "linux", "cpu": "x64" }, "sha512-of5uPqk7oCRF/44a89YlWTEfjsftPywyTULwuFDKyD8QtVZoonrJR6ZWvfFE/6jBT68S0okAkAzzMEdBVWdxWw=="],
 
-    "@node-rs/argon2-wasm32-wasi": ["@node-rs/argon2-wasm32-wasi@2.0.0", "", { "dependencies": { "@napi-rs/wasm-runtime": "^0.2.3" }, "cpu": "none" }, "sha512-WUbkAsxV2ZbwfVKJ/YgSLngn1H2IJ6uO4FYw+KPkDDYbpUHPImg0ny6k2gV340qUXYP6QvHg7EorUbXrLCE8Rg=="],
+    "@node-rs/argon2-wasm32-wasi": ["@node-rs/argon2-wasm32-wasi@2.0.2", "", { "dependencies": { "@napi-rs/wasm-runtime": "^0.2.5" }, "cpu": "none" }, "sha512-U3PzLYKSQYzTERstgtHLd4ZTkOF9co57zTXT77r0cVUsleGZOrd6ut7rHzeWwoJSiHOVxxa0OhG1JVQeB7lLoQ=="],
 
-    "@node-rs/argon2-win32-arm64-msvc": ["@node-rs/argon2-win32-arm64-msvc@2.0.0", "", { "os": "win32", "cpu": "arm64" }, "sha512-yEvArafekU2Roo3DweBReQrRIvD+VQDiLyKhY6uIi/J27iKdWUcpqK2KTyYRak2z32LwqGS+f/4OlOGIHrbFgA=="],
+    "@node-rs/argon2-win32-arm64-msvc": ["@node-rs/argon2-win32-arm64-msvc@2.0.2", "", { "os": "win32", "cpu": "arm64" }, "sha512-Eisd7/NM0m23ijrGr6xI2iMocdOuyl6gO27gfMfya4C5BODbUSP7ljKJ7LrA0teqZMdYHesRDzx36Js++/vhiQ=="],
 
-    "@node-rs/argon2-win32-ia32-msvc": ["@node-rs/argon2-win32-ia32-msvc@2.0.0", "", { "os": "win32", "cpu": "ia32" }, "sha512-JUxcS00LmJ1xJgb1Wc5hg/neuqHmFJXdMEejdul45Mdi5GVuv4lsy3ywXkggjlDfETDkvlgnKgoaHG0mcIdtdg=="],
+    "@node-rs/argon2-win32-ia32-msvc": ["@node-rs/argon2-win32-ia32-msvc@2.0.2", "", { "os": "win32", "cpu": "ia32" }, "sha512-GsE2ezwAYwh72f9gIjbGTZOf4HxEksb5M2eCaj+Y5rGYVwAdt7C12Q2e9H5LRYxWcFvLH4m4jiSZpQQ4upnPAQ=="],
 
-    "@node-rs/argon2-win32-x64-msvc": ["@node-rs/argon2-win32-x64-msvc@2.0.0", "", { "os": "win32", "cpu": "x64" }, "sha512-Wp+CuqwX97y8v+TXRU7FDCeXpWDqqoEZzBTD5RTY/ncgoyhyYsToHGztoKrlK9Nc4Q5Pco9OaJsgL5piHzvzcQ=="],
+    "@node-rs/argon2-win32-x64-msvc": ["@node-rs/argon2-win32-x64-msvc@2.0.2", "", { "os": "win32", "cpu": "x64" }, "sha512-cJxWXanH4Ew9CfuZ4IAEiafpOBCe97bzoKowHCGk5lG/7kR4WF/eknnBlHW9m8q7t10mKq75kruPLtbSDqgRTw=="],
 
     "@nodelib/fs.scandir": ["@nodelib/fs.scandir@2.1.5", "", { "dependencies": { "@nodelib/fs.stat": "2.0.5", "run-parallel": "^1.1.9" } }, "sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g=="],
 
@@ -856,7 +856,7 @@
 
     "browserslist": ["browserslist@4.24.2", "", { "dependencies": { "caniuse-lite": "^1.0.30001669", "electron-to-chromium": "^1.5.41", "node-releases": "^2.0.18", "update-browserslist-db": "^1.1.1" }, "bin": { "browserslist": "cli.js" } }, "sha512-ZIc+Q62revdMcqC6aChtW4jz3My3klmCO1fEmINZY/8J3EpBg5/A/D0AKmBveUh6pgoeycoMkVMko84tuYS+Gg=="],
 
-    "bson": ["bson@6.10.0", "", {}, "sha512-ROchNosXMJD2cbQGm84KoP7vOGPO6/bOAW0veMMbzhXLqoZptcaYRVLitwvuhwhjjpU1qP4YZRWLhgETdgqUQw=="],
+    "bson": ["bson@6.10.3", "", {}, "sha512-MTxGsqgYTwfshYWTRdmZRC+M7FnG1b4y7RO7p2k3X24Wq0yv1m77Wsj0BzlPzd/IowgESfsruQCUToa7vbOpPQ=="],
 
     "buffer-builder": ["buffer-builder@0.2.0", "", {}, "sha512-7VPMEPuYznPSoR21NE1zvd2Xna6c/CloiZCfcMXR1Jny6PjX0N4Nsa38zcBFo/FMK+BlA+FLKbJCQ0i2yxp+Xg=="],
 
@@ -1438,7 +1438,7 @@
 
     "minipass": ["minipass@7.1.2", "", {}, "sha512-qOOzS1cBTWYF4BH8fVePDBOO9iptMnGUEZwNc/cMWnTV2nVLZ7VoNWEPHkYczZA0pdoA7dl6e7FL659nX9S2aw=="],
 
-    "mongodb": ["mongodb@6.8.0", "", { "dependencies": { "@mongodb-js/saslprep": "^1.1.5", "bson": "^6.7.0", "mongodb-connection-string-url": "^3.0.0" }, "peerDependencies": { "@aws-sdk/credential-providers": "^3.188.0", "@mongodb-js/zstd": "^1.1.0", "gcp-metadata": "^5.2.0", "kerberos": "^2.0.1", "mongodb-client-encryption": ">=6.0.0 <7", "snappy": "^7.2.2", "socks": "^2.7.1" }, "optionalPeers": ["@aws-sdk/credential-providers", "@mongodb-js/zstd", "gcp-metadata", "kerberos", "mongodb-client-encryption", "snappy", "socks"] }, "sha512-HGQ9NWDle5WvwMnrvUxsFYPd3JEbqD3RgABHBQRuoCEND0qzhsd0iH5ypHsf1eJ+sXmvmyKpP+FLOKY8Il7jMw=="],
+    "mongodb": ["mongodb@6.13.1", "", { "dependencies": { "@mongodb-js/saslprep": "^1.1.9", "bson": "^6.10.3", "mongodb-connection-string-url": "^3.0.0" }, "peerDependencies": { "@aws-sdk/credential-providers": "^3.632.0", "@mongodb-js/zstd": "^1.1.0 || ^2.0.0", "gcp-metadata": "^5.2.0", "kerberos": "^2.0.1", "mongodb-client-encryption": ">=6.0.0 <7", "snappy": "^7.2.2", "socks": "^2.7.1" }, "optionalPeers": ["@aws-sdk/credential-providers", "@mongodb-js/zstd", "gcp-metadata", "kerberos", "mongodb-client-encryption", "snappy", "socks"] }, "sha512-gdq40tX8StmhP6akMp1pPoEVv+9jTYFSrga/g23JxajPAQhH39ysZrHGzQCSd9PEOnuEQEdjIWqxO7ZSwC0w7Q=="],
 
     "mongodb-connection-string-url": ["mongodb-connection-string-url@3.0.1", "", { "dependencies": { "@types/whatwg-url": "^11.0.2", "whatwg-url": "^13.0.0" } }, "sha512-XqMGwRX0Lgn05TDB4PyG2h2kKO/FfWJyCzYQbIhXUxz7ETt0I/FqHjUeqj37irJ+Dl1ZtU82uYyj14u2XsZKfg=="],
 
@@ -2251,6 +2251,8 @@
     "mdast-util-mdx-jsx/parse-entities/is-decimal": ["is-decimal@2.0.1", "", {}, "sha512-AAB9hiomQs5DXWcRB1rqsxGUstbRroFOPPVAomNk/3XHR5JyEZChOyTWe2oayKnsSsr/kcGqF+z6yuH6HHpN0A=="],
 
     "mdast-util-mdx-jsx/parse-entities/is-hexadecimal": ["is-hexadecimal@2.0.1", "", {}, "sha512-DgZQp241c8oO6cA1SbTEWiXeoxV42vlcJxgH+B3hi1AiqqKruZR3ZGF8In3fj4+/y/7rHvlOZLZtgJ/4ttYGZg=="],
+
+    "mongodb-memory-server-core/mongodb/bson": ["bson@6.10.0", "", {}, "sha512-ROchNosXMJD2cbQGm84KoP7vOGPO6/bOAW0veMMbzhXLqoZptcaYRVLitwvuhwhjjpU1qP4YZRWLhgETdgqUQw=="],
 
     "node-fetch/whatwg-url/tr46": ["tr46@0.0.3", "", {}, "sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw=="],
 
