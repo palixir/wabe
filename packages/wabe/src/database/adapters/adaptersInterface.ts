@@ -1,7 +1,7 @@
 import type { WabeContext } from '../../server/interface'
 import type { WabeTypes } from '../../server'
 
-type IsScalar<T> = T extends string | number | boolean ? true : false
+type IsScalar<T> = T extends string | number | boolean | Date ? true : false
 
 type IsArray<T> = T extends Array<any> ? true : false
 
@@ -16,6 +16,12 @@ type ExtractType<
   ClassName extends keyof T['types'],
   FieldName extends keyof T['types'][ClassName],
 > = T['types'][ClassName][FieldName]
+
+type ExtractWhereType<
+  T extends WabeTypes,
+  ClassName extends keyof T['where'],
+  FieldName extends keyof T['where'][ClassName],
+> = T['where'][ClassName][FieldName]
 
 type WhereScalar<T> = {
   equalTo?: T
@@ -36,21 +42,21 @@ type WhereObject<T> = {
     : WhereScalar<T[P]>
 }
 
-type WhereAggregation<T extends WabeTypes, K extends keyof T['types']> = {
-  [P in keyof T['types'][K]]: IsScalar<ExtractType<T, K, P>> extends false
-    ? WhereObject<Partial<ExtractType<T, K, P>>>
-    : WhereScalar<ExtractType<T, K, P>>
+type WhereAggregation<T extends WabeTypes, K = keyof T['where']> = {
+  [P in keyof T['where'][K]]: IsScalar<ExtractWhereType<T, K, P>> extends false
+    ? WhereObject<Partial<ExtractWhereType<T, K, P>>>
+    : WhereScalar<ExtractWhereType<T, K, P>>
 }
 
-type WhereConditional<T extends WabeTypes, K extends keyof T['types']> = {
+type WhereConditional<T extends WabeTypes, K = keyof T['where']> = {
   OR?: Array<WhereType<T, K>>
   AND?: Array<WhereType<T, K>>
 }
 
-export type WhereType<
-  T extends WabeTypes,
-  K extends keyof T['types'],
-> = Partial<WhereAggregation<T, K>> & WhereConditional<T, K>
+export type WhereType<T extends WabeTypes, K = keyof T['where']> = Partial<
+  WhereAggregation<T, K>
+> &
+  WhereConditional<T, K>
 
 type SelectObject<T, K extends WabeTypes, Depth extends number = 3> = {
   [P in keyof T]: IsScalar<T[P]> extends true

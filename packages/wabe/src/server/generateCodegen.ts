@@ -59,15 +59,20 @@ const wabeTypesToTypescriptTypes = ({
   }
 }
 
-const generateWabeObject = (
-  object: WabeObject<DevWabeTypes>,
+const generateWabeObject = ({
+  object,
+  isInput = false,
   prefix = '',
-): Record<string, Record<string, string>> => {
+}: {
+  object: WabeObject<DevWabeTypes>
+  prefix?: string
+  isInput?: boolean
+}): Record<string, Record<string, string>> => {
   const objectName = object.name
 
   return Object.entries(object.fields).reduce(
     (acc, [fieldName, field]) => {
-      const type = wabeTypesToTypescriptTypes({ field })
+      const type = wabeTypesToTypescriptTypes({ field, isInput })
 
       const objectNameWithPrefix = `${prefix}${firstLetterUpperCase(objectName)}`
 
@@ -75,7 +80,11 @@ const generateWabeObject = (
         field.type === 'Object' ||
         (field.type === 'Array' && field.typeValue === 'Object')
       ) {
-        const subObject = generateWabeObject(field.object, objectNameWithPrefix)
+        const subObject = generateWabeObject({
+          object: field.object,
+          isInput,
+          prefix: objectNameWithPrefix,
+        })
 
         const isArray = field.type === 'Array'
 
@@ -120,7 +129,7 @@ const generateWabeTypes = (classes: ClassInterface<DevWabeTypes>[]) => {
             field.type === 'Object' ||
             (field.type === 'Array' && field.typeValue === 'Object')
           ) {
-            const wabeObject = generateWabeObject(field.object)
+            const wabeObject = generateWabeObject({ object: field.object })
 
             objectsToLoad.push(wabeObject)
           }
@@ -144,6 +153,58 @@ const generateWabeTypes = (classes: ClassInterface<DevWabeTypes>[]) => {
         ...acc,
         ...objects,
         [name]: { id: 'string', ...currentClass },
+      }
+    },
+    {} as Record<string, Record<string, string>>,
+  )
+
+  return wabeTypes
+}
+
+const generateWabeWhereTypes = (classes: ClassInterface<DevWabeTypes>[]) => {
+  const wabeTypes = classes.reduce(
+    (acc, classType) => {
+      const { name, fields } = classType
+
+      const completeName = `Where${firstLetterUpperCase(name)}`
+
+      const objectsToLoad: Array<Record<string, Record<string, string>>> = []
+
+      const currentClass = Object.entries(fields).reduce(
+        (acc2, [name, field]) => {
+          const type = wabeTypesToTypescriptTypes({ field, isInput: true })
+
+          if (
+            field.type === 'Object' ||
+            (field.type === 'Array' && field.typeValue === 'Object')
+          ) {
+            const wabeObject = generateWabeObject({
+              object: field.object,
+              isInput: true,
+            })
+
+            objectsToLoad.push(wabeObject)
+          }
+
+          return {
+            ...acc2,
+            [`${name}${field.required ? '' : 'undefined'}`]: type,
+          }
+        },
+        {} as Record<string, string>,
+      )
+
+      const objects = objectsToLoad.reduce((acc2, object) => {
+        return {
+          ...acc2,
+          ...object,
+        }
+      }, {})
+
+      return {
+        ...acc,
+        ...objects,
+        [completeName]: { id: 'string', ...currentClass },
       }
     },
     {} as Record<string, Record<string, string>>,
@@ -197,13 +258,13 @@ const generateWabeMutationOrQueryInput = (
       if (field.type === 'Object') {
         type = firstLetterInUpperCase(name)
 
-        const wabeObject = generateWabeObject(
-          {
+        const wabeObject = generateWabeObject({
+          object: {
             ...field.object,
             name: type,
           },
-          mutationNameWithFirstLetterUpperCase,
-        )
+          prefix: mutationNameWithFirstLetterUpperCase,
+        })
 
         objectsToLoad.push(wabeObject)
 
@@ -336,7 +397,18 @@ const generateWabeDevTypes = ({
     ',\n\t',
   )}\n}`
 
-  return `${wabeScalarType}\n\n${wabeEnumsGlobalTypesString}\n\n${globalWabeTypeString}`
+  // Where
+  const allWhereNames = classes
+    .map(
+      (schema) => `${schema.name}: Where${firstLetterUpperCase(schema.name)}`,
+    )
+    .filter((schema) => schema)
+
+  const globalWabeWhereTypeString = `export type WabeSchemaWhereTypes = {\n\t${allWhereNames.join(
+    ',\n\t',
+  )}\n}`
+
+  return `${wabeScalarType}\n\n${wabeEnumsGlobalTypesString}\n\n${globalWabeTypeString}\n\n${globalWabeWhereTypeString}`
 }
 
 export const generateCodegen = async ({
@@ -351,6 +423,7 @@ export const generateCodegen = async ({
   const graphqlSchemaContent = printSchema(graphqlSchema)
 
   const wabeClasses = generateWabeTypes(schema.classes || [])
+  const wabeWhereTypes = generateWabeWhereTypes(schema.classes || [])
   const mutationsAndQueries = generateWabeMutationsAndQueriesTypes(
     schema.resolvers || {},
   )
@@ -363,6 +436,7 @@ export const generateCodegen = async ({
   )
   const wabeObjectsInString = wabeClassRecordToString({
     ...wabeClasses,
+    ...wabeWhereTypes,
     ...mutationsAndQueries,
   })
 
@@ -373,6 +447,8 @@ export const generateCodegen = async ({
   })
 
   const wabeTsContent = `${wabeEnumsInString}${wabeScalarsInString}${wabeObjectsInString}${wabeDevTypes}`
+
+  await writeFile(`${path}/wabe.ts`, wabeTsContent)
 
   try {
     const contentOfGraphqlSchema = (
@@ -388,6 +464,5 @@ export const generateCodegen = async ({
       return
   } catch {}
 
-  await writeFile(`${path}/wabe.ts`, wabeTsContent)
   await writeFile(`${path}/schema.graphql`, graphqlSchemaContent)
 }

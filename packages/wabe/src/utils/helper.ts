@@ -3,6 +3,7 @@ import { gql, GraphQLClient } from 'graphql-request'
 import { v4 as uuid } from 'uuid'
 import {
   RoleEnum,
+  type WabeSchemaWhereTypes,
   type WabeSchemaEnums,
   type WabeSchemaScalars,
   type WabeSchemaTypes,
@@ -33,6 +34,7 @@ export interface DevWabeTypes extends WabeTypes {
   types: WabeSchemaTypes
   scalars: WabeSchemaScalars
   enums: WabeSchemaEnums
+  where: WabeSchemaWhereTypes
 }
 
 export const firstLetterUpperCase = (str: string): string =>
