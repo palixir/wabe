@@ -54,7 +54,9 @@ export const defaultSessionHandler =
       accessToken: newAccessToken,
       refreshToken: newRefreshToken,
     } = await session.meFromAccessToken(accessToken, {
-
+      wabe,
+      isRoot: true,
+    })
 
     ctx.wabe = {
       isRoot: false,
