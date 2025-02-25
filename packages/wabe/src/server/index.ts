@@ -15,7 +15,7 @@ import { generateCodegen } from './generateCodegen'
 import { defaultAuthenticationMethods } from '../authentication/defaultAuthentication'
 import { Wobe, cors, rateLimit } from 'wobe'
 import { WobeGraphqlYogaPlugin } from 'wobe-graphql-yoga'
-import type { CorsOptions, RateLimitOptions } from 'wobe'
+import type { Context, CorsOptions, RateLimitOptions } from 'wobe'
 import { Session } from '../authentication/Session'
 import { getCookieInRequestHeaders } from '../utils'
 import type { WabeContext } from './interface'
@@ -28,6 +28,7 @@ import { PaymentController } from '../payment/PaymentController'
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection'
 import type { AIConfig } from '../ai'
 import { FileController } from '../files/FileController'
+import { defaultSessionHandler } from './defaultHandlers'
 
 type SecurityConfig = {
   corsOptions?: CorsOptions
@@ -64,7 +65,7 @@ export type WabeTypes = {
   enums: Record<any, any>
 }
 
-export type WobeCustomContext<T extends WabeTypes> = {
+export type WobeCustomContext<T extends WabeTypes> = Context & {
   wabe: WabeContext<T>
 }
 
@@ -265,63 +266,10 @@ export class Wabe<T extends WabeTypes> {
     this.server.beforeHandler(cors(this.config.security?.corsOptions))
 
     // Set the wabe context
-    this.server.beforeHandler(async (ctx) => {
-      const headers = ctx.request.headers
-
-      if (headers.get('Wabe-Root-Key') === this.config.rootKey) {
-        ctx.wabe = {
-          isRoot: true,
-          wabe: this,
-          response: ctx.res,
-        }
-        return
-      }
-
-      const getAccessToken = () => {
-        if (headers.get('Wabe-Access-Token'))
-          return { accessToken: headers.get('Wabe-Access-Token') }
-
-        const isCookieSession =
-          !!this.config.authentication?.session?.cookieSession
-
-        if (isCookieSession)
-          return {
-            accessToken: getCookieInRequestHeaders(
-              'accessToken',
-              ctx.request.headers,
-            ),
-          }
-
-        return { accessToken: null }
-      }
-
-      const { accessToken } = getAccessToken()
-
-      if (!accessToken) {
-        ctx.wabe = {
-          isRoot: false,
-          wabe: this,
-          response: ctx.res,
-        }
-        return
-      }
-
-      const session = new Session()
-
-      const { user, sessionId } = await session.meFromAccessToken(accessToken, {
-        isRoot: true,
-        // @ts-expect-error
-        wabe: this,
-      })
-
-      ctx.wabe = {
-        isRoot: false,
-        sessionId,
-        user,
-        wabe: this,
-        response: ctx.res,
-      }
-    })
+    this.server.beforeHandler(
+      // @ts-expect-error
+      this.config.authentication.sessionHandler || defaultSessionHandler(this),
+    )
 
     this.server.usePlugin(
       WobeGraphqlYogaPlugin({

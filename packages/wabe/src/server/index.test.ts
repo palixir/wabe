@@ -5,6 +5,8 @@ import { Wabe } from '.'
 import { DatabaseEnum } from '../database'
 import { Schema } from '../schema'
 import { OperationType } from '../hooks'
+import { getAnonymousClient, getUserClient } from '../utils/helper'
+import { gql } from 'graphql-request'
 
 describe('Server', () => {
   it('should load routes', async () => {
@@ -276,4 +278,139 @@ describe('Server', () => {
 
     await wabe.close()
   })
+
+  it('should be able to setup custom session handler', async () => {
+    const databaseId = uuid()
+
+    const port = await getPort()
+    const port2 = await getPort()
+    const wabeMain = new Wabe({
+      rootKey:
+        'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+      database: {
+        type: DatabaseEnum.Mongo,
+        url: 'mongodb://127.0.0.1:27045',
+        name: databaseId,
+      },
+      authentication: {
+        roles: ['Client'],
+      },
+      port,
+    })
+
+    await wabeMain.start()
+
+    const wabeSlave1 = new Wabe({
+      rootKey:
+        'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+      database: {
+        type: DatabaseEnum.Mongo,
+        url: 'mongodb://127.0.0.1:27045',
+        name: databaseId,
+      },
+      authentication: {
+        sessionHandler: (ctx) => {
+          ctx.wabe = {
+            wabe: wabeSlave1,
+            isRoot: false,
+            sessionId: 'sessionId',
+            user: {
+              id: 'id',
+              role: {
+                id: 'roleId',
+                name: 'Client',
+              },
+            },
+          }
+        },
+      },
+      schema: {
+        classes: [
+          {
+            name: 'Test1',
+            fields: {
+              name: {
+                type: 'String',
+              },
+            },
+            permissions: {
+              create: {
+                requireAuthentication: true,
+                authorizedRoles: ['Client'],
+              },
+            },
+          },
+        ],
+      },
+      port: port2,
+    })
+
+    await wabeSlave1.start()
+
+    const client = getAnonymousClient(port2)
+
+    const {
+      signUpWith: { accessToken },
+    } = await client.request<any>(graphql.signUpWith, {
+      input: {
+        authentication: {
+          emailPassword: {
+            email: 'test@test.com',
+            password: 'password',
+          },
+        },
+      },
+    })
+
+    const userClient = getUserClient(port2, accessToken)
+
+    await userClient.request<any>(
+      gql`
+      mutation createTest1($input: CreateTest1Input!) {
+        createTest1(input: $input) {
+          test1 {
+            name
+          }
+        }
+      }
+      `,
+      {
+        input: {
+          fields: {
+            name: 'test',
+          },
+        },
+      },
+    )
+
+    expect(
+      userClient.request<any>(gql`
+      query test1s {
+          test1s {
+            edges {
+                node {
+                    name
+                }
+            }
+          }
+      }
+      `),
+    ).rejects.toThrow('Permission denied to read class Test1')
+
+    await wabeSlave1.close()
+
+    await wabeMain.close()
+  })
 })
+
+const graphql = {
+  signUpWith: gql`
+		 mutation signUpWith($input: SignUpWithInput!) {
+  		signUpWith(input:	$input){
+  			id
+  			accessToken
+  			refreshToken
+  		}
+  	}
+	 `,
+}

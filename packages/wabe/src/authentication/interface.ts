@@ -1,7 +1,7 @@
 import type { User } from '../../generated/wabe'
 import type { WabeContext } from '../server/interface'
 import type { SchemaFields } from '../schema'
-import type { WabeTypes } from '../server'
+import type { WabeTypes, WobeCustomContext } from '../server'
 
 export enum ProviderEnum {
   google = 'google',
@@ -79,9 +79,8 @@ export interface AuthenticationConfig<T extends WabeTypes> {
   backDomain?: string
   providers?: Partial<Record<ProviderEnum, ProviderConfig>>
   customAuthenticationMethods?: CustomAuthenticationMethods<T>[]
+  sessionHandler?: (context: WobeCustomContext<T>) => void | Promise<void>
 }
-
-// Example of url to request in front end : https://accounts.google.com/o/oauth2/auth?client_id=${client_id}&redirect_uri=${'http://localhost:3000/auth/test'}&scope=${'email'}&response_type=code&access_type=offline
 
 export interface CreateTokenFromAuthorizationCodeOptions {
   code: string
