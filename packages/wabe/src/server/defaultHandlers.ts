@@ -48,7 +48,12 @@ export const defaultSessionHandler =
 
     const session = new Session()
 
-    const { user, sessionId } = await session.meFromAccessToken(accessToken, {
+    const {
+      user,
+      sessionId,
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
+    } = await session.meFromAccessToken(accessToken, {
       isRoot: true,
       wabe,
     })
@@ -59,5 +64,28 @@ export const defaultSessionHandler =
       user,
       wabe,
       response: ctx.res,
+    }
+
+    if (
+      wabe.config.authentication?.session?.cookieSession &&
+      newAccessToken &&
+      newRefreshToken &&
+      newAccessToken !== accessToken
+    ) {
+      ctx.res.setCookie('accessToken', newAccessToken, {
+        httpOnly: true,
+        path: '/',
+        expires: session.getAccessTokenExpireAt(wabe.config),
+        sameSite: 'None',
+        secure: true,
+      })
+
+      ctx.res.setCookie('refreshToken', newRefreshToken, {
+        httpOnly: true,
+        path: '/',
+        expires: session.getAccessTokenExpireAt(wabe.config),
+        sameSite: 'None',
+        secure: true,
+      })
     }
   }

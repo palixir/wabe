@@ -36,27 +36,57 @@ export class Session {
   async meFromAccessToken(
     accessToken: string,
     context: WabeContext<DevWabeTypes>,
-  ): Promise<{ sessionId: string | null; user: User | null }> {
+  ): Promise<{
+    sessionId: string | null
+    user: User | null
+    accessToken: string | null
+    refreshToken?: string | null
+  }> {
     const sessions = await context.wabe.controllers.database.getObjects({
       className: '_Session',
       where: {
         accessToken: { equalTo: accessToken },
+        OR: [
+          {
+            // @ts-expect-error
+            accessTokenExpiresAt: { greaterThanOrEqualTo: new Date() },
+          },
+          {
+            // @ts-expect-error
+            refreshTokenExpiresAt: { greaterThanOrEqualTo: new Date() },
+          },
+        ],
       },
       select: {
         id: true,
         user: true,
+        accessTokenExpiresAt: true,
+        refreshTokenExpiresAt: true,
+        refreshToken: true,
       },
       first: 1,
       context,
     })
 
-    if (sessions.length === 0) return { sessionId: null, user: null }
+    if (sessions.length === 0)
+      return {
+        sessionId: null,
+        user: null,
+        accessToken: null,
+        refreshToken: null,
+      }
 
     const session = sessions[0]
 
-    const user = session?.user
+    if (!session || !session?.user)
+      return {
+        sessionId: null,
+        user: null,
+        accessToken: null,
+        refreshToken: null,
+      }
 
-    if (!user) return { sessionId: session?.id ?? null, user: null }
+    const user = session.user
 
     const userWithRole = await context.wabe.controllers.database.getObject({
       className: 'User',
@@ -67,12 +97,34 @@ export class Session {
       id: user.id,
     })
 
+    // If access token is expired and refresh token is not expired
+    if (
+      new Date(session.accessTokenExpiresAt) < new Date() &&
+      new Date(session.refreshTokenExpiresAt) >= new Date() &&
+      session.refreshToken
+    ) {
+      const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
+        await this.refresh(accessToken, session.refreshToken, context)
+
+      return {
+        sessionId: session.id,
+        user: {
+          ...user,
+          role: userWithRole?.role,
+        },
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+      }
+    }
+
     return {
-      sessionId: session?.id ?? null,
+      sessionId: session.id,
       user: {
         ...user,
         role: userWithRole?.role,
       },
+      accessToken,
+      refreshToken: session.refreshToken,
     }
   }
 

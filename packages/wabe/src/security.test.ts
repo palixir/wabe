@@ -1,4 +1,4 @@
-import { describe, beforeAll, afterAll, it, expect } from 'bun:test'
+import { describe, beforeAll, afterAll, it, expect, beforeEach } from 'bun:test'
 import { gql } from 'graphql-request'
 import type { Wabe } from './server'
 import {
@@ -12,12 +12,31 @@ describe('Security tests', () => {
   let wabe: Wabe<DevWabeTypes>
 
   beforeAll(async () => {
-    const setup = await setupTests()
+    const setup = await setupTests([
+      {
+        name: 'Test1',
+        fields: {
+          name: {
+            type: 'String',
+          },
+        },
+        permissions: {
+          create: {
+            authorizedRoles: ['Admin'],
+            requireAuthentication: true,
+          },
+        },
+      },
+    ])
     wabe = setup.wabe
   })
 
   afterAll(async () => {
     await closeTests(wabe)
+  })
+
+  beforeEach(async () => {
+    await wabe.controllers.database.clearDatabase()
   })
 
   it('should not be able to create / update / delete a role (except root)', async () => {
@@ -80,7 +99,7 @@ describe('Security tests', () => {
 
   it('should not be able to create / update / delete a session (except root)', async () => {
     const adminClient = await getAdminUserClient(wabe.config.port, wabe, {
-      email: 'admin2@wabe.dev',
+      email: 'admin@wabe.dev',
       password: 'admin',
     })
 
@@ -147,5 +166,94 @@ describe('Security tests', () => {
     })
 
     expect(sessionAfterDelete?.id).toEqual(sessionId)
+  })
+
+  it('should not be able to do some actions with expired session', async () => {
+    const adminClient = await getAdminUserClient(wabe.config.port, wabe, {
+      email: 'admin@wabe.dev',
+      password: 'admin',
+    })
+
+    expect(
+      adminClient.request(gql`
+      mutation createTest1{
+          createTest1(input: {fields: {name: "test1"}}) {
+              test1 {
+                  id
+              }
+          }
+      }
+      `),
+    ).resolves.toEqual(expect.anything())
+
+    await wabe.controllers.database.updateObjects({
+      className: '_Session',
+      context: {
+        wabe,
+        isRoot: true,
+      },
+      select: { id: true, accessTokenExpiresAt: true },
+      data: {
+        accessTokenExpiresAt: new Date(Date.now() - 1000 * 3600), // 1 hour ago
+        refreshTokenExpiresAt: new Date(Date.now() - 1000 * 3600), // 1 hour ago
+      },
+      where: {},
+    })
+
+    expect(
+      adminClient.request(gql`
+      mutation createTest1{
+          createTest1(input: {fields: {name: "test1"}}) {
+              test1 {
+                  id
+              }
+          }
+      }
+      `),
+    ).rejects.toThrow('Permission denied to create class Test1')
+  })
+
+  it('should be able to refresh session if refresh token is not expired but access token expired', async () => {
+    const adminClient = await getAdminUserClient(wabe.config.port, wabe, {
+      email: 'admin@wabe.dev',
+      password: 'admin',
+    })
+
+    expect(
+      adminClient.request(gql`
+      mutation createTest1{
+          createTest1(input: {fields: {name: "test1"}}) {
+              test1 {
+                  id
+              }
+          }
+      }
+      `),
+    ).resolves.toEqual(expect.anything())
+
+    await wabe.controllers.database.updateObjects({
+      className: '_Session',
+      context: {
+        wabe,
+        isRoot: true,
+      },
+      data: {
+        accessTokenExpiresAt: new Date(Date.now() - 1000 * 3600), // 1 hour ago
+        refreshTokenExpiresAt: new Date(Date.now() + 1000 * 3600), // 1 hour in future
+      },
+      where: {},
+    })
+
+    expect(
+      adminClient.request(gql`
+      mutation createTest1{
+          createTest1(input: {fields: {name: "test1"}}) {
+              test1 {
+                  id
+              }
+          }
+      }
+      `),
+    ).resolves.toEqual(expect.anything())
   })
 })

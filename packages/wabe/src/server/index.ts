@@ -16,8 +16,6 @@ import { defaultAuthenticationMethods } from '../authentication/defaultAuthentic
 import { Wobe, cors, rateLimit } from 'wobe'
 import { WobeGraphqlYogaPlugin } from 'wobe-graphql-yoga'
 import type { Context, CorsOptions, RateLimitOptions } from 'wobe'
-import { Session } from '../authentication/Session'
-import { getCookieInRequestHeaders } from '../utils'
 import type { WabeContext } from './interface'
 import { initializeRoles } from '../authentication/roles'
 import type { FileConfig } from '../files'
@@ -278,61 +276,6 @@ export class Wabe<T extends WabeTypes> {
         graphqlEndpoint: '/graphql',
         plugins: this.config.isProduction ? [useDisableIntrospection()] : [],
         context: async (ctx): Promise<WabeContext<T>> => ctx.wabe,
-        graphqlMiddleware: async (resolve, res) => {
-          const response = await resolve()
-
-          try {
-            if (this.config.authentication?.session?.cookieSession) {
-              const accessToken = getCookieInRequestHeaders(
-                'accessToken',
-                res.request.headers,
-              )
-              const refreshToken = getCookieInRequestHeaders(
-                'refreshToken',
-                res.request.headers,
-              )
-
-              if (accessToken && refreshToken) {
-                const session = new Session()
-
-                const {
-                  accessToken: newAccessToken,
-                  refreshToken: newRefreshToken,
-                } = await session.refresh(accessToken, refreshToken, {
-                  // @ts-expect-error
-                  wabe: this,
-                  isRoot: true,
-                })
-
-                if (!newAccessToken || !newRefreshToken) return response
-
-                if (accessToken !== newAccessToken)
-                  res.setCookie('accessToken', newAccessToken, {
-                    httpOnly: true,
-                    path: '/',
-                    // @ts-expect-error
-                    expires: session.getAccessTokenExpireAt(this.config),
-                    sameSite: 'None',
-                    secure: true,
-                  })
-
-                if (refreshToken !== newRefreshToken)
-                  res.setCookie('refreshToken', newRefreshToken, {
-                    httpOnly: true,
-                    path: '/',
-                    // @ts-expect-error
-                    expires: session.getRefreshTokenExpireAt(this.config),
-                    sameSite: 'None',
-                    secure: true,
-                  })
-              }
-            }
-          } catch {
-            return response
-          }
-
-          return response
-        },
       }),
     )
 

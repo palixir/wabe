@@ -46,11 +46,22 @@ describe('_Session', () => {
       className: '_Session',
       where: {
         accessToken: { equalTo: 'accessToken' },
+        OR: [
+          {
+            accessTokenExpiresAt: { greaterThanOrEqualTo: expect.any(Date) },
+          },
+          {
+            refreshTokenExpiresAt: { greaterThanOrEqualTo: expect.any(Date) },
+          },
+        ],
       },
       first: 1,
       select: {
         id: true,
         user: true,
+        accessTokenExpiresAt: true,
+        refreshTokenExpiresAt: true,
+        refreshToken: true,
       },
       context: { isRoot: true, wabe: { controllers } },
     })
@@ -81,11 +92,22 @@ describe('_Session', () => {
       className: '_Session',
       where: {
         accessToken: { equalTo: 'accessToken' },
+        OR: [
+          {
+            accessTokenExpiresAt: { greaterThanOrEqualTo: expect.any(Date) },
+          },
+          {
+            refreshTokenExpiresAt: { greaterThanOrEqualTo: expect.any(Date) },
+          },
+        ],
       },
       first: 1,
       select: {
         id: true,
         user: true,
+        accessTokenExpiresAt: true,
+        refreshTokenExpiresAt: true,
+        refreshToken: true,
       },
       context: expect.any(Object),
     })
