@@ -16,12 +16,12 @@ import { EmailDevAdapter } from '../email/DevAdapter'
 import { Currency } from '../payment'
 import { FileDevAdapter } from '../files/FileDevAdapter'
 
-type NotNill<T> = T extends null | undefined ? never : T
+type NotNull<T> = T extends null | undefined ? never : T
 
 type Primitive = undefined | null | boolean | string | number
 
 export type DeepRequired<T> = T extends Primitive
-  ? NotNill<T>
+  ? NotNull<T>
   : {
       [P in keyof T]-?: T[P] extends Array<infer U>
         ? Array<DeepRequired<U>>
