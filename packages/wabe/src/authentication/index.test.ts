@@ -558,181 +558,6 @@ describe('Authentication', () => {
     expect(res.tests.edges.length).toEqual(1)
   })
 
-  it('should not authorize to delete an object when an ACL protect the object on write for this role (ACL)', async () => {
-    const { userClient, roleId } = await createUserAndUpdateRole({
-      anonymousClient: client,
-      port,
-      roleName: 'Client',
-      rootClient,
-    })
-
-    const objectCreated = await rootClient.request<any>(gql`
-				mutation createTest {
-					createTest(input:{fields:{name: "test"}}){
-						test{
-							id
-						}
-					}
-				}
-		`)
-
-    const objectId = objectCreated.createTest.test.id
-
-    await rootClient.request<any>(gql`
-			mutation updateACL{
-				updateTest(input:{id: "${objectId}", fields: {acl:{
-					roles: [{
-						roleId: "${roleId}",
-						read: true,
-						write: false
-					}]
-				}}}){
-					test{
-						id
-					}
-				}
-			}
-		`)
-
-    expect(
-      userClient.request<any>(gql`
-				mutation deleteTest{
-					deleteTest(input: {id: "${objectId}"}){
-						test {
-							id
-						}
-					}
-				}
-			`),
-    ).rejects.toThrow('Object not found')
-  })
-
-  it('should not authorize to update an object when an ACL protect the object on write for this role (ACL)', async () => {
-    const { userClient, roleId } = await createUserAndUpdateRole({
-      anonymousClient: client,
-      port,
-      roleName: 'Client',
-      rootClient,
-    })
-
-    const objectCreated = await rootClient.request<any>(gql`
-				mutation createTest {
-					createTest(input:{fields:{name: "test"}}){
-						test{
-							id
-						}
-					}
-				}
-		`)
-
-    const objectId = objectCreated.createTest.test.id
-
-    await rootClient.request<any>(gql`
-			mutation updateACL{
-				updateTest(input:{id: "${objectId}", fields: {acl:{
-					roles: [{
-						roleId: "${roleId}",
-						read: true,
-						write: false
-					}]
-				}}}){
-					test{
-						id
-					}
-				}
-			}
-		`)
-
-    expect(
-      userClient.request<any>(gql`
-				mutation updateTest{
-					updateTest(input: {id: "${objectId}", fields:{name: "tata"}}){
-						test {
-							id
-						}
-					}
-				}
-			`),
-    ).rejects.toThrow('Object not found')
-  })
-
-  it('should not authorize to read an object when an ACL protect the object on read for this role (ACL)', async () => {
-    const { userClient, roleId } = await createUserAndUpdateRole({
-      anonymousClient: client,
-      port,
-      roleName: 'Client',
-      rootClient,
-    })
-
-    const objectCreated = await rootClient.request<any>(gql`
-				mutation createTest {
-					createTest(input:{fields:{name: "test"}}){
-						test{
-							id
-						}
-					}
-				}
-		`)
-
-    const objectId = objectCreated.createTest.test.id
-
-    await rootClient.request<any>(gql`
-			mutation updateACL{
-				updateTest(input:{id: "${objectId}", fields: {acl:{
-					roles: [{
-						roleId: "${roleId}",
-						read: false,
-						write:true
-					}]
-				}}}){
-					test{
-						id
-					}
-				}
-			}
-		`)
-
-    const res = await userClient.request<any>(gql`
-				query tests{
-					tests{
-						edges{
-							node{
-								id
-							}
-						}
-					}
-				}
-			`)
-
-    expect(res.tests.edges.length).toEqual(0)
-  })
-
-  // Class Level Permissions
-
-  it('should not authorize an user to create an object another class with target when the user do not have access to write the other class with (CLP)', async () => {
-    const { userClient } = await createUserAndUpdateRole({
-      anonymousClient: client,
-      port,
-      roleName: 'Client2',
-      rootClient,
-    })
-
-    expect(
-      userClient.request<any>(gql`
-				mutation createTest {
-					createTest(input:{fields:{name: "test", pointer: {createAndLink: {name: "tata"}}}}){
-						test{
-							id
-							pointer {
-								id
-							}
-						}
-					}
-				}
-		`),
-    ).rejects.toThrow('Permission denied to create class Test2')
-  })
-
   it('should not authorized an user to read an object on another class with pointer when the user do not have ACL to read the other class', async () => {
     const { userClient, userId } = await createUserAndUpdateRole({
       anonymousClient: client,
@@ -797,6 +622,21 @@ describe('Authentication', () => {
 							node {
 								id
 								name
+							}
+						}
+					}
+				}
+			`),
+    ).resolves.toEqual(expect.anything())
+
+    expect(
+      userClient.request<any>(gql`
+				query tests{
+					tests{
+						edges {
+							node {
+								id
+								name
 								pointer {
 									id
 								}
@@ -806,6 +646,31 @@ describe('Authentication', () => {
 				}
 			`),
     ).rejects.toThrow('Object not found')
+  })
+
+  // Class Level Permissions
+  it('should not authorize an user to create an object on another class with pointer when the user do not have access to write the other class with (CLP)', async () => {
+    const { userClient } = await createUserAndUpdateRole({
+      anonymousClient: client,
+      port,
+      roleName: 'Client2',
+      rootClient,
+    })
+
+    expect(
+      userClient.request<any>(gql`
+				mutation createTest {
+					createTest(input:{fields:{name: "test", pointer: {createAndLink: {name: "tata"}}}}){
+						test{
+							id
+							pointer {
+								id
+							}
+						}
+					}
+				}
+		`),
+    ).rejects.toThrow('Permission denied to create class Test2')
   })
 
   it('should authorize a connected user to access to a protected resource', async () => {
@@ -892,7 +757,7 @@ describe('Authentication', () => {
     ).rejects.toThrow('Permission denied to read class Test')
   })
 
-  it("should not authorize to access to protected resource if the user doesn't had an authorized role", async () => {
+  it("should not authorized to read an object if the user doesn't had an authorized role (read)", async () => {
     const { userClient } = await createUserAndUpdateRole({
       anonymousClient: client,
       port,
@@ -915,7 +780,7 @@ describe('Authentication', () => {
     ).rejects.toThrow('Permission denied to read class Test')
   })
 
-  it('should not authorize to delete a test object to an user that have the right to read the same class', async () => {
+  it("should not authorized to delete an object if the user doesn't had an authorized role (delete)", async () => {
     const { userClient } = await createUserAndUpdateRole({
       anonymousClient: client,
       port,
@@ -946,6 +811,58 @@ describe('Authentication', () => {
 			}
 		`),
     ).rejects.toThrow('Permission denied to delete class Test')
+  })
+
+  it("should not authorized to create an object if the user doesn't had an authorized role (create)", async () => {
+    const { userClient } = await createUserAndUpdateRole({
+      anonymousClient: client,
+      port,
+      roleName: 'Client',
+      rootClient,
+    })
+
+    expect(
+      userClient.request<any>(gql`
+				mutation createTest2{
+					createTest2(input: {fields: {name: "test"}}){
+						test2{
+							id
+						}
+					}
+				}
+			`),
+    ).rejects.toThrow('Permission denied to create class Test')
+  })
+
+  it("should not authorized to udpdate an object if the user doesn't had an authorized role (update)", async () => {
+    const { userClient } = await createUserAndUpdateRole({
+      anonymousClient: client,
+      port,
+      roleName: 'Client2',
+      rootClient,
+    })
+
+    const res = await rootClient.request<any>(gql`
+				mutation createTest{
+					createTest(input: {fields: {name: "test"}}){
+						test{
+							id
+						}
+					}
+				}
+			`)
+
+    expect(
+      userClient.request<any>(gql`
+			mutation updateTest{
+				updateTest(input: {id: "${res.createTest.test.id}", fields: {name: "tata"}}){
+					test{
+						id
+					}
+				}
+			}
+		`),
+    ).rejects.toThrow('Permission denied to update class Test')
   })
 })
 
