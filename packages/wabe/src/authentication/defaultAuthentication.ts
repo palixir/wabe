@@ -1,13 +1,33 @@
 import type { WabeTypes } from '..'
-import type { CustomAuthenticationMethods } from './interface'
+import type {
+  CustomAuthenticationMethods,
+  ProviderInterface,
+} from './interface'
 import { GitHub } from './providers'
 import { Google } from './providers'
+import { EmailOTP } from './providers/EmailOTP'
 import { EmailPassword } from './providers/EmailPassword'
 import { PhonePassword } from './providers/PhonePassword'
 
 export const defaultAuthenticationMethods = <
   T extends WabeTypes,
->(): CustomAuthenticationMethods<T>[] => [
+>(): CustomAuthenticationMethods<T, ProviderInterface<T>>[] => [
+  {
+    name: 'emailOTP',
+    input: {
+      email: {
+        type: 'Email',
+        required: true,
+      },
+      otp: {
+        type: 'String',
+        required: true,
+      },
+    },
+    // @ts-expect-error
+    provider: new EmailOTP(),
+    isSecondaryFactor: true,
+  },
   {
     name: 'phonePassword',
     input: {
@@ -30,6 +50,7 @@ export const defaultAuthenticationMethods = <
         required: true,
       },
     },
+    // @ts-expect-error
     provider: new PhonePassword(),
   },
   {
@@ -54,6 +75,7 @@ export const defaultAuthenticationMethods = <
         required: true,
       },
     },
+    // @ts-expect-error
     provider: new EmailPassword(),
   },
   {

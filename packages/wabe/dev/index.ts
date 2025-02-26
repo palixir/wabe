@@ -17,6 +17,7 @@ const run = async () => {
     enums: WabeSchemaEnums
     where: WabeSchemaWhereTypes
   }>({
+    isProduction: false,
     codegen: {
       enabled: true,
       path: `${import.meta.dirname}/../generated/`,
@@ -31,10 +32,15 @@ const run = async () => {
       failureRedirectPath: 'https://shipmysaas.com',
       customAuthenticationMethods: [
         {
-          name: 'otp',
+          name: 'EmailOTp',
           input: {
+            email: {
+              type: 'Email',
+              required: true,
+            },
             code: {
               type: 'String',
+              required: true,
             },
           },
           provider: {} as any,

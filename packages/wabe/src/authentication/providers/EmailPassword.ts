@@ -6,6 +6,7 @@ import type {
 } from '../interface'
 import { hashPassword } from '../utils'
 import { contextWithRoot } from '../../utils/export'
+import type { DevWabeTypes } from '../../utils/helper'
 
 type EmailPasswordInterface = {
   password: string
@@ -14,24 +15,23 @@ type EmailPasswordInterface = {
 }
 
 export class EmailPassword
-  implements ProviderInterface<EmailPasswordInterface>
+  implements ProviderInterface<DevWabeTypes, EmailPasswordInterface>
 {
   async onSignIn({
     input,
     context,
-  }: AuthenticationEventsOptions<EmailPasswordInterface>) {
+  }: AuthenticationEventsOptions<DevWabeTypes, EmailPasswordInterface>) {
     const users = await context.wabe.controllers.database.getObjects({
       className: 'User',
       where: {
         authentication: {
-          // @ts-expect-error
           emailPassword: {
             email: { equalTo: input.email },
           },
         },
       },
       context: contextWithRoot(context),
-      select: { id: true, authentication: true },
+      select: { id: true, authentication: true, secondFA: true, email: true },
       first: 1,
     })
 
@@ -67,12 +67,11 @@ export class EmailPassword
   async onSignUp({
     input,
     context,
-  }: AuthenticationEventsOptions<EmailPasswordInterface>) {
+  }: AuthenticationEventsOptions<DevWabeTypes, EmailPasswordInterface>) {
     const users = await context.wabe.controllers.database.count({
       className: 'User',
       where: {
         authentication: {
-          // @ts-expect-error
           emailPassword: {
             email: { equalTo: input.email },
           },
@@ -95,7 +94,10 @@ export class EmailPassword
     userId,
     input,
     context,
-  }: AuthenticationEventsOptionsWithUserId<EmailPasswordInterface>) {
+  }: AuthenticationEventsOptionsWithUserId<
+    DevWabeTypes,
+    EmailPasswordInterface
+  >) {
     const users = await context.wabe.controllers.database.getObjects({
       className: 'User',
       where: {

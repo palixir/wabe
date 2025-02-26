@@ -448,8 +448,6 @@ export const generateCodegen = async ({
 
   const wabeTsContent = `${wabeEnumsInString}${wabeScalarsInString}${wabeObjectsInString}${wabeDevTypes}`
 
-  await writeFile(`${path}/wabe.ts`, wabeTsContent)
-
   try {
     const contentOfGraphqlSchema = (
       await readFile(`${path}/schema.graphql`)
@@ -464,5 +462,6 @@ export const generateCodegen = async ({
       return
   } catch {}
 
+  await writeFile(`${path}/wabe.ts`, wabeTsContent)
   await writeFile(`${path}/schema.graphql`, graphqlSchemaContent)
 }

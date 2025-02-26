@@ -1,5 +1,8 @@
 export type HtmlTemplates = {
-  sendOTPCode: (options: { otp: string }) => string | Promise<string>
+  sendOTPCode: {
+    fn: (options: { otp: string }) => string | Promise<string>
+    subject: string
+  }
 }
 
 export interface EmailSendOptions {

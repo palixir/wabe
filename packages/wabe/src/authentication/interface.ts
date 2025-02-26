@@ -13,36 +13,50 @@ export interface ProviderConfig {
   clientSecret: string
 }
 
-export type AuthenticationEventsOptions<T> = {
-  input: T
-  context: WabeContext<any>
+export type AuthenticationEventsOptions<T extends WabeTypes, K> = {
+  context: WabeContext<T>
+  input: K
 }
 
-export type AuthenticationEventsOptionsWithUserId<T> =
-  AuthenticationEventsOptions<T> & {
-    userId: string
-  }
+export type AuthenticationEventsOptionsWithUserId<
+  T extends WabeTypes,
+  K,
+> = AuthenticationEventsOptions<T, K> & {
+  userId: string
+}
 
-export type ProviderInterface<T = any> = {
-  onSignIn: (options: AuthenticationEventsOptions<T>) => Promise<{
+export type OnSendChallengeOptions<T extends WabeTypes> = {
+  context: WabeContext<T>
+  user: T['types']['User']
+}
+
+export type OnVerifyChallengeOptions<T extends WabeTypes, K> = {
+  context: WabeContext<T>
+  input: K
+}
+
+export type ProviderInterface<T extends WabeTypes, K = any> = {
+  onSignIn: (options: AuthenticationEventsOptions<T, K>) => Promise<{
     user: Partial<User>
   }>
   onSignUp: (
-    options: AuthenticationEventsOptions<T>,
+    options: AuthenticationEventsOptions<T, K>,
   ) => Promise<{ authenticationDataToSave: any }>
   onUpdateAuthenticationData?: (
-    options: AuthenticationEventsOptionsWithUserId<T>,
+    options: AuthenticationEventsOptionsWithUserId<T, K>,
   ) => Promise<{ authenticationDataToSave: any }>
 }
 
-export type SecondaryProviderInterface<T = any> = {
-  onSendChallenge: () => Promise<void>
-  onVerifyChallenge: (options: T) => Promise<boolean>
+export type SecondaryProviderInterface<T extends WabeTypes, K = any> = {
+  onSendChallenge: (options: OnSendChallengeOptions<T>) => Promise<void> | void
+  onVerifyChallenge: (
+    options: OnVerifyChallengeOptions<T, K>,
+  ) => Promise<{ userId: string } | null> | ({ userId: string } | null)
 }
 
 export type CustomAuthenticationMethods<
   T extends WabeTypes,
-  U = ProviderInterface | SecondaryProviderInterface,
+  U = ProviderInterface<T> | SecondaryProviderInterface<T>,
   K = SchemaFields<T>,
   W = SchemaFields<T>,
 > = {
@@ -102,4 +116,8 @@ export enum AuthenticationProvider {
   Google = 'google',
   EmailPassword = 'emailPassword',
   PhonePassword = 'phonePassword',
+}
+
+export enum SecondaryFactor {
+  EmailOTP = 'emailOTP',
 }

@@ -46,7 +46,10 @@ describe('sendOtpCodeResolver', () => {
     wabe.config.email = {
       ...wabe.config.email,
       htmlTemplates: {
-        sendOTPCode: () => 'toto',
+        sendOTPCode: {
+          fn: () => 'toto',
+          subject: 'Confirmation code',
+        },
       },
     }
 
@@ -106,7 +109,7 @@ describe('sendOtpCodeResolver', () => {
     expect(spySend).toHaveBeenCalledWith({
       from: 'main.email@wabe.com',
       to: ['toto@toto.fr'],
-      subject: 'Confirmation code',
+      subject: 'Your OTP code',
       html: expect.any(String),
     })
   })

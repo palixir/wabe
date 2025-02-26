@@ -1,5 +1,6 @@
 import type { AuthenticationGithub } from '../../../generated/wabe'
 import { contextWithRoot } from '../../utils/export'
+import type { DevWabeTypes } from '../../utils/helper'
 import {
   AuthenticationProvider,
   type AuthenticationEventsOptions,
@@ -12,12 +13,14 @@ type GitHubInterface = {
   codeVerifier: string
 }
 
-export class GitHub implements ProviderInterface<GitHubInterface> {
+export class GitHub
+  implements ProviderInterface<DevWabeTypes, GitHubInterface>
+{
   name = 'github'
   async _githubAuthentication({
     context,
     input,
-  }: AuthenticationEventsOptions<GitHubInterface>) {
+  }: AuthenticationEventsOptions<DevWabeTypes, GitHubInterface>) {
     const { authorizationCode, codeVerifier } = input
 
     const githubOauth = new GitHubOauth(context.wabe.config)
@@ -34,7 +37,6 @@ export class GitHub implements ProviderInterface<GitHubInterface> {
       className: 'User',
       where: {
         authentication: {
-          // @ts-expect-error
           github: {
             email: { equalTo: email },
           },
@@ -78,7 +80,9 @@ export class GitHub implements ProviderInterface<GitHubInterface> {
     }
   }
 
-  onSignIn(options: AuthenticationEventsOptions<GitHubInterface>) {
+  onSignIn(
+    options: AuthenticationEventsOptions<DevWabeTypes, GitHubInterface>,
+  ) {
     return this._githubAuthentication(options)
   }
 

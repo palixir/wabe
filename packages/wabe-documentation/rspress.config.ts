@@ -103,6 +103,10 @@ export default defineConfig({
                   link: '/documentation/config/authentication/defaultMethods',
                 },
                 {
+                  text: 'Two-factor authentication (2FA)',
+                  link: '/documentation/config/authentication/twoFactor',
+                },
+                {
                   text: 'Social login (OAuth)',
                   link: '/documentation/config/authentication/oauth',
                 },

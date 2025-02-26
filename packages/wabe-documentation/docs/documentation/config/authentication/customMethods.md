@@ -1,6 +1,6 @@
 # Custom authentication methods
 
-## Create your own method
+## Create primary authentication methods
 
 Wabe offers `default` authentication methods such as Google sign-in or email and password authentication. However, you also have the option to create your `own authentication methods` by developing a class that implements the functions of the `ProviderInterface`.
 
@@ -67,129 +67,83 @@ type ProviderInterface<T = any> = {
 };
 ```
 
-## Example of EmailPassword method
+## Create secondary authentication methods
 
-Here is an example of the `EmailPassword` provider that you can use to develop your own provider.
+To create your own secondary method, you need to create a class that implements the `SecondaryProviderInterface` interface.
 
 ```ts
-import type {
-  AuthenticationEventsOptions,
-  ProviderInterface,
-} from "../interface";
+import type { SecondaryProviderInterface } from 'wabe'
 
-type EmailPasswordInterface = {
-  password: string;
-  email: string;
-};
-
-export class EmailPassword
-  implements ProviderInterface<EmailPasswordInterface>
-{
-  async onSignIn({
-    input,
-    context,
-  }: AuthenticationEventsOptions<EmailPasswordInterface>) {
-    const users = await context.wabe.controllers.database.getObjects({
-      className: "User",
-      where: {
-        authentication: {
-          // @ts-expect-error
-          emailPassword: {
-            email: { equalTo: input.email },
-          },
-        },
-      },
-      context: {
-        ...context,
-        isRoot: true,
-      },
-      select: { authentication: true},
-    });
-
-    if (users.length === 0) {
-      throw new Error("Invalid authentication credentials");
-    }
-
-    const user = users[0];
-
-    const userDatabasePassword = user.authentication?.emailPassword?.password;
-
-    if (!userDatabasePassword) {
-      throw new Error("Invalid authentication credentials");
-    }
-
-    const isPasswordEquals = await Bun.password.verify(
-      input.password,
-      userDatabasePassword,
-      "argon2id",
-    );
-
-    if (
-      !isPasswordEquals
-      || input.email !== user.authentication?.emailPassword?.email
-    ) {
-      throw new Error("Invalid authentication credentials");
-    }
-
-    return {
-      user,
-    };
+export class YourCustomProvider implements SecondaryProviderInterface {
+  async onSendChallenge({ user, context }) {
+    // Send the challenge to the user
   }
 
-  async onSignUp({
-    input,
-    context,
-  }: AuthenticationEventsOptions<EmailPasswordInterface>) {
-    const users = await context.wabe.controllers.database.getObjects({
-      className: "User",
-      where: {
-        authentication: {
-          // @ts-expect-error
-          emailPassword: {
-            email: { equalTo: input.email },
-          },
-        },
-      },
-      context,
-      select: {},
-    });
-
-    if (users.length > 0) throw new Error("User already exists");
-
-    return {
-      authenticationDataToSave: {
-        email: input.email,
-        password: await Bun.password.hash(input.password, "argon2id"),
-      },
-    };
+  async onVerifyChallenge({ input, context }) {
+    // Verify the challenge
+    return { userId: 'userId' }
   }
+}
+```
 
-  async onUpdateAuthenticationData({
-    userId,
-    input,
-    context,
-  }: AuthenticationEventsOptionsWithUserId<EmailPasswordInterface>) {
-    const users = await context.wabe.controllers.database.count({
-      className: 'User',
-      where: {
-        id: {
-          equalTo: userId,
+Then you need to add it to the `customAuthenticationMethods` array in the `authentication` object of the config.
+
+```ts
+authentication: {
+  customAuthenticationMethods: [
+    {
+      name: 'yourCustomMethod',
+      input: {
+        email: {
+          type: 'Email',
+          required: true,
+        },
+        otp: {
+          type: 'String',
+          required: true,
         },
       },
-      context,
-    })
+      provider: new YourCustomProvider(),
+    },
+  ],
+},
+```
 
-    if (users === 0) throw new Error('User not found')
+Now you can use it in the `signInWith` mutation.
 
-    return {
-      authenticationDataToSave: {
-        email: input.email,
-        // biome-ignore lint/correctness/noConstantCondition: <explanation>
-        password: typeof Bun
-          ? await Bun.password.hash(input.password, 'argon2id')
-          : await argon2.hash(input.password),
-      },
+```graphql
+mutation signInWith {
+  signInWith(
+    input: {
+      authentication: {
+        emailPassword: {
+          email: "admin@wabe.dev"
+          password: "admin"
+        }
+      }
     }
+  ) {
+    id
+    accessToken
+  }
+}
+```
+
+And in the `verifyChallenge` mutation.
+
+```graphql
+mutation verifyChallenge {
+  verifyChallenge(
+    input: {
+      secondFA: {
+        yourCustomMethod: {
+          email: "admin@wabe.dev"
+          otp: "123456"
+        }
+      }
+    }
+  ) {
+    accessToken
   }
 }
 ```

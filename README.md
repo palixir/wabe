@@ -27,6 +27,7 @@ const run = async () => {
   // Ensure your database is running before run the file
 
   const wabe = new Wabe({
+    isProduction: process.env.NODE_ENV === "production",
     // Root key example (must be long minimal 64 characters, you can generate it online)
     rootKey:
       "0uwFvUxM$ceFuF1aEtTtZMa7DUN2NZudqgY5ve5W*QCyb58cwMj9JeoaV@d#%29v&aJzswuudVU1%nAT+rxS0Bh&OkgBYc0PH18*",

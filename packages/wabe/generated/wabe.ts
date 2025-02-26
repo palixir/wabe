@@ -11,7 +11,7 @@ export enum AuthenticationProvider {
 }
 
 export enum SecondaryFactor {
-	EmailOTP = "emailOTP"
+	emailOTP = "emailOTP"
 }
 
 export type ACLObjectUsersACL = {
@@ -59,6 +59,12 @@ export type AuthenticationGithub = {
 	username: string
 }
 
+export type SecondFA = {
+	enabled: boolean,
+	provider: SecondaryFactor,
+	isAwaitingVerification?: boolean
+}
+
 export type User = {
 	id: string,
 	name?: string,
@@ -73,7 +79,8 @@ export type User = {
 	isOauth?: boolean,
 	verifiedEmail?: boolean,
 	role?: Role,
-	sessions?: Array<_Session>
+	sessions?: Array<_Session>,
+	secondFA?: SecondFA
 }
 
 export type Experience = {
@@ -145,7 +152,8 @@ export type WhereUser = {
 	isOauth?: boolean,
 	verifiedEmail?: boolean,
 	role?: Role,
-	sessions?: Array<_Session>
+	sessions?: Array<_Session>,
+	secondFA?: SecondFA
 }
 
 export type WherePost = {
@@ -273,9 +281,7 @@ export type SignInWithAuthentication = {
 	phonePassword?: SignInWithAuthenticationPhonePassword,
 	emailPassword?: SignInWithAuthenticationEmailPassword,
 	google?: SignInWithAuthenticationGoogle,
-	github?: SignInWithAuthenticationGithub,
-	otp?: SignInWithAuthenticationOtp,
-	secondaryFactor?: SecondaryFactor
+	github?: SignInWithAuthenticationGithub
 }
 
 export type SignInWithAuthenticationEmailPassword = {
@@ -291,10 +297,6 @@ export type SignInWithAuthenticationGoogle = {
 export type SignInWithAuthenticationGithub = {
 	authorizationCode: string,
 	codeVerifier: string
-}
-
-export type SignInWithAuthenticationOtp = {
-	code?: string
 }
 
 export type SignUpWithInput = {
@@ -314,9 +316,7 @@ export type SignUpWithAuthentication = {
 	phonePassword?: SignUpWithAuthenticationPhonePassword,
 	emailPassword?: SignUpWithAuthenticationEmailPassword,
 	google?: SignUpWithAuthenticationGoogle,
-	github?: SignUpWithAuthenticationGithub,
-	otp?: SignUpWithAuthenticationOtp,
-	secondaryFactor?: SecondaryFactor
+	github?: SignUpWithAuthenticationGithub
 }
 
 export type SignUpWithAuthenticationEmailPassword = {
@@ -332,10 +332,6 @@ export type SignUpWithAuthenticationGoogle = {
 export type SignUpWithAuthenticationGithub = {
 	authorizationCode: string,
 	codeVerifier: string
-}
-
-export type SignUpWithAuthenticationOtp = {
-	code?: string
 }
 
 export type SignOutInput = {
@@ -356,19 +352,26 @@ export type MutationRefreshArgs = {
 }
 
 export type VerifyChallengeInput = {
-	factor?: VerifyChallengeFactor
+	secondFA?: VerifyChallengeSecondFA
 }
 
 export type MutationVerifyChallengeArgs = {
 	input: VerifyChallengeInput
 }
 
-export type VerifyChallengeFactorOtp = {
-	code?: string
+export type VerifyChallengeSecondFAEmailOTP = {
+	email: string,
+	otp: string
 }
 
-export type VerifyChallengeFactor = {
-	otp?: VerifyChallengeFactorOtp
+export type VerifyChallengeSecondFA = {
+	emailOTP?: VerifyChallengeSecondFAEmailOTP,
+	EmailOTp?: VerifyChallengeSecondFAEmailOTp
+}
+
+export type VerifyChallengeSecondFAEmailOTp = {
+	email: string,
+	code: string
 }
 
 export type QueryHelloWorldArgs = {
