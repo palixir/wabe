@@ -17,6 +17,7 @@ const run = async () => {
     enums: WabeSchemaEnums
     where: WabeSchemaWhereTypes
   }>({
+    isProduction: false,
     codegen: {
       enabled: true,
       path: `${import.meta.dirname}/../generated/`,

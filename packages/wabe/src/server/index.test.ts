@@ -14,6 +14,7 @@ describe('Server', () => {
 
     const port = await getPort()
     const wabe = new Wabe({
+      isProduction: false,
       rootKey:
         'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
       database: {
@@ -52,6 +53,7 @@ describe('Server', () => {
 
     const port = await getPort()
     const wabe = new Wabe({
+      isProduction: false,
       rootKey:
         'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
       database: {
@@ -83,6 +85,7 @@ describe('Server', () => {
 
     const port = await getPort()
     const wabe = new Wabe({
+      isProduction: false,
       hostname: '0.0.0.0',
       rootKey:
         'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
@@ -117,6 +120,7 @@ describe('Server', () => {
     expect(
       () =>
         new Wabe({
+          isProduction: false,
           rootKey:
             'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
           database: {
@@ -138,6 +142,7 @@ describe('Server', () => {
     expect(
       () =>
         new Wabe({
+          isProduction: false,
           rootKey:
             'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
           database: {
@@ -153,6 +158,7 @@ describe('Server', () => {
     expect(
       () =>
         new Wabe({
+          isProduction: false,
           rootKey:
             'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
           database: {
@@ -177,6 +183,7 @@ describe('Server', () => {
 
     const port = await getPort()
     const wabe = new Wabe({
+      isProduction: false,
       rootKey:
         'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
       database: {
@@ -204,6 +211,7 @@ describe('Server', () => {
     const port = await getPort()
 
     const wabe = new Wabe({
+      isProduction: false,
       rootKey:
         'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
       database: {
@@ -243,6 +251,7 @@ describe('Server', () => {
     const port = await getPort()
 
     const wabe = new Wabe({
+      isProduction: false,
       rootKey:
         'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
       database: {
@@ -285,6 +294,7 @@ describe('Server', () => {
     const port = await getPort()
     const port2 = await getPort()
     const wabeMain = new Wabe({
+      isProduction: false,
       rootKey:
         'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
       database: {
@@ -301,6 +311,7 @@ describe('Server', () => {
     await wabeMain.start()
 
     const wabeSlave1 = new Wabe({
+      isProduction: false,
       rootKey:
         'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
       database: {

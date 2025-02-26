@@ -20,6 +20,7 @@ const createWabe = async (schema: SchemaInterface<DevWabeTypes>) => {
   const port = await getPort()
 
   const wabe = new Wabe({
+    isProduction: false,
     port,
     schema,
     rootKey:
