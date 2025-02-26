@@ -67,76 +67,73 @@ export default defineConfig({
           ],
         },
         {
-          text: 'Configuration',
+          text: 'Schema',
           collapsible: true,
+          collapsed: true,
           items: [
             {
-              text: 'Schema',
-              collapsible: true,
-              items: [
-                {
-                  text: 'Classes',
-                  link: '/documentation/config/schema/classes',
-                },
-                {
-                  text: 'Resolvers',
-                  link: '/documentation/config/schema/resolvers',
-                },
-                { text: 'Enums', link: '/documentation/config/schema/enums' },
-                {
-                  text: 'Scalars',
-                  link: '/documentation/config/schema/scalars',
-                },
-              ],
+              text: 'Classes',
+              link: '/documentation/conig/schema/classes',
             },
-            { text: 'Files', link: '/documentation/config/files' },
             {
-              text: 'Authentication',
-              collapsible: true,
-              items: [
-                {
-                  text: 'Sign In / Up / Out',
-                  link: '/documentation/config/authentication/interact',
-                },
-                {
-                  text: 'Default auth methods',
-                  link: '/documentation/config/authentication/defaultMethods',
-                },
-                {
-                  text: 'Two-factor authentication (2FA)',
-                  link: '/documentation/config/authentication/twoFactor',
-                },
-                {
-                  text: 'Social login (OAuth)',
-                  link: '/documentation/config/authentication/oauth',
-                },
-                {
-                  text: 'Reset password',
-                  link: '/documentation/config/authentication/resetPassword',
-                },
-                {
-                  text: 'Sessions',
-                  link: '/documentation/config/authentication/sessions',
-                },
-                {
-                  text: 'Roles',
-                  link: '/documentation/config/authentication/roles',
-                },
-                {
-                  text: 'Create custom methods',
-                  link: '/documentation/config/authentication/customMethods',
-                },
-              ],
+              text: 'Resolvers',
+              link: '/documentation/schema/resolvers',
             },
-            { text: 'Hooks', link: '/documentation/config/hooks' },
-            { text: 'Routes', link: '/documentation/config/routes' },
-            { text: 'Codegen', link: '/documentation/config/codegen' },
-            { text: 'Root key', link: '/documentation/config/rootKey' },
+            { text: 'Enums', link: '/documentation/schema/enums' },
+            {
+              text: 'Scalars',
+              link: '/documentation/schema/scalars',
+            },
           ],
         },
+        { text: 'Files', link: '/documentation/files' },
+        {
+          text: 'Authentication',
+          collapsible: true,
+          collapsed: true,
+          items: [
+            {
+              text: 'Sign In / Up / Out',
+              link: '/documentation/authentication/interact',
+            },
+            {
+              text: 'Default auth methods',
+              link: '/documentation/authentication/defaultMethods',
+            },
+            {
+              text: 'Two-factor authentication (2FA)',
+              link: '/documentation/authentication/twoFactor',
+            },
+            {
+              text: 'Social login (OAuth)',
+              link: '/documentation/authentication/oauth',
+            },
+            {
+              text: 'Reset password',
+              link: '/documentation/authentication/resetPassword',
+            },
+            {
+              text: 'Sessions',
+              link: '/documentation/authentication/sessions',
+            },
+            {
+              text: 'Roles',
+              link: '/documentation/authentication/roles',
+            },
+            {
+              text: 'Create custom methods',
+              link: '/documentation/authentication/customMethods',
+            },
+          ],
+        },
+        { text: 'Hooks', link: '/documentation/hooks' },
+        { text: 'Routes', link: '/documentation/routes' },
+        { text: 'Codegen', link: '/documentation/codegen' },
+        { text: 'Root key', link: '/documentation/rootKey' },
         {
           text: 'Interact with database',
           collapsible: true,
+          collapsed: true,
           items: [
             { text: 'GraphQL', link: '/documentation/graphql/api' },
             { text: 'Database', link: '/documentation/database/index' },
