@@ -1,3 +1,5 @@
 export * from './EmailPassword'
 export * from './Google'
 export * from './GitHub'
+export * from './PhonePassword'
+export * from './EmailOTP'

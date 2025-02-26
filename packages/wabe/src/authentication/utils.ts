@@ -9,7 +9,7 @@ import type {
 
 export const getAuthenticationMethod = <
   T extends WabeTypes,
-  U extends ProviderInterface | SecondaryProviderInterface,
+  U = ProviderInterface<T> | SecondaryProviderInterface<T>,
 >(
   listOfMethods: string[],
   context: WabeContext<any>,

@@ -1,5 +1,6 @@
 import type { AuthenticationGoogle } from '../../../generated/wabe'
 import { contextWithRoot } from '../../utils/export'
+import type { DevWabeTypes } from '../../utils/helper'
 import {
   AuthenticationProvider,
   type AuthenticationEventsOptions,
@@ -12,12 +13,14 @@ type GoogleInterface = {
   codeVerifier: string
 }
 
-export class Google implements ProviderInterface<GoogleInterface> {
+export class Google
+  implements ProviderInterface<DevWabeTypes, GoogleInterface>
+{
   name = 'google'
   async _googleAuthentication({
     context,
     input,
-  }: AuthenticationEventsOptions<GoogleInterface>) {
+  }: AuthenticationEventsOptions<DevWabeTypes, GoogleInterface>) {
     const { authorizationCode, codeVerifier } = input
 
     const googleOauth = new GoogleOauth(context.wabe.config)
@@ -39,7 +42,6 @@ export class Google implements ProviderInterface<GoogleInterface> {
       className: 'User',
       where: {
         authentication: {
-          // @ts-expect-error
           google: {
             email: { equalTo: email },
           },
@@ -82,7 +84,9 @@ export class Google implements ProviderInterface<GoogleInterface> {
     }
   }
 
-  onSignIn(options: AuthenticationEventsOptions<GoogleInterface>) {
+  onSignIn(
+    options: AuthenticationEventsOptions<DevWabeTypes, GoogleInterface>,
+  ) {
     return this._googleAuthentication(options)
   }
 

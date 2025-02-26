@@ -1,5 +1,6 @@
 import type { VerifyChallengeInput } from '../../../generated/wabe'
 import type { WabeContext } from '../../server/interface'
+import type { DevWabeTypes } from '../../utils/helper'
 import { Session } from '../Session'
 import type { SecondaryProviderInterface } from '../interface'
 import { getAuthenticationMethod } from '../utils'
@@ -11,32 +12,58 @@ export const verifyChallengeResolver = async (
   }: {
     input: VerifyChallengeInput
   },
-  context: WabeContext<any>,
+  context: WabeContext<DevWabeTypes>,
 ) => {
-  if (!input.factor) throw new Error('One factor is required')
+  if (!input.secondFA) throw new Error('One factor is required')
 
-  const listOfFactor = Object.keys(input.factor)
+  const listOfFactor = Object.keys(input.secondFA)
 
-  if (Object.keys(input.factor).length !== 1)
-    throw new Error('Only one factor is allowed')
+  if (listOfFactor.length > 1) throw new Error('Only one factor is allowed')
 
   const { provider, name } = getAuthenticationMethod<
     any,
-    SecondaryProviderInterface
+    SecondaryProviderInterface<DevWabeTypes>
   >(listOfFactor, context)
 
-  const userId = context.user?.id
+  const result = await provider.onVerifyChallenge({
+    context,
+    // @ts-expect-error
+    input: input.secondFA[name],
+  })
 
-  if (!userId) throw new Error('Invalid user')
-
-  // @ts-expect-error
-  const res = await provider.onVerifyChallenge(input.factor[name])
-
-  if (!res) throw new Error('Invalid challenge')
+  if (!result?.userId) throw new Error('Invalid challenge')
 
   const session = new Session()
 
-  await session.create(userId, context)
+  const { accessToken, refreshToken } = await session.create(
+    result.userId,
+    context,
+  )
 
-  return true
+  if (context.wabe.config.authentication?.session?.cookieSession) {
+    const accessTokenExpiresAt = session.getAccessTokenExpireAt(
+      context.wabe.config,
+    )
+    const refreshTokenExpiresAt = session.getRefreshTokenExpireAt(
+      context.wabe.config,
+    )
+
+    context.response?.setCookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      path: '/',
+      sameSite: 'None',
+      secure: true,
+      expires: refreshTokenExpiresAt,
+    })
+
+    context.response?.setCookie('accessToken', accessToken, {
+      httpOnly: true,
+      path: '/',
+      sameSite: 'None',
+      secure: true,
+      expires: accessTokenExpiresAt,
+    })
+  }
+
+  return { accessToken }
 }

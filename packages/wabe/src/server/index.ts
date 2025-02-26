@@ -35,7 +35,7 @@ type SecurityConfig = {
 
 export interface WabeConfig<T extends WabeTypes> {
   port: number
-  isProduction?: boolean
+  isProduction: boolean
   hostname?: string
   security?: SecurityConfig
   schema?: SchemaInterface<T>
@@ -134,10 +134,10 @@ export class Wabe<T extends WabeTypes> {
       file: file?.adapter ? new FileController(file.adapter, this) : undefined,
     }
 
+    this.loadAuthenticationMethods()
     this.loadRoleEnum()
     this.loadRoutes()
     this.loadHooks()
-    this.loadAuthenticationMethods()
   }
 
   loadRoleEnum() {
@@ -237,7 +237,7 @@ export class Wabe<T extends WabeTypes> {
       process.env.NODE_ENV !== 'test' &&
       this.config.codegen &&
       this.config.codegen.enabled &&
-      this.config.codegen.path
+      this.config.codegen.path.length > 0
     ) {
       await generateCodegen({
         path: this.config.codegen.path,

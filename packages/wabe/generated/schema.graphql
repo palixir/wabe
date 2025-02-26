@@ -11,7 +11,7 @@ enum AuthenticationProvider {
 }
 
 enum SecondaryFactor {
-  EmailOTP
+  emailOTP
 }
 
 """Object containing information about the file"""
@@ -41,6 +41,7 @@ type User {
   verifiedEmail: Boolean
   role: Role
   sessions: _SessionConnection
+  secondFA: UserSecondFA
 }
 
 """Email scalar type"""
@@ -103,6 +104,12 @@ type _SessionEdge {
   node: _Session!
 }
 
+type UserSecondFA {
+  enabled: Boolean!
+  provider: SecondaryFactor!
+  isAwaitingVerification: Boolean
+}
+
 """User class"""
 input UserInput {
   name: String
@@ -118,6 +125,7 @@ input UserInput {
   verifiedEmail: Boolean
   role: RolePointerInput
   sessions: _SessionRelationInput
+  secondFA: UserSecondFAInput
 }
 
 input UserACLObjectInput {
@@ -165,6 +173,12 @@ input UserAuthenticationGithubInput {
   username: String!
 }
 
+input UserSecondFAInput {
+  enabled: Boolean!
+  provider: SecondaryFactor!
+  isAwaitingVerification: Boolean
+}
+
 """Input to link an object to a pointer User"""
 input UserPointerInput {
   unlink: Boolean
@@ -187,6 +201,7 @@ input UserCreateFieldsInput {
   verifiedEmail: Boolean
   role: RolePointerInput
   sessions: _SessionRelationInput
+  secondFA: UserSecondFACreateFieldsInput
 }
 
 input UserACLObjectCreateFieldsInput {
@@ -232,6 +247,12 @@ input UserAuthenticationGithubCreateFieldsInput {
   email: Email
   avatarUrl: String
   username: String
+}
+
+input UserSecondFACreateFieldsInput {
+  enabled: Boolean
+  provider: SecondaryFactor
+  isAwaitingVerification: Boolean
 }
 
 """Input to add a relation to the class User"""
@@ -703,6 +724,7 @@ input UserWhereInput {
   verifiedEmail: BooleanWhereInput
   role: RoleWhereInput
   sessions: _SessionWhereInput
+  secondFA: UserSecondFAWhereInput
   OR: [UserWhereInput]
   AND: [UserWhereInput]
 }
@@ -915,6 +937,14 @@ input _SessionACLObjectRolesACLWhereInput {
   AND: [_SessionACLObjectRolesACLWhereInput]
 }
 
+input UserSecondFAWhereInput {
+  enabled: BooleanWhereInput
+  provider: AnyWhereInput
+  isAwaitingVerification: BooleanWhereInput
+  OR: [UserSecondFAWhereInput]
+  AND: [UserSecondFAWhereInput]
+}
+
 enum UserOrder {
   name_ASC
   name_DESC
@@ -942,6 +972,8 @@ enum UserOrder {
   role_DESC
   sessions_ASC
   sessions_DESC
+  secondFA_ASC
+  secondFA_DESC
 }
 
 type PostConnection {
@@ -1198,7 +1230,7 @@ type Mutation {
   signUpWith(input: SignUpWithInput!): SignUpWithOutput
   signOut: Boolean
   refresh(input: RefreshInput!): RefreshSessionOutput
-  verifyChallenge(input: VerifyChallengeInput!): Boolean
+  verifyChallenge(input: VerifyChallengeInput!): VerifyChallengeOutput
 }
 
 type CreateUserPayload {
@@ -1242,6 +1274,7 @@ input UserUpdateFieldsInput {
   verifiedEmail: Boolean
   role: RolePointerInput
   sessions: _SessionRelationInput
+  secondFA: UserSecondFAUpdateFieldsInput
 }
 
 input UserACLObjectUpdateFieldsInput {
@@ -1287,6 +1320,12 @@ input UserAuthenticationGithubUpdateFieldsInput {
   email: Email
   avatarUrl: String
   username: String
+}
+
+input UserSecondFAUpdateFieldsInput {
+  enabled: Boolean
+  provider: SecondaryFactor
+  isAwaitingVerification: Boolean
 }
 
 input UpdateUsersInput {
@@ -1674,8 +1713,6 @@ input SignInWithAuthenticationInput {
   emailPassword: SignInWithAuthenticationEmailPasswordInput
   google: SignInWithAuthenticationGoogleInput
   github: SignInWithAuthenticationGithubInput
-  otp: SignInWithAuthenticationOtpInput
-  secondaryFactor: SecondaryFactor
 }
 
 input SignInWithAuthenticationPhonePasswordInput {
@@ -1698,10 +1735,6 @@ input SignInWithAuthenticationGithubInput {
   codeVerifier: String!
 }
 
-input SignInWithAuthenticationOtpInput {
-  code: String
-}
-
 type SignUpWithOutput {
   id: String
   accessToken: String!
@@ -1717,8 +1750,6 @@ input SignUpWithAuthenticationInput {
   emailPassword: SignUpWithAuthenticationEmailPasswordInput
   google: SignUpWithAuthenticationGoogleInput
   github: SignUpWithAuthenticationGithubInput
-  otp: SignUpWithAuthenticationOtpInput
-  secondaryFactor: SecondaryFactor
 }
 
 input SignUpWithAuthenticationPhonePasswordInput {
@@ -1741,10 +1772,6 @@ input SignUpWithAuthenticationGithubInput {
   codeVerifier: String!
 }
 
-input SignUpWithAuthenticationOtpInput {
-  code: String
-}
-
 type RefreshSessionOutput {
   accessToken: String!
   refreshToken: String!
@@ -1755,14 +1782,25 @@ input RefreshInput {
   refreshToken: String!
 }
 
+type VerifyChallengeOutput {
+  accessToken: String
+}
+
 input VerifyChallengeInput {
-  factor: VerifyChallengeFactorInput
+  secondFA: VerifyChallengeSecondaryFactorAuthenticationInput
 }
 
-input VerifyChallengeFactorInput {
-  otp: VerifyChallengeFactorOtpInput
+input VerifyChallengeSecondaryFactorAuthenticationInput {
+  emailOTP: VerifyChallengeSecondaryFactorAuthenticationEmailOTPInput
+  EmailOTp: VerifyChallengeSecondaryFactorAuthenticationEmailOTpInput
 }
 
-input VerifyChallengeFactorOtpInput {
-  code: String
+input VerifyChallengeSecondaryFactorAuthenticationEmailOTPInput {
+  email: Email!
+  otp: String!
+}
+
+input VerifyChallengeSecondaryFactorAuthenticationEmailOTpInput {
+  email: Email!
+  code: String!
 }

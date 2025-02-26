@@ -56,7 +56,7 @@ describe('verifyChallenge', () => {
         undefined,
         {
           input: {
-            factor: {
+            secondFA: {
               // @ts-expect-error
               factor1: {},
               factor2: {},
@@ -76,7 +76,7 @@ describe('verifyChallenge', () => {
         undefined,
         {
           input: {
-            factor: {
+            secondFA: {
               // @ts-expect-error
               fakeOtp: {
                 code: '123456',
@@ -89,20 +89,24 @@ describe('verifyChallenge', () => {
     ).rejects.toThrow('Invalid challenge')
   })
 
-  it('should return true if the verifyChallenge is correct', async () => {
+  it('should return userId if the verifyChallenge is correct', async () => {
     const spyCreateSession = spyOn(
       Session.prototype,
       'create',
-    ).mockResolvedValue('session' as never)
+    ).mockResolvedValue({
+      accessToken: 'accessToken',
+      refreshToken: 'refreshToken',
+      sessionId: 'sessionId',
+    })
 
-    mockOnVerifyChallenge.mockResolvedValue(true as never)
+    mockOnVerifyChallenge.mockResolvedValue({ userId: 'userId' } as never)
 
     expect(
       await verifyChallengeResolver(
         undefined,
         {
           input: {
-            factor: {
+            secondFA: {
               // @ts-expect-error
               fakeOtp: {
                 code: '123456',
@@ -112,10 +116,15 @@ describe('verifyChallenge', () => {
         },
         context,
       ),
-    ).toBe(true)
+    ).toEqual({
+      accessToken: 'accessToken',
+    })
 
     expect(mockOnVerifyChallenge).toHaveBeenCalledTimes(1)
-    expect(mockOnVerifyChallenge).toHaveBeenCalledWith({ code: '123456' })
+    expect(mockOnVerifyChallenge).toHaveBeenCalledWith({
+      input: { code: '123456' },
+      context: expect.any(Object),
+    })
 
     expect(spyCreateSession).toHaveBeenCalledTimes(1)
     expect(spyCreateSession).toHaveBeenCalledWith('userId', context)

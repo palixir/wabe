@@ -1,14 +1,12 @@
-import {
-  AuthenticationProvider,
-  signInWithResolver,
-  signUpWithResolver,
-} from '../authentication'
+import { AuthenticationProvider, SecondaryFactor } from '../authentication'
 import { refreshResolver } from '../authentication/resolvers/refreshResolver'
 import { signOutResolver } from '../authentication/resolvers/signOutResolver'
 import { verifyChallengeResolver } from '../authentication/resolvers/verifyChallenge'
 import type { WabeConfig, WabeTypes } from '../server'
 import { defaultMutations, defaultQueries } from './defaultResolvers'
 import type { HookObject } from '../hooks/HookObject'
+import { signUpWithResolver } from '../authentication/resolvers/signUpWithResolver'
+import { signInWithResolver } from '../authentication/resolvers/signInWithResolver'
 
 export type WabePrimaryTypes =
   | 'String'
@@ -236,9 +234,9 @@ export class Schema<T extends WabeTypes> {
       },
       {
         name: 'SecondaryFactor',
-        values: {
-          EmailOTP: 'emailOTP',
-        },
+        values: Object.fromEntries(
+          Object.values(SecondaryFactor).map((key) => [key, key]),
+        ),
       },
     ]
   }
@@ -260,11 +258,10 @@ export class Schema<T extends WabeTypes> {
     const customAuthenticationConfig =
       this.config.authentication?.customAuthenticationMethods || []
 
-    const allSecondaryFactorAuthenticationMethods =
-      customAuthenticationConfig.reduce(
+    const allPrimaryAuthenticationMethodsInput = customAuthenticationConfig
+      .filter((authenticationMethod) => !authenticationMethod.isSecondaryFactor)
+      .reduce(
         (acc, authenticationMethod) => {
-          if (!authenticationMethod.isSecondaryFactor) return acc
-
           acc[authenticationMethod.name] = {
             type: 'Object',
             object: {
@@ -278,26 +275,39 @@ export class Schema<T extends WabeTypes> {
         {} as SchemaFields<T>,
       )
 
-    const allAuthenticationMethodsInput = customAuthenticationConfig.reduce(
-      (acc, authenticationMethod) => {
-        acc[authenticationMethod.name] = {
-          type: 'Object',
-          object: {
-            name: authenticationMethod.name,
-            fields: authenticationMethod.input,
-          },
-        }
+    const allSecondaryFactorAuthenticationMethodsInput =
+      customAuthenticationConfig
+        .filter(
+          (authenticationMethod) => authenticationMethod.isSecondaryFactor,
+        )
+        .reduce(
+          (acc, authenticationMethod) => {
+            acc[authenticationMethod.name] = {
+              type: 'Object',
+              object: {
+                name: authenticationMethod.name,
+                fields: authenticationMethod.input,
+              },
+            }
 
-        return acc
-      },
-      {} as SchemaFields<T>,
-    )
+            return acc
+          },
+          {} as SchemaFields<T>,
+        )
 
     const authenticationInputObject: TypeFieldObject<T> = {
       type: 'Object',
       object: {
         name: 'Authentication',
-        fields: allAuthenticationMethodsInput,
+        fields: allPrimaryAuthenticationMethodsInput,
+      },
+    }
+
+    const secondaryFactorAuthenticationInputObject: TypeFieldObject<T> = {
+      type: 'Object',
+      object: {
+        name: 'SecondaryFactorAuthentication',
+        fields: allSecondaryFactorAuthenticationMethodsInput,
       },
     }
 
@@ -305,26 +315,10 @@ export class Schema<T extends WabeTypes> {
       type: 'Object',
       object: {
         name: 'Authentication',
-        fields: {
-          // All authentication providers
-          ...authenticationInputObject.object.fields,
-          // Secondary factor
-          secondaryFactor: {
-            type: 'SecondaryFactor',
-            required: false,
-          },
-        },
+        fields: authenticationInputObject.object.fields,
         required: true,
       },
       required: true,
-    }
-
-    const challengeInputObject: TypeFieldObject<T> = {
-      type: 'Object',
-      object: {
-        name: 'Factor',
-        fields: allSecondaryFactorAuthenticationMethods,
-      },
     }
 
     return {
@@ -410,19 +404,23 @@ export class Schema<T extends WabeTypes> {
                 },
                 resolve: refreshResolver,
               },
-              ...(Object.keys(challengeInputObject.object.fields).length > 0
-                ? {
-                    verifyChallenge: {
-                      type: 'Boolean',
-                      args: {
-                        input: {
-                          factor: challengeInputObject,
-                        },
-                      },
-                      resolve: verifyChallengeResolver,
+              verifyChallenge: {
+                type: 'Object',
+                outputObject: {
+                  name: 'VerifyChallengeOutput',
+                  fields: {
+                    accessToken: {
+                      type: 'String',
                     },
-                  }
-                : {}),
+                  },
+                },
+                args: {
+                  input: {
+                    secondFA: secondaryFactorAuthenticationInputObject,
+                  },
+                },
+                resolve: verifyChallengeResolver,
+              },
             }
           : {}),
       },
@@ -533,8 +531,13 @@ export class Schema<T extends WabeTypes> {
     const customAuthenticationConfig =
       this.config.authentication?.customAuthenticationMethods || []
 
-    const allAuthenticationDataToStoreObject =
-      customAuthenticationConfig.reduce(
+    const allAuthenticationDataToStoreObject = customAuthenticationConfig
+      .filter(
+        (authenticationMethod) =>
+          authenticationMethod.dataToStore &&
+          !authenticationMethod.isSecondaryFactor,
+      )
+      .reduce(
         (acc, authenticationMethod) => {
           if (authenticationMethod.dataToStore)
             acc[authenticationMethod.name] = {
@@ -581,6 +584,25 @@ export class Schema<T extends WabeTypes> {
       sessions: {
         type: 'Relation',
         class: '_Session',
+      },
+      secondFA: {
+        type: 'Object',
+        object: {
+          name: 'SecondFA',
+          fields: {
+            enabled: {
+              type: 'Boolean',
+              required: true,
+            },
+            provider: {
+              type: 'SecondaryFactor',
+              required: true,
+            },
+            isAwaitingVerification: {
+              type: 'Boolean',
+            },
+          },
+        },
       },
     }
 

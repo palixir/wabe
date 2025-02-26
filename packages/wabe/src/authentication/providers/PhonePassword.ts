@@ -6,6 +6,7 @@ import type {
 } from '../interface'
 import { hashPassword } from '../utils'
 import { contextWithRoot } from '../../utils/export'
+import type { DevWabeTypes } from '../../utils/helper'
 
 type PhonePasswordInterface = {
   password: string
@@ -14,17 +15,16 @@ type PhonePasswordInterface = {
 }
 
 export class PhonePassword
-  implements ProviderInterface<PhonePasswordInterface>
+  implements ProviderInterface<DevWabeTypes, PhonePasswordInterface>
 {
   async onSignIn({
     input,
     context,
-  }: AuthenticationEventsOptions<PhonePasswordInterface>) {
+  }: AuthenticationEventsOptions<DevWabeTypes, PhonePasswordInterface>) {
     const users = await context.wabe.controllers.database.getObjects({
       className: 'User',
       where: {
         authentication: {
-          // @ts-expect-error
           phonePassword: {
             phone: { equalTo: input.phone },
           },
@@ -67,12 +67,11 @@ export class PhonePassword
   async onSignUp({
     input,
     context,
-  }: AuthenticationEventsOptions<PhonePasswordInterface>) {
+  }: AuthenticationEventsOptions<DevWabeTypes, PhonePasswordInterface>) {
     const users = await context.wabe.controllers.database.count({
       className: 'User',
       where: {
         authentication: {
-          // @ts-expect-error
           phonePassword: {
             phone: { equalTo: input.phone },
           },
@@ -95,7 +94,10 @@ export class PhonePassword
     userId,
     input,
     context,
-  }: AuthenticationEventsOptionsWithUserId<PhonePasswordInterface>) {
+  }: AuthenticationEventsOptionsWithUserId<
+    DevWabeTypes,
+    PhonePasswordInterface
+  >) {
     const users = await context.wabe.controllers.database.getObjects({
       className: 'User',
       where: {

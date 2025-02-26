@@ -1,5 +1,6 @@
 import type { ProviderInterface } from '../authentication'
 import { getAuthenticationMethod } from '../authentication/utils'
+import type { DevWabeTypes } from '../utils/helper'
 import type { HookObject } from './HookObject'
 
 export const defaultCallAuthenticationProviderOnBeforeCreateUser = async (
@@ -15,10 +16,10 @@ export const defaultCallAuthenticationProviderOnBeforeCreateUser = async (
 
   const authentication = hookObject.getNewData().authentication
 
-  const { provider, name } = getAuthenticationMethod<any, ProviderInterface>(
-    Object.keys(authentication),
-    context,
-  )
+  const { provider, name } = getAuthenticationMethod<
+    DevWabeTypes,
+    ProviderInterface<DevWabeTypes>
+  >(Object.keys(authentication), context)
 
   const inputOfTheGoodAuthenticationMethod = authentication[name]
 
@@ -48,10 +49,10 @@ export const defaultCallAuthenticationProviderOnBeforeUpdateUser = async (
 
   const authentication = hookObject.getNewData().authentication
 
-  const { provider, name } = getAuthenticationMethod<any, ProviderInterface>(
-    Object.keys(authentication),
-    context,
-  )
+  const { provider, name } = getAuthenticationMethod<
+    DevWabeTypes,
+    ProviderInterface<DevWabeTypes>
+  >(Object.keys(authentication), context)
 
   if (!provider.onUpdateAuthenticationData) return
 

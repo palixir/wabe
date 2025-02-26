@@ -1,6 +1,7 @@
-import { describe, expect, it, beforeEach, mock, spyOn } from 'bun:test'
+import { describe, expect, it, mock, spyOn, afterEach } from 'bun:test'
 import { signInWithResolver } from './signInWithResolver'
 import { Session } from '../Session'
+import { SecondaryFactor } from '../interface'
 
 describe('SignInWith', () => {
   const mockOnLogin = mock(() =>
@@ -43,8 +44,12 @@ describe('SignInWith', () => {
               },
             },
             {
-              name: 'otp',
+              name: 'emailOTP',
               input: {
+                email: {
+                  type: 'Email',
+                  required: true,
+                },
                 code: {
                   type: 'String',
                   required: true,
@@ -61,13 +66,25 @@ describe('SignInWith', () => {
     },
   }
 
-  beforeEach(() => {
+  afterEach(() => {
     mockCreateObject.mockClear()
     mockOnLogin.mockClear()
     mockOnSignUp.mockClear()
   })
 
   it('should call the secondary factor authentication on signIn', async () => {
+    mockOnLogin.mockResolvedValueOnce({
+      user: {
+        id: 'id',
+        // @ts-expect-error
+        email: 'email@test.fr',
+        secondFA: {
+          enabled: true,
+          provider: SecondaryFactor.EmailOTP,
+        },
+      },
+    })
+
     const res = await signInWithResolver(
       {},
       {
@@ -77,11 +94,10 @@ describe('SignInWith', () => {
               email: 'email@test.fr',
               password: 'password',
             },
-            // @ts-expect-error
-            secondaryFactor: 'otp', // Use hardcoded value to avoid dependency on the generated code
           },
         },
       },
+      // @ts-expect-error
       context,
     )
 
@@ -95,6 +111,12 @@ describe('SignInWith', () => {
     })
 
     expect(mockOnSendChallenge).toHaveBeenCalledTimes(1)
+    expect(mockOnSendChallenge).toHaveBeenCalledWith({
+      context: expect.any(Object),
+      user: expect.objectContaining({
+        email: 'email@test.fr',
+      }),
+    })
 
     expect(res).toEqual({
       accessToken: null,

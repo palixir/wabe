@@ -23,7 +23,7 @@ export const signInWithResolver = async (
 ) => {
   const { provider, name } = getAuthenticationMethod<
     DevWabeTypes,
-    ProviderInterface
+    ProviderInterface<DevWabeTypes>
   >(Object.keys(input.authentication || {}), context)
 
   const inputOfTheGoodAuthenticationMethod =
@@ -40,14 +40,20 @@ export const signInWithResolver = async (
 
   if (!userId) throw new Error('Authentication failed')
 
+  const secondFAObject = user.secondFA
+
   // 2 - We call the onSendChallenge method of the provider
-  if (input.authentication?.secondaryFactor) {
+  if (secondFAObject?.enabled) {
     const secondaryProvider = getAuthenticationMethod<
       DevWabeTypes,
-      SecondaryProviderInterface
-    >([input.authentication.secondaryFactor], context)
+      SecondaryProviderInterface<DevWabeTypes>
+    >([secondFAObject.provider], context)
 
-    await secondaryProvider.provider.onSendChallenge()
+    await secondaryProvider.provider.onSendChallenge({
+      context,
+      // @ts-expect-error
+      user,
+    })
 
     return { accessToken: null, refreshToken: null, id: userId }
   }
@@ -70,7 +76,6 @@ export const signInWithResolver = async (
       sameSite: 'None',
       secure: true,
       expires: refreshTokenExpiresAt,
-      // expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
     })
 
     context.response?.setCookie('accessToken', accessToken, {
@@ -79,7 +84,6 @@ export const signInWithResolver = async (
       sameSite: 'None',
       secure: true,
       expires: accessTokenExpiresAt,
-      // expires: new Date(Date.now() + 1000 * 60 * 60 * 24),
     })
   }
 
