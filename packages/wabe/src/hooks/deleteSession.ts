@@ -1,3 +1,4 @@
+import { contextWithRoot } from '../utils/export'
 import type { DevWabeTypes } from '../utils/helper'
 import type { HookObject } from './HookObject'
 
@@ -10,10 +11,7 @@ export const defaultDeleteSessionOnDeleteUser = async (
 
   await object.context.wabe.controllers.database.deleteObjects({
     className: '_Session',
-    context: {
-      ...object.context,
-      isRoot: true,
-    },
+    context: contextWithRoot(object.context),
     where: {
       user: { id: { equalTo: userId } },
     },

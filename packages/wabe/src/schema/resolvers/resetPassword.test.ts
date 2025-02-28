@@ -78,7 +78,6 @@ describe('resetPasswordResolver', () => {
         email: 'toto@toto.fr',
         password: 'tata',
         otp,
-        provider: 'emailPassword',
       },
     })
 
@@ -131,7 +130,6 @@ describe('resetPasswordResolver', () => {
         email: 'toto@toto.fr',
         password: 'tata',
         otp,
-        provider: 'emailPassword',
       },
     })
 
@@ -184,7 +182,6 @@ describe('resetPasswordResolver', () => {
         email: 'toto@toto.fr',
         password: 'tata',
         otp,
-        provider: 'emailPassword',
       },
     })
 
@@ -227,7 +224,6 @@ describe('resetPasswordResolver', () => {
         email: 'toto2@toto.fr',
         password: 'tata',
         otp: '000000',
-        provider: 'emailPassword',
       },
     })
 
@@ -253,7 +249,6 @@ describe('resetPasswordResolver', () => {
         email: 'invalidUser@toto.fr',
         password: 'tata',
         otp: '000000',
-        provider: 'emailPassword',
       },
     })
 
@@ -282,10 +277,61 @@ describe('resetPasswordResolver', () => {
           email: 'toto3@toto.fr',
           password: 'tata',
           otp: 'invalidOtp',
-          provider: 'emailPassword',
         },
       }),
     ).rejects.toThrow('Invalid OTP code')
+
+    process.env.NODE_ENV = 'test'
+  })
+
+  it('should reset password of another provider than emailPassword', async () => {
+    process.env.NODE_ENV = 'production'
+
+    const {
+      createUser: { user },
+    } = await client.request<any>(graphql.createUserWithRoot, {
+      input: {
+        fields: {
+          authentication: {
+            phonePassword: {
+              phone: '+33600000000',
+              password: 'totototo',
+            },
+          },
+        },
+      },
+    })
+
+    const userId = user.id
+
+    const secret = wabe.config.rootKey
+
+    const hashedSecret = createHash('sha256')
+      .update(`${secret}:${userId}`)
+      .digest('hex')
+
+    const otp = totp.generate(hashedSecret)
+
+    await client.request<any>(graphql.resetPassword, {
+      input: {
+        phone: '+33600000000',
+        password: 'tata',
+        otp,
+      },
+    })
+
+    const res = await client.request<any>(graphql.signInWith, {
+      input: {
+        authentication: {
+          phonePassword: {
+            phone: '+33600000000',
+            password: 'tata',
+          },
+        },
+      },
+    })
+
+    expect(res.signInWith.id).toEqual(userId)
 
     process.env.NODE_ENV = 'test'
   })

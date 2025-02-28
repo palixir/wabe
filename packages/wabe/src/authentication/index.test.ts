@@ -115,7 +115,7 @@ describe('Authentication', () => {
         },
         permissions: {
           read: {
-            authorizedRoles: ['Client2'],
+            authorizedRoles: ['Client', 'Client2'],
             requireAuthentication: true,
           },
           create: {

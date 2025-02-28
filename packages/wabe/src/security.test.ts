@@ -1,15 +1,80 @@
 import { describe, beforeAll, afterAll, it, expect, beforeEach } from 'bun:test'
-import { gql } from 'graphql-request'
+import { gql, type GraphQLClient } from 'graphql-request'
 import type { Wabe } from './server'
 import {
   type DevWabeTypes,
   setupTests,
   closeTests,
   getAdminUserClient,
+  getGraphqlClient,
+  getUserClient,
+  getAnonymousClient,
 } from './utils/helper'
+
+const createUserAndUpdateRole = async ({
+  anonymousClient,
+  rootClient,
+  roleName,
+  port,
+  email,
+}: {
+  port: number
+  anonymousClient: GraphQLClient
+  rootClient: GraphQLClient
+  roleName: string
+  email?: string
+}) => {
+  const random = Math.random().toString(36).substring(2)
+
+  const res = await anonymousClient.request<any>(graphql.signUpWith, {
+    input: {
+      authentication: {
+        emailPassword: {
+          email: email || `email${random}@test.fr`,
+          password: 'password',
+        },
+      },
+    },
+  })
+
+  const resOfRoles = await rootClient.request<any>(gql`
+			query getRoles {
+					roles(where: {name: {equalTo: "${roleName}"}}) {
+			    edges {
+		    			node {
+		     			 	id
+		    			}
+		  			}
+					}
+			}
+		`)
+
+  const roleId = resOfRoles.roles.edges[0].node.id
+
+  await rootClient.request<any>(gql`
+			mutation updateUser {
+			  updateUser(input: {id: "${res.signUpWith.id}", fields: {role: {link: "${roleId}"}}}) {
+		  			user {
+		    			id
+		  			}
+					}
+			}
+		`)
+
+  const userClient = getUserClient(port, res.signUpWith.accessToken)
+
+  return {
+    userClient,
+    roleId,
+    userId: res.signUpWith.id,
+    accessToken: res.signUpWith.accessToken,
+    refreshToken: res.signUpWith.refreshToken,
+  }
+}
 
 describe('Security tests', () => {
   let wabe: Wabe<DevWabeTypes>
+  let port: number
 
   beforeAll(async () => {
     const setup = await setupTests([
@@ -21,14 +86,38 @@ describe('Security tests', () => {
           },
         },
         permissions: {
+          read: {
+            authorizedRoles: ['Admin'],
+            requireAuthentication: true,
+          },
           create: {
             authorizedRoles: ['Admin'],
             requireAuthentication: true,
           },
         },
       },
+      {
+        name: 'Test2',
+        fields: {
+          field1: {
+            type: 'Relation',
+            class: 'Test1',
+          },
+          field2: {
+            type: 'Pointer',
+            class: 'Test1',
+          },
+        },
+        permissions: {
+          read: {
+            authorizedRoles: ['Client'],
+            requireAuthentication: true,
+          },
+        },
+      },
     ])
     wabe = setup.wabe
+    port = wabe.config.port
   })
 
   afterAll(async () => {
@@ -37,6 +126,86 @@ describe('Security tests', () => {
 
   beforeEach(async () => {
     await wabe.controllers.database.clearDatabase()
+  })
+
+  it("should not be able to access to a relation if user doesn't have access on read", async () => {
+    const rootClient = getGraphqlClient(port)
+
+    await rootClient.request<any>(gql`
+        mutation createTest2{
+            createTest2(input: {fields: {field1: {createAndAdd: [{name: "toto"}]}}}){
+                test2{
+                    id
+                }
+            }
+        }
+    `)
+
+    const { userClient } = await createUserAndUpdateRole({
+      anonymousClient: getAnonymousClient(port),
+      port,
+      roleName: 'Client',
+      rootClient,
+    })
+
+    expect(
+      userClient.request(gql`
+      query test2s{
+          test2s {
+              edges {
+                  node {
+                      id
+                      field1{
+                          edges {
+                              node {
+                                  id
+                              }
+                          }
+                      }
+                  }
+              }
+          }
+      }
+      `),
+    ).rejects.toThrow('Permission denied to read class Test1')
+  })
+
+  it("should not be able to access to a pointer if user doesn't have access on read", async () => {
+    const rootClient = getGraphqlClient(port)
+
+    await rootClient.request<any>(gql`
+        mutation createTest2{
+            createTest2(input: {fields: {field2: {createAndLink: {name: "toto"}}}}){
+                test2{
+                    id
+                }
+            }
+        }
+    `)
+
+    const { userClient } = await createUserAndUpdateRole({
+      anonymousClient: getAnonymousClient(port),
+      port,
+      roleName: 'Client',
+      rootClient,
+    })
+
+    expect(
+      userClient.request(gql`
+      query test2s{
+          test2s {
+              edges {
+                  node {
+                      id
+                      field2{
+                          id
+                      }
+                  }
+              }
+          }
+      }
+      `),
+    ).rejects.toThrow('Permission denied to read class Test1')
   })
 
   it('should not be able to create / update / delete a role (except root)', async () => {
@@ -257,3 +426,15 @@ describe('Security tests', () => {
     ).resolves.toEqual(expect.anything())
   })
 })
+
+const graphql = {
+  signUpWith: gql`
+		 mutation signUpWith($input: SignUpWithInput!) {
+  		signUpWith(input:	$input){
+  			id
+  			accessToken
+  			refreshToken
+  		}
+  	}
+	 `,
+}

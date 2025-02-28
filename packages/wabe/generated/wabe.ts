@@ -235,9 +235,9 @@ export type SecondCustomMutationSum = {
 
 export type ResetPasswordInput = {
 	password: string,
-	email: string,
-	otp: string,
-	provider: AuthenticationProvider
+	email?: string,
+	phone?: string,
+	otp: string
 }
 
 export type MutationResetPasswordArgs = {

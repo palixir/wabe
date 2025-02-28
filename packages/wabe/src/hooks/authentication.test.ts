@@ -10,7 +10,7 @@ import {
 } from '../utils/helper'
 import type { Wabe } from '../server'
 
-describe('authenticaiton hooks', () => {
+describe('authentication hooks', () => {
   let wabe: Wabe<DevWabeTypes>
   let port: number
   let client: GraphQLClient

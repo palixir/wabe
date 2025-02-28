@@ -1,6 +1,5 @@
 import type { SignUpWithInput } from '../../../generated/wabe'
 import type { WabeContext } from '../../server/interface'
-import { contextWithRoot } from '../../utils/export'
 import { Session } from '../Session'
 
 // 0 - Get the authentication method
@@ -34,7 +33,7 @@ export const signUpWithResolver = async (
 
   const { accessToken, refreshToken } = await session.create(
     createdUserId,
-    contextWithRoot(context),
+    context,
   )
 
   if (context.wabe.config.authentication?.session?.cookieSession) {
