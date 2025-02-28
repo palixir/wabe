@@ -1681,9 +1681,9 @@ input SecondCustomMutationSumInput {
 
 input ResetPasswordInput {
   password: String!
-  email: Email!
+  email: Email
+  phone: String
   otp: String!
-  provider: AuthenticationProvider!
 }
 
 input SendOtpCodeInput {

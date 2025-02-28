@@ -36,14 +36,12 @@ export const defaultMutations: {
         },
         email: {
           type: 'Email',
-          required: true,
+        },
+        phone: {
+          type: 'String',
         },
         otp: {
           type: 'String',
-          required: true,
-        },
-        provider: {
-          type: 'AuthenticationProvider',
           required: true,
         },
       },

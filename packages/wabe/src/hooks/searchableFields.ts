@@ -3,6 +3,8 @@ import { notEmpty } from '../utils/helper'
 import type { HookObject } from './HookObject'
 
 export const stringExtraction = (value: any): Array<string> => {
+  if (value === undefined || value === null) return []
+
   if (typeof value === 'object')
     return Object.values(value).flatMap((v) => stringExtraction(v))
 

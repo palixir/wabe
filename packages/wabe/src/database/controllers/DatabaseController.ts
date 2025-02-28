@@ -335,12 +335,11 @@ export class DatabaseController<T extends WabeTypes> {
         })
 
         if (isPointer) {
-          if (!object[pointerField]) {
+          if (!object[pointerField])
             return {
               ...accObject,
               [pointerField]: null,
             }
-          }
 
           const objectOfPointerClass = await this.getObject({
             className: currentClassName,
@@ -348,7 +347,6 @@ export class DatabaseController<T extends WabeTypes> {
             context,
             // @ts-expect-error
             select: currentSelect,
-            skipHooks: true,
           })
 
           return {
@@ -371,10 +369,7 @@ export class DatabaseController<T extends WabeTypes> {
             select: currentSelect,
             // @ts-expect-error
             where: { id: { in: object[pointerField] } },
-            context: {
-              ...context,
-              isRoot: true,
-            },
+            context,
           })
 
           return {
@@ -632,7 +627,7 @@ export class DatabaseController<T extends WabeTypes> {
 
     return this.getObject({
       className,
-      // Because if you create an object, exceptionnaly you can read it after creatio
+      // Because if you create an object, exceptionnaly you can read it after creation
       context: contextWithRoot(context),
       select,
       id,

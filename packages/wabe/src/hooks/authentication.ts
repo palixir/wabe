@@ -25,10 +25,7 @@ export const defaultCallAuthenticationProviderOnBeforeCreateUser = async (
 
   const { authenticationDataToSave } = await provider.onSignUp({
     input: inputOfTheGoodAuthenticationMethod,
-    context: {
-      ...hookObject.context,
-      isRoot: true,
-    },
+    context,
   })
 
   hookObject.upsertNewData('authentication', {

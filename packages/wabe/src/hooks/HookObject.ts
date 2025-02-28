@@ -3,6 +3,7 @@ import type { RoleEnum, ACLObject } from '../../generated/wabe'
 import type { MutationData, OutputType, Select } from '../database'
 import type { WabeTypes } from '../server'
 import type { WabeContext } from '../server/interface'
+import { contextWithRoot } from '../utils/export'
 
 type AddACLOpptions = {
   userId?: string
@@ -80,10 +81,7 @@ export class HookObject<
     return databaseController.getObject({
       className: this.className,
       id: this.object.id,
-      context: {
-        ...this.context,
-        isRoot: true,
-      },
+      context: contextWithRoot(this.context),
     })
   }
 
@@ -95,7 +93,7 @@ export class HookObject<
         if (currentUserId)
           await this.context.wabe.controllers.database.updateObject({
             className: this.className,
-            context: { ...this.context, isRoot: true },
+            context: contextWithRoot(this.context),
             id: currentUserId,
             data: {
               // @ts-expect-error
@@ -103,6 +101,7 @@ export class HookObject<
             },
             select: {},
           })
+
         return
       }
 
@@ -118,10 +117,7 @@ export class HookObject<
             select: { acl: true },
             // @ts-expect-error
             id: this.object?.id,
-            context: {
-              ...this.context,
-              isRoot: true,
-            },
+            context: contextWithRoot(this.context),
           })
         : // @ts-expect-error
           { acl: this.getNewData().acl }
@@ -151,10 +147,7 @@ export class HookObject<
             equalTo: role,
           },
         },
-        context: {
-          ...this.context,
-          isRoot: true,
-        },
+        context: contextWithRoot(this.context),
       })
 
       const roleId = result[0]?.id
