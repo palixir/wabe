@@ -224,3 +224,75 @@ export const closeTests = async (wabe: Wabe<DevWabeTypes>) => {
   await wabe.controllers.database.adapter?.close()
   await wabe.close()
 }
+
+export const createUserAndUpdateRole = async ({
+  anonymousClient,
+  rootClient,
+  roleName,
+  port,
+  email,
+}: {
+  port: number
+  anonymousClient: GraphQLClient
+  rootClient: GraphQLClient
+  roleName: string
+  email?: string
+}) => {
+  const random = Math.random().toString(36).substring(2)
+
+  const res = await anonymousClient.request<any>(
+    gql`
+    mutation signUpWith($input: SignUpWithInput!) {
+      signUpWith(input: $input) {
+        id
+        accessToken
+        refreshToken
+      }
+    }
+  `,
+    {
+      input: {
+        authentication: {
+          emailPassword: {
+            email: email || `email${random}@test.fr`,
+            password: 'password',
+          },
+        },
+      },
+    },
+  )
+
+  const resOfRoles = await rootClient.request<any>(gql`
+			query getRoles {
+					roles(where: {name: {equalTo: "${roleName}"}}) {
+			    edges {
+		    			node {
+		     			 	id
+		    			}
+		  			}
+					}
+			}
+		`)
+
+  const roleId = resOfRoles.roles.edges[0].node.id
+
+  await rootClient.request<any>(gql`
+			mutation updateUser {
+			  updateUser(input: {id: "${res.signUpWith.id}", fields: {role: {link: "${roleId}"}}}) {
+		  			user {
+		    			id
+		  			}
+					}
+			}
+		`)
+
+  const userClient = getUserClient(port, res.signUpWith.accessToken)
+
+  return {
+    userClient,
+    roleId,
+    userId: res.signUpWith.id,
+    refreshToken: res.signUpWith.refreshToken,
+    accessToken: res.signUpWith.accessToken,
+  }
+}

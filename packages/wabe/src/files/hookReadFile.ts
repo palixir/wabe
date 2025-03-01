@@ -50,7 +50,6 @@ const getFile = async (hookObject: HookObject<any, any>) => {
               url: fileUrlFromBucket || fileInfo.url,
             },
           },
-
           skipHooks: true,
         })
       }),

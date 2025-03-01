@@ -658,7 +658,7 @@ describe('GraphqlSchema', () => {
     await wabe.close()
   })
 
-  it('should b able to update an object with mutation without return any data', async () => {
+  it('should be able to update an object with mutation without return any data', async () => {
     const { client, wabe } = await createWabe({
       classes: [
         {

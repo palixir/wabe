@@ -15,7 +15,7 @@ export const extractFieldsFromSetNode = (
   selectionSet: SelectionSetNode,
   className: string,
 ): Record<string, any> => {
-  const ignoredFields = ['edges', 'node']
+  const ignoredFields = ['edges', 'node', 'clientMutationId', 'ok']
 
   if (className) ignoredFields.push(firstLetterInLowerCase(className))
 
@@ -35,7 +35,6 @@ export const extractFieldsFromSetNode = (
           selection.selectionSet,
           className,
         )
-
         if (ignoredFields.indexOf(currentValue) === -1)
           return {
             ...acc,
@@ -48,7 +47,7 @@ export const extractFieldsFromSetNode = (
         }
       }
 
-      acc[currentValue] = true
+      if (ignoredFields.indexOf(currentValue) === -1) acc[currentValue] = true
 
       return acc
     },
@@ -270,7 +269,7 @@ export const mutationToCreateObject = async (
         context,
         isGraphQLCall: true,
       }),
-    ...(select.ok ? { ok: true } : {}),
+    ok: true,
   }
 }
 
@@ -337,7 +336,7 @@ export const mutationToUpdateObject = async (
         context,
         isGraphQLCall: true,
       }),
-    ...(select.ok ? { ok: true } : {}),
+    ok: true,
   }
 }
 
@@ -393,7 +392,7 @@ export const mutationToDeleteObject = async (
         context,
         isGraphQLCall: true,
       }),
-    ...(select.ok ? { ok: true } : {}),
+    ok: true,
   }
 }
 
