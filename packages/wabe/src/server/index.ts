@@ -273,7 +273,7 @@ export class Wabe<T extends WabeTypes> {
     this.server.usePlugin(
       WobeGraphqlYogaPlugin({
         schema: this.config.graphqlSchema,
-        maskedErrors: false,
+        maskedErrors: this.config.isProduction,
         graphqlEndpoint: '/graphql',
         plugins: this.config.isProduction ? [useDisableIntrospection()] : [],
         context: async (ctx): Promise<WabeContext<T>> => ctx.wabe,
