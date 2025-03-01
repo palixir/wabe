@@ -31,6 +31,7 @@ import { defaultSessionHandler } from './defaultHandlers'
 type SecurityConfig = {
   corsOptions?: CorsOptions
   rateLimit?: RateLimitOptions
+  maskErrorMessage?: boolean
 }
 
 export interface WabeConfig<T extends WabeTypes> {
@@ -273,7 +274,8 @@ export class Wabe<T extends WabeTypes> {
     this.server.usePlugin(
       WobeGraphqlYogaPlugin({
         schema: this.config.graphqlSchema,
-        maskedErrors: false,
+        maskedErrors:
+          this.config.security?.maskErrorMessage || this.config.isProduction,
         graphqlEndpoint: '/graphql',
         plugins: this.config.isProduction ? [useDisableIntrospection()] : [],
         context: async (ctx): Promise<WabeContext<T>> => ctx.wabe,

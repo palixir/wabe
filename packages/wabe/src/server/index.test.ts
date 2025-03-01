@@ -9,6 +9,53 @@ import { getAnonymousClient, getUserClient } from '../utils/helper'
 import { gql } from 'graphql-request'
 
 describe('Server', () => {
+  it('should mask graphql errors message', async () => {
+    spyOn(console, 'error').mockReturnValue()
+    const databaseId = uuid()
+
+    const port = await getPort()
+    const wabe = new Wabe({
+      isProduction: false,
+      rootKey:
+        'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+      database: {
+        type: DatabaseEnum.Mongo,
+        url: 'mongodb://127.0.0.1:27045',
+        name: databaseId,
+      },
+      security: {
+        maskErrorMessage: true,
+      },
+      port,
+      schema: {
+        resolvers: {
+          queries: {
+            tata: {
+              type: 'Boolean',
+              resolve: () => {
+                throw new Error('Error message')
+              },
+            },
+          },
+        },
+      },
+    })
+
+    await wabe.start()
+
+    const graphqlClient = getAnonymousClient(port)
+
+    expect(
+      graphqlClient.request<any>(gql`
+      query tata {
+          tata
+      }
+    `),
+    ).rejects.toThrow('Unexpected error')
+
+    await wabe.close()
+  })
+
   it('should load routes', async () => {
     const databaseId = uuid()
 
