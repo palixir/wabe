@@ -472,11 +472,10 @@ export class DatabaseController<T extends WabeTypes> {
     const objectToReturn = await this.adapter.getObject({
       className,
       id,
-      context,
+      context: contextWithRoot(context),
       // @ts-expect-error
       select: !select ? undefined : selectWithPointersAndRelationsToGetId,
       where: whereWithACLCondition,
-      skipHooks: true,
     })
 
     // @ts-expect-error
@@ -561,14 +560,13 @@ export class DatabaseController<T extends WabeTypes> {
 
     const objectsToReturn = await this.adapter.getObjects({
       className,
-      context,
+      context: contextWithRoot(context),
       first,
       offset,
       where: whereWithACLCondition,
       // @ts-expect-error
       select: !select ? undefined : selectWithPointersAndRelationsToGetId,
       order,
-      skipHooks: true,
     })
 
     return Promise.all(
@@ -627,10 +625,10 @@ export class DatabaseController<T extends WabeTypes> {
 
     return this.getObject({
       className,
-      // Because if you create an object, exceptionnaly you can read it after creation
       context: contextWithRoot(context),
       select,
       id,
+      // Because if you create an object, exceptionnaly you can read it after creation
       skipHooks: true,
       isGraphQLCall,
     })
@@ -705,6 +703,7 @@ export class DatabaseController<T extends WabeTypes> {
       select,
       // @ts-expect-error
       where: { id: { in: ids } },
+      // Because if you create an object, exceptionnaly you can read it after creation
       skipHooks: true,
       first,
       offset,
@@ -765,7 +764,6 @@ export class DatabaseController<T extends WabeTypes> {
       context,
       select,
       id,
-      skipHooks: true,
       isGraphQLCall,
     })
   }
@@ -841,7 +839,6 @@ export class DatabaseController<T extends WabeTypes> {
       select,
       // @ts-expect-error
       where: { id: { in: objectsId } },
-      skipHooks: true,
       first,
       offset,
       order,
@@ -876,7 +873,6 @@ export class DatabaseController<T extends WabeTypes> {
         select,
         id,
         context,
-        skipHooks: true,
         isGraphQLCall,
       })
 
@@ -945,7 +941,6 @@ export class DatabaseController<T extends WabeTypes> {
         first,
         offset,
         order,
-        skipHooks: true,
         isGraphQLCall,
       })
 
