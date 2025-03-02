@@ -37,10 +37,13 @@ const _checkProtected = (
 
   const fieldsUpdated = hookObject.getNewData()
 
+  const operation =
+    operationType === OperationType.BeforeUpdate ? 'update' : 'create'
+
   Object.keys(fieldsUpdated).map((fieldName) => {
     const protectedForCurrentField = schemaClass.fields[fieldName]?.protected
 
-    if (protectedForCurrentField?.protectedOperations.includes('update')) {
+    if (protectedForCurrentField?.protectedOperations.includes(operation)) {
       if (
         isRoot &&
         protectedForCurrentField.authorizedRoles.includes('rootOnly')
@@ -49,7 +52,7 @@ const _checkProtected = (
 
       // @ts-expect-error
       if (!protectedForCurrentField.authorizedRoles.includes(userRole))
-        throw new Error('You are not authorized to update this field')
+        throw new Error(`You are not authorized to ${operation} this field`)
     }
   })
 }
@@ -61,3 +64,7 @@ export const defaultCheckProtectedOnBeforeRead = (
 export const defaultCheckProtectedOnBeforeUpdate = (
   object: HookObject<DevWabeTypes, any>,
 ) => _checkProtected(object, OperationType.BeforeUpdate)
+
+export const defaultCheckProtectedOnBeforeCreate = (
+  object: HookObject<DevWabeTypes, any>,
+) => _checkProtected(object, OperationType.BeforeCreate)
