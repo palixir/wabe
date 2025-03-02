@@ -27,6 +27,7 @@ import {
   defaultCheckPermissionOnUpdate,
 } from './permissions'
 import {
+  defaultCheckProtectedOnBeforeCreate,
   defaultCheckProtectedOnBeforeRead,
   defaultCheckProtectedOnBeforeUpdate,
 } from './protected'
@@ -284,6 +285,11 @@ export const getDefaultHooks = (): Hook<any, any>[] => [
     operationType: OperationType.BeforeUpdate,
     priority: 0,
     callback: defaultCheckProtectedOnBeforeUpdate,
+  },
+  {
+    operationType: OperationType.BeforeCreate,
+    priority: 0,
+    callback: defaultCheckProtectedOnBeforeCreate,
   },
   {
     operationType: OperationType.BeforeCreate,

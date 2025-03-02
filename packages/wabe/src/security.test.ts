@@ -21,6 +21,39 @@ describe('Security tests', () => {
     await wabe.close()
   })
 
+  it('should throw an error when I try to create an user with a role without root access', async () => {
+    const setup = await setupTests()
+    wabe = setup.wabe
+    port = setup.port
+    client = getAnonymousClient(port)
+    rootClient = getGraphqlClient(port)
+
+    const adminRole = await wabe.controllers.database.getObjects({
+      className: 'Role',
+      where: {
+        name: { equalTo: 'Admin' },
+      },
+      first: 1,
+      select: { id: true },
+      context: {
+        wabe,
+        isRoot: true,
+      },
+    })
+
+    expect(
+      client.request(gql`
+     mutation createUser {
+         createUser(input: { fields: {role: {link: "${adminRole[0]?.id}"}} }) {
+             user {
+                 id
+             }
+         }
+     }
+     `),
+    ).rejects.toThrow('You are not authorized to create this field')
+  })
+
   it('should not be able to update role pointer in the User class', async () => {
     const setup = await setupTests()
     wabe = setup.wabe
