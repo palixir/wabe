@@ -76,6 +76,41 @@ describe('File upload', () => {
     })
   })
 
+  it('should not crash when there is no extension for the uploaded file', async () => {
+    await wabe.controllers.database.createObject({
+      // @ts-expect-error
+      className: 'Test3',
+      context: {
+        isRoot: true,
+        wabe,
+      },
+      data: {
+        // @ts-expect-error
+        file: {
+          file: new File(['a'], 'a', { type: 'text/plain' }),
+        },
+      },
+      select: {},
+    })
+
+    const result = await wabe.controllers.database.getObjects({
+      // @ts-expect-error
+      className: 'Test3',
+      context: {
+        isRoot: true,
+        wabe,
+      },
+      where: {},
+      // @ts-expect-error
+      select: { file: true, id: true },
+    })
+
+    // @ts-expect-error
+    expect(result[0].file.name).toEqual('a')
+    // @ts-expect-error
+    expect(result[0].file.url).toEqual(`http://127.0.0.1:${port}/bucket/a`)
+  })
+
   it('should throw an error if no fil ter is provided', async () => {
     const previousFileController = wabe.controllers.file
     // @ts-expect-error

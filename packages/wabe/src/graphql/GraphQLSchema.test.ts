@@ -2932,7 +2932,7 @@ describe('GraphqlSchema', () => {
 					input: {
 						fields: {
 							name: "name"
-							field2: { createAndAdd: [{ field1: "field1" }] }
+							field2: { createAndAdd: [{ field1: "field1" }, { field1: "field2" }] }
 						}
 					}
 				) {
@@ -2949,6 +2949,17 @@ describe('GraphqlSchema', () => {
 				}
 			}
 		`)
+
+    const field2AfterUpdate1 = (await wabe.controllers.database.getObjects({
+      // @ts-expect-error
+      className: 'TestClass2',
+      context: {
+        wabe,
+        isRoot: true,
+      },
+    })) as any
+
+    expect(field2AfterUpdate1[0]?.field2.length).toBe(2)
 
     expect(res.createTestClass2.testClass2.name).toBe('name')
     expect(res.createTestClass2.testClass2.field2.edges[0].node.field1).toBe(
@@ -3271,6 +3282,16 @@ describe('GraphqlSchema', () => {
 			}
 		`)
 
+    const res2 = await client.request<any>(gql`
+			mutation createTestClass {
+				createTestClass(input: { fields: { field1: "field1" } }) {
+					testClass {
+						id
+					}
+				}
+			}
+		`)
+
     const resAfterAdd = await client.request<any>(gql`
 			mutation createTestClass2 {
 				createTestClass2(input: { fields: { name: "name" } }) {
@@ -3282,7 +3303,7 @@ describe('GraphqlSchema', () => {
 			}
 		`)
 
-    const resAfterUpdate = await client.request<any>(gql`
+    await client.request<any>(gql`
 			mutation updateTestClass2 {
 				updateTestClass2(
 					input: {
@@ -3307,9 +3328,63 @@ describe('GraphqlSchema', () => {
 			}
 		`)
 
-    expect(resAfterUpdate.updateTestClass2.testClass2.name).toBe('name')
+    const field2AfterUpdate1 = (await wabe.controllers.database.getObjects({
+      // @ts-expect-error
+      className: 'TestClass2',
+      context: {
+        wabe,
+        isRoot: true,
+      },
+    })) as any
+
+    expect(field2AfterUpdate1[0]?.field2.length).toBe(1)
+
+    const resAfterUpdate2 = await client.request<any>(gql`
+    	mutation updateTestClass2 {
+    		updateTestClass2(
+    			input: {
+    				id: "${resAfterAdd.createTestClass2.testClass2.id}"
+    				fields: {
+    					field2: { add: ["${res2.createTestClass.testClass.id}"] }
+    				}
+    			}
+    		) {
+    			testClass2 {
+    				id
+    				name
+    				field2 {
+    					edges {
+    							node {
+    							   field1
+    							}
+    					}
+    				}
+    			}
+    		}
+    	}
+    `)
+
+    const field2AfterUpdate2 = (await wabe.controllers.database.getObjects({
+      // @ts-expect-error
+      className: 'TestClass2',
+      context: {
+        wabe,
+        isRoot: true,
+      },
+    })) as any
+
+    expect(field2AfterUpdate2[0].field2).toEqual([
+      res.createTestClass.testClass.id,
+      res2.createTestClass.testClass.id,
+    ])
+    expect(field2AfterUpdate2[0]?.field2.length).toBe(2)
+
+    expect(resAfterUpdate2.updateTestClass2.testClass2.name).toBe('name')
     expect(
-      resAfterUpdate.updateTestClass2.testClass2.field2.edges[0].node.field1,
+      resAfterUpdate2.updateTestClass2.testClass2.field2.edges.length,
+    ).toBe(2)
+    expect(
+      resAfterUpdate2.updateTestClass2.testClass2.field2.edges[0].node.field1,
     ).toBe('field1')
 
     await wabe.close()
@@ -3512,6 +3587,16 @@ describe('GraphqlSchema', () => {
 			}
 		`)
 
+    const res2 = await client.request<any>(gql`
+			mutation createTestClass {
+				createTestClass(input: { fields: { field1: "field1" } }) {
+					testClass {
+						id
+					}
+				}
+			}
+		`)
+
     const resAfterAdd = await client.request<any>(gql`
 			mutation createTestClass2 {
 				createTestClass2(input: { fields: { name: "name" } }) {
@@ -3523,7 +3608,7 @@ describe('GraphqlSchema', () => {
 			}
 		`)
 
-    const resAfterUpdate = await client.request<any>(gql`
+    await client.request<any>(gql`
 			mutation updateTestClass2s {
 				updateTestClass2s(
 					input: {
@@ -3549,6 +3634,48 @@ describe('GraphqlSchema', () => {
 				}
 			}
 		`)
+
+    const resAfterUpdate = await client.request<any>(gql`
+			mutation updateTestClass2s {
+				updateTestClass2s(
+					input: {
+						where: {id: {equalTo: "${resAfterAdd.createTestClass2.testClass2.id}"}}
+						fields: {
+							field2: { add: ["${res2.createTestClass.testClass.id}"] }
+						}
+					}
+				) {
+					edges {
+						node {
+							id
+							name
+							field2 {
+								edges {
+									node {
+										field1
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		`)
+
+    const field2AfterUpdate2 = (await wabe.controllers.database.getObjects({
+      // @ts-expect-error
+      className: 'TestClass2',
+      context: {
+        wabe,
+        isRoot: true,
+      },
+    })) as any
+
+    expect(field2AfterUpdate2[0]?.field2.length).toBe(2)
+    expect(field2AfterUpdate2[0]?.field2).toEqual([
+      res.createTestClass.testClass.id,
+      res2.createTestClass.testClass.id,
+    ])
 
     expect(resAfterUpdate.updateTestClass2s.edges[0].node.name).toBe('name')
     expect(
@@ -3612,6 +3739,19 @@ describe('GraphqlSchema', () => {
 			}
 		`)
 
+    const field2BeforeUpdate2 = (await wabe.controllers.database.getObjects({
+      // @ts-expect-error
+      className: 'TestClass2',
+      context: {
+        wabe,
+        isRoot: true,
+      },
+    })) as any
+
+    expect(field2BeforeUpdate2[0]?.field2).toEqual([
+      resAfterAdd.createTestClass2.testClass2.field2.edges[0].node.id,
+    ])
+
     const resAfterUpdate = await client.request<any>(gql`
 			mutation updateTestClass2s {
 				updateTestClass2s(
@@ -3638,6 +3778,17 @@ describe('GraphqlSchema', () => {
 				}
 			}
 		`)
+
+    const field2AfterUpdate2 = (await wabe.controllers.database.getObjects({
+      // @ts-expect-error
+      className: 'TestClass2',
+      context: {
+        wabe,
+        isRoot: true,
+      },
+    })) as any
+
+    expect(field2AfterUpdate2[0]?.field2).toEqual([])
 
     expect(resAfterUpdate.updateTestClass2s.edges[0].node.name).toBe('name')
     expect(
@@ -3738,6 +3889,17 @@ describe('GraphqlSchema', () => {
 				}
 			}
 		`)
+
+    const field2AfterUpdate2 = (await wabe.controllers.database.getObjects({
+      // @ts-expect-error
+      className: 'TestClass2',
+      context: {
+        wabe,
+        isRoot: true,
+      },
+    })) as any
+
+    expect(field2AfterUpdate2[0]?.field2.length).toBe(0)
 
     expect(resAfterUpdate.updateTestClass2.testClass2.name).toBe('name')
     expect(resAfterUpdate.updateTestClass2.testClass2.field2.edges.length).toBe(
