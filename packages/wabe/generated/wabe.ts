@@ -62,7 +62,7 @@ export type AuthenticationGithub = {
 export type SecondFA = {
 	enabled: boolean,
 	provider: SecondaryFactor,
-	isAwaitingVerification?: boolean
+	isAwaitingChallenge?: boolean
 }
 
 export type User = {

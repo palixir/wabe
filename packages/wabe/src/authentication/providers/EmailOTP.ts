@@ -32,6 +32,17 @@ export class EmailOTP
 
     const otpClass = new OTP(context.wabe.config.rootKey)
 
+    await context.wabe.controllers.database.updateObject({
+      className: 'User',
+      id: user.id,
+      data: {
+        secondFA: {
+          isAwaitingChallenge: true,
+        },
+      },
+      context: contextWithRoot(context),
+    })
+
     const otp = otpClass.generate(user.id)
 
     const template = context.wabe.config.email?.htmlTemplates?.sendOTPCode
@@ -57,14 +68,20 @@ export class EmailOTP
           equalTo: input.email,
         },
       },
-      select: { id: true },
+      select: { id: true, secondFA: true },
       first: 1,
       context: contextWithRoot(context),
     })
 
     if (users.length === 0) return null
 
-    const userId = users[0]?.id
+    const user = users[0]
+
+    if (!user) return null
+
+    if (!user.secondFA?.isAwaitingChallenge) return null
+
+    const userId = user.id
 
     if (!userId) return null
 
