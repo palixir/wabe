@@ -27,6 +27,10 @@ import {
   defaultCheckPermissionOnUpdate,
 } from './permissions'
 import {
+  defaultCheckProtectedOnBeforeRead,
+  defaultCheckProtectedOnBeforeUpdate,
+} from './protected'
+import {
   defaultSearchableFieldsBeforeCreate,
   defaultSearchableFieldsBeforeUpdate,
 } from './searchableFields'
@@ -270,6 +274,16 @@ export const getDefaultHooks = (): Hook<any, any>[] => [
     operationType: OperationType.BeforeDelete,
     priority: 0,
     callback: defaultCheckPermissionOnDelete,
+  },
+  {
+    operationType: OperationType.BeforeRead,
+    priority: 0,
+    callback: defaultCheckProtectedOnBeforeRead,
+  },
+  {
+    operationType: OperationType.BeforeUpdate,
+    priority: 0,
+    callback: defaultCheckProtectedOnBeforeUpdate,
   },
   {
     operationType: OperationType.BeforeCreate,

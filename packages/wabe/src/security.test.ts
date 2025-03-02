@@ -21,6 +21,84 @@ describe('Security tests', () => {
     await wabe.close()
   })
 
+  it('should not be able to update role pointer in the User class', async () => {
+    const setup = await setupTests()
+    wabe = setup.wabe
+    port = setup.port
+    client = getAnonymousClient(port)
+    rootClient = getGraphqlClient(port)
+
+    const { userId } = await createUserAndUpdateRole({
+      anonymousClient: getAnonymousClient(port),
+      port,
+      roleName: 'Client',
+      rootClient,
+    })
+
+    expect(
+      wabe.controllers.database.updateObject({
+        className: 'User',
+        id: userId,
+        context: {
+          wabe,
+          isRoot: false,
+        },
+        data: {
+          role: 'newid',
+        },
+      }),
+    ).rejects.toThrow('You are not authorized to update this field')
+  })
+
+  it('should not be able to read / update sessions relation in the User class', async () => {
+    const setup = await setupTests()
+    wabe = setup.wabe
+    port = setup.port
+    client = getAnonymousClient(port)
+    rootClient = getGraphqlClient(port)
+
+    const { userClient, userId } = await createUserAndUpdateRole({
+      anonymousClient: getAnonymousClient(port),
+      port,
+      roleName: 'Client',
+      rootClient,
+    })
+
+    expect(
+      wabe.controllers.database.updateObject({
+        className: 'User',
+        id: userId,
+        context: {
+          wabe,
+          isRoot: false,
+        },
+        data: {
+          sessions: ['newid'],
+        },
+      }),
+    ).rejects.toThrow('You are not authorized to update this field')
+
+    expect(
+      userClient.request<any>(gql`
+    query users {
+        users {
+            edges {
+                node {
+                    sessions {
+                        edges {
+                            node {
+                                id
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    `),
+    ).rejects.toThrow('You are not authorized to read this field')
+  })
+
   it("should throw an error if the user tries to delete an object and doesn't have access to read the object", async () => {
     const setup = await setupTests([
       {

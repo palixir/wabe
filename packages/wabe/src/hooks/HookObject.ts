@@ -23,7 +23,7 @@ export class HookObject<
   public object: OutputType<T, K, keyof T['types'][K]>
   // Object before any mutation, for example before delete
   public originalObject: OutputType<T, K, keyof T['types'][K]> | undefined
-  public select: Array<keyof T['types'][K]>
+  public select: Select
 
   constructor({
     newData,
@@ -48,8 +48,7 @@ export class HookObject<
     this.context = context
     this.object = object
     this.originalObject = originalObject
-    // @ts-expect-error
-    this.select = Object.keys(select || {})
+    this.select = select || {}
   }
 
   getUser() {
