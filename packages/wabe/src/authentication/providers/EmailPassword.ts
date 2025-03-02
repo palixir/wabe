@@ -77,10 +77,11 @@ export class EmailPassword
           },
         },
       },
-      context,
+      context: contextWithRoot(context),
     })
 
-    if (users > 0) throw new Error('User already exists')
+    // Hide real message
+    if (users > 0) throw new Error('Not authorized to create user')
 
     return {
       authenticationDataToSave: {
