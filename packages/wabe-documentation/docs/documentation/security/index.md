@@ -164,6 +164,87 @@ const setAclOnCompany = async (hookObject: HookObject<any, any>) => {
 };
 ```
 
+## Protected Field
+
+The `protected` field allows you to define additional restrictions on read (`read`) and update (`update`) operations for specific fields within a class. By using this field, you can specify which roles are authorized to perform these operations, providing more granular control over data access.
+
+### Usage
+
+To use the `protected` field, you need to define it in the configuration of your class fields. This field accepts an array of roles that are permitted to read or update the field.
+
+### Example
+
+Here is an example configuration using the `protected` field to restrict access to certain fields:
+
+```typescript
+import { Wabe } from "wabe";
+import { RoleEnum } from "../generated/wabe";
+
+const run = async () => {
+  const wabe = new Wabe({
+    // ... other configuration fields
+    authentication: {
+      roles: ["Admin", "Client", "rootOnly"],
+    },
+    schema: {
+      classes: [
+        {
+          name: "Company",
+          fields: {
+            name: {
+              type: "String",
+              protected: {
+                authorizedRoles: [RoleEnum.Admin, RoleEnum.Client], // Only Admin and Client roles can read or update this field
+                operations: ["read", "update"], // Only read and update operations are allowed for this field
+              }
+            },
+            sensitiveInfo: {
+              type: "String",
+              protected: {
+                authorizedRoles: ["rootOnly"], // Only root can read or update field
+                operations: ["read", "update"], // Only read and update operations are allowed for this field
+              }
+            },
+          },
+          permissions: {
+            create: {
+              authorizedRoles: [RoleEnum.Admin],
+              requireAuthentication: true,
+            },
+            read: {
+              requireAuthentication: false,
+            },
+            update: {
+              requireAuthentication: true,
+              authorizedRoles: [RoleEnum.Admin],
+            },
+            delete: {
+              requireAuthentication: true,
+              authorizedRoles: [RoleEnum.Admin],
+            },
+          },
+        },
+      ],
+    },
+  });
+
+  await wabe.start();
+};
+
+await run();
+
+### Explanation
+
+- **`authorizedRoles: [RoleEnum.Admin, RoleEnum.Client]`**: This setting indicates that only users with the `Admin` or `Client` roles will be affected by the `protected` field.
+- **`operations: ["read", "update"]`**: This setting indicates that only read and update operations will be blocked for the field.
+
+### Use Cases
+
+- **Protecting Sensitive Data**: Use the `protected` field to restrict access to sensitive information to specific roles.
+- **Granular Control**: Provide finer control over read and update operations at the individual field level.
+
+By incorporating the `protected` field into your configuration, you can enhance the security of your application by limiting access to critical data to authorized users only.
+
 ## CORS
 
 Wabe allows you to configure Cross-Origin Resource Sharing (CORS) to control the access to your API. You can enable CORS by setting the `corsOptions` property in the `security` configuration object.

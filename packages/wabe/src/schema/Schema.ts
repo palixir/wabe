@@ -31,18 +31,23 @@ export type WabeObject<T extends WabeTypes> = {
   required?: boolean
 }
 
-type TypeFieldBase<U, K extends WabeFieldTypes> = {
-  type: K
+type FieldBase<T extends WabeTypes> = {
   required?: boolean
   description?: string
+  protected?: {
+    authorizedRoles: Array<T['enums']['RoleEnum'] | 'rootOnly'>
+    operations: Array<'update' | 'read'>
+  }
+}
+
+type TypeFieldBase<U, K extends WabeFieldTypes> = {
+  type: K
   defaultValue?: U
 }
 
 type TypeFieldArray<T extends WabeTypes> = {
   type: 'Array'
-  required?: boolean
   requiredValue?: boolean
-  description?: string
   defaultValue?: any[]
 } & (
   | {
@@ -55,47 +60,36 @@ type TypeFieldArray<T extends WabeTypes> = {
 
 type TypeFieldObject<T extends WabeTypes> = {
   type: 'Object'
-  required?: boolean
-  description?: string
   object: WabeObject<T>
   defaultValue?: any
 }
 
 type TypeFieldPointer<T extends WabeTypes> = {
   type: 'Pointer'
-  required?: boolean
-  description?: string
   class: keyof T['types']
 }
 
 type TypeFieldRelation<T extends WabeTypes> = {
   type: 'Relation'
-  required?: boolean
-  description?: string
   class: keyof T['types']
 }
 
 type TypeFieldFile = {
   type: 'File'
-  required?: boolean
-  description?: string
 }
 
 type TypeFieldCustomScalars<T extends WabeTypes> = {
   type: T['scalars']
   required?: boolean
-  description?: string
   defaultValue?: any
 }
 
 type TypeFieldCustomEnums<T extends WabeTypes> = {
   type: keyof T['enums']
-  required?: boolean
-  description?: string
   defaultValue?: any
 }
 
-export type TypeField<T extends WabeTypes> =
+export type TypeField<T extends WabeTypes> = (
   | TypeFieldBase<string, 'String'>
   | TypeFieldBase<number, 'Int'>
   | TypeFieldBase<number, 'Float'>
@@ -110,6 +104,8 @@ export type TypeField<T extends WabeTypes> =
   | TypeFieldFile
   | TypeFieldCustomScalars<T>
   | TypeFieldCustomEnums<T>
+) &
+  FieldBase<T>
 
 export type SchemaFields<T extends WabeTypes> = Record<string, TypeField<T>>
 
@@ -311,7 +307,7 @@ export class Schema<T extends WabeTypes> {
       },
     }
 
-    const authenticationInput: TypeFieldObject<T> = {
+    const authenticationInput: TypeField<T> = {
       type: 'Object',
       object: {
         name: 'Authentication',
@@ -580,10 +576,18 @@ export class Schema<T extends WabeTypes> {
       role: {
         type: 'Pointer',
         class: 'Role',
+        protected: {
+          authorizedRoles: ['rootOnly'],
+          operations: ['update'],
+        },
       },
       sessions: {
         type: 'Relation',
         class: '_Session',
+        protected: {
+          authorizedRoles: ['rootOnly'],
+          operations: ['update', 'read'],
+        },
       },
       secondFA: {
         type: 'Object',
