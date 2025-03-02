@@ -406,10 +406,28 @@ export class DatabaseController<T extends WabeTypes> {
     return this.adapter.createClassIfNotExist(className, context)
   }
 
-  count<K extends keyof T['types']>(
-    params: CountOptions<T, K>,
-  ): Promise<number> {
-    return this.adapter.count(params)
+  async count<K extends keyof T['types']>({
+    className,
+    context,
+    where,
+  }: CountOptions<T, K>): Promise<number> {
+    const hook = initializeHook({
+      className,
+      context,
+      select: {},
+    })
+
+    await hook?.runOnSingleObject({
+      operationType: OperationType.BeforeRead,
+    })
+
+    const count = await this.adapter.count({ className, context, where })
+
+    await hook?.runOnSingleObject({
+      operationType: OperationType.AfterRead,
+    })
+
+    return count
   }
 
   async clearDatabase(): Promise<void> {

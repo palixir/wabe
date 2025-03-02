@@ -77,10 +77,10 @@ export class PhonePassword
           },
         },
       },
-      context,
+      context: contextWithRoot(context),
     })
 
-    if (users > 0) throw new Error('User already exists')
+    if (users > 0) throw new Error('Not authorized to create user')
 
     return {
       authenticationDataToSave: {

@@ -21,6 +21,39 @@ describe('Security tests', () => {
     await wabe.close()
   })
 
+  it('should throw an error if try to count the number of objects in anonymous', async () => {
+    const setup = await setupTests([
+      {
+        name: 'Test',
+        fields: {
+          name: {
+            type: 'String',
+          },
+        },
+        permissions: {
+          read: {
+            authorizedRoles: [],
+            requireAuthentication: true,
+          },
+        },
+      },
+    ])
+    wabe = setup.wabe
+    port = setup.port
+    client = getAnonymousClient(port)
+    rootClient = getGraphqlClient(port)
+
+    expect(
+      client.request(gql`
+      query tests {
+        tests {
+            totalCount
+        }
+      }
+    `),
+    ).rejects.toThrow('Permission denied to read class Test')
+  })
+
   it('should throw an error when I try to create an user with a role without root access', async () => {
     const setup = await setupTests()
     wabe = setup.wabe
