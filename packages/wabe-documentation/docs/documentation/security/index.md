@@ -195,14 +195,14 @@ const run = async () => {
               type: "String",
               protected: {
                 authorizedRoles: [RoleEnum.Admin, RoleEnum.Client], // Only Admin and Client roles can read or update this field
-                operations: ["read", "update"], // Only read and update operations are allowed for this field
+                protectedOperations: ["read", "update"], // Only read and update operations are allowed for this field
               }
             },
             sensitiveInfo: {
               type: "String",
               protected: {
                 authorizedRoles: ["rootOnly"], // Only root can read or update field
-                operations: ["read", "update"], // Only read and update operations are allowed for this field
+                protectedOperations: ["read", "update"], // Only read and update operations are allowed for this field
               }
             },
           },
@@ -236,7 +236,7 @@ await run();
 ### Explanation
 
 - **`authorizedRoles: [RoleEnum.Admin, RoleEnum.Client]`**: This setting indicates that only users with the `Admin` or `Client` roles will be affected by the `protected` field.
-- **`operations: ["read", "update"]`**: This setting indicates that only read and update operations will be blocked for the field.
+- **`protectedOperations: ["read", "update"]`**: This setting indicates that only read and update operations will be blocked for the field.
 
 ### Use Cases
 

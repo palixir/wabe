@@ -19,7 +19,7 @@ const _checkProtected = (
     Object.keys(hookObject.select).map((fieldName) => {
       const protectedForCurrentField = schemaClass.fields[fieldName]?.protected
 
-      if (protectedForCurrentField?.operations.includes('read')) {
+      if (protectedForCurrentField?.protectedOperations.includes('read')) {
         if (
           isRoot &&
           protectedForCurrentField.authorizedRoles.includes('rootOnly')
@@ -40,7 +40,7 @@ const _checkProtected = (
   Object.keys(fieldsUpdated).map((fieldName) => {
     const protectedForCurrentField = schemaClass.fields[fieldName]?.protected
 
-    if (protectedForCurrentField?.operations.includes('update')) {
+    if (protectedForCurrentField?.protectedOperations.includes('update')) {
       if (
         isRoot &&
         protectedForCurrentField.authorizedRoles.includes('rootOnly')

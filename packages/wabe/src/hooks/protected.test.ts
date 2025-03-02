@@ -25,35 +25,35 @@ describe('Protected hook', () => {
             type: 'String',
             protected: {
               authorizedRoles: [RoleEnum.Client],
-              operations: ['update', 'read'],
+              protectedOperations: ['update', 'read'],
             },
           },
           noOne: {
             type: 'String',
             protected: {
               authorizedRoles: [],
-              operations: ['update', 'read'],
+              protectedOperations: ['update', 'read'],
             },
           },
           rootOnly: {
             type: 'String',
             protected: {
               authorizedRoles: ['rootOnly'],
-              operations: ['update', 'read'],
+              protectedOperations: ['update', 'read'],
             },
           },
           notOperation: {
             type: 'String',
             protected: {
               authorizedRoles: [RoleEnum.Client],
-              operations: ['update'],
+              protectedOperations: ['update'],
             },
           },
           notOperationUpdate: {
             type: 'String',
             protected: {
               authorizedRoles: [RoleEnum.Client],
-              operations: ['read'],
+              protectedOperations: ['read'],
             },
           },
         },

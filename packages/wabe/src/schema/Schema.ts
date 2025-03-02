@@ -36,7 +36,7 @@ type FieldBase<T extends WabeTypes> = {
   description?: string
   protected?: {
     authorizedRoles: Array<T['enums']['RoleEnum'] | 'rootOnly'>
-    operations: Array<'update' | 'read'>
+    protectedOperations: Array<'update' | 'read'>
   }
 }
 
@@ -578,7 +578,7 @@ export class Schema<T extends WabeTypes> {
         class: 'Role',
         protected: {
           authorizedRoles: ['rootOnly'],
-          operations: ['update'],
+          protectedOperations: ['update'],
         },
       },
       sessions: {
@@ -586,7 +586,7 @@ export class Schema<T extends WabeTypes> {
         class: '_Session',
         protected: {
           authorizedRoles: ['rootOnly'],
-          operations: ['update', 'read'],
+          protectedOperations: ['update', 'read'],
         },
       },
       secondFA: {
