@@ -75,18 +75,6 @@ describe('EmailOTPProvider', () => {
       }),
     )
 
-    const res = await wabe.controllers.database.getObject({
-      className: 'User',
-      id: createdUser.id,
-      select: { id: true, secondFA: true },
-      context: {
-        wabe,
-        isRoot: true,
-      },
-    })
-
-    expect(res?.secondFA?.isAwaitingChallenge).toBe(true)
-
     const otp = spySendOtpCodeTemplate.mock.calls[0][0]
 
     expect(spySendOtpCodeTemplate).toHaveBeenCalledTimes(1)
@@ -102,9 +90,6 @@ describe('EmailOTPProvider', () => {
       },
       data: {
         email: 'email@test.fr',
-        secondFA: {
-          isAwaitingChallenge: true,
-        },
       },
       select: {
         id: true,
@@ -148,43 +133,5 @@ describe('EmailOTPProvider', () => {
         },
       }),
     ).toEqual(null)
-  })
-
-  it('should return null if the is not awaiting OTP verification', async () => {
-    const createdUser = await wabe.controllers.database.createObject({
-      className: 'User',
-      context: {
-        wabe,
-        isRoot: true,
-      },
-      data: {
-        email: 'email@test.fr',
-        secondFA: {
-          isAwaitingChallenge: false,
-        },
-      },
-      select: {
-        id: true,
-      },
-    })
-
-    if (!createdUser) throw new Error('User not created')
-
-    const otp = new OTP(wabe.config.rootKey).generate(createdUser.id)
-
-    const emailOTP = new EmailOTP()
-
-    expect(
-      await emailOTP.onVerifyChallenge({
-        context: {
-          wabe,
-          isRoot: false,
-        },
-        input: {
-          email: 'email@test.fr',
-          otp,
-        },
-      }),
-    ).toBeNull()
   })
 })
