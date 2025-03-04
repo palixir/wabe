@@ -38,7 +38,8 @@
     "otplib": "12.0.1",
     "p-retry": "6.2.1",
     "wobe": "1.1.10",
-    "wobe-graphql-yoga": "1.2.6"
+    "wobe-graphql-yoga": "1.2.6",
+    "croner": "9.0.0"
   },
   "devDependencies": {
     "@parcel/watcher": "2.3.0",

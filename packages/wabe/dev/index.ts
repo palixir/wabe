@@ -1,5 +1,5 @@
 import { runDatabase } from 'wabe-mongodb-launcher'
-import { DatabaseEnum, Wabe } from '../src'
+import { CronExpressions, DatabaseEnum, Wabe, cron } from '../src'
 import {
   RoleEnum,
   type WabeSchemaWhereTypes,
@@ -23,6 +23,14 @@ const run = async () => {
       path: `${import.meta.dirname}/../generated/`,
     },
     rootKey: 'dev',
+    crons: {
+      test: cron({
+        pattern: CronExpressions.EVERY_SECOND,
+        run: () => {
+          console.log('test')
+        },
+      }),
+    },
     authentication: {
       session: {
         cookieSession: true,

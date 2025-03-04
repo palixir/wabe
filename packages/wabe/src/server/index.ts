@@ -7,6 +7,7 @@ import {
   type SchemaInterface,
 } from '../schema/Schema'
 import { GraphQLObjectType, GraphQLSchema } from 'graphql'
+import type { Cron } from 'croner'
 import { GraphQLSchema as WabeGraphQLSchema } from '../graphql'
 import type { AuthenticationConfig } from '../authentication/interface'
 import { type WabeRoute, defaultRoutes } from './routes'
@@ -34,6 +35,8 @@ type SecurityConfig = {
   maskErrorMessage?: boolean
 }
 
+type CronConfig = Record<string, Cron>
+
 export interface WabeConfig<T extends WabeTypes> {
   port: number
   isProduction: boolean
@@ -56,6 +59,7 @@ export interface WabeConfig<T extends WabeTypes> {
   payment?: PaymentConfig
   ai?: AIConfig
   file?: FileConfig
+  crons?: CronConfig
 }
 
 export type WabeTypes = {

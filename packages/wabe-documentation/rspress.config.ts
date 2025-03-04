@@ -86,7 +86,6 @@ export default defineConfig({
             },
           ],
         },
-        { text: 'Files', link: '/documentation/files' },
         {
           text: 'Authentication',
           collapsible: true,
@@ -143,6 +142,7 @@ export default defineConfig({
           text: 'Security',
           link: '/documentation/security/index',
         },
+        { text: 'Cron', link: '/documentation/cron' },
         { text: 'File', link: '/documentation/file/index' },
         { text: 'Email', link: '/documentation/email/index' },
         { text: 'Payment', link: '/documentation/payment/index' },
