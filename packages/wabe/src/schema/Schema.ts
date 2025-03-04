@@ -602,9 +602,6 @@ export class Schema<T extends WabeTypes> {
               type: 'SecondaryFactor',
               required: true,
             },
-            isAwaitingChallenge: {
-              type: 'Boolean',
-            },
           },
         },
       },

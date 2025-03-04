@@ -27,6 +27,7 @@ import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspect
 import type { AIConfig } from '../ai'
 import { FileController } from '../files/FileController'
 import { defaultSessionHandler } from './defaultHandlers'
+import type { CronConfig } from '../cron'
 
 type SecurityConfig = {
   corsOptions?: CorsOptions
@@ -56,6 +57,7 @@ export interface WabeConfig<T extends WabeTypes> {
   payment?: PaymentConfig
   ai?: AIConfig
   file?: FileConfig
+  crons?: CronConfig
 }
 
 export type WabeTypes = {
