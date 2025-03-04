@@ -127,7 +127,6 @@ export class GitHub implements OAuth2ProviderWithPKCE {
     return {
       email: primaryEmail || null,
       username: userInfo.login,
-      name: userInfo.name,
       avatarUrl: userInfo.avatar_url,
     }
   }
