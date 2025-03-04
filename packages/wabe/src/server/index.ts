@@ -7,7 +7,6 @@ import {
   type SchemaInterface,
 } from '../schema/Schema'
 import { GraphQLObjectType, GraphQLSchema } from 'graphql'
-import type { Cron } from 'croner'
 import { GraphQLSchema as WabeGraphQLSchema } from '../graphql'
 import type { AuthenticationConfig } from '../authentication/interface'
 import { type WabeRoute, defaultRoutes } from './routes'
@@ -28,14 +27,13 @@ import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspect
 import type { AIConfig } from '../ai'
 import { FileController } from '../files/FileController'
 import { defaultSessionHandler } from './defaultHandlers'
+import type { CronConfig } from '../cron'
 
 type SecurityConfig = {
   corsOptions?: CorsOptions
   rateLimit?: RateLimitOptions
   maskErrorMessage?: boolean
 }
-
-type CronConfig = Record<string, Cron>
 
 export interface WabeConfig<T extends WabeTypes> {
   port: number

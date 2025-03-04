@@ -30,3 +30,5 @@ export enum CronExpressions {
   EVERY_6_HOURS = '0 0 */6 * * *',
   EVERY_12_HOURS = '0 0 */12 * * *',
 }
+
+export type CronConfig = Record<string, Cron>
