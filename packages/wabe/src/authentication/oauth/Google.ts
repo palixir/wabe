@@ -98,14 +98,9 @@ export class Google implements OAuth2ProviderWithPKCE {
     }
   }
 
-  async getUserInfo(accessToken: string, idToken: string) {
+  async getUserInfo(accessToken: string) {
     const userInfo = await fetch(
       `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${accessToken}`,
-      {
-        headers: {
-          Authorization: `Bearer ${idToken}`,
-        },
-      },
     )
 
     const { email, verified_email } = await userInfo.json()
