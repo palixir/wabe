@@ -107,7 +107,6 @@ type _SessionEdge {
 type UserSecondFA {
   enabled: Boolean!
   provider: SecondaryFactor!
-  isAwaitingChallenge: Boolean
 }
 
 """User class"""
@@ -176,7 +175,6 @@ input UserAuthenticationGithubInput {
 input UserSecondFAInput {
   enabled: Boolean!
   provider: SecondaryFactor!
-  isAwaitingChallenge: Boolean
 }
 
 """Input to link an object to a pointer User"""
@@ -252,7 +250,6 @@ input UserAuthenticationGithubCreateFieldsInput {
 input UserSecondFACreateFieldsInput {
   enabled: Boolean
   provider: SecondaryFactor
-  isAwaitingChallenge: Boolean
 }
 
 """Input to add a relation to the class User"""
@@ -940,7 +937,6 @@ input _SessionACLObjectRolesACLWhereInput {
 input UserSecondFAWhereInput {
   enabled: BooleanWhereInput
   provider: AnyWhereInput
-  isAwaitingChallenge: BooleanWhereInput
   OR: [UserSecondFAWhereInput]
   AND: [UserSecondFAWhereInput]
 }
@@ -1325,7 +1321,6 @@ input UserAuthenticationGithubUpdateFieldsInput {
 input UserSecondFAUpdateFieldsInput {
   enabled: Boolean
   provider: SecondaryFactor
-  isAwaitingChallenge: Boolean
 }
 
 input UpdateUsersInput {

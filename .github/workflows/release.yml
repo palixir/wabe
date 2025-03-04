@@ -1,137 +1,138 @@
-name: 'release'
+name: "release"
 
 on:
-    workflow_dispatch:
-        inputs:
-            package:
-                description: 'Package to release'
-                required: true
-                type: choice
-                options:
-                    - 'wabe'
-                    - 'wabe-resend'
-                    - 'wabe-stripe'
-                    - 'wabe-openai'
-                    - 'wabe-buns3'
-                    - 'wabe-mongodb-launcher'
+  workflow_dispatch:
+    inputs:
+      package:
+        description: "Package to release"
+        required: true
+        type: choice
+        options:
+          - "wabe"
+          - "wabe-resend"
+          - "wabe-stripe"
+          - "wabe-openai"
+          - "wabe-buns3"
+          - "wabe-cron"
+          - "wabe-mongodb-launcher"
 
 jobs:
-    release:
-        runs-on: ubuntu-latest
-        name: 'Release ${{inputs.package}}'
+  release:
+    runs-on: ubuntu-latest
+    name: "Release ${{inputs.package}}"
 
-        permissions:
-            contents: write
-            pull-requests: read
+    permissions:
+      contents: write
+      pull-requests: read
 
-        steps:
-            - uses: actions/checkout@v4
-              with:
-                  fetch-depth: 0
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-            - uses: actions/setup-node@v4
-              with:
-                  node-version: 22
-                  registry-url: 'https://registry.npmjs.org'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: "https://registry.npmjs.org"
 
-            - uses: oven-sh/setup-bun@v2
-              with:
-                  bun-version: latest
-                  registry-url: 'https://registry.npmjs.org'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+          registry-url: "https://registry.npmjs.org"
 
-            - run: bun install
-            - run: bun run build
-            - run: bun ci
+      - run: bun install
+      - run: bun run build
+      - run: bun ci
 
-            - name: 'Get Previous tag'
-              id: previousTag
-              run: |
-                echo "Fetching tags..."
-                previous_tag=$(git tag -l "${{inputs.package}}-[0-9]*" --sort=-v:refname | head -n 1)
-                echo "Found previous tag: $previous_tag"
-                echo "tag=$previous_tag" >> $GITHUB_ENV
+      - name: "Get Previous tag"
+        id: previousTag
+        run: |
+          echo "Fetching tags..."
+          previous_tag=$(git tag -l "${{inputs.package}}-[0-9]*" --sort=-v:refname | head -n 1)
+          echo "Found previous tag: $previous_tag"
+          echo "tag=$previous_tag" >> $GITHUB_ENV
 
-            - name: 'Get Next Version from package.json'
-              id: nextVersion
-              run: |
-                package_json_path="./packages/${{inputs.package}}/package.json"
-                if [ ! -f "$package_json_path" ]; then
-                  echo "Error: $package_json_path not found."
-                  exit 1
-                fi
-                next_version=$(jq -r .version < "$package_json_path")
-                if [ -z "$next_version" ]; then
-                  echo "Error: Version not found in $package_json_path."
-                  exit 1
-                fi
-                echo "Next version: $next_version"
-                echo "next_version=$next_version" >> $GITHUB_ENV
+      - name: "Get Next Version from package.json"
+        id: nextVersion
+        run: |
+          package_json_path="./packages/${{inputs.package}}/package.json"
+          if [ ! -f "$package_json_path" ]; then
+            echo "Error: $package_json_path not found."
+            exit 1
+          fi
+          next_version=$(jq -r .version < "$package_json_path")
+          if [ -z "$next_version" ]; then
+            echo "Error: Version not found in $package_json_path."
+            exit 1
+          fi
+          echo "Next version: $next_version"
+          echo "next_version=$next_version" >> $GITHUB_ENV
 
-            # We publish on NPM before releasing on GitHub to avoid releasing a version that is not published
-            - run: npm publish --access=public --workspace=${{inputs.package}}
-              env:
-                  NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+      # We publish on NPM before releasing on GitHub to avoid releasing a version that is not published
+      - run: npm publish --access=public --workspace=${{inputs.package}}
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
 
-            - name: Create tag
-              uses: actions/github-script@v7
-              with:
-                  script: |
-                      github.rest.git.createRef({
-                        owner: context.repo.owner,
-                        repo: context.repo.repo,
-                        ref: 'refs/tags/${{inputs.package}}-${{env.next_version}}',
-                        sha: context.sha
-                      })
+      - name: Create tag
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/${{inputs.package}}-${{env.next_version}}',
+              sha: context.sha
+            })
 
-            - name: Build Changelog
-              id: github_release
-              uses: mikepenz/release-changelog-builder-action@v4.2.2
-              with:
-                  fromTag: ${{ env.tag }}
-                  toTag: ${{inputs.package}}-${{env.next_version}}
-                  configurationJson: |
-                      {
-                        "categories": [
-                            {
-                              "title": "## 🚀 Features",
-                              "labels": ["feat"]
-                            },
-                            {
-                              "title": "## 🐛 Fixes",
-                              "labels": ["fix", "bug"]
-                            },
-                            {
-                              "key": "tests",
-                              "title": "## 🧪 Tests",
-                              "labels": ["test"]
-                            },
-                            {
-                              "key": "doc",
-                              "title": "## 📚 Documentation",
-                              "labels": ["docs", "doc"]
-                            },
-                            {
-                              "key": "misc",
-                              "title": "## 💬 Miscellaneous",
-                              "labels": ["ci", "chore", "perf", "refactor"]
-                            }
-                        ],
-                        "template": "#{{CHANGELOG}}\n\n",
-                        "pr_template": "- #{{TITLE}} (by @#{{AUTHOR}} in ##{{NUMBER}}) ",
-                        "label_extractor": [
-                            {
-                              "pattern": "^(ci|chore|doc|docs|feat|fix|bug|perf|refactor|test|tests)\\(${{inputs.package}}\\):(.*)",
-                              "target": "$1",
-                              "on_property": "title"
-                            }
-                        ]
-                      }
+      - name: Build Changelog
+        id: github_release
+        uses: mikepenz/release-changelog-builder-action@v4.2.2
+        with:
+          fromTag: ${{ env.tag }}
+          toTag: ${{inputs.package}}-${{env.next_version}}
+          configurationJson: |
+            {
+              "categories": [
+                  {
+                    "title": "## 🚀 Features",
+                    "labels": ["feat"]
+                  },
+                  {
+                    "title": "## 🐛 Fixes",
+                    "labels": ["fix", "bug"]
+                  },
+                  {
+                    "key": "tests",
+                    "title": "## 🧪 Tests",
+                    "labels": ["test"]
+                  },
+                  {
+                    "key": "doc",
+                    "title": "## 📚 Documentation",
+                    "labels": ["docs", "doc"]
+                  },
+                  {
+                    "key": "misc",
+                    "title": "## 💬 Miscellaneous",
+                    "labels": ["ci", "chore", "perf", "refactor"]
+                  }
+              ],
+              "template": "#{{CHANGELOG}}\n\n",
+              "pr_template": "- #{{TITLE}} (by @#{{AUTHOR}} in ##{{NUMBER}}) ",
+              "label_extractor": [
+                  {
+                    "pattern": "^(ci|chore|doc|docs|feat|fix|bug|perf|refactor|test|tests)\\(${{inputs.package}}\\):(.*)",
+                    "target": "$1",
+                    "on_property": "title"
+                  }
+              ]
+            }
 
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-            - name: Create Release
-              uses: softprops/action-gh-release@v2
-              with:
-                  tag_name: ${{inputs.package}}-${{env.next_version}}
-                  body: ${{steps.github_release.outputs.changelog}}
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{inputs.package}}-${{env.next_version}}
+          body: ${{steps.github_release.outputs.changelog}}
