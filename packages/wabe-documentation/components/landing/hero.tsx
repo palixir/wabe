@@ -1,7 +1,8 @@
 import { Image } from '@heroui/image'
 import { CallToAction } from './callToAction'
 import { computePublicPath } from '../utils'
-import { Button, Link } from '@heroui/react'
+import { Button } from '@heroui/react'
+import { Link } from 'rspress/theme'
 import InformationCircleIcon from '@heroicons/react/24/outline/InformationCircleIcon'
 
 export default function Hero() {
@@ -10,7 +11,6 @@ export default function Hero() {
       <section id="hero" className="my-20">
         <div className="flex flex-col justify-center items-center mx-auto gap-20">
           <div className="flex flex-col gap-8 justify-center items-center max-w-5xl mx-auto text-center w-full">
-            {/* Titre Principal Amélioré */}
             <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-center leading-tight">
               Create your &nbsp;
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-teal-400 to-green-400">
@@ -45,7 +45,6 @@ export default function Hero() {
                 variant="bordered"
                 size="lg"
                 href="/documentation/wabe/motivations"
-                target="_blank"
                 className="relative overflow-hidden px-8 py-4 rounded-xl shadow-md transition-transform transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg focus:ring-2 focus:ring-blue-500"
                 startContent={<InformationCircleIcon className="w-8 h-8" />}
               >
