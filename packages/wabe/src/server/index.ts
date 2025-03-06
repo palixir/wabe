@@ -57,7 +57,7 @@ export interface WabeConfig<T extends WabeTypes> {
   payment?: PaymentConfig
   ai?: AIConfig
   file?: FileConfig
-  crons?: CronConfig
+  crons?: CronConfig<T>
 }
 
 export type WabeTypes = {
@@ -99,6 +99,7 @@ export class Wabe<T extends WabeTypes> {
     email,
     payment,
     routes,
+    crons,
   }: WabeConfig<T>) {
     this.config = {
       isProduction,
@@ -115,6 +116,7 @@ export class Wabe<T extends WabeTypes> {
       payment,
       routes,
       file,
+      crons,
     }
 
     this.server = new Wobe<WobeCustomContext<T>>({ hostname }).get(
@@ -137,10 +139,22 @@ export class Wabe<T extends WabeTypes> {
       file: file?.adapter ? new FileController(file.adapter, this) : undefined,
     }
 
+    this.loadCrons()
     this.loadAuthenticationMethods()
     this.loadRoleEnum()
     this.loadRoutes()
     this.loadHooks()
+  }
+
+  loadCrons() {
+    if (!this.config.crons) return
+
+    const crons = this.config.crons.map((cron) => ({
+      ...cron,
+      job: cron.cron(this),
+    }))
+
+    this.config.crons = crons
   }
 
   loadRoleEnum() {

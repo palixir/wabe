@@ -25,14 +25,15 @@ const run = async () => {
       url: "mongodb://127.0.0.1:27045",
       name: "WabeApp",
     },
-    crons: {
-      test: cron({
-        pattern: CronExpressions.EVERY_SECOND,
-        run: () => {
-          console.log('test')
-        },
-      }),
-    },
+    crons: [
+      {
+        name: 'test',
+        cron: cron({
+          pattern: '* * * * * *',
+          run: (wabe) => console.log('test', wabe.config.port),
+        }),
+      },
+    ],
     port: 3000,
   });
 

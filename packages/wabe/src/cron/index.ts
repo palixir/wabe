@@ -1,16 +1,24 @@
 import { Cron } from 'croner'
+import type { Wabe, WabeTypes } from '../server'
 
-export const cron = ({
-  pattern,
-  run,
-  maxRuns,
-  enabledProtectedRuns,
-}: {
-  pattern: string
-  maxRuns?: number
-  enabledProtectedRuns?: boolean
-  run: () => any | Promise<any>
-}) => new Cron(pattern, { maxRuns, protect: enabledProtectedRuns }, run)
+export type OutputCron<T extends WabeTypes> = (wabe: Wabe<T>) => Cron
+
+export const cron =
+  <T extends WabeTypes>({
+    pattern,
+    run,
+    maxRuns,
+    enabledProtectedRuns,
+  }: {
+    pattern: string
+    maxRuns?: number
+    enabledProtectedRuns?: boolean
+    run: (wabe: Wabe<T>) => any | Promise<any>
+  }): OutputCron<T> =>
+  (wabe: Wabe<T>) =>
+    new Cron(pattern, { maxRuns, protect: enabledProtectedRuns }, () =>
+      run(wabe),
+    )
 
 export enum CronExpressions {
   EVERY_SECOND = '* * * * * *',
@@ -31,4 +39,8 @@ export enum CronExpressions {
   EVERY_12_HOURS = '0 0 */12 * * *',
 }
 
-export type CronConfig = Record<string, Cron>
+export type CronConfig<T extends WabeTypes> = Array<{
+  name: string
+  cron: OutputCron<T>
+  job?: Cron
+}>

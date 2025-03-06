@@ -8,7 +8,7 @@ describe('cron', () => {
     const job = cron({
       pattern: '* * * * * *',
       run,
-    })
+    })({} as any)
 
     job.trigger()
 
@@ -27,7 +27,7 @@ describe('cron', () => {
         await new Promise((resolve) => setTimeout(resolve, 4000))
       },
       enabledProtectedRuns: true,
-    })
+    })({} as any)
 
     await new Promise((resolve) => setTimeout(resolve, 2100))
 
