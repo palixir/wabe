@@ -681,6 +681,10 @@ export class Schema<T extends WabeTypes> {
             },
           },
         },
+        protected: {
+          authorizedRoles: ['rootOnly'],
+          protectedOperations: ['update', 'read', 'create'],
+        },
       },
       createdAt: {
         type: 'Date',
