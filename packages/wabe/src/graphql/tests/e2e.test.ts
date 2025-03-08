@@ -1,12 +1,4 @@
-import {
-  afterAll,
-  afterEach,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-} from 'bun:test'
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'bun:test'
 import type { Wabe } from '../../server'
 import {
   type DevWabeTypes,
@@ -15,17 +7,6 @@ import {
   setupTests,
 } from '../../utils/helper'
 import { type GraphQLClient, gql } from 'graphql-request'
-
-const cleanUsers = async (client: GraphQLClient) => {
-  const { users } = await client.request<any>(graphql.users, {})
-  await Promise.all(
-    users.edges.map(({ node }: { node: any }) =>
-      client.request<any>(graphql.deleteUser, {
-        input: { id: node.id },
-      }),
-    ),
-  )
-}
 
 describe('GraphQL : E2E', () => {
   let wabe: Wabe<DevWabeTypes>
@@ -44,6 +25,8 @@ describe('GraphQL : E2E', () => {
   })
 
   beforeEach(async () => {
+    await wabe.controllers.database.clearDatabase()
+
     await client.request<any>(graphql.createUsers, {
       input: {
         fields: [
@@ -54,13 +37,9 @@ describe('GraphQL : E2E', () => {
     })
   })
 
-  afterEach(async () => {
-    await cleanUsers(client)
-  })
-
   describe('Default requests', () => {
     it("should use pagination with 'offset' and 'first' arguments", async () => {
-      await cleanUsers(client)
+      await wabe.controllers.database.clearDatabase()
 
       const res = await client.request<any>(graphql.createUsers, {
         input: {
