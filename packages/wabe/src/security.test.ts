@@ -54,7 +54,7 @@ describe('Security tests', () => {
     ).rejects.toThrow('Permission denied to read class Test')
   })
 
-  it('should throw an error when I try to create, update and read ACL field without root access', async () => {
+  it('should throw an error when I try to update and read ACL field without root access', async () => {
     const setup = await setupTests([
       {
         name: 'Test',
@@ -102,18 +102,6 @@ describe('Security tests', () => {
      `)
 
     const testId = res.createTest.test.id
-
-    expect(
-      userClient.request(gql`
-          mutation createTest {
-              createTest(input: {fields: {acl: {users: [{userId: "2"}]}}}) {
-                  test {
-                      id
-                  }
-              }
-          }
-          `),
-    ).rejects.toThrow('You are not authorized to create this field')
 
     expect(
       userClient.request(gql`

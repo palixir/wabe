@@ -323,11 +323,6 @@ const graphql = {
         user {
             id
             email
-            acl {
-                users {
-                    userId
-                }
-            }
         }
       }
   	}
