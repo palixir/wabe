@@ -54,6 +54,87 @@ describe('Security tests', () => {
     ).rejects.toThrow('Permission denied to read class Test')
   })
 
+  it('should throw an error when I try to update and read ACL field without root access', async () => {
+    const setup = await setupTests([
+      {
+        name: 'Test',
+        fields: {
+          name: {
+            type: 'String',
+          },
+        },
+        permissions: {
+          create: {
+            authorizedRoles: ['Client'],
+            requireAuthentication: true,
+          },
+          read: {
+            authorizedRoles: ['Client'],
+            requireAuthentication: true,
+          },
+          update: {
+            authorizedRoles: ['Client'],
+            requireAuthentication: true,
+          },
+        },
+      },
+    ])
+    wabe = setup.wabe
+    port = setup.port
+    client = getAnonymousClient(port)
+    rootClient = getGraphqlClient(port)
+
+    const { userClient } = await createUserAndUpdateRole({
+      anonymousClient: getAnonymousClient(port),
+      port,
+      roleName: 'Client',
+      rootClient,
+    })
+
+    const res = await userClient.request<any>(gql`
+     mutation createTest {
+         createTest(input: {fields: {name: "Test"}}) {
+             test {
+                 id
+             }
+         }
+     }
+     `)
+
+    const testId = res.createTest.test.id
+
+    expect(
+      userClient.request(gql`
+      query tests {
+          tests {
+              edges {
+                  node {
+                      id
+                      acl {
+                          users {
+                              userId
+                          }
+                      }
+                  }
+              }
+          }
+      }
+      `),
+    ).rejects.toThrow('You are not authorized to read this field')
+
+    expect(
+      userClient.request(gql`
+        mutation updateTest {
+            updateTest(input: {id: "${testId}", fields: {acl: {users: [{userId: "2"}]}}}) {
+                test {
+                    id
+                }
+            }
+        }
+        `),
+    ).rejects.toThrow('You are not authorized to update this field')
+  })
+
   it('should throw an error when I try to create an user with a role without root access', async () => {
     const setup = await setupTests()
     wabe = setup.wabe
