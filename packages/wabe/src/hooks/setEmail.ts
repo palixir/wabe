@@ -11,6 +11,8 @@ const updateEmail = (object: HookObject<DevWabeTypes, 'User'>) => {
 
   const emailToSave = authentication[provider].email
 
+  if (!emailToSave) return
+
   object.upsertNewData('email', emailToSave)
 
   if (provider) object.upsertNewData('provider', provider)

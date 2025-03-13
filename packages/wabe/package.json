@@ -32,14 +32,15 @@
   "dependencies": {
     "@graphql-yoga/plugin-disable-introspection": "2.10.9",
     "@node-rs/argon2": "2.0.2",
+    "croner": "9.0.0",
+    "js-srp6a": "1.0.2",
     "jsonwebtoken": "9.0.2",
     "libphonenumber-js": "1.11.18",
     "mongodb": "6.13.1",
     "otplib": "12.0.1",
     "p-retry": "6.2.1",
     "wobe": "1.1.10",
-    "wobe-graphql-yoga": "1.2.6",
-    "croner": "9.0.0"
+    "wobe-graphql-yoga": "1.2.6"
   },
   "devDependencies": {
     "@parcel/watcher": "2.3.0",

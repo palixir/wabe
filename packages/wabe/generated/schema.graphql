@@ -69,6 +69,7 @@ type UserAuthentication {
   emailPassword: UserAuthenticationEmailPassword
   google: UserAuthenticationGoogle
   github: UserAuthenticationGithub
+  emailPasswordSRP: UserAuthenticationEmailPasswordSRP
 }
 
 type UserAuthenticationPhonePassword {
@@ -93,6 +94,12 @@ type UserAuthenticationGithub {
   email: Email!
   avatarUrl: String!
   username: String!
+}
+
+type UserAuthenticationEmailPasswordSRP {
+  salt: String!
+  verifier: String!
+  serverSecret: String
 }
 
 type _SessionConnection {
@@ -149,6 +156,7 @@ input UserAuthenticationInput {
   emailPassword: UserAuthenticationEmailPasswordInput
   google: UserAuthenticationGoogleInput
   github: UserAuthenticationGithubInput
+  emailPasswordSRP: UserAuthenticationEmailPasswordSRPInput
 }
 
 input UserAuthenticationPhonePasswordInput {
@@ -170,6 +178,12 @@ input UserAuthenticationGithubInput {
   email: Email!
   avatarUrl: String!
   username: String!
+}
+
+input UserAuthenticationEmailPasswordSRPInput {
+  salt: String!
+  verifier: String!
+  serverSecret: String
 }
 
 input UserSecondFAInput {
@@ -224,6 +238,7 @@ input UserAuthenticationCreateFieldsInput {
   emailPassword: UserAuthenticationEmailPasswordCreateFieldsInput
   google: UserAuthenticationGoogleCreateFieldsInput
   github: UserAuthenticationGithubCreateFieldsInput
+  emailPasswordSRP: UserAuthenticationEmailPasswordSRPCreateFieldsInput
 }
 
 input UserAuthenticationPhonePasswordCreateFieldsInput {
@@ -245,6 +260,12 @@ input UserAuthenticationGithubCreateFieldsInput {
   email: Email
   avatarUrl: String
   username: String
+}
+
+input UserAuthenticationEmailPasswordSRPCreateFieldsInput {
+  salt: String
+  verifier: String
+  serverSecret: String
 }
 
 input UserSecondFACreateFieldsInput {
@@ -811,6 +832,7 @@ input UserAuthenticationWhereInput {
   emailPassword: UserAuthenticationEmailPasswordWhereInput
   google: UserAuthenticationGoogleWhereInput
   github: UserAuthenticationGithubWhereInput
+  emailPasswordSRP: UserAuthenticationEmailPasswordSRPWhereInput
   OR: [UserAuthenticationWhereInput]
   AND: [UserAuthenticationWhereInput]
 }
@@ -849,6 +871,14 @@ input UserAuthenticationGithubWhereInput {
   username: StringWhereInput
   OR: [UserAuthenticationGithubWhereInput]
   AND: [UserAuthenticationGithubWhereInput]
+}
+
+input UserAuthenticationEmailPasswordSRPWhereInput {
+  salt: StringWhereInput
+  verifier: StringWhereInput
+  serverSecret: StringWhereInput
+  OR: [UserAuthenticationEmailPasswordSRPWhereInput]
+  AND: [UserAuthenticationEmailPasswordSRPWhereInput]
 }
 
 input AnyWhereInput {
@@ -1214,6 +1244,15 @@ type Mutation {
   customMutation(input: CustomMutationInput!): Int
   secondCustomMutation(input: SecondCustomMutationInput!): Int
 
+  """Sign up with SRP authentication method"""
+  signUpWithSRP(input: SignUpWithSRPInput!): Boolean
+
+  """Sign in with SRP authentication method"""
+  signInWithSRP(input: SignInWithSRPInput!): SignInWithSRPOutput
+
+  """Process the server session proof"""
+  processSRPChallenge(input: ProcessSRPChallengeInput!): ProcessSRPChallengeOutput
+
   """Mutation to reset the password of the user"""
   resetPassword(input: ResetPasswordInput!): Boolean
 
@@ -1295,6 +1334,7 @@ input UserAuthenticationUpdateFieldsInput {
   emailPassword: UserAuthenticationEmailPasswordUpdateFieldsInput
   google: UserAuthenticationGoogleUpdateFieldsInput
   github: UserAuthenticationGithubUpdateFieldsInput
+  emailPasswordSRP: UserAuthenticationEmailPasswordSRPUpdateFieldsInput
 }
 
 input UserAuthenticationPhonePasswordUpdateFieldsInput {
@@ -1316,6 +1356,12 @@ input UserAuthenticationGithubUpdateFieldsInput {
   email: Email
   avatarUrl: String
   username: String
+}
+
+input UserAuthenticationEmailPasswordSRPUpdateFieldsInput {
+  salt: String
+  verifier: String
+  serverSecret: String
 }
 
 input UserSecondFAUpdateFieldsInput {
@@ -1672,6 +1718,32 @@ input SecondCustomMutationInput {
 input SecondCustomMutationSumInput {
   a: Int!
   b: Int!
+}
+
+input SignUpWithSRPInput {
+  email: Email!
+  salt: String!
+  verifier: String!
+}
+
+type SignInWithSRPOutput {
+  salt: String!
+  serverPublic: String!
+}
+
+input SignInWithSRPInput {
+  email: Email!
+  clientPublic: String!
+}
+
+type ProcessSRPChallengeOutput {
+  serverSessionProof: String!
+}
+
+input ProcessSRPChallengeInput {
+  email: Email!
+  clientPublic: String!
+  clientSessionProof: String!
 }
 
 input ResetPasswordInput {
