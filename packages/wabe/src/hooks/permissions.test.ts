@@ -170,7 +170,6 @@ describe('Permissions', () => {
     it('should throw permission denied if no session id is provided but class require authentication', () => {
       const context: WabeContext<any> = {
         sessionId: '',
-        // @ts-expect-error
         user: {},
         isRoot: false,
         wabe: { controllers, config } as any,
