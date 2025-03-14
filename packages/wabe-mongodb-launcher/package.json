@@ -6,7 +6,7 @@
     "description": "Package to launch the mongodb for test",
     "scripts": {
         "ci":"bun lint",
-        "build": "bun --filter wabe-build build $(pwd)",
+        "build": "bun --filter wabe-build build:package $(pwd)",
         "lint": "biome lint . --config-path=../../ --no-errors-on-unmatched",
         "format": "biome format --config-path=../../ --write ."
     },
