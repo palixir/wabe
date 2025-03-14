@@ -1,0 +1,14 @@
+{
+    "name": "wabe-build",
+    "version": "0.5.0",
+    "license": "MIT",
+    "main": "src/index.ts",
+    "description": "Utils package to build other packages",
+    "scripts": {
+        "build": "bun run src/index.ts"
+    },
+    "devDependencies": {
+        "@types/bun": "latest",
+        "oxc-transform": "0.58.1"
+    }
+}

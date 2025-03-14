@@ -20,8 +20,7 @@
   },
   "main": "dist/index.js",
   "scripts": {
-    "build": "bun generate:codegen && bun build $(pwd)/src/index.ts --outdir dist/ --target=node --external=@node-rs/argon2 && bun generate:types",
-    "generate:types": "dts-bundle-generator -o dist/index.d.ts src/index.ts --no-check --external-imports=wobe",
+    "build": "bun --filter wabe-build build $(pwd)",
     "check": "tsc --project $(pwd)/tsconfig.json",
     "lint": "biome lint . --no-errors-on-unmatched --config-path=../../",
     "ci": "bun generate:codegen && bun lint $(pwd) && bun check && bun test src",
@@ -46,11 +45,11 @@
     "@types/bun": "latest",
     "@types/jsonwebtoken": "9.0.6",
     "@types/uuid": "9.0.6",
-    "dts-bundle-generator": "9.5.1",
     "get-port": "7.1.0",
     "graphql-request": "6.1.0",
     "uuid": "10.0.0",
     "wabe-mongodb-launcher": "workspace:*",
-    "wabe-pluralize": "workspace:*"
+    "wabe-pluralize": "workspace:*",
+    "wabe-build": "workspace:*"
   }
 }

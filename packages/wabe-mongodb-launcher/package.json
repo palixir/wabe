@@ -6,10 +6,9 @@
     "description": "Package to launch the mongodb for test",
     "scripts": {
         "ci":"bun lint",
-        "build": "bun build --outdir dist $(pwd)/src/index.ts --target=node --external=* && bun generate:types",
+        "build": "bun --filter wabe-build build $(pwd)",
         "lint": "biome lint . --config-path=../../ --no-errors-on-unmatched",
-        "format": "biome format --config-path=../../ --write .",
-        "generate:types": "tsc --emitDeclarationOnly --declaration --declarationDir dist"
+        "format": "biome format --config-path=../../ --write ."
     },
     "dependencies": {
         "tcp-port-used": "1.0.2",

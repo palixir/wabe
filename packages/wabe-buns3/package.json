@@ -20,8 +20,7 @@
   },
   "main": "dist/index.js",
   "scripts": {
-    "build": "bun build --outdir dist $(pwd)/src/index.ts --target=bun && bun generate:types",
-    "generate:types": "dts-bundle-generator -o dist/index.d.ts src/index.ts --no-check",
+    "build": "bun --filter wabe-build build $(pwd)",
     "check": "tsc --project $(pwd)/tsconfig.json",
     "lint": "biome lint . --no-errors-on-unmatched --config-path=../../",
     "ci": "bun check && bun lint $(pwd) && bun test src",
@@ -29,7 +28,6 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "wabe": "workspace:*",
-    "dts-bundle-generator": "9.5.1"
+    "wabe": "workspace:*"
   }
 }
