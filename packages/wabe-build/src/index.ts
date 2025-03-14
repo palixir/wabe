@@ -33,6 +33,7 @@ const getDtsBunPlugin = (): BunPlugin => {
 }
 
 const directory = process.argv[2]
+const target = (process.argv[3] || 'node') as 'node' | 'browser' | 'bun'
 
 const run = async () => {
   await Bun.$`rm -rf ${directory}/dist`
@@ -42,7 +43,7 @@ const run = async () => {
     root: `${directory}/src`,
     outdir: `${directory}/dist`,
     minify: true,
-    target: 'node',
+    target,
     plugins: [getDtsBunPlugin()],
     external: ['@node-rs/argon2'],
   })
