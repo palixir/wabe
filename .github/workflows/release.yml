@@ -12,6 +12,7 @@ on:
           - "wabe-resend"
           - "wabe-stripe"
           - "wabe-openai"
+          - "wabe-mistralai"
           - "wabe-buns3"
           - "wabe-cron"
           - "wabe-mongodb-launcher"
