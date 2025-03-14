@@ -5,7 +5,7 @@
     "main": "src/index.ts",
     "description": "Utils package to build other packages",
     "scripts": {
-        "build": "bun run src/index.ts"
+        "build:package": "bun run src/index.ts"
     },
     "devDependencies": {
         "@types/bun": "latest",
