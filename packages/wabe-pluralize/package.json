@@ -5,12 +5,12 @@
     "main": "src/index.ts",
     "description": "Package to pluralize a word in english",
     "scripts": {
-        "build": "tsc --project tsconfig.json",
+        "build": "bun --filter wabe-build build:package $(pwd)",
+        "check": "tsc --project $(pwd)/tsconfig.json",
         "ci":"bun lint && bun test",
-        "lint": "biome lint $(pwd)/*.ts --config-path=../../ --no-errors-on-unmatched",
+        "lint": "biome lint $(pwd)/src/*.ts --config-path=../../ --no-errors-on-unmatched",
         "format": "biome format --write . --config-path=../../"
     },
-    "dependencies": {},
     "devDependencies": {
         "@types/bun": "latest"
     }

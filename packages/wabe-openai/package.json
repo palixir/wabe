@@ -21,8 +21,7 @@
   },
   "main": "dist/index.js",
   "scripts": {
-    "build": "bun build --outdir dist $(pwd)/src/index.ts --target=node --external=* && bun generate:types",
-    "generate:types": "tsc --emitDeclarationOnly --declaration --declarationDir dist",
+    "build": "bun --filter wabe-build build:package $(pwd)",
     "check": "tsc --project $(pwd)/tsconfig.json",
     "lint": "biome lint . --no-errors-on-unmatched --config-path=../../",
     "ci": "bun check && bun lint $(pwd) && bun test src",
