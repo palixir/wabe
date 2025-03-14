@@ -35,6 +35,9 @@ type SecurityConfig = {
   maskErrorMessage?: boolean
 }
 
+export * from './interface'
+export * from './routes'
+
 export interface WabeConfig<T extends WabeTypes> {
   port: number
   isProduction: boolean
