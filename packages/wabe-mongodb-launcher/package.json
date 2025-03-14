@@ -9,7 +9,7 @@
         "build": "bun build --outdir dist $(pwd)/src/index.ts --target=node --external=* && bun generate:types",
         "lint": "biome lint . --config-path=../../ --no-errors-on-unmatched",
         "format": "biome format --config-path=../../ --write .",
-        "generate:types": "dts-bundle-generator -o dist/index.d.ts $(pwd)/src/index.ts --no-check --external-imports=wobe"
+        "generate:types": "tsc --emitDeclarationOnly --declaration --declarationDir dist"
     },
     "dependencies": {
         "tcp-port-used": "1.0.2",
@@ -17,7 +17,6 @@
     },
     "devDependencies": {
         "@types/bun": "latest",
-        "@types/tcp-port-used": "1.0.4",
-        "dts-bundle-generator": "9.5.1"
+        "@types/tcp-port-used": "1.0.4"
     }
 }
