@@ -40,7 +40,8 @@ export type Authentication = {
 	phonePassword?: AuthenticationPhonePassword,
 	emailPassword?: AuthenticationEmailPassword,
 	google?: AuthenticationGoogle,
-	github?: AuthenticationGithub
+	github?: AuthenticationGithub,
+	emailPasswordSRP?: AuthenticationEmailPasswordSRP
 }
 
 export type AuthenticationEmailPassword = {
@@ -57,6 +58,12 @@ export type AuthenticationGithub = {
 	email: string,
 	avatarUrl: string,
 	username: string
+}
+
+export type AuthenticationEmailPasswordSRP = {
+	salt: string,
+	verifier: string,
+	serverSecret?: string
 }
 
 export type SecondFA = {
@@ -230,6 +237,35 @@ export type MutationSecondCustomMutationArgs = {
 export type SecondCustomMutationSum = {
 	a: number,
 	b: number
+}
+
+export type SignUpWithSRPInput = {
+	email: string,
+	salt: string,
+	verifier: string
+}
+
+export type MutationSignUpWithSRPArgs = {
+	input: SignUpWithSRPInput
+}
+
+export type SignInWithSRPInput = {
+	email: string,
+	clientPublic: string
+}
+
+export type MutationSignInWithSRPArgs = {
+	input: SignInWithSRPInput
+}
+
+export type ProcessSRPChallengeInput = {
+	email: string,
+	clientPublic: string,
+	clientSessionProof: string
+}
+
+export type MutationProcessSRPChallengeArgs = {
+	input: ProcessSRPChallengeInput
 }
 
 export type ResetPasswordInput = {

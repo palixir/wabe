@@ -16,6 +16,9 @@ export const defaultCallAuthenticationProviderOnBeforeCreateUser = async (
 
   const authentication = hookObject.getNewData().authentication
 
+  // Exception for SRP
+  if (authentication.emailPasswordSRP) return
+
   const { provider, name } = getAuthenticationMethod<
     DevWabeTypes,
     ProviderInterface<DevWabeTypes>
@@ -45,6 +48,9 @@ export const defaultCallAuthenticationProviderOnBeforeUpdateUser = async (
   const context = hookObject.context
 
   const authentication = hookObject.getNewData().authentication
+
+  // Exception for SRP
+  if (authentication.emailPasswordSRP) return
 
   const { provider, name } = getAuthenticationMethod<
     DevWabeTypes,

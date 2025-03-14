@@ -553,7 +553,29 @@ export class Schema<T extends WabeTypes> {
       type: 'Object',
       object: {
         name: 'Authentication',
-        fields: allAuthenticationDataToStoreObject,
+        fields: {
+          ...allAuthenticationDataToStoreObject,
+          // HardCoded for the moment
+          emailPasswordSRP: {
+            type: 'Object',
+            object: {
+              name: 'EmailPasswordSRP',
+              fields: {
+                salt: {
+                  type: 'String',
+                  required: true,
+                },
+                verifier: {
+                  type: 'String',
+                  required: true,
+                },
+                serverSecret: {
+                  type: 'String',
+                },
+              },
+            },
+          },
+        },
       },
     }
 
