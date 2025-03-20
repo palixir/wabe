@@ -133,7 +133,7 @@ export class Session {
         iat: Date.now(),
         exp: this.getAccessTokenExpireAt(context.wabe.config).getTime(),
       },
-      import.meta.env.JWT_SECRET || 'dev',
+      context.wabe.config.authentication?.session?.jwtSecret || 'dev',
     )
 
     this.refreshToken = jwt.sign(
@@ -142,7 +142,7 @@ export class Session {
         iat: Date.now(),
         exp: this.getRefreshTokenExpireAt(context.wabe.config).getTime(),
       },
-      import.meta.env.JWT_SECRET || 'dev',
+      context.wabe.config.authentication?.session?.jwtSecret || 'dev',
     )
 
     const res = await context.wabe.controllers.database.createObject({
@@ -264,7 +264,7 @@ export class Session {
         iat: Date.now(),
         exp: this.getAccessTokenExpireAt(context.wabe.config).getTime(),
       },
-      import.meta.env.JWT_SECRET || 'dev',
+      context.wabe.config.authentication?.session?.jwtSecret || 'dev',
     )
 
     const newRefreshToken = jwt.sign(
@@ -273,7 +273,7 @@ export class Session {
         iat: Date.now(),
         exp: this.getRefreshTokenExpireAt(context.wabe.config).getTime(),
       },
-      import.meta.env.JWT_SECRET || 'dev',
+      context.wabe.config.authentication?.session?.jwtSecret || 'dev',
     )
 
     await context.wabe.controllers.database.updateObject({
