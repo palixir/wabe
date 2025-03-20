@@ -145,6 +145,7 @@ export const setupTests = async (
     authentication: {
       roles: ['Client', 'Client2', 'Client3', 'Admin'],
       session: {
+        jwtSecret: 'dev',
         cookieSession: true,
       },
     },

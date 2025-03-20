@@ -82,6 +82,10 @@ export interface SessionConfig {
    * Set to true to automatically store the session tokens in cookies
    */
   cookieSession?: boolean
+  /**
+   * The JWT secret used to sign the session tokens
+   */
+  jwtSecret: string
 }
 
 export interface AuthenticationConfig<T extends WabeTypes> {

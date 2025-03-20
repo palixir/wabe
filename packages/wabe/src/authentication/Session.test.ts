@@ -124,7 +124,16 @@ describe('_Session', () => {
     const thirtyDays = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
 
     const { accessToken, refreshToken } = await session.create('userId', {
-      wabe: { controllers },
+      wabe: {
+        controllers,
+        config: {
+          authentication: {
+            session: {
+              jwtSecret: 'dev',
+            },
+          },
+        },
+      },
     } as any)
 
     expect(accessToken).not.toBeUndefined()
@@ -203,7 +212,18 @@ describe('_Session', () => {
     const { accessToken, refreshToken } = await session.refresh(
       'accessToken',
       'refreshToken',
-      { wabe: { controllers } } as any,
+      {
+        wabe: {
+          controllers,
+          config: {
+            authentication: {
+              session: {
+                jwtSecret: 'dev',
+              },
+            },
+          },
+        },
+      } as any,
     )
 
     expect(accessToken).not.toBeUndefined()
