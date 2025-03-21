@@ -225,6 +225,45 @@ describe('GraphqlSchema', () => {
     })
   })
 
+  it('should be able to only get ok output on query / mutation that returns connection object', async () => {
+    const { wabe, client } = await createWabe({
+      classes: [
+        {
+          name: 'TestClass',
+          fields: {
+            field1: {
+              type: 'String',
+            },
+          },
+          permissions: {
+            read: {
+              authorizedRoles: [],
+              requireAuthentication: true,
+            },
+          },
+        },
+      ],
+    })
+
+    await client.request(gql`
+      mutation deleteTestClasses {
+        deleteTestClasses(input: { where: { field1: { equalTo: "field1" } } }) {
+          ok
+        }
+      }
+      `)
+
+    await client.request(gql`
+      query testsClasses {
+        testClasses {
+          ok
+        }
+      }
+      `)
+
+    await wabe.close()
+  })
+
   it('should set correctly the where input on array field', async () => {
     const { wabe } = await createWabe({
       classes: [

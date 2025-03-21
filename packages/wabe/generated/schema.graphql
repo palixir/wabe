@@ -103,6 +103,7 @@ type UserAuthenticationEmailPasswordSRP {
 }
 
 type _SessionConnection {
+  ok: Boolean
   totalCount: Int
   edges: [_SessionEdge]
 }
@@ -294,6 +295,7 @@ type Post {
 }
 
 type UserConnection {
+  ok: Boolean
   totalCount: Int
   edges: [UserEdge]
 }
@@ -1003,6 +1005,7 @@ enum UserOrder {
 }
 
 type PostConnection {
+  ok: Boolean
   totalCount: Int
   edges: [PostEdge]
 }
@@ -1109,6 +1112,7 @@ enum _SessionOrder {
 }
 
 type RoleConnection {
+  ok: Boolean
   totalCount: Int
   edges: [RoleEdge]
 }
@@ -1133,6 +1137,7 @@ enum RoleOrder {
 }
 
 type _InternalConfigConnection {
+  ok: Boolean
   totalCount: Int
   edges: [_InternalConfigEdge]
 }
