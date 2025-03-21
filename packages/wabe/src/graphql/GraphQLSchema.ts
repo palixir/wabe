@@ -473,6 +473,7 @@ export class GraphQLSchema {
     const connectionObject = new GraphQLObjectType({
       name: `${wabeClass.name}Connection`,
       fields: () => ({
+        ok: { type: GraphQLBoolean },
         totalCount: { type: GraphQLInt },
         edges: { type: new GraphQLList(edgeObject) },
       }),
