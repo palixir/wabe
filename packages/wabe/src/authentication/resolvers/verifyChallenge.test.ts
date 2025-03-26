@@ -118,6 +118,7 @@ describe('verifyChallenge', () => {
       ),
     ).toEqual({
       accessToken: 'accessToken',
+      srp: undefined,
     })
 
     expect(mockOnVerifyChallenge).toHaveBeenCalledTimes(1)

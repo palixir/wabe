@@ -108,6 +108,10 @@ export default defineConfig({
               link: '/documentation/authentication/oauth',
             },
             {
+              text: 'Email password with SRP protocol',
+              link: '/documentation/authentication/emailPasswordSRP',
+            },
+            {
               text: 'Reset password',
               link: '/documentation/authentication/resetPassword',
             },

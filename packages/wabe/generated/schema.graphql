@@ -65,11 +65,18 @@ type UserACLObjectRolesACL {
 }
 
 type UserAuthentication {
+  emailPasswordSRP: UserAuthenticationEmailPasswordSRP
   phonePassword: UserAuthenticationPhonePassword
   emailPassword: UserAuthenticationEmailPassword
   google: UserAuthenticationGoogle
   github: UserAuthenticationGithub
-  emailPasswordSRP: UserAuthenticationEmailPasswordSRP
+}
+
+type UserAuthenticationEmailPasswordSRP {
+  email: Email!
+  salt: String!
+  verifier: String!
+  serverSecret: String
 }
 
 type UserAuthenticationPhonePassword {
@@ -94,12 +101,6 @@ type UserAuthenticationGithub {
   email: Email!
   avatarUrl: String!
   username: String!
-}
-
-type UserAuthenticationEmailPasswordSRP {
-  salt: String!
-  verifier: String!
-  serverSecret: String
 }
 
 type _SessionConnection {
@@ -153,11 +154,18 @@ input UserACLObjectRolesACLInput {
 }
 
 input UserAuthenticationInput {
+  emailPasswordSRP: UserAuthenticationEmailPasswordSRPInput
   phonePassword: UserAuthenticationPhonePasswordInput
   emailPassword: UserAuthenticationEmailPasswordInput
   google: UserAuthenticationGoogleInput
   github: UserAuthenticationGithubInput
-  emailPasswordSRP: UserAuthenticationEmailPasswordSRPInput
+}
+
+input UserAuthenticationEmailPasswordSRPInput {
+  email: Email!
+  salt: String!
+  verifier: String!
+  serverSecret: String
 }
 
 input UserAuthenticationPhonePasswordInput {
@@ -179,12 +187,6 @@ input UserAuthenticationGithubInput {
   email: Email!
   avatarUrl: String!
   username: String!
-}
-
-input UserAuthenticationEmailPasswordSRPInput {
-  salt: String!
-  verifier: String!
-  serverSecret: String
 }
 
 input UserSecondFAInput {
@@ -235,11 +237,18 @@ input UserACLObjectRolesACLCreateFieldsInput {
 }
 
 input UserAuthenticationCreateFieldsInput {
+  emailPasswordSRP: UserAuthenticationEmailPasswordSRPCreateFieldsInput
   phonePassword: UserAuthenticationPhonePasswordCreateFieldsInput
   emailPassword: UserAuthenticationEmailPasswordCreateFieldsInput
   google: UserAuthenticationGoogleCreateFieldsInput
   github: UserAuthenticationGithubCreateFieldsInput
-  emailPasswordSRP: UserAuthenticationEmailPasswordSRPCreateFieldsInput
+}
+
+input UserAuthenticationEmailPasswordSRPCreateFieldsInput {
+  email: Email
+  salt: String
+  verifier: String
+  serverSecret: String
 }
 
 input UserAuthenticationPhonePasswordCreateFieldsInput {
@@ -261,12 +270,6 @@ input UserAuthenticationGithubCreateFieldsInput {
   email: Email
   avatarUrl: String
   username: String
-}
-
-input UserAuthenticationEmailPasswordSRPCreateFieldsInput {
-  salt: String
-  verifier: String
-  serverSecret: String
 }
 
 input UserSecondFACreateFieldsInput {
@@ -830,13 +833,22 @@ input SearchWhereInput {
 scalar Search
 
 input UserAuthenticationWhereInput {
+  emailPasswordSRP: UserAuthenticationEmailPasswordSRPWhereInput
   phonePassword: UserAuthenticationPhonePasswordWhereInput
   emailPassword: UserAuthenticationEmailPasswordWhereInput
   google: UserAuthenticationGoogleWhereInput
   github: UserAuthenticationGithubWhereInput
-  emailPasswordSRP: UserAuthenticationEmailPasswordSRPWhereInput
   OR: [UserAuthenticationWhereInput]
   AND: [UserAuthenticationWhereInput]
+}
+
+input UserAuthenticationEmailPasswordSRPWhereInput {
+  email: EmailWhereInput
+  salt: StringWhereInput
+  verifier: StringWhereInput
+  serverSecret: StringWhereInput
+  OR: [UserAuthenticationEmailPasswordSRPWhereInput]
+  AND: [UserAuthenticationEmailPasswordSRPWhereInput]
 }
 
 input UserAuthenticationPhonePasswordWhereInput {
@@ -873,14 +885,6 @@ input UserAuthenticationGithubWhereInput {
   username: StringWhereInput
   OR: [UserAuthenticationGithubWhereInput]
   AND: [UserAuthenticationGithubWhereInput]
-}
-
-input UserAuthenticationEmailPasswordSRPWhereInput {
-  salt: StringWhereInput
-  verifier: StringWhereInput
-  serverSecret: StringWhereInput
-  OR: [UserAuthenticationEmailPasswordSRPWhereInput]
-  AND: [UserAuthenticationEmailPasswordSRPWhereInput]
 }
 
 input AnyWhereInput {
@@ -1249,15 +1253,6 @@ type Mutation {
   customMutation(input: CustomMutationInput!): Int
   secondCustomMutation(input: SecondCustomMutationInput!): Int
 
-  """Sign up with SRP authentication method"""
-  signUpWithSRP(input: SignUpWithSRPInput!): Boolean
-
-  """Sign in with SRP authentication method"""
-  signInWithSRP(input: SignInWithSRPInput!): SignInWithSRPOutput
-
-  """Process the server session proof"""
-  processSRPChallenge(input: ProcessSRPChallengeInput!): ProcessSRPChallengeOutput
-
   """Mutation to reset the password of the user"""
   resetPassword(input: ResetPasswordInput!): Boolean
 
@@ -1335,11 +1330,18 @@ input UserACLObjectRolesACLUpdateFieldsInput {
 }
 
 input UserAuthenticationUpdateFieldsInput {
+  emailPasswordSRP: UserAuthenticationEmailPasswordSRPUpdateFieldsInput
   phonePassword: UserAuthenticationPhonePasswordUpdateFieldsInput
   emailPassword: UserAuthenticationEmailPasswordUpdateFieldsInput
   google: UserAuthenticationGoogleUpdateFieldsInput
   github: UserAuthenticationGithubUpdateFieldsInput
-  emailPasswordSRP: UserAuthenticationEmailPasswordSRPUpdateFieldsInput
+}
+
+input UserAuthenticationEmailPasswordSRPUpdateFieldsInput {
+  email: Email
+  salt: String
+  verifier: String
+  serverSecret: String
 }
 
 input UserAuthenticationPhonePasswordUpdateFieldsInput {
@@ -1361,12 +1363,6 @@ input UserAuthenticationGithubUpdateFieldsInput {
   email: Email
   avatarUrl: String
   username: String
-}
-
-input UserAuthenticationEmailPasswordSRPUpdateFieldsInput {
-  salt: String
-  verifier: String
-  serverSecret: String
 }
 
 input UserSecondFAUpdateFieldsInput {
@@ -1725,32 +1721,6 @@ input SecondCustomMutationSumInput {
   b: Int!
 }
 
-input SignUpWithSRPInput {
-  email: Email!
-  salt: String!
-  verifier: String!
-}
-
-type SignInWithSRPOutput {
-  salt: String!
-  serverPublic: String!
-}
-
-input SignInWithSRPInput {
-  email: Email!
-  clientPublic: String!
-}
-
-type ProcessSRPChallengeOutput {
-  serverSessionProof: String!
-}
-
-input ProcessSRPChallengeInput {
-  email: Email!
-  clientPublic: String!
-  clientSessionProof: String!
-}
-
 input ResetPasswordInput {
   password: String!
   email: Email
@@ -1774,6 +1744,12 @@ type SignInWithOutput {
   id: String
   accessToken: String
   refreshToken: String
+  srp: SignInWithOutputSRPOutputSignInWith
+}
+
+type SignInWithOutputSRPOutputSignInWith {
+  salt: String
+  serverPublic: String
 }
 
 input SignInWithInput {
@@ -1781,10 +1757,18 @@ input SignInWithInput {
 }
 
 input SignInWithAuthenticationInput {
+  emailPasswordSRP: SignInWithAuthenticationEmailPasswordSRPInput
   phonePassword: SignInWithAuthenticationPhonePasswordInput
   emailPassword: SignInWithAuthenticationEmailPasswordInput
   google: SignInWithAuthenticationGoogleInput
   github: SignInWithAuthenticationGithubInput
+}
+
+input SignInWithAuthenticationEmailPasswordSRPInput {
+  email: Email!
+  clientPublic: String
+  salt: String
+  verifier: String
 }
 
 input SignInWithAuthenticationPhonePasswordInput {
@@ -1818,10 +1802,18 @@ input SignUpWithInput {
 }
 
 input SignUpWithAuthenticationInput {
+  emailPasswordSRP: SignUpWithAuthenticationEmailPasswordSRPInput
   phonePassword: SignUpWithAuthenticationPhonePasswordInput
   emailPassword: SignUpWithAuthenticationEmailPasswordInput
   google: SignUpWithAuthenticationGoogleInput
   github: SignUpWithAuthenticationGithubInput
+}
+
+input SignUpWithAuthenticationEmailPasswordSRPInput {
+  email: Email!
+  clientPublic: String
+  salt: String
+  verifier: String
 }
 
 input SignUpWithAuthenticationPhonePasswordInput {
@@ -1856,6 +1848,11 @@ input RefreshInput {
 
 type VerifyChallengeOutput {
   accessToken: String
+  srp: VerifyChallengeOutputSRPOutputVerifyChallenge
+}
+
+type VerifyChallengeOutputSRPOutputVerifyChallenge {
+  serverSessionProof: String!
 }
 
 input VerifyChallengeInput {
@@ -1863,16 +1860,17 @@ input VerifyChallengeInput {
 }
 
 input VerifyChallengeSecondaryFactorAuthenticationInput {
+  emailPasswordSRPChallenge: VerifyChallengeSecondaryFactorAuthenticationEmailPasswordSRPChallengeInput
   emailOTP: VerifyChallengeSecondaryFactorAuthenticationEmailOTPInput
-  EmailOTp: VerifyChallengeSecondaryFactorAuthenticationEmailOTpInput
+}
+
+input VerifyChallengeSecondaryFactorAuthenticationEmailPasswordSRPChallengeInput {
+  email: Email!
+  clientPublic: String!
+  clientSessionProof: String!
 }
 
 input VerifyChallengeSecondaryFactorAuthenticationEmailOTPInput {
   email: Email!
   otp: String!
-}
-
-input VerifyChallengeSecondaryFactorAuthenticationEmailOTpInput {
-  email: Email!
-  code: String!
 }

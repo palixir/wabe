@@ -31,17 +31,24 @@ export type ACLObjectRolesACL = {
 	write: boolean
 }
 
-export type AuthenticationPhonePassword = {
-	phone: string,
-	password: string
+export type AuthenticationEmailPasswordSRP = {
+	email: string,
+	salt: string,
+	verifier: string,
+	serverSecret?: string
 }
 
 export type Authentication = {
+	emailPasswordSRP?: AuthenticationEmailPasswordSRP,
 	phonePassword?: AuthenticationPhonePassword,
 	emailPassword?: AuthenticationEmailPassword,
 	google?: AuthenticationGoogle,
-	github?: AuthenticationGithub,
-	emailPasswordSRP?: AuthenticationEmailPasswordSRP
+	github?: AuthenticationGithub
+}
+
+export type AuthenticationPhonePassword = {
+	phone: string,
+	password: string
 }
 
 export type AuthenticationEmailPassword = {
@@ -58,12 +65,6 @@ export type AuthenticationGithub = {
 	email: string,
 	avatarUrl: string,
 	username: string
-}
-
-export type AuthenticationEmailPasswordSRP = {
-	salt: string,
-	verifier: string,
-	serverSecret?: string
 }
 
 export type SecondFA = {
@@ -239,35 +240,6 @@ export type SecondCustomMutationSum = {
 	b: number
 }
 
-export type SignUpWithSRPInput = {
-	email: string,
-	salt: string,
-	verifier: string
-}
-
-export type MutationSignUpWithSRPArgs = {
-	input: SignUpWithSRPInput
-}
-
-export type SignInWithSRPInput = {
-	email: string,
-	clientPublic: string
-}
-
-export type MutationSignInWithSRPArgs = {
-	input: SignInWithSRPInput
-}
-
-export type ProcessSRPChallengeInput = {
-	email: string,
-	clientPublic: string,
-	clientSessionProof: string
-}
-
-export type MutationProcessSRPChallengeArgs = {
-	input: ProcessSRPChallengeInput
-}
-
 export type ResetPasswordInput = {
 	password: string,
 	email?: string,
@@ -307,16 +279,24 @@ export type MutationSignInWithArgs = {
 	input: SignInWithInput
 }
 
-export type SignInWithAuthenticationPhonePassword = {
-	phone: string,
-	password: string
+export type SignInWithAuthenticationEmailPasswordSRP = {
+	email: string,
+	clientPublic?: string,
+	salt?: string,
+	verifier?: string
 }
 
 export type SignInWithAuthentication = {
+	emailPasswordSRP?: SignInWithAuthenticationEmailPasswordSRP,
 	phonePassword?: SignInWithAuthenticationPhonePassword,
 	emailPassword?: SignInWithAuthenticationEmailPassword,
 	google?: SignInWithAuthenticationGoogle,
 	github?: SignInWithAuthenticationGithub
+}
+
+export type SignInWithAuthenticationPhonePassword = {
+	phone: string,
+	password: string
 }
 
 export type SignInWithAuthenticationEmailPassword = {
@@ -342,16 +322,24 @@ export type MutationSignUpWithArgs = {
 	input: SignUpWithInput
 }
 
-export type SignUpWithAuthenticationPhonePassword = {
-	phone: string,
-	password: string
+export type SignUpWithAuthenticationEmailPasswordSRP = {
+	email: string,
+	clientPublic?: string,
+	salt?: string,
+	verifier?: string
 }
 
 export type SignUpWithAuthentication = {
+	emailPasswordSRP?: SignUpWithAuthenticationEmailPasswordSRP,
 	phonePassword?: SignUpWithAuthenticationPhonePassword,
 	emailPassword?: SignUpWithAuthenticationEmailPassword,
 	google?: SignUpWithAuthenticationGoogle,
 	github?: SignUpWithAuthenticationGithub
+}
+
+export type SignUpWithAuthenticationPhonePassword = {
+	phone: string,
+	password: string
 }
 
 export type SignUpWithAuthenticationEmailPassword = {
@@ -394,19 +382,20 @@ export type MutationVerifyChallengeArgs = {
 	input: VerifyChallengeInput
 }
 
-export type VerifyChallengeSecondFAEmailOTP = {
+export type VerifyChallengeSecondFAEmailPasswordSRPChallenge = {
 	email: string,
-	otp: string
+	clientPublic: string,
+	clientSessionProof: string
 }
 
 export type VerifyChallengeSecondFA = {
-	emailOTP?: VerifyChallengeSecondFAEmailOTP,
-	EmailOTp?: VerifyChallengeSecondFAEmailOTp
+	emailPasswordSRPChallenge?: VerifyChallengeSecondFAEmailPasswordSRPChallenge,
+	emailOTP?: VerifyChallengeSecondFAEmailOTP
 }
 
-export type VerifyChallengeSecondFAEmailOTp = {
+export type VerifyChallengeSecondFAEmailOTP = {
 	email: string,
-	code: string
+	otp: string
 }
 
 export type QueryHelloWorldArgs = {
