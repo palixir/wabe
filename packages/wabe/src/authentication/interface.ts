@@ -38,6 +38,10 @@ export type OnVerifyChallengeOptions<T extends WabeTypes, K> = {
 export type ProviderInterface<T extends WabeTypes, K = any> = {
   onSignIn: (options: AuthenticationEventsOptions<T, K>) => Promise<{
     user: Partial<User>
+    srp?: {
+      salt: string
+      serverPublic: string
+    }
   }>
   onSignUp: (
     options: AuthenticationEventsOptions<T, K>,
@@ -48,10 +52,12 @@ export type ProviderInterface<T extends WabeTypes, K = any> = {
 }
 
 export type SecondaryProviderInterface<T extends WabeTypes, K = any> = {
-  onSendChallenge: (options: OnSendChallengeOptions<T>) => Promise<void> | void
+  onSendChallenge?: (options: OnSendChallengeOptions<T>) => Promise<void> | void
   onVerifyChallenge: (
     options: OnVerifyChallengeOptions<T, K>,
-  ) => Promise<{ userId: string } | null> | ({ userId: string } | null)
+  ) =>
+    | Promise<{ userId: string; srp?: { serverSessionProof: string } } | null>
+    | ({ userId: string; srp?: { serverSessionProof: string } } | null)
 }
 
 export type CustomAuthenticationMethods<

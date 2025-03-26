@@ -226,6 +226,7 @@ describe('SignInWith', () => {
       accessToken: 'accessToken',
       refreshToken: 'refreshToken',
       id: 'id',
+      srp: undefined,
     })
     expect(mockOnLogin).toHaveBeenCalledTimes(1)
     expect(mockOnLogin).toHaveBeenCalledWith({

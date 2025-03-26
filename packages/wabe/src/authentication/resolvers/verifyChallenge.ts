@@ -65,5 +65,5 @@ export const verifyChallengeResolver = async (
     })
   }
 
-  return { accessToken }
+  return { accessToken, srp: result.srp }
 }

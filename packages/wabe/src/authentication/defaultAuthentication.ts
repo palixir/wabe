@@ -7,11 +7,72 @@ import { GitHub } from './providers'
 import { Google } from './providers'
 import { EmailOTP } from './providers/EmailOTP'
 import { EmailPassword } from './providers/EmailPassword'
+import {
+  EmailPasswordSRPChallenge,
+  EmailPasswordSRP,
+} from './providers/EmailPasswordSRP'
 import { PhonePassword } from './providers/PhonePassword'
 
 export const defaultAuthenticationMethods = <
   T extends WabeTypes,
 >(): CustomAuthenticationMethods<T, ProviderInterface<T>>[] => [
+  {
+    name: 'emailPasswordSRPChallenge',
+    input: {
+      email: {
+        type: 'Email',
+        required: true,
+      },
+      clientPublic: {
+        type: 'String',
+        required: true,
+      },
+      clientSessionProof: {
+        type: 'String',
+        required: true,
+      },
+    },
+    // @ts-expect-error
+    provider: new EmailPasswordSRPChallenge(),
+    isSecondaryFactor: true,
+  },
+  {
+    name: 'emailPasswordSRP',
+    input: {
+      email: {
+        type: 'Email',
+        required: true,
+      },
+      clientPublic: {
+        type: 'String',
+      },
+      salt: {
+        type: 'String',
+      },
+      verifier: {
+        type: 'String',
+      },
+    },
+    dataToStore: {
+      email: {
+        type: 'Email',
+        required: true,
+      },
+      salt: {
+        type: 'String',
+        required: true,
+      },
+      verifier: {
+        type: 'String',
+        required: true,
+      },
+      serverSecret: {
+        type: 'String',
+      },
+    },
+    // @ts-expect-error
+    provider: new EmailPasswordSRP(),
+  },
   {
     name: 'emailOTP',
     input: {

@@ -335,6 +335,20 @@ export class Schema<T extends WabeTypes> {
                     refreshToken: {
                       type: 'String',
                     },
+                    srp: {
+                      type: 'Object',
+                      object: {
+                        name: 'SRPOutputSignInWith',
+                        fields: {
+                          salt: {
+                            type: 'String',
+                          },
+                          serverPublic: {
+                            type: 'String',
+                          },
+                        },
+                      },
+                    },
                   },
                 },
                 args: {
@@ -407,6 +421,18 @@ export class Schema<T extends WabeTypes> {
                   fields: {
                     accessToken: {
                       type: 'String',
+                    },
+                    srp: {
+                      type: 'Object',
+                      object: {
+                        name: 'SRPOutputVerifyChallenge',
+                        fields: {
+                          serverSessionProof: {
+                            type: 'String',
+                            required: true,
+                          },
+                        },
+                      },
                     },
                   },
                 },
@@ -553,29 +579,7 @@ export class Schema<T extends WabeTypes> {
       type: 'Object',
       object: {
         name: 'Authentication',
-        fields: {
-          ...allAuthenticationDataToStoreObject,
-          // HardCoded for the moment
-          emailPasswordSRP: {
-            type: 'Object',
-            object: {
-              name: 'EmailPasswordSRP',
-              fields: {
-                salt: {
-                  type: 'String',
-                  required: true,
-                },
-                verifier: {
-                  type: 'String',
-                  required: true,
-                },
-                serverSecret: {
-                  type: 'String',
-                },
-              },
-            },
-          },
-        },
+        fields: allAuthenticationDataToStoreObject,
       },
     }
 

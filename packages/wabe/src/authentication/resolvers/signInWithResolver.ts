@@ -31,7 +31,7 @@ export const signInWithResolver = async (
     input.authentication[name]
 
   // 1 - We call the onSignIn method of the provider
-  const { user } = await provider.onSignIn({
+  const { user, srp } = await provider.onSignIn({
     input: inputOfTheGoodAuthenticationMethod,
     context,
   })
@@ -49,7 +49,7 @@ export const signInWithResolver = async (
       SecondaryProviderInterface<DevWabeTypes>
     >([secondFAObject.provider], context)
 
-    await secondaryProvider.provider.onSendChallenge({
+    await secondaryProvider.provider.onSendChallenge?.({
       context,
       // @ts-expect-error
       user,
@@ -87,5 +87,5 @@ export const signInWithResolver = async (
     })
   }
 
-  return { accessToken, refreshToken, id: userId }
+  return { accessToken, refreshToken, id: userId, srp }
 }

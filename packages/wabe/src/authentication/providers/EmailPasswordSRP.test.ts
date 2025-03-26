@@ -35,15 +35,21 @@ describe('EmailPasswordSRP', () => {
 
     await anonymousClient.request<any>(
       gql`
-        mutation signUpWithSRP($input: SignUpWithSRPInput!) {
-          signUpWithSRP(input: $input)
+        mutation signUpWith($input: SignUpWithInput!) {
+          signUpWith(input: $input) {
+            accessToken
+          }
         }
       `,
       {
         input: {
-          email,
-          salt,
-          verifier,
+          authentication: {
+            emailPasswordSRP: {
+              email,
+              salt,
+              verifier,
+            },
+          },
         },
       },
     )
@@ -51,44 +57,56 @@ describe('EmailPasswordSRP', () => {
     // Sign in
     const clientEphemeral = client.generateEphemeral()
 
-    const { signInWithSRP } = await anonymousClient.request<any>(
+    const { signInWith } = await anonymousClient.request<any>(
       gql`
-      mutation signInWithSRP($input: SignInWithSRPInput!) {
-        signInWithSRP(input: $input) {
-          salt
-          serverPublic
+      mutation signInWith($input: SignInWithInput!) {
+        signInWith(input: $input) {
+          srp {
+            salt
+            serverPublic
+          }
         }
       }
     `,
       {
         input: {
-          email,
-          clientPublic: clientEphemeral.public,
+          authentication: {
+            emailPasswordSRP: {
+              email,
+              clientPublic: clientEphemeral.public,
+            },
+          },
         },
       },
     )
 
     const clientSession = await client.deriveSession(
       clientEphemeral.secret,
-      signInWithSRP.serverPublic,
+      signInWith.srp.serverPublic,
       salt,
       '', // Because we don't hash the username
       privateKey,
     )
 
-    const { processSRPChallenge } = await anonymousClient.request<any>(
+    const { verifyChallenge } = await anonymousClient.request<any>(
       gql`
-        mutation processSRPChallenge($input: ProcessSRPChallengeInput!) {
-          processSRPChallenge(input: $input) {
-            serverSessionProof
+        mutation verifyChallenge($input: VerifyChallengeInput!) {
+            verifyChallenge(input: $input) {
+            srp {
+              serverSessionProof
+            }
           }
         }
       `,
       {
         input: {
-          email,
-          clientPublic: clientEphemeral.public,
-          clientSessionProof: clientSession.proof,
+          secondFA: {
+            emailPasswordSRPChallenge: {
+              email,
+              clientPublic: clientEphemeral.public,
+              clientSessionProof: clientSession.proof,
+            },
+          },
         },
       },
     )
@@ -97,7 +115,7 @@ describe('EmailPasswordSRP', () => {
       client.verifySession(
         clientEphemeral.public,
         clientSession,
-        processSRPChallenge.serverSessionProof,
+        verifyChallenge.srp.serverSessionProof,
       ),
     ).resolves.toBeUndefined()
   })

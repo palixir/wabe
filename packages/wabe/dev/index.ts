@@ -30,23 +30,6 @@ const run = async () => {
       roles: ['Admin', 'Client'],
       successRedirectPath: 'http://shipmysaas.com',
       failureRedirectPath: 'https://shipmysaas.com',
-      customAuthenticationMethods: [
-        {
-          name: 'EmailOTp',
-          input: {
-            email: {
-              type: 'Email',
-              required: true,
-            },
-            code: {
-              type: 'String',
-              required: true,
-            },
-          },
-          provider: {} as any,
-          isSecondaryFactor: true,
-        },
-      ],
     },
     database: {
       type: DatabaseEnum.Mongo,
