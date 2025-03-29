@@ -118,7 +118,7 @@
       },
       "devDependencies": {
         "@types/bun": "latest",
-        "@types/pg": "^8.11.11",
+        "@types/pg": "8.11.11",
         "@types/tcp-port-used": "1.0.4",
       },
     },

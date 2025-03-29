@@ -3,12 +3,13 @@ import { gql, type GraphQLClient } from 'graphql-request'
 import type { Wabe } from './server'
 import {
   type DevWabeTypes,
-  setupTests,
   getAdminUserClient,
   getGraphqlClient,
   getAnonymousClient,
   createUserAndUpdateRole,
   getUserClient,
+  setupTests,
+  closeTests,
 } from './utils/helper'
 
 describe('Security tests', () => {
@@ -52,6 +53,8 @@ describe('Security tests', () => {
       }
     `),
     ).rejects.toThrow('Permission denied to read class Test')
+
+    await closeTests(wabe)
   })
 
   it('should throw an error when I try to update and read ACL field without root access', async () => {
@@ -133,6 +136,8 @@ describe('Security tests', () => {
         }
         `),
     ).rejects.toThrow('You are not authorized to update this field')
+
+    await closeTests(wabe)
   })
 
   it('should throw an error when I try to create an user with a role without root access', async () => {
@@ -166,6 +171,8 @@ describe('Security tests', () => {
      }
      `),
     ).rejects.toThrow('You are not authorized to create this field')
+
+    await closeTests(wabe)
   })
 
   it('should not be able to update role pointer in the User class', async () => {
@@ -195,6 +202,8 @@ describe('Security tests', () => {
         },
       }),
     ).rejects.toThrow('You are not authorized to update this field')
+
+    await closeTests(wabe)
   })
 
   it('should not be able to read / update sessions relation in the User class', async () => {
@@ -244,6 +253,8 @@ describe('Security tests', () => {
     }
     `),
     ).rejects.toThrow('You are not authorized to read this field')
+
+    await closeTests(wabe)
   })
 
   it("should throw an error if the user tries to delete an object and doesn't have access to read the object", async () => {
@@ -318,6 +329,8 @@ describe('Security tests', () => {
         }
       `),
     ).rejects.toThrow('Permission denied to read class Test1')
+
+    await closeTests(wabe)
   })
 
   it("should throw an error if the user try to update an object and doesn't have access to read the object", async () => {
@@ -392,6 +405,8 @@ describe('Security tests', () => {
         }
       `),
     ).rejects.toThrow('Permission denied to read class Test1')
+
+    await closeTests(wabe)
   })
 
   it('should not create object in relation if not have permission to create', async () => {
@@ -461,6 +476,8 @@ describe('Security tests', () => {
         }
     `),
     ).rejects.toThrow('Permission denied to create class Test1')
+
+    await closeTests(wabe)
   })
 
   it('should not create object in pointer if not have permission to create', async () => {
@@ -530,6 +547,8 @@ describe('Security tests', () => {
         }
     `),
     ).rejects.toThrow('Permission denied to create class Test1')
+
+    await closeTests(wabe)
   })
 
   it("should not be able to access to a relation if user doesn't have access on read", async () => {
@@ -618,6 +637,8 @@ describe('Security tests', () => {
       }
       `),
     ).rejects.toThrow('Permission denied to read class Test1')
+
+    await closeTests(wabe)
   })
 
   it("should not be able to access to a pointer if user doesn't have access on read", async () => {
@@ -702,6 +723,8 @@ describe('Security tests', () => {
       }
       `),
     ).rejects.toThrow('Permission denied to read class Test1')
+
+    await closeTests(wabe)
   })
 
   it('should not be able to create / update / delete a role (except root)', async () => {
@@ -766,6 +789,8 @@ describe('Security tests', () => {
       }
     `),
     ).rejects.toThrowError('Permission denied to create class Role')
+
+    await closeTests(wabe)
   })
 
   it('should not be able to create / update / delete a session (except root)', async () => {
@@ -844,6 +869,8 @@ describe('Security tests', () => {
     })
 
     expect(sessionAfterDelete?.id).toEqual(sessionId)
+
+    await closeTests(wabe)
   })
 
   it('should not be able to do some actions with expired session', async () => {
@@ -914,6 +941,8 @@ describe('Security tests', () => {
       }
       `),
     ).rejects.toThrow('Permission denied to create class Test1')
+
+    await closeTests(wabe)
   })
 
   it('should be able to refresh session if refresh token is not expired but access token expired', async () => {
@@ -983,6 +1012,8 @@ describe('Security tests', () => {
       }
       `),
     ).resolves.toEqual(expect.anything())
+
+    await closeTests(wabe)
   })
 
   it('should access to an object', async () => {
@@ -1048,6 +1079,8 @@ describe('Security tests', () => {
 
     expect(res.test4s.edges.length).toEqual(1)
     expect(res.test4s.edges[0].node.name).toEqual('test')
+
+    await closeTests(wabe)
   })
 
   it('should access to an object created by another user without ACL', async () => {
@@ -1113,6 +1146,8 @@ describe('Security tests', () => {
 
     expect(res.test4s.edges.length).toEqual(1)
     expect(res.test4s.edges[0].node.name).toEqual('test')
+
+    await closeTests(wabe)
   })
 
   it('should authorize user to access to created object with self acl but not an other user', async () => {
@@ -1198,6 +1233,8 @@ describe('Security tests', () => {
     expect(res.createTest3.test3.id).toBeDefined()
     expect(res2.test3s.edges.length).toEqual(0)
     expect(res3.test3s.edges.length).toEqual(0)
+
+    await closeTests(wabe)
   })
 
   it('should not authorize create object when authorizedRoles is empty', async () => {
@@ -1255,6 +1292,8 @@ describe('Security tests', () => {
 				}
 		`),
     ).not.toThrow()
+
+    await closeTests(wabe)
   })
 
   it('should not authorize an user to read an object when the user has not access on read to the object (ACL)', async () => {
@@ -1362,6 +1401,8 @@ describe('Security tests', () => {
 			`)
 
     expect(res.tests.edges.length).toEqual(0)
+
+    await closeTests(wabe)
   })
 
   it('should not authorize an user to write (delete) an object when the user has not access on write to the object (ACL)', async () => {
@@ -1467,6 +1508,8 @@ describe('Security tests', () => {
 				}
 			`),
     ).rejects.toThrow('Object not found')
+
+    await closeTests(wabe)
   })
 
   it('should not authorize an user to get the result of mutation (read) when he has access on write but not on read (ACL)', async () => {
@@ -1572,6 +1615,8 @@ describe('Security tests', () => {
 				}
 			`),
     ).rejects.toThrow('Object not found')
+
+    await closeTests(wabe)
   })
 
   it('should not authorize an user to write (update) an object when the user has not access on write to the object (ACL)', async () => {
@@ -1677,6 +1722,8 @@ describe('Security tests', () => {
 				}
 			`),
     ).rejects.toThrow('Object not found')
+
+    await closeTests(wabe)
   })
 
   it('should authorize an user to read an object when the user has access on read to the object (ACL)', async () => {
@@ -1784,6 +1831,8 @@ describe('Security tests', () => {
 			`)
 
     expect(res.tests.edges.length).toEqual(1)
+
+    await closeTests(wabe)
   })
 
   it('should not authorized an user to read an object on another class with pointer when the user do not have ACL to read the other class', async () => {
@@ -1930,6 +1979,8 @@ describe('Security tests', () => {
 				}
 			`),
     ).rejects.toThrow('Object not found')
+
+    await closeTests(wabe)
   })
 
   it('should not authorized an user to read an object on another class with relation when the user do not have ACL to read the other class', async () => {
@@ -2084,6 +2135,8 @@ describe('Security tests', () => {
 			`)
 
     expect(res.tests.edges[0].node.relation.edges.length).toEqual(0)
+
+    await closeTests(wabe)
   })
 
   it('should not authorize an user to create an object on another class with pointer when the user do not have access to write the other class with (CLP)', async () => {
@@ -2164,6 +2217,8 @@ describe('Security tests', () => {
 				}
 		`),
     ).rejects.toThrow('Permission denied to create class Test2')
+
+    await closeTests(wabe)
   })
 
   it('should authorize a connected user to access to a protected resource', async () => {
@@ -2243,6 +2298,8 @@ describe('Security tests', () => {
 		`)
 
     expect(resOfTest.tests.edges.length).toEqual(0)
+
+    await closeTests(wabe)
   })
 
   it('should authorize a connected user to access to protected resource after the user refresh his token', async () => {
@@ -2335,6 +2392,8 @@ describe('Security tests', () => {
 		`)
 
     expect(resOfTest.tests.edges.length).toEqual(0)
+
+    await closeTests(wabe)
   })
 
   it('should not authorize to access to protected resource if the user is not connected', async () => {
@@ -2416,6 +2475,8 @@ describe('Security tests', () => {
 			}
 		`),
     ).rejects.toThrow('Permission denied to read class Test')
+
+    await closeTests(wabe)
   })
 
   it("should not authorized to read an object if the user doesn't had an authorized role (read one)", async () => {
@@ -2503,6 +2564,8 @@ describe('Security tests', () => {
 			}
 		`),
     ).rejects.toThrow('Permission denied to read class Test')
+
+    await closeTests(wabe)
   })
 
   it("should not authorized to read an object if the user doesn't had an authorized role (read many)", async () => {
@@ -2582,6 +2645,8 @@ describe('Security tests', () => {
 			}
 		`),
     ).rejects.toThrow('Permission denied to read class Test')
+
+    await closeTests(wabe)
   })
 
   it("should not authorized to delete an object if the user doesn't had an authorized role (delete)", async () => {
@@ -2671,6 +2736,8 @@ describe('Security tests', () => {
 			}
 		`),
     ).rejects.toThrow('Permission denied to delete class Test')
+
+    await closeTests(wabe)
   })
 
   it("should not authorized to create an object if the user doesn't had an authorized role (create)", async () => {
@@ -2748,6 +2815,8 @@ describe('Security tests', () => {
 				}
 			`),
     ).rejects.toThrow('Permission denied to create class Test')
+
+    await closeTests(wabe)
   })
 
   it("should not authorized to udpdate an object if the user doesn't had an authorized role (update)", async () => {
@@ -2835,6 +2904,8 @@ describe('Security tests', () => {
 			}
 		`),
     ).rejects.toThrow('Permission denied to update class Test')
+
+    await closeTests(wabe)
   })
 })
 
