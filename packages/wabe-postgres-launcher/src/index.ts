@@ -3,18 +3,12 @@ import { newDb } from 'pg-mem'
 import tcpPortUsed from 'tcp-port-used'
 
 export const runDatabase = async (): Promise<Client | undefined> => {
-  const port = 5432
-  const universalPort = '127.0.0.1'
-  try {
-    if (await tcpPortUsed.check(port, universalPort)) return
-    const db = newDb()
+  if (await tcpPortUsed.check(27045, '127.0.0.1')) return
+  const db = newDb()
 
-    console.info('PostgreSQL started')
+  console.info('PostgreSQL started')
 
-    const { Client } = db.adapters.createPg()
+  const { Client } = db.adapters.createPg()
 
-    return Client
-  } catch (error) {
-    console.error('Error setting up in-memory PostgreSQL:', error)
-  }
+  return Client
 }

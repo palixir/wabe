@@ -11,7 +11,8 @@
   "scripts": {
     "build:wabe": "bun --filter './packages/wabe' build",
     "build:wabe-mongodb-launcher": "bun --filter './packages/wabe-mongodb-launcher' build",
-    "build": "bun build:wabe-mongodb-launcher && bun build:wabe && CI_BUILD=true bun --filter './packages/wabe-*' build",
+    "build:wabe-postgres-launcher": "bun --filter './packages/wabe-postgres-launcher' build",
+    "build": "bun build:wabe-mongodb-launcher && bun build:wabe-postgres-launcher && bun build:wabe && CI_BUILD=true bun --filter './packages/wabe-*' build",
     "ci": "bun --filter './packages/*' ci",
     "format": "bun --filter './packages/*' format && biome format --write ./*.json",
     "lint": "bun --filter './packages/*' lint",
