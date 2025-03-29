@@ -324,7 +324,6 @@ describe('File upload', () => {
     // 2 for create and update
     expect(spyFileDevAdapterUploadFile).toHaveBeenCalledTimes(2)
     const fileArg = spyFileDevAdapterUploadFile.mock.calls[1][0]
-
     expect(fileArg.name).toEqual('b.text')
     expect(await fileArg.text()).toEqual('b')
   })
