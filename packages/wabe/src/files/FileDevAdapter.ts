@@ -6,7 +6,7 @@ export class FileDevAdapter implements FileAdapter {
   private basePath = 'bucket'
   private rootPath = process.cwd()
 
-  async uploadFile(file: File | Blob): Promise<void> {
+  async uploadFile(file: File): Promise<void> {
     const fullPath = path.join(this.rootPath, this.basePath)
 
     await mkdir(fullPath, { recursive: true })

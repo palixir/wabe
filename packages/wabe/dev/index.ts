@@ -26,6 +26,7 @@ const run = async () => {
     authentication: {
       session: {
         cookieSession: true,
+        jwtSecret: 'dev',
       },
       roles: ['Admin', 'Client'],
       successRedirectPath: 'http://shipmysaas.com',
