@@ -5,17 +5,18 @@
     "main": "dist/index.js",
     "description": "Package to launch the postgres database for test",
     "scripts": {
-        "ci":"bun lint",
+        "ci": "bun lint",
         "build": "bun --filter wabe-build build:package $(pwd)",
         "lint": "biome lint . --config-path=../../ --no-errors-on-unmatched",
         "format": "biome format --config-path=../../ --write ."
     },
     "dependencies": {
-        "tcp-port-used": "1.0.2",
-        "mongodb-memory-server": "10.1.4"
+        "pg-mem": "3.0.5",
+        "tcp-port-used": "1.0.2"
     },
     "devDependencies": {
         "@types/bun": "latest",
+        "@types/pg": "8.11.11",
         "@types/tcp-port-used": "1.0.4"
     }
 }
