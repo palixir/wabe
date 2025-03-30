@@ -10,24 +10,23 @@
 
 Wabe is an open-source backend as a service that allows you to create your own fully customizable backend in just a few minutes. It handles database access, automatic GraphQL API generation, authentication with various methods (classic or OAuth), permissions, security, and more for you.
 
-## Install for wabe-openai
+## Install for wabe-mongodb
 
 ```sh
 bun install wabe # On bun
 npm install wabe # On npm
 yarn add wabe # On yarn
 
-bun install wabe-openai # On bun
-npm install wabe-openai # On npm
-yarn add wabe-openai # On yarn
+bun install wabe-mongodb # On bun
+npm install wabe-mongodb # On npm
+yarn add wabe-mongodb # On yarn
 ```
 
-## Basic example of wabe-openai usage
+## Basic example of wabe-mongodb usage
 
 ```ts
 import { Wabe } from "wabe";
 import { MongoAdapter } from "wabe-mongodb"
-import { OpenAIAdapter } from "wabe-openai";
 
 const run = async () => {
   // Ensure your database is running before run the file
@@ -43,17 +42,10 @@ const run = async () => {
         url: "mongodb://127.0.0.1:27045",
       })
     },
-    ai: {
-      adapter : new OpenAIAdapter("YOUR_OPENAI_SECRET_KEY", { model : "gpt-4o" }),
-    }
     port: 3000,
   });
 
   await wabe.start();
-
-  await wabe.controllers.ai.createCompletion({
-    content: "What is the best Backend as a Service ?"
-  });
 };
 
 await run();
