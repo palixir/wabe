@@ -1,0 +1,28 @@
+{
+	"name": "wabe-postgres",
+	"version": "0.1.0",
+	"description": "PostgreSQL adapter for the Wabe database layer",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"type": "module",
+	"keywords": [
+		"wabe",
+		"postgres",
+		"postgresql",
+		"database",
+		"adapter"
+	],
+	"license": "MIT",
+	"dependencies": {
+		"p-retry": "^5.1.2",
+		"pg": "^8.11.3",
+		"wabe": "workspace:*"
+	},
+	"devDependencies": {
+		"@types/pg": "^8.10.9",
+		"typescript": "^5.3.3"
+	},
+	"peerDependencies": {
+		"wabe": "workspace:*"
+	}
+}
