@@ -1,29 +1,49 @@
-import type { Client, Pool } from 'pg'
-import { randomUUID } from 'node:crypto'
-import { DataType, newDb } from 'pg-mem'
+import Docker from 'dockerode'
 import tcpPortUsed from 'tcp-port-used'
 
-export const runDatabase = async (): Promise<
-	{ client: Client; pool: Pool } | undefined
-> => {
-	if (await tcpPortUsed.check(27045, '127.0.0.1')) return
-	const db = newDb()
+const docker = new Docker()
 
-	db.public.registerFunction({
-		name: 'gen_random_uuid',
-		returns: DataType.text,
-		implementation: () => randomUUID(),
-	})
+// URL: 'postgres://postgres:postgres@localhost:5432/testdb'
+export const runDatabase = async () => {
+  try {
+    const port = 5432
 
-	console.info('PostgreSQL started')
+    if (await tcpPortUsed.check(port, '127.0.0.1')) {
+      console.error(`Port ${port} is already in use.`)
+      return
+    }
 
-	const { Pool } = db.adapters.createPg()
+    console.info('Pulling postgres:17.4')
+    await docker.pull('postgres:17.4')
 
-	const pool = new Pool({
-		connectionString: 'postgres://localhost:27045/memdb',
-	})
+    const container = await docker.createContainer({
+      Image: 'postgres:17.4',
+      name: 'Wabe-Postgres',
+      Env: ['POSTGRES_USER=wabe', 'POSTGRES_PASSWORD=wabe', 'POSTGRES_DB=Wabe'],
+      HostConfig: {
+        PortBindings: {
+          '5432/tcp': [{ HostPort: `${port}` }],
+        },
+      },
+      AttachStdin: false,
+      AttachStdout: true,
+      AttachStderr: true,
+      Tty: true,
+      OpenStdin: false,
+      StdinOnce: false,
+    })
 
-	const client = await pool.connect()
+    await container.start()
 
-	return { client, pool }
+    console.info('PostgreSQL started')
+  } catch (error: any) {
+    if (error.message.includes('there a typo in the url or port')) {
+      console.error('You need to run Docker on your machine')
+      return
+    }
+
+    console.error(error)
+  }
 }
+
+runDatabase()

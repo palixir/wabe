@@ -1,7 +1,7 @@
 {
     "name": "wabe-postgres-launcher",
     "version": "0.5.0",
-    "license": "MIT",
+    "license": "Apache-2.0",
     "main": "dist/index.js",
     "description": "Package to launch the postgres database for test",
     "scripts": {
@@ -11,12 +11,12 @@
         "format": "biome format --config-path=../../ --write ."
     },
     "dependencies": {
-        "pg-mem": "3.0.5",
+        "dockerode": "4.0.4",
         "tcp-port-used": "1.0.2"
     },
     "devDependencies": {
         "@types/bun": "latest",
-        "@types/pg": "8.11.11",
+        "@types/dockerode": "3.3.36",
         "@types/tcp-port-used": "1.0.4"
     }
 }

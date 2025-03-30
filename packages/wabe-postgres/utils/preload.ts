@@ -1,5 +1,5 @@
 const setupEnvironment = () => {
-	process.env.TEST = 'true'
+  process.env.TEST = 'true'
 }
 
 setupEnvironment()

@@ -12,7 +12,14 @@
 		"database",
 		"adapter"
 	],
-	"license": "MIT",
+	"scripts": {
+    "build": "bun --filter wabe-build build:package $(pwd)",
+    "check": "tsc --project $(pwd)/tsconfig.json",
+    "lint": "biome lint . --no-errors-on-unmatched --config-path=../../",
+    "ci": "bun check && bun lint $(pwd) && bun test src",
+    "format": "biome format --write . --config-path=../../"
+  },
+	"license": "Apache-2.0",
 	"dependencies": {
 		"p-retry": "5.1.2",
 		"pg": "8.14.1"
