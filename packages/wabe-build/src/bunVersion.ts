@@ -35,7 +35,7 @@ const getDtsBunPlugin = (): BunPlugin => {
 const directory = process.argv[2]
 const target = (process.argv[3] || 'node') as 'node' | 'browser' | 'bun'
 
-const run = async () => {
+export const bunCompilation = async () => {
   await Bun.$`rm -rf ${directory}/dist`
 
   const result = await Bun.build({
@@ -50,5 +50,3 @@ const run = async () => {
 
   if (!result.success) for (const log of result.logs) console.error(log)
 }
-
-run()
