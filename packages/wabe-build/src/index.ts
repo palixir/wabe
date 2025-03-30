@@ -1,54 +1,102 @@
-import type { BunPlugin } from 'bun'
-import { isolatedDeclaration } from 'oxc-transform'
+import ts from 'typescript'
+import * as fsp from 'node:fs/promises'
+import path from 'node:path'
 
-// From https://github.com/oven-sh/bun/issues/5141
-const getDtsBunPlugin = (): BunPlugin => {
-  const wroteTrack = new Set<string>()
-  return {
-    name: 'oxc-transform-dts',
-    setup(builder) {
-      if (builder.config.root && builder.config.outdir) {
-        const rootPath = Bun.pathToFileURL(builder.config.root).pathname
-        const outPath = Bun.pathToFileURL(builder.config.outdir).pathname
-        builder.onStart(() => wroteTrack.clear())
-        builder.onLoad({ filter: /\.ts$/ }, async (args) => {
-          if (args.path.startsWith(rootPath) && !wroteTrack.has(args.path)) {
-            wroteTrack.add(args.path)
-            const { code } = isolatedDeclaration(
-              args.path,
-              await Bun.file(args.path).text(),
-            )
-            await Bun.write(
-              args.path
-                .replace(new RegExp(`^${rootPath}`), outPath)
-                .replace(/\.ts$/, '.d.ts'),
-              code,
-            )
-          }
-          return undefined
-        })
-      }
-    },
-  }
-}
-
-const directory = process.argv[2]
-const target = (process.argv[3] || 'node') as 'node' | 'browser' | 'bun'
+const directory = process.argv[2] || '.'
+const srcDirectory = path.join(directory, 'src')
+const outDirectory = path.join(directory, 'dist')
+const generatedDirectory = path.join(outDirectory, 'generated')
 
 const run = async () => {
-  await Bun.$`rm -rf ${directory}/dist`
+  const options: ts.CompilerOptions = {
+    lib: [],
+    target: ts.ScriptTarget.ESNext,
+    module: ts.ModuleKind.ESNext,
+    moduleDetection: ts.ModuleDetectionKind.Force,
+    jsx: ts.JsxEmit.ReactJSX,
+    allowJs: true,
+    moduleResolution: ts.ModuleResolutionKind.Bundler,
+    outDir: outDirectory,
+    strict: true,
+    skipLibCheck: true,
+    noFallthroughCasesInSwitch: true,
+    noUnusedLocals: false,
+    noUnusedParameters: false,
+    noPropertyAccessFromIndexSignature: false,
+    declaration: true,
+  }
 
-  const result = await Bun.build({
-    entrypoints: [`${directory}/src/index.ts`],
-    root: `${directory}/src`,
-    outdir: `${directory}/dist`,
-    minify: true,
-    target,
-    plugins: [getDtsBunPlugin()],
-    external: ['@node-rs/argon2'],
-  })
+  const fileNames = [path.join(srcDirectory, 'index.ts')]
 
-  if (!result.success) for (const log of result.logs) console.error(log)
+  const program = ts.createProgram(fileNames, options)
+
+  const emitResult = program.emit()
+
+  const allDiagnostics = ts
+    .getPreEmitDiagnostics(program)
+    .concat(emitResult.diagnostics)
+    .filter((diagnostic) => diagnostic.category === ts.DiagnosticCategory.Error)
+
+  for (const diagnostic of allDiagnostics) {
+    if (diagnostic.file && diagnostic.start !== undefined) {
+      const { line, character } = ts.getLineAndCharacterOfPosition(
+        diagnostic.file,
+        diagnostic.start,
+      )
+      const message = ts.flattenDiagnosticMessageText(
+        diagnostic.messageText,
+        '\n',
+      )
+      console.log(
+        `${diagnostic.file.fileName} (${line + 1},${character + 1}): ${message}`,
+      )
+    } else {
+      console.log(ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n'))
+    }
+  }
+
+  const exitCode = emitResult.emitSkipped ? 1 : 0
+
+  if (exitCode === 0) {
+    // Check if the 'generated' directory exists in 'dist' and delete it
+    try {
+      const stats = await fsp.stat(generatedDirectory)
+      if (stats.isDirectory())
+        await fsp.rm(generatedDirectory, { recursive: true, force: true })
+    } catch (error: any) {
+      if (error.code !== 'ENOENT')
+        console.error(`Error deleting directory: ${error.message}`)
+    }
+
+    const srcDirectoryInOutput = path.join(outDirectory, 'src')
+
+    try {
+      const stats = await fsp.stat(srcDirectoryInOutput)
+
+      if (stats.isDirectory()) {
+        // Move contents of 'src' within 'dist' to the root of the 'dist' directory
+        const files = await fsp.readdir(srcDirectoryInOutput)
+        for (const file of files) {
+          const srcFilePath = path.join(srcDirectoryInOutput, file)
+          const destFilePath = path.join(outDirectory, file)
+
+          const stat = await fsp.lstat(srcFilePath)
+          if (stat.isDirectory()) {
+            await fsp.cp(srcFilePath, destFilePath, { recursive: true })
+          } else {
+            await fsp.copyFile(srcFilePath, destFilePath)
+          }
+        }
+
+        await fsp.rm(srcDirectoryInOutput, { recursive: true, force: true })
+      }
+    } catch (error: any) {
+      if (error.code !== 'ENOENT')
+        console.error(`Error moving files: ${error.message}`)
+    }
+  }
+
+  process.exit(exitCode)
 }
 
 run()

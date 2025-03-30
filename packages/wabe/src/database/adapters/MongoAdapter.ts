@@ -406,8 +406,8 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
 
   async deleteObjects<
     K extends keyof T['types'],
-    U extends keyof T['types'][U],
-    W extends keyof T['types'][U],
+    U extends keyof T['types'][K],
+    W extends keyof T['types'][K],
   >(params: DeleteObjectsOptions<T, K, U, W>) {
     if (!this.database)
       throw new Error('Connection to database is not established')
