@@ -8,5 +8,5 @@ export interface DatabaseConfig {
   name: string
 }
 
-export * from './adapters'
-export * from './controllers'
+export * from './controllers/DatabaseController'
+export * from './interface'

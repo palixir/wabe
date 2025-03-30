@@ -15,7 +15,7 @@ import type {
   OutputType,
   CountOptions,
   OrderType,
-} from './adaptersInterface'
+} from '../interface'
 import type { WabeTypes } from '../../server'
 import type { WabeContext } from '../../server/interface'
 import { notEmpty } from '../../utils/helper'

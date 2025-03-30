@@ -1,5 +1,5 @@
-import type { WabeContext } from '../../server/interface'
-import type { WabeTypes } from '../../server'
+import type { WabeContext } from '../server/interface'
+import type { WabeTypes } from '../server'
 
 type IsScalar<T> = T extends string | number | boolean | Date ? true : false
 

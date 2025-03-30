@@ -16,7 +16,7 @@ import type {
   UpdateObjectOptions,
   UpdateObjectsOptions,
   WhereType,
-} from '../adapters/adaptersInterface'
+} from '../interface'
 
 export type Select = Record<string, boolean>
 type SelectWithObject = Record<string, object | boolean>
