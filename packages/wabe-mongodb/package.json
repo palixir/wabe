@@ -1,0 +1,37 @@
+{
+  "name": "wabe-mongodb",
+  "version": "0.5.0",
+  "description": "MongoDB adapter for Wabe (official)",
+  "homepage": "https://wabe.dev",
+  "author": {
+    "name": "coratgerl",
+    "url": "https://github.com/coratgerl"
+  },
+  "license": "Apache-2.0",
+  "keywords": [
+    "backend",
+    "wabe",
+    "graphql",
+    "baas",
+    "mongodb"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/palixir/wabe.git"
+  },
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "bun --filter wabe-build build:package $(pwd)",
+    "check": "tsc --project $(pwd)/tsconfig.json",
+    "lint": "biome lint . --no-errors-on-unmatched --config-path=../../",
+    "ci": "bun check && bun lint $(pwd) && bun test src",
+    "format": "biome format --write . --config-path=../../"
+  },
+  "dependencies": {
+    "mongodb": "6.15.0"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "wabe": "workspace:*"
+  }
+}

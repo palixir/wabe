@@ -78,6 +78,17 @@
         "wabe": "workspace:*",
       },
     },
+    "packages/wabe-mongodb": {
+      "name": "wabe-mongodb",
+      "version": "0.5.0",
+      "dependencies": {
+        "mongodb": "^6.15.0",
+      },
+      "devDependencies": {
+        "@types/bun": "latest",
+        "wabe": "workspace:*",
+      },
+    },
     "packages/wabe-mongodb-launcher": {
       "name": "wabe-mongodb-launcher",
       "version": "0.5.2",
@@ -1965,6 +1976,8 @@
 
     "wabe-mistralai": ["wabe-mistralai@workspace:packages/wabe-mistralai"],
 
+    "wabe-mongodb": ["wabe-mongodb@workspace:packages/wabe-mongodb"],
+
     "wabe-mongodb-launcher": ["wabe-mongodb-launcher@workspace:packages/wabe-mongodb-launcher"],
 
     "wabe-openai": ["wabe-openai@workspace:packages/wabe-openai"],
@@ -2228,6 +2241,8 @@
     "wabe-buns3/@types/bun": ["@types/bun@1.2.5", "", { "dependencies": { "bun-types": "1.2.5" } }, "sha512-w2OZTzrZTVtbnJew1pdFmgV99H0/L+Pvw+z1P67HaR18MHOzYnTYOi6qzErhK8HyT+DB782ADVPPE92Xu2/Opg=="],
 
     "wabe-mistralai/@types/bun": ["@types/bun@1.2.5", "", { "dependencies": { "bun-types": "1.2.5" } }, "sha512-w2OZTzrZTVtbnJew1pdFmgV99H0/L+Pvw+z1P67HaR18MHOzYnTYOi6qzErhK8HyT+DB782ADVPPE92Xu2/Opg=="],
+
+    "wabe-mongodb/mongodb": ["mongodb@6.15.0", "", { "dependencies": { "@mongodb-js/saslprep": "^1.1.9", "bson": "^6.10.3", "mongodb-connection-string-url": "^3.0.0" }, "peerDependencies": { "@aws-sdk/credential-providers": "^3.188.0", "@mongodb-js/zstd": "^1.1.0 || ^2.0.0", "gcp-metadata": "^5.2.0", "kerberos": "^2.0.1", "mongodb-client-encryption": ">=6.0.0 <7", "snappy": "^7.2.2", "socks": "^2.7.1" }, "optionalPeers": ["@aws-sdk/credential-providers", "@mongodb-js/zstd", "gcp-metadata", "kerberos", "mongodb-client-encryption", "snappy", "socks"] }, "sha512-ifBhQ0rRzHDzqp9jAQP6OwHSH7dbYIQjD3SbJs9YYk9AikKEettW/9s/tbSFDTpXcRbF+u1aLrhHxDFaYtZpFQ=="],
 
     "wabe-openai/@types/bun": ["@types/bun@1.2.5", "", { "dependencies": { "bun-types": "1.2.5" } }, "sha512-w2OZTzrZTVtbnJew1pdFmgV99H0/L+Pvw+z1P67HaR18MHOzYnTYOi6qzErhK8HyT+DB782ADVPPE92Xu2/Opg=="],
 
