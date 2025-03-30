@@ -18,8 +18,7 @@ import type {
 } from '../interface'
 import type { WabeTypes } from '../../server'
 import type { WabeContext } from '../../server/interface'
-import { notEmpty } from '../../utils/helper'
-import { contextWithRoot } from '../../utils/export'
+import { contextWithRoot, notEmpty } from '../../utils/export'
 
 export const buildMongoOrderQuery = <
   T extends WabeTypes,

@@ -1,6 +1,6 @@
 import { getClassFromClassName } from '../utils'
 import type { WabeContext } from '../server/interface'
-import { notEmpty } from '../utils/helper'
+import { notEmpty } from '../utils/export'
 
 type CreateAndLink = any
 type Link = string

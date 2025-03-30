@@ -2,7 +2,7 @@ import type { WabeTypes } from '../..'
 import { OperationType, initializeHook } from '../../hooks'
 import type { WabeContext } from '../../server/interface'
 import { contextWithRoot } from '../../utils/export'
-import { notEmpty } from '../../utils/helper'
+import { notEmpty } from '../../utils/export'
 import type {
   CountOptions,
   CreateObjectOptions,

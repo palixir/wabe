@@ -32,6 +32,9 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "wabe": "workspace:*"
+    "wabe": "workspace:*",
+    "wabe-mongodb-launcher": "workspace:*",
+    "get-port": "7.1.0",
+    "uuid": "10.0.0"
   }
 }

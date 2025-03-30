@@ -1,4 +1,3 @@
-
 import { gql, GraphQLClient } from 'graphql-request'
 import {
   RoleEnum,
@@ -18,9 +17,6 @@ export interface DevWabeTypes extends WabeTypes {
 
 export const firstLetterUpperCase = (str: string): string =>
   str.charAt(0).toUpperCase() + str.slice(1)
-
-export const notEmpty = <T>(value: T | null | undefined): value is T =>
-  value !== null && value !== undefined
 
 export const getGraphqlClient = (port: number): GraphQLClient => {
   const client = new GraphQLClient(`http://127.0.0.1:${port}/graphql`, {

@@ -1,0 +1,4 @@
+telemetry = false
+
+[test]
+preload = ['./preload.ts']
