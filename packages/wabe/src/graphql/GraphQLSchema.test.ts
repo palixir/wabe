@@ -3,7 +3,6 @@ import getPort from 'get-port'
 import { GraphQLObjectType, GraphQLSchema } from 'graphql'
 import { gql } from 'graphql-request'
 import { v4 as uuid } from 'uuid'
-import { DatabaseEnum } from '../database'
 import { Schema, type SchemaInterface } from '../schema'
 import { Wabe } from '../server'
 import {
@@ -19,6 +18,8 @@ const createWabe = async (schema: SchemaInterface<DevWabeTypes>) => {
 
   const port = await getPort()
 
+  const mongoAdapter = await import('wabe-mongodb')
+
   const wabe = new Wabe({
     isProduction: false,
     port,
@@ -26,9 +27,11 @@ const createWabe = async (schema: SchemaInterface<DevWabeTypes>) => {
     rootKey:
       '0uwFvUxM$ceFuF1aEtTtZMa7DUN2NZudqgY5ve5W*QCyb58cwMj9JeoaV@d#%29v&aJzswuudVU1%nAT+rxS0Bh&OkgBYc0PH18*',
     database: {
-      type: DatabaseEnum.Mongo,
-      url: 'mongodb://127.0.0.1:27045',
-      name: databaseId,
+      // @ts-expect-error
+      adapter: new mongoAdapter.MongoAdapter<DevWabeTypes>({
+        databaseName: databaseId,
+        databaseUrl: 'mongodb://127.0.0.1:27045',
+      }),
     },
   })
 

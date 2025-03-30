@@ -362,6 +362,7 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
       await context.wabe.controllers.database.getObjects({
         className,
         where,
+        // @ts-expect-error
         select: { id: true },
         offset,
         first,

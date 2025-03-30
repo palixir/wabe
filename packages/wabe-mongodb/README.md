@@ -25,7 +25,8 @@ yarn add wabe-openai # On yarn
 ## Basic example of wabe-openai usage
 
 ```ts
-import { DatabaseEnum, Wabe } from "wabe";
+import { Wabe } from "wabe";
+import { MongoAdapter } from "wabe-mongodb"
 import { OpenAIAdapter } from "wabe-openai";
 
 const run = async () => {
@@ -37,9 +38,10 @@ const run = async () => {
     rootKey:
       "0uwFvUxM$ceFuF1aEtTtZMa7DUN2NZudqgY5ve5W*QCyb58cwMj9JeoaV@d#%29v&aJzswuudVU1%nAT+rxS0Bh&OkgBYc0PH18*",
     database: {
-      type: DatabaseEnum.Mongo,
-      url: "mongodb://127.0.0.1:27045",
-      name: "WabeApp",
+      adapter: new MongoAdapter({
+        databaseName: "WabeApp",
+        url: "mongodb://127.0.0.1:27045",
+      })
     },
     ai: {
       adapter : new OpenAIAdapter("YOUR_OPENAI_SECRET_KEY", { model : "gpt-4o" }),

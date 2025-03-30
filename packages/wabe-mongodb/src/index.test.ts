@@ -11,7 +11,7 @@ import { fail } from 'node:assert'
 import { ObjectId } from 'mongodb'
 import { notEmpty, type Wabe, type WabeContext } from 'wabe'
 import { buildMongoWhereQuery, type MongoAdapter } from '.'
-import { setupTests, closeTests } from './utils'
+import { setupTests, closeTests } from '../utils/testHelper'
 
 describe('Mongo adapter', () => {
   let mongoAdapter: MongoAdapter<any>

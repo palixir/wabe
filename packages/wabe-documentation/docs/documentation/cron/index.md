@@ -11,7 +11,8 @@ The cron system is not designed to handle heavy background tasks. Tasks run on t
 To configure a cron in Wabe, you can use the `crons` option when initializing your Wabe instance. Here is an example configuration:
 
 ```ts
-import { DatabaseEnum, Wabe, cron, CronExpressions } from "wabe";
+import { Wabe, cron, CronExpressions } from "wabe";
+import { MongoAdapter } from "wabe-mongodb"
 
 const run = async () => {
   // Ensure your database is running before run the file
@@ -21,9 +22,10 @@ const run = async () => {
     rootKey:
       "0uwFvUxM$ceFuF1aEtTtZMa7DUN2NZudqgY5ve5W*QCyb58cwMj9JeoaV@d#%29v&aJzswuudVU1%nAT+rxS0Bh&OkgBYc0PH18*",
     database: {
-      type: DatabaseEnum.Mongo,
-      url: "mongodb://127.0.0.1:27045",
-      name: "WabeApp",
+      adapter: new MongoAdapter({
+        databaseName: "WabeApp",
+        url: "mongodb://127.0.0.1:27045",
+      })
     },
     crons: [
       {

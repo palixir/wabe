@@ -1,12 +1,9 @@
-export enum DatabaseEnum {
-  Mongo = 'mongo',
+import type { WabeTypes } from '../server'
+import type { DatabaseAdapter } from './interface'
+
+export interface DatabaseConfig<T extends WabeTypes> {
+  adapter: DatabaseAdapter<T>
 }
 
-export interface DatabaseConfig {
-  type: DatabaseEnum
-  url: string
-  name: string
-}
-
-export * from './controllers/DatabaseController'
+export * from './DatabaseController'
 export * from './interface'

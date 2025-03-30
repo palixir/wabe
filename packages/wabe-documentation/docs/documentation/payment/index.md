@@ -6,7 +6,8 @@ With wabe, you have the ability to create payments either by using official adap
 
 
 ```ts
-import { DatabaseEnum, Wabe, PaymentMode, Currency } from "wabe";
+import { Wabe, PaymentMode, Currency } from "wabe";
+import { MongoAdapter } from "wabe-mongodb"
 import { StripeAdapter } from "wabe-stripe";
 
 const run = async () => {
@@ -18,9 +19,10 @@ const run = async () => {
     rootKey:
       "0uwFvUxM$ceFuF1aEtTtZMa7DUN2NZudqgY5ve5W*QCyb58cwMj9JeoaV@d#%29v&aJzswuudVU1%nAT+rxS0Bh&OkgBYc0PH18*",
     database: {
-      type: DatabaseEnum.Mongo,
-      url: "mongodb://127.0.0.1:27045",
-      name: "WabeApp",
+      adapter: new MongoAdapter({
+        databaseName: "WabeApp",
+        url: "mongodb://127.0.0.1:27045",
+      })
     },
     payment: {
       adapter: new StripeAdapter('YOU_STRIPE_SECRET_KEY'),

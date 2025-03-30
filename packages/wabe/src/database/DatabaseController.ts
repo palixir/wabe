@@ -1,8 +1,8 @@
 import type { WabeTypes } from '../..'
-import { OperationType, initializeHook } from '../../hooks'
-import type { WabeContext } from '../../server/interface'
-import { contextWithRoot } from '../../utils/export'
-import { notEmpty } from '../../utils/export'
+import { OperationType, initializeHook } from '../hooks'
+import type { WabeContext } from '../server/interface'
+import { contextWithRoot } from '../utils/export'
+import { notEmpty } from '../utils/export'
 import type {
   CountOptions,
   CreateObjectOptions,
@@ -16,7 +16,7 @@ import type {
   UpdateObjectOptions,
   UpdateObjectsOptions,
   WhereType,
-} from '../interface'
+} from './interface'
 
 export type Select = Record<string, boolean>
 type SelectWithObject = Record<string, object | boolean>

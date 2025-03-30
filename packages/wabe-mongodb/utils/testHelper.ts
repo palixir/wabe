@@ -1,6 +1,7 @@
 import { v4 as uuid } from 'uuid'
-import { type ClassInterface, DatabaseEnum, Wabe } from 'wabe'
+import { type ClassInterface, Wabe } from 'wabe'
 import getPort from 'get-port'
+import { MongoAdapter } from '../src'
 
 export const setupTests = async (
   additionalClasses: ClassInterface<any>[] = [],
@@ -14,9 +15,10 @@ export const setupTests = async (
     rootKey:
       '0uwFvUxM$ceFuF1aEtTtZMa7DUN2NZudqgY5ve5W*QCyb58cwMj9JeoaV@d#%29v&aJzswuudVU1%nAT+rxS0Bh&OkgBYc0PH18*',
     database: {
-      type: DatabaseEnum.Mongo,
-      url: 'mongodb://127.0.0.1:27045',
-      name: databaseId,
+      adapter: new MongoAdapter({
+        databaseName: databaseId,
+        databaseUrl: 'mongodb://127.0.0.1:27045',
+      }),
     },
     authentication: {
       roles: ['Client', 'Client2', 'Client3', 'Admin'],

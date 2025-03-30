@@ -51,6 +51,7 @@
     "uuid": "10.0.0",
     "wabe-mongodb-launcher": "workspace:*",
     "wabe-pluralize": "workspace:*",
-    "wabe-build": "workspace:*"
+    "wabe-build": "workspace:*",
+    "wabe-mongodb": "workspace:*"
   }
 }
