@@ -8,9 +8,8 @@ import {
   getAnonymousClient,
   createUserAndUpdateRole,
   getUserClient,
-  setupTests,
-  closeTests,
 } from './utils/helper'
+import { setupTests, closeTests } from './utils/testHelper'
 
 describe('Security tests', () => {
   let wabe: Wabe<DevWabeTypes>

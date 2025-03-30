@@ -1,12 +1,8 @@
 import { afterAll, beforeAll, describe, it, expect } from 'bun:test'
 import { createSRPClient } from 'js-srp6a'
 import type { Wabe } from '../../server'
-import {
-  type DevWabeTypes,
-  setupTests,
-  closeTests,
-  getAnonymousClient,
-} from '../../utils/helper'
+import { type DevWabeTypes, getAnonymousClient } from '../../utils/helper'
+import { setupTests, closeTests } from '../../utils/testHelper'
 import { gql } from 'graphql-request'
 
 describe('EmailPasswordSRP', () => {

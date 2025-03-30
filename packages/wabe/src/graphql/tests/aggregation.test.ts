@@ -1,12 +1,8 @@
 import { beforeAll, afterAll, describe, it, expect } from 'bun:test'
 import { type GraphQLClient, gql } from 'graphql-request'
 import type { Wabe } from '../../server'
-import {
-  type DevWabeTypes,
-  closeTests,
-  getGraphqlClient,
-  setupTests,
-} from '../../utils/helper'
+import { type DevWabeTypes, getGraphqlClient } from '../../utils/helper'
+import { setupTests, closeTests } from '../../utils/testHelper'
 
 const graphql = {
   users: gql`

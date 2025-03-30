@@ -3,11 +3,10 @@ import { gql } from 'graphql-request'
 import type { Wabe } from '../server'
 import {
   type DevWabeTypes,
-  setupTests,
   getAnonymousClient,
-  closeTests,
   getUserClient,
 } from '../utils/helper'
+import { setupTests, closeTests } from '../utils/testHelper'
 
 describe('hooks/session', () => {
   let wabe: Wabe<DevWabeTypes>

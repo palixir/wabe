@@ -11,11 +11,10 @@ import { gql, type GraphQLClient } from 'graphql-request'
 import type { Wabe } from '../../server'
 import {
   type DevWabeTypes,
-  setupTests,
   getGraphqlClient,
-  closeTests,
   getAnonymousClient,
 } from '../../utils/helper'
+import { setupTests, closeTests } from '../../utils/testHelper'
 import { EmailDevAdapter } from '../../email/DevAdapter'
 
 describe('sendOtpCodeResolver', () => {

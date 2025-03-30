@@ -1,12 +1,11 @@
 import { describe, expect, it, beforeAll, afterAll } from 'bun:test'
 import {
-  closeTests,
   createUserAndUpdateRole,
   type DevWabeTypes,
   getAnonymousClient,
   getGraphqlClient,
-  setupTests,
 } from '../utils/helper'
+import { setupTests, closeTests } from '../utils/testHelper'
 import type { Wabe } from '../server'
 import { RoleEnum } from '../../generated/wabe'
 import { gql, type GraphQLClient } from 'graphql-request'

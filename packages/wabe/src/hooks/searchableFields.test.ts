@@ -5,7 +5,8 @@ import {
   stringExtraction,
 } from './searchableFields'
 import { HookObject } from './HookObject'
-import { closeTests, setupTests, type DevWabeTypes } from '../utils/helper'
+import type { DevWabeTypes } from '../utils/helper'
+import { setupTests, closeTests } from '../utils/testHelper'
 import { OperationType } from '.'
 import type { Wabe } from '../server'
 

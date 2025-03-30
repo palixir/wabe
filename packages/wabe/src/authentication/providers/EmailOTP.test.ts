@@ -8,7 +8,8 @@ import {
   afterEach,
 } from 'bun:test'
 import { EmailOTP } from './EmailOTP'
-import { closeTests, type DevWabeTypes, setupTests } from '../../utils/helper'
+import type { DevWabeTypes } from '../../utils/helper'
+import { setupTests, closeTests } from '../../utils/testHelper'
 import { EmailDevAdapter, type Wabe } from '../..'
 import * as sendOtpCodeTemplate from '../../email/templates/sendOtpCode'
 import { OTP } from '../OTP'

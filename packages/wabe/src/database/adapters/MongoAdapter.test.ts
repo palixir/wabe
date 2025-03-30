@@ -10,12 +10,8 @@ import {
 import { fail } from 'node:assert'
 import { ObjectId } from 'mongodb'
 import type { Wabe } from '../..'
-import {
-  type DevWabeTypes,
-  closeTests,
-  notEmpty,
-  setupTests,
-} from '../../utils/helper'
+import { type DevWabeTypes, notEmpty } from '../../utils/helper'
+import { setupTests, closeTests } from '../../utils/testHelper'
 import { type MongoAdapter, buildMongoWhereQuery } from './MongoAdapter'
 import type { WabeContext } from '../../server/interface'
 
