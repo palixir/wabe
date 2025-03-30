@@ -56,7 +56,7 @@ export class HookObject<
   }
 
   isFieldUpdated(field: keyof T['types'][K]) {
-    return this.newData && !!this.newData[field]
+    return !!(this.newData && !!this.newData[field])
   }
 
   upsertNewData(field: keyof T['types'][K], value: any) {
