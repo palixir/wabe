@@ -1,7 +1,8 @@
 import { afterAll, beforeAll, describe, it, expect } from 'bun:test'
 import type { Wabe } from '../server'
-import { type DevWabeTypes, setupTests, closeTests } from '../utils/helper'
+import type { DevWabeTypes } from '../utils/helper'
 import { initializeRoles } from './roles'
+import { setupTests, closeTests } from '../utils/testHelper'
 
 describe('roles', () => {
   let wabe: Wabe<DevWabeTypes>

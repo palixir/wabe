@@ -1,10 +1,6 @@
 import { describe, beforeAll, afterAll, expect, it, afterEach } from 'bun:test'
-import {
-  closeTests,
-  getGraphqlClient,
-  setupTests,
-  type DevWabeTypes,
-} from '../utils/helper'
+import { getGraphqlClient, type DevWabeTypes } from '../utils/helper'
+import { setupTests, closeTests } from '../utils/testHelper'
 import type { Wabe } from '../server'
 import { gql, type GraphQLClient } from 'graphql-request'
 

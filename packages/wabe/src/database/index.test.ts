@@ -12,13 +12,12 @@ import {
 import type { Wabe } from '../server'
 import {
   type DevWabeTypes,
-  setupTests,
-  closeTests,
   getAdminUserClient,
   getGraphqlClient,
   createUserAndUpdateRole,
   getAnonymousClient,
 } from '../utils/helper'
+import { setupTests, closeTests } from '../utils/testHelper'
 import type { WabeContext } from '../server/interface'
 import { OperationType, getDefaultHooks } from '../hooks'
 import { gql } from 'graphql-request'

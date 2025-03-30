@@ -3,12 +3,11 @@ import { createHash } from 'node:crypto'
 import { totp } from 'otplib'
 import { gql, type GraphQLClient } from 'graphql-request'
 import {
-  closeTests,
   type DevWabeTypes,
   getAnonymousClient,
   getGraphqlClient,
-  setupTests,
 } from '../../utils/helper'
+import { setupTests, closeTests } from '../../utils/testHelper'
 import type { Wabe } from '../../server'
 
 describe('resetPasswordResolver', () => {

@@ -1,11 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'bun:test'
 import type { Wabe } from '../../server'
-import {
-  type DevWabeTypes,
-  closeTests,
-  getGraphqlClient,
-  setupTests,
-} from '../../utils/helper'
+import { type DevWabeTypes, getGraphqlClient } from '../../utils/helper'
+import { setupTests, closeTests } from '../../utils/testHelper'
 import { type GraphQLClient, gql } from 'graphql-request'
 
 describe('GraphQL : E2E', () => {

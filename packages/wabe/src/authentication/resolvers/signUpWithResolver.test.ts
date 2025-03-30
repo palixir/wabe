@@ -1,12 +1,8 @@
 import { beforeAll, afterAll, describe, expect, it } from 'bun:test'
-import {
-  closeTests,
-  type DevWabeTypes,
-  getAnonymousClient,
-  setupTests,
-} from '../../utils/helper'
+import { type DevWabeTypes, getAnonymousClient } from '../../utils/helper'
 import type { Wabe } from '../../server'
 import { gql } from 'graphql-request'
+import { setupTests, closeTests } from '../../utils/testHelper'
 
 describe('SignUpWith', () => {
   let wabe: Wabe<DevWabeTypes>

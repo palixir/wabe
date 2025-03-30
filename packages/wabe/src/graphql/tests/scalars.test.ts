@@ -1,12 +1,8 @@
 import { afterAll, beforeAll, describe, expect, it } from 'bun:test'
 import type { Wabe } from '../../server'
 import { type GraphQLClient, gql } from 'graphql-request'
-import {
-  type DevWabeTypes,
-  closeTests,
-  getGraphqlClient,
-  setupTests,
-} from '../../utils/helper'
+import { type DevWabeTypes, getGraphqlClient } from '../../utils/helper'
+import { setupTests, closeTests } from '../../utils/testHelper'
 
 describe('GraphQL : Scalars', () => {
   let wabe: Wabe<DevWabeTypes>

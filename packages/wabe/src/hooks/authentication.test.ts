@@ -1,13 +1,12 @@
 import { describe, beforeAll, afterAll, it, expect } from 'bun:test'
 import { gql, type GraphQLClient } from 'graphql-request'
 import {
-  closeTests,
   type DevWabeTypes,
   getAnonymousClient,
   getGraphqlClient,
   getUserClient,
-  setupTests,
 } from '../utils/helper'
+import { setupTests, closeTests } from '../utils/testHelper'
 import type { Wabe } from '../server'
 
 describe('authentication hooks', () => {
