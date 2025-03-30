@@ -1,7 +1,8 @@
 import { v4 as uuid } from 'uuid'
+import { runDatabase } from 'wabe-postgres-launcher'
 import { type ClassInterface, Wabe } from 'wabe'
 import getPort from 'get-port'
-import { MongoAdapter, PostgresAdapter } from '../src'
+import { PostgresAdapter } from '../src'
 
 export const setupTests = async (
 	additionalClasses: ClassInterface<any>[] = []
@@ -10,16 +11,23 @@ export const setupTests = async (
 
 	const port = await getPort()
 
+	const databasePostgres = await runDatabase()
+
+	if (!databasePostgres) throw new Error('Failed to run Postgres database')
+
 	const wabe = new Wabe<any>({
 		isProduction: false,
 		rootKey:
 			'0uwFvUxM$ceFuF1aEtTtZMa7DUN2NZudqgY5ve5W*QCyb58cwMj9JeoaV@d#%29v&aJzswuudVU1%nAT+rxS0Bh&OkgBYc0PH18*',
 		database: {
-			adapter: new PostgresAdapter({
-				databaseUrl:
-					'postgresql://username:password@localhost:5432/dbname',
-				databaseName: 'wabe',
-			}),
+			adapter: new PostgresAdapter(
+				{
+					databaseUrl:
+						'postgresql://username:password@localhost:5432/dbname',
+					databaseName: databaseId,
+				},
+				databasePostgres.pool
+			),
 		},
 		authentication: {
 			roles: ['Client', 'Client2', 'Client3', 'Admin'],

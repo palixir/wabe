@@ -1,14 +1,29 @@
-import type { Client } from 'pg'
-import { newDb } from 'pg-mem'
+import type { Client, Pool } from 'pg'
+import { randomUUID } from 'node:crypto'
+import { DataType, newDb } from 'pg-mem'
 import tcpPortUsed from 'tcp-port-used'
 
-export const runDatabase = async (): Promise<Client | undefined> => {
-  if (await tcpPortUsed.check(27045, '127.0.0.1')) return
-  const db = newDb()
+export const runDatabase = async (): Promise<
+	{ client: Client; pool: Pool } | undefined
+> => {
+	if (await tcpPortUsed.check(27045, '127.0.0.1')) return
+	const db = newDb()
 
-  console.info('PostgreSQL started')
+	db.public.registerFunction({
+		name: 'gen_random_uuid',
+		returns: DataType.text,
+		implementation: () => randomUUID(),
+	})
 
-  const { Client } = db.adapters.createPg()
+	console.info('PostgreSQL started')
 
-  return Client
+	const { Pool } = db.adapters.createPg()
+
+	const pool = new Pool({
+		connectionString: 'postgres://localhost:27045/memdb',
+	})
+
+	const client = await pool.connect()
+
+	return { client, pool }
 }

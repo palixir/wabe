@@ -1,5 +1,5 @@
-import { Pool, type PoolClient, type QueryResult } from 'pg'
-import pRetry from 'p-retry'
+import { Pool } from 'pg'
+import { v4 as uuid } from 'pg'
 import {
 	type AdapterOptions,
 	type DatabaseAdapter,
@@ -18,11 +18,8 @@ import {
 	type WabeTypes,
 	type WabeContext,
 	contextWithRoot,
+	notEmpty,
 } from 'wabe'
-
-// Utility function to check if a value exists
-const notEmpty = <T>(value: T | null | undefined): value is T =>
-	value !== null && value !== undefined
 
 export const buildPostgresOrderQuery = <
 	T extends WabeTypes,
@@ -236,36 +233,35 @@ export class PostgresAdapter<T extends WabeTypes>
 	public options: AdapterOptions
 	public pool: Pool
 
-	constructor(options: AdapterOptions) {
+	constructor(options: AdapterOptions, pool?: Pool) {
 		this.options = options
-		this.pool = new Pool({
-			connectionString: options.databaseUrl,
-		})
+		this.pool =
+			pool ||
+			new Pool({
+				connectionString: options.databaseUrl,
+			})
 	}
 
 	async connect() {
-		try {
-			const client = await pRetry(() => this.pool.connect(), {
-				retries: 5,
-				minTimeout: process.env.NODE_ENV === 'production' ? 1000 : 100,
-				factor: 2,
-			})
-			client.release() // Release the client back to the pool
-
-			// Create the database if it doesn't exist
-			const pgClient = await this.pool.connect()
-			try {
-				await pgClient.query(
-					`CREATE DATABASE IF NOT EXISTS "${this.options.databaseName}"`
-				)
-			} finally {
-				pgClient.release()
-			}
-
-			return this.pool
-		} catch (error) {
-			throw new Error(`Failed to connect to PostgreSQL: ${error}`)
-		}
+		// try {
+		// 	const client = await pRetry(() => this.pool.connect(), {
+		// 		retries: 5,
+		// 		minTimeout: process.env.NODE_ENV === 'production' ? 1000 : 100,
+		// 		factor: 2,
+		// 	})
+		// 	client.release()
+		// 	const pgClient = await this.pool.connect()
+		// 	try {
+		// 		await pgClient.query(
+		// 			`CREATE DATABASE IF NOT EXISTS "${this.options.databaseName}"`
+		// 		)
+		// 	} finally {
+		// 		pgClient.release()
+		// 	}
+		// 	return this.pool
+		// } catch (error) {
+		// 	throw new Error(`Failed to connect to PostgreSQL: ${error}`)
+		// }
 	}
 
 	async close() {
@@ -290,7 +286,6 @@ export class PostgresAdapter<T extends WabeTypes>
 			await client.query(`
         CREATE TABLE IF NOT EXISTS "${String(className)}" (
           _id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-          data JSONB NOT NULL DEFAULT '{}'::jsonb
         )
       `)
 
@@ -305,9 +300,7 @@ export class PostgresAdapter<T extends WabeTypes>
 				await client.query(`
           CREATE ${indexType} INDEX IF NOT EXISTS 
           idx_${String(className)}_${String(index.field)} 
-          ON "${String(className)}" ((data->>'${String(
-					index.field
-				)}') ${indexDirection})
+          ON "${String(className)}" (${String(index.field)}' ${indexDirection})
         `)
 			}
 
@@ -612,6 +605,7 @@ export class PostgresAdapter<T extends WabeTypes>
 				await context.wabe.controllers.database.getObjects({
 					className,
 					where,
+					// @ts-expect-error
 					select: { id: true },
 					offset,
 					first,

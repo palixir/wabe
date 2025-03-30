@@ -14,15 +14,12 @@
 	],
 	"license": "MIT",
 	"dependencies": {
-		"p-retry": "^5.1.2",
-		"pg": "^8.11.3",
-		"wabe": "workspace:*"
+		"p-retry": "5.1.2",
+		"pg": "8.14.1"
 	},
 	"devDependencies": {
-		"@types/pg": "^8.10.9",
-		"typescript": "^5.3.3"
-	},
-	"peerDependencies": {
-		"wabe": "workspace:*"
+		"@types/pg": "8.11.11",
+		"wabe": "workspace:*",
+		"wabe-postgres-launcher": "workspace:*"
 	}
 }
