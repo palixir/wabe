@@ -2,13 +2,18 @@ import { describe, expect, it, spyOn } from 'bun:test'
 import { v4 as uuid } from 'uuid'
 import getPort from 'get-port'
 import { Wabe } from '.'
-import { DatabaseEnum } from '../database'
 import { Schema } from '../schema'
 import { OperationType } from '../hooks'
-import { getAnonymousClient, getUserClient } from '../utils/helper'
+import {
+  type DevWabeTypes,
+  getAnonymousClient,
+  getUserClient,
+} from '../utils/helper'
 import { gql } from 'graphql-request'
 
-describe('Server', () => {
+describe('Server', async () => {
+  const mongoAdapter = await import('wabe-mongodb')
+
   it('should mask graphql errors message', async () => {
     spyOn(console, 'error').mockReturnValue()
     const databaseId = uuid()
@@ -19,9 +24,11 @@ describe('Server', () => {
       rootKey:
         'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
       database: {
-        type: DatabaseEnum.Mongo,
-        url: 'mongodb://127.0.0.1:27045',
-        name: databaseId,
+        // @ts-expect-error
+        adapter: new mongoAdapter.MongoAdapter<DevWabeTypes>({
+          databaseName: databaseId,
+          databaseUrl: 'mongodb://127.0.0.1:27045',
+        }),
       },
       security: {
         maskErrorMessage: true,
@@ -65,9 +72,11 @@ describe('Server', () => {
       rootKey:
         'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
       database: {
-        type: DatabaseEnum.Mongo,
-        url: 'mongodb://127.0.0.1:27045',
-        name: databaseId,
+        // @ts-expect-error
+        adapter: new mongoAdapter.MongoAdapter<DevWabeTypes>({
+          databaseName: databaseId,
+          databaseUrl: 'mongodb://127.0.0.1:27045',
+        }),
       },
       port,
       routes: [
@@ -104,9 +113,11 @@ describe('Server', () => {
       rootKey:
         'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
       database: {
-        type: DatabaseEnum.Mongo,
-        url: 'mongodb://127.0.0.1:27045',
-        name: databaseId,
+        // @ts-expect-error
+        adapter: new mongoAdapter.MongoAdapter<DevWabeTypes>({
+          databaseName: databaseId,
+          databaseUrl: 'mongodb://127.0.0.1:27045',
+        }),
       },
       port,
       schema: {
@@ -137,9 +148,11 @@ describe('Server', () => {
       rootKey:
         'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
       database: {
-        type: DatabaseEnum.Mongo,
-        url: 'mongodb://127.0.0.1:27045',
-        name: databaseId,
+        // @ts-expect-error
+        adapter: new mongoAdapter.MongoAdapter<DevWabeTypes>({
+          databaseName: databaseId,
+          databaseUrl: 'mongodb://127.0.0.1:27045',
+        }),
       },
       port,
       schema: {
@@ -171,9 +184,11 @@ describe('Server', () => {
           rootKey:
             'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
           database: {
-            type: DatabaseEnum.Mongo,
-            url: 'mongodb://127.0.0.1:27045',
-            name: databaseId,
+            // @ts-expect-error
+            adapter: new mongoAdapter.MongoAdapter<DevWabeTypes>({
+              databaseName: databaseId,
+              databaseUrl: 'mongodb://127.0.0.1:27045',
+            }),
           },
           port,
           hooks: [
@@ -193,9 +208,11 @@ describe('Server', () => {
           rootKey:
             'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
           database: {
-            type: DatabaseEnum.Mongo,
-            url: 'mongodb://127.0.0.1:27045',
-            name: databaseId,
+            // @ts-expect-error
+            adapter: new mongoAdapter.MongoAdapter<DevWabeTypes>({
+              databaseName: databaseId,
+              databaseUrl: 'mongodb://127.0.0.1:27045',
+            }),
           },
           port,
           hooks: [],
@@ -209,9 +226,11 @@ describe('Server', () => {
           rootKey:
             'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
           database: {
-            type: DatabaseEnum.Mongo,
-            url: 'mongodb://127.0.0.1:27045',
-            name: databaseId,
+            // @ts-expect-error
+            adapter: new mongoAdapter.MongoAdapter<DevWabeTypes>({
+              databaseName: databaseId,
+              databaseUrl: 'mongodb://127.0.0.1:27045',
+            }),
           },
           port,
           hooks: [
@@ -234,9 +253,11 @@ describe('Server', () => {
       rootKey:
         'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
       database: {
-        type: DatabaseEnum.Mongo,
-        url: 'mongodb://127.0.0.1:27045',
-        name: databaseId,
+        // @ts-expect-error
+        adapter: new mongoAdapter.MongoAdapter<DevWabeTypes>({
+          databaseName: databaseId,
+          databaseUrl: 'mongodb://127.0.0.1:27045',
+        }),
       },
       port,
     })
@@ -262,9 +283,11 @@ describe('Server', () => {
       rootKey:
         'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
       database: {
-        type: DatabaseEnum.Mongo,
-        url: 'mongodb://127.0.0.1:27045',
-        name: databaseId,
+        // @ts-expect-error
+        adapter: new mongoAdapter.MongoAdapter<DevWabeTypes>({
+          databaseName: databaseId,
+          databaseUrl: 'mongodb://127.0.0.1:27045',
+        }),
       },
       port,
       schema: {
@@ -302,9 +325,11 @@ describe('Server', () => {
       rootKey:
         'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
       database: {
-        type: DatabaseEnum.Mongo,
-        url: 'mongodb://127.0.0.1:27045',
-        name: databaseId,
+        // @ts-expect-error
+        adapter: new mongoAdapter.MongoAdapter<DevWabeTypes>({
+          databaseName: databaseId,
+          databaseUrl: 'mongodb://127.0.0.1:27045',
+        }),
       },
       port,
       schema: {
@@ -345,9 +370,11 @@ describe('Server', () => {
       rootKey:
         'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
       database: {
-        type: DatabaseEnum.Mongo,
-        url: 'mongodb://127.0.0.1:27045',
-        name: databaseId,
+        // @ts-expect-error
+        adapter: new mongoAdapter.MongoAdapter<DevWabeTypes>({
+          databaseName: databaseId,
+          databaseUrl: 'mongodb://127.0.0.1:27045',
+        }),
       },
       authentication: {
         roles: ['Client'],
@@ -362,9 +389,11 @@ describe('Server', () => {
       rootKey:
         'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
       database: {
-        type: DatabaseEnum.Mongo,
-        url: 'mongodb://127.0.0.1:27045',
-        name: databaseId,
+        // @ts-expect-error
+        adapter: new mongoAdapter.MongoAdapter<DevWabeTypes>({
+          databaseName: databaseId,
+          databaseUrl: 'mongodb://127.0.0.1:27045',
+        }),
       },
       authentication: {
         sessionHandler: (ctx) => {

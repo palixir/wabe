@@ -7,7 +7,8 @@ Wabe allow you to store files very easily, with a fully automatic integration in
 To configure your adapter you can for example use the `Buns3Adapter` :
 
 ```ts
-import { DatabaseEnum, Wabe } from "wabe";
+import { Wabe } from "wabe";
+import { MongoAdapter } from "wabe-mongodb"
 import { Buns3Adapter } from "wabe-buns3";
 
 const run = async () => {
@@ -19,9 +20,10 @@ const run = async () => {
     rootKey:
       "0uwFvUxM$ceFuF1aEtTtZMa7DUN2NZudqgY5ve5W*QCyb58cwMj9JeoaV@d#%29v&aJzswuudVU1%nAT+rxS0Bh&OkgBYc0PH18*",
     database: {
-      type: DatabaseEnum.Mongo,
-      url: "mongodb://127.0.0.1:27045",
-      name: "WabeApp",
+      adapter: new MongoAdapter({
+        databaseName: "WabeApp",
+        url: "mongodb://127.0.0.1:27045",
+      })
     },
     file: {
       adapter : new Buns3Adapter({

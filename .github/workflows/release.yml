@@ -9,6 +9,7 @@ on:
         type: choice
         options:
           - "wabe"
+          - "wabe-mongodb"
           - "wabe-resend"
           - "wabe-stripe"
           - "wabe-openai"

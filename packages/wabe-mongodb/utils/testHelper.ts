@@ -1,14 +1,7 @@
 import { v4 as uuid } from 'uuid'
-import {
-  type ClassInterface,
-  Currency,
-  EmailDevAdapter,
-  FileDevAdapter,
-  PaymentDevAdapter,
-} from '..'
-import { Wabe } from '../server'
-import type { DevWabeTypes } from './helper'
+import { type ClassInterface, Wabe } from 'wabe'
 import getPort from 'get-port'
+import { MongoAdapter } from '../src'
 
 export const setupTests = async (
   additionalClasses: ClassInterface<any>[] = [],
@@ -17,15 +10,12 @@ export const setupTests = async (
 
   const port = await getPort()
 
-  const mongoAdapter = await import('wabe-mongodb')
-
-  const wabe = new Wabe<DevWabeTypes>({
+  const wabe = new Wabe<any>({
     isProduction: false,
     rootKey:
       '0uwFvUxM$ceFuF1aEtTtZMa7DUN2NZudqgY5ve5W*QCyb58cwMj9JeoaV@d#%29v&aJzswuudVU1%nAT+rxS0Bh&OkgBYc0PH18*',
     database: {
-      // @ts-expect-error
-      adapter: new mongoAdapter.MongoAdapter<DevWabeTypes>({
+      adapter: new MongoAdapter({
         databaseName: databaseId,
         databaseUrl: 'mongodb://127.0.0.1:27045',
       }),
@@ -38,20 +28,6 @@ export const setupTests = async (
       },
     },
     port,
-    email: {
-      adapter: new EmailDevAdapter(),
-      mainEmail: 'main.email@wabe.com',
-    },
-    payment: {
-      adapter: new PaymentDevAdapter(),
-      currency: Currency.EUR,
-      supportedPaymentMethods: ['card', 'paypal'],
-    },
-    file: {
-      adapter: new FileDevAdapter(),
-      // 12 hours of cache
-      urlCacheInSeconds: 3600 * 12,
-    },
     schema: {
       classes: [
         ...additionalClasses,
@@ -109,7 +85,7 @@ export const setupTests = async (
   return { wabe, port }
 }
 
-export const closeTests = async (wabe: Wabe<DevWabeTypes>) => {
+export const closeTests = async (wabe: Wabe<any>) => {
   await wabe.controllers.database.adapter?.close()
   await wabe.close()
 }

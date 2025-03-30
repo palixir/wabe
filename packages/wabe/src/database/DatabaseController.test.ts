@@ -7,10 +7,11 @@ import {
   spyOn,
   afterAll,
 } from 'bun:test'
-import { DatabaseController, type WhereType } from '..'
-import * as hooks from '../../hooks/index'
-import type { WabeContext } from '../../server/interface'
-import type { DevWabeTypes } from '../../utils/helper'
+import type { WhereType } from '.'
+import * as hooks from '../hooks/index'
+import type { WabeContext } from '../server/interface'
+import type { DevWabeTypes } from '../utils/helper'
+import { DatabaseController } from './DatabaseController'
 
 describe('DatabaseController', () => {
   const mockGetObject = mock(() => {})

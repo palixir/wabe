@@ -7,7 +7,7 @@ In the `schema` object of the `Wabe` configuration, you can also define resolver
 For each `query` you choose to create, you can give it a name (in the example below, "helloWorld"). You can also specify a return type (supported types in Wabe include String, Int, Float, Boolean, File, etc.). Additionally, you can provide arguments if needed. Finally, you must assign it a resolver function that contains the code to execute when your query is called.
 
 ```ts
-import { DatabaseEnum, Wabe } from "wabe";
+import { Wabe } from "wabe";
 
 const run = async () => {
   const wabe = new Wabe({
@@ -47,7 +47,7 @@ await run();
 Just like with queries, you can create `mutations` (such as "sumAndUpdateResult" in the example below) with a return type, arguments (within the input object), and a resolver function.
 
 ```ts
-import { DatabaseEnum, Wabe } from "wabe";
+import { Wabe } from "wabe";
 
 const run = async () => {
   const wabe = new Wabe({

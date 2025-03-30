@@ -1,5 +1,6 @@
 import { runDatabase } from 'wabe-mongodb-launcher'
-import { DatabaseEnum, Wabe } from '../src'
+import { MongoAdapter } from 'wabe-mongodb'
+import { Wabe } from '../src'
 import {
   RoleEnum,
   type WabeSchemaWhereTypes,
@@ -33,9 +34,15 @@ const run = async () => {
       failureRedirectPath: 'https://shipmysaas.com',
     },
     database: {
-      type: DatabaseEnum.Mongo,
-      url: 'mongodb://127.0.0.1:27045',
-      name: 'Wabe',
+      adapter: new MongoAdapter<{
+        types: WabeSchemaTypes
+        scalars: WabeSchemaScalars
+        enums: WabeSchemaEnums
+        where: WabeSchemaWhereTypes
+      }>({
+        databaseName: 'Wabe',
+        databaseUrl: 'mongodb://127.0.0.1:27045',
+      }),
     },
     port: 3000,
     schema: {

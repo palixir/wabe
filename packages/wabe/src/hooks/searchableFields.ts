@@ -1,5 +1,5 @@
 import { tokenize } from '../utils'
-import { notEmpty } from '../utils/helper'
+import { notEmpty } from '../utils/export'
 import type { HookObject } from './HookObject'
 
 export const stringExtraction = (value: any): Array<string> => {

@@ -9,15 +9,13 @@ import {
 } from 'bun:test'
 import { fail } from 'node:assert'
 import { ObjectId } from 'mongodb'
-import type { Wabe } from '../..'
-import { type DevWabeTypes, notEmpty } from '../../utils/helper'
-import { setupTests, closeTests } from '../../utils/testHelper'
-import { type MongoAdapter, buildMongoWhereQuery } from './MongoAdapter'
-import type { WabeContext } from '../../server/interface'
+import { notEmpty, type Wabe, type WabeContext } from 'wabe'
+import { buildMongoWhereQuery, type MongoAdapter } from '.'
+import { setupTests, closeTests } from '../utils/testHelper'
 
 describe('Mongo adapter', () => {
-  let mongoAdapter: MongoAdapter<DevWabeTypes>
-  let wabe: Wabe<DevWabeTypes>
+  let mongoAdapter: MongoAdapter<any>
+  let wabe: Wabe<any>
   let context: WabeContext<any>
 
   beforeAll(async () => {
@@ -925,6 +923,7 @@ describe('Mongo adapter', () => {
     expect(
       await mongoAdapter.getObjects({
         className: 'User',
+        // @ts-expect-error
         where: {
           OR: [
             {
@@ -954,6 +953,7 @@ describe('Mongo adapter', () => {
     expect(
       await mongoAdapter.getObjects({
         className: 'User',
+        // @ts-expect-error
         where: {
           OR: [
             {
@@ -979,6 +979,7 @@ describe('Mongo adapter', () => {
     expect(
       await mongoAdapter.getObjects({
         className: 'User',
+        // @ts-expect-error
         where: {
           AND: [
             {
@@ -1003,6 +1004,7 @@ describe('Mongo adapter', () => {
     expect(
       await mongoAdapter.getObjects({
         className: 'User',
+        // @ts-expect-error
         where: {
           AND: [
             {
@@ -1597,6 +1599,7 @@ describe('Mongo adapter', () => {
       className: 'User',
       where: {
         authentication: {
+          // @ts-expect-error
           emailPassword: {
             email: { equalTo: 'email@test.fr' },
           },
@@ -1631,6 +1634,7 @@ describe('Mongo adapter', () => {
       className: 'User',
       where: {
         authentication: {
+          // @ts-expect-error
           emailPassword: {
             email: { equalTo: 'email@test.fr' },
           },

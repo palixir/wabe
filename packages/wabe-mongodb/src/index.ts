@@ -1,25 +1,25 @@
 import { type Db, type Filter, MongoClient, ObjectId } from 'mongodb'
 import pRetry from 'p-retry'
-import type {
-  AdapterOptions,
-  DatabaseAdapter,
-  GetObjectOptions,
-  CreateObjectOptions,
-  UpdateObjectOptions,
-  GetObjectsOptions,
-  CreateObjectsOptions,
-  UpdateObjectsOptions,
-  DeleteObjectsOptions,
-  WhereType,
-  DeleteObjectOptions,
-  OutputType,
-  CountOptions,
-  OrderType,
-} from './adaptersInterface'
-import type { WabeTypes } from '../../server'
-import type { WabeContext } from '../../server/interface'
-import { notEmpty } from '../../utils/helper'
-import { contextWithRoot } from '../../utils/export'
+import {
+  type AdapterOptions,
+  type DatabaseAdapter,
+  type GetObjectOptions,
+  type CreateObjectOptions,
+  type UpdateObjectOptions,
+  type GetObjectsOptions,
+  type CreateObjectsOptions,
+  type UpdateObjectsOptions,
+  type DeleteObjectsOptions,
+  type WhereType,
+  type DeleteObjectOptions,
+  type OutputType,
+  type CountOptions,
+  type OrderType,
+  type WabeTypes,
+  type WabeContext,
+  contextWithRoot,
+  notEmpty,
+} from 'wabe'
 
 export const buildMongoOrderQuery = <
   T extends WabeTypes,
@@ -362,6 +362,7 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
       await context.wabe.controllers.database.getObjects({
         className,
         where,
+        // @ts-expect-error
         select: { id: true },
         offset,
         first,

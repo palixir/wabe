@@ -10,24 +10,23 @@
 
 Wabe is an open-source backend as a service that allows you to create your own fully customizable backend in just a few minutes. It handles database access, automatic GraphQL API generation, authentication with various methods (classic or OAuth), permissions, security, and more for you.
 
-## Install for wabe-resend
+## Install for wabe-mongodb
 
 ```sh
 bun install wabe # On bun
 npm install wabe # On npm
 yarn add wabe # On yarn
 
-bun install wabe-resend # On bun
-npm install wabe-resend # On npm
-yarn add wabe-resend # On yarn
+bun install wabe-mongodb # On bun
+npm install wabe-mongodb # On npm
+yarn add wabe-mongodb # On yarn
 ```
 
-## Basic example of wabe-resend usage
+## Basic example of wabe-mongodb usage
 
 ```ts
 import { Wabe } from "wabe";
 import { MongoAdapter } from "wabe-mongodb"
-import { ResendAdapter } from "wabe-resend";
 
 const run = async () => {
   // Ensure your database is running before run the file
@@ -43,20 +42,10 @@ const run = async () => {
         url: "mongodb://127.0.0.1:27045",
       })
     },
-    email: {
-      adapter : new ResendAdapter("YOUR_RESEND_API_KEY"),
-    }
     port: 3000,
   });
 
   await wabe.start();
-
-  await wabe.controllers.email.send({
-    from : "test@test.com",
-    to: ["target@gmail.com"],
-    subject: "Test",
-    text: "Test",
-  });
 };
 
 await run();

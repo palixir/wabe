@@ -1,5 +1,5 @@
-import type { WabeContext } from '../../server/interface'
-import type { WabeTypes } from '../../server'
+import type { WabeContext } from '../server/interface'
+import type { WabeTypes } from '../server'
 
 type IsScalar<T> = T extends string | number | boolean | Date ? true : false
 
@@ -135,7 +135,7 @@ export type MutationData<
 export interface CountOptions<T extends WabeTypes, K extends keyof T['types']> {
   className: K
   where?: WhereType<T, K>
-  context: WabeContext<any>
+  context: WabeContext<T>
 }
 
 export interface GetObjectOptions<
@@ -146,7 +146,7 @@ export interface GetObjectOptions<
   className: K
   id: string
   where?: WhereType<T, K>
-  context: WabeContext<any>
+  context: WabeContext<T>
   skipHooks?: boolean
   select?: SelectType<T, K, U>
   isGraphQLCall?: boolean
@@ -163,7 +163,7 @@ export interface GetObjectsOptions<
   order?: OrderType<T, K, U>
   offset?: number
   first?: number
-  context: WabeContext<any>
+  context: WabeContext<T>
   skipHooks?: boolean
   select?: SelectType<T, K, W>
   isGraphQLCall?: boolean
@@ -177,7 +177,7 @@ export interface CreateObjectOptions<
 > {
   className: K
   data: MutationData<T, K, U>
-  context: WabeContext<any>
+  context: WabeContext<T>
   select?: SelectType<T, K, W>
   isGraphQLCall?: boolean
 }
@@ -193,7 +193,7 @@ export interface CreateObjectsOptions<
   offset?: number
   first?: number
   order?: OrderType<T, U, X>
-  context: WabeContext<any>
+  context: WabeContext<T>
   select?: SelectType<T, K, W>
   isGraphQLCall?: boolean
 }
@@ -208,7 +208,7 @@ export interface UpdateObjectOptions<
   id: string
   where?: WhereType<T, K>
   data: MutationData<T, K, U>
-  context: WabeContext<any>
+  context: WabeContext<T>
   skipHooks?: boolean
   select?: SelectType<T, K, W>
   isGraphQLCall?: boolean
@@ -227,7 +227,7 @@ export interface UpdateObjectsOptions<
   data: MutationData<T, K, U>
   offset?: number
   first?: number
-  context: WabeContext<any>
+  context: WabeContext<T>
   skipHooks?: boolean
   select?: SelectType<T, K, W>
   isGraphQLCall?: boolean
@@ -241,7 +241,7 @@ export interface DeleteObjectOptions<
   className: K
   id: string
   where?: WhereType<T, K>
-  context: WabeContext<any>
+  context: WabeContext<T>
   select?: SelectType<T, K, U>
   isGraphQLCall?: boolean
 }
@@ -257,7 +257,7 @@ export interface DeleteObjectsOptions<
   order?: OrderType<T, K, U>
   offset?: number
   first?: number
-  context: WabeContext<any>
+  context: WabeContext<T>
   select?: SelectType<T, K, W>
   isGraphQLCall?: boolean
 }
@@ -268,14 +268,12 @@ export interface DatabaseAdapter<T extends WabeTypes> {
 
   createClassIfNotExist(
     className: string,
-    context: WabeContext<any>,
+    context: WabeContext<T>,
   ): Promise<any>
 
   clearDatabase(): Promise<void>
 
-  count<T extends WabeTypes, K extends keyof T['types']>(
-    params: CountOptions<T, K>,
-  ): Promise<number>
+  count<K extends keyof T['types']>(params: CountOptions<T, K>): Promise<number>
 
   getObject<K extends keyof T['types'], U extends keyof T['types'][K]>(
     params: GetObjectOptions<T, K, U>,

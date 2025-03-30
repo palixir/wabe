@@ -1,6 +1,5 @@
 import type { DatabaseConfig } from '../database'
-import { DatabaseController } from '../database/controllers/DatabaseController'
-import { MongoAdapter } from '../database/adapters/MongoAdapter'
+import { DatabaseController } from '../database/DatabaseController'
 import {
   type EnumInterface,
   Schema,
@@ -45,7 +44,7 @@ export interface WabeConfig<T extends WabeTypes> {
   security?: SecurityConfig
   schema?: SchemaInterface<T>
   graphqlSchema?: GraphQLSchema
-  database: DatabaseConfig
+  database: DatabaseConfig<T>
   codegen?:
     | {
         enabled: true
@@ -130,13 +129,8 @@ export class Wabe<T extends WabeTypes> {
       },
     )
 
-    const databaseAdapter = new MongoAdapter({
-      databaseName: database.name,
-      databaseUrl: database.url,
-    })
-
     this.controllers = {
-      database: new DatabaseController<T>(databaseAdapter),
+      database: new DatabaseController<T>(database.adapter),
       email: email?.adapter ? new EmailController(email.adapter) : undefined,
       payment: payment?.adapter ? new PaymentController(payment) : undefined,
       file: file?.adapter ? new FileController(file.adapter, this) : undefined,
