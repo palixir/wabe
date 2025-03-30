@@ -1,6 +1,5 @@
-import getPort from 'get-port'
+
 import { gql, GraphQLClient } from 'graphql-request'
-import { v4 as uuid } from 'uuid'
 import {
   RoleEnum,
   type WabeSchemaWhereTypes,
@@ -8,13 +7,7 @@ import {
   type WabeSchemaScalars,
   type WabeSchemaTypes,
 } from '../../generated/wabe'
-import { DatabaseEnum } from '../database'
-import { Wabe, type WabeTypes } from '../server'
-import { PaymentDevAdapter } from '../payment/DevAdapter'
-import type { ClassInterface } from '../schema'
-import { EmailDevAdapter } from '../email/DevAdapter'
-import { Currency } from '../payment'
-import { FileDevAdapter } from '../files/FileDevAdapter'
+import type { Wabe, WabeTypes } from '../server'
 
 export interface DevWabeTypes extends WabeTypes {
   types: WabeSchemaTypes
@@ -124,106 +117,6 @@ export const getAdminUserClient = async (
   })
 
   return { ...client, request: client.request<any> } as GraphQLClient
-}
-
-export const setupTests = async (
-  additionalClasses: ClassInterface<any>[] = [],
-) => {
-  const databaseId = uuid()
-
-  const port = await getPort()
-
-  const wabe = new Wabe<DevWabeTypes>({
-    isProduction: false,
-    rootKey:
-      '0uwFvUxM$ceFuF1aEtTtZMa7DUN2NZudqgY5ve5W*QCyb58cwMj9JeoaV@d#%29v&aJzswuudVU1%nAT+rxS0Bh&OkgBYc0PH18*',
-    database: {
-      type: DatabaseEnum.Mongo,
-      url: 'mongodb://127.0.0.1:27045',
-      name: databaseId,
-    },
-    authentication: {
-      roles: ['Client', 'Client2', 'Client3', 'Admin'],
-      session: {
-        jwtSecret: 'dev',
-        cookieSession: true,
-      },
-    },
-    port,
-    email: {
-      adapter: new EmailDevAdapter(),
-      mainEmail: 'main.email@wabe.com',
-    },
-    payment: {
-      adapter: new PaymentDevAdapter(),
-      currency: Currency.EUR,
-      supportedPaymentMethods: ['card', 'paypal'],
-    },
-    file: {
-      adapter: new FileDevAdapter(),
-      // 12 hours of cache
-      urlCacheInSeconds: 3600 * 12,
-    },
-    schema: {
-      classes: [
-        ...additionalClasses,
-        {
-          name: 'User',
-          fields: {
-            name: { type: 'String' },
-            age: { type: 'Int' },
-            isAdmin: { type: 'Boolean', defaultValue: false },
-            floatValue: { type: 'Float' },
-            birthDate: { type: 'Date' },
-            arrayValue: {
-              type: 'Array',
-              typeValue: 'String',
-            },
-            test: { type: 'TestScalar' },
-          },
-          searchableFields: ['email'],
-          permissions: {
-            create: {
-              requireAuthentication: false,
-            },
-            delete: {
-              requireAuthentication: true,
-            },
-            update: {
-              requireAuthentication: false,
-            },
-            read: {
-              requireAuthentication: false,
-            },
-            acl: async (hookObject) => {
-              await hookObject.addACL('users', {
-                userId: hookObject.object?.id,
-                read: true,
-                write: true,
-              })
-
-              await hookObject.addACL('roles', null)
-            },
-          },
-        },
-      ],
-      scalars: [
-        {
-          name: 'TestScalar',
-          description: 'Test scalar',
-        },
-      ],
-    },
-  })
-
-  await wabe.start()
-
-  return { wabe, port }
-}
-
-export const closeTests = async (wabe: Wabe<DevWabeTypes>) => {
-  await wabe.controllers.database.adapter?.close()
-  await wabe.close()
 }
 
 export const createUserAndUpdateRole = async ({

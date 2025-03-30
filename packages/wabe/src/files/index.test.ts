@@ -8,12 +8,8 @@ import {
   spyOn,
 } from 'bun:test'
 import { FileDevAdapter, type Wabe } from '..'
-import {
-  type DevWabeTypes,
-  closeTests,
-  getAnonymousClient,
-  setupTests,
-} from '../utils/helper'
+import { type DevWabeTypes, getAnonymousClient } from '../utils/helper'
+import { setupTests, closeTests } from '../utils/testHelper'
 import { gql } from 'graphql-request'
 
 describe('File upload', () => {

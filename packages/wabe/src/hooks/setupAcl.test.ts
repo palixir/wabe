@@ -9,13 +9,12 @@ import {
 } from 'bun:test'
 import { gql, type GraphQLClient } from 'graphql-request'
 import {
-  closeTests,
   getAnonymousClient,
   getGraphqlClient,
   getUserClient,
-  setupTests,
   type DevWabeTypes,
 } from '../utils/helper'
+import { setupTests, closeTests } from '../utils/testHelper'
 import type { Wabe } from '../server'
 
 const createUserAndUpdateRole = async ({

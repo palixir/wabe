@@ -1,11 +1,7 @@
 import { describe, beforeAll, afterAll, expect, it, beforeEach } from 'bun:test'
 import type { Wabe } from '../server'
-import {
-  closeTests,
-  type DevWabeTypes,
-  getGraphqlClient,
-  setupTests,
-} from '../utils/helper'
+import { type DevWabeTypes, getGraphqlClient } from '../utils/helper'
+import { setupTests, closeTests } from '../utils/testHelper'
 import { gql, type GraphQLClient } from 'graphql-request'
 
 describe('Delete session on delete user', () => {

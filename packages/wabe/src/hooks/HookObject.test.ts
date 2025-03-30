@@ -1,7 +1,8 @@
 import { describe, expect, it, beforeAll, afterAll } from 'bun:test'
 import { HookObject } from './HookObject'
 import { OperationType } from '.'
-import { closeTests, setupTests, type DevWabeTypes } from '../utils/helper'
+import type { DevWabeTypes } from '../utils/helper'
+import { setupTests, closeTests } from '../utils/testHelper'
 import type { Wabe } from '../server'
 
 describe('HookObject', () => {
