@@ -11,22 +11,17 @@ export const setupTests = async (
 
   const port = await getPort()
 
-  const databasePostgres = await runDatabase()
-
-  if (!databasePostgres) throw new Error('Failed to run Postgres database')
+  await runDatabase()
 
   const wabe = new Wabe<any>({
     isProduction: false,
     rootKey:
       '0uwFvUxM$ceFuF1aEtTtZMa7DUN2NZudqgY5ve5W*QCyb58cwMj9JeoaV@d#%29v&aJzswuudVU1%nAT+rxS0Bh&OkgBYc0PH18*',
     database: {
-      adapter: new PostgresAdapter(
-        {
-          databaseUrl: 'postgresql://username:password@localhost:5432/dbname',
-          databaseName: databaseId,
-        },
-        databasePostgres.pool,
-      ),
+      adapter: new PostgresAdapter({
+        databaseUrl: 'postgresql://wabe:wabe@localhost:5432/postgres',
+        databaseName: databaseId,
+      }),
     },
     authentication: {
       roles: ['Client', 'Client2', 'Client3', 'Admin'],
@@ -39,6 +34,12 @@ export const setupTests = async (
     schema: {
       classes: [
         ...additionalClasses,
+        {
+          name: 'Test',
+          fields: {
+            field1: { type: 'String' },
+          },
+        },
         {
           name: 'User',
           fields: {

@@ -40,7 +40,7 @@ const getSQLColumnCreateTableFromType = <T extends WabeTypes>(
     case 'Date':
       return `DATE${type.required ? ' NOT NULL' : ''}`
     case 'File':
-      return `VARCHAR(255)${type.required ? ' NOT NULL' : ''}`
+      return `JSONB${type.required ? ' NOT NULL' : ''}`
     case 'Object':
       return `JSONB${type.required ? ' NOT NULL' : ''}`
     case 'Array':
@@ -50,7 +50,7 @@ const getSQLColumnCreateTableFromType = <T extends WabeTypes>(
     case 'Relation':
       return `JSONB${type.required ? ' NOT NULL' : ''}`
     default:
-      return ''
+      return `JSONB${type.required ? ' NOT NULL' : ''}`
   }
 }
 
@@ -67,10 +67,9 @@ export const buildPostgresOrderQuery = <
 
   if (objectKeys.length === 0) return ''
 
-  const orderClauses = objectKeys.map((key) => {
-    const value = order[key]
-    return `${key === 'id' ? '_id' : String(key)} ${value}`
-  })
+  const orderClauses = objectKeys.map(
+    (key) => `${key === 'id' ? '_id' : String(key)} ${order[key]}`,
+  )
 
   return `ORDER BY ${orderClauses.join(', ')}`
 }
@@ -81,6 +80,7 @@ export const buildPostgresWhereQueryAndValues = <
 >(
   where?: WhereType<T, K>,
   startParamIndex = 1,
+  parentKey?: string,
 ): { query: string; values: any[]; paramIndex: number } => {
   if (!where) return { query: '', values: [], paramIndex: startParamIndex }
 
@@ -89,168 +89,178 @@ export const buildPostgresWhereQueryAndValues = <
   if (objectKeys.length === 0)
     return { query: '', values: [], paramIndex: startParamIndex }
 
-  let paramIndex = startParamIndex
-  const conditions: string[] = []
-  const values: any[] = []
+  const acc = objectKeys.reduce(
+    (acc, key) => {
+      const value = where[key]
+      const keyToWrite = key === 'id' ? '_id' : String(key)
 
-  for (const key of objectKeys) {
-    const value = where[key]
-    const keyToWrite = key === 'id' ? '_id' : String(key)
+      const fullKey = parentKey
+        ? `${parentKey}->>'${keyToWrite}'`
+        : `"${keyToWrite}"`
 
-    if (value?.equalTo !== undefined) {
-      conditions.push(`${keyToWrite} = $${paramIndex}`)
-      values.push(value.equalTo)
-      paramIndex++
-    }
-
-    if (value?.notEqualTo !== undefined) {
-      conditions.push(`${keyToWrite} != $${paramIndex}`)
-      values.push(value.notEqualTo)
-      paramIndex++
-    }
-
-    if (value?.greaterThan !== undefined) {
-      conditions.push(`${keyToWrite} > $${paramIndex}`)
-      values.push(value.greaterThan)
-      paramIndex++
-    }
-
-    if (value?.greaterThanOrEqualTo !== undefined) {
-      conditions.push(`${keyToWrite} >= $${paramIndex}`)
-      values.push(value.greaterThanOrEqualTo)
-      paramIndex++
-    }
-
-    if (value?.lessThan !== undefined) {
-      conditions.push(`${keyToWrite} < $${paramIndex}`)
-      values.push(value.lessThan)
-      paramIndex++
-    }
-
-    if (value?.lessThanOrEqualTo !== undefined) {
-      conditions.push(`${keyToWrite} <= $${paramIndex}`)
-      values.push(value.lessThanOrEqualTo)
-      paramIndex++
-    }
-
-    if (
-      value?.in !== undefined &&
-      Array.isArray(value.in) &&
-      value.in.length > 0
-    ) {
-      const placeholders = value.in.map(() => `$${paramIndex++}`).join(', ')
-      conditions.push(`${keyToWrite} IN (${placeholders})`)
-      values.push(...value.in)
-    }
-
-    if (
-      value?.notIn !== undefined &&
-      Array.isArray(value.notIn) &&
-      value.notIn.length > 0
-    ) {
-      const placeholders = value.notIn.map(() => `$${paramIndex++}`).join(', ')
-      conditions.push(`${keyToWrite} NOT IN (${placeholders})`)
-      values.push(...value.notIn)
-    }
-
-    if (value?.contains !== undefined) {
-      // For array containment in PostgreSQL
-      conditions.push(`${keyToWrite} @> $${paramIndex}`)
-      values.push(
-        Array.isArray(value.contains) ? value.contains : [value.contains],
-      )
-      paramIndex++
-    }
-
-    if (value?.notContains !== undefined) {
-      // For array not containing in PostgreSQL
-      conditions.push(`NOT (${keyToWrite} @> $${paramIndex})`)
-      values.push(
-        Array.isArray(value.notContains)
-          ? value.notContains
-          : [value.notContains],
-      )
-      paramIndex++
-    }
-
-    if (key === 'OR' && Array.isArray(value) && value.length > 0) {
-      const orConditions: string[] = []
-      for (const orWhere of value) {
-        const {
-          query,
-          values: orValues,
-          paramIndex: newParamIndex,
-        } = buildPostgresWhereQueryAndValues(orWhere, paramIndex)
-        if (query) {
-          orConditions.push(`(${query})`)
-          values.push(...orValues)
-          paramIndex = newParamIndex
-        }
+      if (value?.equalTo) {
+        acc.conditions.push(`${fullKey} = $${acc.paramIndex}`)
+        acc.values.push(value.equalTo)
+        acc.paramIndex++
+        return acc
       }
-      if (orConditions.length > 0) {
-        conditions.push(`(${orConditions.join(' OR ')})`)
-      }
-    }
 
-    if (key === 'AND' && Array.isArray(value) && value.length > 0) {
-      const andConditions: string[] = []
-      for (const andWhere of value) {
-        const {
-          query,
-          values: andValues,
-          paramIndex: newParamIndex,
-        } = buildPostgresWhereQueryAndValues(andWhere, paramIndex)
-        if (query) {
-          andConditions.push(`(${query})`)
-          values.push(...andValues)
-          paramIndex = newParamIndex
-        }
+      if (value?.notEqualTo) {
+        acc.conditions.push(`${fullKey} != $${acc.paramIndex}`)
+        acc.values.push(value.notEqualTo)
+        acc.paramIndex++
+        return acc
       }
-      if (andConditions.length > 0) {
-        conditions.push(`(${andConditions.join(' AND ')})`)
+
+      if (value?.greaterThan) {
+        acc.conditions.push(`${fullKey} > $${acc.paramIndex}`)
+        acc.values.push(value.greaterThan)
+        acc.paramIndex++
+        return acc
       }
-    }
 
-    // Handle nested object conditions (recursive)
-    if (
-      typeof value === 'object' &&
-      !Array.isArray(value) &&
-      key !== 'OR' &&
-      key !== 'AND' &&
-      !('equalTo' in value) &&
-      !('notEqualTo' in value) &&
-      !('greaterThan' in value) &&
-      !('greaterThanOrEqualTo' in value) &&
-      !('lessThan' in value) &&
-      !('lessThanOrEqualTo' in value) &&
-      !('in' in value) &&
-      !('notIn' in value) &&
-      !('contains' in value) &&
-      !('notContains' in value)
-    ) {
-      const {
-        query,
-        values: nestedValues,
-        paramIndex: newParamIndex,
-      } = buildPostgresWhereQueryAndValues(value as any, paramIndex)
+      if (value?.greaterThanOrEqualTo) {
+        acc.conditions.push(`${fullKey} >= $${acc.paramIndex}`)
+        acc.values.push(value.greaterThanOrEqualTo)
+        acc.paramIndex++
+        return acc
+      }
 
-      if (query) {
-        // In PostgreSQL, for accessing JSON fields we use ->>
-        const nestedConditions = query.replace(
-          /([a-zA-Z0-9_]+)\s*=/g,
-          `${String(keyToWrite)}->>'$1' =`,
+      if (value?.lessThan) {
+        acc.conditions.push(`${fullKey} < $${acc.paramIndex}`)
+        acc.values.push(value.lessThan)
+        acc.paramIndex++
+        return acc
+      }
+
+      if (value?.lessThanOrEqualTo) {
+        acc.conditions.push(`${fullKey} <= $${acc.paramIndex}`)
+        acc.values.push(value.lessThanOrEqualTo)
+        acc.paramIndex++
+        return acc
+      }
+
+      if (value?.in && Array.isArray(value.in) && value.in.length > 0) {
+        const placeholders = value.in
+          .map(() => `$${acc.paramIndex++}`)
+          .join(', ')
+        acc.conditions.push(`${fullKey} IN (${placeholders})`)
+        acc.values.push(...value.in)
+        return acc
+      }
+
+      if (
+        value?.notIn &&
+        Array.isArray(value.notIn) &&
+        value.notIn.length > 0
+      ) {
+        const placeholders = value.notIn
+          .map(() => `$${acc.paramIndex++}`)
+          .join(', ')
+        acc.conditions.push(`${fullKey} NOT IN (${placeholders})`)
+        acc.values.push(...value.notIn)
+        return acc
+      }
+
+      if (value?.contains) {
+        acc.conditions.push(`${fullKey} @> $${acc.paramIndex}`)
+        acc.values.push(
+          Array.isArray(value.contains) ? value.contains : [value.contains],
         )
-        conditions.push(`(${nestedConditions})`)
-        values.push(...nestedValues)
-        paramIndex = newParamIndex
+        acc.paramIndex++
+        return acc
       }
-    }
-  }
+
+      if (value?.notContains) {
+        acc.conditions.push(`NOT (${fullKey} @> $${acc.paramIndex})`)
+        acc.values.push(
+          Array.isArray(value.notContains)
+            ? value.notContains
+            : [value.notContains],
+        )
+        acc.paramIndex++
+        return acc
+      }
+
+      if (key === 'OR' && Array.isArray(value) && value.length > 0) {
+        const orConditions = value.map((orWhere) => {
+          const {
+            query,
+            values: orValues,
+            paramIndex: newParamIndex,
+          } = buildPostgresWhereQueryAndValues(orWhere, acc.paramIndex)
+          acc.paramIndex = newParamIndex
+          return { query, values: orValues }
+        })
+
+        const orQueries = orConditions
+          .filter(({ query }) => query)
+          .map(({ query }) => `(${query})`)
+
+        if (orQueries.length > 0) {
+          acc.conditions.push(`(${orQueries.join(' OR ')})`)
+          orConditions.forEach(({ values: orValues }) =>
+            acc.values.push(...orValues),
+          )
+        }
+        return acc
+      }
+
+      if (key === 'AND' && Array.isArray(value) && value.length > 0) {
+        const andConditions = value.map((andWhere) => {
+          const {
+            query,
+            values: andValues,
+            paramIndex: newParamIndex,
+          } = buildPostgresWhereQueryAndValues(andWhere, acc.paramIndex)
+          acc.paramIndex = newParamIndex
+          return { query, values: andValues }
+        })
+
+        const andQueries = andConditions
+          .filter(({ query }) => query)
+          .map(({ query }) => `(${query})`)
+
+        if (andQueries.length > 0) {
+          acc.conditions.push(`(${andQueries.join(' AND ')})`)
+          andConditions.forEach(({ values: andValues }) =>
+            acc.values.push(...andValues),
+          )
+        }
+        return acc
+      }
+
+      if (typeof value === 'object') {
+        const fullKeyForObject = parentKey
+          ? `${parentKey}->'${keyToWrite}'`
+          : `"${keyToWrite}"`
+
+        const nestedResult = buildPostgresWhereQueryAndValues(
+          value as any,
+          acc.paramIndex,
+          fullKeyForObject,
+        )
+        if (nestedResult.query) {
+          acc.conditions.push(`(${nestedResult.query})`)
+          acc.values.push(...nestedResult.values)
+          acc.paramIndex = nestedResult.paramIndex
+        }
+        return acc
+      }
+
+      return acc
+    },
+    {
+      conditions: [] as string[],
+      values: [] as any[],
+      paramIndex: startParamIndex,
+    },
+  )
 
   return {
-    query: conditions.length > 0 ? conditions.join(' AND ') : '',
-    values,
-    paramIndex,
+    query: acc.conditions.length > 0 ? acc.conditions.join(' AND ') : '',
+    values: acc.values,
+    paramIndex: acc.paramIndex,
   }
 }
 
@@ -291,8 +301,8 @@ export class PostgresAdapter<T extends WabeTypes>
     // }
   }
 
-  close() {
-    return this.pool.end()
+  async close() {
+    if (!this.pool.ended) await this.pool.end()
   }
 
   async createClassIfNotExist(
@@ -324,20 +334,20 @@ export class PostgresAdapter<T extends WabeTypes>
         )
       `)
 
-      // Create indexes
       const indexes = schemaClass.indexes || []
 
-      for (const index of indexes) {
-        const indexType = index.unique ? 'UNIQUE' : ''
-        const indexDirection = index.order === 'ASC' ? 'ASC' : 'DESC'
+      await Promise.all(
+        indexes.map((index) => {
+          const indexType = index.unique ? 'UNIQUE' : ''
+          const indexDirection = index.order === 'ASC' ? 'ASC' : 'DESC'
 
-        // For JSON fields, create an index on the jsonb expression
-        await client.query(`
-          CREATE ${indexType} INDEX IF NOT EXISTS
-          idx_${String(className)}_${String(index.field)}
-          ON "${String(className)}" (${String(index.field)}' ${indexDirection})
-        `)
-      }
+          return client.query(`
+            CREATE ${indexType} INDEX IF NOT EXISTS
+            idx_${String(className)}_${String(index.field)}
+            ON "${String(className)}" (${String(index.field)}' ${indexDirection})
+          `)
+        }),
+      )
 
       return className
     } finally {
@@ -362,7 +372,7 @@ export class PostgresAdapter<T extends WabeTypes>
         values,
       )
 
-      return parseInt(result.rows[0].count, 10)
+      return Number(result.rows[0].count)
     } finally {
       client.release()
     }
@@ -372,17 +382,17 @@ export class PostgresAdapter<T extends WabeTypes>
     const client = await this.pool.connect()
 
     try {
-      // Get all tables except Role
       const tablesResult = await client.query(`
         SELECT tablename
         FROM pg_catalog.pg_tables
         WHERE schemaname = 'public' AND tablename != 'Role'
       `)
 
-      // Delete all data from each table
-      for (const table of tablesResult.rows) {
-        await client.query(`TRUNCATE TABLE "${table.tablename}" CASCADE`)
-      }
+      await Promise.all(
+        tablesResult.rows.map((table) =>
+          client.query(`TRUNCATE TABLE "${table.tablename}" CASCADE`),
+        ),
+      )
     } finally {
       client.release()
     }
@@ -398,31 +408,18 @@ export class PostgresAdapter<T extends WabeTypes>
     const client = await this.pool.connect()
 
     try {
-      let { query, values } = buildPostgresWhereQueryAndValues(where, 2) // Start from 2 because $1 is used for id
+      const { query, values } = buildPostgresWhereQueryAndValues(where, 2)
 
       const whereClause = query ? `AND ${query}` : ''
 
-      // If select is provided, we need to extract only those fields from the data
-      let selectFields: string[] = []
-      if (select) {
-        // Convert select to array of keys where the value is true
-        for (const key in select) {
-          if (
-            Object.prototype.hasOwnProperty.call(select, key) &&
-            select[key as keyof typeof select]
-          ) {
-            selectFields.push(key)
-          }
-        }
-      }
+      const selectFields = select
+        ? Object.keys(select)
+            .filter((key) => select[key as keyof typeof select])
+            .map((key) => `"${key === 'id' ? '_id' : key}"`)
+        : []
 
-      let selectExpression = '*'
-      if (selectFields.length > 0) {
-        // Include _id and construct a JSON object with just the selected fields
-        selectExpression = `_id, jsonb_build_object(${selectFields
-          .map((field) => `'${field}', data->>'${field}'`)
-          .join(', ')}) as data`
-      }
+      const selectExpression =
+        selectFields.length > 0 ? selectFields.join(', ') : '*'
 
       const result = await client.query(
         `SELECT ${selectExpression} FROM "${String(
@@ -437,7 +434,6 @@ export class PostgresAdapter<T extends WabeTypes>
 
       const row = result.rows[0]
 
-      // Convert _id to id in the result
       const { _id, ...data } = row
       return {
         ...data,
@@ -467,27 +463,14 @@ export class PostgresAdapter<T extends WabeTypes>
       const limitClause = first ? `LIMIT ${first}` : ''
       const offsetClause = offset ? `OFFSET ${offset}` : ''
 
-      // If select is provided, we need to extract only those fields from the data
-      let selectFields: string[] = []
-      if (select) {
-        // Convert select to array of keys where the value is true
-        for (const key in select) {
-          if (
-            Object.prototype.hasOwnProperty.call(select, key) &&
-            select[key as keyof typeof select]
-          ) {
-            selectFields.push(key)
-          }
-        }
-      }
+      const selectFields = select
+        ? Object.keys(select)
+            .filter((key) => select[key as keyof typeof select])
+            .map((key) => `"${key === 'id' ? '_id' : key}"`)
+        : []
 
-      let selectExpression = '*'
-      if (selectFields.length > 0) {
-        // Include _id and construct a JSON object with just the selected fields
-        selectExpression = `_id, jsonb_build_object(${selectFields
-          .map((field) => `'${field}', data->>'${field}'`)
-          .join(', ')}) as data`
-      }
+      const selectExpression =
+        selectFields.length > 0 ? selectFields.join(', ') : '*'
 
       const result = await client.query(
         `SELECT ${selectExpression} FROM "${String(
@@ -520,9 +503,13 @@ export class PostgresAdapter<T extends WabeTypes>
     const client = await this.pool.connect()
 
     try {
+      const columns = Object.keys(data).map((column) => `"${column}"`)
+      const values = Object.values(data)
+      const placeholders = columns.map((_, index) => `$${index + 1}`)
+
       const result = await client.query(
-        `INSERT INTO "${String(className)}" (data) VALUES ($1) RETURNING _id`,
-        [JSON.stringify(data)],
+        `INSERT INTO "${String(className)}" (${columns.join(', ')}) VALUES (${placeholders.join(', ')}) RETURNING _id`,
+        values,
       )
 
       return { id: result.rows[0]._id }
@@ -546,13 +533,15 @@ export class PostgresAdapter<T extends WabeTypes>
     const client = await this.pool.connect()
 
     try {
-      const placeholders = data.map((_, index) => `($${index + 1})`).join(', ')
-      const values = data.map((item) => JSON.stringify(item))
+      const columns = Object.keys(data[0]).map((column) => `"${column}"`)
+      const placeholders = data.map(
+        (_, index) =>
+          `(${columns.map((_, i) => `$${index * columns.length + i + 1}`).join(', ')})`,
+      )
+      const values = data.flatMap((item) => Object.values(item))
 
       const result = await client.query(
-        `INSERT INTO "${String(
-          className,
-        )}" (data) VALUES ${placeholders} RETURNING _id`,
+        `INSERT INTO "${String(className)}" (${columns.join(', ')}) VALUES ${placeholders.join(', ')} RETURNING _id`,
         values,
       )
 
@@ -576,34 +565,20 @@ export class PostgresAdapter<T extends WabeTypes>
     const client = await this.pool.connect()
 
     try {
-      let { query, values } = buildPostgresWhereQueryAndValues(where, 3) // Start from 3 because $1 is for id and $2 is for data
+      const { query, values } = buildPostgresWhereQueryAndValues(where, 3)
 
       const whereClause = query ? `AND ${query}` : ''
 
-      // In PostgreSQL, we use jsonb_set to update specific fields in the JSON data
-      // First, we need to get the current data
-      const getResult = await client.query(
-        `SELECT data FROM "${String(className)}" WHERE _id = $1`,
-        [id],
-      )
-
-      if (getResult.rows.length === 0) {
-        throw new Error('Object not found')
-      }
-
-      const currentData = getResult.rows[0].data
-      const updatedData = { ...currentData, ...data }
+      const setClause = Object.keys(data)
+        .map((key, index) => `${key} = $${index + 2}`)
+        .join(', ')
 
       const result = await client.query(
-        `UPDATE "${String(
-          className,
-        )}" SET data = $2 WHERE _id = $1 ${whereClause} RETURNING _id`,
-        [id, JSON.stringify(updatedData), ...values],
+        `UPDATE "${String(className)}" SET ${setClause} WHERE _id = $1 ${whereClause} RETURNING _id`,
+        [id, ...Object.values(data), ...values],
       )
 
-      if (result.rowCount === 0) {
-        throw new Error('Object not found or where clause not satisfied')
-      }
+      if (result.rowCount === 0) throw new Error('Object not found')
 
       return { id }
     } finally {
@@ -626,12 +601,10 @@ export class PostgresAdapter<T extends WabeTypes>
     const client = await this.pool.connect()
 
     try {
-      // First get the objects to update to return their IDs later
       const objectsBeforeUpdate =
         await context.wabe.controllers.database.getObjects({
           className,
           where,
-          // @ts-expect-error
           select: { id: true },
           offset,
           first,
@@ -641,29 +614,22 @@ export class PostgresAdapter<T extends WabeTypes>
 
       if (objectsBeforeUpdate.length === 0) return []
 
-      // Get object IDs to update
       const objectIds = objectsBeforeUpdate
         .filter(notEmpty)
         .map((obj) => obj.id)
 
-      // Perform the update for each object
-      for (const id of objectIds) {
-        // Get current data
-        const getResult = await client.query(
-          `SELECT data FROM "${String(className)}" WHERE _id = $1`,
-          [id],
-        )
-
-        if (getResult.rows.length > 0) {
-          const currentData = getResult.rows[0].data
-          const updatedData = { ...currentData, ...data }
+      await Promise.all(
+        objectIds.map(async (id) => {
+          const setClause = Object.keys(data)
+            .map((key, index) => `${key} = $${index + 1}`)
+            .join(', ')
 
           await client.query(
-            `UPDATE "${String(className)}" SET data = $2 WHERE _id = $1`,
-            [id, JSON.stringify(updatedData)],
+            `UPDATE "${String(className)}" SET ${setClause} WHERE _id = $${Object.keys(data).length + 1}`,
+            [...Object.values(data), id],
           )
-        }
-      }
+        }),
+      )
 
       return objectsBeforeUpdate.filter(notEmpty).map((obj) => ({ id: obj.id }))
     } finally {
@@ -681,7 +647,7 @@ export class PostgresAdapter<T extends WabeTypes>
     const client = await this.pool.connect()
 
     try {
-      let { query, values } = buildPostgresWhereQueryAndValues(where, 2) // Start from 2 because $1 is used for id
+      const { query, values } = buildPostgresWhereQueryAndValues(where, 2)
 
       const whereClause = query ? `AND ${query}` : ''
 

@@ -42,10 +42,10 @@ export const bunCompilation = async () => {
     entrypoints: [`${directory}/src/index.ts`],
     root: `${directory}/src`,
     outdir: `${directory}/dist`,
-    minify: true,
+    minify: false,
     target: target || 'node',
     plugins: [getDtsBunPlugin()],
-    external: ['@node-rs/argon2'],
+    external: ['@node-rs/argon2', 'dockerode'],
   })
 
   if (!result.success) for (const log of result.logs) console.error(log)

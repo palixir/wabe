@@ -395,8 +395,8 @@ export class DatabaseController<T extends WabeTypes> {
     return this.adapter.connect()
   }
 
-  close(): Promise<any> {
-    return this.adapter.close()
+  async close() {
+    await this.adapter.close()
   }
 
   createClassIfNotExist(

@@ -6,17 +6,17 @@
     "description": "Package to launch the postgres database for test",
     "scripts": {
         "ci": "bun lint",
-        "build": "bun --filter wabe-build build:package $(pwd)",
+        "build": "bun --filter wabe-build build:package $(pwd) node",
         "lint": "biome lint . --config-path=../../ --no-errors-on-unmatched",
         "format": "biome format --config-path=../../ --write ."
     },
     "dependencies": {
-        "dockerode": "4.0.4",
+        "dockerode": "4.0.5",
         "tcp-port-used": "1.0.2"
     },
     "devDependencies": {
         "@types/bun": "latest",
-        "@types/dockerode": "3.3.36",
+        "@types/dockerode": "3.3.37",
         "@types/tcp-port-used": "1.0.4"
     }
 }

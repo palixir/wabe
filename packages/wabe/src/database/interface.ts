@@ -264,7 +264,7 @@ export interface DeleteObjectsOptions<
 
 export interface DatabaseAdapter<T extends WabeTypes> {
   connect(): Promise<any>
-  close(): Promise<any>
+  close(): Promise<void>
 
   createClassIfNotExist(
     className: string,
