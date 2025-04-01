@@ -1,5 +1,6 @@
 import type { WabeTypes } from '../..'
 import { OperationType, initializeHook } from '../hooks'
+import type { SchemaInterface } from '../schema'
 import type { WabeContext } from '../server/interface'
 import { contextWithRoot } from '../utils/export'
 import { notEmpty } from '../utils/export'
@@ -406,6 +407,10 @@ export class DatabaseController<T extends WabeTypes> {
     return this.adapter.createClassIfNotExist(className, context)
   }
 
+  initializeDatabase(schema: SchemaInterface<T>): Promise<void> {
+    return this.adapter.initializeDatabase(schema)
+  }
+
   async count<K extends keyof T['types']>({
     className,
     context,
@@ -759,7 +764,6 @@ export class DatabaseController<T extends WabeTypes> {
     })
 
     const whereWithACLCondition = this._buildWhereWithACL({}, context, 'write')
-
     await this.adapter.updateObject({
       className,
       select,

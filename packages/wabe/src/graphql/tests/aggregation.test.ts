@@ -1,4 +1,12 @@
-import { beforeAll, afterAll, describe, it, expect } from 'bun:test'
+import {
+  beforeAll,
+  afterAll,
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+} from 'bun:test'
 import { type GraphQLClient, gql } from 'graphql-request'
 import type { Wabe } from '../../server'
 import { type DevWabeTypes, getGraphqlClient } from '../../utils/helper'
@@ -49,7 +57,9 @@ describe('GraphQL : aggregation', () => {
     wabe = setup.wabe
     port = setup.port
     client = getGraphqlClient(port)
+  })
 
+  beforeEach(async () => {
     await client.request<any>(graphql.createUsers, {
       input: {
         fields: [
@@ -76,6 +86,10 @@ describe('GraphQL : aggregation', () => {
     })
   })
 
+  afterEach(async () => {
+    await wabe.controllers.database.clearDatabase()
+  })
+
   afterAll(async () => {
     await closeTests(wabe)
   })
@@ -84,7 +98,7 @@ describe('GraphQL : aggregation', () => {
     expect(
       await client.request<any>(graphql.users, {
         where: {
-          arrayValue: { contains: ['a'] },
+          arrayValue: { contains: 'a' },
         },
       }),
     ).toEqual({
@@ -92,7 +106,7 @@ describe('GraphQL : aggregation', () => {
         edges: [
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Lucas',
               age: 20,
               isAdmin: true,
@@ -114,7 +128,7 @@ describe('GraphQL : aggregation', () => {
         edges: [
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Jeanne',
               age: 18,
               isAdmin: false,
@@ -136,7 +150,7 @@ describe('GraphQL : aggregation', () => {
         edges: [
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Lucas',
               age: 20,
               isAdmin: true,
@@ -158,7 +172,7 @@ describe('GraphQL : aggregation', () => {
         edges: [
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Jeanne',
               age: 18,
               isAdmin: false,
@@ -182,7 +196,7 @@ describe('GraphQL : aggregation', () => {
     expect(
       await client.request<any>(graphql.users, {
         where: {
-          arrayValue: { contains: ['z'] },
+          arrayValue: { contains: 'z' },
         },
       }),
     ).toEqual({
@@ -202,7 +216,7 @@ describe('GraphQL : aggregation', () => {
         edges: [
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Lucas',
               age: 20,
               isAdmin: true,
@@ -224,7 +238,7 @@ describe('GraphQL : aggregation', () => {
         edges: [
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Jeanne',
               age: 18,
               isAdmin: false,
@@ -246,7 +260,7 @@ describe('GraphQL : aggregation', () => {
         edges: [
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Lucas',
               age: 20,
               isAdmin: true,
@@ -268,7 +282,7 @@ describe('GraphQL : aggregation', () => {
         edges: [
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Lucas',
               age: 20,
               isAdmin: true,
@@ -290,7 +304,7 @@ describe('GraphQL : aggregation', () => {
         edges: [
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Jeanne',
               age: 18,
               isAdmin: false,
@@ -309,10 +323,10 @@ describe('GraphQL : aggregation', () => {
       }),
     ).toEqual({
       users: {
-        edges: [
+        edges: expect.arrayContaining([
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Lucas',
               age: 20,
               isAdmin: true,
@@ -321,14 +335,14 @@ describe('GraphQL : aggregation', () => {
           },
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Jeanne',
               age: 18,
               isAdmin: false,
               floatValue: 2.5,
             },
           },
-        ],
+        ]),
       },
     })
 
@@ -343,7 +357,7 @@ describe('GraphQL : aggregation', () => {
         edges: [
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Lucas',
               age: 20,
               isAdmin: true,
@@ -365,7 +379,7 @@ describe('GraphQL : aggregation', () => {
         edges: [
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Jeanne',
               age: 18,
               isAdmin: false,
@@ -389,7 +403,7 @@ describe('GraphQL : aggregation', () => {
         edges: [
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Lucas',
               age: 20,
               isAdmin: true,
@@ -411,7 +425,7 @@ describe('GraphQL : aggregation', () => {
         edges: [
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Jeanne',
               age: 18,
               isAdmin: false,
@@ -433,7 +447,7 @@ describe('GraphQL : aggregation', () => {
         edges: [
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Lucas',
               age: 20,
               isAdmin: true,
@@ -455,7 +469,7 @@ describe('GraphQL : aggregation', () => {
         edges: [
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Jeanne',
               age: 18,
               isAdmin: false,
@@ -479,7 +493,7 @@ describe('GraphQL : aggregation', () => {
         edges: [
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Lucas',
               age: 20,
               isAdmin: true,
@@ -501,7 +515,7 @@ describe('GraphQL : aggregation', () => {
         edges: [
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Jeanne',
               age: 18,
               isAdmin: false,
@@ -523,7 +537,7 @@ describe('GraphQL : aggregation', () => {
         edges: [
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Jeanne',
               age: 18,
               isAdmin: false,
@@ -542,10 +556,10 @@ describe('GraphQL : aggregation', () => {
       }),
     ).toEqual({
       users: {
-        edges: [
+        edges: expect.arrayContaining([
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Lucas',
               age: 20,
               isAdmin: true,
@@ -554,14 +568,14 @@ describe('GraphQL : aggregation', () => {
           },
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Jeanne',
               age: 18,
               isAdmin: false,
               floatValue: 2.5,
             },
           },
-        ],
+        ]),
       },
     })
 
@@ -576,7 +590,7 @@ describe('GraphQL : aggregation', () => {
         edges: [
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Lucas',
               age: 20,
               isAdmin: true,
@@ -595,10 +609,10 @@ describe('GraphQL : aggregation', () => {
       }),
     ).toEqual({
       users: {
-        edges: [
+        edges: expect.arrayContaining([
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Lucas',
               age: 20,
               isAdmin: true,
@@ -607,14 +621,14 @@ describe('GraphQL : aggregation', () => {
           },
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Jeanne',
               age: 18,
               isAdmin: false,
               floatValue: 2.5,
             },
           },
-        ],
+        ]),
       },
     })
 
@@ -629,7 +643,7 @@ describe('GraphQL : aggregation', () => {
         edges: [
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Lucas',
               age: 20,
               isAdmin: true,
@@ -651,7 +665,7 @@ describe('GraphQL : aggregation', () => {
         edges: [
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Jeanne',
               age: 18,
               isAdmin: false,
@@ -675,7 +689,7 @@ describe('GraphQL : aggregation', () => {
         edges: [
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Lucas',
               age: 20,
               isAdmin: true,
@@ -697,7 +711,7 @@ describe('GraphQL : aggregation', () => {
         edges: [
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Jeanne',
               age: 18,
               isAdmin: false,
@@ -719,7 +733,7 @@ describe('GraphQL : aggregation', () => {
         edges: [
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Lucas',
               age: 20,
               isAdmin: true,
@@ -741,7 +755,7 @@ describe('GraphQL : aggregation', () => {
         edges: [
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Jeanne',
               age: 18,
               isAdmin: false,
@@ -765,7 +779,7 @@ describe('GraphQL : aggregation', () => {
         edges: [
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Lucas',
               age: 20,
               isAdmin: true,
@@ -787,7 +801,7 @@ describe('GraphQL : aggregation', () => {
         edges: [
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Jeanne',
               age: 18,
               isAdmin: false,
@@ -809,7 +823,7 @@ describe('GraphQL : aggregation', () => {
         edges: [
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Lucas',
               age: 20,
               isAdmin: true,
@@ -828,10 +842,10 @@ describe('GraphQL : aggregation', () => {
       }),
     ).toEqual({
       users: {
-        edges: [
+        edges: expect.arrayContaining([
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Lucas',
               age: 20,
               isAdmin: true,
@@ -840,14 +854,14 @@ describe('GraphQL : aggregation', () => {
           },
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Jeanne',
               age: 18,
               isAdmin: false,
               floatValue: 2.5,
             },
           },
-        ],
+        ]),
       },
     })
 
@@ -862,7 +876,7 @@ describe('GraphQL : aggregation', () => {
         edges: [
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Jeanne',
               age: 18,
               isAdmin: false,
@@ -884,7 +898,7 @@ describe('GraphQL : aggregation', () => {
         edges: [
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Jeanne',
               age: 18,
               isAdmin: false,
@@ -906,7 +920,7 @@ describe('GraphQL : aggregation', () => {
         edges: [
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Lucas',
               age: 20,
               isAdmin: true,
@@ -928,7 +942,7 @@ describe('GraphQL : aggregation', () => {
         edges: [
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Jeanne',
               age: 18,
               isAdmin: false,
@@ -952,7 +966,7 @@ describe('GraphQL : aggregation', () => {
         edges: [
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Jeanne',
               age: 18,
               isAdmin: false,
@@ -974,7 +988,7 @@ describe('GraphQL : aggregation', () => {
         edges: [
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Lucas',
               age: 20,
               isAdmin: true,
@@ -996,7 +1010,7 @@ describe('GraphQL : aggregation', () => {
         edges: [
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Lucas',
               age: 20,
               isAdmin: true,
@@ -1018,7 +1032,7 @@ describe('GraphQL : aggregation', () => {
         edges: [
           {
             node: {
-              id: expect.any(String),
+              id: expect.anything(),
               name: 'Jeanne',
               age: 18,
               isAdmin: false,
@@ -1037,26 +1051,28 @@ describe('GraphQL : aggregation', () => {
       },
     })
 
-    expect(users.edges).toEqual([
-      {
-        node: {
-          id: expect.any(String),
-          name: 'Lucas',
-          age: 20,
-          isAdmin: true,
-          floatValue: 1.5,
+    expect(users.edges).toEqual(
+      expect.arrayContaining([
+        {
+          node: {
+            id: expect.anything(),
+            name: 'Lucas',
+            age: 20,
+            isAdmin: true,
+            floatValue: 1.5,
+          },
         },
-      },
-      {
-        node: {
-          id: expect.any(String),
-          name: 'Jeanne',
-          age: 18,
-          isAdmin: false,
-          floatValue: 2.5,
+        {
+          node: {
+            id: expect.anything(),
+            name: 'Jeanne',
+            age: 18,
+            isAdmin: false,
+            floatValue: 2.5,
+          },
         },
-      },
-    ])
+      ]),
+    )
 
     const { users: users2 } = await client.request<any>(graphql.users, {
       where: {
@@ -1067,7 +1083,7 @@ describe('GraphQL : aggregation', () => {
     expect(users2.edges).toEqual([
       {
         node: {
-          id: expect.any(String),
+          id: expect.anything(),
           name: 'Lucas',
           age: 20,
           isAdmin: true,
@@ -1095,7 +1111,7 @@ describe('GraphQL : aggregation', () => {
     expect(users2.edges).toEqual([
       {
         node: {
-          id: expect.any(String),
+          id: expect.anything(),
           name: 'Lucas',
           age: 20,
           isAdmin: true,

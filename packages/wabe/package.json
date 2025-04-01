@@ -49,6 +49,7 @@
     "graphql-request": "6.1.0",
     "get-port": "7.1.0",
     "uuid": "10.0.0",
+    "wabe-postgres-launcher": "workspace:*",
     "wabe-mongodb-launcher": "workspace:*",
     "wabe-pluralize": "workspace:*",
     "wabe-build": "workspace:*",

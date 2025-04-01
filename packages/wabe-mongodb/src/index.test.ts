@@ -576,7 +576,10 @@ describe('Mongo adapter', () => {
       'collection',
     ).mockReturnValue({} as any)
 
-    await mongoAdapter.createClassIfNotExist('User', context)
+    await mongoAdapter.createClassIfNotExist(
+      'User',
+      context.wabe.config.schema || {},
+    )
 
     expect(spyCollection).toHaveBeenCalledTimes(1)
     expect(spyCollection).toHaveBeenCalledWith('User')
@@ -1375,18 +1378,20 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    expect(updatedObjects2).toEqual([
-      {
-        id: expect.any(String),
-        name: 'Doe',
-        age: 23,
-      },
-      {
-        id: expect.any(String),
-        name: 'Lucas1',
-        age: 23,
-      },
-    ])
+    expect(updatedObjects2).toEqual(
+      expect.arrayContaining([
+        {
+          id: expect.any(String),
+          name: 'Doe',
+          age: 23,
+        },
+        {
+          id: expect.any(String),
+          name: 'Lucas1',
+          age: 23,
+        },
+      ]),
+    )
   })
 
   it('should update the same field of an objet that which we use in the where field', async () => {

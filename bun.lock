@@ -37,6 +37,7 @@
         "wabe-mongodb": "workspace:*",
         "wabe-mongodb-launcher": "workspace:*",
         "wabe-pluralize": "workspace:*",
+        "wabe-postgres-launcher": "workspace:*",
       },
     },
     "packages/wabe-build": {

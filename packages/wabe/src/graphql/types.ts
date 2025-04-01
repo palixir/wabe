@@ -30,7 +30,9 @@ export const DateScalarType = new GraphQLScalarType({
     return date
   },
   serialize(value: any) {
-    return value.toISOString()
+    if (value instanceof Date) return value.toISOString()
+
+    return new Date(value).toISOString()
   },
 })
 

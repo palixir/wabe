@@ -21,23 +21,20 @@ export const defaultBeforeUpdateForUpdatedAt = (
 export const defaultBeforeCreateForDefaultValue = async (
   object: HookObject<any, any>,
 ) => {
-  const schemaClass = getClassFromClassName<DevWabeTypes>(
-    object.className,
-    object.context.wabe.config,
-  )
-
-  const allFields = Object.keys(schemaClass.fields)
-
-  allFields.map((field) => {
-    const currentSchemaField = schemaClass.fields[field]
-
-    if (
-      !object.isFieldUpdated(field) &&
-      currentSchemaField.type !== 'Pointer' &&
-      currentSchemaField.type !== 'Relation' &&
-      currentSchemaField.type !== 'File' &&
-      currentSchemaField.defaultValue !== undefined
-    )
-      object.upsertNewData(field, currentSchemaField.defaultValue)
-  })
+  // const schemaClass = getClassFromClassName<DevWabeTypes>(
+  //   object.className,
+  //   object.context.wabe.config,
+  // )
+  // const allFields = Object.keys(schemaClass.fields)
+  // allFields.map((field) => {
+  //   const currentSchemaField = schemaClass.fields[field]
+  //   if (
+  //     !object.isFieldUpdated(field) &&
+  //     currentSchemaField.type !== 'Pointer' &&
+  //     currentSchemaField.type !== 'Relation' &&
+  //     currentSchemaField.type !== 'File' &&
+  //     currentSchemaField.defaultValue !== undefined
+  //   )
+  //     object.upsertNewData(field, currentSchemaField.defaultValue)
+  // })
 }

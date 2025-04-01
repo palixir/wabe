@@ -18,6 +18,7 @@ export const setupTests = async (
   const port = await getPort()
 
   const mongoAdapter = await import('wabe-mongodb')
+  const posgresAdapter = await import('wabe-postgres')
 
   const wabe = new Wabe<DevWabeTypes>({
     isProduction: false,
@@ -25,9 +26,11 @@ export const setupTests = async (
       '0uwFvUxM$ceFuF1aEtTtZMa7DUN2NZudqgY5ve5W*QCyb58cwMj9JeoaV@d#%29v&aJzswuudVU1%nAT+rxS0Bh&OkgBYc0PH18*',
     database: {
       // @ts-expect-error
-      adapter: new mongoAdapter.MongoAdapter<DevWabeTypes>({
+      adapter: new posgresAdapter.PostgresAdapter<DevWabeTypes>({
+        // databaseName: databaseId,
+        // databaseUrl: 'mongodb://127.0.0.1:27045',
+        databaseUrl: 'postgresql://wabe:wabe@localhost:5432',
         databaseName: databaseId,
-        databaseUrl: 'mongodb://127.0.0.1:27045',
       }),
     },
     authentication: {

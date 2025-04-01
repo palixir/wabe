@@ -1,5 +1,6 @@
 import type { WabeContext } from '../server/interface'
 import type { WabeTypes } from '../server'
+import { SchemaInterface } from '../schema'
 
 type IsScalar<T> = T extends string | number | boolean | Date ? true : false
 
@@ -268,9 +269,10 @@ export interface DatabaseAdapter<T extends WabeTypes> {
 
   createClassIfNotExist(
     className: string,
-    context: WabeContext<T>,
+    schema: SchemaInterface<T>,
   ): Promise<any>
 
+  initializeDatabase(schema: SchemaInterface<T>): Promise<void>
   clearDatabase(): Promise<void>
 
   count<K extends keyof T['types']>(params: CountOptions<T, K>): Promise<number>

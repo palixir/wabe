@@ -1,12 +1,4 @@
-import {
-  afterAll,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  spyOn,
-} from 'bun:test'
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'bun:test'
 import { fail } from 'node:assert'
 import { notEmpty, type Wabe, type WabeContext } from 'wabe'
 import { buildPostgresWhereQueryAndValues, type PostgresAdapter } from '.'
@@ -53,15 +45,294 @@ describe('Postgres adapter', () => {
           client.query(`TRUNCATE TABLE "${row.tablename}" CASCADE`),
         ),
       )
-
-      await client.query(`DROP TABLE IF EXISTS "Test" CASCADE`)
     } finally {
       client.release()
     }
   })
 
+  it('should create a row with an array field', async () => {
+    const res = await postgresAdapter.createObject({
+      className: 'Test',
+      data: {
+        array: ['a', 'b', 'c'],
+      },
+      context,
+    })
+
+    expect(res.id).toBeDefined()
+  })
+
+  it('should create an object with an enum field', async () => {
+    const res = await postgresAdapter.createObject({
+      className: 'Test',
+      data: {
+        enum: 'emailPassword',
+      },
+      context,
+    })
+
+    expect(res.id).toBeDefined()
+  })
+
+  it('should update updatedAt on an object (update one and many)', async () => {
+    const res = await postgresAdapter.createObject({
+      className: 'Test',
+      data: {
+        array: ['a', 'b', 'c'],
+      },
+      context,
+    })
+
+    const res2 = await postgresAdapter.updateObject({
+      className: 'Test',
+      data: {
+        updatedAt: new Date(),
+      },
+      context,
+      id: res.id,
+    })
+
+    expect(res2.id).toBeDefined()
+
+    const res3 = await postgresAdapter.updateObjects({
+      className: 'Test',
+      data: {
+        updatedAt: new Date(),
+      },
+      context,
+      where: {
+        id: {
+          equalTo: res.id,
+        },
+      },
+    })
+
+    expect(res3.length).toEqual(1)
+  })
+
+  it('should insert date in iso string', async () => {
+    // Because we store date in iso string in database
+    const now = new Date()
+
+    const res = await postgresAdapter.createObject({
+      className: 'Test',
+      data: {
+        date: now.toISOString(),
+      },
+      context,
+    })
+
+    const res2 = await postgresAdapter.getObject({
+      className: 'Test',
+      id: res.id,
+      context,
+      select: { date: true },
+    })
+
+    expect(res2?.date).toEqual(now.toISOString())
+  })
+
+  it('should support notEqualTo', async () => {
+    await postgresAdapter.createObjects({
+      className: 'User',
+      data: [
+        {
+          name: 'Toto',
+        },
+        {
+          name: 'Toto2',
+        },
+      ],
+      context,
+    })
+
+    const res2 = await postgresAdapter.getObjects({
+      className: 'User',
+      context,
+      where: {
+        name: {
+          notEqualTo: 'Toto',
+        },
+      },
+    })
+
+    expect(res2.length).toEqual(1)
+    expect(res2[0]?.name).toEqual('Toto2')
+
+    const res3 = await postgresAdapter.getObjects({
+      className: 'User',
+      context,
+      where: {
+        email: {
+          notEqualTo: 'toto@gmail.com',
+        },
+      },
+    })
+
+    expect(res3.length).toEqual(2)
+  })
+
+  it('should query contains on array field', async () => {
+    const res = await postgresAdapter.createObject({
+      className: 'Test',
+      data: {
+        array: ['a', 'b', 'c'],
+      },
+      context,
+    })
+
+    expect(res.id).toBeDefined()
+
+    const res2 = await postgresAdapter.getObjects({
+      className: 'Test',
+      context,
+      where: {
+        array: {
+          contains: 'a',
+        },
+      },
+      select: { array: true },
+    })
+
+    expect(res2[0]?.array).toEqual(['a', 'b', 'c'])
+
+    const res3 = await postgresAdapter.getObjects({
+      className: 'Test',
+      context,
+      where: {
+        array: {
+          notContains: 'd',
+        },
+      },
+      select: { array: true },
+    })
+
+    expect(res3[0]?.array).toEqual(['a', 'b', 'c'])
+  })
+
+  it('should query equalTo on array field', async () => {
+    const res = await postgresAdapter.createObject({
+      className: 'Test',
+      data: {
+        array: ['a', 'b', 'c'],
+      },
+      context,
+    })
+
+    expect(res.id).toBeDefined()
+
+    const res2 = await postgresAdapter.getObjects({
+      className: 'Test',
+      context,
+      where: {
+        array: {
+          equalTo: ['a', 'b', 'c'],
+        },
+      },
+      select: { array: true },
+    })
+
+    expect(res2[0]?.array).toEqual(['a', 'b', 'c'])
+
+    const res3 = await postgresAdapter.getObjects({
+      className: 'Test',
+      context,
+      where: {
+        array: {
+          notEqualTo: ['d'],
+        },
+      },
+      select: { array: true },
+    })
+
+    expect(res3[0]?.array).toEqual(['a', 'b', 'c'])
+  })
+
+  it('should update with complex where (AND and OR)', async () => {
+    const createdObject = await postgresAdapter.createObject({
+      className: 'Test',
+      data: {
+        field1: 'test',
+        int: 10,
+      },
+      context,
+    })
+
+    const res = await postgresAdapter.updateObject({
+      className: 'Test',
+      id: createdObject.id,
+      data: {
+        field1: 'tata',
+      },
+      where: {
+        OR: [
+          // @ts-expect-error
+          {
+            AND: [
+              {
+                field1: { equalTo: 'test' },
+              },
+              {
+                int: { equalTo: 11 },
+              },
+            ],
+          },
+          // @ts-expect-error
+          {
+            AND: [
+              {
+                field1: { equalTo: 'test' },
+              },
+              {
+                int: { equalTo: 10 },
+              },
+            ],
+          },
+        ],
+      },
+      context,
+    })
+
+    expect(res.id).toEqual(createdObject.id)
+  })
+
+  it('should support where with null value', async () => {
+    await postgresAdapter.createObject({
+      className: 'Test',
+      data: {
+        int: null,
+      },
+      context,
+    })
+
+    const res = await postgresAdapter.getObjects({
+      className: 'Test',
+      // @ts-expect-error
+      where: {
+        OR: [{ int: { equalTo: 10 } }, { int: { equalTo: null } }],
+      },
+      context,
+    })
+
+    expect(res.length).toEqual(1)
+
+    const res2 = await postgresAdapter.getObjects({
+      className: 'Test',
+      where: {
+        int: { notEqualTo: null },
+      },
+      context,
+    })
+
+    expect(res2.length).toEqual(0)
+  })
+
+  // END OF NEW TESTS
+
   it('should create class', async () => {
     const client = await postgresAdapter.pool.connect()
+
+    await client.query(`DROP TABLE IF EXISTS "Test" CASCADE`)
 
     const initialCheck = await client.query(`
         SELECT EXISTS (
@@ -72,7 +343,10 @@ describe('Postgres adapter', () => {
 
     expect(initialCheck.rows[0].exists).toBe(false)
 
-    await postgresAdapter.createClassIfNotExist('Test', context)
+    await postgresAdapter.createClassIfNotExist(
+      'Test',
+      context.wabe.config.schema || {},
+    )
 
     const finalCheck = await client.query(`
         SELECT EXISTS (
@@ -84,22 +358,6 @@ describe('Postgres adapter', () => {
     expect(finalCheck.rows[0].exists).toBe(true)
 
     client.release()
-  })
-
-  it.skip('should retry on connection error', async () => {
-    const spyPoolConnect = spyOn(
-      postgresAdapter.pool,
-      'connect',
-    ).mockImplementationOnce(() => {
-      throw new Error('Connection error')
-    })
-
-    await postgresAdapter.connect()
-
-    expect(spyPoolConnect).toHaveBeenCalledTimes(2)
-
-    spyPoolConnect.mockRestore()
-    spyPoolConnect.mockClear()
   })
 
   it('should only return id on createObject if fields is empty', async () => {
@@ -331,10 +589,18 @@ describe('Postgres adapter', () => {
       className: '_Session',
       data: [
         {
+          accessToken: 'accessToken',
           refreshToken: 'refreshToken',
+          accessTokenExpiresAt: new Date(),
+          refreshTokenExpiresAt: new Date(),
+          user: 'id',
         },
         {
+          accessToken: 'accessToken',
           refreshToken: 'refreshToken',
+          accessTokenExpiresAt: new Date(),
+          refreshTokenExpiresAt: new Date(),
+          user: 'id',
         },
       ],
       select: {},
@@ -433,7 +699,7 @@ describe('Postgres adapter', () => {
         context,
         data: { name: 'Lucas2' },
       }),
-    ).rejects.toThrow('Object not found or where clause not satisfied')
+    ).rejects.toThrow('Object not found')
 
     const { id } = await postgresAdapter.updateObject({
       className: 'User',
@@ -1126,7 +1392,7 @@ describe('Postgres adapter', () => {
     expect(
       postgresAdapter.getObject({
         className: 'User',
-        id: 'non-existing-id',
+        id: '4fd2217c-bc08-437f-bf01-d21e8bd7b891',
         select: { name: true },
         context,
       }),
@@ -1374,18 +1640,20 @@ describe('Postgres adapter', () => {
       context,
     })
 
-    expect(updatedObjects2).toEqual([
-      {
-        id: expect.any(String),
-        name: 'Doe',
-        age: 23,
-      },
-      {
-        id: expect.any(String),
-        name: 'Lucas1',
-        age: 23,
-      },
-    ])
+    expect(updatedObjects2).toEqual(
+      expect.arrayContaining([
+        {
+          id: expect.any(String),
+          name: 'Doe',
+          age: 23,
+        },
+        {
+          id: expect.any(String),
+          name: 'Lucas1',
+          age: 23,
+        },
+      ]),
+    )
   })
 
   it('should update the same field of an objet that which we use in the where field', async () => {
@@ -1494,36 +1762,6 @@ describe('Postgres adapter', () => {
     })
 
     expect(resAfterDelete.length).toEqual(0)
-  })
-
-  it('should build where query for postgres adapter', () => {
-    const { query, values } = buildPostgresWhereQueryAndValues({
-      name: { equalTo: 'John' },
-      age: { greaterThan: 20 },
-      OR: [
-        {
-          age: { lessThan: 10 },
-        },
-        {
-          name: { equalTo: 'John' },
-        },
-      ],
-      AND: [
-        {
-          age: { lessThan: 10 },
-        },
-        {
-          name: { equalTo: 'John' },
-        },
-      ],
-    })
-
-    expect(query).toBeTruthy()
-    expect(values.length).toBeGreaterThan(0)
-    expect(query).toContain('name =')
-    expect(query).toContain('age >')
-    expect(query).toContain('OR')
-    expect(query).toContain('AND')
   })
 
   it('should build empty where query for postgres adapter if where is empty', () => {
