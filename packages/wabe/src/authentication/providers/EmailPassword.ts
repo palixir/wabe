@@ -35,15 +35,25 @@ export class EmailPassword
       first: 1,
     })
 
+    const { showSensitiveErrors } = context.wabe.config.security || {}
+
     if (users.length === 0)
-      throw new Error('Invalid authentication credentials')
+      throw new Error(
+        showSensitiveErrors
+          ? 'Username not found in database'
+          : 'Invalid authentication credentials',
+      )
 
     const user = users[0]
 
     const userDatabasePassword = user?.authentication?.emailPassword?.password
 
     if (!userDatabasePassword)
-      throw new Error('Invalid authentication credentials')
+      throw new Error(
+        showSensitiveErrors
+          ? 'User has no password set up'
+          : 'Invalid authentication credentials',
+      )
 
     const isPasswordEquals = await verify(
       userDatabasePassword,
@@ -57,7 +67,11 @@ export class EmailPassword
       !isPasswordEquals ||
       input.email !== user.authentication?.emailPassword?.email
     )
-      throw new Error('Invalid authentication credentials')
+      throw new Error(
+        showSensitiveErrors
+          ? 'Password or email are not matching'
+          : 'Invalid authentication credentials',
+      )
 
     return {
       user,
@@ -80,8 +94,14 @@ export class EmailPassword
       context: contextWithRoot(context),
     })
 
-    // Hide real message
-    if (users > 0) throw new Error('Not authorized to create user')
+    const { showSensitiveErrors } = context.wabe.config.security || {}
+
+    if (users > 0)
+      throw new Error(
+        showSensitiveErrors
+          ? 'User already exists in database'
+          : 'Not authorized to create user',
+      )
 
     return {
       authenticationDataToSave: {
@@ -110,7 +130,14 @@ export class EmailPassword
       select: { authentication: true },
     })
 
-    if (users.length === 0) throw new Error('User not found')
+    const { showSensitiveErrors } = context.wabe.config.security || {}
+
+    if (users.length === 0)
+      throw new Error(
+        showSensitiveErrors
+          ? 'User not found'
+          : 'Not authorized to update user credentials',
+      )
 
     const user = users[0]
 
