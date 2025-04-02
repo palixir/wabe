@@ -354,10 +354,23 @@ export class DatabaseController<T extends WabeTypes> {
         })
 
         if (isRelation && object[pointerField]) {
+          const selectWithoutTotalCount = Object.entries(
+            currentSelect || {},
+          ).reduce(
+            (acc, [key, value]) => {
+              if (key === 'totalCount') return acc
+
+              return {
+                ...acc,
+                [key]: value,
+              }
+            },
+            {} as Record<string, any>,
+          )
+
           const relationObjects = await this.getObjects({
             className: currentClassName,
-            // @ts-expect-error
-            select: currentSelect,
+            select: selectWithoutTotalCount,
             // @ts-expect-error
             where: { id: { in: object[pointerField] } },
             context,
@@ -392,9 +405,9 @@ export class DatabaseController<T extends WabeTypes> {
 
   createClassIfNotExist(
     className: string,
-    context: WabeContext<T>,
+    schema: SchemaInterface<T>,
   ): Promise<any> {
-    return this.adapter.createClassIfNotExist(className, context)
+    return this.adapter.createClassIfNotExist(className, schema)
   }
 
   initializeDatabase(schema: SchemaInterface<T>): Promise<void> {

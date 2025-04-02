@@ -220,10 +220,12 @@ export const queryForMultipleObject = async (
 ) => {
   const select = getFieldsFromInfo(info, className)
 
+  const { totalCount, ...selectWithoutTotalCount } = select
+
   const objects = await context.wabe.controllers.database.getObjects({
     className,
     where,
-    select,
+    select: selectWithoutTotalCount,
     offset,
     first,
     context,
@@ -232,7 +234,7 @@ export const queryForMultipleObject = async (
   })
 
   return {
-    totalCount: select.totalCount
+    totalCount: totalCount
       ? await context.wabe.controllers.database.count({
           className,
           where,

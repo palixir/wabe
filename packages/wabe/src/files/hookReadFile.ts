@@ -24,7 +24,7 @@ const getFile = async (hookObject: HookObject<any, any>) => {
 
         if (!fileName && fileInfo.url) return fileInfo.url
 
-        const fileUrlGeneratedAt = fileInfo.urlGeneratedAt as Date
+        const fileUrlGeneratedAt = new Date(fileInfo.urlGeneratedAt)
 
         if (
           fileUrlGeneratedAt &&
