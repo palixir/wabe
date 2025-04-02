@@ -32,6 +32,14 @@ type SecurityConfig = {
   corsOptions?: CorsOptions
   rateLimit?: RateLimitOptions
   maskErrorMessage?: boolean
+  /**
+   * Some errors may contain some sensitive informations that should not be
+   * shown in production for security reasons. Use this with great caution.
+   *
+   * If this parameter is falsy, it will show a generic sensitive free error
+   * message instead.
+   */
+  showSensitiveErrors?: boolean
 }
 
 export * from './interface'
