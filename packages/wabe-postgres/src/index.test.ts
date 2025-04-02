@@ -327,6 +327,54 @@ describe('Postgres adapter', () => {
     expect(res2.length).toEqual(0)
   })
 
+  it('should be able to interact with element in array in json', async () => {
+    await postgresAdapter.createObject({
+      className: 'Test',
+      data: {
+        object: { array: [{ string: 'string' }] },
+      },
+      context,
+    })
+
+    await postgresAdapter.createObject({
+      className: 'Test',
+      data: {
+        object: { array: [{ string: 'string2' }] },
+      },
+      context,
+    })
+
+    const res = await postgresAdapter.getObjects({
+      className: 'Test',
+      context,
+      where: {
+        object: {
+          // @ts-expect-error
+          array: {
+            contains: { string: 'string' },
+          },
+        },
+      },
+    })
+
+    expect(res.length).toBe(1)
+
+    const res2 = await postgresAdapter.getObjects({
+      className: 'Test',
+      context,
+      where: {
+        object: {
+          // @ts-expect-error
+          array: {
+            notContains: { string: 'string' },
+          },
+        },
+      },
+    })
+
+    expect(res2.length).toBe(1)
+  })
+
   // END OF NEW TESTS
 
   it('should create class', async () => {

@@ -250,18 +250,14 @@ export class DatabaseController<T extends WabeTypes> {
                         {
                           acl: {
                             users: {
-                              userId: {
-                                in: [userId],
-                              },
+                              contains: { userId },
                             },
                           },
                         },
                         {
                           acl: {
                             users: {
-                              [operation]: {
-                                in: [true],
-                              },
+                              contains: { [operation]: true },
                             },
                           },
                         },
@@ -274,27 +270,21 @@ export class DatabaseController<T extends WabeTypes> {
                         {
                           acl: {
                             users: {
-                              userId: {
-                                notIn: [userId],
-                              },
+                              notContains: { userId },
                             },
                           },
                         },
                         {
                           acl: {
                             roles: {
-                              roleId: {
-                                in: [roleId],
-                              },
+                              contains: { roleId },
                             },
                           },
                         },
                         {
                           acl: {
                             roles: {
-                              [operation]: {
-                                in: [true],
-                              },
+                              contains: { [operation]: true },
                             },
                           },
                         },
@@ -580,6 +570,10 @@ export class DatabaseController<T extends WabeTypes> {
       operationType: OperationType.AfterRead,
       where: whereWithACLCondition,
     })
+
+    // console.log({
+    //   whereWithACLCondition: JSON.stringify(whereWithACLCondition.AND),
+    // })
 
     const objectsToReturn = await this.adapter.getObjects({
       className,

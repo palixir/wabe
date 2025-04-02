@@ -100,6 +100,10 @@ export const buildPostgresWhereQueryAndValues = <
         ? `${parentKey}->>'${keyToWrite}'`
         : `"${keyToWrite}"`
 
+      const simpleFullKey = parentKey
+        ? `${parentKey}->'${keyToWrite}'`
+        : `"${keyToWrite}"`
+
       if (value?.equalTo || value?.equalTo === null) {
         if (value.equalTo === null) {
           acc.conditions.push(`${fullKey} IS NULL`)
@@ -185,10 +189,11 @@ export const buildPostgresWhereQueryAndValues = <
       }
 
       if (value?.contains) {
-        acc.conditions.push(`${fullKey} @> $${acc.paramIndex}`)
+        // Simple access on json field because contains is use for array or object column
+        acc.conditions.push(`${simpleFullKey} @> $${acc.paramIndex}`)
         acc.values.push(
           Array.isArray(value.contains)
-            ? value.contains
+            ? JSON.stringify(value.contains)
             : JSON.stringify([value.contains]),
         )
         acc.paramIndex++
@@ -196,10 +201,11 @@ export const buildPostgresWhereQueryAndValues = <
       }
 
       if (value?.notContains) {
-        acc.conditions.push(`NOT (${fullKey} @> $${acc.paramIndex})`)
+        // Simple access on json field because contains is use for array or object column
+        acc.conditions.push(`NOT (${simpleFullKey}  @> $${acc.paramIndex})`)
         acc.values.push(
           Array.isArray(value.notContains)
-            ? value.notContains
+            ? JSON.stringify(value.notContains)
             : JSON.stringify([value.notContains]),
         )
         acc.paramIndex++
@@ -259,14 +265,10 @@ export const buildPostgresWhereQueryAndValues = <
       }
 
       if (typeof value === 'object') {
-        const fullKeyForObject = parentKey
-          ? `${parentKey}->'${keyToWrite}'`
-          : `"${keyToWrite}"`
-
         const nestedResult = buildPostgresWhereQueryAndValues(
           value as any,
           acc.paramIndex,
-          fullKeyForObject,
+          simpleFullKey,
         )
         if (nestedResult.query) {
           acc.conditions.push(`(${nestedResult.query})`)
