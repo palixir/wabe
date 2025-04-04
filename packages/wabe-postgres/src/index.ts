@@ -541,8 +541,11 @@ export class PostgresAdapter<T extends WabeTypes>
       const columns = Object.keys(data).map((column) => `"${column}"`)
       const values = computeValuesFromData(data)
       const placeholders = columns.map((_, index) => `$${index + 1}`)
+
       const result = await client.query(
-        `INSERT INTO "${String(className)}" (${columns.join(', ')}) VALUES (${placeholders.join(', ')}) RETURNING _id`,
+        columns.length === 0
+          ? `INSERT INTO "${String(className)}" DEFAULT VALUES RETURNING _id`
+          : `INSERT INTO "${String(className)}" (${columns.join(', ')}) VALUES (${placeholders.join(', ')}) RETURNING _id`,
         values,
       )
 
@@ -573,7 +576,9 @@ export class PostgresAdapter<T extends WabeTypes>
       const values = data.flatMap((item) => computeValuesFromData(item))
 
       const result = await client.query(
-        `INSERT INTO "${String(className)}" (${columns.join(', ')}) VALUES ${placeholders.join(', ')} RETURNING _id`,
+        columns.length === 0
+          ? `INSERT INTO "${String(className)}" DEFAULT VALUES RETURNING _id`
+          : `INSERT INTO "${String(className)}" (${columns.join(', ')}) VALUES ${placeholders.join(', ')} RETURNING _id`,
         values,
       )
 

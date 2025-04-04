@@ -227,30 +227,24 @@ describe('DatabaseController', () => {
               acl: { equalTo: null },
             },
             {
-              AND: [
-                {
-                  acl: {
-                    users: { userId: { in: ['userId'] } },
-                  },
-                },
-                { acl: { users: { read: { in: [true] } } } },
-              ],
+              acl: {
+                users: { contains: { userId: 'userId', read: true } },
+              },
             },
             {
               AND: [
                 {
                   acl: {
                     users: {
-                      userId: { notIn: ['userId'] },
+                      notContains: { userId: 'userId' },
                     },
                   },
                 },
                 {
                   acl: {
-                    roles: { roleId: { in: ['roleId'] } },
+                    roles: { contains: { roleId: 'roleId', read: true } },
                   },
                 },
-                { acl: { roles: { read: { in: [true] } } } },
               ],
             },
           ],
@@ -289,14 +283,9 @@ describe('DatabaseController', () => {
               acl: { equalTo: null },
             },
             {
-              AND: [
-                {
-                  acl: {
-                    users: { userId: { in: ['userId'] } },
-                  },
-                },
-                { acl: { users: { write: { in: [true] } } } },
-              ],
+              acl: {
+                users: { contains: { userId: 'userId', write: true } },
+              },
             },
           ],
         },

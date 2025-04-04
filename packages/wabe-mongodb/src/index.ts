@@ -62,7 +62,12 @@ export const buildMongoWhereQuery = <
       const keyToWrite = key === 'id' ? '_id' : key
 
       if (value?.contains || value?.contains === null)
-        acc[keyToWrite] = { $all: value.contains }
+        acc[keyToWrite] = {
+          ...(typeof value.contains === 'object' &&
+          !Array.isArray(value.contains)
+            ? { $elemMatch: value.contains }
+            : { $all: value.contains }),
+        }
       if (value?.notContains || value?.notContains === null)
         acc[keyToWrite] = { $ne: value.notContains }
       if (value?.equalTo || value?.equalTo === null)

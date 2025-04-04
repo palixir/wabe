@@ -50,6 +50,24 @@ describe('Postgres adapter', () => {
     }
   })
 
+  it('should create a row with no values', async () => {
+    const res = await postgresAdapter.createObject({
+      className: 'Test',
+      data: {},
+      context,
+    })
+
+    expect(res.id).toBeDefined()
+
+    const res2 = await postgresAdapter.createObjects({
+      className: 'Test',
+      data: [{}],
+      context,
+    })
+
+    expect(res2[0].id).toBeDefined()
+  })
+
   it('should create a row with an array field', async () => {
     const res = await postgresAdapter.createObject({
       className: 'Test',

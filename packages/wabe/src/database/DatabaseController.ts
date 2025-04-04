@@ -246,22 +246,14 @@ export class DatabaseController<T extends WabeTypes> {
                 },
                 userId
                   ? {
-                      AND: [
-                        {
-                          acl: {
-                            users: {
-                              contains: { userId },
-                            },
+                      acl: {
+                        users: {
+                          contains: {
+                            userId,
+                            [operation]: true,
                           },
                         },
-                        {
-                          acl: {
-                            users: {
-                              contains: { [operation]: true },
-                            },
-                          },
-                        },
-                      ],
+                      },
                     }
                   : undefined,
                 roleId
@@ -277,14 +269,7 @@ export class DatabaseController<T extends WabeTypes> {
                         {
                           acl: {
                             roles: {
-                              contains: { roleId },
-                            },
-                          },
-                        },
-                        {
-                          acl: {
-                            roles: {
-                              contains: { [operation]: true },
+                              contains: { roleId, [operation]: true },
                             },
                           },
                         },
@@ -584,10 +569,6 @@ export class DatabaseController<T extends WabeTypes> {
       where: whereWithACLCondition,
     })
 
-    // console.log({
-    //   whereWithACLCondition: JSON.stringify(whereWithACLCondition.AND),
-    // })
-
     const objectsToReturn = await this.adapter.getObjects({
       className,
       context: contextWithRoot(context),
@@ -643,7 +624,7 @@ export class DatabaseController<T extends WabeTypes> {
       className,
       context,
       select,
-      data: newData,
+      data: newData || data,
     })
 
     await hook.runOnSingleObject({
@@ -771,6 +752,7 @@ export class DatabaseController<T extends WabeTypes> {
     })
 
     const whereWithACLCondition = this._buildWhereWithACL({}, context, 'write')
+
     await this.adapter.updateObject({
       className,
       select,

@@ -129,6 +129,7 @@ export class EmailPasswordSRPChallenge
         },
       },
       select: {
+        id: true,
         authentication: true,
       },
     })

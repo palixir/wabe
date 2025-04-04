@@ -1,4 +1,4 @@
-import { describe, beforeAll, afterAll, expect, it } from 'bun:test'
+import { describe, beforeAll, afterAll, expect, it, beforeEach } from 'bun:test'
 import { gql } from 'graphql-request'
 import type { Wabe } from '../server'
 import {
@@ -16,6 +16,10 @@ describe('hooks/session', () => {
     const setup = await setupTests()
     wabe = setup.wabe
     port = setup.port
+  })
+
+  beforeEach(async () => {
+    await wabe.controllers.database.clearDatabase()
   })
 
   afterAll(async () => {
@@ -71,7 +75,7 @@ describe('hooks/session', () => {
       input: {
         authentication: {
           emailPassword: {
-            email: 'email@test.fr',
+            email: 'email2@test.fr',
             password: 'password',
           },
         },
