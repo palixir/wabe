@@ -10,6 +10,7 @@ on:
         options:
           - "wabe"
           - "wabe-mongodb"
+          - "wabe-postgres"
           - "wabe-resend"
           - "wabe-stripe"
           - "wabe-openai"

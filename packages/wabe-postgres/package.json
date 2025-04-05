@@ -1,7 +1,7 @@
 {
 	"name": "wabe-postgres",
-	"version": "0.1.0",
-	"description": "PostgreSQL adapter for the Wabe database layer",
+	"version": "0.5.0",
+	"description": "PostgreSQL adapter for Wabe (official)",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"type": "module",
