@@ -334,7 +334,7 @@ formData.append("map", JSON.stringify({ 0: ["variables.logo"] }));
 
 formData.append("0", new File(["a"], "a.text", { type: "text/plain" }));
 
-const res = await fetch("http://127.0.0.1:3000/graphql", {
+const res = await fetch("http://127.0.0.1:3001/graphql", {
   method: "POST",
   body: formData,
 });

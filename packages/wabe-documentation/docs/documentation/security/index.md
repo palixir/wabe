@@ -257,7 +257,7 @@ const run = async () => {
     // ... others config fields
     security: {
       corsOptions: {
-        origin: "http://localhost:3000",
+        origin: "http://localhost:3001",
         allowMethods: ["GET", "POST", "PUT", "DELETE"],
         allowedHeaders: ["Content-Type", "Authorization"],
         exposedHeaders: ["Content-Type", "Authorization"],

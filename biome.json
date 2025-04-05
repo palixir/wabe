@@ -6,7 +6,8 @@
       "**/dist/**",
       "**/node_modules/**",
       "build/**",
-      "**/generated/**"
+      "**/generated/**",
+      ".nuxt/**"
     ],
     "ignoreUnknown": true
   },

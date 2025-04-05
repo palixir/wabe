@@ -46,7 +46,7 @@ const run = async () => {
     ai: {
       adapter : new OpenAIAdapter("YOUR_OPENAI_SECRET_KEY", { model : "gpt-4o" }),
     }
-    port: 3000,
+    port: 3001,
   });
 
   await wabe.start();

@@ -34,7 +34,7 @@ const run = async () => {
       }),
       urlCacheInSeconds: 3600 * 24, // 24 hours
     }
-    port: 3000,
+    port: 3001,
   });
 
   await wabe.start();
@@ -93,7 +93,7 @@ formData.append("map", JSON.stringify({ 0: ["variables.avatar"] }));
 
 formData.append("0", new File(["a"], "a.text", { type: "text/plain" }));
 
-const res = await fetch("http://127.0.0.1:3000/graphql", {
+const res = await fetch("http://127.0.0.1:3001/graphql", {
   method: "POST",
   body: formData,
 });

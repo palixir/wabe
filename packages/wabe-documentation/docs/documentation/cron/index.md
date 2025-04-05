@@ -36,7 +36,7 @@ const run = async () => {
         }),
       },
     ],
-    port: 3000,
+    port: 3001,
   });
 
   await wabe.start();
