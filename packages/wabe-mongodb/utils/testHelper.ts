@@ -32,6 +32,36 @@ export const setupTests = async (
       classes: [
         ...additionalClasses,
         {
+          name: 'Test',
+          fields: {
+            field1: { type: 'String' },
+            int: { type: 'Int' },
+            array: { type: 'Array', typeValue: 'String' },
+            date: { type: 'Date' },
+            enum: { type: 'AuthenticationProvider' },
+            object: {
+              type: 'Object',
+              object: {
+                name: 'Object',
+                fields: {
+                  array: {
+                    type: 'Array',
+                    typeValue: 'Object',
+                    object: {
+                      name: 'SubObject',
+                      fields: {
+                        string: {
+                          type: 'String',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        {
           name: 'User',
           fields: {
             name: { type: 'String' },

@@ -10,19 +10,24 @@ export const runDatabase = async (): Promise<void> => {
 
     if (await tcpPortUsed.check(port, '127.0.0.1')) return
 
-    console.info('Pulling postgres:17.4')
-    const stream = await docker.pull('postgres:17.4')
+    const imageName = 'postgres:17.4'
 
-    await new Promise((resolve, reject) => {
-      docker.modem.followProgress(stream, (err, res) =>
-        err ? reject(err) : resolve(res),
-      )
-    })
+    // Check if the image already exists locally
+    try {
+      docker.getImage(imageName)
+    } catch {
+      console.info('Pulling postgres:17.4')
+      const stream = await docker.pull(imageName)
 
-    console.info('Starting postgres:17.4')
+      await new Promise((resolve, reject) => {
+        docker.modem.followProgress(stream, (err, res) =>
+          err ? reject(err) : resolve(res),
+        )
+      })
+    }
 
     const container = await docker.createContainer({
-      Image: 'postgres:17.4',
+      Image: imageName,
       name: 'Wabe-Postgres',
       Env: ['POSTGRES_USER=wabe', 'POSTGRES_PASSWORD=wabe', 'POSTGRES_DB=Wabe'],
       HostConfig: {
@@ -39,6 +44,10 @@ export const runDatabase = async (): Promise<void> => {
     })
 
     await container.start()
+
+    while (!(await tcpPortUsed.check(port, '127.0.0.1'))) {
+      await new Promise((resolve) => setTimeout(resolve, 500))
+    }
 
     console.info('PostgreSQL started')
   } catch (error: any) {

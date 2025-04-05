@@ -393,8 +393,6 @@ describe('Postgres adapter', () => {
     expect(res2.length).toBe(1)
   })
 
-  // END OF NEW TESTS
-
   it('should create class', async () => {
     const client = await postgresAdapter.pool.connect()
 

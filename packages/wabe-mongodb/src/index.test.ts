@@ -49,6 +49,349 @@ describe('Mongo adapter', () => {
       )
   })
 
+  it('should create a row with no values', async () => {
+    const res = await mongoAdapter.createObject({
+      className: 'Test',
+      data: {},
+      context,
+    })
+
+    expect(res.id).toBeDefined()
+
+    const res2 = await mongoAdapter.createObjects({
+      className: 'Test',
+      data: [{}],
+      context,
+    })
+
+    expect(res2[0].id).toBeDefined()
+  })
+
+  it('should create a row with an array field', async () => {
+    const res = await mongoAdapter.createObject({
+      className: 'Test',
+      data: {
+        array: ['a', 'b', 'c'],
+      },
+      context,
+    })
+
+    expect(res.id).toBeDefined()
+  })
+
+  it('should create an object with an enum field', async () => {
+    const res = await mongoAdapter.createObject({
+      className: 'Test',
+      data: {
+        enum: 'emailPassword',
+      },
+      context,
+    })
+
+    expect(res.id).toBeDefined()
+  })
+
+  it('should update updatedAt on an object (update one and many)', async () => {
+    const res = await mongoAdapter.createObject({
+      className: 'Test',
+      data: {
+        array: ['a', 'b', 'c'],
+      },
+      context,
+    })
+
+    const res2 = await mongoAdapter.updateObject({
+      className: 'Test',
+      data: {
+        updatedAt: new Date(),
+      },
+      context,
+      id: res.id,
+    })
+
+    expect(res2.id).toBeDefined()
+
+    const res3 = await mongoAdapter.updateObjects({
+      className: 'Test',
+      data: {
+        updatedAt: new Date(),
+      },
+      context,
+      where: {
+        id: {
+          equalTo: res.id,
+        },
+      },
+    })
+
+    expect(res3.length).toEqual(1)
+  })
+
+  it('should insert date in iso string', async () => {
+    // Because we store date in iso string in database
+    const now = new Date()
+
+    const res = await mongoAdapter.createObject({
+      className: 'Test',
+      data: {
+        date: now.toISOString(),
+      },
+      context,
+    })
+
+    const res2 = await mongoAdapter.getObject({
+      className: 'Test',
+      id: res.id,
+      context,
+      select: { date: true },
+    })
+
+    expect(res2?.date).toEqual(now.toISOString())
+  })
+
+  it('should support notEqualTo', async () => {
+    await mongoAdapter.createObjects({
+      className: 'User',
+      data: [
+        {
+          name: 'Toto',
+        },
+        {
+          name: 'Toto2',
+        },
+      ],
+      context,
+    })
+
+    const res2 = await mongoAdapter.getObjects({
+      className: 'User',
+      context,
+      where: {
+        name: {
+          notEqualTo: 'Toto',
+        },
+      },
+    })
+
+    expect(res2.length).toEqual(1)
+    expect(res2[0]?.name).toEqual('Toto2')
+
+    const res3 = await mongoAdapter.getObjects({
+      className: 'User',
+      context,
+      where: {
+        email: {
+          notEqualTo: 'toto@gmail.com',
+        },
+      },
+    })
+
+    expect(res3.length).toEqual(2)
+  })
+
+  it('should query contains on array field', async () => {
+    const res = await mongoAdapter.createObject({
+      className: 'Test',
+      data: {
+        array: ['a', 'b', 'c'],
+      },
+      context,
+    })
+
+    expect(res.id).toBeDefined()
+
+    const res2 = await mongoAdapter.getObjects({
+      className: 'Test',
+      context,
+      where: {
+        array: {
+          contains: 'a',
+        },
+      },
+      select: { array: true },
+    })
+
+    expect(res2[0]?.array).toEqual(['a', 'b', 'c'])
+
+    const res3 = await mongoAdapter.getObjects({
+      className: 'Test',
+      context,
+      where: {
+        array: {
+          notContains: 'd',
+        },
+      },
+      select: { array: true },
+    })
+
+    expect(res3[0]?.array).toEqual(['a', 'b', 'c'])
+  })
+
+  it('should query equalTo on array field', async () => {
+    const res = await mongoAdapter.createObject({
+      className: 'Test',
+      data: {
+        array: ['a', 'b', 'c'],
+      },
+      context,
+    })
+
+    expect(res.id).toBeDefined()
+
+    const res2 = await mongoAdapter.getObjects({
+      className: 'Test',
+      context,
+      where: {
+        array: {
+          equalTo: ['a', 'b', 'c'],
+        },
+      },
+      select: { array: true },
+    })
+
+    expect(res2[0]?.array).toEqual(['a', 'b', 'c'])
+
+    const res3 = await mongoAdapter.getObjects({
+      className: 'Test',
+      context,
+      where: {
+        array: {
+          notEqualTo: ['d'],
+        },
+      },
+      select: { array: true },
+    })
+
+    expect(res3[0]?.array).toEqual(['a', 'b', 'c'])
+  })
+
+  it('should update with complex where (AND and OR)', async () => {
+    const createdObject = await mongoAdapter.createObject({
+      className: 'Test',
+      data: {
+        field1: 'test',
+        int: 10,
+      },
+      context,
+    })
+
+    const res = await mongoAdapter.updateObject({
+      className: 'Test',
+      id: createdObject.id,
+      data: {
+        field1: 'tata',
+      },
+      where: {
+        OR: [
+          // @ts-expect-error
+          {
+            AND: [
+              {
+                field1: { equalTo: 'test' },
+              },
+              {
+                int: { equalTo: 11 },
+              },
+            ],
+          },
+          // @ts-expect-error
+          {
+            AND: [
+              {
+                field1: { equalTo: 'test' },
+              },
+              {
+                int: { equalTo: 10 },
+              },
+            ],
+          },
+        ],
+      },
+      context,
+    })
+
+    expect(res.id).toEqual(createdObject.id)
+  })
+
+  it('should support where with null value', async () => {
+    await mongoAdapter.createObject({
+      className: 'Test',
+      data: {
+        int: null,
+      },
+      context,
+    })
+
+    const res = await mongoAdapter.getObjects({
+      className: 'Test',
+      // @ts-expect-error
+      where: {
+        OR: [{ int: { equalTo: 10 } }, { int: { equalTo: null } }],
+      },
+      context,
+    })
+
+    expect(res.length).toEqual(1)
+
+    const res2 = await mongoAdapter.getObjects({
+      className: 'Test',
+      where: {
+        int: { notEqualTo: null },
+      },
+      context,
+    })
+
+    expect(res2.length).toEqual(0)
+  })
+
+  it('should be able to interact with element in array in json', async () => {
+    await mongoAdapter.createObject({
+      className: 'Test',
+      data: {
+        object: { array: [{ string: 'string' }] },
+      },
+      context,
+    })
+
+    await mongoAdapter.createObject({
+      className: 'Test',
+      data: {
+        object: { array: [{ string: 'string2' }] },
+      },
+      context,
+    })
+
+    const res = await mongoAdapter.getObjects({
+      className: 'Test',
+      context,
+      where: {
+        object: {
+          // @ts-expect-error
+          array: {
+            contains: { string: 'string' },
+          },
+        },
+      },
+    })
+
+    expect(res.length).toBe(1)
+
+    const res2 = await mongoAdapter.getObjects({
+      className: 'Test',
+      context,
+      where: {
+        object: {
+          // @ts-expect-error
+          array: {
+            notContains: { string: 'string' },
+          },
+        },
+      },
+    })
+
+    expect(res2.length).toBe(1)
+  })
+
   it('should retry on connection error', async () => {
     const spyMongoClientConnect = spyOn(
       mongoAdapter.client,
