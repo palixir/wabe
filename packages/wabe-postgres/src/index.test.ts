@@ -1,7 +1,9 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'bun:test'
 import { fail } from 'node:assert'
-import { notEmpty, type Wabe, type WabeContext } from 'wabe'
-import { buildPostgresWhereQueryAndValues, type PostgresAdapter } from '.'
+import getPort from 'get-port'
+import { v4 as uuid } from 'uuid'
+import { notEmpty, Wabe, type WabeContext } from 'wabe'
+import { buildPostgresWhereQueryAndValues, PostgresAdapter } from '.'
 import { setupTests, closeTests } from '../utils/testHelper'
 
 describe('Postgres adapter', () => {
@@ -422,6 +424,92 @@ describe('Postgres adapter', () => {
     expect(finalCheck.rows[0].exists).toBe(true)
 
     client.release()
+  })
+
+  it('should update table if a column is added after the first launch', async () => {
+    const port = await getPort()
+    const databaseId = uuid()
+    const wabe = new Wabe<any>({
+      isProduction: false,
+      rootKey:
+        '0uwFvUxM$ceFuF1aEtTtZMa7DUN2NZudqgY5ve5W*QCyb58cwMj9JeoaV@d#%29v&aJzswuudVU1%nAT+rxS0Bh&OkgBYc0PH18*',
+      database: {
+        adapter: new PostgresAdapter({
+          databaseUrl: 'postgresql://wabe:wabe@localhost:5432',
+          databaseName: databaseId,
+        }),
+      },
+      port,
+      schema: {
+        classes: [
+          {
+            name: 'Test',
+            fields: {
+              field1: { type: 'String' },
+            },
+          },
+        ],
+      },
+    })
+
+    await wabe.start()
+
+    const port2 = await getPort()
+
+    const wabe2 = new Wabe<any>({
+      isProduction: false,
+      rootKey:
+        '0uwFvUxM$ceFuF1aEtTtZMa7DUN2NZudqgY5ve5W*QCyb58cwMj9JeoaV@d#%29v&aJzswuudVU1%nAT+rxS0Bh&OkgBYc0PH18*',
+      database: {
+        adapter: new PostgresAdapter({
+          databaseUrl: 'postgresql://wabe:wabe@localhost:5432',
+          databaseName: databaseId,
+        }),
+      },
+      port: port2,
+      schema: {
+        classes: [
+          {
+            name: 'Test',
+            fields: {
+              field1: { type: 'String' },
+              field2: { type: 'String' },
+            },
+          },
+        ],
+      },
+    })
+
+    await wabe2.start()
+
+    await wabe2.controllers.database.createObject({
+      className: 'Test',
+      data: {
+        field1: 'test',
+        field2: 'test2',
+      },
+      context: {
+        wabe: wabe2,
+        isRoot: true,
+      },
+    })
+
+    const res = await wabe2.controllers.database.getObjects({
+      className: 'Test',
+      context: {
+        wabe: wabe2,
+        isRoot: true,
+      },
+    })
+
+    expect(res.length).toEqual(1)
+    expect(res[0]).toEqual(
+      expect.objectContaining({ field1: 'test', field2: 'test2' }),
+    )
+
+    await wabe2.close()
+
+    await wabe.close()
   })
 
   it('should only return id on createObject if fields is empty', async () => {

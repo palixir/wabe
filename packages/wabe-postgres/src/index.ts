@@ -328,7 +328,13 @@ export class PostgresAdapter<T extends WabeTypes>
     const client = await this.postgresPool.connect()
 
     try {
-      await client.query(`CREATE DATABASE "${this.options.databaseName}"`)
+      const res = await client.query(
+        'SELECT datname FROM pg_database WHERE datname = $1',
+        [this.options.databaseName],
+      )
+
+      if (res.rowCount === 0)
+        await client.query(`CREATE DATABASE "${this.options.databaseName}"`)
 
       await Promise.all(
         (schema.classes || []).map((classSchema) => {
@@ -379,7 +385,9 @@ export class PostgresAdapter<T extends WabeTypes>
     const client = await this.pool.connect()
 
     try {
-      const createTableParams = Object.entries(schemaClass.fields)
+      const columns = Object.entries(schemaClass.fields)
+
+      const createTableParams = columns
         .map(([fieldName, field]) => {
           const sqlColumnCreateTable = getSQLColumnCreateTableFromType(field)
 
@@ -387,6 +395,7 @@ export class PostgresAdapter<T extends WabeTypes>
         })
         .join(', ')
 
+      // Create the table if it doesn't exist
       await client.query(`
         CREATE TABLE IF NOT EXISTS "${String(className)}" (
           _id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -394,6 +403,32 @@ export class PostgresAdapter<T extends WabeTypes>
         )
       `)
 
+      // Update the table if a column is added after the first launch
+      const res = await client.query(
+        `
+        SELECT column_name
+        FROM information_schema.columns
+        WHERE table_name = $1
+      `,
+        [String(className)],
+      )
+
+      const existingColumns = res.rows.map((row) => row.column_name)
+
+      // Add missing columns to the table
+      await Promise.all(
+        columns
+          .filter(([fieldName]) => !existingColumns.includes(fieldName))
+          .map(([fieldName, field]) => {
+            const sqlColumnCreateTable = getSQLColumnCreateTableFromType(field)
+            return client.query(`
+              ALTER TABLE "${String(className)}"
+              ADD COLUMN "${fieldName}" ${sqlColumnCreateTable}
+            `)
+          }),
+      )
+
+      // Create indexes if they don't exist
       const indexes = schemaClass.indexes || []
 
       await Promise.all(
