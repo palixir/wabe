@@ -33,7 +33,7 @@ const getDtsBunPlugin = (): BunPlugin => {
 }
 
 const directory = process.argv[2]
-const target = (process.argv[3] || 'node') as 'node' | 'browser' | 'bun'
+const target = process.argv[3] as 'node' | 'browser' | 'bun'
 
 export const bunCompilation = async () => {
   await Bun.$`rm -rf ${directory}/dist`
@@ -42,10 +42,10 @@ export const bunCompilation = async () => {
     entrypoints: [`${directory}/src/index.ts`],
     root: `${directory}/src`,
     outdir: `${directory}/dist`,
-    minify: true,
-    target,
+    minify: false,
+    target: target || 'node',
     plugins: [getDtsBunPlugin()],
-    external: ['@node-rs/argon2'],
+    external: ['@node-rs/argon2', 'dockerode'],
   })
 
   if (!result.success) for (const log of result.logs) console.error(log)

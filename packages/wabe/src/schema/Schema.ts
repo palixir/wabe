@@ -22,7 +22,10 @@ export type WabeCustomTypes = 'Array' | 'Object'
 
 export type WabeRelationTypes = 'Pointer' | 'Relation'
 
-type WabeFieldTypes = WabeCustomTypes | WabePrimaryTypes | WabeRelationTypes
+export type WabeFieldTypes =
+  | WabeCustomTypes
+  | WabePrimaryTypes
+  | WabeRelationTypes
 
 export type WabeObject<T extends WabeTypes> = {
   name: string

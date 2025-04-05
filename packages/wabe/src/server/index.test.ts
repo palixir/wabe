@@ -4,16 +4,11 @@ import getPort from 'get-port'
 import { Wabe } from '.'
 import { Schema } from '../schema'
 import { OperationType } from '../hooks'
-import {
-  type DevWabeTypes,
-  getAnonymousClient,
-  getUserClient,
-} from '../utils/helper'
+import { getAnonymousClient, getUserClient } from '../utils/helper'
 import { gql } from 'graphql-request'
+import { getDatabaseAdapter } from '../utils/testHelper'
 
 describe('Server', async () => {
-  const mongoAdapter = await import('wabe-mongodb')
-
   it('should mask graphql errors message', async () => {
     spyOn(console, 'error').mockReturnValue()
     const databaseId = uuid()
@@ -25,10 +20,7 @@ describe('Server', async () => {
         'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
       database: {
         // @ts-expect-error
-        adapter: new mongoAdapter.MongoAdapter<DevWabeTypes>({
-          databaseName: databaseId,
-          databaseUrl: 'mongodb://127.0.0.1:27045',
-        }),
+        adapter: await getDatabaseAdapter(databaseId),
       },
       security: {
         maskErrorMessage: true,
@@ -73,10 +65,7 @@ describe('Server', async () => {
         'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
       database: {
         // @ts-expect-error
-        adapter: new mongoAdapter.MongoAdapter<DevWabeTypes>({
-          databaseName: databaseId,
-          databaseUrl: 'mongodb://127.0.0.1:27045',
-        }),
+        adapter: await getDatabaseAdapter(databaseId),
       },
       port,
       routes: [
@@ -114,10 +103,7 @@ describe('Server', async () => {
         'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
       database: {
         // @ts-expect-error
-        adapter: new mongoAdapter.MongoAdapter<DevWabeTypes>({
-          databaseName: databaseId,
-          databaseUrl: 'mongodb://127.0.0.1:27045',
-        }),
+        adapter: await getDatabaseAdapter(databaseId),
       },
       port,
       schema: {
@@ -149,10 +135,7 @@ describe('Server', async () => {
         'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
       database: {
         // @ts-expect-error
-        adapter: new mongoAdapter.MongoAdapter<DevWabeTypes>({
-          databaseName: databaseId,
-          databaseUrl: 'mongodb://127.0.0.1:27045',
-        }),
+        adapter: await getDatabaseAdapter(databaseId),
       },
       port,
       schema: {
@@ -178,17 +161,14 @@ describe('Server', async () => {
 
     const port = await getPort()
     expect(
-      () =>
+      async () =>
         new Wabe({
           isProduction: false,
           rootKey:
             'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
           database: {
             // @ts-expect-error
-            adapter: new mongoAdapter.MongoAdapter<DevWabeTypes>({
-              databaseName: databaseId,
-              databaseUrl: 'mongodb://127.0.0.1:27045',
-            }),
+            adapter: await getDatabaseAdapter(databaseId),
           },
           port,
           hooks: [
@@ -202,17 +182,14 @@ describe('Server', async () => {
     ).toThrow('Hook priority <= 0 is reserved for internal uses')
 
     expect(
-      () =>
+      async () =>
         new Wabe({
           isProduction: false,
           rootKey:
             'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
           database: {
             // @ts-expect-error
-            adapter: new mongoAdapter.MongoAdapter<DevWabeTypes>({
-              databaseName: databaseId,
-              databaseUrl: 'mongodb://127.0.0.1:27045',
-            }),
+            adapter: await getDatabaseAdapter(databaseId),
           },
           port,
           hooks: [],
@@ -220,17 +197,14 @@ describe('Server', async () => {
     ).not.toThrow()
 
     expect(
-      () =>
+      async () =>
         new Wabe({
           isProduction: false,
           rootKey:
             'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
           database: {
             // @ts-expect-error
-            adapter: new mongoAdapter.MongoAdapter<DevWabeTypes>({
-              databaseName: databaseId,
-              databaseUrl: 'mongodb://127.0.0.1:27045',
-            }),
+            adapter: await getDatabaseAdapter(databaseId),
           },
           port,
           hooks: [
@@ -254,10 +228,7 @@ describe('Server', async () => {
         'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
       database: {
         // @ts-expect-error
-        adapter: new mongoAdapter.MongoAdapter<DevWabeTypes>({
-          databaseName: databaseId,
-          databaseUrl: 'mongodb://127.0.0.1:27045',
-        }),
+        adapter: await getDatabaseAdapter(databaseId),
       },
       port,
     })
@@ -284,10 +255,7 @@ describe('Server', async () => {
         'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
       database: {
         // @ts-expect-error
-        adapter: new mongoAdapter.MongoAdapter<DevWabeTypes>({
-          databaseName: databaseId,
-          databaseUrl: 'mongodb://127.0.0.1:27045',
-        }),
+        adapter: await getDatabaseAdapter(databaseId),
       },
       port,
       schema: {
@@ -326,10 +294,7 @@ describe('Server', async () => {
         'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
       database: {
         // @ts-expect-error
-        adapter: new mongoAdapter.MongoAdapter<DevWabeTypes>({
-          databaseName: databaseId,
-          databaseUrl: 'mongodb://127.0.0.1:27045',
-        }),
+        adapter: await getDatabaseAdapter(databaseId),
       },
       port,
       schema: {
@@ -371,10 +336,7 @@ describe('Server', async () => {
         'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
       database: {
         // @ts-expect-error
-        adapter: new mongoAdapter.MongoAdapter<DevWabeTypes>({
-          databaseName: databaseId,
-          databaseUrl: 'mongodb://127.0.0.1:27045',
-        }),
+        adapter: await getDatabaseAdapter(databaseId),
       },
       authentication: {
         roles: ['Client'],
@@ -390,10 +352,7 @@ describe('Server', async () => {
         'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
       database: {
         // @ts-expect-error
-        adapter: new mongoAdapter.MongoAdapter<DevWabeTypes>({
-          databaseName: databaseId,
-          databaseUrl: 'mongodb://127.0.0.1:27045',
-        }),
+        adapter: await getDatabaseAdapter(databaseId),
       },
       authentication: {
         sessionHandler: (ctx) => {

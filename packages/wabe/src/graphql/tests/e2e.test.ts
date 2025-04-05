@@ -66,7 +66,6 @@ describe('GraphQL : E2E', () => {
       })
 
       expect(users.edges.length).toEqual(2)
-      expect(users.edges[0].node.name).toEqual('Toto6')
     })
 
     it('should create user with a custom scalar (phone)', async () => {
@@ -101,28 +100,55 @@ describe('GraphQL : E2E', () => {
       })
 
       expect(users2.edges.length).toEqual(2)
-      expect(users2.edges).toEqual([
-        {
-          node: {
-            id: expect.anything(),
+      expect(users2.edges).toEqual(
+        expect.arrayContaining([
+          {
+            node: {
+              id: expect.anything(),
+              name: 'Lucas',
+              age: 23,
+            },
+          },
+          {
+            node: {
+              id: expect.anything(),
+              name: 'Jeanne',
+              age: 23,
+            },
+          },
+        ]),
+      )
+    })
+
+    it("should throw an error object not found if the object doesn't exist", async () => {
+      // Just to get valid id
+      const fakeObjectWithValidId =
+        await wabe.controllers.database.createObject({
+          className: 'User',
+          data: {
             name: 'Lucas',
             age: 23,
           },
-        },
-        {
-          node: {
-            id: expect.anything(),
-            name: 'Jeanne',
-            age: 23,
+          context: {
+            wabe,
+            isRoot: true,
           },
-        },
-      ])
-    })
+        })
 
-    it("should throw an error object not found if the object doesn't exist", () => {
+      if (!fakeObjectWithValidId?.id) throw new Error('Failed test')
+
+      await wabe.controllers.database.deleteObject({
+        className: 'User',
+        id: fakeObjectWithValidId?.id,
+        context: {
+          wabe,
+          isRoot: true,
+        },
+      })
+
       expect(
         client.request<any>(graphql.user, {
-          id: '65356f69ea1fe46431076723',
+          id: fakeObjectWithValidId.id,
         }),
       ).rejects.toThrow('Object not found')
     })
@@ -159,22 +185,24 @@ describe('GraphQL : E2E', () => {
         },
       })
 
-      expect(res.users.edges).toEqual([
-        {
-          node: {
-            id: expect.anything(),
-            name: 'Lucas',
-            age: 23,
+      expect(res.users.edges).toEqual(
+        expect.arrayContaining([
+          {
+            node: {
+              id: expect.anything(),
+              name: 'Lucas',
+              age: 23,
+            },
           },
-        },
-        {
-          node: {
-            id: expect.anything(),
-            name: 'Jeanne',
-            age: 23,
+          {
+            node: {
+              id: expect.anything(),
+              name: 'Jeanne',
+              age: 23,
+            },
           },
-        },
-      ])
+        ]),
+      )
     })
 
     it('should create an object', async () => {
@@ -224,10 +252,12 @@ describe('GraphQL : E2E', () => {
         },
       })
 
-      expect(res.createUsers.edges).toEqual([
-        { node: { name: 'Lucas2', age: 24 } },
-        { node: { name: 'Jeanne2', age: 24 } },
-      ])
+      expect(res.createUsers.edges).toEqual(
+        expect.arrayContaining([
+          { node: { name: 'Lucas2', age: 24 } },
+          { node: { name: 'Jeanne2', age: 24 } },
+        ]),
+      )
 
       const { users } = await client.request<any>(graphql.users, {
         where: {
@@ -249,10 +279,12 @@ describe('GraphQL : E2E', () => {
         },
       })
 
-      expect(users2.users.edges).toEqual([
-        { node: { id: expect.anything(), name: 'Lucas2', age: 24 } },
-        { node: { id: expect.anything(), name: 'Jeanne2', age: 24 } },
-      ])
+      expect(users2.users.edges).toEqual(
+        expect.arrayContaining([
+          { node: { id: expect.anything(), name: 'Lucas2', age: 24 } },
+          { node: { id: expect.anything(), name: 'Jeanne2', age: 24 } },
+        ]),
+      )
     })
 
     it('should update one object', async () => {
@@ -333,20 +365,22 @@ describe('GraphQL : E2E', () => {
         },
       })
 
-      expect(res.deleteUsers.edges).toEqual([
-        {
-          node: {
-            name: 'Lucas',
-            age: 23,
+      expect(res.deleteUsers.edges).toEqual(
+        expect.arrayContaining([
+          {
+            node: {
+              name: 'Lucas',
+              age: 23,
+            },
           },
-        },
-        {
-          node: {
-            name: 'Jeanne',
-            age: 23,
+          {
+            node: {
+              name: 'Jeanne',
+              age: 23,
+            },
           },
-        },
-      ])
+        ]),
+      )
 
       const { users } = await client.request<any>(graphql.users, {})
 

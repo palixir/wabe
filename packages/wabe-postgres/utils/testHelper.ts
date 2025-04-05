@@ -1,7 +1,8 @@
 import { v4 as uuid } from 'uuid'
+import { runDatabase } from 'wabe-postgres-launcher'
 import { type ClassInterface, Wabe } from 'wabe'
 import getPort from 'get-port'
-import { MongoAdapter } from '../src'
+import { PostgresAdapter } from '../src'
 
 export const setupTests = async (
   additionalClasses: ClassInterface<any>[] = [],
@@ -10,14 +11,16 @@ export const setupTests = async (
 
   const port = await getPort()
 
+  await runDatabase()
+
   const wabe = new Wabe<any>({
     isProduction: false,
     rootKey:
       '0uwFvUxM$ceFuF1aEtTtZMa7DUN2NZudqgY5ve5W*QCyb58cwMj9JeoaV@d#%29v&aJzswuudVU1%nAT+rxS0Bh&OkgBYc0PH18*',
     database: {
-      adapter: new MongoAdapter({
+      adapter: new PostgresAdapter({
+        databaseUrl: 'postgresql://wabe:wabe@localhost:5432',
         databaseName: databaseId,
-        databaseUrl: 'mongodb://127.0.0.1:27045',
       }),
     },
     authentication: {

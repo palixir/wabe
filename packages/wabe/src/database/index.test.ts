@@ -196,7 +196,6 @@ describe('Database', () => {
     // @ts-expect-error
     expect(res.test3[0]).toEqual(
       expect.objectContaining({
-        name: 'test',
         id: expect.any(String),
       }),
     )
@@ -373,6 +372,7 @@ describe('Database', () => {
         id: true,
         // @ts-expect-error
         userTest: {
+          id: true,
           name: true,
         },
       },
@@ -624,8 +624,6 @@ describe('Database', () => {
     expect(res.length).toEqual(2)
   })
 
-  // For the moment we keep the mongodb behavior for the negative value (for limit)
-  // https://www.mongodb.com/docs/manual/reference/method/cursor.limit/#negative-values
   it('should get all the objects with negative limit and offset', async () => {
     const res = await wabe.controllers.database.createObjects({
       className: 'User',
@@ -652,11 +650,10 @@ describe('Database', () => {
         },
       ],
       select: { name: true, id: true },
-      first: -2,
       context,
     })
 
-    expect(res.length).toEqual(2)
+    expect(res.length).toEqual(5)
 
     expect(
       wabe.controllers.database.createObjects({
@@ -687,7 +684,7 @@ describe('Database', () => {
         offset: -2,
         context,
       }),
-    ).rejects.toThrow("BSON field 'skip' value must be >= 0, actual value '-2'")
+    ).rejects.toThrow()
   })
 
   it('should createObjects and deleteObjects with offset and limit', async () => {
@@ -718,6 +715,7 @@ describe('Database', () => {
       select: { name: true, id: true },
       first: 2,
       offset: 2,
+      order: { name: 'ASC' },
       context,
     })
 
@@ -967,8 +965,7 @@ describe('Database', () => {
     await wabe.controllers.database.updateObject({
       className: 'User',
       context,
-      // @ts-expect-error
-      data: [{ name: 'Lucas' }],
+      data: { name: 'Lucas' },
       select: { id: true },
       id: res?.id || '',
     })

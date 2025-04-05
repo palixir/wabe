@@ -1,5 +1,4 @@
-import { runDatabase } from 'wabe-mongodb-launcher'
-import { MongoAdapter } from 'wabe-mongodb'
+import { runDatabase as runPostgresDatabase } from 'wabe-postgres-launcher'
 import { Wabe } from '../src'
 import {
   RoleEnum,
@@ -8,9 +7,10 @@ import {
   type WabeSchemaScalars,
   type WabeSchemaTypes,
 } from '../generated/wabe'
+import { getDatabaseAdapter } from '../src/utils/testHelper'
 
 const run = async () => {
-  await runDatabase()
+  await runPostgresDatabase()
 
   const wabe = new Wabe<{
     types: WabeSchemaTypes
@@ -30,19 +30,11 @@ const run = async () => {
         jwtSecret: 'dev',
       },
       roles: ['Admin', 'Client'],
-      successRedirectPath: 'http://shipmysaas.com',
-      failureRedirectPath: 'https://shipmysaas.com',
+      successRedirectPath: 'https://wabe.dev',
+      failureRedirectPath: 'https://wabe.dev',
     },
     database: {
-      adapter: new MongoAdapter<{
-        types: WabeSchemaTypes
-        scalars: WabeSchemaScalars
-        enums: WabeSchemaEnums
-        where: WabeSchemaWhereTypes
-      }>({
-        databaseName: 'Wabe',
-        databaseUrl: 'mongodb://127.0.0.1:27045',
-      }),
+      adapter: await getDatabaseAdapter('Wabe'),
     },
     port: 3000,
     schema: {

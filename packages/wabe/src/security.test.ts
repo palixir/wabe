@@ -807,7 +807,7 @@ describe('Security tests', () => {
     expect(
       adminClient.request<any>(gql`
       mutation create_Session {
-        create_Session(input: { fields: {accessToken: "token"} }) {
+        create_Session(input: { fields: {accessToken: "token" }}) {
             _session {
              id
             }
@@ -815,6 +815,16 @@ describe('Security tests', () => {
       }
     `),
     ).rejects.toThrowError('Permission denied to create class _Session')
+
+    const res = await adminClient.request<any>(gql`
+        query me {
+            me {
+                user {
+                    id
+                }
+            }
+        }
+    `)
 
     const session = await wabe.controllers.database.createObject({
       className: '_Session',
@@ -824,6 +834,10 @@ describe('Security tests', () => {
       },
       data: {
         accessToken: 'token',
+        user: res.me.user.id,
+        accessTokenExpiresAt: new Date(),
+        refreshToken: 'refreshToken',
+        refreshTokenExpiresAt: new Date(),
       },
       select: { id: true },
     })

@@ -25,12 +25,9 @@ export const defaultBeforeCreateForDefaultValue = async (
     object.className,
     object.context.wabe.config,
   )
-
   const allFields = Object.keys(schemaClass.fields)
-
   allFields.map((field) => {
     const currentSchemaField = schemaClass.fields[field]
-
     if (
       !object.isFieldUpdated(field) &&
       currentSchemaField.type !== 'Pointer' &&

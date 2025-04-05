@@ -1,20 +1,13 @@
-import {
-  afterAll,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  spyOn,
-} from 'bun:test'
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'bun:test'
 import { fail } from 'node:assert'
-import { ObjectId } from 'mongodb'
-import { notEmpty, type Wabe, type WabeContext } from 'wabe'
-import { buildMongoWhereQuery, type MongoAdapter } from '.'
+import getPort from 'get-port'
+import { v4 as uuid } from 'uuid'
+import { notEmpty, Wabe, type WabeContext } from 'wabe'
+import { buildPostgresWhereQueryAndValues, PostgresAdapter } from '.'
 import { setupTests, closeTests } from '../utils/testHelper'
 
-describe('Mongo adapter', () => {
-  let mongoAdapter: MongoAdapter<any>
+describe('Postgres adapter', () => {
+  let postgresAdapter: PostgresAdapter<any>
   let wabe: Wabe<any>
   let context: WabeContext<any>
 
@@ -23,7 +16,7 @@ describe('Mongo adapter', () => {
     wabe = setup.wabe
 
     // @ts-expect-error
-    mongoAdapter = wabe.controllers.database.adapter
+    postgresAdapter = wabe.controllers.database.adapter
 
     context = {
       isRoot: true,
@@ -39,18 +32,28 @@ describe('Mongo adapter', () => {
   })
 
   beforeEach(async () => {
-    const collections = await mongoAdapter.database?.collections()
+    // Get all tables except Role
+    const client = await postgresAdapter.pool.connect()
+    try {
+      const tablesResult = await client.query(`
+        SELECT tablename
+        FROM pg_catalog.pg_tables
+        WHERE schemaname = 'public' AND tablename != 'Role'
+      `)
 
-    if (collections)
+      // Delete all data from each table
       await Promise.all(
-        collections
-          ?.filter((collection) => collection.collectionName !== 'Role')
-          .map((collection) => collection.drop()),
+        tablesResult.rows.map((row) =>
+          client.query(`TRUNCATE TABLE "${row.tablename}" CASCADE`),
+        ),
       )
+    } finally {
+      client.release()
+    }
   })
 
   it('should create a row with no values', async () => {
-    const res = await mongoAdapter.createObject({
+    const res = await postgresAdapter.createObject({
       className: 'Test',
       data: {},
       context,
@@ -58,7 +61,7 @@ describe('Mongo adapter', () => {
 
     expect(res.id).toBeDefined()
 
-    const res2 = await mongoAdapter.createObjects({
+    const res2 = await postgresAdapter.createObjects({
       className: 'Test',
       data: [{}],
       context,
@@ -68,7 +71,7 @@ describe('Mongo adapter', () => {
   })
 
   it('should create a row with an array field', async () => {
-    const res = await mongoAdapter.createObject({
+    const res = await postgresAdapter.createObject({
       className: 'Test',
       data: {
         array: ['a', 'b', 'c'],
@@ -80,7 +83,7 @@ describe('Mongo adapter', () => {
   })
 
   it('should create an object with an enum field', async () => {
-    const res = await mongoAdapter.createObject({
+    const res = await postgresAdapter.createObject({
       className: 'Test',
       data: {
         enum: 'emailPassword',
@@ -92,7 +95,7 @@ describe('Mongo adapter', () => {
   })
 
   it('should update updatedAt on an object (update one and many)', async () => {
-    const res = await mongoAdapter.createObject({
+    const res = await postgresAdapter.createObject({
       className: 'Test',
       data: {
         array: ['a', 'b', 'c'],
@@ -100,7 +103,7 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    const res2 = await mongoAdapter.updateObject({
+    const res2 = await postgresAdapter.updateObject({
       className: 'Test',
       data: {
         updatedAt: new Date(),
@@ -111,7 +114,7 @@ describe('Mongo adapter', () => {
 
     expect(res2.id).toBeDefined()
 
-    const res3 = await mongoAdapter.updateObjects({
+    const res3 = await postgresAdapter.updateObjects({
       className: 'Test',
       data: {
         updatedAt: new Date(),
@@ -131,7 +134,7 @@ describe('Mongo adapter', () => {
     // Because we store date in iso string in database
     const now = new Date()
 
-    const res = await mongoAdapter.createObject({
+    const res = await postgresAdapter.createObject({
       className: 'Test',
       data: {
         date: now.toISOString(),
@@ -139,7 +142,7 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    const res2 = await mongoAdapter.getObject({
+    const res2 = await postgresAdapter.getObject({
       className: 'Test',
       id: res.id,
       context,
@@ -150,7 +153,7 @@ describe('Mongo adapter', () => {
   })
 
   it('should support notEqualTo', async () => {
-    await mongoAdapter.createObjects({
+    await postgresAdapter.createObjects({
       className: 'User',
       data: [
         {
@@ -163,7 +166,7 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    const res2 = await mongoAdapter.getObjects({
+    const res2 = await postgresAdapter.getObjects({
       className: 'User',
       context,
       where: {
@@ -176,7 +179,7 @@ describe('Mongo adapter', () => {
     expect(res2.length).toEqual(1)
     expect(res2[0]?.name).toEqual('Toto2')
 
-    const res3 = await mongoAdapter.getObjects({
+    const res3 = await postgresAdapter.getObjects({
       className: 'User',
       context,
       where: {
@@ -190,7 +193,7 @@ describe('Mongo adapter', () => {
   })
 
   it('should query contains on array field', async () => {
-    const res = await mongoAdapter.createObject({
+    const res = await postgresAdapter.createObject({
       className: 'Test',
       data: {
         array: ['a', 'b', 'c'],
@@ -200,7 +203,7 @@ describe('Mongo adapter', () => {
 
     expect(res.id).toBeDefined()
 
-    const res2 = await mongoAdapter.getObjects({
+    const res2 = await postgresAdapter.getObjects({
       className: 'Test',
       context,
       where: {
@@ -213,7 +216,7 @@ describe('Mongo adapter', () => {
 
     expect(res2[0]?.array).toEqual(['a', 'b', 'c'])
 
-    const res3 = await mongoAdapter.getObjects({
+    const res3 = await postgresAdapter.getObjects({
       className: 'Test',
       context,
       where: {
@@ -228,7 +231,7 @@ describe('Mongo adapter', () => {
   })
 
   it('should query equalTo on array field', async () => {
-    const res = await mongoAdapter.createObject({
+    const res = await postgresAdapter.createObject({
       className: 'Test',
       data: {
         array: ['a', 'b', 'c'],
@@ -238,7 +241,7 @@ describe('Mongo adapter', () => {
 
     expect(res.id).toBeDefined()
 
-    const res2 = await mongoAdapter.getObjects({
+    const res2 = await postgresAdapter.getObjects({
       className: 'Test',
       context,
       where: {
@@ -251,7 +254,7 @@ describe('Mongo adapter', () => {
 
     expect(res2[0]?.array).toEqual(['a', 'b', 'c'])
 
-    const res3 = await mongoAdapter.getObjects({
+    const res3 = await postgresAdapter.getObjects({
       className: 'Test',
       context,
       where: {
@@ -266,7 +269,7 @@ describe('Mongo adapter', () => {
   })
 
   it('should update with complex where (AND and OR)', async () => {
-    const createdObject = await mongoAdapter.createObject({
+    const createdObject = await postgresAdapter.createObject({
       className: 'Test',
       data: {
         field1: 'test',
@@ -275,7 +278,7 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    const res = await mongoAdapter.updateObject({
+    const res = await postgresAdapter.updateObject({
       className: 'Test',
       id: createdObject.id,
       data: {
@@ -314,7 +317,7 @@ describe('Mongo adapter', () => {
   })
 
   it('should support where with null value', async () => {
-    await mongoAdapter.createObject({
+    await postgresAdapter.createObject({
       className: 'Test',
       data: {
         int: null,
@@ -322,7 +325,7 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    const res = await mongoAdapter.getObjects({
+    const res = await postgresAdapter.getObjects({
       className: 'Test',
       // @ts-expect-error
       where: {
@@ -333,7 +336,7 @@ describe('Mongo adapter', () => {
 
     expect(res.length).toEqual(1)
 
-    const res2 = await mongoAdapter.getObjects({
+    const res2 = await postgresAdapter.getObjects({
       className: 'Test',
       where: {
         int: { notEqualTo: null },
@@ -345,7 +348,7 @@ describe('Mongo adapter', () => {
   })
 
   it('should be able to interact with element in array in json', async () => {
-    await mongoAdapter.createObject({
+    await postgresAdapter.createObject({
       className: 'Test',
       data: {
         object: { array: [{ string: 'string' }] },
@@ -353,7 +356,7 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    await mongoAdapter.createObject({
+    await postgresAdapter.createObject({
       className: 'Test',
       data: {
         object: { array: [{ string: 'string2' }] },
@@ -361,7 +364,7 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    const res = await mongoAdapter.getObjects({
+    const res = await postgresAdapter.getObjects({
       className: 'Test',
       context,
       where: {
@@ -376,7 +379,7 @@ describe('Mongo adapter', () => {
 
     expect(res.length).toBe(1)
 
-    const res2 = await mongoAdapter.getObjects({
+    const res2 = await postgresAdapter.getObjects({
       className: 'Test',
       context,
       where: {
@@ -392,24 +395,125 @@ describe('Mongo adapter', () => {
     expect(res2.length).toBe(1)
   })
 
-  it('should retry on connection error', async () => {
-    const spyMongoClientConnect = spyOn(
-      mongoAdapter.client,
-      'connect',
-    ).mockImplementationOnce(() => {
-      throw new Error('Connection error')
+  it('should create class', async () => {
+    const client = await postgresAdapter.pool.connect()
+
+    await client.query(`DROP TABLE IF EXISTS "Test" CASCADE`)
+
+    const initialCheck = await client.query(`
+        SELECT EXISTS (
+          SELECT FROM information_schema.tables
+          WHERE table_name = 'Test'
+        )
+      `)
+
+    expect(initialCheck.rows[0].exists).toBe(false)
+
+    await postgresAdapter.createClassIfNotExist(
+      'Test',
+      context.wabe.config.schema || {},
+    )
+
+    const finalCheck = await client.query(`
+        SELECT EXISTS (
+          SELECT FROM information_schema.tables
+          WHERE table_name = 'Test'
+        )
+      `)
+
+    expect(finalCheck.rows[0].exists).toBe(true)
+
+    client.release()
+  })
+
+  it('should update table if a column is added after the first launch', async () => {
+    const port = await getPort()
+    const databaseId = uuid()
+    const wabe = new Wabe<any>({
+      isProduction: false,
+      rootKey:
+        '0uwFvUxM$ceFuF1aEtTtZMa7DUN2NZudqgY5ve5W*QCyb58cwMj9JeoaV@d#%29v&aJzswuudVU1%nAT+rxS0Bh&OkgBYc0PH18*',
+      database: {
+        adapter: new PostgresAdapter({
+          databaseUrl: 'postgresql://wabe:wabe@localhost:5432',
+          databaseName: databaseId,
+        }),
+      },
+      port,
+      schema: {
+        classes: [
+          {
+            name: 'Test',
+            fields: {
+              field1: { type: 'String' },
+            },
+          },
+        ],
+      },
     })
 
-    await mongoAdapter.initializeDatabase(wabe.config.schema || {})
+    await wabe.start()
 
-    expect(spyMongoClientConnect).toHaveBeenCalledTimes(2)
+    const port2 = await getPort()
 
-    spyMongoClientConnect.mockRestore()
-    spyMongoClientConnect.mockClear()
+    const wabe2 = new Wabe<any>({
+      isProduction: false,
+      rootKey:
+        '0uwFvUxM$ceFuF1aEtTtZMa7DUN2NZudqgY5ve5W*QCyb58cwMj9JeoaV@d#%29v&aJzswuudVU1%nAT+rxS0Bh&OkgBYc0PH18*',
+      database: {
+        adapter: new PostgresAdapter({
+          databaseUrl: 'postgresql://wabe:wabe@localhost:5432',
+          databaseName: databaseId,
+        }),
+      },
+      port: port2,
+      schema: {
+        classes: [
+          {
+            name: 'Test',
+            fields: {
+              field1: { type: 'String' },
+              field2: { type: 'String' },
+            },
+          },
+        ],
+      },
+    })
+
+    await wabe2.start()
+
+    await wabe2.controllers.database.createObject({
+      className: 'Test',
+      data: {
+        field1: 'test',
+        field2: 'test2',
+      },
+      context: {
+        wabe: wabe2,
+        isRoot: true,
+      },
+    })
+
+    const res = await wabe2.controllers.database.getObjects({
+      className: 'Test',
+      context: {
+        wabe: wabe2,
+        isRoot: true,
+      },
+    })
+
+    expect(res.length).toEqual(1)
+    expect(res[0]).toEqual(
+      expect.objectContaining({ field1: 'test', field2: 'test2' }),
+    )
+
+    await wabe2.close()
+
+    await wabe.close()
   })
 
   it('should only return id on createObject if fields is empty', async () => {
-    const res = await mongoAdapter.createObject({
+    const res = await postgresAdapter.createObject({
       className: 'User',
       data: {
         name: 'John',
@@ -419,12 +523,12 @@ describe('Mongo adapter', () => {
       select: {},
     })
 
-    expect(ObjectId.isValid(res?.id || '')).toBeTrue()
+    expect(res?.id).toBeDefined()
     expect(res).toEqual({ id: expect.any(String) })
   })
 
   it('should only return an array of id on createObjects if fields is empty', async () => {
-    const res = await mongoAdapter.createObjects({
+    const res = await postgresAdapter.createObjects({
       className: 'User',
       data: [
         {
@@ -436,12 +540,12 @@ describe('Mongo adapter', () => {
       select: {},
     })
 
-    expect(ObjectId.isValid(res[0]?.id || '')).toBeTrue()
+    expect(res[0]?.id).toBeDefined()
     expect(res).toEqual([{ id: expect.any(String) }])
   })
 
   it('should only return id on updateObject if fields is empty', async () => {
-    const insertedObject = await mongoAdapter.createObject({
+    const insertedObject = await postgresAdapter.createObject({
       className: 'User',
       data: {
         name: 'John',
@@ -450,7 +554,7 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    const res = await mongoAdapter.updateObject({
+    const res = await postgresAdapter.updateObject({
       className: 'User',
       id: insertedObject?.id || '',
       data: { name: 'Doe' },
@@ -458,12 +562,12 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    expect(ObjectId.isValid(res?.id || '')).toBeTrue()
+    expect(res?.id).toBeDefined()
     expect(res).toEqual({ id: expect.any(String) })
   })
 
   it('should only return an array of id on updateObjects if fields is empty', async () => {
-    await mongoAdapter.createObjects({
+    await postgresAdapter.createObjects({
       className: 'User',
       data: [
         {
@@ -474,7 +578,7 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    const res = await mongoAdapter.updateObjects({
+    const res = await postgresAdapter.updateObjects({
       className: 'User',
       where: {
         name: { equalTo: 'John' },
@@ -484,12 +588,12 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    expect(ObjectId.isValid(res[0]?.id || '')).toBeTrue()
+    expect(res[0]?.id).toBeDefined()
     expect(res).toEqual([{ id: expect.any(String) }])
   })
 
   it("should order the result by the field 'name' in ascending order", async () => {
-    await mongoAdapter.createObjects({
+    await postgresAdapter.createObjects({
       className: 'User',
       data: [
         {
@@ -505,7 +609,7 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    const res = await mongoAdapter.getObjects({
+    const res = await postgresAdapter.getObjects({
       className: 'User',
       select: { name: true },
       order: {
@@ -518,7 +622,7 @@ describe('Mongo adapter', () => {
   })
 
   it("should order the result by the field 'name' in descending order", async () => {
-    await mongoAdapter.createObjects({
+    await postgresAdapter.createObjects({
       className: 'User',
       data: [
         {
@@ -534,7 +638,7 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    const res = await mongoAdapter.getObjects({
+    const res = await postgresAdapter.getObjects({
       className: 'User',
       select: { name: true },
       order: {
@@ -547,7 +651,7 @@ describe('Mongo adapter', () => {
   })
 
   it("should order the result by the field 'age' and 'name' in descending order", async () => {
-    await mongoAdapter.createObjects({
+    await postgresAdapter.createObjects({
       className: 'User',
       data: [
         {
@@ -563,7 +667,7 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    const res = await mongoAdapter.getObjects({
+    const res = await postgresAdapter.getObjects({
       className: 'User',
       select: { name: true },
       order: {
@@ -577,14 +681,14 @@ describe('Mongo adapter', () => {
   })
 
   it('should count all elements corresponds to where condition in collection', async () => {
-    const res = await mongoAdapter.count({
+    const res = await postgresAdapter.count({
       className: 'User',
       context,
     })
 
     expect(res).toEqual(0)
 
-    await mongoAdapter.createObjects({
+    await postgresAdapter.createObjects({
       className: 'User',
       data: [
         {
@@ -600,14 +704,14 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    const res2 = await mongoAdapter.count({
+    const res2 = await postgresAdapter.count({
       className: 'User',
       context,
     })
 
     expect(res2).toEqual(2)
 
-    const res3 = await mongoAdapter.count({
+    const res3 = await postgresAdapter.count({
       className: 'User',
       context,
       where: { age: { equalTo: 20 } },
@@ -617,7 +721,7 @@ describe('Mongo adapter', () => {
   })
 
   it('should clear all database except Role collection', async () => {
-    await mongoAdapter.createObjects({
+    await postgresAdapter.createObjects({
       className: 'User',
       data: [
         {
@@ -633,35 +737,43 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    await mongoAdapter.createObjects({
+    await postgresAdapter.createObjects({
       className: '_Session',
       data: [
         {
+          accessToken: 'accessToken',
           refreshToken: 'refreshToken',
+          accessTokenExpiresAt: new Date(),
+          refreshTokenExpiresAt: new Date(),
+          user: 'id',
         },
         {
+          accessToken: 'accessToken',
           refreshToken: 'refreshToken',
+          accessTokenExpiresAt: new Date(),
+          refreshTokenExpiresAt: new Date(),
+          user: 'id',
         },
       ],
       select: {},
       context,
     })
 
-    await mongoAdapter.clearDatabase()
+    await postgresAdapter.clearDatabase()
 
-    const res = await mongoAdapter.getObjects({
+    const res = await postgresAdapter.getObjects({
       className: 'User',
       select: {},
       context,
     })
 
-    const res2 = await mongoAdapter.getObjects({
+    const res2 = await postgresAdapter.getObjects({
       className: '_Session',
       select: {},
       context,
     })
 
-    const res3 = await mongoAdapter.getObjects({
+    const res3 = await postgresAdapter.getObjects({
       className: 'Role',
       select: { id: true },
       context,
@@ -673,7 +785,7 @@ describe('Mongo adapter', () => {
   })
 
   it('should support where on getObject for additional check (acl for example)', async () => {
-    const insertedObjects = await mongoAdapter.createObjects({
+    const insertedObjects = await postgresAdapter.createObjects({
       className: 'User',
       data: [
         {
@@ -690,7 +802,7 @@ describe('Mongo adapter', () => {
     })
 
     expect(
-      mongoAdapter.getObject({
+      postgresAdapter.getObject({
         className: 'User',
         where: {
           name: { equalTo: 'InvalidName' },
@@ -700,7 +812,7 @@ describe('Mongo adapter', () => {
       }),
     ).rejects.toThrow('Object not found')
 
-    const res = await mongoAdapter.getObject({
+    const res = await postgresAdapter.getObject({
       className: 'User',
       where: {
         name: { equalTo: 'Lucas' },
@@ -713,7 +825,7 @@ describe('Mongo adapter', () => {
   })
 
   it('should support where on updateObject for additional check (acl for example)', async () => {
-    const insertedObjects = await mongoAdapter.createObjects({
+    const insertedObjects = await postgresAdapter.createObjects({
       className: 'User',
       data: [
         {
@@ -730,7 +842,7 @@ describe('Mongo adapter', () => {
     })
 
     expect(
-      mongoAdapter.updateObject({
+      postgresAdapter.updateObject({
         className: 'User',
         where: {
           name: { equalTo: 'InvalidName' },
@@ -741,7 +853,7 @@ describe('Mongo adapter', () => {
       }),
     ).rejects.toThrow('Object not found')
 
-    const { id } = await mongoAdapter.updateObject({
+    const { id } = await postgresAdapter.updateObject({
       className: 'User',
       where: {
         name: { equalTo: 'Lucas' },
@@ -751,7 +863,7 @@ describe('Mongo adapter', () => {
       data: { name: 'Lucas2' },
     })
 
-    const updatedObject = await mongoAdapter.getObject({
+    const updatedObject = await postgresAdapter.getObject({
       className: 'User',
       id,
       select: { id: true, name: true },
@@ -762,7 +874,7 @@ describe('Mongo adapter', () => {
   })
 
   it('should support where on delete for additional check (acl for example)', async () => {
-    const insertedObjects = await mongoAdapter.createObjects({
+    const insertedObjects = await postgresAdapter.createObjects({
       className: 'User',
       data: [
         {
@@ -779,7 +891,7 @@ describe('Mongo adapter', () => {
     })
 
     expect(
-      mongoAdapter.deleteObject({
+      postgresAdapter.deleteObject({
         className: 'User',
         where: {
           name: { equalTo: 'InvalidName' },
@@ -789,7 +901,7 @@ describe('Mongo adapter', () => {
       }),
     ).rejects.toThrow('Object not found')
 
-    await mongoAdapter.deleteObject({
+    await postgresAdapter.deleteObject({
       className: 'User',
       where: {
         name: { equalTo: 'Lucas' },
@@ -799,8 +911,8 @@ describe('Mongo adapter', () => {
     })
   })
 
-  it('should support notEqualTo on _id', async () => {
-    const insertedObjects = await mongoAdapter.createObjects({
+  it('should support notEqualTo on id', async () => {
+    const insertedObjects = await postgresAdapter.createObjects({
       className: 'User',
       data: [
         {
@@ -816,7 +928,7 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    const res = await mongoAdapter.getObjects({
+    const res = await postgresAdapter.getObjects({
       className: 'User',
       where: {
         id: { notEqualTo: insertedObjects[0]?.id },
@@ -827,8 +939,8 @@ describe('Mongo adapter', () => {
     expect(res.length).toEqual(1)
   })
 
-  it('should support equalTo on _id', async () => {
-    const insertedObjects = await mongoAdapter.createObjects({
+  it('should support equalTo on id', async () => {
+    const insertedObjects = await postgresAdapter.createObjects({
       className: 'User',
       data: [
         {
@@ -844,7 +956,7 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    const res = await mongoAdapter.getObjects({
+    const res = await postgresAdapter.getObjects({
       className: 'User',
       where: {
         id: { equalTo: insertedObjects[0]?.id },
@@ -855,8 +967,8 @@ describe('Mongo adapter', () => {
     expect(res.length).toEqual(1)
   })
 
-  it('should support $in aggregation on _id', async () => {
-    const insertedObjects = await mongoAdapter.createObjects({
+  it('should support in aggregation on id', async () => {
+    const insertedObjects = await postgresAdapter.createObjects({
       className: 'User',
       data: [
         {
@@ -872,10 +984,12 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    const res = await mongoAdapter.getObjects({
+    const res = await postgresAdapter.getObjects({
       className: 'User',
       where: {
-        id: { in: insertedObjects.map((obj) => obj?.id).filter(notEmpty) },
+        id: {
+          in: insertedObjects.map((obj) => obj?.id).filter(notEmpty),
+        },
       },
       context,
     })
@@ -883,8 +997,8 @@ describe('Mongo adapter', () => {
     expect(res.length).toEqual(2)
   })
 
-  it('should support $nin aggregation on _id', async () => {
-    const insertedObjects = await mongoAdapter.createObjects({
+  it('should support notIn aggregation on id', async () => {
+    const insertedObjects = await postgresAdapter.createObjects({
       className: 'User',
       data: [
         {
@@ -900,10 +1014,12 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    const res = await mongoAdapter.getObjects({
+    const res = await postgresAdapter.getObjects({
       className: 'User',
       where: {
-        id: { notIn: insertedObjects.map((obj) => obj?.id).filter(notEmpty) },
+        id: {
+          notIn: insertedObjects.map((obj) => obj?.id).filter(notEmpty),
+        },
       },
       context,
     })
@@ -911,39 +1027,8 @@ describe('Mongo adapter', () => {
     expect(res.length).toEqual(0)
   })
 
-  it('should create class', async () => {
-    if (!mongoAdapter.database) fail()
-
-    const spyCollection = spyOn(
-      mongoAdapter.database,
-      'collection',
-    ).mockReturnValue({} as any)
-
-    await mongoAdapter.createClassIfNotExist(
-      'User',
-      context.wabe.config.schema || {},
-    )
-
-    expect(spyCollection).toHaveBeenCalledTimes(1)
-    expect(spyCollection).toHaveBeenCalledWith('User')
-
-    spyCollection.mockRestore()
-  })
-
-  it("should not create class if it's not connected", () => {
-    const cloneMongoAdapter = Object.assign(
-      Object.create(Object.getPrototypeOf(mongoAdapter)),
-      mongoAdapter,
-    )
-    cloneMongoAdapter.database = undefined
-
-    expect(cloneMongoAdapter.createClassIfNotExist('User')).rejects.toThrow(
-      'Connection to database is not established',
-    )
-  })
-
   it('should always return id', async () => {
-    const insertedObjects = await mongoAdapter.createObjects({
+    const insertedObjects = await postgresAdapter.createObjects({
       className: 'User',
       data: [
         {
@@ -955,13 +1040,13 @@ describe('Mongo adapter', () => {
       select: { age: true, id: true },
     })
 
-    if (!insertedObjects) fail
+    if (!insertedObjects) fail()
 
     expect(insertedObjects[0]?.id).toBeDefined()
   })
 
   it('should return id if no fields is specified', async () => {
-    const insertedObjects = await mongoAdapter.createObjects({
+    const insertedObjects = await postgresAdapter.createObjects({
       className: 'User',
       data: [
         {
@@ -977,8 +1062,8 @@ describe('Mongo adapter', () => {
     expect(insertedObjects[0]?.id).toBeDefined()
   })
 
-  it('should getObjects using id and not _id', async () => {
-    const insertedObjects = await mongoAdapter.createObjects({
+  it('should getObjects using id', async () => {
+    const insertedObjects = await postgresAdapter.createObjects({
       className: 'User',
       data: [
         {
@@ -996,13 +1081,11 @@ describe('Mongo adapter', () => {
 
     if (!insertedObjects) fail()
 
-    const res = await mongoAdapter.getObjects({
+    const res = await postgresAdapter.getObjects({
       className: 'User',
       where: {
         id: {
-          equalTo: ObjectId.createFromHexString(
-            insertedObjects[0]?.id || '',
-          ).toString(),
+          equalTo: insertedObjects[0]?.id || '',
         },
       },
       context,
@@ -1012,7 +1095,7 @@ describe('Mongo adapter', () => {
   })
 
   it('should getObjects with limit and offset', async () => {
-    await mongoAdapter.createObjects({
+    await postgresAdapter.createObjects({
       className: 'User',
       data: [
         {
@@ -1040,7 +1123,7 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    const res = await mongoAdapter.getObjects({
+    const res = await postgresAdapter.getObjects({
       className: 'User',
       select: { name: true },
       first: 2,
@@ -1054,7 +1137,7 @@ describe('Mongo adapter', () => {
   })
 
   it('should get all the objects without limit and without offset', async () => {
-    await mongoAdapter.createObjects({
+    await postgresAdapter.createObjects({
       className: 'User',
       data: [
         {
@@ -1082,7 +1165,7 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    const res = await mongoAdapter.getObjects({
+    const res = await postgresAdapter.getObjects({
       className: 'User',
       select: { name: true },
       context,
@@ -1092,8 +1175,8 @@ describe('Mongo adapter', () => {
     expect(res.length).toEqual(5)
   })
 
-  it('should get the _id of an object', async () => {
-    const insertedObject = await mongoAdapter.createObject({
+  it('should get the id of an object', async () => {
+    const insertedObject = await postgresAdapter.createObject({
       className: 'User',
       data: {
         name: 'John',
@@ -1103,7 +1186,7 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    const res = await mongoAdapter.getObject({
+    const res = await postgresAdapter.getObject({
       id: insertedObject?.id.toString() || '',
       className: 'User',
       select: { id: true },
@@ -1113,8 +1196,8 @@ describe('Mongo adapter', () => {
     expect(res?.id).toEqual(insertedObject?.id || '')
   })
 
-  it('should get all fields when * is specified', async () => {
-    const insertedObject = await mongoAdapter.createObject({
+  it('should get all fields when no select is specified', async () => {
+    const insertedObject = await postgresAdapter.createObject({
       className: 'User',
       data: {
         name: 'John',
@@ -1130,10 +1213,9 @@ describe('Mongo adapter', () => {
 
     expect(id).toBeDefined()
 
-    const res = await mongoAdapter.getObject({
+    const res = await postgresAdapter.getObject({
       className: 'User',
       id: id.toString(),
-
       context,
     })
 
@@ -1146,8 +1228,8 @@ describe('Mongo adapter', () => {
     )
   })
 
-  it('should get one object with specific field and * fields', async () => {
-    const insertedObject = await mongoAdapter.createObject({
+  it('should get one object with specific field', async () => {
+    const insertedObject = await postgresAdapter.createObject({
       className: 'User',
       data: {
         name: 'John',
@@ -1163,7 +1245,7 @@ describe('Mongo adapter', () => {
 
     expect(id).toBeDefined()
 
-    const field = await mongoAdapter.getObject({
+    const field = await postgresAdapter.getObject({
       className: 'User',
       id: id.toString(),
       select: { name: true, id: true },
@@ -1176,8 +1258,8 @@ describe('Mongo adapter', () => {
     })
   })
 
-  it('should get all object with specific field and * fields', async () => {
-    const objects = await mongoAdapter.getObjects({
+  it('should get all object with specific field', async () => {
+    const objects = await postgresAdapter.getObjects({
       className: 'User',
       select: { name: true },
       context,
@@ -1185,7 +1267,7 @@ describe('Mongo adapter', () => {
 
     expect(objects.length).toEqual(0)
 
-    await mongoAdapter.createObject({
+    await postgresAdapter.createObject({
       className: 'User',
       data: {
         name: 'John1',
@@ -1195,7 +1277,7 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    await mongoAdapter.createObject({
+    await postgresAdapter.createObject({
       className: 'User',
       data: {
         name: 'John2',
@@ -1205,7 +1287,7 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    const objects2 = await mongoAdapter.getObjects({
+    const objects2 = await postgresAdapter.getObjects({
       className: 'User',
       select: { name: true, id: true },
       context,
@@ -1223,7 +1305,7 @@ describe('Mongo adapter', () => {
       },
     ])
 
-    const objects3 = await mongoAdapter.getObjects({
+    const objects3 = await postgresAdapter.getObjects({
       className: 'User',
       select: { name: true, id: true, age: true },
       context,
@@ -1245,7 +1327,7 @@ describe('Mongo adapter', () => {
   })
 
   it('should get all objects with where filter', async () => {
-    await mongoAdapter.createObject({
+    await postgresAdapter.createObject({
       className: 'User',
       data: {
         name: 'John1',
@@ -1255,7 +1337,7 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    await mongoAdapter.createObject({
+    await postgresAdapter.createObject({
       className: 'User',
       data: {
         name: 'John2',
@@ -1267,7 +1349,7 @@ describe('Mongo adapter', () => {
 
     // OR statement
     expect(
-      await mongoAdapter.getObjects({
+      await postgresAdapter.getObjects({
         className: 'User',
         // @ts-expect-error
         where: {
@@ -1297,7 +1379,7 @@ describe('Mongo adapter', () => {
     ])
 
     expect(
-      await mongoAdapter.getObjects({
+      await postgresAdapter.getObjects({
         className: 'User',
         // @ts-expect-error
         where: {
@@ -1323,7 +1405,7 @@ describe('Mongo adapter', () => {
 
     // AND statement
     expect(
-      await mongoAdapter.getObjects({
+      await postgresAdapter.getObjects({
         className: 'User',
         // @ts-expect-error
         where: {
@@ -1348,7 +1430,7 @@ describe('Mongo adapter', () => {
     ])
 
     expect(
-      await mongoAdapter.getObjects({
+      await postgresAdapter.getObjects({
         className: 'User',
         // @ts-expect-error
         where: {
@@ -1367,7 +1449,7 @@ describe('Mongo adapter', () => {
 
     // Equal to statement
     expect(
-      await mongoAdapter.getObjects({
+      await postgresAdapter.getObjects({
         className: 'User',
         where: {
           name: { equalTo: 'John1' },
@@ -1384,7 +1466,7 @@ describe('Mongo adapter', () => {
     ])
 
     expect(
-      await mongoAdapter.getObjects({
+      await postgresAdapter.getObjects({
         className: 'User',
         where: {
           age: { greaterThan: 21 },
@@ -1395,7 +1477,7 @@ describe('Mongo adapter', () => {
 
     // Not equal to statement
     expect(
-      await mongoAdapter.getObjects({
+      await postgresAdapter.getObjects({
         className: 'User',
         where: {
           name: { notEqualTo: 'John1' },
@@ -1411,20 +1493,9 @@ describe('Mongo adapter', () => {
       },
     ])
 
-    // Less than statement on string (not implemented)
-    expect(
-      await mongoAdapter.getObjects({
-        className: 'User',
-        where: {
-          name: { lessThan: 'John1' },
-        },
-        context,
-      }),
-    ).toEqual([])
-
     // Less than to statement on number
     expect(
-      await mongoAdapter.getObjects({
+      await postgresAdapter.getObjects({
         className: 'User',
         where: {
           age: { lessThan: 30 },
@@ -1447,7 +1518,7 @@ describe('Mongo adapter', () => {
 
     // Equal to statement on number
     expect(
-      await mongoAdapter.getObjects({
+      await postgresAdapter.getObjects({
         className: 'User',
         where: {
           age: { equalTo: 20 },
@@ -1471,9 +1542,9 @@ describe('Mongo adapter', () => {
 
   it("should throw object not found if the object doesn't exist", () => {
     expect(
-      mongoAdapter.getObject({
+      postgresAdapter.getObject({
         className: 'User',
-        id: '5f9b3b3b3b3b3b3b3b3b3b3b',
+        id: '4fd2217c-bc08-437f-bf01-d21e8bd7b891',
         select: { name: true },
         context,
       }),
@@ -1481,7 +1552,7 @@ describe('Mongo adapter', () => {
   })
 
   it('should create object and return the created object', async () => {
-    const { id } = await mongoAdapter.createObject({
+    const { id } = await postgresAdapter.createObject({
       className: 'User',
       data: {
         name: 'Lucas',
@@ -1491,7 +1562,7 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    const insertedObject = await mongoAdapter.getObject({
+    const insertedObject = await postgresAdapter.getObject({
       className: 'User',
       id,
       select: { age: true, id: true },
@@ -1500,7 +1571,7 @@ describe('Mongo adapter', () => {
 
     expect(insertedObject).toEqual({ age: 23, id: expect.any(String) })
 
-    const { id: id2 } = await mongoAdapter.createObject({
+    const { id: id2 } = await postgresAdapter.createObject({
       className: 'User',
       data: {
         name: 'Lucas2',
@@ -1510,7 +1581,7 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    const insertedObject2 = await mongoAdapter.getObject({
+    const insertedObject2 = await postgresAdapter.getObject({
       className: 'User',
       id: id2,
       select: { name: true, id: true, age: true },
@@ -1525,7 +1596,7 @@ describe('Mongo adapter', () => {
   })
 
   it('should create multiple objects and return an array of the created object', async () => {
-    await mongoAdapter.createObjects({
+    await postgresAdapter.createObjects({
       className: 'User',
       data: [
         {
@@ -1541,7 +1612,7 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    const insertedObjects = await mongoAdapter.getObjects({
+    const insertedObjects = await postgresAdapter.getObjects({
       className: 'User',
       where: {},
       select: { name: true, id: true },
@@ -1560,8 +1631,8 @@ describe('Mongo adapter', () => {
     ])
   })
 
-  it('should create multiple objects and return an array of the created object with * fields', async () => {
-    await mongoAdapter.createObjects({
+  it('should create multiple objects and return an array of the created object with all fields', async () => {
+    await postgresAdapter.createObjects({
       className: 'User',
       data: [
         {
@@ -1577,7 +1648,7 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    const insertedObjects = await mongoAdapter.getObjects({
+    const insertedObjects = await postgresAdapter.getObjects({
       className: 'User',
       where: {},
       select: { name: true, id: true, age: true },
@@ -1599,7 +1670,7 @@ describe('Mongo adapter', () => {
   })
 
   it('should update object', async () => {
-    const insertedObject = await mongoAdapter.createObject({
+    const insertedObject = await postgresAdapter.createObject({
       className: 'User',
       data: {
         name: 'John',
@@ -1612,7 +1683,7 @@ describe('Mongo adapter', () => {
 
     const id = insertedObject.id
 
-    await mongoAdapter.updateObject({
+    await postgresAdapter.updateObject({
       className: 'User',
       id: id.toString(),
       data: { name: 'Doe' },
@@ -1620,7 +1691,7 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    const updatedObject = await mongoAdapter.getObject({
+    const updatedObject = await postgresAdapter.getObject({
       className: 'User',
       id: id.toString(),
       select: { name: true, id: true },
@@ -1632,7 +1703,7 @@ describe('Mongo adapter', () => {
       id: expect.any(String),
     })
 
-    await mongoAdapter.updateObject({
+    await postgresAdapter.updateObject({
       className: 'User',
       id: id.toString(),
       data: { name: 'Doe' },
@@ -1640,7 +1711,7 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    const updatedObject2 = await mongoAdapter.getObject({
+    const updatedObject2 = await postgresAdapter.getObject({
       className: 'User',
       id: id.toString(),
       select: { name: true, age: true, id: true },
@@ -1655,7 +1726,7 @@ describe('Mongo adapter', () => {
   })
 
   it('should update multiple objects', async () => {
-    const insertedObjects = await mongoAdapter.createObjects({
+    const insertedObjects = await postgresAdapter.createObjects({
       className: 'User',
       data: [
         {
@@ -1672,7 +1743,7 @@ describe('Mongo adapter', () => {
 
     if (!insertedObjects) fail()
 
-    await mongoAdapter.updateObjects({
+    await postgresAdapter.updateObjects({
       className: 'User',
       where: {
         name: { equalTo: 'Lucas' },
@@ -1682,7 +1753,7 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    const updatedObjects = await mongoAdapter.getObjects({
+    const updatedObjects = await postgresAdapter.getObjects({
       className: 'User',
       where: {
         name: {
@@ -1700,7 +1771,7 @@ describe('Mongo adapter', () => {
       },
     ])
 
-    await mongoAdapter.updateObjects({
+    await postgresAdapter.updateObjects({
       className: 'User',
       where: {
         age: { greaterThanOrEqualTo: 20 },
@@ -1710,7 +1781,7 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    const updatedObjects2 = await mongoAdapter.getObjects({
+    const updatedObjects2 = await postgresAdapter.getObjects({
       className: 'User',
       where: {
         age: {
@@ -1738,7 +1809,7 @@ describe('Mongo adapter', () => {
   })
 
   it('should update the same field of an objet that which we use in the where field', async () => {
-    const insertedObject = await mongoAdapter.createObject({
+    const insertedObject = await postgresAdapter.createObject({
       className: 'User',
       data: {
         name: 'John',
@@ -1749,7 +1820,7 @@ describe('Mongo adapter', () => {
 
     if (!insertedObject) fail()
 
-    await mongoAdapter.updateObjects({
+    await postgresAdapter.updateObjects({
       className: 'User',
       data: { name: 'Doe' },
       where: {
@@ -1761,7 +1832,7 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    const updatedObjects = await mongoAdapter.getObjects({
+    const updatedObjects = await postgresAdapter.getObjects({
       className: 'User',
       where: {
         name: {
@@ -1781,7 +1852,7 @@ describe('Mongo adapter', () => {
   })
 
   it('should delete one object', async () => {
-    const insertedObject = await mongoAdapter.createObject({
+    const insertedObject = await postgresAdapter.createObject({
       className: 'User',
       data: {
         name: 'John',
@@ -1794,7 +1865,7 @@ describe('Mongo adapter', () => {
 
     const id = insertedObject.id
 
-    await mongoAdapter.deleteObject({
+    await postgresAdapter.deleteObject({
       className: 'User',
       id: id.toString(),
       select: { name: true, id: true, age: true },
@@ -1802,7 +1873,7 @@ describe('Mongo adapter', () => {
     })
 
     expect(
-      mongoAdapter.getObject({
+      postgresAdapter.getObject({
         className: 'User',
         id: id.toString(),
         context,
@@ -1811,7 +1882,7 @@ describe('Mongo adapter', () => {
   })
 
   it('should delete multiple object', async () => {
-    await mongoAdapter.createObject({
+    await postgresAdapter.createObject({
       className: 'User',
       data: {
         name: 'John',
@@ -1820,7 +1891,7 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    await mongoAdapter.createObject({
+    await postgresAdapter.createObject({
       className: 'User',
       data: {
         name: 'Lucas',
@@ -1829,14 +1900,14 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    await mongoAdapter.deleteObjects({
+    await postgresAdapter.deleteObjects({
       className: 'User',
       where: { age: { equalTo: 18 } },
       select: { name: true, id: true, age: true },
       context,
     })
 
-    const resAfterDelete = await mongoAdapter.getObjects({
+    const resAfterDelete = await postgresAdapter.getObjects({
       className: 'User',
       where: { age: { equalTo: 18 } },
       context,
@@ -1845,92 +1916,15 @@ describe('Mongo adapter', () => {
     expect(resAfterDelete.length).toEqual(0)
   })
 
-  it('should build where query with equalTo null', () => {
-    const where = buildMongoWhereQuery({
-      acl: { equalTo: null },
-    })
+  it('should build empty where query for postgres adapter if where is empty', () => {
+    const { query, values } = buildPostgresWhereQueryAndValues({})
 
-    expect(where).toEqual({
-      acl: null,
-    })
+    expect(query).toEqual('')
+    expect(values).toEqual([])
   })
 
-  it('should build where query for mongo adapter', () => {
-    const where = buildMongoWhereQuery({
-      name: { equalTo: 'John' },
-      age: { greaterThan: 20 },
-      OR: [
-        {
-          age: { lessThan: 10 },
-        },
-        {
-          name: { equalTo: 'John' },
-        },
-        // @ts-expect-error
-        {
-          OR: [
-            {
-              name: { equalTo: 'Tata' },
-            },
-          ],
-        },
-      ],
-      AND: [
-        {
-          age: { lessThan: 10 },
-        },
-        {
-          name: { equalTo: 'John' },
-        },
-        // @ts-expect-error
-        {
-          AND: [
-            {
-              name: { equalTo: 'Tata' },
-            },
-          ],
-        },
-      ],
-    })
-
-    expect(where).toEqual({
-      name: 'John',
-      age: { $gt: 20 },
-      $or: [
-        { age: { $lt: 10 } },
-        { name: 'John' },
-        { $or: [{ name: 'Tata' }] },
-      ],
-      $and: [
-        { age: { $lt: 10 } },
-        { name: 'John' },
-        { $and: [{ name: 'Tata' }] },
-      ],
-    })
-  })
-
-  it('should build empty where query for mongoAdapter if where is empty', () => {
-    const where = buildMongoWhereQuery({})
-
-    expect(where).toEqual({})
-  })
-
-  it('should build empty where query for mongoAdapter if operation not exist', () => {
-    // @ts-expect-error
-    const where = buildMongoWhereQuery({ name: { notExist: 'John' } })
-
-    expect(where).toEqual({})
-  })
-
-  it('should build empty where query for mongoAdapter if operation not exist', () => {
-    // @ts-expect-error
-    const where = buildMongoWhereQuery({ name: { notExist: 'John' } })
-
-    expect(where).toEqual({})
-  })
-
-  it('should request sub object in object', async () => {
-    await mongoAdapter.createObject({
+  it('should request nested objects in object', async () => {
+    await postgresAdapter.createObject({
       className: 'User',
       context,
       data: {
@@ -1943,7 +1937,7 @@ describe('Mongo adapter', () => {
       },
     })
 
-    const res = await mongoAdapter.getObjects({
+    const res = await postgresAdapter.getObjects({
       className: 'User',
       where: {
         authentication: {
@@ -1962,41 +1956,5 @@ describe('Mongo adapter', () => {
       'email@test.fr',
     )
     expect(res[0]?.authentication?.emailPassword?.password).toEqual('password')
-  })
-
-  it('should request sub object in object with selection fields', async () => {
-    await mongoAdapter.createObject({
-      className: 'User',
-      context,
-      data: {
-        authentication: {
-          emailPassword: {
-            email: 'email@test.fr',
-            password: 'password',
-          },
-        },
-      },
-    })
-
-    const res = await mongoAdapter.getObjects({
-      className: 'User',
-      where: {
-        authentication: {
-          // @ts-expect-error
-          emailPassword: {
-            email: { equalTo: 'email@test.fr' },
-          },
-        },
-      },
-      context,
-      // @ts-expect-error
-      select: { authentication: { emailPassword: { email: true } } },
-    })
-
-    expect(res.length).toEqual(1)
-    expect(res[0]?.authentication?.emailPassword?.email).toEqual(
-      'email@test.fr',
-    )
-    expect(res[0]?.authentication?.emailPassword?.password).toBeUndefined()
   })
 })

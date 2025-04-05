@@ -1,7 +1,7 @@
 {
     "name": "wabe-pluralize",
     "version": "0.0.1",
-    "license": "MIT",
+    "license": "Apache-2.0",
     "main": "src/index.ts",
     "description": "Package to pluralize a word in english",
     "scripts": {

@@ -1,14 +1,81 @@
-import type { Client } from 'pg'
-import { newDb } from 'pg-mem'
+import Docker from 'dockerode'
 import tcpPortUsed from 'tcp-port-used'
 
-export const runDatabase = async (): Promise<Client | undefined> => {
-  if (await tcpPortUsed.check(27045, '127.0.0.1')) return
-  const db = newDb()
+const docker = new Docker()
 
-  console.info('PostgreSQL started')
+// URL: 'postgres://username:password@localhost:5432/databaseName'
+export const runDatabase = async (): Promise<void> => {
+  try {
+    const port = 5432
 
-  const { Client } = db.adapters.createPg()
+    if (await tcpPortUsed.check(port, '127.0.0.1')) return
 
-  return Client
+    const imageName = 'postgres:17.4-alpine'
+
+    // Check if the image already exists locally
+    const images = await docker.listImages()
+
+    if (!images.find((image) => image.RepoTags?.includes(imageName))) {
+      console.info(`Pulling ${imageName}`)
+
+      const stream = await docker.pull(imageName)
+
+      await new Promise((resolve, reject) => {
+        docker.modem.followProgress(stream, (err, res) =>
+          err ? reject(err) : resolve(res),
+        )
+      })
+    }
+
+    const container = await docker.createContainer({
+      Image: imageName,
+      name: 'wabe-postgres',
+      Env: ['POSTGRES_USER=wabe', 'POSTGRES_PASSWORD=wabe', 'POSTGRES_DB=Wabe'],
+      HostConfig: {
+        PortBindings: {
+          '5432/tcp': [{ HostPort: `${port}` }],
+        },
+      },
+      AttachStdin: false,
+      AttachStdout: true,
+      AttachStderr: true,
+      Tty: true,
+      OpenStdin: false,
+      StdinOnce: false,
+    })
+
+    await container.start()
+
+    while (!(await tcpPortUsed.check(port, '127.0.0.1'))) {
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+    }
+
+    console.info('PostgreSQL started')
+  } catch (error: any) {
+    if (error.message.includes('there a typo in the url or port')) {
+      console.error('You need to run Docker on your machine')
+      return
+    }
+
+    // Try to find and remove the container if it exists
+    try {
+      const containers = await docker.listContainers({ all: true })
+      const existingContainer = containers.find((container) =>
+        container.Names.includes('/Wabe-Postgres'),
+      )
+
+      if (existingContainer) {
+        const container = docker.getContainer(existingContainer.Id)
+        await container.stop()
+        await container.remove()
+
+        // We retry to run the database
+        return runDatabase()
+      }
+    } catch (cleanupError) {
+      console.error('Error during cleanup:', cleanupError)
+    }
+
+    console.error('An error occurred:', error)
+  }
 }

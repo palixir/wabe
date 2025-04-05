@@ -1,5 +1,6 @@
 import type { WabeTypes } from '../..'
 import { OperationType, initializeHook } from '../hooks'
+import type { SchemaInterface } from '../schema'
 import type { WabeContext } from '../server/interface'
 import { contextWithRoot } from '../utils/export'
 import { notEmpty } from '../utils/export'
@@ -245,26 +246,14 @@ export class DatabaseController<T extends WabeTypes> {
                 },
                 userId
                   ? {
-                      AND: [
-                        {
-                          acl: {
-                            users: {
-                              userId: {
-                                in: [userId],
-                              },
-                            },
+                      acl: {
+                        users: {
+                          contains: {
+                            userId,
+                            [operation]: true,
                           },
                         },
-                        {
-                          acl: {
-                            users: {
-                              [operation]: {
-                                in: [true],
-                              },
-                            },
-                          },
-                        },
-                      ],
+                      },
                     }
                   : undefined,
                 roleId
@@ -273,27 +262,14 @@ export class DatabaseController<T extends WabeTypes> {
                         {
                           acl: {
                             users: {
-                              userId: {
-                                notIn: [userId],
-                              },
+                              notContains: { userId },
                             },
                           },
                         },
                         {
                           acl: {
                             roles: {
-                              roleId: {
-                                in: [roleId],
-                              },
-                            },
-                          },
-                        },
-                        {
-                          acl: {
-                            roles: {
-                              [operation]: {
-                                in: [true],
-                              },
+                              contains: { roleId, [operation]: true },
                             },
                           },
                         },
@@ -363,10 +339,23 @@ export class DatabaseController<T extends WabeTypes> {
         })
 
         if (isRelation && object[pointerField]) {
+          const selectWithoutTotalCount = Object.entries(
+            currentSelect || {},
+          ).reduce(
+            (acc, [key, value]) => {
+              if (key === 'totalCount') return acc
+
+              return {
+                ...acc,
+                [key]: value,
+              }
+            },
+            {} as Record<string, any>,
+          )
+
           const relationObjects = await this.getObjects({
             className: currentClassName,
-            // @ts-expect-error
-            select: currentSelect,
+            select: selectWithoutTotalCount,
             // @ts-expect-error
             where: { id: { in: object[pointerField] } },
             context,
@@ -391,19 +380,19 @@ export class DatabaseController<T extends WabeTypes> {
     )
   }
 
-  connect(): Promise<any> {
-    return this.adapter.connect()
-  }
-
-  close(): Promise<any> {
-    return this.adapter.close()
+  async close() {
+    await this.adapter.close()
   }
 
   createClassIfNotExist(
     className: string,
-    context: WabeContext<T>,
+    schema: SchemaInterface<T>,
   ): Promise<any> {
-    return this.adapter.createClassIfNotExist(className, context)
+    return this.adapter.createClassIfNotExist(className, schema)
+  }
+
+  initializeDatabase(schema: SchemaInterface<T>): Promise<void> {
+    return this.adapter.initializeDatabase(schema)
   }
 
   async count<K extends keyof T['types']>({
@@ -631,7 +620,7 @@ export class DatabaseController<T extends WabeTypes> {
       className,
       context,
       select,
-      data: newData,
+      data: newData || data,
     })
 
     await hook.runOnSingleObject({

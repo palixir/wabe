@@ -160,7 +160,7 @@ export const initializeHook = <
       originalObject?: OutputType<DevWabeTypes, any, any>
     }): Promise<MutationData<T, K, any>> => {
       if (hooksOrderByPriorities.length === 0)
-        return { object: undefined, newData: {} }
+        return { object: undefined, newData: undefined }
 
       const object = await computeObject({
         id: options.id,

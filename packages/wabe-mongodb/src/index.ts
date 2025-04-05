@@ -16,9 +16,9 @@ import {
   type CountOptions,
   type OrderType,
   type WabeTypes,
-  type WabeContext,
   contextWithRoot,
   notEmpty,
+  type SchemaInterface,
 } from 'wabe'
 
 export const buildMongoOrderQuery = <
@@ -62,7 +62,16 @@ export const buildMongoWhereQuery = <
       const keyToWrite = key === 'id' ? '_id' : key
 
       if (value?.contains || value?.contains === null)
-        acc[keyToWrite] = { $all: value.contains }
+        acc[keyToWrite] = {
+          ...(typeof value.contains === 'object' &&
+          !Array.isArray(value.contains)
+            ? { $elemMatch: value.contains }
+            : {
+                $all: Array.isArray(value.contains)
+                  ? value.contains
+                  : [value.contains],
+              }),
+        }
       if (value?.notContains || value?.notContains === null)
         acc[keyToWrite] = { $ne: value.notContains }
       if (value?.equalTo || value?.equalTo === null)
@@ -147,29 +156,18 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
     this.client = new MongoClient(options.databaseUrl)
   }
 
-  async connect() {
-    const client = await pRetry(() => this.client.connect(), {
-      retries: 5,
-      minTimeout: process.env.NODE_ENV === 'production' ? 1000 : 100,
-      factor: 2,
-    })
-
-    this.database = client.db(this.options.databaseName)
-    return client
-  }
-
-  close() {
-    return this.client.close()
+  async close() {
+    await this.client.close()
   }
 
   async createClassIfNotExist(
     className: keyof T['types'],
-    context: WabeContext<T>,
+    schema: SchemaInterface<T>,
   ) {
     if (!this.database)
       throw new Error('Connection to database is not established')
 
-    const schemaClass = context.wabe.config.schema?.classes?.find(
+    const schemaClass = schema?.classes?.find(
       (currentClass) => currentClass.name === className,
     )
 
@@ -189,18 +187,22 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
         { unique: !!index.unique },
       ),
     )
-
-    return collection
   }
 
-  async count<K extends keyof T['types']>(params: CountOptions<T, K>) {
-    const { className, where, context } = params
+  async initializeDatabase(schema: SchemaInterface<T>): Promise<void> {
+    const client = await pRetry(() => this.client.connect(), {
+      retries: 5,
+      minTimeout: process.env.NODE_ENV === 'production' ? 1000 : 100,
+      factor: 2,
+    })
 
-    const collection = await this.createClassIfNotExist(className, context)
+    this.database = client.db(this.options.databaseName)
 
-    const whereBuilded = buildMongoWhereQuery<T, K>(where)
-
-    return collection.countDocuments(whereBuilded)
+    await Promise.all(
+      (schema.classes || []).map((classSchema) => {
+        return this.createClassIfNotExist(classSchema.name, schema)
+      }),
+    )
   }
 
   async clearDatabase() {
@@ -216,17 +218,32 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
     )
   }
 
+  count<K extends keyof T['types']>(params: CountOptions<T, K>) {
+    if (!this.database)
+      throw new Error('Connection to database is not established')
+
+    const { className, where } = params
+
+    // @ts-expect-error
+    const collection = this.database.collection(className)
+
+    const whereBuilded = buildMongoWhereQuery<T, K>(where)
+
+    return collection.countDocuments(whereBuilded)
+  }
+
   async getObject<K extends keyof T['types'], U extends keyof T['types'][K]>(
     params: GetObjectOptions<T, K, U>,
   ): Promise<OutputType<T, K, U>> {
     if (!this.database)
       throw new Error('Connection to database is not established')
 
-    const { className, id, select, where, context } = params
+    const { className, id, select, where } = params
 
     const whereBuilded = buildMongoWhereQuery<T, K>(where)
 
-    const collection = await this.createClassIfNotExist(className, context)
+    // @ts-expect-error
+    const collection = this.database.collection(className)
 
     const res = await collection.findOne(
       { _id: new ObjectId(id), ...whereBuilded } as Filter<any>,
@@ -253,12 +270,13 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
     if (!this.database)
       throw new Error('Connection to database is not established')
 
-    const { className, select, where, offset, first, context, order } = params
+    const { className, select, where, offset, first, order } = params
 
     const whereBuilded = buildMongoWhereQuery(where)
     const orderBuilded = buildMongoOrderQuery(order)
 
-    const collection = await this.createClassIfNotExist(className, context)
+    // @ts-expect-error
+    const collection = this.database.collection(className)
 
     const res = await collection
       .find(whereBuilded, {
@@ -287,9 +305,10 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
     if (!this.database)
       throw new Error('Connection to database is not established')
 
-    const { className, data, context } = params
+    const { className, data } = params
 
-    const collection = await this.createClassIfNotExist(className, context)
+    // @ts-expect-error
+    const collection = this.database.collection(className)
 
     const res = await collection.insertOne(data, {})
 
@@ -305,9 +324,10 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
     if (!this.database)
       throw new Error('Connection to database is not established')
 
-    const { className, data, context } = params
+    const { className, data } = params
 
-    const collection = await this.createClassIfNotExist(className, context)
+    // @ts-expect-error
+    const collection = this.database.collection(className)
 
     const res = await collection.insertMany(data, {})
 
@@ -322,11 +342,12 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
     if (!this.database)
       throw new Error('Connection to database is not established')
 
-    const { className, id, data, context, where } = params
+    const { className, id, data, where } = params
 
     const whereBuilded = where ? buildMongoWhereQuery<T, W>(where) : {}
 
-    const collection = await this.createClassIfNotExist(className, context)
+    // @ts-expect-error
+    const collection = this.database.collection(className)
 
     const res = await collection.updateOne(
       {
@@ -352,11 +373,12 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
     if (!this.database)
       throw new Error('Connection to database is not established')
 
-    const { className, where, data, offset, first, context, order } = params
+    const { className, where, data, offset, first, order, context } = params
 
     const whereBuilded = buildMongoWhereQuery<T, W>(where)
 
-    const collection = await this.createClassIfNotExist(className, context)
+    // @ts-expect-error
+    const collection = this.database.collection(className)
 
     const objectsBeforeUpdate =
       await context.wabe.controllers.database.getObjects({
@@ -391,11 +413,12 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
     if (!this.database)
       throw new Error('Connection to database is not established')
 
-    const { className, id, context } = params
+    const { className, id } = params
 
     const whereBuilded = buildMongoWhereQuery(params.where)
 
-    const collection = await this.createClassIfNotExist(className, context)
+    // @ts-expect-error
+    const collection = this.database.collection(className)
 
     const res = await collection.deleteOne({
       _id: new ObjectId(id),
@@ -413,11 +436,12 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
     if (!this.database)
       throw new Error('Connection to database is not established')
 
-    const { className, where, context } = params
+    const { className, where } = params
 
     const whereBuilded = buildMongoWhereQuery(where)
 
-    const collection = await this.createClassIfNotExist(className, context)
+    // @ts-expect-error
+    const collection = this.database.collection(className)
 
     await collection.deleteMany(whereBuilded)
   }
