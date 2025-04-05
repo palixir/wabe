@@ -47,8 +47,11 @@ export const runDatabase = async (): Promise<void> => {
     await container.start()
 
     while (!(await tcpPortUsed.check(port, '127.0.0.1'))) {
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      await Bun.sleep(1000)
     }
+
+    // 1000 ms more to let the time to established connection
+    await Bun.sleep(1000)
 
     console.info('PostgreSQL started')
   } catch (error: any) {
