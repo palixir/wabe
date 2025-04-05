@@ -48,7 +48,7 @@ const run = async () => {
       currency: Currency.USD,
       supportedPaymentMethods: ['card', 'paypal'],
     },
-    port: 3000,
+    port: 3001,
   });
 
   await wabe.start();

@@ -54,7 +54,7 @@ const run = async () => {
         url: "mongodb://127.0.0.1:27045",
       })
     },
-    port: 3000,
+    port: 3001,
     schema: {
       classes: [],
       scalars: [],
@@ -88,7 +88,7 @@ You can now **run** the `index.ts` file with the following command `bun run inde
 
 Now that you’ve launched your first server with Wabe, you can go to the following address:
 
-`http://localhost:3000/graphql`
+`http://localhost:3001/graphql`
 
 You’ll arrive at a GraphiQL interface with an online playground that allows you to test queries (figure 1). Click on "Show documentation explorer" in the top left corner to access the second interface (figure 2).
 

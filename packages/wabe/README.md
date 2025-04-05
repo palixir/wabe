@@ -38,7 +38,7 @@ const run = async () => {
         url: "mongodb://127.0.0.1:27045",
       })
     },
-    port: 3000,
+    port: 3001,
   });
 
   await wabe.start();

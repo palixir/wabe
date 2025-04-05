@@ -46,7 +46,7 @@ const run = async () => {
     ai: {
       adapter : new MistralAIAdapter("YOUR_MISTRAL_SECRET_KEY"),
     }
-    port: 3000,
+    port: 3001,
   });
 
   await wabe.start();

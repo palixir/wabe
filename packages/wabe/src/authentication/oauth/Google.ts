@@ -26,7 +26,7 @@ export class Google implements OAuth2ProviderWithPKCE {
 
     if (!googleConfig) throw new Error('Google config not found')
 
-    const baseUrl = `http${config.isProduction ? 's' : ''}://${config.authentication?.backDomain || '127.0.0.1:' + config.port || 3000}`
+    const baseUrl = `http${config.isProduction ? 's' : ''}://${config.authentication?.backDomain || '127.0.0.1:' + config.port || 3001}`
 
     const redirectURI = `${baseUrl}/auth/oauth/callback`
 

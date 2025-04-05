@@ -36,7 +36,7 @@ const run = async () => {
     database: {
       adapter: await getDatabaseAdapter('Wabe'),
     },
-    port: 3000,
+    port: 3001,
     schema: {
       classes: [
         {

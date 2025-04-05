@@ -4,9 +4,9 @@ import { OAuth2Client } from './Oauth2Client'
 
 describe('GitHub oauth', () => {
   const config = {
-    port: 3000,
+    port: 3001,
     authentication: {
-      backDomain: 'api.shipmysaas.com',
+      backDomain: 'api.wabe.dev',
       providers: {
         github: {
           clientId: 'clientId',

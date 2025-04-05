@@ -34,7 +34,7 @@ export class FileDevAdapter implements FileAdapter {
 
     try {
       await access(filePath, constants.F_OK)
-      return `http://127.0.0.1:${options?.port || 3000}/${this.basePath}/${fileName}`
+      return `http://127.0.0.1:${options?.port || 3001}/${this.basePath}/${fileName}`
     } catch {
       return null
     }

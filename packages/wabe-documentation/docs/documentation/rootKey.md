@@ -21,7 +21,7 @@ await run();
 Example of GraphQLClient creates with root key :
 
 ```ts
-const client = new GraphQLClient(`http://127.0.0.1:3000/graphql`, {
+const client = new GraphQLClient(`http://127.0.0.1:3001/graphql`, {
   headers: {
     "Wabe-Root-Key": "YourRootKeyAsLongAsPossible",
   },

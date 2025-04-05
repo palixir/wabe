@@ -46,7 +46,7 @@ const run = async () => {
     email: {
       adapter : new ResendAdapter("YOUR_RESEND_API_KEY"),
     }
-    port: 3000,
+    port: 3001,
   });
 
   await wabe.start();
