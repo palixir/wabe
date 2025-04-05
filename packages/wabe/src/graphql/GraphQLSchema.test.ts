@@ -12,14 +12,12 @@ import {
 } from '../utils/helper'
 import { GraphQLSchema as WabeGraphQLSchema } from './GraphQLSchema'
 import { getTypeFromGraphQLSchema } from './parseGraphqlSchema'
+import { getDatabaseAdapter } from '../utils/testHelper'
 
 const createWabe = async (schema: SchemaInterface<DevWabeTypes>) => {
   const databaseId = uuid()
 
   const port = await getPort()
-
-  const mongoAdapter = await import('wabe-mongodb')
-  const postgresAdapter = await import('wabe-postgres')
 
   const wabe = new Wabe({
     isProduction: false,
@@ -29,14 +27,7 @@ const createWabe = async (schema: SchemaInterface<DevWabeTypes>) => {
       '0uwFvUxM$ceFuF1aEtTtZMa7DUN2NZudqgY5ve5W*QCyb58cwMj9JeoaV@d#%29v&aJzswuudVU1%nAT+rxS0Bh&OkgBYc0PH18*',
     database: {
       // @ts-expect-error
-      // adapter: new mongoAdapter.MongoAdapter<DevWabeTypes>({
-      //   databaseName: databaseId,
-      //   databaseUrl: 'mongodb://127.0.0.1:27045',
-      // }),
-      adapter: new postgresAdapter.PostgresAdapter<DevWabeTypes>({
-        databaseUrl: 'postgresql://wabe:wabe@localhost:5432',
-        databaseName: databaseId,
-      }),
+      adapter: await getDatabaseAdapter(databaseId),
     },
   })
 

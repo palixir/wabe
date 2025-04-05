@@ -228,7 +228,6 @@ export class Wabe<T extends WabeTypes> {
 
     this.config.schema = wabeSchema.schema
 
-    await this.controllers.database.connect()
     await this.controllers.database.initializeDatabase(wabeSchema.schema)
 
     const graphqlSchema = new WabeGraphQLSchema(wabeSchema)

@@ -400,7 +400,7 @@ describe('Mongo adapter', () => {
       throw new Error('Connection error')
     })
 
-    await mongoAdapter.connect()
+    await mongoAdapter.initializeDatabase(wabe.config.schema || {})
 
     expect(spyMongoClientConnect).toHaveBeenCalledTimes(2)
 

@@ -321,8 +321,6 @@ export class PostgresAdapter<T extends WabeTypes>
     })
   }
 
-  async connect() {}
-
   async initializeDatabase(schema: SchemaInterface<T>) {
     // We create the database with the pool on postgres database
     const client = await this.postgresPool.connect()

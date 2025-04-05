@@ -10,6 +10,15 @@ import { Wabe } from '../server'
 import type { DevWabeTypes } from './helper'
 import getPort from 'get-port'
 
+export const getDatabaseAdapter = async (databaseName: string) => {
+  const postgresAdapter = await import('wabe-postgres')
+
+  return new postgresAdapter.PostgresAdapter<DevWabeTypes>({
+    databaseUrl: 'postgresql://wabe:wabe@localhost:5432',
+    databaseName,
+  })
+}
+
 export const setupTests = async (
   additionalClasses: ClassInterface<any>[] = [],
 ) => {
@@ -17,21 +26,13 @@ export const setupTests = async (
 
   const port = await getPort()
 
-  const mongoAdapter = await import('wabe-mongodb')
-  const posgresAdapter = await import('wabe-postgres')
-
   const wabe = new Wabe<DevWabeTypes>({
     isProduction: false,
     rootKey:
       '0uwFvUxM$ceFuF1aEtTtZMa7DUN2NZudqgY5ve5W*QCyb58cwMj9JeoaV@d#%29v&aJzswuudVU1%nAT+rxS0Bh&OkgBYc0PH18*',
     database: {
       // @ts-expect-error
-      adapter: new posgresAdapter.PostgresAdapter<DevWabeTypes>({
-        // databaseName: databaseId,
-        // databaseUrl: 'mongodb://127.0.0.1:27045',
-        databaseUrl: 'postgresql://wabe:wabe@localhost:5432',
-        databaseName: databaseId,
-      }),
+      adapter: await getDatabaseAdapter(databaseId),
     },
     authentication: {
       roles: ['Client', 'Client2', 'Client3', 'Admin'],

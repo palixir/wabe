@@ -380,10 +380,6 @@ export class DatabaseController<T extends WabeTypes> {
     )
   }
 
-  connect(): Promise<any> {
-    return this.adapter.connect()
-  }
-
   async close() {
     await this.adapter.close()
   }

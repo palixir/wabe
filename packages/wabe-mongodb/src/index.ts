@@ -156,17 +156,6 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
     this.client = new MongoClient(options.databaseUrl)
   }
 
-  async connect() {
-    const client = await pRetry(() => this.client.connect(), {
-      retries: 5,
-      minTimeout: process.env.NODE_ENV === 'production' ? 1000 : 100,
-      factor: 2,
-    })
-
-    this.database = client.db(this.options.databaseName)
-    return client
-  }
-
   async close() {
     await this.client.close()
   }
@@ -201,6 +190,14 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
   }
 
   async initializeDatabase(schema: SchemaInterface<T>): Promise<void> {
+    const client = await pRetry(() => this.client.connect(), {
+      retries: 5,
+      minTimeout: process.env.NODE_ENV === 'production' ? 1000 : 100,
+      factor: 2,
+    })
+
+    this.database = client.db(this.options.databaseName)
+
     await Promise.all(
       (schema.classes || []).map((classSchema) => {
         return this.createClassIfNotExist(classSchema.name, schema)
