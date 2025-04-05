@@ -10,13 +10,14 @@ export const runDatabase = async (): Promise<void> => {
 
     if (await tcpPortUsed.check(port, '127.0.0.1')) return
 
-    const imageName = 'postgres:17.4'
+    const imageName = 'postgres:17.4-alpine'
 
     // Check if the image already exists locally
-    try {
-      docker.getImage(imageName)
-    } catch {
-      console.info('Pulling postgres:17.4')
+    const images = await docker.listImages()
+
+    if (!images.find((image) => image.RepoTags?.includes(imageName))) {
+      console.info(`Pulling ${imageName}`)
+
       const stream = await docker.pull(imageName)
 
       await new Promise((resolve, reject) => {
@@ -28,7 +29,7 @@ export const runDatabase = async (): Promise<void> => {
 
     const container = await docker.createContainer({
       Image: imageName,
-      name: 'Wabe-Postgres',
+      name: 'wabe-postgres',
       Env: ['POSTGRES_USER=wabe', 'POSTGRES_PASSWORD=wabe', 'POSTGRES_DB=Wabe'],
       HostConfig: {
         PortBindings: {
@@ -46,7 +47,7 @@ export const runDatabase = async (): Promise<void> => {
     await container.start()
 
     while (!(await tcpPortUsed.check(port, '127.0.0.1'))) {
-      await new Promise((resolve) => setTimeout(resolve, 500))
+      await new Promise((resolve) => setTimeout(resolve, 1000))
     }
 
     console.info('PostgreSQL started')
@@ -78,5 +79,3 @@ export const runDatabase = async (): Promise<void> => {
     console.error('An error occurred:', error)
   }
 }
-
-runDatabase()
