@@ -1,4 +1,5 @@
 enum RoleEnum {
+  DashboardAdmin
   Admin
   Client
 }

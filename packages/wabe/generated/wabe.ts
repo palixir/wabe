@@ -1,4 +1,5 @@
 export enum RoleEnum {
+	DashboardAdmin = "DashboardAdmin",
 	Admin = "Admin",
 	Client = "Client"
 }

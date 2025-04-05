@@ -155,9 +155,11 @@ export class Wabe<T extends WabeTypes> {
   }
 
   loadRoleEnum() {
-    const roles = this.config.authentication?.roles || []
-
-    if (roles.length === 0) return
+    const roles = [
+      // Default Dashboard Admin role
+      'DashboardAdmin',
+      ...(this.config.authentication?.roles || []),
+    ]
 
     const roleEnum: EnumInterface = {
       name: 'RoleEnum',
