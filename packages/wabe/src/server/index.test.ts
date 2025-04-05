@@ -320,6 +320,7 @@ describe('Server', async () => {
     expect(roleEnum?.values).toEqual({
       Admin: 'Admin',
       Client: 'Client',
+      DashboardAdmin: 'DashboardAdmin',
     })
 
     await wabe.close()
