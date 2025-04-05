@@ -10,7 +10,6 @@
     "postinstall": "nuxt prepare",
     "check": "tsc --project $(pwd)/tsconfig.json",
     "lint": "biome lint . --no-errors-on-unmatched --config-path=../../",
-    "ci": "bun generate:codegen && bun lint $(pwd) && bun check && bun test src",
     "format": "biome format --write . --config-path=../../",
     "storybook": "storybook dev --port 6006",
     "build-storybook": "storybook build"
