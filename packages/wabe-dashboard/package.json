@@ -1,5 +1,5 @@
 {
-  "name": "wabe-dashboard",
+  "name": "nuxt-ui-pro-template-dashboard",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,30 +8,12 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "check": "tsc --project $(pwd)/tsconfig.json",
-    "lint": "biome lint . --no-errors-on-unmatched --config-path=../../",
-    "format": "biome format --write . --config-path=../../",
-    "storybook": "storybook dev --port 6006",
-    "build-storybook": "storybook build"
+    "lint": "eslint .",
+    "typecheck": "nuxt typecheck"
   },
   "dependencies": {
-    "@nuxt/icon": "1.11.0",
     "@nuxt/ui": "3.0.2",
-    "@nuxtjs/apollo": "5.0.0-alpha.14",
-    "@nuxtjs/tailwindcss": "6.13.2",
     "nuxt": "3.16.2",
-    "vue": "3.5.13",
-    "vue-router": "4.5.0"
-  },
-  "devDependencies": {
-    "@nuxtjs/storybook": "8.3.3",
-    "storybook": "8.6.12",
-    "@storybook/vue3": "8.6.12",
-    "@storybook-vue/nuxt": "8.3.3",
-    "@storybook/addon-links": "8.6.12",
-    "@storybook/builder-vite": "8.6.12",
-    "@storybook/addon-essentials": "8.6.12",
-    "@storybook/addon-interactions": "8.6.12",
-    "@storybook/blocks": "8.6.12"
+    "tailwindcss": "4.1.3"
   }
 }
