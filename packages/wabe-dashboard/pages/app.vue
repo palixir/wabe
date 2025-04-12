@@ -1,5 +1,7 @@
+<script setup lang="ts">
+import Sidebar from '@/components/Sidebar/index.vue'
+</script>
+
 <template>
-  <div class="bg-red-500">
-    tataa
-  </div>
+<Sidebar />
 </template>
