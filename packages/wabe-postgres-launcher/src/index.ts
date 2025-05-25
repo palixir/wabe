@@ -57,7 +57,7 @@ export const runDatabase = async (): Promise<void> => {
   } catch (error: any) {
     if (error.message.includes('there a typo in the url or port')) {
       console.error('You need to run Docker on your machine')
-      return
+      process.exit(1)
     }
 
     // Try to find and remove the container if it exists
