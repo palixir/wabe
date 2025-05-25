@@ -13,6 +13,10 @@ Note: Each code contribution must be tested either by an existing test or a new 
 
 First of all, thanks you for taking time to improve Wabe. Wabe have a great test coverage, to keep this code quality, please add tests that cover your changes 🙂.
 
+## Requirement
+
+Wabe supports two types of databases: MongoDB and PostgreSQL. Since PostgreSQL is faster, it is the one we use in our tests. To run the tests, you need to have Docker installed and running on your machine. The launch scripts will take care of downloading the PostgreSQL image and creating a container before running the tests. More information can be found in the `wabe-postgres-launcher` or `wabe-mongodb-launcher` packages.
+
 ## Install
 
 Wabe uses Bun, so you need the latest version of Bun. You can see [here](https://bun.sh/docs/installation) if Bun is not installed on your machine.
