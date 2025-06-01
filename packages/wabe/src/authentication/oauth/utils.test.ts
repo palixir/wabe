@@ -29,7 +29,7 @@ describe('Oauth utils', () => {
   it('should generate random values for code_verifier or state', () => {
     const randomValue = generateRandomValues()
 
-    // Google recommend an entrophy between 43 ans 128 characters for code_verifier
+    // Google recommends an entropy between 43 and 128 characters for the code_verifier
     expect(randomValue.length).toEqual(80)
   })
 })
