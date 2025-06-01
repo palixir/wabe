@@ -364,14 +364,14 @@ export const getDefaultHooks = (): Hook<any, any>[] => [
   {
     className: 'User',
     operationType: OperationType.BeforeCreate,
-    // Need to be after authentication for udpate and create user hook
+    // Need to be after authentication for update and create user hook
     priority: 2,
     callback: defaultSetEmail,
   },
   {
     className: 'User',
     operationType: OperationType.BeforeUpdate,
-    // Need to be after authentication for udpate and create user hook
+    // Need to be after authentication for update and create user hook
     priority: 2,
     callback: defaultSetEmailOnUpdate,
   },
