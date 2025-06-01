@@ -12,7 +12,7 @@ const view = () => (
             </h1>
 
             <p className="text-lg mx-auto text-muted-foreground text-balance">
-              The SaaS boilerplate with NextJS focus on quality, effiency and
+              The SaaS boilerplate with NextJS focus on quality, efficiency and
               security to build powerful SaaS applications.
             </p>
 
