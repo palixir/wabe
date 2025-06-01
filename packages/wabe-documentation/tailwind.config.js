@@ -24,7 +24,7 @@ module.exports = {
             foreground: '#EEEEEC',
           },
         },
-        ligth: {
+        light: {
           colors: {
             background: '#ffffff',
             'background-secondary': '#f8f9fa',

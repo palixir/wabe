@@ -73,7 +73,7 @@ export default defineConfig({
           items: [
             {
               text: 'Classes',
-              link: '/documentation/conig/schema/classes',
+              link: '/documentation/config/schema/classes',
             },
             {
               text: 'Resolvers',
