@@ -11,7 +11,7 @@ Note: Each code contribution must be tested either by an existing test or a new 
 
 ## Note about new PR
 
-First of all, thanks you for taking time to improve Wabe. Wabe have a great test coverage, to keep this code quality, please add tests that cover your changes 🙂.
+First of all, thank you for taking the time to improve Wabe. Wabe has a great test coverage, to keep this code quality, please add tests that cover your changes 🙂.
 
 ## Requirement
 
@@ -44,7 +44,7 @@ bun ci # Run lint + test on package
 
 Before any commit a pre-commit command that will run on your machine to ensure that the code is correctly formatted and the lint is respected. If you have any error of formatting during the pre-commit you can simply run the following command (at the root of the repository):
 
-Wabe repository also uses the conventional commits to ensure a consistence and facilitate the release. Yours PR and yours commits need to follow this convention. You can see here to see more information about [Conventional commits](https://www.conventionalcommits.org/en/v1.0.0/).
+Wabe repository also uses the conventional commits to ensure consistence and facilitate the release. Your PRs and your commits need to follow this convention. You can see here to see more information about [Conventional commits](https://www.conventionalcommits.org/en/v1.0.0/).
 
 ```sh
 bun format
