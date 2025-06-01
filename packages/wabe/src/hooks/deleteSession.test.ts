@@ -93,7 +93,7 @@ describe('Delete session on delete user', () => {
     expect(sessions2.edges.length).toEqual(1)
   })
 
-  it("should not delete any session if the user doens't have any session", async () => {
+  it("should not delete any session if the user doesn't have any session", async () => {
     const {
       signUpWith: { id: userId },
     } = await client.request<any>(graphql.signUpWith, {
