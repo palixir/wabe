@@ -110,7 +110,7 @@ query companies {
 
 As you may have noticed in the query that retrieves multiple objects, you have the option to define an `offset`, which corresponds to the number of results from which you want to start retrieving. You can also specify a `first` number of items to retrieve. The `offset` and `first` fields are **GraphQL Relay** compliant.
 
-For a good pagination, it's recommend to use `totalCount` to get the total number of elements instead of getting the length of the `edges` object. `totalCount` represents the total number of results that are corresponding to your request. Edges only corresponds to the objects returns with `offset` and `first` consideration.
+For a good pagination, it's recommended to use `totalCount` to get the total number of elements instead of getting the length of the `edges` object. `totalCount` represents the total number of results that are corresponding to your request. Edges only corresponds to the objects returns with `offset` and `first` consideration.
 
 For example, in a query with a `where` clause that retrieves a total of 100 results, if you set an `offset` of 20 and a `first` of 10, you will retrieve items from the twentieth to the thirtieth.
 
@@ -161,7 +161,7 @@ Case where the user doesn't exist :
 
 ```graphql
 mutation createCompany {
-  # Here the user with id userId already exist so we just link the new company to this user
+  # Here the user with id userId already exists so we just link the new company to this user
   createCompany(input: {fields: {name: "companyName", mainUser: {link: "userId"}}}) {
     company {
       id
@@ -242,7 +242,7 @@ Case where the user doesn't exist :
 
 ```graphql
 mutation createCompany {
-  # Here the user with id userId1 and userId2 already exist so we just link the new company to this user
+  # Here the user with id userId1 and userId2 already exists so we just link the new company to this user
   createCompany(input: {fields: {name: "companyName", mainUsers: {add: ["userId1", "userId2"]}}}) {
     company {
       id

@@ -51,7 +51,7 @@ await run();
 
 - **Authentication**: Secure and scalable authentication for your applications.
 - **Permissions**: Granular permissions control to secure your resources.
-- **Database**: A powerful, scalable database to store and manage you data.
+- **Database**: A powerful, scalable database to store and manage your data.
 - **GraphQL API**: A flexible and powerful GraphQL API (following GraphQL Relay standard) to interact with your data.
 - **Hooks**: Powerful hooks system to execute custom actions before or after database requests.
 - **Email**: Send emails with your favorite provider with very simple integration.
