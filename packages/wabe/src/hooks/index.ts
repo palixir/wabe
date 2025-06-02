@@ -45,6 +45,7 @@ import {
   defaultSetupAclBeforeCreate,
   defaultSetupAclOnUserAfterCreate,
 } from './setupAcl'
+import { hashFieldHook } from './hashFieldHook'
 
 export enum OperationType {
   AfterCreate = 'afterCreate',
@@ -400,5 +401,15 @@ export const getDefaultHooks = (): Hook<any, any>[] => [
     operationType: OperationType.BeforeUpdate,
     priority: 1,
     callback: defaultBeforeUpdateSessionOnUser,
+  },
+  {
+    operationType: OperationType.BeforeCreate,
+    priority: 1,
+    callback: hashFieldHook,
+  },
+  {
+    operationType: OperationType.BeforeUpdate,
+    priority: 1,
+    callback: hashFieldHook,
   },
 ]
