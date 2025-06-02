@@ -17,6 +17,7 @@ export type WabePrimaryTypes =
   | 'Phone'
   | 'Date'
   | 'File'
+  | 'Hash'
 
 export type WabeCustomTypes = 'Array' | 'Object'
 
@@ -100,6 +101,7 @@ export type TypeField<T extends WabeTypes> = (
   | TypeFieldBase<Date, 'Date'>
   | TypeFieldBase<string, 'Email'>
   | TypeFieldBase<string, 'Phone'>
+  | TypeFieldBase<string, 'Hash'>
   | TypeFieldArray<T>
   | TypeFieldObject<T>
   | TypeFieldPointer<T>
