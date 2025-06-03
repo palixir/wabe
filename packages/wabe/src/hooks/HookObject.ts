@@ -18,7 +18,7 @@ export class HookObject<
 > {
   public className: K
   private newData: MutationData<T, K, keyof T['types'][K]> | undefined
-  private operationType: OperationType
+  public operationType: OperationType
   public context: WabeContext<T>
   public object: OutputType<T, K, keyof T['types'][K]>
   // Object before any mutation, for example before delete
@@ -62,7 +62,7 @@ export class HookObject<
   upsertNewData(field: keyof T['types'][K], value: any) {
     if (!this.newData) return
 
-    if (!this.operationType.includes('before'))
+    if (!['beforeCreate', 'beforeUpdate'].includes(this.operationType))
       throw new Error('Cannot set data in a hook that is not a before hook')
 
     this.newData[field] = value

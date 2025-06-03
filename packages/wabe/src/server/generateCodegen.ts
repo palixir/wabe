@@ -24,6 +24,7 @@ const wabePrimaryTypesToTypescriptTypes: Record<WabePrimaryTypes, string> = {
   Phone: 'string',
   Date: 'Date',
   File: '{url: string, name: string}',
+  Hash: 'string',
 }
 
 const wabeTypesToTypescriptTypes = ({
@@ -94,7 +95,11 @@ const generateWabeObject = ({
           ...{
             [objectNameWithPrefix]: {
               ...acc[objectNameWithPrefix],
-              [`${fieldName}${field.required ? '' : 'undefined'}`]: `${isArray ? 'Array<' : ''}${objectNameWithPrefix}${firstLetterUpperCase(field.object.name)}${isArray ? '>' : ''}`,
+              [`${fieldName}${field.required ? '' : 'undefined'}`]: `${
+                isArray ? 'Array<' : ''
+              }${objectNameWithPrefix}${firstLetterUpperCase(field.object.name)}${
+                isArray ? '>' : ''
+              }`,
             },
           },
         }
@@ -296,12 +301,13 @@ const generateWabeMutationOrQueryInput = (
             mutationObject,
         }
       : {}),
-    [`${isMutation ? 'Mutation' : 'Query'}${firstLetterInUpperCase(mutationOrQueryName)}Args`]:
-      isMutation
-        ? {
-            input: `${firstLetterInUpperCase(mutationOrQueryName)}Input`,
-          }
-        : mutationObject,
+    [`${isMutation ? 'Mutation' : 'Query'}${firstLetterInUpperCase(
+      mutationOrQueryName,
+    )}Args`]: isMutation
+      ? {
+          input: `${firstLetterInUpperCase(mutationOrQueryName)}Input`,
+        }
+      : mutationObject,
     ...objects,
   }
 }
@@ -385,7 +391,9 @@ const generateWabeDevTypes = ({
 
   const wabeEnumsGlobalTypesString =
     wabeEnumsGlobalTypes.length > 0
-      ? `export type WabeSchemaEnums = {\n\t${wabeEnumsGlobalTypes.join(',\n\t')}\n}`
+      ? `export type WabeSchemaEnums = {\n\t${wabeEnumsGlobalTypes.join(
+          ',\n\t',
+        )}\n}`
       : ''
 
   // Classes

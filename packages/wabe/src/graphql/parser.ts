@@ -57,6 +57,7 @@ export const templateScalarType: Record<WabePrimaryTypes, GraphQLScalarType> = {
   Email: EmailScalarType,
   File: FileScalarType,
   Phone: PhoneScalarType,
+  Hash: GraphQLString,
 }
 
 export const templateWhereInput: Record<
@@ -72,6 +73,7 @@ export const templateWhereInput: Record<
   Phone: PhoneWhereInput,
   Array: ArrayWhereInput,
   File: FileWhereInput,
+  Hash: StringWhereInput,
 }
 
 interface GraphqlParserFactoryOptions {
