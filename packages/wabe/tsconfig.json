@@ -2,11 +2,11 @@
 	"compilerOptions": {
 		"lib": ["ESNext"],
 		"target": "ESNext",
-		"module": "NodeNext",
+		"module": "ESNext",
 		"moduleDetection": "force",
 		"allowJs": true,
 
-		"moduleResolution": "nodenext",
+		"moduleResolution": "bundler",
 		"verbatimModuleSyntax": false,
 		"outDir":"dist",
 		"noEmit": true,
