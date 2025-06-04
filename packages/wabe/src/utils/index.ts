@@ -1,6 +1,33 @@
 import type { ClassInterface } from '../schema'
 import type { WabeTypes, WabeConfig } from '../server'
 
+export const getNewObjectAfterUpdateNestedProperty = (
+  obj: any,
+  path: string,
+  value: any,
+) => {
+  const keys = path.split('.')
+  let current = { ...obj }
+
+  for (let i = 0; i < keys.length - 1; i++) {
+    const key = keys[i]
+    if (current[key] === undefined) {
+      current[key] = {}
+    }
+    current = current[key]
+  }
+
+  current[keys[keys.length - 1]] = value
+  return obj
+}
+
+export const getNestedProperty = (obj: any, path: string) => {
+  return path.split('.').reduce((acc, part) => acc?.[part], obj)
+}
+
+export const isArgon2Hash = (value: string): boolean =>
+  typeof value === 'string' && value.startsWith('$argon2')
+
 export const firstLetterInUpperCase = (str: string) => {
   const indexOfFirstLetter = str.search(/[a-z]/i)
 

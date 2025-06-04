@@ -11,10 +11,6 @@ import { contextWithRoot } from '../utils/export'
 import type { DevWabeTypes } from '../utils/helper'
 import { HookObject } from './HookObject'
 import {
-  defaultCallAuthenticationProviderOnBeforeCreateUser,
-  defaultCallAuthenticationProviderOnBeforeUpdateUser,
-} from './authentication'
-import {
   defaultBeforeCreateForCreatedAt,
   defaultBeforeCreateForDefaultValue,
   defaultBeforeUpdateForUpdatedAt,
@@ -327,18 +323,7 @@ export const getDefaultHooks = (): Hook<any, any>[] => [
     priority: 1,
     callback: defaultAfterDeleteFile,
   },
-  {
-    className: 'User',
-    operationType: OperationType.BeforeCreate,
-    priority: 1,
-    callback: defaultCallAuthenticationProviderOnBeforeCreateUser,
-  },
-  {
-    className: 'User',
-    operationType: OperationType.BeforeUpdate,
-    priority: 1,
-    callback: defaultCallAuthenticationProviderOnBeforeUpdateUser,
-  },
+
   {
     operationType: OperationType.BeforeCreate,
     // Need to be after email setup
