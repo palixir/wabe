@@ -49,12 +49,12 @@ export type Authentication = {
 
 export type AuthenticationPhonePassword = {
 	phone: string,
-	password: string
+	password: Hash
 }
 
 export type AuthenticationEmailPassword = {
 	email: string,
-	password: string
+	password: Hash
 }
 
 export type AuthenticationGoogle = {
@@ -297,12 +297,12 @@ export type SignInWithAuthentication = {
 
 export type SignInWithAuthenticationPhonePassword = {
 	phone: string,
-	password: string
+	password: Hash
 }
 
 export type SignInWithAuthenticationEmailPassword = {
 	email: string,
-	password: string
+	password: Hash
 }
 
 export type SignInWithAuthenticationGoogle = {
@@ -340,12 +340,12 @@ export type SignUpWithAuthentication = {
 
 export type SignUpWithAuthenticationPhonePassword = {
 	phone: string,
-	password: string
+	password: Hash
 }
 
 export type SignUpWithAuthenticationEmailPassword = {
 	email: string,
-	password: string
+	password: Hash
 }
 
 export type SignUpWithAuthenticationGoogle = {
