@@ -1,5 +1,4 @@
 import { runDatabase as runPostgresDatabase } from 'wabe-postgres-launcher'
-import { Wabe } from '../src'
 import {
   RoleEnum,
   type WabeSchemaWhereTypes,
@@ -8,6 +7,7 @@ import {
   type WabeSchemaTypes,
 } from '../generated/wabe'
 import { getDatabaseAdapter } from '../src/utils/testHelper'
+import { Wabe } from '../src/server/index'
 
 const run = async () => {
   await runPostgresDatabase()

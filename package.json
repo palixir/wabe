@@ -9,6 +9,7 @@
   "private": true,
   "workspaces": ["packages/*"],
   "scripts": {
+    "clean": "git clean -fdX",
     "build:wabe": "bun --filter './packages/wabe' build",
     "build:wabe-mongodb-launcher": "bun --filter './packages/wabe-mongodb-launcher' build",
     "build:wabe-postgres-launcher": "bun --filter './packages/wabe-postgres-launcher' build",
