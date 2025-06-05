@@ -49,6 +49,16 @@ describe('hashFieldHook', () => {
         },
       },
     },
+    twoHashes: {
+      type: 'Object',
+      object: {
+        name: 'TwoHashes',
+        fields: {
+          hash1: { type: 'Hash' },
+          hash2: { type: 'Hash' },
+        },
+      },
+    },
   }
 
   it('should hashed a plain value in a sub object in beforeCreate', async () => {
@@ -74,6 +84,37 @@ describe('hashFieldHook', () => {
       'mysecret',
     )
     expect(isValid).toBe(true)
+  })
+
+  it('should hashed a plain value in a sub object with 2 hash fields in beforeCreate', async () => {
+    const newData = {
+      twoHashes: { hash1: 'mysecret', hash2: 'mysecret' },
+    }
+
+    const hookObject = makeHookObject({
+      className: 'User',
+      operationType: OperationType.BeforeCreate,
+      newData,
+      fields,
+    })
+
+    await hashFieldHook(hookObject)
+
+    expect(hookObject.getNewData().twoHashes.hash1).not.toBe('mysecret')
+
+    const isValid = await verify(
+      hookObject.getNewData().twoHashes.hash1,
+      'mysecret',
+    )
+    expect(isValid).toBe(true)
+
+    expect(hookObject.getNewData().twoHashes.hash2).not.toBe('mysecret')
+
+    const isValid2 = await verify(
+      hookObject.getNewData().twoHashes.hash2,
+      'mysecret',
+    )
+    expect(isValid2).toBe(true)
   })
 
   it('hashes a plain value on beforeCreate', async () => {

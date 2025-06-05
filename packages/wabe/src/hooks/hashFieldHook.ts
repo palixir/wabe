@@ -1,11 +1,10 @@
 import { hash, Algorithm } from '@node-rs/argon2'
 import type { HookObject } from './HookObject'
 import type { WabeTypes } from '../server'
-import type { TypeField } from '../schema/Schema'
 import {
   getNestedProperty,
-  isArgon2Hash,
   getNewObjectAfterUpdateNestedProperty,
+  isArgon2Hash,
 } from '../utils'
 import { OperationType } from '.'
 
@@ -14,9 +13,7 @@ const hashField = ({
 }: {
   value: ReturnType<typeof HookObject.prototype.getNewData>
 }) => {
-  if (!value || typeof value !== 'string') return
-
-  if (isArgon2Hash(value)) return value
+  if (!value || typeof value !== 'string' || isArgon2Hash(value)) return value
 
   return hash(value, { algorithm: Algorithm.Argon2id })
 }
@@ -33,68 +30,69 @@ export async function hashFieldHook<
 
   const fields = hookObject.context.wabe.config.schema?.classes?.find(
     (cls: any) => cls.name === hookObject.className,
-  )?.fields as Record<string, TypeField<T>>
+  )?.fields
 
   if (!fields) return
 
-  const computeHashForFields = async ({
+  const computeHashForFields = ({
     fieldsToCompute,
     path = '',
   }: {
     fieldsToCompute: typeof fields
     path?: string
-  }) => {
-    for (const [fieldName, fieldDef] of Object.entries(fieldsToCompute)) {
-      if (fieldDef.type === 'Object') {
-        await computeHashForFields({
+  }) =>
+    Promise.all(
+      Object.entries(fieldsToCompute).map(async ([fieldName, fieldDef]) => {
+        if (fieldDef.type === 'Object') {
+          await computeHashForFields({
+            // @ts-expect-error
+            fieldsToCompute: fieldDef.object.fields,
+            path: `${path || ''}${path ? '.' : ''}${fieldName}`,
+          })
+
+          return
+        }
+
+        if (fieldDef.type !== 'Hash') return
+
+        // If we don't have nested object
+        if (!path) {
+          const hashed = await hashField({
+            // @ts-expect-error
+            value: hookObject.getNewData()[fieldName],
+          })
+
           // @ts-expect-error
-          fieldsToCompute: fieldDef.object.fields,
-          path: `${path || ''}${path ? '.' : ''}${fieldName}`,
-        })
+          hookObject.upsertNewData(fieldName, hashed)
 
-        continue
-      }
+          return
+        }
 
-      if (fieldDef.type !== 'Hash') continue
-
-      // If we don't have nested object
-      if (!path) {
-        const hashed = await hashField({
-          // @ts-expect-error
-          value: hookObject.getNewData()[fieldName],
-        })
-
+        const objectNameToUpdate = path.split('.')[0]
         // @ts-expect-error
-        hookObject.upsertNewData(fieldName, hashed)
+        const objectToUpdate = hookObject.getNewData()[objectNameToUpdate]
+        const valueToUpdate = getNestedProperty(hookObject.getNewData(), path)
 
-        continue
-      }
+        if (!valueToUpdate?.[fieldName]) return
 
-      const objectNameToUpdate = path.split('.')[0]
-      // @ts-expect-error
-      const objectToUpdate = hookObject.getNewData()[objectNameToUpdate]
-      const valueToUpdate = getNestedProperty(hookObject.getNewData(), path)
+        const hashed = await hashField({
+          value: valueToUpdate[fieldName],
+        })
 
-      if (!valueToUpdate?.[fieldName]) continue
-
-      const hashed = await hashField({
-        value: valueToUpdate[fieldName],
-      })
-
-      const newObject = getNewObjectAfterUpdateNestedProperty(
-        { [objectNameToUpdate]: objectToUpdate },
-        `${path}.${fieldName}`,
-        hashed,
-      )
-
-      if (hashed)
-        hookObject.upsertNewData(
-          // @ts-expect-error
-          objectNameToUpdate,
-          newObject[objectNameToUpdate],
+        const newObject = getNewObjectAfterUpdateNestedProperty(
+          { [objectNameToUpdate]: objectToUpdate },
+          `${path}.${fieldName}`,
+          hashed,
         )
-    }
-  }
+
+        if (hashed)
+          hookObject.upsertNewData(
+            // @ts-expect-error
+            objectNameToUpdate,
+            newObject[objectNameToUpdate],
+          )
+      }),
+    )
 
   await computeHashForFields({ fieldsToCompute: fields })
 }
