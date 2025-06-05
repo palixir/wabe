@@ -97,7 +97,7 @@ export const defaultAuthenticationMethods = <
         required: true,
       },
       password: {
-        type: 'String',
+        type: 'Hash',
         required: true,
       },
     },
@@ -107,7 +107,7 @@ export const defaultAuthenticationMethods = <
         required: true,
       },
       password: {
-        type: 'String',
+        type: 'Hash',
         required: true,
       },
     },
@@ -122,7 +122,7 @@ export const defaultAuthenticationMethods = <
         required: true,
       },
       password: {
-        type: 'String',
+        type: 'Hash',
         required: true,
       },
     },
@@ -132,7 +132,7 @@ export const defaultAuthenticationMethods = <
         required: true,
       },
       password: {
-        type: 'String',
+        type: 'Hash',
         required: true,
       },
     },

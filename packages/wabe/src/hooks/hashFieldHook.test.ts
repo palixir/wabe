@@ -2,6 +2,8 @@ import { hashFieldHook } from './hashFieldHook'
 import { describe, expect, it } from 'bun:test'
 import { Algorithm, verify, hash as argon2hash } from '@node-rs/argon2'
 import { HookObject } from './HookObject'
+import type { SchemaFields } from '../schema'
+import { OperationType } from '.'
 
 const makeHookObject = ({ className, operationType, newData, fields }: any) => {
   const config = {
@@ -27,10 +29,52 @@ const makeHookObject = ({ className, operationType, newData, fields }: any) => {
 }
 
 describe('hashFieldHook', () => {
-  const fields = {
+  const fields: SchemaFields<any> = {
     password: { type: 'Hash' },
     email: { type: 'Email' },
+    authentication: {
+      type: 'Object',
+      object: {
+        name: 'Authentication',
+        fields: {
+          emailPassword: {
+            type: 'Object',
+            object: {
+              name: 'EmailPassword',
+              fields: {
+                password: { type: 'Hash' },
+              },
+            },
+          },
+        },
+      },
+    },
   }
+
+  it('should hashed a plain value in a sub object in beforeCreate', async () => {
+    const newData = {
+      authentication: { emailPassword: { password: 'mysecret' } },
+    }
+
+    const hookObject = makeHookObject({
+      className: 'User',
+      operationType: OperationType.BeforeCreate,
+      newData,
+      fields,
+    })
+
+    await hashFieldHook(hookObject)
+
+    expect(
+      hookObject.getNewData().authentication.emailPassword.password,
+    ).not.toBe('mysecret')
+
+    const isValid = await verify(
+      hookObject.getNewData().authentication.emailPassword.password,
+      'mysecret',
+    )
+    expect(isValid).toBe(true)
+  })
 
   it('hashes a plain value on beforeCreate', async () => {
     const newData = { password: 'mysecret', email: 'test@example.com' }
@@ -43,7 +87,7 @@ describe('hashFieldHook', () => {
     await hashFieldHook(hookObject)
     expect(hookObject.getNewData().password).not.toBe('mysecret')
     expect(hookObject.getNewData().email).toBe('test@example.com')
-    // Verify the hash
+
     const isValid = await verify(hookObject.getNewData().password, 'mysecret')
     expect(isValid).toBe(true)
   })

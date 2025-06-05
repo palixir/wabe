@@ -45,6 +45,7 @@ const wabeTypesToTypescriptTypes = ({
     case 'Email':
     case 'Phone':
     case 'File':
+    case 'Hash':
       return wabePrimaryTypesToTypescriptTypes[field.type]
     case 'Array':
       if (field.typeValue === 'Object') return `Array<${field.object.name}>`
