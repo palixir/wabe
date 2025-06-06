@@ -136,7 +136,7 @@ export const buildMongoWhereQuery = <
 
         if (entries.length > 0)
           return {
-            [`${keyToWrite.toString()}.${entries[0][0]}`]: entries[0][1],
+            [`${keyToWrite.toString()}.${entries[0]?.[0]}`]: entries[0]?.[1],
           }
       }
 

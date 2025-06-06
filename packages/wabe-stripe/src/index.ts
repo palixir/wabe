@@ -352,7 +352,7 @@ export class StripeAdapter implements PaymentAdapter {
 
       const lastElement = transactions.data[transactions.data.length - 1]
 
-      return recursiveToGetTotalRevenue(newTotalRevenue, lastElement.id)
+      return recursiveToGetTotalRevenue(newTotalRevenue, lastElement?.id)
     }
 
     return recursiveToGetTotalRevenue()
@@ -373,8 +373,8 @@ export class StripeAdapter implements PaymentAdapter {
         invoice.subscription?.toString() || '',
       )
 
-      const intervalCount = subscription.items.data[0].plan.interval_count
-      const interval = subscription.items.data[0].plan.interval
+      const intervalCount = subscription.items.data[0]?.plan.interval_count
+      const interval = subscription.items.data[0]?.plan.interval
 
       return { intervalCount, interval }
     }
@@ -421,7 +421,7 @@ export class StripeAdapter implements PaymentAdapter {
 
       return recursiveToGetAllTransactions(
         newArrayOfTransactions,
-        lastElement.id,
+        lastElement?.id,
       )
     }
 
@@ -440,14 +440,14 @@ export class StripeAdapter implements PaymentAdapter {
       })
 
       const newTotalRevenue = subscriptions.data.reduce((acc, subscription) => {
-        return acc + (subscription.items.data[0].plan.amount || 0)
+        return acc + (subscription.items.data[0]?.plan.amount || 0)
       }, totalRevenue)
 
       if (!subscriptions.has_more) return newTotalRevenue
 
       const lastElement = subscriptions.data[subscriptions.data.length - 1]
 
-      return recursiveGetSubscriptionRevenue(newTotalRevenue, lastElement.id)
+      return recursiveGetSubscriptionRevenue(newTotalRevenue, lastElement?.id)
     }
 
     return recursiveGetSubscriptionRevenue()

@@ -20,7 +20,7 @@ export interface FileAdapter {
    * Upload a file and returns the url of the file
    * @param file: File
    */
-  uploadFile(file: File | Blob): Promise<void>
+  uploadFile(file: File): Promise<void>
   /**
    * Read a file and returns the url of the file
    * @param fileName: string
