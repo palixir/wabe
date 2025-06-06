@@ -17,7 +17,6 @@ import { WobeGraphqlYogaPlugin } from 'wobe-graphql-yoga'
 import type { Context, CorsOptions, RateLimitOptions } from 'wobe'
 import type { WabeContext } from './interface'
 import { initializeRoles } from '../authentication/roles'
-import type { FileConfig } from '../files'
 import type { EmailConfig } from '../email'
 import { EmailController } from '../email/EmailController'
 import type { PaymentConfig } from '../payment/interface'
@@ -27,6 +26,7 @@ import type { AIConfig } from '../ai'
 import { FileController } from '../files/FileController'
 import { defaultSessionHandler } from './defaultHandlers'
 import type { CronConfig } from '../cron'
+import type { FileConfig } from '../files'
 
 type SecurityConfig = {
   corsOptions?: CorsOptions

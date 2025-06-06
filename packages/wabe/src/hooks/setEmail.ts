@@ -7,7 +7,7 @@ const updateEmail = (object: HookObject<DevWabeTypes, 'User'>) => {
   if (!authentication) return
 
   // Considering that we only have one authentication provider (for double auth maybe need an adjustment)
-  const provider = Object.keys(authentication)[0]
+  const provider = Object.keys(authentication)[0] || ''
 
   const emailToSave = authentication[provider].email
 

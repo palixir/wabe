@@ -56,7 +56,7 @@ export const extractFieldsFromSetNode = (
 }
 
 const getFieldsFromInfo = (info: GraphQLResolveInfo, className: string) => {
-  const selectionSet = info.fieldNodes[0].selectionSet
+  const selectionSet = info.fieldNodes[0]?.selectionSet
 
   if (!selectionSet) throw new Error('No output fields provided')
 
@@ -183,10 +183,12 @@ const transformOrder = (
 ): Record<string, 'ASC' | 'DESC'> =>
   order?.reduce(
     (acc, currentOrder) => {
-      const [key, value] = Object.entries(currentOrder)[0]
+      const result = Object.entries(currentOrder)[0]
+
+      if (!result || !result[0] || !result[1]) return acc
 
       // @ts-expect-error
-      acc[key] = value
+      acc[result[0]] = result[1]
 
       return acc
     },

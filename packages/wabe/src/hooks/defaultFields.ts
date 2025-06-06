@@ -30,10 +30,10 @@ export const defaultBeforeCreateForDefaultValue = async (
     const currentSchemaField = schemaClass.fields[field]
     if (
       !object.isFieldUpdated(field) &&
-      currentSchemaField.type !== 'Pointer' &&
-      currentSchemaField.type !== 'Relation' &&
-      currentSchemaField.type !== 'File' &&
-      currentSchemaField.defaultValue !== undefined
+      currentSchemaField?.type !== 'Pointer' &&
+      currentSchemaField?.type !== 'Relation' &&
+      currentSchemaField?.type !== 'File' &&
+      currentSchemaField?.defaultValue !== undefined
     )
       object.upsertNewData(field, currentSchemaField.defaultValue)
   })

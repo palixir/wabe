@@ -97,7 +97,7 @@ describe('hooks/session', () => {
     await wabe.controllers.database.deleteObjects({
       className: '_Session',
       where: {
-        id: { equalTo: res2[0]?.sessions?.[0].id },
+        id: { equalTo: res2[0]?.sessions?.[0]?.id },
       },
       context: {
         wabe,

@@ -4,7 +4,7 @@
  * @param urlCacheInSeconds: number Number of seconds to cache the url, equal to the number of seconds the url will be valid
  * @param devDirectory: string The directory where the files will be uploaded
  */
-export interface FileConfig {
+export type FileConfig = {
   adapter: FileAdapter
   urlCacheInSeconds?: number
   devDirectory?: string

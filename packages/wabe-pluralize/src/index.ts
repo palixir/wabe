@@ -76,7 +76,11 @@ export const pluralize = (noun: string): string => {
   )
     return `${noun}es`
 
-  if (noun.endsWith('y') && !'aeiou'.includes(noun[noun.length - 2]))
+  const element = noun[noun.length - 2]
+
+  if (!element) return `${noun}s`
+
+  if (noun.endsWith('y') && !'aeiou'.includes(element))
     return `${noun.slice(0, -1)}ies`
 
   return `${noun}s`

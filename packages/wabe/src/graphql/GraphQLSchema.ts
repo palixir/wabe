@@ -122,12 +122,16 @@ export class GraphQLSchema {
 
         // Loop to avoid O(n)² complexity of spread on accumulator
         for (const key in defaultQueriesKeys) {
+          // @ts-expect-error
           acc.queries[defaultQueriesKeys[key]] =
+            // @ts-expect-error
             defaultQueries[defaultQueriesKeys[key]]
         }
 
         for (const key in defaultMutationsKeys) {
+          // @ts-expect-error
           acc.mutations[defaultMutationsKeys[key]] =
+            // @ts-expect-error
             defaultMutations[defaultMutationsKeys[key]]
         }
 
@@ -156,7 +160,9 @@ export class GraphQLSchema {
     const customQueriesKeys = Object.keys(customQueries)
 
     for (const key in customQueriesKeys) {
+      // @ts-expect-error
       queriesMutationAndObjects.queries[customQueriesKeys[key]] =
+        // @ts-expect-error
         customQueries[customQueriesKeys[key]]
     }
 
@@ -168,7 +174,9 @@ export class GraphQLSchema {
     const customMutationsKeys = Object.keys(customMutations)
 
     for (const key in customMutationsKeys) {
+      // @ts-expect-error
       queriesMutationAndObjects.mutations[customMutationsKeys[key]] =
+        // @ts-expect-error
         customMutations[customMutationsKeys[key]]
     }
 
@@ -605,11 +613,14 @@ export class GraphQLSchema {
     return Object.keys(resolvers).reduce(
       (acc, currentKey) => {
         const currentMutation = resolvers[currentKey]
-        const required = !!currentMutation.required
-        const input = currentMutation.args?.input || {}
+
+        if (!currentMutation) return acc
+
+        const required = !!currentMutation?.required
+        const input = currentMutation?.args?.input || {}
         const numberOfFieldsInInput = Object.keys(input).length
 
-        const currentKeyWithFirstLetterUpperCase = `${currentKey[0].toUpperCase()}${currentKey.slice(
+        const currentKeyWithFirstLetterUpperCase = `${currentKey[0]?.toUpperCase()}${currentKey.slice(
           1,
         )}`
 
@@ -660,8 +671,11 @@ export class GraphQLSchema {
     return Object.keys(resolvers).reduce(
       (acc, currentKey) => {
         const currentQuery = resolvers[currentKey]
-        const required = !!currentQuery.required
-        const currentArgs = currentQuery.args || {}
+
+        if (!currentQuery) return acc
+
+        const required = !!currentQuery?.required
+        const currentArgs = currentQuery?.args || {}
 
         const graphqlParserWithInput = graphqlParser({
           schemaFields: currentArgs,

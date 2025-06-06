@@ -21,7 +21,7 @@ const handleFile = async (hookObject: HookObject<any, any>) => {
         return
       }
 
-      if (schema.fields[keyName].type !== 'File' || !(file instanceof File))
+      if (schema.fields[keyName]?.type !== 'File' || !(file instanceof File))
         return
 
       if (!hookObject.context.wabe.controllers.file)

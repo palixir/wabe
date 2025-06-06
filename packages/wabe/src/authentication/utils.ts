@@ -34,7 +34,7 @@ export const getAuthenticationMethod = <
   // We check if the authentication method is valid
   const validAuthenticationMethod = customAuthenticationConfig.find(
     (method) =>
-      method.name.toLowerCase() === authenticationMethod.toLowerCase(),
+      method.name.toLowerCase() === authenticationMethod?.toLowerCase(),
   )
 
   if (!validAuthenticationMethod)

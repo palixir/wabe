@@ -76,10 +76,10 @@ describe('EmailOTPProvider', () => {
       }),
     )
 
-    const otp = spySendOtpCodeTemplate.mock.calls[0][0]
+    const otp = spySendOtpCodeTemplate.mock.calls[0]?.[0]
 
     expect(spySendOtpCodeTemplate).toHaveBeenCalledTimes(1)
-    expect(otp.length).toBe(6)
+    expect(otp?.length).toBe(6)
   })
 
   it('should return the userId if the OTP code is valid', async () => {

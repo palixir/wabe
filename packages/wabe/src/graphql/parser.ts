@@ -137,7 +137,7 @@ export const GraphqlParser: GraphqlParserConstructor =
             .charAt(0)
             .toUpperCase()}${key.slice(1)}`
 
-          if (currentField.type === 'Object') {
+          if (currentField?.type === 'Object') {
             acc[key] = {
               type: callBackForObjectType({
                 required: currentField.object.required,
@@ -150,8 +150,8 @@ export const GraphqlParser: GraphqlParserConstructor =
             return acc
           }
 
-          if (currentField.type === 'Array') {
-            if (currentField.typeValue === 'Object') {
+          if (currentField?.type === 'Array') {
+            if (currentField?.typeValue === 'Object') {
               const objectList = new GraphQLList(
                 callBackForObjectType({
                   required: currentField.object.required,
@@ -195,13 +195,13 @@ export const GraphqlParser: GraphqlParserConstructor =
           const graphqlType = getGraphqlType({
             ...currentField,
             // We never come here, complicated to good type this
-            type: currentField.type as WabePrimaryTypes,
+            type: currentField?.type as WabePrimaryTypes,
             isWhereType,
           })
 
           acc[key] = {
             type:
-              currentField.required && !forceRequiredToFalse
+              currentField?.required && !forceRequiredToFalse
                 ? new GraphQLNonNull(graphqlType)
                 : graphqlType,
           }
@@ -431,8 +431,8 @@ export const GraphqlParser: GraphqlParserConstructor =
         (acc, key) => {
           const currentField = schemaFields[key]
 
-          const isRelation = currentField.type === 'Relation'
-          const isPointer = currentField.type === 'Pointer'
+          const isRelation = currentField?.type === 'Relation'
+          const isPointer = currentField?.type === 'Pointer'
 
           if (isRelation || isPointer) {
             const graphqlObject = allObjects[currentField.class]
@@ -441,8 +441,8 @@ export const GraphqlParser: GraphqlParserConstructor =
               case 'Object': {
                 acc[key] = {
                   type: isRelation
-                    ? graphqlObject.connectionObject
-                    : graphqlObject.object,
+                    ? graphqlObject?.connectionObject
+                    : graphqlObject?.object,
                 }
 
                 break
@@ -452,15 +452,15 @@ export const GraphqlParser: GraphqlParserConstructor =
               case 'InputObject': {
                 acc[key] = {
                   type: isRelation
-                    ? graphqlObject.relationInputObject
-                    : graphqlObject.pointerInputObject,
+                    ? graphqlObject?.relationInputObject
+                    : graphqlObject?.pointerInputObject,
                 }
 
                 break
               }
               case 'WhereInputObject': {
                 acc[key] = {
-                  type: allObjects[currentField.class].whereInputObject,
+                  type: allObjects[currentField.class]?.whereInputObject,
                 }
 
                 break
@@ -470,12 +470,12 @@ export const GraphqlParser: GraphqlParserConstructor =
             return acc
           }
 
-          if (currentField.type === 'File') {
+          if (currentField?.type === 'File') {
             if (graphqlObjectType === 'Object')
               acc[key] = {
                 type: currentField.required
-                  ? new GraphQLNonNull(allObjects.FileInfo.object)
-                  : allObjects.FileInfo.object,
+                  ? new GraphQLNonNull(allObjects.FileInfo?.object)
+                  : allObjects.FileInfo?.object,
               }
 
             if (
@@ -484,15 +484,15 @@ export const GraphqlParser: GraphqlParserConstructor =
             ) {
               acc[key] = {
                 type: currentField.required
-                  ? new GraphQLNonNull(allObjects.FileInfo.inputObject)
-                  : allObjects.FileInfo.inputObject,
+                  ? new GraphQLNonNull(allObjects.FileInfo?.inputObject)
+                  : allObjects.FileInfo?.inputObject,
               }
             }
 
             return acc
           }
 
-          if (currentField.type === 'Object') {
+          if (currentField?.type === 'Object') {
             acc[key] = {
               type: callback({
                 ...currentField,
@@ -504,7 +504,7 @@ export const GraphqlParser: GraphqlParserConstructor =
             return acc
           }
 
-          if (currentField.type === 'Array') {
+          if (currentField?.type === 'Array') {
             if (currentField.typeValue === 'Object') {
               const objectList = new GraphQLList(
                 callback({
@@ -527,12 +527,13 @@ export const GraphqlParser: GraphqlParserConstructor =
 
           const graphqlType = getGraphqlType({
             ...currentField,
+            type: currentField?.type,
             isWhereType,
           })
 
           acc[key] = {
             type:
-              currentField.required && !forceRequiredToFalse
+              currentField?.required && !forceRequiredToFalse
                 ? new GraphQLNonNull(graphqlType)
                 : graphqlType,
           }

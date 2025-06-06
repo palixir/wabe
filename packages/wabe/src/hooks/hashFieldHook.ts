@@ -68,7 +68,7 @@ export async function hashFieldHook<
           return
         }
 
-        const objectNameToUpdate = path.split('.')[0]
+        const objectNameToUpdate = path.split('.')[0] || ''
         // @ts-expect-error
         const objectToUpdate = hookObject.getNewData()[objectNameToUpdate]
         const valueToUpdate = getNestedProperty(hookObject.getNewData(), path)

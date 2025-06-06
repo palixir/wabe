@@ -7,7 +7,8 @@ import {
   type WabeSchemaTypes,
 } from '../generated/wabe'
 import { getDatabaseAdapter } from '../src/utils/testHelper'
-import { Wabe } from '../src/server/index'
+import { Wabe } from '../src/server'
+import { FileDevAdapter } from '../src'
 
 const run = async () => {
   await runPostgresDatabase()
@@ -34,7 +35,11 @@ const run = async () => {
       failureRedirectPath: 'https://wabe.dev',
     },
     database: {
+      // @ts-expect-error
       adapter: await getDatabaseAdapter('Wabe'),
+    },
+    file: {
+      adapter: new FileDevAdapter(),
     },
     port: 3001,
     schema: {
