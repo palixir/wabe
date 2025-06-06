@@ -22,7 +22,7 @@ export class Buns3Adapter implements FileAdapter {
     this.aclForUrl = options.aclForUrl || 'private'
   }
 
-  async uploadFile(file: File | Blob): Promise<void> {
+  async uploadFile(file: File): Promise<void> {
     await this.s3Client.write(file.name, file)
   }
 

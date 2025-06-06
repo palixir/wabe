@@ -226,13 +226,13 @@ describe('File upload', () => {
     expect(jsonRes.data.createTest3s.edges[1].node.file.name).toEqual('b.text')
 
     expect(spyFileDevAdapterUploadFile).toHaveBeenCalledTimes(2)
-    const fileArg = spyFileDevAdapterUploadFile.mock.calls[0][0]
-    expect(fileArg.name).toEqual('a.text')
-    expect(await fileArg.text()).toEqual('a')
+    const fileArg = spyFileDevAdapterUploadFile.mock.calls[0]?.[0]
+    expect(fileArg?.name).toEqual('a.text')
+    expect(await fileArg?.text()).toEqual('a')
 
-    const fileArg2 = spyFileDevAdapterUploadFile.mock.calls[1][0]
-    expect(fileArg2.name).toEqual('b.text')
-    expect(await fileArg2.text()).toEqual('b')
+    const fileArg2 = spyFileDevAdapterUploadFile.mock.calls[1]?.[0]
+    expect(fileArg2?.name).toEqual('b.text')
+    expect(await fileArg2?.text()).toEqual('b')
   })
 
   it('should upload a file on request on type File on create request', async () => {
@@ -263,9 +263,9 @@ describe('File upload', () => {
     expect(jsonRes.data.createTest3.test3.file.isPresignedUrl).toEqual(true)
 
     expect(spyFileDevAdapterUploadFile).toHaveBeenCalledTimes(1)
-    const fileArg = spyFileDevAdapterUploadFile.mock.calls[0][0]
-    expect(fileArg.name).toEqual('a.text')
-    expect(await fileArg.text()).toEqual('a')
+    const fileArg = spyFileDevAdapterUploadFile.mock.calls[0]?.[0]
+    expect(fileArg?.name).toEqual('a.text')
+    expect(await fileArg?.text()).toEqual('a')
   })
 
   it('should upload a file on request on type File on update request', async () => {
@@ -319,9 +319,9 @@ describe('File upload', () => {
 
     // 2 for create and update
     expect(spyFileDevAdapterUploadFile).toHaveBeenCalledTimes(2)
-    const fileArg = spyFileDevAdapterUploadFile.mock.calls[1][0]
-    expect(fileArg.name).toEqual('b.text')
-    expect(await fileArg.text()).toEqual('b')
+    const fileArg = spyFileDevAdapterUploadFile.mock.calls[1]?.[0]
+    expect(fileArg?.name).toEqual('b.text')
+    expect(await fileArg?.text()).toEqual('b')
   })
 
   it('should return the url of the file on after read request', async () => {

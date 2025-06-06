@@ -50,13 +50,13 @@ const deepCompareGraphQLObjects = (
     const field2 = fields2[fieldName]
 
     // Check field name
-    if (field1.name !== field2.name) return false
+    if (field1?.name !== field2?.name) return false
 
     // Check field description
-    if (field1.description !== field2.description) return false
+    if (field1?.description !== field2?.description) return false
 
     // Check field type
-    if (field1.type.toString() !== field2.type.toString()) return false
+    if (field1?.type.toString() !== field2?.type.toString()) return false
   }
 
   return true

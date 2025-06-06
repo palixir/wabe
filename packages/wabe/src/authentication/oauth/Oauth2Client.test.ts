@@ -76,9 +76,9 @@ describe('Oauth2Client', () => {
     expectedBody.set('redirect_uri', 'https://redirectURI')
 
     expect(spySendTokenRequest).toHaveBeenCalledTimes(1)
-    const body = spySendTokenRequest.mock.calls[0][0]
-    const options = spySendTokenRequest.mock.calls[0][1]
-    expect(body.toString()).toEqual(expectedBody.toString())
+    const body = spySendTokenRequest.mock.calls[0]?.[0]
+    const options = spySendTokenRequest.mock.calls[0]?.[1]
+    expect(body?.toString()).toEqual(expectedBody.toString())
     expect(options).toBeUndefined()
 
     await oauthClient.validateAuthorizationCode('code', {
@@ -95,9 +95,9 @@ describe('Oauth2Client', () => {
     expectedBody2.set('code_verifier', 'codeVerifier')
 
     expect(spySendTokenRequest).toHaveBeenCalledTimes(2)
-    const body2 = spySendTokenRequest.mock.calls[1][0]
-    const options2 = spySendTokenRequest.mock.calls[1][1]
-    expect(body2.toString()).toEqual(expectedBody2.toString())
+    const body2 = spySendTokenRequest.mock.calls[1]?.[0]
+    const options2 = spySendTokenRequest.mock.calls[1]?.[1]
+    expect(body2?.toString()).toEqual(expectedBody2.toString())
     expect(options2).toEqual({
       codeVerifier: 'codeVerifier',
       authenticateWith: 'http_basic_auth',
@@ -121,9 +121,9 @@ describe('Oauth2Client', () => {
     expectedBody.set('grant_type', 'refresh_token')
 
     expect(spySendTokenRequest).toHaveBeenCalledTimes(1)
-    const body = spySendTokenRequest.mock.calls[0][0]
-    const options = spySendTokenRequest.mock.calls[0][1]
-    expect(body.toString()).toEqual(expectedBody.toString())
+    const body = spySendTokenRequest.mock.calls[0]?.[0]
+    const options = spySendTokenRequest.mock.calls[0]?.[1]
+    expect(body?.toString()).toEqual(expectedBody.toString())
     expect(options).toBeUndefined()
 
     await oauthClient.refreshAccessToken('refreshToken', {
@@ -137,9 +137,9 @@ describe('Oauth2Client', () => {
     expectedBody2.set('grant_type', 'refresh_token')
 
     expect(spySendTokenRequest).toHaveBeenCalledTimes(2)
-    const body2 = spySendTokenRequest.mock.calls[1][0]
-    const options2 = spySendTokenRequest.mock.calls[1][1]
-    expect(body2.toString()).toEqual(expectedBody2.toString())
+    const body2 = spySendTokenRequest.mock.calls[1]?.[0]
+    const options2 = spySendTokenRequest.mock.calls[1]?.[1]
+    expect(body2?.toString()).toEqual(expectedBody2.toString())
     expect(options2).toEqual({
       authenticateWith: 'http_basic_auth',
       credentials: 'credentials',

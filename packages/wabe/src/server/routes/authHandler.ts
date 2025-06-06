@@ -24,8 +24,8 @@ export const oauthHandlerCallback = async (
   wabeContext: WabeContext<any>,
 ) => {
   try {
-    const state = decodeURIComponent(context.query.state)
-    const code = decodeURIComponent(context.query.code)
+    const state = decodeURIComponent(context.query.state || '')
+    const code = decodeURIComponent(context.query.code || '')
 
     const stateInCookie = context.getCookie('state')
 

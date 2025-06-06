@@ -11,7 +11,7 @@ export class FileController implements FileAdapter {
     this.wabe = wabe
   }
 
-  uploadFile(file: File | Blob) {
+  uploadFile(file: File) {
     return this.adapter.uploadFile(file)
   }
 

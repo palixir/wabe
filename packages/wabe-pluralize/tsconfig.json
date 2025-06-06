@@ -1,14 +1,31 @@
 {
   "compilerOptions": {
-    "module": "ESNext",
-    "target": "ES2022",
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
-    "skipLibCheck": true,
-    "moduleResolution": "node",
-    "outDir": "dist",
-    "declaration": true
+      // Environment setup & latest features
+      "lib": ["ESNext"],
+      "target": "ESNext",
+      "module": "Preserve",
+      "moduleDetection": "force",
+      "jsx": "react-jsx",
+      "allowJs": true,
+
+      // Bundler mode
+      "moduleResolution": "bundler",
+      "allowImportingTsExtensions": true,
+      "verbatimModuleSyntax": false,
+      "noEmit": true,
+
+      // Best practices
+      "strict": true,
+      "skipLibCheck": true,
+      "noFallthroughCasesInSwitch": true,
+      "noUncheckedIndexedAccess": true,
+      "noImplicitOverride": true,
+
+      // Some stricter flags (disabled by default)
+      "noUnusedLocals": false,
+      "noUnusedParameters": false,
+      "noPropertyAccessFromIndexSignature": false,
+      "baseUrl": "."
   },
   "exclude": [
     "node_modules",

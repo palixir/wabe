@@ -601,7 +601,7 @@ export class PostgresAdapter<T extends WabeTypes>
     const client = await this.pool.connect()
 
     try {
-      const columns = Object.keys(data[0]).map((column) => `"${column}"`)
+      const columns = Object.keys(data[0] || {}).map((column) => `"${column}"`)
       const placeholders = data.map(
         (_, index) =>
           `(${columns.map((_, i) => `$${index * columns.length + i + 1}`).join(', ')})`,

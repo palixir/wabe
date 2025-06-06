@@ -174,8 +174,8 @@ describe('Hooks', () => {
       id: 'id',
     })
 
-    expect(spy_findHooksByPriority.mock.calls[0][0].priority).toEqual(1)
-    expect(spy_findHooksByPriority.mock.calls[1][0].priority).toEqual(2)
+    expect(spy_findHooksByPriority.mock.calls[0]?.[0].priority).toEqual(1)
+    expect(spy_findHooksByPriority.mock.calls[1]?.[0].priority).toEqual(2)
   })
 
   it('should call hook that is trigger by operation type', async () => {

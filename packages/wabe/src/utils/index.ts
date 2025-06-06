@@ -11,12 +11,16 @@ export const getNewObjectAfterUpdateNestedProperty = (
 
   for (let i = 0; i < keys.length - 1; i++) {
     const key = keys[i]
+
+    if (!key) continue
+
     if (current[key] === undefined) {
       current[key] = {}
     }
     current = current[key]
   }
 
+  // @ts-expect-error
   current[keys[keys.length - 1]] = value
   return obj
 }
@@ -33,7 +37,7 @@ export const firstLetterInUpperCase = (str: string) => {
 
   return (
     str.slice(0, indexOfFirstLetter) +
-    str[indexOfFirstLetter].toUpperCase() +
+    str[indexOfFirstLetter]?.toUpperCase() +
     str.slice(indexOfFirstLetter + 1)
   )
 }
@@ -43,7 +47,7 @@ export const firstLetterInLowerCase = (str: string) => {
 
   return (
     str.slice(0, indexOfFirstLetter) +
-    str[indexOfFirstLetter].toLowerCase() +
+    str[indexOfFirstLetter]?.toLowerCase() +
     str.slice(indexOfFirstLetter + 1)
   )
 }

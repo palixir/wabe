@@ -56,8 +56,8 @@ export class DatabaseController<T extends WabeTypes> {
 
     const pointerOrRelationFields = Object.keys(realClass.fields).filter(
       (fieldName) =>
-        realClass.fields[fieldName].type === 'Pointer' ||
-        realClass.fields[fieldName].type === 'Relation',
+        realClass.fields[fieldName]?.type === 'Pointer' ||
+        realClass.fields[fieldName]?.type === 'Relation',
     )
 
     return Object.entries(select).reduce(
@@ -670,16 +670,18 @@ export class DatabaseController<T extends WabeTypes> {
       ),
     )
 
-    const arrayOfComputedData = await Promise.all(
-      hooks.map(
-        async (hook) =>
-          (
-            await hook.runOnMultipleObjects({
-              operationType: OperationType.BeforeCreate,
-            })
-          )?.newData[0],
-      ),
-    )
+    const arrayOfComputedData = (
+      await Promise.all(
+        hooks.map(
+          async (hook) =>
+            (
+              await hook.runOnMultipleObjects({
+                operationType: OperationType.BeforeCreate,
+              })
+            )?.newData[0],
+        ),
+      )
+    ).filter(notEmpty)
 
     const listOfIds = await this.adapter.createObjects({
       className,

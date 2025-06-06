@@ -17,6 +17,6 @@ export class OpenAIAdapter implements AIAdapter {
       store: false,
     })
 
-    return chatCompletion.choices[0].message.content || ''
+    return chatCompletion.choices[0]?.message.content || ''
   }
 }

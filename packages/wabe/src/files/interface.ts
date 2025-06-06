@@ -4,7 +4,7 @@
  * @param urlCacheInSeconds: number Number of seconds to cache the url, equal to the number of seconds the url will be valid
  * @param devDirectory: string The directory where the files will be uploaded
  */
-export interface FileConfig {
+export type FileConfig = {
   adapter: FileAdapter
   urlCacheInSeconds?: number
   devDirectory?: string
@@ -20,7 +20,7 @@ export interface FileAdapter {
    * Upload a file and returns the url of the file
    * @param file: File
    */
-  uploadFile(file: File | Blob): Promise<void>
+  uploadFile(file: File): Promise<void>
   /**
    * Read a file and returns the url of the file
    * @param fileName: string

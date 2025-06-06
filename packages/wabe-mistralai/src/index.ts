@@ -20,7 +20,7 @@ export class MistralAIAdapter implements AIAdapter {
       ],
     })
 
-    const output = result.choices?.[0].message.content as string
+    const output = result.choices?.[0]?.message.content as string
 
     if (!output) throw new Error('No content found')
 

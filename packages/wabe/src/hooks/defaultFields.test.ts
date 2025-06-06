@@ -40,13 +40,13 @@ describe('Default fields', () => {
         expect.any(Date),
       )
 
-      const createdAt = spyHookObjectUpsertNewData.mock.calls[0][1]
+      const createdAt = spyHookObjectUpsertNewData.mock.calls[0]?.[1]
 
       expect(createdAt.getDay()).toEqual(now.getDay())
       expect(createdAt.getMonth()).toEqual(now.getMonth())
       expect(createdAt.getFullYear()).toEqual(now.getFullYear())
 
-      const updatedAt = spyHookObjectUpsertNewData.mock.calls[1][1]
+      const updatedAt = spyHookObjectUpsertNewData.mock.calls[1]?.[1]
       expect(updatedAt.getDay()).toEqual(now.getDay())
       expect(updatedAt.getMonth()).toEqual(now.getMonth())
       expect(updatedAt.getFullYear()).toEqual(now.getFullYear())
@@ -73,7 +73,7 @@ describe('Default fields', () => {
         expect.any(Date),
       )
 
-      const updatedAt = spyHookObjectUpsertNewData.mock.calls[0][1]
+      const updatedAt = spyHookObjectUpsertNewData.mock.calls[0]?.[1]
 
       // Don't test hours to avoid flaky
       expect(updatedAt.getDay()).toEqual(now.getDay())
@@ -101,7 +101,7 @@ describe('Default fields', () => {
       expect(spyHookObjectUpsertNewData).toHaveBeenCalledTimes(1)
     })
 
-    it('should not overwrite if the updatedAt field is already set', async () => {
+    it('should not overwrite if the updatedAt field is already set', () => {
       const hookObject = new HookObject<DevWabeTypes, 'User'>({
         className: 'User',
         operationType: OperationType.BeforeCreate,
@@ -116,7 +116,7 @@ describe('Default fields', () => {
 
       const spyHookObjectUpsertNewData = spyOn(hookObject, 'upsertNewData')
 
-      await defaultBeforeCreateForCreatedAt(hookObject)
+      defaultBeforeCreateForCreatedAt(hookObject)
 
       expect(spyHookObjectUpsertNewData).toHaveBeenCalledTimes(1)
     })
