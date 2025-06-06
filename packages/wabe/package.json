@@ -50,6 +50,7 @@
     "wabe-mongodb-launcher": "workspace:*",
     "wabe-pluralize": "workspace:*",
     "wabe-build": "workspace:*",
-    "wabe-mongodb": "workspace:*"
+    "wabe-mongodb": "workspace:*",
+    "wabe": "workspace:*"
   }
 }
