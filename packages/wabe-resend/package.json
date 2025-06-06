@@ -27,10 +27,9 @@
     "format": "biome format --write . --config-path=../../"
   },
   "dependencies": {
-    "resend": "4.1.2"
+    "resend": "4.5.2"
   },
   "devDependencies": {
-    "@types/bun": "latest",
     "@types/react": "19.0.10",
     "wabe": "workspace:*"
   }

@@ -28,10 +28,9 @@
     "format": "biome format --write . --config-path=../../"
   },
   "dependencies": {
-    "mongodb": "6.15.0"
+    "mongodb": "6.17.0"
   },
   "devDependencies": {
-    "@types/bun": "latest",
     "wabe": "workspace:*",
     "wabe-mongodb-launcher": "workspace:*",
     "get-port": "7.1.0",
