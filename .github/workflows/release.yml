@@ -12,7 +12,6 @@ on:
           - "wabe-mongodb"
           - "wabe-postgres"
           - "wabe-resend"
-          - "wabe-stripe"
           - "wabe-openai"
           - "wabe-mistralai"
           - "wabe-buns3"

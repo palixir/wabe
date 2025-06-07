@@ -67,7 +67,7 @@ describe('Postgres adapter', () => {
       context,
     })
 
-    expect(res2[0].id).toBeDefined()
+    expect(res2[0]?.id).toBeDefined()
   })
 
   it('should create a row with an array field', async () => {

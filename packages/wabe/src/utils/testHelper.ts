@@ -1,20 +1,16 @@
 import { v4 as uuid } from 'uuid'
-import {
-  type ClassInterface,
-  Currency,
-  EmailDevAdapter,
-  FileDevAdapter,
-  PaymentDevAdapter,
-} from '..'
+import { type ClassInterface, EmailDevAdapter, FileDevAdapter } from '..'
 import { Wabe } from '../server'
 import type { DevWabeTypes } from './helper'
 import getPort from 'get-port'
 
 export const getDatabaseAdapter = async (databaseName: string) => {
-  const postgresAdapter = await import('wabe-postgres')
+  const mongodbAdapter = await import('wabe-mongodb')
 
-  return new postgresAdapter.PostgresAdapter<DevWabeTypes>({
-    databaseUrl: 'postgresql://wabe:wabe@localhost:5432',
+  return new mongodbAdapter.MongoAdapter<DevWabeTypes>({
+    // For postgres
+    // databaseUrl: 'postgresql://wabe:wabe@localhost:5432',
+    databaseUrl: 'mongodb://localhost:27045',
     databaseName,
   })
 }
@@ -45,11 +41,6 @@ export const setupTests = async (
     email: {
       adapter: new EmailDevAdapter(),
       mainEmail: 'main.email@wabe.com',
-    },
-    payment: {
-      adapter: new PaymentDevAdapter(),
-      currency: Currency.EUR,
-      supportedPaymentMethods: ['card', 'paypal'],
     },
     file: {
       adapter: new FileDevAdapter(),

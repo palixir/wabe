@@ -50,8 +50,8 @@ export const runDatabase = async (): Promise<void> => {
       await Bun.sleep(1000)
     }
 
-    // 1000 ms more to let the time to established connection
-    await Bun.sleep(1000)
+    // 2000 ms more to let the time to established connection
+    await Bun.sleep(2000)
 
     console.info('PostgreSQL started')
   } catch (error: any) {
@@ -64,7 +64,7 @@ export const runDatabase = async (): Promise<void> => {
     try {
       const containers = await docker.listContainers({ all: true })
       const existingContainer = containers.find((container) =>
-        container.Names.includes('/Wabe-Postgres'),
+        container.Names.includes('/wabe-postgres'),
       )
 
       if (existingContainer) {

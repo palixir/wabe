@@ -37,8 +37,7 @@ const view = () => (
                   role-based permissions.
                 </li>
                 <li>
-                  ✅ <strong>File Storage & Payments</strong> – Store files
-                  effortlessly and accept secure payments via Stripe.
+                  ✅ <strong>File Storage</strong> – Store files effortlessly
                 </li>
                 <li>
                   ✅ <strong>Auto-Generated GraphQL API</strong> – Define your

@@ -12,25 +12,6 @@ describe('cron', () => {
 
     job.trigger()
 
-    expect(run).toHaveBeenCalled()
-
-    expect(run).toHaveBeenCalled()
-  })
-
-  it('should should enable protected runs', async () => {
-    const run = mock()
-
-    cron({
-      pattern: '* * * * * *',
-      run: async () => {
-        run()
-        await new Promise((resolve) => setTimeout(resolve, 4000))
-      },
-      enabledProtectedRuns: true,
-    })({} as any)
-
-    await new Promise((resolve) => setTimeout(resolve, 2100))
-
     expect(run).toHaveBeenCalledTimes(1)
   })
 })

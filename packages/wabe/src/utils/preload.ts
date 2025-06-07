@@ -1,8 +1,8 @@
-import { runDatabase as runPostgresDatabase } from 'wabe-postgres-launcher'
+import { runDatabase } from 'wabe-mongodb-launcher'
 
 const setupEnvironment = () => {
   process.env.TEST = 'true'
 }
 
-await runPostgresDatabase()
+await runDatabase()
 setupEnvironment()
