@@ -5,7 +5,6 @@ import {
   EnvelopeIcon,
   DocumentIcon,
   CpuChipIcon,
-  CreditCardIcon,
   LockClosedIcon,
 } from '@heroicons/react/24/outline'
 import { Button, Card, CardBody, CardHeader, Link } from '@heroui/react'
@@ -38,13 +37,6 @@ const hours = [
       'Send emails with your preferred email provider (SendGrid, Mailgun, etc.).',
     docLink: '/documentation/email/index',
     icon: <EnvelopeIcon width={28} className="text-yellow-500" />,
-  },
-  {
-    title: 'Secure Payments',
-    description:
-      'Integrated Stripe (or your preferred payment provider) support for secure payments.',
-    docLink: '/documentation/payment/index',
-    icon: <CreditCardIcon width={28} className="text-indigo-500" />,
   },
   {
     title: 'File storage ',

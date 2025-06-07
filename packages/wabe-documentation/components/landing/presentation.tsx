@@ -23,9 +23,9 @@ const view = () => (
             <div>
               <strong>Wabe:</strong> An open-source Backend-as-a-Service (BaaS)
               written in TypeScript, featuring authentication, database
-              management, payment integration, email services, file storage,
-              GraphQL APIs, hooks, and more. This project includes over 37,000
-              lines of code and years of dedication.
+              management, email services, file storage, GraphQL APIs, hooks, and
+              more. This project includes over 37,000 lines of code and years of
+              dedication.
             </div>
           </li>
           <li className="flex items-start gap-4">
@@ -44,8 +44,7 @@ const view = () => (
               </strong>{' '}
               A comprehensive SaaS boilerplate that combines my expertise and
               knowledge, enabling developers to build robust SaaS applications
-              with tools like Next.js, Wabe, Stripe, and HeroUI (previously
-              NextUI).
+              with tools like Next.js, Wabe, and shadcn
             </div>
           </li>
           <li className="flex items-start gap-4">

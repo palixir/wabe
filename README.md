@@ -8,7 +8,7 @@
 
 ## What is Wabe?
 
-Wabe is an open-source backend as a service that allows you to create your own fully customizable backend in just a few minutes. It handles database access, automatic GraphQL API generation, authentication with various methods (classic or OAuth), permissions, security, payment, emails, and more for you.
+Wabe is an open-source backend as a service that allows you to create your own fully customizable backend in just a few minutes. It handles database access, automatic GraphQL API generation, authentication with various methods (classic or OAuth), permissions, security, emails, and more for you.
 
 ## Install
 
@@ -22,7 +22,7 @@ yarn add wabe # On yarn
 
 ```ts
 import { Wabe } from "wabe";
-import { MongoAdapter } from "wabe-mongodb"
+import { MongoAdapter } from "wabe-mongodb";
 
 const run = async () => {
   // Ensure your database is running before run the file
@@ -36,7 +36,7 @@ const run = async () => {
       adapter: new MongoAdapter({
         databaseName: "WabeApp",
         url: "mongodb://127.0.0.1:27045",
-      })
+      }),
     },
     port: 3000,
   });
@@ -55,7 +55,6 @@ await run();
 - **GraphQL API**: A flexible and powerful GraphQL API (following GraphQL Relay standard) to interact with your data.
 - **Hooks**: Powerful hooks system to execute custom actions before or after database requests.
 - **Email**: Send emails with your favorite provider with very simple integration.
-- **Payment**: Accept payments with Stripe or create your own payment provider adapter.
 
 ## Contributing
 

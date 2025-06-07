@@ -19,8 +19,6 @@ import type { WabeContext } from './interface'
 import { initializeRoles } from '../authentication/roles'
 import type { EmailConfig } from '../email'
 import { EmailController } from '../email/EmailController'
-import type { PaymentConfig } from '../payment/interface'
-import { PaymentController } from '../payment/PaymentController'
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection'
 import type { AIConfig } from '../ai'
 import { FileController } from '../files/FileController'
@@ -56,7 +54,6 @@ export interface WabeConfig<T extends WabeTypes> {
   rootKey: string
   hooks?: Hook<T, any>[]
   email?: EmailConfig
-  payment?: PaymentConfig
   ai?: AIConfig
   file?: FileConfig
   crons?: CronConfig<T>
@@ -76,7 +73,6 @@ export type WobeCustomContext<T extends WabeTypes> = Context & {
 type WabeControllers<T extends WabeTypes> = {
   database: DatabaseController<T>
   email?: EmailController
-  payment?: PaymentController
   file?: FileController
 }
 
@@ -99,7 +95,6 @@ export class Wabe<T extends WabeTypes> {
     hooks,
     file,
     email,
-    payment,
     routes,
     crons,
   }: WabeConfig<T>) {
@@ -115,7 +110,6 @@ export class Wabe<T extends WabeTypes> {
       rootKey,
       hooks,
       email,
-      payment,
       routes,
       file,
       crons,
@@ -132,7 +126,6 @@ export class Wabe<T extends WabeTypes> {
     this.controllers = {
       database: new DatabaseController<T>(database.adapter),
       email: email?.adapter ? new EmailController(email.adapter) : undefined,
-      payment: payment?.adapter ? new PaymentController(payment) : undefined,
       file: file?.adapter ? new FileController(file.adapter, this) : undefined,
     }
 

@@ -1,11 +1,5 @@
 import { v4 as uuid } from 'uuid'
-import {
-  type ClassInterface,
-  Currency,
-  EmailDevAdapter,
-  FileDevAdapter,
-  PaymentDevAdapter,
-} from '..'
+import { type ClassInterface, EmailDevAdapter, FileDevAdapter } from '..'
 import { Wabe } from '../server'
 import type { DevWabeTypes } from './helper'
 import getPort from 'get-port'
@@ -45,11 +39,6 @@ export const setupTests = async (
     email: {
       adapter: new EmailDevAdapter(),
       mainEmail: 'main.email@wabe.com',
-    },
-    payment: {
-      adapter: new PaymentDevAdapter(),
-      currency: Currency.EUR,
-      supportedPaymentMethods: ['card', 'paypal'],
     },
     file: {
       adapter: new FileDevAdapter(),
