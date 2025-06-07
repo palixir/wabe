@@ -11,6 +11,7 @@
         "format": "biome format --config-path=../../ --write ."
     },
     "dependencies": {
+      "uuid": "10.0.0",
         "dockerode": "4.0.5",
         "tcp-port-used": "1.0.2"
     },
