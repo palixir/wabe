@@ -4,7 +4,7 @@ import type { HookObject } from './HookObject'
 import { OperationType } from './index'
 
 const convertOperationTypeToPermission = (operationType: OperationType) => {
-  const template: Record<OperationType, PermissionsOperations> = {
+  const template: Partial<Record<OperationType, PermissionsOperations>> = {
     [OperationType.BeforeCreate]: 'create',
     [OperationType.AfterCreate]: 'create',
     [OperationType.BeforeRead]: 'read',

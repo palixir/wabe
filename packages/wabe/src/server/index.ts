@@ -21,10 +21,10 @@ import type { EmailConfig } from '../email'
 import { EmailController } from '../email/EmailController'
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection'
 import type { AIConfig } from '../ai'
-import { FileController } from '../files/FileController'
+import { FileController } from '../file/FileController'
 import { defaultSessionHandler } from './defaultHandlers'
 import type { CronConfig } from '../cron'
-import type { FileConfig } from '../files'
+import type { FileConfig } from '../file'
 
 type SecurityConfig = {
   corsOptions?: CorsOptions
