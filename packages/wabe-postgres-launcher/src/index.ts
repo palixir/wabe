@@ -1,4 +1,3 @@
-import { v4 as uuid } from 'uuid'
 import Docker from 'dockerode'
 import tcpPortUsed from 'tcp-port-used'
 
@@ -28,11 +27,9 @@ export const runDatabase = async (): Promise<void> => {
       })
     }
 
-    const uniqueId = uuid()
-
     const container = await docker.createContainer({
       Image: imageName,
-      name: `wabe-postgres-${uniqueId}`,
+      name: 'wabe-postgres',
       Env: ['POSTGRES_USER=wabe', 'POSTGRES_PASSWORD=wabe', 'POSTGRES_DB=Wabe'],
       HostConfig: {
         PortBindings: {
@@ -67,7 +64,7 @@ export const runDatabase = async (): Promise<void> => {
     try {
       const containers = await docker.listContainers({ all: true })
       const existingContainer = containers.find((container) =>
-        container.Names.includes('/Wabe-Postgres'),
+        container.Names.includes('/wabe-postgres'),
       )
 
       if (existingContainer) {
