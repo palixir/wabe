@@ -5,6 +5,7 @@ import {
   describe,
   expect,
   it,
+  mock,
   spyOn,
 } from 'bun:test'
 import { FileDevAdapter, type Wabe } from '..'
@@ -21,6 +22,8 @@ describe('File upload', () => {
     'uploadFile',
   )
   const spyFileDevAdapterReadFile = spyOn(FileDevAdapter.prototype, 'readFile')
+
+  const mockBeforeUpload = mock()
 
   beforeAll(async () => {
     const setup = await setupTests([
@@ -50,6 +53,10 @@ describe('File upload', () => {
 
     spyFileDevAdapterReadFile.mockClear()
     spyFileDevAdapterUploadFile.mockClear()
+
+    const fileConfig = wabe.config.file
+
+    if (fileConfig) fileConfig.beforeUpload = mockBeforeUpload
   })
 
   afterAll(async () => {
@@ -59,6 +66,7 @@ describe('File upload', () => {
   afterEach(async () => {
     spyFileDevAdapterUploadFile.mockClear()
     spyFileDevAdapterReadFile.mockClear()
+    mockBeforeUpload.mockClear()
 
     await wabe.controllers.database.deleteObjects({
       // @ts-expect-error
@@ -70,6 +78,68 @@ describe('File upload', () => {
       where: {},
       select: {},
     })
+  })
+
+  it('should call beforeUpload if specified in the file config', async () => {
+    await wabe.controllers.database.createObject({
+      // @ts-expect-error
+      className: 'Test3',
+      context: {
+        isRoot: true,
+        wabe,
+      },
+      data: {
+        // @ts-expect-error
+        file: {
+          file: new File(['a'], 'a', { type: 'text/plain' }),
+        },
+      },
+      select: {},
+    })
+
+    expect(mockBeforeUpload).toHaveBeenCalledTimes(1)
+    const fileArg = mockBeforeUpload.mock.calls[0]?.[0]
+    expect(fileArg?.name).toEqual('a')
+    expect(await fileArg?.text()).toEqual('a')
+
+    // should return the same file if no file is returned by beforeUpload
+    expect(spyFileDevAdapterUploadFile).toHaveBeenCalledTimes(1)
+    const fileArg2 = spyFileDevAdapterUploadFile.mock.calls[0]?.[0]
+    expect(fileArg2?.name).toEqual('a')
+    expect(await fileArg2?.text()).toEqual('a')
+  })
+
+  it('should call beforeUpload and return the file returned by beforeUpload', async () => {
+    mockBeforeUpload.mockImplementationOnce(
+      () => new File(['b'], 'b.txt', { type: 'text/plain' }),
+    )
+
+    await wabe.controllers.database.createObject({
+      // @ts-expect-error
+      className: 'Test3',
+      context: {
+        isRoot: true,
+        wabe,
+      },
+      data: {
+        // @ts-expect-error
+        file: {
+          file: new File(['a'], 'a', { type: 'text/plain' }),
+        },
+      },
+      select: {},
+    })
+
+    expect(mockBeforeUpload).toHaveBeenCalledTimes(1)
+    const fileArg = mockBeforeUpload.mock.calls[0]?.[0]
+    expect(fileArg?.name).toEqual('a')
+    expect(await fileArg?.text()).toEqual('a')
+
+    // should return the same file if no file is returned by beforeUpload
+    expect(spyFileDevAdapterUploadFile).toHaveBeenCalledTimes(1)
+    const fileArg2 = spyFileDevAdapterUploadFile.mock.calls[0]?.[0]
+    expect(fileArg2?.name).toEqual('b.txt')
+    expect(await fileArg2?.text()).toEqual('b')
   })
 
   it('should not crash when there is no extension for the uploaded file', async () => {

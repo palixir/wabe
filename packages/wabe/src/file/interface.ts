@@ -1,13 +1,16 @@
+import type { WabeContext, WabeTypes } from 'src/server'
+
 /**
  * The file config contains the adapter to use to upload file
  * @param adapter: FileAdapter
  * @param urlCacheInSeconds: number Number of seconds to cache the url, equal to the number of seconds the url will be valid
  * @param devDirectory: string The directory where the files will be uploaded
  */
-export type FileConfig = {
+export type FileConfig<T extends WabeTypes> = {
   adapter: FileAdapter
   urlCacheInSeconds?: number
   devDirectory?: string
+  beforeUpload?: (file: File, context: WabeContext<T>) => Promise<File> | File
 }
 
 export interface ReadFileOptions {

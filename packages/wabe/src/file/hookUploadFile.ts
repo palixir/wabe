@@ -9,6 +9,8 @@ const handleFile = async (hookObject: HookObject<any, any>) => {
 
   if (!schema) return
 
+  const beforeUpload = hookObject.context.wabe.config.file?.beforeUpload
+
   await Promise.all(
     Object.keys(newData).map(async (keyName) => {
       const file = newData[keyName]?.file as File
@@ -27,8 +29,11 @@ const handleFile = async (hookObject: HookObject<any, any>) => {
       if (!hookObject.context.wabe.controllers.file)
         throw new Error('No file adapter found')
 
+      const fileToUpload =
+        (await beforeUpload?.(file, hookObject.context)) || file
+
       // We upload the file and set the name of the file in the newData
-      await hookObject.context.wabe.controllers.file?.uploadFile(file)
+      await hookObject.context.wabe.controllers.file?.uploadFile(fileToUpload)
 
       hookObject.upsertNewData(keyName, {
         name: file.name,
