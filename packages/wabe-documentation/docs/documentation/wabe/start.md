@@ -96,6 +96,6 @@ You’ll arrive at a GraphiQL interface with an online playground that allows yo
 
 In this interface, you’ll see that some queries are already created. By default, `Wabe` provides three classes: one class for users (with various elements, including authentication), a `Session` class to manage user sessions, and the last one corresponds to `Roles`. Any roles you create (see the Schema section) will be automatically added to the Role class and included in the RoleEnum enum.
 
-![GraphQL Playground wiht all default resolvers](/graphqlPlayground2.webp)
+![GraphQL Playground with all default resolvers](/graphqlPlayground2.webp)
 
 For each class you define, two queries and six mutations will be automatically generated to allow you to interact with your data. This will be explained in more detail in the Schema section.
