@@ -4,7 +4,8 @@
   "devDependencies": {
     "@biomejs/biome": "1.9.3",
     "lefthook": "1.7.18",
-    "typescript": "5.8.2"
+    "typescript": "5.8.2",
+    "@types/bun": "latest"
   },
   "private": true,
   "workspaces": ["packages/*"],
