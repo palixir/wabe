@@ -152,7 +152,7 @@ const setAclOnCompany = async (hookObject: HookObject<any, any>) => {
         write: true,
       },
     ],
-    // Array of roles with acces on read and write for each one
+    // Array of roles with access on read and write for each one
     roles: [
       {
         roleId: "roleId",
