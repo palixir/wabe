@@ -8,6 +8,6 @@
         "build:package": "bun run src/index.ts"
     },
     "devDependencies": {
-        "oxc-transform": "0.58.1"
+        "oxc-transform": "0.72.3"
     }
 }
