@@ -29,10 +29,9 @@
     "format": "biome format --write . --config-path=../../"
   },
   "dependencies": {
-    "@mistralai/mistralai": "1.5.1"
+    "@mistralai/mistralai": "1.7.1"
   },
   "devDependencies": {
-    "@types/bun": "latest",
     "wabe": "workspace:*"
   }
 }

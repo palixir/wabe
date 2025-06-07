@@ -21,6 +21,7 @@ const mockCouponsCreate = mock(() => {})
 const mockPromotionCodesCreate = mock(() => {})
 const mockPromotionCodesUpdate = mock(() => {})
 const mockCouponsDel = mock(() => {})
+const mockInvoicePaymentsList = mock(() => {})
 
 spyOn(Stripe.prototype, 'customers').mockReturnValue({
   create: mockCreateCustomer,
@@ -76,6 +77,10 @@ spyOn(StripeAdapter.prototype, '_streamToString').mockReturnValue(
   Promise.resolve('body'),
 )
 
+spyOn(Stripe.prototype, 'invoicePayments').mockReturnValue({
+  list: mockInvoicePaymentsList,
+} as never)
+
 describe('wabe-stripe', () => {
   beforeEach(() => {
     mockListCustomers.mockClear()
@@ -95,6 +100,7 @@ describe('wabe-stripe', () => {
     mockPromotionCodesCreate.mockClear()
     mockPromotionCodesUpdate.mockClear()
     mockCouponsDel.mockClear()
+    mockInvoicePaymentsList.mockClear()
   })
 
   it('should delete a coupon', async () => {
@@ -373,6 +379,14 @@ describe('wabe-stripe', () => {
   it('should get all transactions with first to 50', async () => {
     const adapter = new StripeAdapter('API_KEY')
 
+    mockInvoicePaymentsList.mockResolvedValue({
+      data: [
+        {
+          invoice: 'month',
+        },
+      ],
+    } as never)
+
     mockListCharges.mockResolvedValue({
       data: [
         {
@@ -398,7 +412,12 @@ describe('wabe-stripe', () => {
     } as never)
 
     mockInvoicesRetrieve.mockResolvedValue({
-      subscription: 'sub_123',
+      parent: {
+        type: 'subscription_details',
+        subscription_details: {
+          subscription: 'sub_123',
+        },
+      },
     } as never)
 
     mockSubscriptionsRetrieve.mockResolvedValue({
@@ -463,6 +482,14 @@ describe('wabe-stripe', () => {
 
   it('should return isSubscription false if no subscription found', async () => {
     const adapter = new StripeAdapter('API_KEY')
+
+    mockInvoicePaymentsList.mockResolvedValue({
+      data: [
+        {
+          invoice: 'tata',
+        },
+      ],
+    } as never)
 
     mockListCharges.mockResolvedValue({
       data: [

@@ -10,8 +10,5 @@
         "ci":"bun lint && bun test",
         "lint": "biome lint $(pwd)/src/*.ts --config-path=../../ --no-errors-on-unmatched",
         "format": "biome format --write . --config-path=../../"
-    },
-    "devDependencies": {
-        "@types/bun": "latest"
     }
 }

@@ -27,10 +27,9 @@
     "format": "biome format --write . --config-path=../../"
   },
   "dependencies": {
-    "stripe": "17.5.0"
+    "stripe": "18.2.1"
   },
   "devDependencies": {
-    "@types/bun": "latest",
     "wabe": "workspace:*"
   }
 }

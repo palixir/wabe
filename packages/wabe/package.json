@@ -35,15 +35,12 @@
     "js-srp6a": "1.0.2",
     "jsonwebtoken": "9.0.2",
     "libphonenumber-js": "1.11.18",
-    "mongodb": "6.13.1",
     "otplib": "12.0.1",
     "p-retry": "6.2.1",
     "wobe": "1.1.10",
     "wobe-graphql-yoga": "1.2.6"
   },
   "devDependencies": {
-    "@parcel/watcher": "2.3.0",
-    "@types/bun": "latest",
     "@types/jsonwebtoken": "9.0.6",
     "@types/uuid": "9.0.6",
     "graphql-request": "6.1.0",
@@ -53,6 +50,7 @@
     "wabe-mongodb-launcher": "workspace:*",
     "wabe-pluralize": "workspace:*",
     "wabe-build": "workspace:*",
-    "wabe-mongodb": "workspace:*"
+    "wabe-mongodb": "workspace:*",
+    "wabe": "workspace:*"
   }
 }

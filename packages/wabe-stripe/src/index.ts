@@ -25,7 +25,7 @@ export class StripeAdapter implements PaymentAdapter {
 
   constructor(apiKey: string) {
     this.stripe = new Stripe(apiKey, {
-      apiVersion: '2024-12-18.acacia',
+      apiVersion: '2025-05-28.basil',
       appInfo: {
         name: 'wabe',
       },
@@ -316,10 +316,10 @@ export class StripeAdapter implements PaymentAdapter {
         amountDue: invoice.amount_due,
         amountPaid: invoice.amount_paid,
         currency: invoice.currency as Currency,
-        id: invoice.id,
+        id: invoice.id || '',
         created: invoice.created,
         invoiceUrl: invoice.hosted_invoice_url || '',
-        isPaid: invoice.paid,
+        isPaid: invoice.amount_paid > 0,
       })) || []
 
     return formatInvoices
@@ -367,10 +367,14 @@ export class StripeAdapter implements PaymentAdapter {
     const _getSubscriptionInterval = async (chargeId?: string) => {
       const invoice = await this.stripe.invoices.retrieve(chargeId || '')
 
-      if (!invoice.subscription) return undefined
+      if (
+        invoice.parent?.type !== 'subscription_details' ||
+        typeof invoice.parent?.subscription_details?.subscription !== 'string'
+      )
+        return undefined
 
       const subscription = await this.stripe.subscriptions.retrieve(
-        invoice.subscription?.toString() || '',
+        invoice.parent.subscription_details.subscription?.toString() || '',
       )
 
       const intervalCount = subscription.items.data[0]?.plan.interval_count
@@ -398,8 +402,16 @@ export class StripeAdapter implements PaymentAdapter {
             charge.customer?.toString() || '',
           )) as Stripe.Customer
 
+          const invoicePayments = await this.stripe.invoicePayments.list({
+            payment: {
+              payment_intent: charge.payment_intent?.toString() || '',
+              type: 'payment_intent',
+            },
+            limit: 1,
+          })
+
           const interval = await _getSubscriptionInterval(
-            charge.invoice?.toString(),
+            invoicePayments.data[0]?.invoice.toString(),
           )
 
           return {
