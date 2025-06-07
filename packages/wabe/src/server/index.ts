@@ -55,7 +55,7 @@ export interface WabeConfig<T extends WabeTypes> {
   hooks?: Hook<T, any>[]
   email?: EmailConfig
   ai?: AIConfig
-  file?: FileConfig
+  file?: FileConfig<T>
   crons?: CronConfig<T>
 }
 

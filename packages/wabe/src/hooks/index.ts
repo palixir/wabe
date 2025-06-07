@@ -52,8 +52,6 @@ export enum OperationType {
   BeforeUpdate = 'beforeUpdate',
   BeforeDelete = 'beforeDelete',
   BeforeRead = 'beforeRead',
-  BeforeUpload = 'beforeUpload',
-  BeforeDownload = 'beforeDownload',
 }
 
 export type Hook<T extends WabeTypes, K extends keyof WabeTypes['types']> = {
