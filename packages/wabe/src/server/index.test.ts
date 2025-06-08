@@ -7,6 +7,7 @@ import { OperationType } from '../hooks'
 import { getAnonymousClient, getUserClient } from '../utils/helper'
 import { gql } from 'graphql-request'
 import { getDatabaseAdapter } from '../utils/testHelper'
+import { RoleEnum } from 'generated/wabe'
 
 describe('Server', async () => {
   it('should mask graphql errors message', async () => {
@@ -383,7 +384,7 @@ describe('Server', async () => {
             permissions: {
               create: {
                 requireAuthentication: true,
-                authorizedRoles: ['Client'],
+                authorizedRoles: [RoleEnum.Client],
               },
             },
           },
