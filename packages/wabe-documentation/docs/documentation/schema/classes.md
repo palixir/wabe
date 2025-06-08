@@ -17,6 +17,7 @@ The schema object in your Wabe app configuration allows you to define the schema
 - Array
 - Pointer
 - Relation
+- Hash
 
 The `classes` array allow you to create new classe in your project with some fields. In the example below, a company class had a required name and a logo.
 
