@@ -6,7 +6,9 @@
       "devDependencies": {
         "@biomejs/biome": "1.9.3",
         "@types/bun": "latest",
+        "@types/tcp-port-used": "1.0.4",
         "lefthook": "1.7.18",
+        "tcp-port-used": "1.0.2",
         "typescript": "5.8.2",
       },
     },

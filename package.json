@@ -5,17 +5,16 @@
     "@biomejs/biome": "1.9.3",
     "lefthook": "1.7.18",
     "typescript": "5.8.2",
+    "tcp-port-used": "1.0.2",
+    "@types/tcp-port-used": "1.0.4",
     "@types/bun": "latest"
   },
   "private": true,
   "workspaces": ["packages/*"],
   "scripts": {
     "clean": "git clean -fdX",
-    "build:wabe": "bun --filter './packages/wabe' build",
-    "build:wabe-mongodb-launcher": "bun --filter './packages/wabe-mongodb-launcher' build",
-    "build:wabe-postgres-launcher": "bun --filter './packages/wabe-postgres-launcher' build",
-    "build": "bun build:wabe-mongodb-launcher && bun build:wabe-postgres-launcher && bun build:wabe && CI_BUILD=true bun --filter './packages/wabe-*' build",
-    "ci": "bun --filter './packages/*' ci",
+    "build": "CI_BUILD=true bun scripts/build.ts",
+    "ci": "bun run scripts/ci.ts",
     "format": "bun --filter './packages/*' format && biome format --write ./*.json",
     "lint": "bun --filter './packages/*' lint",
     "squash": "base_branch=${1:-main} && git fetch origin $base_branch && branch=$(git branch --show-current) && git checkout $branch && git reset $(git merge-base origin/$base_branch $branch) && git add -A"
