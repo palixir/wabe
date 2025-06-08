@@ -1,10 +1,18 @@
 import Docker from 'dockerode'
 import tcpPortUsed from 'tcp-port-used'
+import PQueue from 'p-queue'
+
+const queue = new PQueue({ concurrency: 1 })
+
+export const runDatabase = async (): Promise<void> =>
+  queue.add(async () => {
+    await startPostgres()
+  })
 
 const docker = new Docker()
 
 // URL: 'postgres://username:password@localhost:5432/databaseName'
-export const runDatabase = async (): Promise<void> => {
+export const startPostgres = async (): Promise<void> => {
   try {
     const port = 5432
 
