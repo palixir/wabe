@@ -1,10 +1,10 @@
 import type { MutationData, OutputType, Select, WhereType } from '../database'
-import { defaultAfterDeleteFile } from '../files/hookDeleteFile'
-import { defaultAfterReadFile } from '../files/hookReadFile'
+import { defaultAfterDeleteFile } from '../file/hookDeleteFile'
+import { defaultAfterReadFile } from '../file/hookReadFile'
 import {
   defaultBeforeCreateUpload,
   defaultBeforeUpdateUpload,
-} from '../files/hookUploadFile'
+} from '../file/hookUploadFile'
 import type { WabeConfig, WabeTypes } from '../server'
 import type { WabeContext } from '../server/interface'
 import { contextWithRoot } from '../utils/export'

@@ -1,7 +1,15 @@
 import { MongoMemoryServer } from 'mongodb-memory-server'
 import tcpPortUsed from 'tcp-port-used'
+import PQueue from 'p-queue'
 
-export const runDatabase = async (): Promise<void> => {
+const queue = new PQueue({ concurrency: 1 })
+
+export const runDatabase = async (): Promise<void> =>
+  queue.add(async () => {
+    await startMongo()
+  })
+
+const startMongo = async (): Promise<void> => {
   if (await tcpPortUsed.check(27045, '127.0.0.1')) return
 
   await MongoMemoryServer.create({
