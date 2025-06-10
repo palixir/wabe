@@ -52,7 +52,7 @@ describe('Default fields', () => {
       expect(updatedAt.getFullYear()).toEqual(now.getFullYear())
     })
 
-    it('shoud add updatedAt value on update operation type', () => {
+    it('should add updatedAt value on update operation type', () => {
       const hookObject = new HookObject<DevWabeTypes, 'User'>({
         className: 'User',
         operationType: OperationType.BeforeUpdate,
