@@ -86,7 +86,7 @@ export const getCookieInRequestHeaders = (
  * - lowercase
  * - normalize with NFD
  * - remove diacritics and accents characters
- * - replace matching abbreviation with long version (if disableAbbrevations is not set)
+ * - replace matching abbreviation with long version (if disableAbbreviations is not set)
  * - replace 2 or more spaces by one
  * - replace all non alpha characters by a space
  * - trim
