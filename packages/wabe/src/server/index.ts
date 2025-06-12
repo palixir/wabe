@@ -255,7 +255,7 @@ export class Wabe<T extends WabeTypes> {
       })
 
       // If we just want codegen we exit before server created.
-      // Not the best solution but usefull to avoid multiple source of truth
+      // Not the best solution but useful to avoid multiple source of truth
       if (process.env.CODEGEN) process.exit(0)
     }
 

@@ -1808,7 +1808,7 @@ describe('Postgres adapter', () => {
     )
   })
 
-  it('should update the same field of an objet that which we use in the where field', async () => {
+  it('should update the same field of an object that which we use in the where field', async () => {
     const insertedObject = await postgresAdapter.createObject({
       className: 'User',
       data: {
