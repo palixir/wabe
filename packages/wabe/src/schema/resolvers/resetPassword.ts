@@ -4,6 +4,8 @@ import type { WabeContext } from '../../server/interface'
 import { contextWithRoot } from '../../utils/export'
 import type { DevWabeTypes } from '../../utils/helper'
 
+const DUMMY_USER_ID = '00000000-0000-0000-0000-000000000000'
+
 export const resetPasswordResolver = async (
   _: any,
   { input: { email, phone, password, otp } }: MutationResetPasswordArgs,
@@ -24,41 +26,39 @@ export const resetPasswordResolver = async (
     context: contextWithRoot(context),
   })
 
-  // We return true if the user doesn't exist to avoid leaking that the user exists or not
-  if (users.length === 0) return true
-
-  const user = users[0]
-
-  if (!user) return true
+  const realUser = users.length > 0 ? users[0] : null
+  const userId = realUser?.id ?? DUMMY_USER_ID
 
   const otpClass = new OTP(context.wabe.config.rootKey)
+  const isOtpValid = otpClass.verify(otp, userId)
 
-  const isOtpValid = otpClass.verify(otp, user.id)
+  if (realUser) {
+    const inProd = process.env.NODE_ENV === 'production'
+    const devBypass = !inProd && otp === '000000'
 
-  if (process.env.NODE_ENV === 'production' && !isOtpValid)
-    throw new Error('Invalid OTP code')
+    if (!isOtpValid && !(devBypass && !inProd))
+      throw new Error('Invalid OTP code')
 
-  if (process.env.NODE_ENV !== 'production' && otp !== '000000' && !isOtpValid)
-    throw new Error('Invalid OTP code')
+    const providerKey = phone ? 'phonePassword' : 'emailPassword'
 
-  const nameOfProvider = phone ? 'phonePassword' : 'emailPassword'
-
-  await context.wabe.controllers.database.updateObject({
-    className: 'User',
-    id: user.id,
-    data: {
-      authentication: {
-        [nameOfProvider]: {
-          ...(phone && { phone: user.authentication?.phonePassword?.phone }),
-          ...(email && { email }),
-          // The password is already hashed in the hook
-          password,
+    await context.wabe.controllers.database.updateObject({
+      className: 'User',
+      id: realUser.id,
+      data: {
+        authentication: {
+          [providerKey]: {
+            ...(phone && {
+              phone: realUser.authentication?.phonePassword?.phone,
+            }),
+            ...(email && { email }),
+            password,
+          },
         },
       },
-    },
-    select: {},
-    context: contextWithRoot(context),
-  })
+      select: {},
+      context: contextWithRoot(context),
+    })
+  }
 
   return true
 }

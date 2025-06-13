@@ -125,7 +125,7 @@ describe('Phone password', () => {
       }),
     ).rejects.toThrow('Invalid authentication credentials')
 
-    expect(spyArgonPasswordVerify).toHaveBeenCalledTimes(0)
+    expect(spyArgonPasswordVerify).toHaveBeenCalledTimes(1)
   })
 
   it('should not signIn with phone password if there is phone is invalid', () => {

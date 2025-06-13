@@ -6,7 +6,12 @@ import type {
 } from '../interface'
 import { contextWithRoot } from '../../utils/export'
 import type { DevWabeTypes } from '../../utils/helper'
-import { createSRPServer } from 'js-srp6a'
+import { createSRPServer, type Ephemeral, type Session } from 'js-srp6a'
+
+// 🛡 Valeurs factices pour mitigation des timing attacks
+const DUMMY_SALT = 'deadbeefdeadbeefdeadbeefdeadbeef'
+const DUMMY_VERIFIER =
+  '94c8f9b69f44fa0453a8a65129a7865ea2d70b21e645cf185d6fd42a679e524c394d4f02bba2032b10517be8c80f0f58e94302cb57cce7ce1e0a21906b6d22020b84a473d8ef58ea1f53e5204f8b83f05dc334b781fda309ad7cb8fa5c91dc81f64c114b671688b22e0f693a9c97ad2f43e6f1954c83d73e81e3dc8a963b7cbce'
 
 type EmailPasswordSRPInterface = {
   clientPublic: string
@@ -39,21 +44,24 @@ export class EmailPasswordSRP
       first: 1,
     })
 
-    if (users.length === 0)
-      throw new Error('Invalid authentication credentials')
-
     const user = users[0]
 
-    if (!user) throw new Error('Invalid authentication credentials')
+    const salt = user?.authentication?.emailPasswordSRP?.salt ?? DUMMY_SALT
+    const verifier =
+      user?.authentication?.emailPasswordSRP?.verifier ?? DUMMY_VERIFIER
 
-    const salt = user?.authentication?.emailPasswordSRP?.salt
-    const verifier = user?.authentication?.emailPasswordSRP?.verifier
-
-    // Return bogus data to avoid leaking information
-    if (!salt || !verifier)
+    let ephemeral: Ephemeral
+    try {
+      ephemeral = await server.generateEphemeral(verifier)
+    } catch {
       throw new Error('Invalid authentication credentials')
+    }
 
-    const ephemeral = await server.generateEphemeral(verifier)
+    if (!user || !user?.id) {
+      // Simulation d'opération pour garder le même temps
+      await new Promise((resolve) => setTimeout(resolve, 10))
+      throw new Error('Invalid authentication credentials')
+    }
 
     await context.wabe.controllers.database.updateObject({
       className: 'User',
@@ -85,7 +93,6 @@ export class EmailPasswordSRP
       context: contextWithRoot(context),
     })
 
-    // Hide real message
     if (users > 0) throw new Error('Not authorized to create user')
 
     return {
@@ -134,31 +141,39 @@ export class EmailPasswordSRPChallenge
       },
     })
 
-    // Return bogus data to avoid leaking information
-    if (users.length === 0)
-      throw new Error('Invalid authentication credentials')
-
     const user = users[0]
 
-    if (!user) throw new Error('Invalid authentication credentials')
+    const salt = user?.authentication?.emailPasswordSRP?.salt ?? DUMMY_SALT
+    const verifier =
+      user?.authentication?.emailPasswordSRP?.verifier ?? DUMMY_VERIFIER
+    const serverSecret =
+      user?.authentication?.emailPasswordSRP?.serverSecret ?? 'deadbeef'
 
-    const salt = user?.authentication?.emailPasswordSRP?.salt
-    const verifier = user?.authentication?.emailPasswordSRP?.verifier
-    const serverSecret = user?.authentication?.emailPasswordSRP?.serverSecret
-
-    // Return bogus data to avoid leaking information
-    if (!salt || !verifier || !serverSecret)
+    let serverSession: Session
+    try {
+      serverSession = await server.deriveSession(
+        serverSecret,
+        input.clientPublic,
+        salt,
+        '', // no username
+        verifier,
+        input.clientSessionProof,
+      )
+    } catch {
       throw new Error('Invalid authentication credentials')
+    }
 
-    const serverSession = await server.deriveSession(
-      serverSecret,
-      input.clientPublic,
-      salt,
-      '', // Because we don't hash the username
-      verifier,
-      input.clientSessionProof,
-    )
+    if (!user || !user?.id) {
+      // Simulation pour garder un timing constant
+      await new Promise((resolve) => setTimeout(resolve, 10))
+      throw new Error('Invalid authentication credentials')
+    }
 
-    return { userId: user.id, srp: { serverSessionProof: serverSession.proof } }
+    return {
+      userId: user.id,
+      srp: {
+        serverSessionProof: serverSession.proof,
+      },
+    }
   }
 }
