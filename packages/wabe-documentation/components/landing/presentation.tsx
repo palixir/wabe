@@ -15,7 +15,7 @@ const view = () => (
         </p>
       </div>
 
-      {/* Liste des projets */}
+      {/* Liste des projects */}
       <div className="flex flex-col items-center gap-6 text-center">
         <ul className="list-inside space-y-4 text-left text-lg text-gray-500 max-w-4xl">
           <li className="flex items-start gap-4">
