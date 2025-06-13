@@ -115,4 +115,92 @@ describe('EmailPasswordSRP', () => {
       ),
     ).resolves.toBeUndefined()
   })
+
+  it('should not authenticate with invalid password', async () => {
+    const anonymousClient = getAnonymousClient(wabe.config.port)
+    const email = 'invalid@test.com'
+    const correctPassword = 'correct_password'
+    const wrongPassword = 'wrong_password'
+
+    const client = createSRPClient('SHA-256', 3072)
+
+    const salt = client.generateSalt()
+    const privateKey = await client.deriveSafePrivateKey(salt, correctPassword)
+    const verifier = client.deriveVerifier(privateKey)
+
+    await anonymousClient.request<any>(
+      gql`
+         mutation signUpWith($input: SignUpWithInput!) {
+           signUpWith(input: $input) {
+             accessToken
+           }
+         }
+       `,
+      {
+        input: {
+          authentication: {
+            emailPasswordSRP: { email, salt, verifier },
+          },
+        },
+      },
+    )
+
+    const clientEphemeral = client.generateEphemeral()
+
+    const { signInWith } = await anonymousClient.request<any>(
+      gql`
+         mutation signInWith($input: SignInWithInput!) {
+           signInWith(input: $input) {
+             srp { salt serverPublic }
+           }
+         }
+       `,
+      {
+        input: {
+          authentication: {
+            emailPasswordSRP: {
+              email,
+              clientPublic: clientEphemeral.public,
+            },
+          },
+        },
+      },
+    )
+
+    // Derive with wrong password
+    const wrongPrivateKey = await client.deriveSafePrivateKey(
+      salt,
+      wrongPassword,
+    )
+    const wrongClientSession = await client.deriveSession(
+      clientEphemeral.secret,
+      signInWith.srp.serverPublic,
+      salt,
+      '',
+      wrongPrivateKey,
+    )
+
+    expect(
+      anonymousClient.request<any>(
+        gql`
+           mutation verifyChallenge($input: VerifyChallengeInput!) {
+             verifyChallenge(input: $input) {
+               srp { serverSessionProof }
+             }
+           }
+         `,
+        {
+          input: {
+            secondFA: {
+              emailPasswordSRPChallenge: {
+                email,
+                clientPublic: clientEphemeral.public,
+                clientSessionProof: wrongClientSession.proof,
+              },
+            },
+          },
+        },
+      ),
+    ).rejects.toThrow('Invalid authentication credentials')
+  })
 })

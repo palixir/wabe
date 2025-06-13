@@ -125,7 +125,7 @@ describe('Email password', () => {
       }),
     ).rejects.toThrow('Invalid authentication credentials')
 
-    expect(spyArgonPasswordVerify).toHaveBeenCalledTimes(0)
+    expect(spyArgonPasswordVerify).toHaveBeenCalledTimes(1)
   })
 
   it('should not signIn with email password if there is email is invalid', () => {

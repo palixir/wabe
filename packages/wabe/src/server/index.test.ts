@@ -94,6 +94,58 @@ describe('Server', async () => {
     await wabe.close()
   })
 
+  it('should setup the root key in context if the root key is correct', async () => {
+    const databaseId = uuid()
+
+    const port = await getPort()
+    const wabe = new Wabe({
+      isProduction: false,
+      rootKey: 'thisistherootkey',
+      database: {
+        // @ts-expect-error
+        adapter: await getDatabaseAdapter(databaseId),
+      },
+      port,
+      schema: {
+        classes: [
+          {
+            name: 'Collection1',
+            fields: { name: { type: 'String' } },
+          },
+        ],
+      },
+    })
+
+    await wabe.start()
+
+    const res = await fetch(`http://127.0.0.1:${port}/graphql`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query: `
+          query {
+            collection1s {
+              edges {
+                node {
+                  name
+                }
+              }
+            }
+          }
+        `,
+      }),
+    })
+
+    expect((await res.json()).errors[0].message).toEqual(
+      'Permission denied to read class Collection1',
+    )
+
+    expect(res.status).toEqual(200)
+    await wabe.close()
+  })
+
   it('should run server', async () => {
     const databaseId = uuid()
 

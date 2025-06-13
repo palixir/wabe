@@ -8,6 +8,9 @@ import { hashPassword } from '../utils'
 import { contextWithRoot } from '../../utils/export'
 import type { DevWabeTypes } from '../../utils/helper'
 
+const DUMMY_PASSWORD_HASH =
+  '$argon2id$v=19$m=65536,t=2,p=1$YWJjZGVmZw$YzBhRkNiSEZlY3hzUVYxZg'
+
 type PhonePasswordInterface = {
   password: string
   phone: string
@@ -35,25 +38,17 @@ export class PhonePassword
       first: 1,
     })
 
-    if (users.length === 0)
-      throw new Error('Invalid authentication credentials')
-
     const user = users[0]
-
     const userDatabasePassword = user?.authentication?.phonePassword?.password
 
-    if (!userDatabasePassword)
-      throw new Error('Invalid authentication credentials')
+    const passwordHashToCheck = userDatabasePassword ?? DUMMY_PASSWORD_HASH
 
-    const isPasswordEquals = await verify(
-      userDatabasePassword,
-      input.password,
-      {
-        algorithm: Algorithm.Argon2id,
-      },
-    )
+    const isPasswordEquals = await verify(passwordHashToCheck, input.password, {
+      algorithm: Algorithm.Argon2id,
+    })
 
     if (
+      !user ||
       !isPasswordEquals ||
       input.phone !== user.authentication?.phonePassword?.phone
     )

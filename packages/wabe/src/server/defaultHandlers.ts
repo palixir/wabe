@@ -1,4 +1,5 @@
 import type { Wabe, WobeCustomContext } from '.'
+import { timingSafeEqual } from 'node:crypto'
 import { Session } from '../authentication/Session'
 import { getCookieInRequestHeaders } from '../utils'
 import type { DevWabeTypes } from '../utils/helper'
@@ -8,7 +9,13 @@ export const defaultSessionHandler =
   async (ctx: WobeCustomContext<DevWabeTypes>) => {
     const headers = ctx.request.headers
 
-    if (headers.get('Wabe-Root-Key') === wabe.config.rootKey) {
+    const headerRootKey = Buffer.from(headers.get('Wabe-Root-Key') || '')
+    const rootKey = Buffer.from(wabe.config.rootKey)
+
+    if (
+      headerRootKey.length === rootKey.length &&
+      timingSafeEqual(rootKey, headerRootKey)
+    ) {
       ctx.wabe = {
         isRoot: true,
         wabe,

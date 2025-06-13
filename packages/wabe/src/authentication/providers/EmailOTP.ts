@@ -8,6 +8,8 @@ import type {
 } from '../interface'
 import { OTP } from '../OTP'
 
+const DUMMY_USER_ID = '00000000-0000-0000-0000-000000000000'
+
 type EmailOTPInterface = {
   email: string
   otp: string
@@ -62,23 +64,22 @@ export class EmailOTP
       context: contextWithRoot(context),
     })
 
-    if (users.length === 0) return null
+    const realUser = users.length > 0 ? users[0] : null
+    const userId = realUser?.id ?? DUMMY_USER_ID
 
-    const user = users[0]
-
-    if (!user) return null
-
-    const userId = user.id
-
-    if (!userId) return null
+    const isDevBypass =
+      !context.wabe.config.isProduction &&
+      input.otp === '000000' &&
+      realUser !== null
 
     const otpClass = new OTP(context.wabe.config.rootKey)
 
-    if (!context.wabe.config.isProduction && input.otp === '000000')
-      return { userId }
+    const isOtpValid = otpClass.verify(input.otp, userId)
 
-    if (!otpClass.verify(input.otp, userId)) return null
+    if (realUser && (isOtpValid || isDevBypass)) {
+      return { userId: realUser.id }
+    }
 
-    return { userId }
+    return null
   }
 }
