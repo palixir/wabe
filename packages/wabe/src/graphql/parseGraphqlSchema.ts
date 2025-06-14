@@ -58,7 +58,7 @@ const _getTypeFields = (
   // @ts-expect-error
   const fields = (type?.getFields?.() || {}) as Record<string, any>
 
-  const formatedFields = Object.entries(fields).reduce(
+  const formattedFields = Object.entries(fields).reduce(
     (acc, [fieldName, fieldType]) => ({
       ...acc,
       [fieldName]: fieldType.type.toString(),
@@ -67,7 +67,7 @@ const _getTypeFields = (
   )
 
   return {
-    input: formatedFields,
+    input: formattedFields,
   }
 }
 
