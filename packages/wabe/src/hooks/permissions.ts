@@ -62,7 +62,11 @@ export const _checkCLP = async (
 
   const sessionId = object.context.sessionId
 
-  if (!permissionProperties.requireAuthentication) return
+  if (
+    !permissionProperties.requireAuthentication &&
+    !permissionProperties.authorizedRoles
+  )
+    return
 
   // User is not corrected but requireAuthentication is on true
   if (!sessionId || !object.getUser())
