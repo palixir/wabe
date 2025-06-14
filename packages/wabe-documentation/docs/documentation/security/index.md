@@ -16,7 +16,7 @@ import { RoleEnum } from "../generated/wabe";
 
 const run = async () => {
   const wabe = new Wabe({
-    // ... others config fields
+    // ... other configuration fields
     authentication: {
       // We create one role named Admin
       roles: ["Admin"],
@@ -73,7 +73,7 @@ import { RoleEnum } from "../generated/wabe";
 
 const run = async () => {
   const wabe = new Wabe({
-    // ... others config fields
+    // ... other configuration fields
     authentication: {
       // We create one role named Admin
       roles: ["Admin"],
@@ -109,20 +109,20 @@ const run = async () => {
             },
             acl: async (hookObject) => {
               // The user that creataed the company is authorized to read and write it
-              await hookObject.addACL('users', {
+              await hookObject.addACL("users", {
                 userId: hookObject.context.user?.id,
                 read: true,
                 write: true,
-              })
+              });
 
               // No roles are authorized to read or write the company
-              await hookObject.addACL('roles', null)
+              await hookObject.addACL("roles", null);
               // Or you can specify a role
-              await hookObject.addACL('roles', {
+              await hookObject.addACL("roles", {
                 role: RoleEnum.Admin,
                 read: true,
                 write: true,
-              })
+              });
             },
           },
         },
@@ -176,7 +176,7 @@ To use the `protected` field, you need to define it in the configuration of your
 
 Here is an example configuration using the `protected` field to restrict access to certain fields:
 
-```typescript
+````typescript
 import { Wabe } from "wabe";
 import { RoleEnum } from "../generated/wabe";
 
@@ -254,7 +254,7 @@ import { Wabe } from "wabe";
 
 const run = async () => {
   const wabe = new Wabe({
-    // ... others config fields
+    // ... other configuration fields
     security: {
       corsOptions: {
         origin: "http://localhost:3001",
@@ -271,7 +271,7 @@ const run = async () => {
 };
 
 await run();
-```
+````
 
 ## Rate limiting
 
@@ -282,12 +282,33 @@ import { Wabe } from "wabe";
 
 const run = async () => {
   const wabe = new Wabe({
-    // ... others config fields
+    // ... other configuration fields
     security: {
       rateLimit: {
         interval: 60 * 1000, // 1 minute
         numberOfRequests: 100, // 100 requests per minute
       },
+    },
+  });
+
+  await wabe.start();
+};
+
+await run();
+```
+
+## Hide sensitive error message
+
+You can hide sensitive error messages, for example, to avoid leaking any information to an attacker during the authentication process.
+
+```ts
+import { Wabe } from "wabe";
+
+const run = async () => {
+  const wabe = new Wabe({
+    // ... other configuration fields
+    security: {
+      hideSensitiveErrorMessage: true,
     },
   });
 

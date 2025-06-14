@@ -24,7 +24,7 @@ describe('Server', async () => {
         adapter: await getDatabaseAdapter(databaseId),
       },
       security: {
-        maskErrorMessage: true,
+        hideSensitiveErrorMessage: true,
       },
       port,
       schema: {

@@ -29,7 +29,7 @@ import type { FileConfig } from '../file'
 type SecurityConfig = {
   corsOptions?: CorsOptions
   rateLimit?: RateLimitOptions
-  maskErrorMessage?: boolean
+  hideSensitiveErrorMessage?: boolean
 }
 
 export * from './interface'
@@ -283,7 +283,8 @@ export class Wabe<T extends WabeTypes> {
       WobeGraphqlYogaPlugin({
         schema: this.config.graphqlSchema,
         maskedErrors:
-          this.config.security?.maskErrorMessage || this.config.isProduction,
+          this.config.security?.hideSensitiveErrorMessage ||
+          this.config.isProduction,
         graphqlEndpoint: '/graphql',
         plugins: this.config.isProduction ? [useDisableIntrospection()] : [],
         context: async (ctx): Promise<WabeContext<T>> => ctx.wabe,
