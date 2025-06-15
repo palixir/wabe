@@ -20,7 +20,7 @@ const run = async () => {
     database: {
       adapter: new MongoAdapter({
         databaseName: "WabeApp",
-        url: "mongodb://127.0.0.1:27045",
+        databaseUrl: "mongodb://127.0.0.1:27045",
       })
     },
     ai: {
@@ -40,10 +40,10 @@ await run();
 ```ts
 // With controller
 const fn = async (context: WabeContext<any>) => {
- await context.wabe.controllers.ai.createCompletion({
-   content: "What is the best Backend as a Service ?"
- });
-}
+  await context.wabe.controllers.ai.createCompletion({
+    content: "What is the best Backend as a Service ?",
+  });
+};
 ```
 
 ## OpenAI adapter

@@ -19,7 +19,7 @@ const run = async () => {
     database: {
       adapter: new MongoAdapter({
         databaseName: "WabeApp",
-        url: "mongodb://127.0.0.1:27045",
+        databaseUrl: "mongodb://127.0.0.1:27045",
       })
     },
     email: {
@@ -42,12 +42,12 @@ await run();
 // With controller
 const fn = async (context: WabeContext<any>) => {
   await context.wabe.controllers.email.send({
-    from : "test@test.com",
+    from: "test@test.com",
     to: ["target@gmail.com"],
     subject: "Test",
     text: "Test",
   });
-}
+};
 ```
 
 ## Template configuration
@@ -63,11 +63,11 @@ const run = async () => {
     // ... others config fields
     email: {
       adapter: new ResendAdapter("API_KEY"),
-      mainEmail: 'support@yourcompany.com',
+      mainEmail: "support@yourcompany.com",
       htmlTemplates: {
         sendOTPCode: (payload: any) =>
           `<h1>Hello ${payload.name}</h1><p>You have a new confirmation code: ${payload.code}</p>`,
-      }
+      },
     },
   });
 
@@ -101,4 +101,4 @@ await run();
 
 ## Create your own adapter
 
-You can create your own adapter implementing the interface  [here](https://github.com/palixir/wabe/blob/main/packages/wabe/src/email/interface.ts)
+You can create your own adapter implementing the interface [here](https://github.com/palixir/wabe/blob/main/packages/wabe/src/email/interface.ts)
