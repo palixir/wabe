@@ -16,6 +16,52 @@ describe('SignUpWith', () => {
     await closeTests(wabe)
   })
 
+  it('should throw an error if the signUp is disabled', async () => {
+    if (wabe.config) {
+      wabe.config.authentication = {
+        disableSignUp: true,
+      }
+    }
+    const anonymousClient = getAnonymousClient(wabe.config.port)
+
+    const userSchema = wabe.config.schema?.classes?.find(
+      (classItem) => classItem.name === 'User',
+    )
+
+    if (!userSchema) throw new Error('Failed to find user schema')
+
+    // @ts-expect-error
+    userSchema.permissions.create.requireAuthentication = true
+
+    expect(
+      anonymousClient.request<any>(
+        gql`
+      mutation signUpWith($input: SignUpWithInput!) {
+        signUpWith(input: $input) {
+          id
+        }
+      }
+      `,
+        {
+          input: {
+            authentication: {
+              emailPassword: {
+                email: 'email@test.fr',
+                password: 'password',
+              },
+            },
+          },
+        },
+      ),
+    ).rejects.toThrow('SignUp is disabled')
+
+    if (wabe.config) {
+      wabe.config.authentication = {
+        disableSignUp: false,
+      }
+    }
+  })
+
   it('should block the signUpWith if the user creation is blocked for anonymous (the creation is done with root to avoid ACL issues)', () => {
     const anonymousClient = getAnonymousClient(wabe.config.port)
 

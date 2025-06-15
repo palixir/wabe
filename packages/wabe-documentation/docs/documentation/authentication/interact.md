@@ -6,14 +6,39 @@ When logging in or out, the inputs you pass as parameters to the mutation corres
 
 ## Sign up
 
+You can disable signUp with the parameters `disableSignUp` in the authentication object :
+
+```ts
+import { Wabe } from "wabe";
+
+const run = async () => {
+  // Ensure your database is running before run the file
+  const wabe = new Wabe({
+    // ... Others configuration fields
+    authentication: {
+      disableSignUp: true,
+    },
+    port: 3001,
+  });
+
+  await wabe.start();
+};
+
+await run();
+```
+
 ```graphql
 mutation signUpWith {
   signUpWith(
-    input: {authentication: {emailPassword: {email: "your.email@gmail.com", password: "password"}}}
+    input: {
+      authentication: {
+        emailPassword: { email: "your.email@gmail.com", password: "password" }
+      }
+    }
   ) {
     id
     accessToken
-		refreshToken
+    refreshToken
   }
 }
 ```
@@ -23,7 +48,11 @@ mutation signUpWith {
 ```graphql
 mutation signInWith {
   signInWith(
-    input: {authentication: {emailPassword: {email: "your.email@gmail.com", password: "password"}}}
+    input: {
+      authentication: {
+        emailPassword: { email: "your.email@gmail.com", password: "password" }
+      }
+    }
   ) {
     id
     accessToken
@@ -35,7 +64,7 @@ mutation signInWith {
 ## Sign out
 
 ```graphql
-mutation signOut{
+mutation signOut {
   signOut
 }
 ```

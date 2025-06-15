@@ -15,6 +15,9 @@ export const signUpWithResolver = async (
   },
   context: WabeContext<any>,
 ) => {
+  if (context.wabe.config.authentication?.disableSignUp)
+    throw new Error('SignUp is disabled')
+
   // Create object call the provider signUp
   const res = await context.wabe.controllers.database.createObject({
     className: 'User',
