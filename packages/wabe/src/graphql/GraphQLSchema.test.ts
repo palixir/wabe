@@ -615,7 +615,7 @@ describe('GraphqlSchema', () => {
               type: 'Array',
               typeValue: 'Object',
               object: {
-                name: 'SubOject',
+                name: 'SubObject',
                 fields: {
                   field2: {
                     type: 'Array',
@@ -636,7 +636,7 @@ describe('GraphqlSchema', () => {
       getTypeFromGraphQLSchema({
         schema: wabe.config.graphqlSchema || ({} as any),
         type: 'Type',
-        name: 'TestClassSubOject',
+        name: 'TestClassSubObject',
       }).input,
     ).toEqual({
       field2: '[String]!',
@@ -1088,7 +1088,7 @@ describe('GraphqlSchema', () => {
             field1: {
               type: 'Object',
               object: {
-                name: 'SubOject',
+                name: 'SubObject',
                 fields: {
                   field2: { type: 'String' },
                   field3: { type: 'Int' },
@@ -2043,7 +2043,7 @@ describe('GraphqlSchema', () => {
             field1: {
               type: 'Object',
               object: {
-                name: 'SubOject',
+                name: 'SubObject',
                 fields: {
                   field2: { type: 'String' },
                   field3: { type: 'Int' },
@@ -2077,7 +2077,7 @@ describe('GraphqlSchema', () => {
     const request = await client.request<any>(
       gql`
 				query testClasses(
-					$field1WhereInput: TestClassSubOjectWhereInput
+					$field1WhereInput: TestClassSubObjectWhereInput
 				) {
 					testClasses(where: { field1: $field1WhereInput }) {
 						edges {
