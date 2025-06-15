@@ -1863,6 +1863,7 @@ input VerifyChallengeInput {
 input VerifyChallengeSecondaryFactorAuthenticationInput {
   emailPasswordSRPChallenge: VerifyChallengeSecondaryFactorAuthenticationEmailPasswordSRPChallengeInput
   emailOTP: VerifyChallengeSecondaryFactorAuthenticationEmailOTPInput
+  qrCodeOTP: VerifyChallengeSecondaryFactorAuthenticationQrCodeOTPInput
 }
 
 input VerifyChallengeSecondaryFactorAuthenticationEmailPasswordSRPChallengeInput {
@@ -1872,6 +1873,11 @@ input VerifyChallengeSecondaryFactorAuthenticationEmailPasswordSRPChallengeInput
 }
 
 input VerifyChallengeSecondaryFactorAuthenticationEmailOTPInput {
+  email: Email!
+  otp: String!
+}
+
+input VerifyChallengeSecondaryFactorAuthenticationQrCodeOTPInput {
   email: Email!
   otp: String!
 }
