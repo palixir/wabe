@@ -1,6 +1,7 @@
 import { totp } from 'otplib'
 import type { TOTP } from 'otplib/core'
 import { createHash } from 'node:crypto'
+import { toBase32 } from 'src/utils'
 
 const FIVE_MINUTES = 5
 
@@ -29,5 +30,25 @@ export class OTP {
       .digest('hex')
 
     return this.internalTotp.verify({ secret: hashedSecret, token: otp })
+  }
+
+  generateKeyuri({
+    userId,
+    emailOrUsername,
+    applicationName,
+  }: {
+    userId: string
+    emailOrUsername: string
+    applicationName: string
+  }): string {
+    const hashedSecret = createHash('sha256')
+      .update(`${this.secret}:${userId}`)
+      .digest('hex')
+
+    return this.internalTotp.keyuri(
+      emailOrUsername,
+      applicationName,
+      toBase32(hashedSecret),
+    )
   }
 }

@@ -3,7 +3,7 @@ import type {
   CustomAuthenticationMethods,
   ProviderInterface,
 } from './interface'
-import { GitHub } from './providers'
+import { GitHub, QRCodeOTP } from './providers'
 import { Google } from './providers'
 import { EmailOTP } from './providers/EmailOTP'
 import { EmailPassword } from './providers/EmailPassword'
@@ -87,6 +87,22 @@ export const defaultAuthenticationMethods = <
     },
     // @ts-expect-error
     provider: new EmailOTP(),
+    isSecondaryFactor: true,
+  },
+  {
+    name: 'qrCodeOTP',
+    input: {
+      email: {
+        type: 'Email',
+        required: true,
+      },
+      otp: {
+        type: 'String',
+        required: true,
+      },
+    },
+    // @ts-expect-error
+    provider: new QRCodeOTP(),
     isSecondaryFactor: true,
   },
   {

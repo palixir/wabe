@@ -391,10 +391,16 @@ export type VerifyChallengeSecondFAEmailPasswordSRPChallenge = {
 
 export type VerifyChallengeSecondFA = {
 	emailPasswordSRPChallenge?: VerifyChallengeSecondFAEmailPasswordSRPChallenge,
-	emailOTP?: VerifyChallengeSecondFAEmailOTP
+	emailOTP?: VerifyChallengeSecondFAEmailOTP,
+	qrCodeOTP?: VerifyChallengeSecondFAQrCodeOTP
 }
 
 export type VerifyChallengeSecondFAEmailOTP = {
+	email: string,
+	otp: string
+}
+
+export type VerifyChallengeSecondFAQrCodeOTP = {
 	email: string,
 	otp: string
 }

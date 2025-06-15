@@ -42,4 +42,18 @@ describe('OTP', () => {
 
     expect(otp.internalTotp.options.window).toEqual([5, 0])
   })
+
+  it('should generate a valid keyuri', () => {
+    const otp = new OTP('rootKey')
+
+    const keyuri = otp.generateKeyuri({
+      userId: 'userId',
+      emailOrUsername: 'email@test.fr',
+      applicationName: 'Wabe',
+    })
+
+    expect(keyuri).toBe(
+      'otpauth://totp/Wabe:email%40test.fr?secret=A4DQOCAAAAEAAAAAAABQGBIIAIEQAAQAAQAACCIFAYCAEBIFAAEAACAAAADAIAADAAEAMAAEAADAOAAAA4CAABAAAACAAAAGAMAAAAA&period=30&digits=6&algorithm=SHA1&issuer=Wabe',
+    )
+  })
 })
