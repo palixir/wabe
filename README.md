@@ -35,7 +35,7 @@ const run = async () => {
     database: {
       adapter: new MongoAdapter({
         databaseName: "WabeApp",
-        url: "mongodb://127.0.0.1:27045",
+        databaseUrl: "mongodb://127.0.0.1:27045",
       }),
     },
     port: 3000,
