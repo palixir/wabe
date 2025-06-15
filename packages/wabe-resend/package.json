@@ -1,6 +1,6 @@
 {
   "name": "wabe-resend",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "Resend email adapter for Wabe (official)",
   "homepage": "https://wabe.dev",
   "author": {

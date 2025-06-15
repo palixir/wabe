@@ -1,6 +1,6 @@
 {
   "name": "wabe-buns3",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Bun S3 adapter for Wabe",
   "homepage": "https://wabe.dev",
   "author": {

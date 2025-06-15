@@ -1,6 +1,6 @@
 {
   "name": "wabe-mongodb",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "MongoDB adapter for Wabe (official)",
   "homepage": "https://wabe.dev",
   "author": {
