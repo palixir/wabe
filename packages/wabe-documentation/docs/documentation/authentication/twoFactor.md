@@ -1,45 +1,62 @@
-# Two-factor authentication
+# Two-Factor Authentication (2FA)
 
-Wabe supports two-factor authentication (2FA) very easily. It is possible to add a second factor to your authentication methods. You have two options, use default methods provided by Wabe or create your own. Wabe provides a default method for email OTP.
+Wabe makes adding a second authentication factor straightforward. You can:
 
-## How it works
+- Use built-in providers: Email OTP or QR-Code OTP
+- Implement your own custom provider
 
-User contains an object `secondFA` that contains the namf of the second factor and some other information like if the second factor is enabled or not.
+## Introduction
 
-```ts
-{
-  secondFA: {
-    enabled: true,
-    provider: 'emailOTP',
-  },
-}
-```
+Two-Factor Authentication (2FA) adds an additional layer of security to your application. With Wabe, you can easily add a second authentication factor using built-in providers or by implementing your own custom provider.
 
-If the second factor is enabled, when the user signs in with for example email and password, the signIn will launch the `onSendChallenge` method of the provider. The provider will then send a challenge to the user for example an email with a OTP code or a SMS with a code.
+## How it Works
 
-Than the front will have to call the `verifyChallenge` mutation with the data needed to verify the challenge, for example for email OTP the input will be:
+### User Configuration
+
+Each user object holds a `secondFA` block:
 
 ```ts
-{
-  secondFA: {
-    emailOTP: {
-      email: 'user@example.com',
-      otp: '123456',
-    },
-  },
-}
+    {
+      secondFA: {
+        enabled: true,
+        provider: 'emailOTP', // or 'qrCodeOTP', or your custom name
+      },
+    }
 ```
 
-The `verifyChallenge` mutation will then call the `onVerifyChallenge` method of the provider and return the userId.
+### Sign-In Process with 2FA
 
-## Example
+1. The user signs in with their credentials (e.g., email and password).
+2. If the second factor is enabled, the `onSendChallenge` method of the provider is called. The provider then sends a challenge to the user (e.g., an email with an OTP code or an SMS with a code).
+3. The frontend must call the `verifyChallenge` mutation with the data needed to verify the challenge. For example, for Email OTP, the input would be:
 
-First the user admin will sign in with email and password, and the user will receive an email with an OTP code.
+```ts
+    {
+      secondFA: {
+        emailOTP: {
+          email: 'user@example.com',
+          otp: '123456',
+        },
+      },
+    }
+```
+
+4. The `verifyChallenge` mutation calls the `onVerifyChallenge` method of the provider and returns the `userId`.
+
+## Examples
+
+### Example with Email OTP
+
+1. The user admin signs in with email and password and receives an email with an OTP code.
 
 ```graphql
 mutation signInWith {
   signInWith(
-    input: {authentication: {emailPassword: {email: "admin@wabe.dev", password: "admin"}}}
+    input: {
+      authentication: {
+        emailPassword: { email: "admin@wabe.dev", password: "admin" }
+      }
+    }
   ) {
     id
     accessToken
@@ -47,18 +64,13 @@ mutation signInWith {
 }
 ```
 
-Then the front will call the `verifyChallenge` mutation with the OTP code.
+2. The frontend calls the `verifyChallenge` mutation with the OTP code.
 
 ```graphql
 mutation verifyChallenge {
   verifyChallenge(
     input: {
-      secondFA: {
-        EmailOTP: {
-          email: "admin@wabe.dev"
-          otp: "123456"
-        }
-      }
+      secondFA: { emailOTP: { email: "admin@wabe.dev", otp: "123456" } }
     }
   ) {
     accessToken
@@ -66,14 +78,56 @@ mutation verifyChallenge {
 }
 ```
 
-Finally the user will be logged in.
+3. The user is now logged in.
 
-## Create your own method
+### Example with QRCodeOTP
+
+You can use QRCodeOTP methods to let your users use OTP applications like Google Authenticator, Microsoft Authenticator, etc.
+
+1. In your backend, import the OTP class from Wabe and generate a key URI. Then send this key URI to your frontend and display a QRCode.
+
+```ts
+import { OTP } from "wabe";
+
+const otp = new OTP("YOUR ROOT KEY");
+
+const keyuri = otp.generateKeyuri({
+  userId: "userId",
+  emailOrUsername: "email@test.fr",
+  applicationName: "Wabe",
+});
+// Send this keyuri to the frontend you can for example create a custom query for this.
+```
+
+2. In your frontend, use a library like `qrcode` to display the QRCode.
+
+```ts
+import { useEffect, useState } from 'react'
+import qrcode from 'qrcode'
+
+export const Test = () => {
+  const [test, setTest] = useState('')
+
+  useEffect(() => {
+    qrcode
+      .toDataURL(theKeyUriThatYourSendFromTheBackend)
+      .then((url) => setTest(url))
+  }, [])
+
+  return <img src={test} />
+}
+```
+
+3. Follow steps similar to those for Email OTP for sign-in and challenge verification.
+
+## Create Your Own Method
 
 To create your own method, you need to create a class that implements the `SecondaryProviderInterface` interface.
 
+1. Implement the `SecondaryProviderInterface` interface.
+
 ```ts
-import type { SecondaryProviderInterface } from 'wabe'
+import type { SecondaryProviderInterface } from "wabe";
 
 export class YourCustomProvider implements SecondaryProviderInterface {
   async onSendChallenge({ user, context }) {
@@ -82,45 +136,42 @@ export class YourCustomProvider implements SecondaryProviderInterface {
 
   async onVerifyChallenge({ input, context }) {
     // Verify the challenge
-    return { userId: 'userId' }
+    return { userId: "userId" };
   }
 }
 ```
 
-Then you need to add it to the `customAuthenticationMethods` array in the `authentication` object of the config.
+2. Add it to the `customAuthenticationMethods` array in the `authentication` object of the config.
 
 ```ts
-authentication: {
-  customAuthenticationMethods: [
-    {
-      name: 'yourCustomMethod',
-      input: {
-        email: {
-          type: 'Email',
-          required: true,
+    authentication: {
+      customAuthenticationMethods: [
+        {
+          name: 'yourCustomMethod',
+          input: {
+            email: {
+              type: 'Email',
+              required: true,
+            },
+            otp: {
+              type: 'String',
+              required: true,
+            },
+          },
+          provider: new YourCustomProvider(),
         },
-        otp: {
-          type: 'String',
-          required: true,
-        },
-      },
-      provider: new YourCustomProvider(),
+      ],
     },
-  ],
-},
 ```
 
-Now you can use it in the `signInWith` mutation.
+3. Use it in the `signInWith` mutation.
 
 ```graphql
 mutation signInWith {
   signInWith(
     input: {
       authentication: {
-        emailPassword: {
-          email: "admin@wabe.dev"
-          password: "admin"
-        }
+        emailPassword: { email: "admin@wabe.dev", password: "admin" }
       }
     }
   ) {
@@ -130,18 +181,13 @@ mutation signInWith {
 }
 ```
 
-And in the `verifyChallenge` mutation.
+4. Use it in the `verifyChallenge` mutation.
 
 ```graphql
 mutation verifyChallenge {
   verifyChallenge(
     input: {
-      secondFA: {
-        yourCustomMethod: {
-          email: "admin@wabe.dev"
-          otp: "123456"
-        }
-      }
+      secondFA: { yourCustomMethod: { email: "admin@wabe.dev", otp: "123456" } }
     }
   ) {
     accessToken

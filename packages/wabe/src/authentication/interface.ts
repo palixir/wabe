@@ -104,6 +104,7 @@ export interface AuthenticationConfig<T extends WabeTypes> {
   providers?: Partial<Record<ProviderEnum, ProviderConfig>>
   customAuthenticationMethods?: CustomAuthenticationMethods<T>[]
   sessionHandler?: (context: WobeCustomContext<T>) => void | Promise<void>
+  disableSignUp?: boolean
 }
 
 export interface CreateTokenFromAuthorizationCodeOptions {
