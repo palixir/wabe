@@ -646,7 +646,7 @@ describe('GraphqlSchema', () => {
     await wabe.close()
   })
 
-  // It is usefull when we have the permission to create but not to read the data
+  // It is useful when we have the permission to create but not to read the data
   // We should be able to create a new object without return any data
   // Just use the "ok" field
   it('should be able to create a new object with mutation without return any data', async () => {
