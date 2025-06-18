@@ -47,19 +47,13 @@ describe('Phone password', () => {
     spyBunPasswordHash.mockResolvedValueOnce('$argon2id$hashedPassword')
 
     const {
-      authenticationDataToSave: { phone, password },
+      authenticationDataToSave: { phone },
     } = await phonePassword.onSignUp({
       context: { wabe: controllers } as any,
       input: { phone: 'phone@test.fr', password: 'password' },
     })
 
     expect(phone).toBe('phone@test.fr')
-    expect(password).toBe('$argon2id$hashedPassword')
-
-    expect(spyBunPasswordHash).toHaveBeenCalledTimes(1)
-    expect(spyBunPasswordHash).toHaveBeenCalledWith('password', {
-      algorithm: argon2.Algorithm.Argon2id,
-    })
   })
 
   it('should signIn with phone password', async () => {
@@ -190,8 +184,5 @@ describe('Phone password', () => {
     })
 
     expect(res.authenticationDataToSave.phone).toBe('phone@test.fr')
-    expect(res.authenticationDataToSave.password).toBe(
-      '$argon2id$hashedPassword',
-    )
   })
 })

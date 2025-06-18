@@ -47,19 +47,13 @@ describe('Email password', () => {
     spyBunPasswordHash.mockResolvedValueOnce('$argon2id$hashedPassword')
 
     const {
-      authenticationDataToSave: { email, password },
+      authenticationDataToSave: { email },
     } = await emailPassword.onSignUp({
       context: { wabe: controllers } as any,
       input: { email: 'email@test.fr', password: 'password' },
     })
 
     expect(email).toBe('email@test.fr')
-    expect(password).toBe('$argon2id$hashedPassword')
-
-    expect(spyBunPasswordHash).toHaveBeenCalledTimes(1)
-    expect(spyBunPasswordHash).toHaveBeenCalledWith('password', {
-      algorithm: argon2.Algorithm.Argon2id,
-    })
   })
 
   it('should signIn with email password', async () => {
@@ -190,8 +184,5 @@ describe('Email password', () => {
     })
 
     expect(res.authenticationDataToSave.email).toBe('email@test.fr')
-    expect(res.authenticationDataToSave.password).toBe(
-      '$argon2id$hashedPassword',
-    )
   })
 })

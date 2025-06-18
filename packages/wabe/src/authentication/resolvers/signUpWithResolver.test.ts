@@ -1,4 +1,4 @@
-import { beforeAll, afterAll, describe, expect, it } from 'bun:test'
+import { beforeAll, afterAll, describe, expect, it, beforeEach } from 'bun:test'
 import { type DevWabeTypes, getAnonymousClient } from '../../utils/helper'
 import type { Wabe } from '../../server'
 import { gql } from 'graphql-request'
@@ -12,13 +12,64 @@ describe('SignUpWith', () => {
     wabe = setup.wabe
   })
 
+  beforeEach(async () => {
+    await wabe.controllers.database.clearDatabase()
+  })
+
   afterAll(async () => {
     await closeTests(wabe)
+  })
+
+  it('should throw an error if user already exist with emailPassword', async () => {
+    const anonymousClient = getAnonymousClient(wabe.config.port)
+
+    await anonymousClient.request<any>(
+      gql`
+      mutation signUpWith($input: SignUpWithInput!) {
+          signUpWith(input: $input) {
+              id
+          }
+      }
+    `,
+      {
+        input: {
+          authentication: {
+            emailPassword: {
+              email: 'test@gmail.com',
+              password: 'password',
+            },
+          },
+        },
+      },
+    )
+
+    expect(
+      anonymousClient.request<any>(
+        gql`
+      mutation signUpWith($input: SignUpWithInput!) {
+          signUpWith(input: $input) {
+              id
+          }
+      }
+    `,
+        {
+          input: {
+            authentication: {
+              emailPassword: {
+                email: 'test@gmail.com',
+                password: 'password',
+              },
+            },
+          },
+        },
+      ),
+    ).rejects.toThrow('Not authorized to create user')
   })
 
   it('should throw an error if the signUp is disabled', async () => {
     if (wabe.config) {
       wabe.config.authentication = {
+        ...wabe.config.authentication,
         disableSignUp: true,
       }
     }
@@ -57,6 +108,7 @@ describe('SignUpWith', () => {
 
     if (wabe.config) {
       wabe.config.authentication = {
+        ...wabe.config.authentication,
         disableSignUp: false,
       }
     }

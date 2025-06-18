@@ -4,7 +4,6 @@ import type {
   AuthenticationEventsOptionsWithUserId,
   ProviderInterface,
 } from '../interface'
-import { hashPassword } from '../utils'
 import { contextWithRoot } from '../../utils/export'
 import type { DevWabeTypes } from '../../utils/helper'
 
@@ -81,7 +80,7 @@ export class EmailPassword
     return {
       authenticationDataToSave: {
         email: input.email,
-        password: await hashPassword(input.password),
+        password: input.password,
       },
     }
   }
@@ -113,7 +112,7 @@ export class EmailPassword
       authenticationDataToSave: {
         email: input.email ?? user?.authentication?.emailPassword?.email,
         password: input.password
-          ? await hashPassword(input.password)
+          ? input.password
           : user?.authentication?.emailPassword?.password,
       },
     }
