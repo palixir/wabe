@@ -4,7 +4,6 @@ import type {
   AuthenticationEventsOptionsWithUserId,
   ProviderInterface,
 } from '../interface'
-import { hashPassword } from '../utils'
 import { contextWithRoot } from '../../utils/export'
 import type { DevWabeTypes } from '../../utils/helper'
 
@@ -80,7 +79,7 @@ export class PhonePassword
     return {
       authenticationDataToSave: {
         phone: input.phone,
-        password: await hashPassword(input.password),
+        password: input.password,
       },
     }
   }
@@ -112,7 +111,7 @@ export class PhonePassword
       authenticationDataToSave: {
         phone: input.phone ?? user?.authentication?.phonePassword?.phone,
         password: input.password
-          ? await hashPassword(input.password)
+          ? input.password
           : user?.authentication?.phonePassword?.password,
       },
     }

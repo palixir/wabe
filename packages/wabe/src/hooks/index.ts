@@ -43,6 +43,10 @@ import {
 } from './setupAcl'
 import { hashFieldHook } from './hashFieldHook'
 import { defaultBeforeCreateUser } from './createUser'
+import {
+  defaultCallAuthenticationProviderOnBeforeCreateUser,
+  defaultCallAuthenticationProviderOnBeforeUpdateUser,
+} from './authentication'
 
 export enum OperationType {
   AfterCreate = 'afterCreate',
@@ -403,5 +407,17 @@ export const getDefaultHooks = (): Hook<any, any>[] => [
     operationType: OperationType.BeforeCreate,
     priority: 1,
     callback: defaultBeforeCreateUser,
+  },
+  {
+    className: 'User',
+    operationType: OperationType.BeforeCreate,
+    priority: 1,
+    callback: defaultCallAuthenticationProviderOnBeforeCreateUser,
+  },
+  {
+    className: 'User',
+    operationType: OperationType.BeforeUpdate,
+    priority: 1,
+    callback: defaultCallAuthenticationProviderOnBeforeUpdateUser,
   },
 ]
