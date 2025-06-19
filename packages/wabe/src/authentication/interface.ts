@@ -131,4 +131,5 @@ export enum AuthenticationProvider {
 
 export enum SecondaryFactor {
   EmailOTP = 'emailOTP',
+  QRCodeOTP = 'qrcodeOTP',
 }
