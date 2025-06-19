@@ -12,7 +12,8 @@ export enum AuthenticationProvider {
 }
 
 export enum SecondaryFactor {
-	emailOTP = "emailOTP"
+	emailOTP = "emailOTP",
+	qrcodeOTP = "qrcodeOTP"
 }
 
 export type ACLObjectUsersACL = {

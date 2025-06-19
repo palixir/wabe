@@ -13,6 +13,7 @@ enum AuthenticationProvider {
 
 enum SecondaryFactor {
   emailOTP
+  qrcodeOTP
 }
 
 """Object containing information about the file"""
