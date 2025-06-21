@@ -103,6 +103,7 @@ describe('hooks/session', () => {
         wabe,
         isRoot: true,
       },
+      select: {},
     })
 
     const res3 = await wabe.controllers.database.getObjects({

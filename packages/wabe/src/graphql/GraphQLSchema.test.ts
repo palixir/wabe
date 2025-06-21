@@ -3409,11 +3409,13 @@ describe('GraphqlSchema', () => {
         wabe,
         isRoot: true,
       },
+      // @ts-expect-error
+      select: { field2: true },
     })) as any
 
     expect(field2AfterUpdate2[0].field2).toEqual([
-      res.createTestClass.testClass.id,
-      res2.createTestClass.testClass.id,
+      { id: res.createTestClass.testClass.id },
+      { id: res2.createTestClass.testClass.id },
     ])
     expect(field2AfterUpdate2[0]?.field2.length).toBe(2)
 
@@ -3707,12 +3709,14 @@ describe('GraphqlSchema', () => {
         wabe,
         isRoot: true,
       },
+      // @ts-expect-error
+      select: { field2: true },
     })) as any
 
     expect(field2AfterUpdate2[0]?.field2.length).toBe(2)
     expect(field2AfterUpdate2[0]?.field2).toEqual([
-      res.createTestClass.testClass.id,
-      res2.createTestClass.testClass.id,
+      { id: res.createTestClass.testClass.id },
+      { id: res2.createTestClass.testClass.id },
     ])
 
     expect(resAfterUpdate.updateTestClass2s.edges[0].node.name).toBe('name')
@@ -3784,10 +3788,12 @@ describe('GraphqlSchema', () => {
         wabe,
         isRoot: true,
       },
+      // @ts-expect-error
+      select: { field2: true },
     })) as any
 
     expect(field2BeforeUpdate2[0]?.field2).toEqual([
-      resAfterAdd.createTestClass2.testClass2.field2.edges[0].node.id,
+      { id: resAfterAdd.createTestClass2.testClass2.field2.edges[0].node.id },
     ])
 
     const resAfterUpdate = await client.request<any>(gql`

@@ -19,6 +19,8 @@ const _checkProtected = (
     Object.keys(hookObject.select).map((fieldName) => {
       const protectedForCurrentField = schemaClass.fields[fieldName]?.protected
 
+      if (!protectedForCurrentField) return
+
       if (protectedForCurrentField?.protectedOperations.includes('read')) {
         if (
           isRoot &&
