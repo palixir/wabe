@@ -1,7 +1,7 @@
 import type { GraphQLResolveInfo, SelectionSetNode } from 'graphql'
 import type { WabeTypes } from '..'
 import type { WabeContext } from '../server/interface'
-import { firstLetterInLowerCase } from '../utils'
+import { contextWithoutGraphQLCall, firstLetterInLowerCase } from '../utils'
 import {
   type InputFields,
   type TypeOfExecution,
@@ -130,7 +130,7 @@ export const executeRelationOnFields = ({
         newAcc[fieldName] = await createAndLink({
           createAndLink: value.createAndLink,
           fieldName,
-          context,
+          context: contextWithoutGraphQLCall(context),
           className,
         })
       } else if (typeof value === 'object' && value?.link) {
@@ -141,13 +141,13 @@ export const executeRelationOnFields = ({
         newAcc[fieldName] = await createAndAdd({
           createAndAdd: value.createAndAdd,
           fieldName,
-          context,
+          context: contextWithoutGraphQLCall(context),
           className,
         })
       } else if (typeof value === 'object' && value?.add) {
         const addValue = await add({
           add: value.add,
-          context,
+          context: contextWithoutGraphQLCall(context),
           fieldName,
           typeOfExecution: typeOfExecution || 'create',
           id,
@@ -159,7 +159,7 @@ export const executeRelationOnFields = ({
       } else if (typeof value === 'object' && value?.remove) {
         const removeValue = await remove({
           remove: value.remove,
-          context,
+          context: contextWithoutGraphQLCall(context),
           fieldName,
           typeOfExecution: typeOfExecution || 'create',
           id,
@@ -209,7 +209,6 @@ export const queryForOneObject = (
     id,
     select,
     context,
-    isGraphQLCall: true,
   })
 }
 
@@ -232,7 +231,6 @@ export const queryForMultipleObject = async (
     first,
     context,
     order: transformOrder(order),
-    isGraphQLCall: true,
   })
 
   return {
@@ -271,7 +269,6 @@ export const mutationToCreateObject = async (
         data: updatedFieldsToCreate,
         select,
         context,
-        isGraphQLCall: true,
       }),
     ok: true,
   }
@@ -305,7 +302,6 @@ export const mutationToCreateMultipleObjects = async (
     first,
     context,
     order: transformOrder(order),
-    isGraphQLCall: true,
   })
 
   return {
@@ -338,7 +334,6 @@ export const mutationToUpdateObject = async (
         data: updatedFields,
         select,
         context,
-        isGraphQLCall: true,
       }),
     ok: true,
   }
@@ -370,7 +365,6 @@ export const mutationToUpdateMultipleObjects = async (
     first,
     context,
     order,
-    isGraphQLCall: true,
   })
 
   return {
@@ -394,7 +388,6 @@ export const mutationToDeleteObject = async (
         id: args.input?.id,
         select,
         context,
-        isGraphQLCall: true,
       }),
     ok: true,
   }
@@ -417,7 +410,6 @@ export const mutationToDeleteMultipleObjects = async (
     first,
     context,
     order,
-    isGraphQLCall: true,
   })
 
   return {

@@ -34,7 +34,6 @@ export class EmailPassword
       },
       context: contextWithRoot(context),
       first: 1,
-      isGraphQLCall: true,
     })
 
     const user = users[0]

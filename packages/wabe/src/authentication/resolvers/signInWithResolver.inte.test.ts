@@ -21,7 +21,6 @@ describe('signInWithResolver integration test', () => {
       email: 'admin@wabe.dev',
       password: 'admin',
     })
-
     const res = await adminClient.request<any>(
       gql`
       mutation signInWith($input: SignInWithInput!) {

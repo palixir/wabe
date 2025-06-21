@@ -47,6 +47,7 @@ import {
   defaultCallAuthenticationProviderOnBeforeCreateUser,
   defaultCallAuthenticationProviderOnBeforeUpdateUser,
 } from './authentication'
+import { contextWithoutGraphQLCall } from 'src/utils'
 
 export enum OperationType {
   AfterCreate = 'afterCreate',
@@ -124,9 +125,9 @@ export const initializeHook = <
 
     return context.wabe.controllers.database.getObject({
       className,
-      context: contextWithRoot(context),
+      context: contextWithoutGraphQLCall(contextWithRoot(context)),
       id,
-      skipHooks: true,
+      _skipHooks: true,
     })
   }
 
@@ -142,9 +143,9 @@ export const initializeHook = <
 
     const res = await context.wabe.controllers.database.getObjects({
       className,
-      context: contextWithRoot(context),
+      context: contextWithoutGraphQLCall(contextWithRoot(context)),
       where: where ? where : { id: { in: ids } },
-      skipHooks: true,
+      _skipHooks: true,
     })
 
     // @ts-expect-error
@@ -172,7 +173,7 @@ export const initializeHook = <
         className,
         newData,
         operationType: options.operationType,
-        context,
+        context: contextWithoutGraphQLCall(context),
         object,
         originalObject: options.originalObject,
         select,
@@ -226,7 +227,7 @@ export const initializeHook = <
             className,
             newData,
             operationType: options.operationType,
-            context,
+            context: contextWithoutGraphQLCall(context),
             object,
             originalObject: originalObjectToUse,
             select,

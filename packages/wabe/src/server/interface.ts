@@ -7,4 +7,5 @@ export interface WabeContext<T extends WabeTypes> {
   sessionId?: string | null
   isRoot: boolean
   wabe: Wabe<T>
+  isGraphQLCall?: boolean
 }
