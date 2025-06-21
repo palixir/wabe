@@ -49,10 +49,60 @@ export class DatabaseController<T extends WabeTypes> {
 
     if (!realClass) throw new Error('Class not found in schema')
 
-    // If select is not provided we return all fields except pointer and relation
-    // If select is undefined and in project on adapter we should get all fields
-    // This is the default behavior for MongoAdapter
-    if (!select) return { pointers: {}, selectWithoutPointers: {} }
+    if (!select) {
+      return Object.entries(realClass.fields).reduce(
+        (acc, [fieldName, value]) => {
+          // We don't want to select the acl field
+          if (fieldName === 'acl') return acc
+
+          if (value.type === 'Pointer' || value.type === 'Relation') {
+            const realPointerClass = context.wabe.config.schema?.classes?.find(
+              // @ts-expect-error
+              (c) => c.name.toLowerCase() === value.class.toLowerCase(),
+            )
+
+            if (!realPointerClass) return acc
+
+            const newSelect = Object.entries(realPointerClass.fields).reduce(
+              (acc, [fieldName, field]) => {
+                if (field.type === 'Relation' || field.type === 'Pointer')
+                  return acc
+
+                return {
+                  ...acc,
+                  [fieldName]: true,
+                }
+              },
+              {},
+            )
+
+            return {
+              ...acc,
+              pointers: {
+                ...acc.pointers,
+                [fieldName]: {
+                  // @ts-expect-error
+                  className: value.class,
+                  select: newSelect,
+                },
+              },
+            }
+          }
+
+          return {
+            ...acc,
+            selectWithoutPointers: {
+              ...acc.selectWithoutPointers,
+              [fieldName]: true,
+            },
+          }
+        },
+        {
+          pointers: {},
+          selectWithoutPointers: {},
+        },
+      )
+    }
 
     const pointerOrRelationFields = Object.keys(realClass.fields).filter(
       (fieldName) =>
@@ -289,12 +339,14 @@ export class DatabaseController<T extends WabeTypes> {
     originClassName,
     object,
     isGraphQLCall,
+    skipHooks,
   }: {
     originClassName: string
     pointers: Record<string, { className: string; select: Select }>
     context: WabeContext<any>
     object: Record<string, any>
     isGraphQLCall?: boolean
+    skipHooks?: boolean
   }) {
     return Object.entries(pointers).reduce(
       async (
@@ -323,6 +375,7 @@ export class DatabaseController<T extends WabeTypes> {
             context,
             // @ts-expect-error
             select: currentSelect,
+            skipHooks,
           })
 
           return {
@@ -342,11 +395,11 @@ export class DatabaseController<T extends WabeTypes> {
           const selectWithoutTotalCount = Object.entries(
             currentSelect || {},
           ).reduce(
-            (acc, [key, value]) => {
-              if (key === 'totalCount') return acc
+            (acc2, [key, value]) => {
+              if (key === 'totalCount') return acc2
 
               return {
-                ...acc,
+                ...acc2,
                 [key]: value,
               }
             },
@@ -359,10 +412,11 @@ export class DatabaseController<T extends WabeTypes> {
             // @ts-expect-error
             where: { id: { in: object[pointerField] } },
             context,
+            skipHooks,
           })
 
           return {
-            ...acc,
+            ...accObject,
             [pointerField]: isGraphQLCall
               ? {
                   totalCount: relationObjects.length,
@@ -496,6 +550,7 @@ export class DatabaseController<T extends WabeTypes> {
         // @ts-expect-error
         object: objectToReturn,
         isGraphQLCall,
+        skipHooks,
       })),
     }
   }
@@ -577,18 +632,21 @@ export class DatabaseController<T extends WabeTypes> {
     })
 
     return Promise.all(
-      objectsToReturn.map(async (object) => ({
-        ...object,
-        ...(await this._getFinalObjectWithPointerAndRelation({
-          // @ts-expect-error
-          object,
-          context,
-          // @ts-expect-error
-          originClassName: className,
-          pointers,
-          isGraphQLCall,
-        })),
-      })),
+      objectsToReturn.map(async (object) => {
+        return {
+          ...object,
+          ...(await this._getFinalObjectWithPointerAndRelation({
+            // @ts-expect-error
+            object,
+            context,
+            // @ts-expect-error
+            originClassName: className,
+            pointers,
+            isGraphQLCall,
+            skipHooks,
+          })),
+        }
+      }),
     ) as Promise<OutputType<T, K, W>[]>
   }
 
