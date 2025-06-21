@@ -8,6 +8,7 @@ export const defaultSessionHandler =
   (wabe: Wabe<DevWabeTypes>) =>
   async (ctx: WobeCustomContext<DevWabeTypes>) => {
     const headers = ctx.request.headers
+    const isGraphQLCall = ctx.request.url.includes('/graphql')
 
     const headerRootKey = Buffer.from(headers.get('Wabe-Root-Key') || '')
     const rootKey = Buffer.from(wabe.config.rootKey)
@@ -20,6 +21,7 @@ export const defaultSessionHandler =
         isRoot: true,
         wabe,
         response: ctx.res,
+        isGraphQLCall,
       }
       return
     }
@@ -49,6 +51,7 @@ export const defaultSessionHandler =
         isRoot: false,
         wabe,
         response: ctx.res,
+        isGraphQLCall,
       }
       return
     }
@@ -63,6 +66,7 @@ export const defaultSessionHandler =
     } = await session.meFromAccessToken(accessToken, {
       wabe,
       isRoot: true,
+      isGraphQLCall,
     })
 
     ctx.wabe = {
@@ -71,6 +75,7 @@ export const defaultSessionHandler =
       user,
       wabe,
       response: ctx.res,
+      isGraphQLCall,
     }
 
     if (

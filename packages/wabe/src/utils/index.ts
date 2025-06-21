@@ -1,5 +1,12 @@
 import type { ClassInterface } from '../schema'
-import type { WabeTypes, WabeConfig } from '../server'
+import type { WabeTypes, WabeConfig, WabeContext } from '../server'
+
+export const contextWithoutGraphQLCall = (
+  context: WabeContext<any>,
+): WabeContext<any> => ({
+  ...context,
+  isGraphQLCall: false,
+})
 
 export const toBase32 = (stringToEncode: string): string => {
   const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'

@@ -148,9 +148,8 @@ export interface GetObjectOptions<
   id: string
   where?: WhereType<T, K>
   context: WabeContext<T>
-  skipHooks?: boolean
+  _skipHooks?: boolean
   select?: SelectType<T, K, U>
-  isGraphQLCall?: boolean
 }
 
 export interface GetObjectsOptions<
@@ -165,9 +164,8 @@ export interface GetObjectsOptions<
   offset?: number
   first?: number
   context: WabeContext<T>
-  skipHooks?: boolean
+  _skipHooks?: boolean
   select?: SelectType<T, K, W>
-  isGraphQLCall?: boolean
 }
 
 export interface CreateObjectOptions<
@@ -180,7 +178,6 @@ export interface CreateObjectOptions<
   data: MutationData<T, K, U>
   context: WabeContext<T>
   select?: SelectType<T, K, W>
-  isGraphQLCall?: boolean
 }
 export interface CreateObjectsOptions<
   T extends WabeTypes,
@@ -196,7 +193,6 @@ export interface CreateObjectsOptions<
   order?: OrderType<T, U, X>
   context: WabeContext<T>
   select?: SelectType<T, K, W>
-  isGraphQLCall?: boolean
 }
 
 export interface UpdateObjectOptions<
@@ -210,9 +206,8 @@ export interface UpdateObjectOptions<
   where?: WhereType<T, K>
   data: MutationData<T, K, U>
   context: WabeContext<T>
-  skipHooks?: boolean
+  _skipHooks?: boolean
   select?: SelectType<T, K, W>
-  isGraphQLCall?: boolean
 }
 
 export interface UpdateObjectsOptions<
@@ -229,9 +224,8 @@ export interface UpdateObjectsOptions<
   offset?: number
   first?: number
   context: WabeContext<T>
-  skipHooks?: boolean
+  _skipHooks?: boolean
   select?: SelectType<T, K, W>
-  isGraphQLCall?: boolean
 }
 
 export interface DeleteObjectOptions<
@@ -244,7 +238,6 @@ export interface DeleteObjectOptions<
   where?: WhereType<T, K>
   context: WabeContext<T>
   select?: SelectType<T, K, U>
-  isGraphQLCall?: boolean
 }
 
 export interface DeleteObjectsOptions<
@@ -260,7 +253,6 @@ export interface DeleteObjectsOptions<
   first?: number
   context: WabeContext<T>
   select?: SelectType<T, K, W>
-  isGraphQLCall?: boolean
 }
 
 export interface DatabaseAdapter<T extends WabeTypes> {

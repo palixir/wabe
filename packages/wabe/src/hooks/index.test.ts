@@ -101,9 +101,13 @@ describe('Hooks', () => {
     expect(mockGetObject).toHaveBeenCalledTimes(1)
     expect(mockGetObject).toHaveBeenCalledWith({
       className: 'ClassName',
-      context: { isRoot: true, wabe: { controllers, config } },
+      context: {
+        isRoot: true,
+        wabe: { controllers, config },
+        isGraphQLCall: false,
+      },
       id: 'id',
-      skipHooks: true,
+      _skipHooks: true,
     })
 
     expect(mockCallback1).toHaveBeenCalledTimes(1)
@@ -122,6 +126,7 @@ describe('Hooks', () => {
         controllers: expect.any(Object),
         config,
       },
+      isGraphQLCall: false,
     })
   })
 
@@ -151,6 +156,7 @@ describe('Hooks', () => {
     expect(hookObject.context).toEqual({
       isRoot: true,
       wabe: { controllers: expect.any(Object), config },
+      isGraphQLCall: false,
     })
   })
 

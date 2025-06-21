@@ -151,7 +151,6 @@ export class Session {
       data: {
         accessToken: this.accessToken,
         accessTokenExpiresAt: this.getAccessTokenExpireAt(context.wabe.config),
-
         refreshToken: this.refreshToken,
         refreshTokenExpiresAt: this.getRefreshTokenExpireAt(
           context.wabe.config,
