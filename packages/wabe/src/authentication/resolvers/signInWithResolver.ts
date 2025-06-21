@@ -55,7 +55,7 @@ export const signInWithResolver = async (
       user,
     })
 
-    return { accessToken: null, refreshToken: null, id: userId }
+    return { accessToken: null, refreshToken: null, user }
   }
 
   const session = new Session()
@@ -87,5 +87,5 @@ export const signInWithResolver = async (
     })
   }
 
-  return { accessToken, refreshToken, id: userId, srp }
+  return { accessToken, refreshToken, user, srp }
 }

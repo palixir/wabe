@@ -121,7 +121,15 @@ describe('SignInWith', () => {
     expect(res).toEqual({
       accessToken: null,
       refreshToken: null,
-      id: 'id',
+      user: {
+        id: 'id',
+        email: 'email@test.fr',
+        secondFA: {
+          enabled: true,
+          // @ts-expect-error
+          provider: SecondaryFactor.EmailOTP,
+        },
+      },
     })
   })
 
@@ -225,7 +233,9 @@ describe('SignInWith', () => {
     expect(res).toEqual({
       accessToken: 'accessToken',
       refreshToken: 'refreshToken',
-      id: 'id',
+      user: {
+        id: 'id',
+      },
       srp: undefined,
     })
     expect(mockOnLogin).toHaveBeenCalledTimes(1)

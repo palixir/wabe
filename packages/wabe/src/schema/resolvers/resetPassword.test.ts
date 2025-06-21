@@ -91,7 +91,7 @@ describe('resetPasswordResolver', () => {
       },
     })
 
-    expect(res.signInWith.id).toEqual(userId)
+    expect(res.signInWith.user.id).toEqual(userId)
 
     process.env.NODE_ENV = 'test'
   })
@@ -143,7 +143,7 @@ describe('resetPasswordResolver', () => {
       },
     })
 
-    expect(res.signInWith.id).toEqual(userId)
+    expect(res.signInWith.user.id).toEqual(userId)
 
     process.env.NODE_ENV = 'test'
   })
@@ -195,7 +195,7 @@ describe('resetPasswordResolver', () => {
       },
     })
 
-    expect(res.signInWith.id).toEqual(userId)
+    expect(res.signInWith.user.id).toEqual(userId)
   })
 
   it('should reset password in dev mode with code 000000', async () => {
@@ -237,7 +237,7 @@ describe('resetPasswordResolver', () => {
       },
     })
 
-    expect(res.signInWith.id).toEqual(userId)
+    expect(res.signInWith.user.id).toEqual(userId)
   })
 
   it("should return true if the user doesn't exist (hide sensitive data)", async () => {
@@ -330,7 +330,7 @@ describe('resetPasswordResolver', () => {
       },
     })
 
-    expect(res.signInWith.id).toEqual(userId)
+    expect(res.signInWith.user.id).toEqual(userId)
 
     process.env.NODE_ENV = 'test'
   })
@@ -340,7 +340,9 @@ const graphql = {
   signInWith: gql`
       mutation signInWith($input: SignInWithInput!) {
         signInWith(input: $input){
-          id
+          user {
+              id
+          }
         }
       }
     `,

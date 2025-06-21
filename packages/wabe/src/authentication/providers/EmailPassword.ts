@@ -33,7 +33,6 @@ export class EmailPassword
         },
       },
       context: contextWithRoot(context),
-      select: { id: true, authentication: true, secondFA: true, email: true },
       first: 1,
     })
 

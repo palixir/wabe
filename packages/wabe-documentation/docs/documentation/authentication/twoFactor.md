@@ -58,7 +58,9 @@ mutation signInWith {
       }
     }
   ) {
-    id
+    user {
+      id
+    }
     accessToken
   }
 }
