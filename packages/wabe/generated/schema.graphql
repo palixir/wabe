@@ -1743,7 +1743,7 @@ input SendEmailInput {
 }
 
 type SignInWithOutput {
-  id: String
+  user: User
   accessToken: String
   refreshToken: String
   srp: SignInWithOutputSRPOutputSignInWith

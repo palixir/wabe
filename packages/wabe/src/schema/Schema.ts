@@ -333,7 +333,10 @@ export class Schema<T extends WabeTypes> {
                 outputObject: {
                   name: 'SignInWithOutput',
                   fields: {
-                    id: { type: 'String' },
+                    user: {
+                      type: 'Pointer',
+                      class: 'User',
+                    },
                     accessToken: {
                       type: 'String',
                     },
