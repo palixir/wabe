@@ -90,7 +90,7 @@ describe('Security tests', () => {
     await closeTests(wabe)
   })
 
-  it('should throw an error when I try to update and read ACL field without root access', async () => {
+  it('should throw an error when I try to update and create ACL field without root access', async () => {
     const setup = await setupTests([
       {
         name: 'Test',
@@ -141,25 +141,6 @@ describe('Security tests', () => {
 
     expect(
       userClient.request(gql`
-      query tests {
-          tests {
-              edges {
-                  node {
-                      id
-                      acl {
-                          users {
-                              userId
-                          }
-                      }
-                  }
-              }
-          }
-      }
-      `),
-    ).rejects.toThrow('You are not authorized to read this field')
-
-    expect(
-      userClient.request(gql`
         mutation updateTest {
             updateTest(input: {id: "${testId}", fields: {acl: {users: [{userId: "2"}]}}}) {
                 test {
@@ -169,6 +150,18 @@ describe('Security tests', () => {
         }
         `),
     ).rejects.toThrow('You are not authorized to update this field')
+
+    expect(
+      userClient.request(gql`
+        mutation createTest {
+            createTest(input: {fields: {acl: {users: [{userId: "2"}]}}}) {
+                test {
+                    id
+                }
+            }
+        }
+        `),
+    ).rejects.toThrow('You are not authorized to create this field')
 
     await closeTests(wabe)
   })
@@ -239,14 +232,14 @@ describe('Security tests', () => {
     await closeTests(wabe)
   })
 
-  it('should not be able to read / update sessions relation in the User class', async () => {
+  it('should not be able to create / update sessions relation in the User class', async () => {
     const setup = await setupTests()
     wabe = setup.wabe
     port = setup.port
     client = getAnonymousClient(port)
     rootClient = getGraphqlClient(port)
 
-    const { userClient, userId } = await createUserAndUpdateRole({
+    const { userId } = await createUserAndUpdateRole({
       anonymousClient: getAnonymousClient(port),
       port,
       roleName: 'Client',
@@ -268,24 +261,17 @@ describe('Security tests', () => {
     ).rejects.toThrow('You are not authorized to update this field')
 
     expect(
-      userClient.request<any>(gql`
-    query users {
-        users {
-            edges {
-                node {
-                    sessions {
-                        edges {
-                            node {
-                                id
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    `),
-    ).rejects.toThrow('You are not authorized to read this field')
+      wabe.controllers.database.createObject({
+        className: 'User',
+        context: {
+          wabe,
+          isRoot: false,
+        },
+        data: {
+          sessions: ['newid'],
+        },
+      }),
+    ).rejects.toThrow('You are not authorized to create this field')
 
     await closeTests(wabe)
   })

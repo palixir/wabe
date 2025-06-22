@@ -49,60 +49,7 @@ export class DatabaseController<T extends WabeTypes> {
 
     if (!realClass) throw new Error('Class not found in schema')
 
-    if (!select) {
-      return Object.entries(realClass.fields).reduce(
-        (acc, [fieldName, value]) => {
-          // We don't want to select the acl field
-          if (fieldName === 'acl') return acc
-
-          if (value.type === 'Pointer' || value.type === 'Relation') {
-            const realPointerClass = context.wabe.config.schema?.classes?.find(
-              // @ts-expect-error
-              (c) => c.name.toLowerCase() === value.class.toLowerCase(),
-            )
-
-            if (!realPointerClass) return acc
-
-            const newSelect = Object.entries(realPointerClass.fields).reduce(
-              (acc, [fieldName, field]) => {
-                if (field.type === 'Relation' || field.type === 'Pointer')
-                  return acc
-
-                return {
-                  ...acc,
-                  [fieldName]: true,
-                }
-              },
-              {},
-            )
-
-            return {
-              ...acc,
-              pointers: {
-                ...acc.pointers,
-                [fieldName]: {
-                  // @ts-expect-error
-                  className: value.class,
-                  select: newSelect,
-                },
-              },
-            }
-          }
-
-          return {
-            ...acc,
-            selectWithoutPointers: {
-              ...acc.selectWithoutPointers,
-              [fieldName]: true,
-            },
-          }
-        },
-        {
-          pointers: {},
-          selectWithoutPointers: {},
-        },
-      )
-    }
+    if (!select) return { pointers: {}, selectWithoutPointers: {} }
 
     const pointerOrRelationFields = Object.keys(realClass.fields).filter(
       (fieldName) =>

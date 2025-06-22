@@ -4,7 +4,7 @@ import * as OAuth from './OAuth'
 import { AuthenticationProvider } from '../interface'
 
 // Use GitHub test as use case
-describe('OAuth providers', () => {
+describe('OAuth', () => {
   const mockGetObjects = mock(() => Promise.resolve([]))
   const mockCount = mock(() => Promise.resolve(0)) as any
   const mockCreateObject = mock(() => Promise.resolve({ id: 'userId' })) as any
@@ -82,7 +82,17 @@ describe('OAuth providers', () => {
       },
       first: 1,
       context: expect.any(Object),
-      select: { id: true },
+      select: {
+        authentication: true,
+        role: true,
+        secondFA: true,
+        email: true,
+        id: true,
+        provider: true,
+        isOauth: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     })
 
     expect(mockCreateObject).toHaveBeenCalledTimes(1)
@@ -100,6 +110,17 @@ describe('OAuth providers', () => {
         },
       },
       context: expect.any(Object),
+      select: {
+        authentication: true,
+        role: true,
+        secondFA: true,
+        email: true,
+        id: true,
+        provider: true,
+        isOauth: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     })
   })
 
@@ -144,7 +165,17 @@ describe('OAuth providers', () => {
       },
       first: 1,
       context: expect.any(Object),
-      select: { id: true },
+      select: {
+        authentication: true,
+        role: true,
+        secondFA: true,
+        email: true,
+        id: true,
+        provider: true,
+        isOauth: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     })
 
     expect(mockCreateObject).toHaveBeenCalledTimes(0)

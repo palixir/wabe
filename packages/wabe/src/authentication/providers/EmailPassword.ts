@@ -33,6 +33,17 @@ export class EmailPassword
         },
       },
       context: contextWithRoot(context),
+      select: {
+        authentication: true,
+        role: true,
+        secondFA: true,
+        email: true,
+        id: true,
+        provider: true,
+        isOauth: true,
+        createdAt: true,
+        updatedAt: true,
+      },
       first: 1,
     })
 

@@ -60,7 +60,17 @@ export const oAuthAuthentication =
       },
       context: contextWithRoot(context),
       first: 1,
-      select: { id: true },
+      select: {
+        authentication: true,
+        role: true,
+        secondFA: true,
+        email: true,
+        id: true,
+        provider: true,
+        isOauth: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     })
 
     if (user.length === 0) {
@@ -74,6 +84,17 @@ export const oAuthAuthentication =
           },
         },
         context: contextWithRoot(context),
+        select: {
+          authentication: true,
+          role: true,
+          secondFA: true,
+          email: true,
+          id: true,
+          provider: true,
+          isOauth: true,
+          createdAt: true,
+          updatedAt: true,
+        },
       })
 
       if (!createdUser) throw new Error('User not found')
