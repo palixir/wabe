@@ -31,7 +31,17 @@ export class QRCodeOTP
           equalTo: input.email,
         },
       },
-      select: { id: true, secondFA: true },
+      select: {
+        authentication: true,
+        role: true,
+        secondFA: true,
+        email: true,
+        id: true,
+        provider: true,
+        isOauth: true,
+        createdAt: true,
+        updatedAt: true,
+      },
       first: 1,
       context: contextWithRoot(context),
     })

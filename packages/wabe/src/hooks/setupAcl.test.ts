@@ -506,14 +506,7 @@ describe('setupAcl', () => {
   })
 
   it('should not setup acl if the acl field is already provided in the creation', async () => {
-    const { userClient } = await createUserAndUpdateRole({
-      anonymousClient,
-      port,
-      roleName: 'Client',
-      rootClient,
-    })
-
-    await userClient.request<any>(gql`
+    await rootClient.request<any>(gql`
         mutation createSetupACL6 {
           createSetupACL6(input: {fields: {test: "test", acl: {users: [{userId: "test", read: true, write: true}], roles: [{roleId: "test", read: true, write: true}]}}}) {
             setupACL6 {

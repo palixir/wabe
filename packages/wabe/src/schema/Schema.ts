@@ -620,7 +620,7 @@ export class Schema<T extends WabeTypes> {
         class: '_Session',
         protected: {
           authorizedRoles: ['rootOnly'],
-          protectedOperations: ['update', 'read'],
+          protectedOperations: ['create', 'update'],
         },
       },
       secondFA: {
@@ -717,7 +717,7 @@ export class Schema<T extends WabeTypes> {
         },
         protected: {
           authorizedRoles: ['rootOnly'],
-          protectedOperations: ['update', 'read'],
+          protectedOperations: ['create', 'update'],
         },
       },
       createdAt: {

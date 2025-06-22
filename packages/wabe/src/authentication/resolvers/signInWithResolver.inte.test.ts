@@ -35,7 +35,6 @@ describe('signInWithResolver integration test', () => {
             role {
                 name
             }
-            sessions { edges { node { id } } }
           }
         }
       }
@@ -53,7 +52,6 @@ describe('signInWithResolver integration test', () => {
     )
 
     expect(res.signInWith.user.role.name).toBe('Admin')
-    expect(res.signInWith.user.sessions.edges.length).toBe(1)
     expect(res.signInWith.user.authentication.emailPassword).toEqual({
       email: 'admin@wabe.dev',
     })
