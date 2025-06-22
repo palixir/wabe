@@ -1,7 +1,7 @@
 import { totp, authenticator } from 'otplib'
 import type { TOTP } from 'otplib/core'
 import { createHash } from 'node:crypto'
-import base32Encode from 'base32-encode'
+import { base32Encode } from 'src/utils'
 
 const TWO_MINUTES = 5
 
