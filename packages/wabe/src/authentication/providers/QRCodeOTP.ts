@@ -46,7 +46,7 @@ export class QRCodeOTP
 
     const otpClass = new OTP(context.wabe.config.rootKey)
 
-    const isOtpValid = otpClass.verify(input.otp, userId)
+    const isOtpValid = otpClass.authenticatorVerify(input.otp, userId)
 
     if (realUser && (isOtpValid || isDevBypass)) return { userId: realUser.id }
 

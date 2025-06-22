@@ -1,9 +1,9 @@
-import { totp } from 'otplib'
+import { totp, authenticator } from 'otplib'
 import type { TOTP } from 'otplib/core'
 import { createHash } from 'node:crypto'
-import { toBase32 } from 'src/utils'
+import base32Encode from 'base32-encode'
 
-const FIVE_MINUTES = 5
+const TWO_MINUTES = 5
 
 export class OTP {
   private secret: string
@@ -12,24 +12,42 @@ export class OTP {
   constructor(rootKey: string) {
     this.secret = rootKey
     this.internalTotp = totp.clone({
-      window: [FIVE_MINUTES, 0],
+      window: [TWO_MINUTES, 0],
     })
   }
 
-  generate(userId: string): string {
-    const hashedSecret = createHash('sha256')
+  deriveSecret(userId: string): string {
+    const hash = createHash('sha256')
       .update(`${this.secret}:${userId}`)
-      .digest('hex')
+      .digest()
 
-    return this.internalTotp.generate(hashedSecret)
+    return base32Encode(hash, 'RFC4648', { padding: false })
+  }
+
+  generate(userId: string): string {
+    const secret = this.deriveSecret(userId)
+
+    return this.internalTotp.generate(secret)
   }
 
   verify(otp: string, userId: string): boolean {
-    const hashedSecret = createHash('sha256')
-      .update(`${this.secret}:${userId}`)
-      .digest('hex')
+    const secret = this.deriveSecret(userId)
 
-    return this.internalTotp.verify({ secret: hashedSecret, token: otp })
+    return this.internalTotp.verify({ secret, token: otp })
+  }
+
+  authenticatorGenerate(userId: string): string {
+    const secret = this.deriveSecret(userId)
+    return authenticator.generate(secret)
+  }
+
+  authenticatorVerify(otp: string, userId: string): boolean {
+    const secret = this.deriveSecret(userId)
+
+    return authenticator.verify({
+      secret,
+      token: otp,
+    })
   }
 
   generateKeyuri({
@@ -41,14 +59,8 @@ export class OTP {
     emailOrUsername: string
     applicationName: string
   }): string {
-    const hashedSecret = createHash('sha256')
-      .update(`${this.secret}:${userId}`)
-      .digest('hex')
+    const secret = this.deriveSecret(userId)
 
-    return this.internalTotp.keyuri(
-      emailOrUsername,
-      applicationName,
-      toBase32(hashedSecret),
-    )
+    return authenticator.keyuri(emailOrUsername, applicationName, secret)
   }
 }

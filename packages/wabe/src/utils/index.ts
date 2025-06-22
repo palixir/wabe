@@ -8,30 +8,6 @@ export const contextWithoutGraphQLCall = (
   isGraphQLCall: false,
 })
 
-export const toBase32 = (stringToEncode: string): string => {
-  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
-  let bits = 0
-  let value = 0
-  let output = ''
-
-  for (let i = 0; i < stringToEncode.length; i++) {
-    // @ts-expect-error
-    value = (value << 8) | stringToEncode[i]
-    bits += 8
-
-    while (bits >= 5) {
-      output += alphabet[(value >>> (bits - 5)) & 31]
-      bits -= 5
-    }
-  }
-
-  if (bits > 0) {
-    output += alphabet[(value << (5 - bits)) & 31]
-  }
-
-  return output
-}
-
 export const getNewObjectAfterUpdateNestedProperty = (
   obj: any,
   path: string,

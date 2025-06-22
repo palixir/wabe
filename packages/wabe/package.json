@@ -31,6 +31,7 @@
   "dependencies": {
     "@graphql-yoga/plugin-disable-introspection": "2.10.9",
     "@node-rs/argon2": "2.0.2",
+    "base32-encode": "^2.0.0",
     "croner": "9.0.0",
     "js-srp6a": "1.0.2",
     "jsonwebtoken": "9.0.2",
