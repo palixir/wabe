@@ -1,6 +1,4 @@
 import { describe, it, afterAll, beforeAll, expect, beforeEach } from 'bun:test'
-import { createHash } from 'node:crypto'
-import { totp } from 'otplib'
 import { gql, type GraphQLClient } from 'graphql-request'
 import {
   type DevWabeTypes,
@@ -9,6 +7,7 @@ import {
 } from '../../utils/helper'
 import { setupTests, closeTests } from '../../utils/testHelper'
 import type { Wabe } from '../../server'
+import { OTP } from 'src'
 
 describe('resetPasswordResolver', () => {
   let wabe: Wabe<DevWabeTypes>
@@ -64,19 +63,13 @@ describe('resetPasswordResolver', () => {
 
     const userId = edges[0].node.id
 
-    const secret = wabe.config.rootKey
-
-    const hashedSecret = createHash('sha256')
-      .update(`${secret}:${userId}`)
-      .digest('hex')
-
-    const otp = totp.generate(hashedSecret)
+    const otp = new OTP(wabe.config.rootKey)
 
     await anonymousClient.request<any>(graphql.resetPassword, {
       input: {
         email: 'toto@toto.fr',
         password: 'tata',
-        otp,
+        otp: otp.generate(userId),
       },
     })
 
@@ -116,19 +109,13 @@ describe('resetPasswordResolver', () => {
 
     const userId = user.id
 
-    const secret = wabe.config.rootKey
-
-    const hashedSecret = createHash('sha256')
-      .update(`${secret}:${userId}`)
-      .digest('hex')
-
-    const otp = totp.generate(hashedSecret)
+    const otp = new OTP(wabe.config.rootKey)
 
     await client.request<any>(graphql.resetPassword, {
       input: {
         email: 'toto@toto.fr',
         password: 'tata',
-        otp,
+        otp: otp.generate(userId),
       },
     })
 
@@ -168,19 +155,13 @@ describe('resetPasswordResolver', () => {
 
     const userId = user.id
 
-    const secret = wabe.config.rootKey
-
-    const hashedSecret = createHash('sha256')
-      .update(`${secret}:${userId}`)
-      .digest('hex')
-
-    const otp = totp.generate(hashedSecret)
+    const otp = new OTP(wabe.config.rootKey)
 
     await client.request<any>(graphql.resetPassword, {
       input: {
         email: 'toto@toto.fr',
         password: 'tata',
-        otp,
+        otp: otp.generate(userId),
       },
     })
 
@@ -303,19 +284,13 @@ describe('resetPasswordResolver', () => {
 
     const userId = user.id
 
-    const secret = wabe.config.rootKey
-
-    const hashedSecret = createHash('sha256')
-      .update(`${secret}:${userId}`)
-      .digest('hex')
-
-    const otp = totp.generate(hashedSecret)
+    const otp = new OTP(wabe.config.rootKey)
 
     await client.request<any>(graphql.resetPassword, {
       input: {
         phone: '+33600000000',
         password: 'tata',
-        otp,
+        otp: otp.generate(userId),
       },
     })
 

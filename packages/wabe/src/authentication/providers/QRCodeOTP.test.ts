@@ -38,7 +38,9 @@ describe('QRCodeOTPProvider', () => {
 
     if (!createdUser) throw new Error('User not created')
 
-    const otp = new OTP(wabe.config.rootKey).generate(createdUser.id)
+    const otp = new OTP(wabe.config.rootKey).authenticatorGenerate(
+      createdUser.id,
+    )
 
     const qrCodeOTP = new QRCodeOTP()
 

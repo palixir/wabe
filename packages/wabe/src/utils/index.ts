@@ -8,15 +8,75 @@ export const contextWithoutGraphQLCall = (
   isGraphQLCall: false,
 })
 
-export const toBase32 = (stringToEncode: string): string => {
-  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
+const RFC4648 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
+const RFC4648_HEX = '0123456789ABCDEFGHIJKLMNOPQRSTUV'
+const CROCKFORD = '0123456789ABCDEFGHJKMNPQRSTVWXYZ'
+
+type Base32Variant = 'RFC3548' | 'RFC4648' | 'RFC4648-HEX' | 'Crockford'
+
+interface Base32Options {
+  padding?: boolean
+}
+
+/**
+ * Convert supported input types to Uint8Array.
+ */
+export const toUint8Array = (
+  data: string | ArrayBuffer | Uint8Array | Buffer,
+): Uint8Array => {
+  if (data instanceof Uint8Array) return data
+
+  if (typeof data === 'string') {
+    const encoder = new TextEncoder()
+    return encoder.encode(data)
+  }
+
+  if (data instanceof ArrayBuffer) return new Uint8Array(data)
+
+  throw new TypeError('Unsupported data type for base32 encoding')
+}
+
+/**
+ * Encode binary data to base32 using specified variant.
+ * Base on https://github.com/LinusU/base32-encode/blob/master/index.js
+ */
+export const base32Encode = (
+  data: string | ArrayBuffer | Uint8Array | Buffer,
+  variant: Base32Variant,
+  options: Base32Options = {},
+): string => {
+  let alphabet: string
+  let defaultPadding: boolean
+
+  switch (variant) {
+    case 'RFC3548':
+    case 'RFC4648':
+      alphabet = RFC4648
+      defaultPadding = true
+      break
+    case 'RFC4648-HEX':
+      alphabet = RFC4648_HEX
+      defaultPadding = true
+      break
+    case 'Crockford':
+      alphabet = CROCKFORD
+      defaultPadding = false
+      break
+    default:
+      throw new Error(`Unknown base32 variant: ${variant}`)
+  }
+
+  const padding =
+    options.padding !== undefined ? options.padding : defaultPadding
+  const view = toUint8Array(data)
+
   let bits = 0
   let value = 0
   let output = ''
 
-  for (let i = 0; i < stringToEncode.length; i++) {
+  for (let i = 0; i < view.length; i++) {
     // @ts-expect-error
-    value = (value << 8) | stringToEncode[i]
+    value = (value << 8) | view[i]
     bits += 8
 
     while (bits >= 5) {
@@ -27,6 +87,12 @@ export const toBase32 = (stringToEncode: string): string => {
 
   if (bits > 0) {
     output += alphabet[(value << (5 - bits)) & 31]
+  }
+
+  if (padding) {
+    while (output.length % 8 !== 0) {
+      output += '='
+    }
   }
 
   return output

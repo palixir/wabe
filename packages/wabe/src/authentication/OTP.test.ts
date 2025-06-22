@@ -53,7 +53,17 @@ describe('OTP', () => {
     })
 
     expect(keyuri).toBe(
-      'otpauth://totp/Wabe:email%40test.fr?secret=A4DQOCAAAAEAAAAAAABQGBIIAIEQAAQAAQAACCIFAYCAEBIFAAEAACAAAADAIAADAAEAMAAEAADAOAAAA4CAABAAAACAAAAGAMAAAAA&period=30&digits=6&algorithm=SHA1&issuer=Wabe',
+      'otpauth://totp/Wabe:email%40test.fr?secret=O54OZDANWM2YFHJKJMMVMQSV7DUMUZFT3BWE4Z5NOQCAATGGHKYA&period=30&digits=6&algorithm=SHA1&issuer=Wabe',
     )
+  })
+
+  it('should verify an OTP generated from authenticator', () => {
+    const otp = new OTP('rootKey')
+
+    const code = otp.authenticatorGenerate('userId')
+
+    const isValid = otp.authenticatorVerify(code, 'userId')
+
+    expect(isValid).toBe(true)
   })
 })
