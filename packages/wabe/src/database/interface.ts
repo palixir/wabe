@@ -261,7 +261,7 @@ export interface DatabaseAdapter<T extends WabeTypes> {
   createClassIfNotExist(
     className: string,
     schema: SchemaInterface<T>,
-  ): Promise<any>
+  ): Promise<any> | any
 
   initializeDatabase(schema: SchemaInterface<T>): Promise<void>
   clearDatabase(): Promise<void>
