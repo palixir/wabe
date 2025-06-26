@@ -66,7 +66,7 @@ describe('SignUpWith', () => {
     ).rejects.toThrow('Not authorized to create user')
   })
 
-  it('should throw an error if the signUp is disabled', async () => {
+  it('should throw an error if the signUp is disabled', () => {
     if (wabe.config) {
       wabe.config.authentication = {
         ...wabe.config.authentication,

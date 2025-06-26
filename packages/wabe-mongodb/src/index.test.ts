@@ -64,7 +64,7 @@ describe('Mongo adapter', () => {
       context,
     })
 
-    expect(res2[0].id).toBeDefined()
+    expect(res2[0]?.id).toBeDefined()
   })
 
   it('should create a row with an array field', async () => {
@@ -911,7 +911,7 @@ describe('Mongo adapter', () => {
     expect(res.length).toEqual(0)
   })
 
-  it('should create class', async () => {
+  it('should create class', () => {
     if (!mongoAdapter.database) fail()
 
     const spyCollection = spyOn(
@@ -919,10 +919,7 @@ describe('Mongo adapter', () => {
       'collection',
     ).mockReturnValue({} as any)
 
-    await mongoAdapter.createClassIfNotExist(
-      'User',
-      context.wabe.config.schema || {},
-    )
+    mongoAdapter.createClassIfNotExist('User', context.wabe.config.schema || {})
 
     expect(spyCollection).toHaveBeenCalledTimes(1)
     expect(spyCollection).toHaveBeenCalledWith('User')
@@ -937,7 +934,7 @@ describe('Mongo adapter', () => {
     )
     cloneMongoAdapter.database = undefined
 
-    expect(cloneMongoAdapter.createClassIfNotExist('User')).rejects.toThrow(
+    expect(() => cloneMongoAdapter.createClassIfNotExist('User')).toThrow(
       'Connection to database is not established',
     )
   })

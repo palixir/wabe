@@ -18,7 +18,7 @@ const convertOperationTypeToPermission = (operationType: OperationType) => {
   return template[operationType]
 }
 
-export const _getPermissionPropertiesOfAClass = async ({
+export const _getPermissionPropertiesOfAClass = ({
   className,
   operation,
   context,

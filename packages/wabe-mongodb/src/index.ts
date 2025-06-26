@@ -160,7 +160,7 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
     await this.client.close()
   }
 
-  async createClassIfNotExist(
+  createClassIfNotExist(
     className: keyof T['types'],
     schema: SchemaInterface<T>,
   ) {

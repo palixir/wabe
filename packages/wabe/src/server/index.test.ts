@@ -9,7 +9,7 @@ import { gql } from 'graphql-request'
 import { getDatabaseAdapter } from '../utils/testHelper'
 import { RoleEnum } from 'generated/wabe'
 
-describe('Server', async () => {
+describe('Server', () => {
   it('should mask graphql errors message', async () => {
     spyOn(console, 'error').mockReturnValue()
     const databaseId = uuid()

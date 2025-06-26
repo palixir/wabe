@@ -71,7 +71,11 @@ export const getFieldsOfClassName = ({
   fields,
   className,
   context,
-}: { fields: string[]; className: string; context: WabeContext<any> }): {
+}: {
+  fields: string[]
+  className: string
+  context: WabeContext<any>
+}): {
   classFields: string[]
   othersFields: string[]
 } => {

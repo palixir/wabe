@@ -7,18 +7,20 @@ const deleteFile = async (hookObject: HookObject<any, any>) => {
 
   if (!schema) return
 
-  Object.entries(schema.fields)
-    .filter(([_, value]) => value.type === 'File')
-    .map(async ([fieldName]) => {
-      const fileName = hookObject.originalObject?.[fieldName]?.name as string
+  await Promise.all(
+    Object.entries(schema.fields)
+      .filter(([_, value]) => value.type === 'File')
+      .map(([fieldName]) => {
+        const fileName = hookObject.originalObject?.[fieldName]?.name as string
 
-      if (!fileName) return
+        if (!fileName) return
 
-      if (!hookObject.context.wabe.controllers.file)
-        throw new Error('No file adapter found')
+        if (!hookObject.context.wabe.controllers.file)
+          throw new Error('No file adapter found')
 
-      await hookObject.context.wabe.controllers.file?.deleteFile(fileName)
-    })
+        return hookObject.context.wabe.controllers.file?.deleteFile(fileName)
+      }),
+  )
 }
 
 export const defaultAfterDeleteFile = (hookObject: HookObject<any, any>) =>
