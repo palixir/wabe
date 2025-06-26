@@ -181,7 +181,7 @@ describe('Oauth2Client', () => {
     mockFetch.mockRestore()
   })
 
-  it('should throw an error if the result of the request is not valid', async () => {
+  it('should throw an error if the result of the request is not valid', () => {
     mockFetch.mockResolvedValue({
       json: () => Promise.resolve({}),
       ok: false,

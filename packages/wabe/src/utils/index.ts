@@ -192,7 +192,6 @@ export const tokenize = (value: string) => {
   const tmpValue = value
     .toLowerCase()
     .normalize('NFD')
-    // biome-ignore lint/suspicious/noMisleadingCharacterClass:
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/\s\s+/g, ' ')
 

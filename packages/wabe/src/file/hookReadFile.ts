@@ -28,8 +28,7 @@ const getFile = async (hookObject: HookObject<any, any>) => {
 
         if (
           fileUrlGeneratedAt &&
-          fileUrlGeneratedAt.getTime() + urlCacheInSeconds * 1000 >
-            new Date().getTime()
+          fileUrlGeneratedAt.getTime() + urlCacheInSeconds * 1000 > Date.now()
         )
           return
 

@@ -18,7 +18,7 @@ export const defaultBeforeUpdateForUpdatedAt = (
   object.upsertNewData('updatedAt', new Date())
 }
 
-export const defaultBeforeCreateForDefaultValue = async (
+export const defaultBeforeCreateForDefaultValue = (
   object: HookObject<any, any>,
 ) => {
   const schemaClass = getClassFromClassName<DevWabeTypes>(
