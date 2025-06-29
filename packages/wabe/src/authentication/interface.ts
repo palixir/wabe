@@ -2,6 +2,7 @@ import type { User } from '../../generated/wabe'
 import type { WabeContext } from '../server/interface'
 import type { SchemaFields } from '../schema'
 import type { WabeTypes, WobeCustomContext } from '../server'
+import type { SelectType } from '../database/interface'
 
 export enum ProviderEnum {
   google = 'google',
@@ -75,7 +76,7 @@ export type CustomAuthenticationMethods<
 
 export type RoleConfig = Array<string>
 
-export interface SessionConfig {
+export interface SessionConfig<T extends WabeTypes> {
   /**
    * The time in milliseconds that the access token will expire
    */
@@ -92,10 +93,14 @@ export interface SessionConfig {
    * The JWT secret used to sign the session tokens
    */
   jwtSecret: string
+  /**
+   * A selection of fields to include in the JWT token in the "user" fields
+   */
+  jwtTokenFields?: SelectType<T, 'User', keyof T['types']['User']>
 }
 
 export interface AuthenticationConfig<T extends WabeTypes> {
-  session?: SessionConfig
+  session?: SessionConfig<T>
   roles?: RoleConfig
   successRedirectPath?: string
   failureRedirectPath?: string

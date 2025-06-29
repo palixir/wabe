@@ -28,6 +28,184 @@ describe('_Session', () => {
     mockUpdateObject.mockClear()
   })
 
+  it('should set all data set in the jwtTokenFields on create session', async () => {
+    mockGetObject.mockResolvedValueOnce({
+      id: 'userId',
+      email: 'user@email.com',
+    })
+
+    const session = new Session()
+
+    const jwtTokenFields = {
+      id: true,
+      email: true,
+    }
+
+    const { accessToken, refreshToken } = await session.create('userId', {
+      isRoot: true,
+      wabe: {
+        controllers,
+        config: {
+          authentication: {
+            session: {
+              jwtSecret: 'dev',
+              jwtTokenFields,
+            },
+          },
+        },
+      },
+    } as any)
+
+    const decodedAccessToken = jwt.decode(accessToken) as JwtPayload
+    const decodedRefreshToken = jwt.decode(refreshToken) as JwtPayload
+
+    expect(decodedAccessToken.user).toEqual({
+      id: 'userId',
+      email: 'user@email.com',
+    })
+
+    expect(decodedRefreshToken.user).toEqual({
+      id: 'userId',
+      email: 'user@email.com',
+    })
+  })
+
+  it('should set all data set in the jwtTokenFields on refresh session', async () => {
+    mockGetObjects.mockResolvedValue([
+      {
+        id: 'sessionId',
+        refreshToken: 'refreshToken',
+        refreshTokenExpiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
+        user: {
+          id: 'userId',
+          email: 'userEmail',
+        },
+      },
+    ])
+    mockGetObject.mockResolvedValue({
+      id: 'userId',
+      email: 'user@email.com',
+    })
+
+    const session = new Session()
+
+    const jwtTokenFields = {
+      id: true,
+      email: true,
+    }
+
+    const { accessToken, refreshToken } = await session.refresh(
+      'accessToken',
+      'refreshToken',
+      {
+        isRoot: true,
+        wabe: {
+          controllers,
+          config: {
+            authentication: {
+              session: {
+                jwtSecret: 'dev',
+                jwtTokenFields,
+              },
+            },
+          },
+        },
+      } as any,
+    )
+
+    if (!accessToken || !refreshToken) fail()
+
+    const decodedAccessToken = jwt.decode(accessToken) as JwtPayload
+    const decodedRefreshToken = jwt.decode(refreshToken) as JwtPayload
+
+    expect(decodedAccessToken.user).toEqual({
+      id: 'userId',
+      email: 'user@email.com',
+    })
+
+    expect(decodedRefreshToken.user).toEqual({
+      id: 'userId',
+      email: 'user@email.com',
+    })
+  })
+
+  it('should not set user fields if not jwtTokenFields is set on create session', async () => {
+    mockGetObject.mockResolvedValueOnce({
+      id: 'userId',
+      email: 'user@email.com',
+    })
+
+    const session = new Session()
+
+    const { accessToken, refreshToken } = await session.create('userId', {
+      isRoot: true,
+      wabe: {
+        controllers,
+        config: {
+          authentication: {
+            session: {
+              jwtSecret: 'dev',
+            },
+          },
+        },
+      },
+    } as any)
+
+    const decodedAccessToken = jwt.decode(accessToken) as JwtPayload
+    const decodedRefreshToken = jwt.decode(refreshToken) as JwtPayload
+
+    expect(decodedAccessToken.user).toBeUndefined()
+
+    expect(decodedRefreshToken.user).toBeUndefined()
+  })
+
+  it('should not set user fields if not jwtTokenFields is set on refresh session', async () => {
+    mockGetObjects.mockResolvedValue([
+      {
+        id: 'sessionId',
+        refreshToken: 'refreshToken',
+        refreshTokenExpiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
+        user: {
+          id: 'userId',
+          email: 'userEmail',
+        },
+      },
+    ])
+    mockGetObject.mockResolvedValue({
+      id: 'userId',
+      email: 'user@email.com',
+    })
+
+    const session = new Session()
+
+    const { accessToken, refreshToken } = await session.refresh(
+      'accessToken',
+      'refreshToken',
+      {
+        isRoot: true,
+        wabe: {
+          controllers,
+          config: {
+            authentication: {
+              session: {
+                jwtSecret: 'dev',
+              },
+            },
+          },
+        },
+      } as any,
+    )
+
+    if (!accessToken || !refreshToken) fail()
+
+    const decodedAccessToken = jwt.decode(accessToken) as JwtPayload
+    const decodedRefreshToken = jwt.decode(refreshToken) as JwtPayload
+
+    expect(decodedAccessToken.user).toBeUndefined()
+
+    expect(decodedRefreshToken.user).toBeUndefined()
+  })
+
   it('should returns null if no user found', async () => {
     mockGetObjects.mockResolvedValue([])
 
