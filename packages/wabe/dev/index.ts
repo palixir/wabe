@@ -29,6 +29,9 @@ const run = async () => {
       session: {
         cookieSession: true,
         jwtSecret: 'dev',
+        jwtTokenFields: {
+          id: true,
+        },
       },
       roles: ['Admin', 'Client'],
       successRedirectPath: 'https://wabe.dev',

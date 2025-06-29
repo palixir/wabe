@@ -127,9 +127,22 @@ export class Session {
   }
 
   async create(userId: string, context: WabeContext<DevWabeTypes>) {
+    const jwtTokenFields =
+      context.wabe.config.authentication?.session?.jwtTokenFields
+
+    const result = jwtTokenFields
+      ? await context.wabe.controllers.database.getObject({
+          className: 'User',
+          select: jwtTokenFields,
+          context,
+          id: userId,
+        })
+      : undefined
+
     this.accessToken = jwt.sign(
       {
         userId,
+        user: result,
         iat: Date.now(),
         exp: this.getAccessTokenExpireAt(context.wabe.config).getTime(),
       },
@@ -139,6 +152,7 @@ export class Session {
     this.refreshToken = jwt.sign(
       {
         userId,
+        user: result,
         iat: Date.now(),
         exp: this.getRefreshTokenExpireAt(context.wabe.config).getTime(),
       },
@@ -167,29 +181,6 @@ export class Session {
       refreshToken: this.refreshToken,
       sessionId: res.id,
     }
-  }
-
-  async delete(context: WabeContext<DevWabeTypes>) {
-    if (!context.sessionId) return
-
-    await context.wabe.controllers.database.deleteObject({
-      className: '_Session',
-      context: contextWithRoot(context),
-      id: context.sessionId,
-      select: {},
-    })
-  }
-
-  _isRefreshTokenExpired(
-    userRefreshTokenExpiresAt: Date,
-    refreshTokenAgeInMs: number,
-  ) {
-    const refreshTokenEmittedAt =
-      userRefreshTokenExpiresAt.getTime() - refreshTokenAgeInMs
-    const numberOfMsSinceRefreshTokenEmitted =
-      Date.now() - refreshTokenEmittedAt
-
-    return numberOfMsSinceRefreshTokenEmitted >= 0.75 * refreshTokenAgeInMs
   }
 
   async refresh(
@@ -257,9 +248,22 @@ export class Session {
         refreshToken: null,
       }
 
+    const jwtTokenFields =
+      context.wabe.config.authentication?.session?.jwtTokenFields
+
+    const result = jwtTokenFields
+      ? await context.wabe.controllers.database.getObject({
+          className: 'User',
+          select: jwtTokenFields,
+          context,
+          id: userId,
+        })
+      : undefined
+
     const newAccessToken = jwt.sign(
       {
         userId,
+        user: result,
         iat: Date.now(),
         exp: this.getAccessTokenExpireAt(context.wabe.config).getTime(),
       },
@@ -269,6 +273,7 @@ export class Session {
     const newRefreshToken = jwt.sign(
       {
         userId,
+        user: result,
         iat: Date.now(),
         exp: this.getRefreshTokenExpireAt(context.wabe.config).getTime(),
       },
@@ -294,5 +299,28 @@ export class Session {
       accessToken: newAccessToken,
       refreshToken: newRefreshToken,
     }
+  }
+
+  async delete(context: WabeContext<DevWabeTypes>) {
+    if (!context.sessionId) return
+
+    await context.wabe.controllers.database.deleteObject({
+      className: '_Session',
+      context: contextWithRoot(context),
+      id: context.sessionId,
+      select: {},
+    })
+  }
+
+  _isRefreshTokenExpired(
+    userRefreshTokenExpiresAt: Date,
+    refreshTokenAgeInMs: number,
+  ) {
+    const refreshTokenEmittedAt =
+      userRefreshTokenExpiresAt.getTime() - refreshTokenAgeInMs
+    const numberOfMsSinceRefreshTokenEmitted =
+      Date.now() - refreshTokenEmittedAt
+
+    return numberOfMsSinceRefreshTokenEmitted >= 0.75 * refreshTokenAgeInMs
   }
 }
