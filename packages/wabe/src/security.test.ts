@@ -1,4 +1,5 @@
 import { describe, it, expect, afterEach } from 'bun:test'
+import { decode, sign } from 'jsonwebtoken'
 import { gql, type GraphQLClient } from 'graphql-request'
 import type { Wabe } from './server'
 import {
@@ -19,6 +20,47 @@ describe('Security tests', () => {
 
   afterEach(async () => {
     await wabe.close()
+  })
+
+  it('should return null if the accessToken is an invalid accessToken', async () => {
+    const setup = await setupTests()
+    wabe = setup.wabe
+    port = setup.port
+    client = getAnonymousClient(port)
+    rootClient = getGraphqlClient(port)
+
+    const { accessToken } = await createUserAndUpdateRole({
+      anonymousClient: getAnonymousClient(port),
+      port,
+      roleName: 'Client',
+      rootClient,
+    })
+
+    const decoded = decode(accessToken) as any
+
+    const invalidToken = sign(
+      {
+        ...decoded,
+        sub: 'fake-user-id',
+      },
+      'dev',
+    )
+
+    const userClient = getUserClient(port, invalidToken)
+
+    const res = await userClient.request<any>(gql`
+      query me {
+          me {
+            user {
+                id
+            }
+        }
+      }
+    `)
+
+    expect(res.me.user).toBeNull()
+
+    await closeTests(wabe)
   })
 
   it('should throw an error if try to access to a class with empty authorizedRoles but not requireAuthentication', async () => {
@@ -2507,7 +2549,7 @@ describe('Security tests', () => {
 				}
 			}
 		`),
-    ).rejects.toThrow('Permission denied to read class Test')
+    ).rejects.toThrow('jwt malformed')
 
     await closeTests(wabe)
   })

@@ -3,7 +3,7 @@ import { fail } from 'node:assert'
 import jwt, { type JwtPayload } from 'jsonwebtoken'
 import { Session } from './Session'
 
-describe('_Session', () => {
+describe('Session', () => {
   const mockGetObject = mock(() => Promise.resolve({}) as any)
   const mockGetObjects = mock(() => Promise.resolve([]) as any)
   const mockCreateObject = mock(() => Promise.resolve({ id: 'userId' })) as any
@@ -27,6 +27,14 @@ describe('_Session', () => {
     mockDeleteObject.mockClear()
     mockUpdateObject.mockClear()
   })
+
+  const context = {
+    isRoot: true,
+    wabe: {
+      controllers,
+      config: { authentication: { session: { jwtSecret: 'dev' } } },
+    },
+  } as any
 
   it('should set all data set in the jwtTokenFields on create session', async () => {
     mockGetObject.mockResolvedValueOnce({
@@ -71,10 +79,15 @@ describe('_Session', () => {
   })
 
   it('should set all data set in the jwtTokenFields on refresh session', async () => {
+    const session = new Session()
+
+    const { accessToken: oldAccessToken, refreshToken: oldRefreshToken } =
+      await session.create('userId', context)
+
     mockGetObjects.mockResolvedValue([
       {
         id: 'sessionId',
-        refreshToken: 'refreshToken',
+        refreshToken: oldRefreshToken,
         refreshTokenExpiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
         user: {
           id: 'userId',
@@ -87,16 +100,14 @@ describe('_Session', () => {
       email: 'user@email.com',
     })
 
-    const session = new Session()
-
     const jwtTokenFields = {
       id: true,
       email: true,
     }
 
     const { accessToken, refreshToken } = await session.refresh(
-      'accessToken',
-      'refreshToken',
+      oldAccessToken,
+      oldRefreshToken,
       {
         isRoot: true,
         wabe: {
@@ -137,19 +148,10 @@ describe('_Session', () => {
 
     const session = new Session()
 
-    const { accessToken, refreshToken } = await session.create('userId', {
-      isRoot: true,
-      wabe: {
-        controllers,
-        config: {
-          authentication: {
-            session: {
-              jwtSecret: 'dev',
-            },
-          },
-        },
-      },
-    } as any)
+    const { accessToken, refreshToken } = await session.create(
+      'userId',
+      context,
+    )
 
     const decodedAccessToken = jwt.decode(accessToken) as JwtPayload
     const decodedRefreshToken = jwt.decode(refreshToken) as JwtPayload
@@ -160,10 +162,15 @@ describe('_Session', () => {
   })
 
   it('should not set user fields if not jwtTokenFields is set on refresh session', async () => {
+    const session = new Session()
+
+    const { accessToken: oldAccessToken, refreshToken: oldRefreshToken } =
+      await session.create('userId', context)
+
     mockGetObjects.mockResolvedValue([
       {
         id: 'sessionId',
-        refreshToken: 'refreshToken',
+        refreshToken: oldRefreshToken,
         refreshTokenExpiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
         user: {
           id: 'userId',
@@ -176,24 +183,10 @@ describe('_Session', () => {
       email: 'user@email.com',
     })
 
-    const session = new Session()
-
     const { accessToken, refreshToken } = await session.refresh(
-      'accessToken',
-      'refreshToken',
-      {
-        isRoot: true,
-        wabe: {
-          controllers,
-          config: {
-            authentication: {
-              session: {
-                jwtSecret: 'dev',
-              },
-            },
-          },
-        },
-      } as any,
+      oldAccessToken,
+      oldRefreshToken,
+      context,
     )
 
     if (!accessToken || !refreshToken) fail()
@@ -211,10 +204,9 @@ describe('_Session', () => {
 
     const session = new Session()
 
-    const res = await session.meFromAccessToken('accessToken', {
-      isRoot: true,
-      wabe: { controllers },
-    } as any)
+    const { accessToken } = await session.create('userId', context)
+
+    const res = await session.meFromAccessToken(accessToken, context)
 
     expect(res.user).toBeNull()
     expect(res.sessionId).toBeNull()
@@ -223,7 +215,7 @@ describe('_Session', () => {
     expect(mockGetObjects).toHaveBeenCalledWith({
       className: '_Session',
       where: {
-        accessToken: { equalTo: 'accessToken' },
+        accessToken: { equalTo: accessToken },
         OR: [
           {
             accessTokenExpiresAt: { greaterThanOrEqualTo: expect.any(Date) },
@@ -241,7 +233,7 @@ describe('_Session', () => {
         refreshTokenExpiresAt: true,
         refreshToken: true,
       },
-      context: { isRoot: true, wabe: { controllers } },
+      context: expect.any(Object),
     })
   })
 
@@ -260,16 +252,18 @@ describe('_Session', () => {
 
     const session = new Session()
 
-    const { sessionId, user } = await session.meFromAccessToken('accessToken', {
-      isRoot: true,
-      wabe: { controllers },
-    } as any)
+    const { accessToken } = await session.create('userId', context)
+
+    const { sessionId, user } = await session.meFromAccessToken(
+      accessToken,
+      context,
+    )
 
     expect(mockGetObjects).toHaveBeenCalledTimes(1)
     expect(mockGetObjects).toHaveBeenCalledWith({
       className: '_Session',
       where: {
-        accessToken: { equalTo: 'accessToken' },
+        accessToken: { equalTo: accessToken },
         OR: [
           {
             accessTokenExpiresAt: { greaterThanOrEqualTo: expect.any(Date) },
@@ -301,18 +295,10 @@ describe('_Session', () => {
     const fifteenMinutes = new Date(Date.now() + 1000 * 60 * 15)
     const thirtyDays = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
 
-    const { accessToken, refreshToken } = await session.create('userId', {
-      wabe: {
-        controllers,
-        config: {
-          authentication: {
-            session: {
-              jwtSecret: 'dev',
-            },
-          },
-        },
-      },
-    } as any)
+    const { accessToken, refreshToken } = await session.create(
+      'userId',
+      context,
+    )
 
     expect(accessToken).not.toBeUndefined()
     expect(refreshToken).not.toBeUndefined()
@@ -373,10 +359,15 @@ describe('_Session', () => {
   })
 
   it('should refresh a session', async () => {
+    const session = new Session()
+
+    const { accessToken: oldAccessToken, refreshToken: oldRefreshToken } =
+      await session.create('userId', context)
+
     mockGetObjects.mockResolvedValue([
       {
         id: 'sessionId',
-        refreshToken: 'refreshToken',
+        refreshToken: oldRefreshToken,
         refreshTokenExpiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
         user: {
           id: 'userId',
@@ -385,23 +376,10 @@ describe('_Session', () => {
       },
     ])
 
-    const session = new Session()
-
     const { accessToken, refreshToken } = await session.refresh(
-      'accessToken',
-      'refreshToken',
-      {
-        wabe: {
-          controllers,
-          config: {
-            authentication: {
-              session: {
-                jwtSecret: 'dev',
-              },
-            },
-          },
-        },
-      } as any,
+      oldAccessToken,
+      oldRefreshToken,
+      context,
     )
 
     expect(accessToken).not.toBeUndefined()
@@ -411,7 +389,7 @@ describe('_Session', () => {
     expect(mockGetObjects).toHaveBeenCalledWith({
       className: '_Session',
       where: {
-        accessToken: { equalTo: 'accessToken' },
+        accessToken: { equalTo: oldAccessToken },
       },
       select: {
         id: true,
@@ -488,12 +466,13 @@ describe('_Session', () => {
 
     const session = new Session()
 
+    const { accessToken: oldAccessToken, refreshToken: oldRefreshToken } =
+      await session.create('userId', context)
+
     const { accessToken, refreshToken } = await session.refresh(
-      'accessToken',
-      'refreshToken',
-      {
-        wabe: { controllers },
-      } as any,
+      oldAccessToken,
+      oldRefreshToken,
+      context,
     )
 
     expect(accessToken).toBeNull()
@@ -503,7 +482,7 @@ describe('_Session', () => {
     expect(mockGetObjects).toHaveBeenCalledWith({
       className: '_Session',
       where: {
-        accessToken: { equalTo: 'accessToken' },
+        accessToken: { equalTo: oldAccessToken },
       },
       select: {
         id: true,
@@ -521,7 +500,7 @@ describe('_Session', () => {
     })
   })
 
-  it("should throw an error on refresh session if session's refresh token is expired", () => {
+  it("should throw an error on refresh session if session's refresh token is expired", async () => {
     mockGetObjects.mockResolvedValue([
       {
         id: 'sessionId',
@@ -536,14 +515,17 @@ describe('_Session', () => {
 
     const session = new Session()
 
-    expect(
-      session.refresh('accessToken', 'refreshToken', {
-        wabe: { controllers },
-      } as any),
-    ).rejects.toThrow('Refresh token expired')
+    const { refreshToken, accessToken } = await session.create(
+      'userId',
+      context,
+    )
+
+    expect(session.refresh(accessToken, refreshToken, context)).rejects.toThrow(
+      'Refresh token expired',
+    )
   })
 
-  it("should throw an error on refresh session if session's refresh token is not the same as the one in the database", () => {
+  it("should throw an error on refresh session if session's refresh token is not the same as the one in the database", async () => {
     mockGetObjects.mockResolvedValue([
       {
         id: 'sessionId',
@@ -558,10 +540,13 @@ describe('_Session', () => {
 
     const session = new Session()
 
-    expect(
-      session.refresh('accessToken', 'wrongRefreshToken', {
-        wabe: { controllers },
-      } as any),
-    ).rejects.toThrow('Invalid refresh token')
+    const { refreshToken, accessToken } = await session.create(
+      'userId',
+      context,
+    )
+
+    expect(session.refresh(accessToken, refreshToken, context)).rejects.toThrow(
+      'Invalid refresh token',
+    )
   })
 })

@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken'
+import jwt, { verify } from 'jsonwebtoken'
 import type { WabeContext } from '../server/interface'
 import type { User } from '../../generated/wabe'
 import type { WabeConfig } from '../server'
@@ -42,6 +42,21 @@ export class Session {
     accessToken: string | null
     refreshToken?: string | null
   }> {
+    if (
+      !verify(
+        accessToken,
+        context.wabe.config.authentication?.session?.jwtSecret || 'dev',
+        {},
+      )
+    ) {
+      return {
+        sessionId: null,
+        user: null,
+        accessToken: null,
+        refreshToken: null,
+      }
+    }
+
     const sessions = await context.wabe.controllers.database.getObjects({
       className: '_Session',
       where: {
@@ -188,6 +203,30 @@ export class Session {
     refreshToken: string,
     context: WabeContext<DevWabeTypes>,
   ) {
+    if (
+      !verify(
+        accessToken,
+        context.wabe.config.authentication?.session?.jwtSecret || 'dev',
+        {},
+      )
+    )
+      return {
+        accessToken: null,
+        refreshToken: null,
+      }
+
+    if (
+      !verify(
+        refreshToken,
+        context.wabe.config.authentication?.session?.jwtSecret || 'dev',
+        {},
+      )
+    )
+      return {
+        accessToken: null,
+        refreshToken: null,
+      }
+
     const session = await context.wabe.controllers.database.getObjects({
       className: '_Session',
       where: {
