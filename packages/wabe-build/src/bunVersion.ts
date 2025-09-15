@@ -45,7 +45,7 @@ export const bunCompilation = async () => {
     minify: false,
     target: target || 'node',
     plugins: [getDtsBunPlugin()],
-    external: ['@node-rs/argon2', 'dockerode'],
+    external: ['dockerode'],
   })
 
   if (!result.success) for (const log of result.logs) console.error(log)

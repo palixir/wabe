@@ -1,12 +1,11 @@
-import { hash, Algorithm } from '@node-rs/argon2'
 import type { HookObject } from './HookObject'
 import type { WabeTypes } from '../server'
 import {
   getNestedProperty,
   getNewObjectAfterUpdateNestedProperty,
-  isArgon2Hash,
 } from '../utils'
 import { OperationType } from '.'
+import { hashArgon2, isArgon2Hash } from 'src/utils/crypto'
 
 const hashField = ({
   value,
@@ -15,7 +14,7 @@ const hashField = ({
 }) => {
   if (!value || typeof value !== 'string' || isArgon2Hash(value)) return value
 
-  return hash(value, { algorithm: Algorithm.Argon2id })
+  return hashArgon2(value)
 }
 
 export async function hashFieldHook<

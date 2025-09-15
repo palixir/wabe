@@ -126,9 +126,6 @@ export const getNestedProperty = (obj: any, path: string) => {
   return path.split('.').reduce((acc, part) => acc?.[part], obj)
 }
 
-export const isArgon2Hash = (value: string): boolean =>
-  typeof value === 'string' && value.startsWith('$argon2')
-
 export const firstLetterInUpperCase = (str: string) => {
   const indexOfFirstLetter = str.search(/[a-z]/i)
 

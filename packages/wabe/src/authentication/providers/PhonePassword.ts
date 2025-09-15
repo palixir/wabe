@@ -1,14 +1,13 @@
-import { Algorithm, verify } from '@node-rs/argon2'
 import type {
   AuthenticationEventsOptions,
   AuthenticationEventsOptionsWithUserId,
   ProviderInterface,
 } from '../interface'
-import { contextWithRoot } from '../../utils/export'
+import { contextWithRoot, verifyArgon2 } from '../../utils/export'
 import type { DevWabeTypes } from '../../utils/helper'
 
 const DUMMY_PASSWORD_HASH =
-  '$argon2id$v=19$m=65536,t=2,p=1$YWJjZGVmZw$YzBhRkNiSEZlY3hzUVYxZg'
+  '$argon2id$v=19$m=65536,t=2,p=1$wHZB9xRS/Mbo7L3SL9e935Ag5K+T2EuT/XgB8akwZgo$SPf8EZ4T1HYkuIll4v2hSzNCH7woX3VrZJo3yWg5u8U'
 
 type PhonePasswordInterface = {
   password: string
@@ -52,9 +51,10 @@ export class PhonePassword
 
     const passwordHashToCheck = userDatabasePassword ?? DUMMY_PASSWORD_HASH
 
-    const isPasswordEquals = await verify(passwordHashToCheck, input.password, {
-      algorithm: Algorithm.Argon2id,
-    })
+    const isPasswordEquals = await verifyArgon2(
+      input.password,
+      passwordHashToCheck,
+    )
 
     if (
       !user ||
