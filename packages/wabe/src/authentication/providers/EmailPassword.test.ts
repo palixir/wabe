@@ -7,7 +7,7 @@ import {
   afterEach,
   afterAll,
 } from 'bun:test'
-import * as argon2 from '@node-rs/argon2'
+import * as crypto from '../../utils/crypto'
 
 import { EmailPassword } from './EmailPassword'
 
@@ -16,8 +16,8 @@ describe('Email password', () => {
   const mockCount = mock(() => Promise.resolve(0)) as any
   const mockCreateObject = mock(() => Promise.resolve({ id: 'userId' })) as any
 
-  const spyArgonPasswordVerify = spyOn(argon2, 'verify')
-  const spyBunPasswordHash = spyOn(argon2, 'hash')
+  const spyArgonPasswordVerify = spyOn(crypto, 'verifyArgon2')
+  const spyBunPasswordHash = spyOn(crypto, 'hashArgon2')
 
   const controllers = {
     controllers: {
@@ -88,9 +88,8 @@ describe('Email password', () => {
 
     expect(spyArgonPasswordVerify).toHaveBeenCalledTimes(1)
     expect(spyArgonPasswordVerify).toHaveBeenCalledWith(
-      'hashedPassword',
       'password',
-      { algorithm: argon2.Algorithm.Argon2id },
+      'hashedPassword',
     )
   })
 

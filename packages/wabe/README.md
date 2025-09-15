@@ -10,6 +10,8 @@
 
 Wabe is an open-source backend as a service that allows you to create your own fully customizable backend in just a few minutes. It handles database access, automatic GraphQL API generation, authentication with various methods (classic or OAuth), permissions, security, emails, and more for you.
 
+It requires Bun or Node > 24.7.
+
 ## Install
 
 ```sh

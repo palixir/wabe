@@ -1,4 +1,3 @@
-import { Algorithm, hash } from '@node-rs/argon2'
 import type { WabeTypes } from '../server'
 import type { WabeContext } from '../server/interface'
 import type {
@@ -42,8 +41,3 @@ export const getAuthenticationMethod = <
 
   return validAuthenticationMethod as CustomAuthenticationMethods<T, U>
 }
-
-export const hashPassword = (password: string) =>
-  hash(password, {
-    algorithm: Algorithm.Argon2id,
-  })
