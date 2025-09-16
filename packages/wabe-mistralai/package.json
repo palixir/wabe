@@ -24,9 +24,9 @@
   "scripts": {
     "build": "bun --filter wabe-build build:package $(pwd)",
     "check": "tsc --project $(pwd)/tsconfig.json",
-    "lint": "biome lint . --no-errors-on-unmatched --config-path=../../",
+    "lint": "biome lint . --no-errors-on-unmatched",
     "ci": "bun check && bun lint $(pwd) && bun test src",
-    "format": "biome format --write . --config-path=../../"
+    "format": "biome format --write ."
   },
   "dependencies": {
     "@mistralai/mistralai": "1.7.1"

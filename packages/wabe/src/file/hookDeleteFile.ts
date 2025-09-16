@@ -13,7 +13,7 @@ const deleteFile = async (hookObject: HookObject<any, any>) => {
       .map(([fieldName]) => {
         const fileName = hookObject.originalObject?.[fieldName]?.name as string
 
-        if (!fileName) return
+        if (!fileName) return Promise.resolve()
 
         if (!hookObject.context.wabe.controllers.file)
           throw new Error('No file adapter found')

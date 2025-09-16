@@ -2,7 +2,7 @@
   "name": "main",
   "version": "1.0.0",
   "devDependencies": {
-    "@biomejs/biome": "2.0.5",
+    "@biomejs/biome": "2.2.4",
     "lefthook": "1.7.18",
     "typescript": "5.8.2",
     "tcp-port-used": "1.0.2",

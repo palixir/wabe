@@ -20,7 +20,7 @@ export const base64URLencode = (content: string) => {
 
   const result = hasher.digest('base64')
 
-  // @ts-ignore
+  // @ts-expect-error
   return result.split('=')[0].replaceAll('+', '-').replaceAll('/', '_')
 }
 
