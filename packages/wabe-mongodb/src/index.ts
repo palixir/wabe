@@ -1,22 +1,22 @@
 import { type Db, type Filter, MongoClient, ObjectId } from 'mongodb'
 import pRetry from 'p-retry'
-import {
-  type AdapterOptions,
-  type DatabaseAdapter,
-  type GetObjectOptions,
-  type CreateObjectOptions,
-  type UpdateObjectOptions,
-  type GetObjectsOptions,
-  type CreateObjectsOptions,
-  type UpdateObjectsOptions,
-  type DeleteObjectsOptions,
-  type WhereType,
-  type DeleteObjectOptions,
-  type OutputType,
-  type CountOptions,
-  type OrderType,
-  type WabeTypes,
-  type SchemaInterface,
+import type {
+  AdapterOptions,
+  DatabaseAdapter,
+  GetObjectOptions,
+  CreateObjectOptions,
+  UpdateObjectOptions,
+  GetObjectsOptions,
+  CreateObjectsOptions,
+  UpdateObjectsOptions,
+  DeleteObjectsOptions,
+  WhereType,
+  DeleteObjectOptions,
+  OutputType,
+  CountOptions,
+  OrderType,
+  WabeTypes,
+  SchemaInterface,
 } from 'wabe'
 
 export const buildMongoOrderQuery = <
