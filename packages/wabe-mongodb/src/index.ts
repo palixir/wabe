@@ -16,8 +16,6 @@ import {
   type CountOptions,
   type OrderType,
   type WabeTypes,
-  contextWithRoot,
-  notEmpty,
   type SchemaInterface,
 } from 'wabe'
 
@@ -103,7 +101,7 @@ export const buildMongoWhereQuery = <
             keyToWrite === '_id'
               ? value.in
                   // @ts-expect-error
-                  .filter((inValue) => typeof inValue === 'string')
+                  .filter((inValue: any) => typeof inValue === 'string')
                   // @ts-expect-error
                   .map((inValue) => ObjectId.createFromHexString(inValue))
               : value.in,
@@ -114,7 +112,7 @@ export const buildMongoWhereQuery = <
             keyToWrite === '_id'
               ? value.notIn
                   // @ts-expect-error
-                  .filter((notInValue) => typeof notInValue === 'string')
+                  .filter((notInValue: any) => typeof notInValue === 'string')
                   // @ts-expect-error
                   .map((notInValue) => ObjectId.createFromHexString(notInValue))
               : value.notIn,
@@ -331,7 +329,9 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
 
     const res = await collection.insertMany(data, {})
 
-    return Object.values(res.insertedIds).map((id) => ({ id: id.toString() }))
+    return Object.values(res.insertedIds).map((id) => ({
+      id: id.toString(),
+    }))
   }
 
   async updateObject<
@@ -389,7 +389,10 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
         offset,
         first,
         // Root because we need the id at least for hook
-        context: contextWithRoot(context),
+        context: {
+          ...context,
+          isRoot: true,
+        },
         order,
       })
 
@@ -400,7 +403,7 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
     })
 
     return Object.values(objectsBeforeUpdate)
-      .filter(notEmpty)
+      .filter(Boolean)
       .map((object) => ({
         // The fallback will never be called, just an miss type
         id: object?.id || '',

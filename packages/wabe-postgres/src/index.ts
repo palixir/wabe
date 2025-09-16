@@ -15,8 +15,6 @@ import {
   type CountOptions,
   type OrderType,
   type WabeTypes,
-  contextWithRoot,
-  notEmpty,
   type TypeField,
   type SchemaInterface,
 } from 'wabe'
@@ -681,15 +679,18 @@ export class PostgresAdapter<T extends WabeTypes>
           select: { id: true },
           offset,
           first,
-          context: contextWithRoot(context),
+          context: {
+            ...context,
+            isRoot: true,
+          },
           order,
         })
 
       if (objectsBeforeUpdate.length === 0) return []
 
       const objectIds = objectsBeforeUpdate
-        .filter(notEmpty)
-        .map((obj) => obj.id)
+        .filter(Boolean)
+        .map((obj: any) => obj.id) as string[]
 
       await Promise.all(
         objectIds.map(async (id) => {
@@ -704,7 +705,9 @@ export class PostgresAdapter<T extends WabeTypes>
         }),
       )
 
-      return objectsBeforeUpdate.filter(notEmpty).map((obj) => ({ id: obj.id }))
+      return objectsBeforeUpdate
+        .filter(Boolean)
+        .map((obj: any) => ({ id: obj.id }))
     } finally {
       client.release()
     }
