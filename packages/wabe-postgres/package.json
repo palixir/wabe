@@ -1,6 +1,6 @@
 {
 	"name": "wabe-postgres",
-	"version": "0.5.0",
+	"version": "0.5.1",
 	"description": "PostgreSQL adapter for Wabe (official)",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
@@ -13,12 +13,12 @@
 		"adapter"
 	],
 	"scripts": {
-    "build": "bun --filter wabe-build build:package $(pwd)",
-    "check": "tsc --project $(pwd)/tsconfig.json",
-    "lint": "biome lint . --no-errors-on-unmatched --config-path=../../",
-    "ci": "bun check && bun lint $(pwd) && bun test src",
-    "format": "biome format --write . --config-path=../../"
-  },
+		"build": "bun --filter wabe-build build:package $(pwd)",
+		"check": "tsc --project $(pwd)/tsconfig.json",
+		"lint": "biome lint . --no-errors-on-unmatched --config-path=../../",
+		"ci": "bun check && bun lint $(pwd) && bun test src",
+		"format": "biome format --write . --config-path=../../"
+	},
 	"license": "Apache-2.0",
 	"dependencies": {
 		"p-retry": "5.1.2",
