@@ -37,7 +37,7 @@ bun dev # Run server and create all codegen
 
 bun test # Run test on wabe package
 # or
-bun ci # Run lint + test on package
+bun run ci # Run lint + test on package
 ```
 
 ## Pre-commit
