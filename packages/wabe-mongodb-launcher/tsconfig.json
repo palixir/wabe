@@ -15,5 +15,5 @@
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "noEmit": false
-  },
+  }
 }
