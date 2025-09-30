@@ -75,7 +75,7 @@ const view = () => (
               <div className="mt-6">
                 <Button
                   as="a"
-                  href="https://palixir.github.io/wabe/index"
+                  href="https://palixir.github.io/wabe"
                   color="primary"
                   size="lg"
                   className="font-semibold"

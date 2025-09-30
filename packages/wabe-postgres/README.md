@@ -1,6 +1,6 @@
 # Wabe
 
-📚 **Documentation:** [https://palixir.github.io/wabe/index](https://palixir.github.io/wabe/index)
+📚 **Documentation:** [https://palixir.github.io/wabe](https://palixir.github.io/wabe)
 
 **Create your backend without vendor lock-in**
 
