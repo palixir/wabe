@@ -9,7 +9,7 @@
     "preview": "rspress preview"
   },
   "dependencies": {
-    "rspress": "1.40.2",
+    "rspress": "1.45.6",
     "@heroui/react": "2.6.13",
     "@heroicons/react": "2.2.0"
   },
