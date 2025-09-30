@@ -2,6 +2,7 @@ import * as path from 'node:path'
 import { defineConfig } from 'rspress/config'
 
 export default defineConfig({
+  base: 'wabe-documentation',
   root: path.join(__dirname, 'docs'),
   route: {
     cleanUrls: true,

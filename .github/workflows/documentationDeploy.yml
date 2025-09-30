@@ -40,7 +40,7 @@ jobs:
           bun --filter "./packages/wabe-documentation" build
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: ./packages/wabe-documentation/doc_build
 
