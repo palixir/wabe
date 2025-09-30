@@ -2,6 +2,7 @@ import * as path from 'node:path'
 import { defineConfig } from 'rspress/config'
 
 export default defineConfig({
+  // Wabe because the repository name is wabe (for github pages)
   base: '/wabe/',
   root: path.join(__dirname, 'docs'),
   route: {
