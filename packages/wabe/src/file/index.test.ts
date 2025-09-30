@@ -254,14 +254,16 @@ describe('File upload', () => {
       data: {
         // @ts-expect-error
         file: {
-          url: 'https://wabe.dev/assets/logo.png',
+          url: 'https://palixir.github.io/wabe//assets/logo.png',
         },
       },
       id: result?.[0]?.id || '',
     })
 
     // @ts-expect-error
-    expect(res.file.url).toEqual('https://wabe.dev/assets/logo.png')
+    expect(res.file.url).toEqual(
+      'https://palixir.github.io/wabe//assets/logo.png',
+    )
     // @ts-expect-error
     expect(res.file.isPresignedUrl).toEqual(false)
   })
@@ -676,7 +678,7 @@ describe('File upload', () => {
       data: {
         // @ts-expect-error
         file: {
-          url: 'https://wabe.dev/assets/logo.png',
+          url: 'https://palixir.github.io/wabe//assets/logo.png',
         },
       },
       id: idOfCreatedObject,
@@ -824,7 +826,7 @@ describe('File upload', () => {
     await anonymousClient.request<any>(
       gql`
         mutation {
-          createTest3(input: {fields: {file: {url: "https://wabe.dev/assets/logo.png"}}}) {
+          createTest3(input: {fields: {file: {url: "https://palixir.github.io/wabe//assets/logo.png"}}}) {
             test3 {
               id
               file {
@@ -858,7 +860,7 @@ describe('File upload', () => {
     )
 
     expect(test3s.edges[0].node.file.url).toEqual(
-      'https://wabe.dev/assets/logo.png',
+      'https://palixir.github.io/wabe//assets/logo.png',
     )
   })
 

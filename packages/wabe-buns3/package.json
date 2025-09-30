@@ -2,7 +2,7 @@
   "name": "wabe-buns3",
   "version": "0.5.1",
   "description": "Bun S3 adapter for Wabe",
-  "homepage": "https://wabe.dev",
+  "homepage": "https://palixir.github.io/wabe/",
   "author": {
     "name": "coratgerl",
     "url": "https://github.com/coratgerl"

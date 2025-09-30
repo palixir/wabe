@@ -8,112 +8,112 @@
 
 
 <url>
-  <loc>https://wabe.dev/</loc>
+  <loc>https://palixir.github.io/wabe//</loc>
   <lastmod>2024-10-18T13:57:12+00:00</lastmod>
   <priority>1.00</priority>
 </url>
 <url>
-  <loc>https://wabe.dev/wabe/motivations.html</loc>
+  <loc>https://palixir.github.io/wabe//wabe/motivations.html</loc>
   <lastmod>2024-10-18T13:57:12+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
-  <loc>https://wabe.dev/wabe/start.html</loc>
+  <loc>https://palixir.github.io/wabe//wabe/start.html</loc>
   <lastmod>2024-10-18T13:57:13+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
-  <loc>https://wabe.dev/wabe/concepts.html</loc>
+  <loc>https://palixir.github.io/wabe//wabe/concepts.html</loc>
   <lastmod>2024-10-18T13:57:13+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
-  <loc>https://wabe.dev/config/schema/classes.html</loc>
+  <loc>https://palixir.github.io/wabe//config/schema/classes.html</loc>
   <lastmod>2024-10-18T13:57:14+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
-  <loc>https://wabe.dev/config/schema/resolvers.html</loc>
+  <loc>https://palixir.github.io/wabe//config/schema/resolvers.html</loc>
   <lastmod>2024-10-18T13:57:14+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
-  <loc>https://wabe.dev/config/schema/enums.html</loc>
+  <loc>https://palixir.github.io/wabe//config/schema/enums.html</loc>
   <lastmod>2024-10-18T13:57:14+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
-  <loc>https://wabe.dev/config/schema/scalars.html</loc>
+  <loc>https://palixir.github.io/wabe//config/schema/scalars.html</loc>
   <lastmod>2024-10-18T13:57:14+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
-  <loc>https://wabe.dev/config/files.html</loc>
+  <loc>https://palixir.github.io/wabe//config/files.html</loc>
   <lastmod>2024-10-18T13:57:14+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
-  <loc>https://wabe.dev/config/authentication/interact.html</loc>
+  <loc>https://palixir.github.io/wabe//config/authentication/interact.html</loc>
   <lastmod>2024-10-18T13:57:14+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
-  <loc>https://wabe.dev/config/authentication/sessions.html</loc>
+  <loc>https://palixir.github.io/wabe//config/authentication/sessions.html</loc>
   <lastmod>2024-10-18T13:57:14+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
-  <loc>https://wabe.dev/config/authentication/roles.html</loc>
+  <loc>https://palixir.github.io/wabe//config/authentication/roles.html</loc>
   <lastmod>2024-10-18T13:57:15+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
-  <loc>https://wabe.dev/config/authentication/oauth.html</loc>
+  <loc>https://palixir.github.io/wabe//config/authentication/oauth.html</loc>
   <lastmod>2024-10-18T13:57:15+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
-  <loc>https://wabe.dev/config/authentication/customMethods.html</loc>
+  <loc>https://palixir.github.io/wabe//config/authentication/customMethods.html</loc>
   <lastmod>2024-10-18T13:57:15+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
-  <loc>https://wabe.dev/config/hooks.html</loc>
+  <loc>https://palixir.github.io/wabe//config/hooks.html</loc>
   <lastmod>2024-10-18T13:57:15+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
-  <loc>https://wabe.dev/config/routes.html</loc>
+  <loc>https://palixir.github.io/wabe//config/routes.html</loc>
   <lastmod>2024-10-18T13:57:15+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
-  <loc>https://wabe.dev/config/codegen.html</loc>
+  <loc>https://palixir.github.io/wabe//config/codegen.html</loc>
   <lastmod>2024-10-18T13:57:15+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
-  <loc>https://wabe.dev/config/rootKey.html</loc>
+  <loc>https://palixir.github.io/wabe//config/rootKey.html</loc>
   <lastmod>2024-10-18T13:57:15+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
-  <loc>https://wabe.dev/graphql/api.html</loc>
+  <loc>https://palixir.github.io/wabe//graphql/api.html</loc>
   <lastmod>2024-10-18T13:57:16+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
-  <loc>https://wabe.dev/database/index.html</loc>
+  <loc>https://palixir.github.io/wabe//database/index.html</loc>
   <lastmod>2024-10-18T13:57:16+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
-  <loc>https://wabe.dev/security/index.html</loc>
+  <loc>https://palixir.github.io/wabe//security/index.html</loc>
   <lastmod>2024-10-18T13:57:16+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
-  <loc>https://wabe.dev/email/index.html</loc>
+  <loc>https://palixir.github.io/wabe//email/index.html</loc>
   <lastmod>2024-10-18T13:57:16+00:00</lastmod>
   <priority>0.64</priority>
 </url>

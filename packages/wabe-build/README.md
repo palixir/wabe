@@ -1,9 +1,9 @@
 <p align="center">
-  <a href="https://wabe.dev"><img src="https://wabe.dev/assets/logo.png" alt="Wabe logo" height=170></a>
+  <a href="https://palixir.github.io/wabe/"><img src="https://palixir.github.io/wabe//assets/logo.png" alt="Wabe logo" height=170></a>
 </p>
 
 <div align="center">
-  <a href="https://wabe.dev">Documentation</a>
+  <a href="https://palixir.github.io/wabe/">Documentation</a>
 </div>
 
 ## What is Wabe?
@@ -25,8 +25,7 @@ yarn add wabe-mongodb-launcher # On yarn
 ## Basic example of wabe-mongodb-launcher usage
 
 ```ts
-import { runDatabase } from 'wabe-mongodb-launcher'
+import { runDatabase } from "wabe-mongodb-launcher";
 
-
-await runDatabase()
+await runDatabase();
 ```

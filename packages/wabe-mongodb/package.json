@@ -2,7 +2,7 @@
   "name": "wabe-mongodb",
   "version": "0.5.2",
   "description": "MongoDB adapter for Wabe (official)",
-  "homepage": "https://wabe.dev",
+  "homepage": "https://palixir.github.io/wabe/",
   "author": {
     "name": "coratgerl",
     "url": "https://github.com/coratgerl"

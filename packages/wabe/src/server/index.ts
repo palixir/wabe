@@ -20,7 +20,6 @@ import { initializeRoles } from '../authentication/roles'
 import type { EmailConfig } from '../email'
 import { EmailController } from '../email/EmailController'
 import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection'
-import type { AIConfig } from '../ai'
 import { FileController } from '../file/FileController'
 import { defaultSessionHandler } from './defaultHandlers'
 import type { CronConfig } from '../cron'
@@ -54,7 +53,6 @@ export interface WabeConfig<T extends WabeTypes> {
   rootKey: string
   hooks?: Hook<T, any>[]
   email?: EmailConfig
-  ai?: AIConfig
   file?: FileConfig<T>
   crons?: CronConfig<T>
 }

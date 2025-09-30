@@ -1,4 +1,4 @@
 User-agent: *
 Disallow:
 Disallow: /cgi-bin/
-Sitemap: https://wabe.dev/sitemap.xml
+Sitemap: https://palixir.github.io/wabe//sitemap.xml

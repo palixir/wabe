@@ -34,8 +34,8 @@ const run = async () => {
         },
       },
       roles: ['Admin', 'Client'],
-      successRedirectPath: 'https://wabe.dev',
-      failureRedirectPath: 'https://wabe.dev',
+      successRedirectPath: 'https://palixir.github.io/wabe/',
+      failureRedirectPath: 'https://palixir.github.io/wabe/',
     },
     database: {
       // @ts-expect-error
