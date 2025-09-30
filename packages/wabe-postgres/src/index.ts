@@ -1,24 +1,22 @@
 import { Pool } from 'pg'
-import {
-  type AdapterOptions,
-  type DatabaseAdapter,
-  type GetObjectOptions,
-  type CreateObjectOptions,
-  type UpdateObjectOptions,
-  type GetObjectsOptions,
-  type CreateObjectsOptions,
-  type UpdateObjectsOptions,
-  type DeleteObjectsOptions,
-  type WhereType,
-  type DeleteObjectOptions,
-  type OutputType,
-  type CountOptions,
-  type OrderType,
-  type WabeTypes,
-  contextWithRoot,
-  notEmpty,
-  type TypeField,
-  type SchemaInterface,
+import type {
+  AdapterOptions,
+  DatabaseAdapter,
+  GetObjectOptions,
+  CreateObjectOptions,
+  UpdateObjectOptions,
+  GetObjectsOptions,
+  CreateObjectsOptions,
+  UpdateObjectsOptions,
+  DeleteObjectsOptions,
+  WhereType,
+  DeleteObjectOptions,
+  OutputType,
+  CountOptions,
+  OrderType,
+  WabeTypes,
+  TypeField,
+  SchemaInterface,
 } from 'wabe'
 
 const getSQLColumnCreateTableFromType = <T extends WabeTypes>(
@@ -681,15 +679,18 @@ export class PostgresAdapter<T extends WabeTypes>
           select: { id: true },
           offset,
           first,
-          context: contextWithRoot(context),
+          context: {
+            ...context,
+            isRoot: true,
+          },
           order,
         })
 
       if (objectsBeforeUpdate.length === 0) return []
 
       const objectIds = objectsBeforeUpdate
-        .filter(notEmpty)
-        .map((obj) => obj.id)
+        .filter(Boolean)
+        .map((obj: any) => obj.id) as string[]
 
       await Promise.all(
         objectIds.map(async (id) => {
@@ -704,7 +705,9 @@ export class PostgresAdapter<T extends WabeTypes>
         }),
       )
 
-      return objectsBeforeUpdate.filter(notEmpty).map((obj) => ({ id: obj.id }))
+      return objectsBeforeUpdate
+        .filter(Boolean)
+        .map((obj: any) => ({ id: obj.id }))
     } finally {
       client.release()
     }

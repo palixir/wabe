@@ -1,6 +1,6 @@
 {
   "name": "wabe",
-  "version": "0.6.8",
+  "version": "0.6.9",
   "description": "Your backend in minutes not days",
   "homepage": "https://wabe.dev",
   "author": {
@@ -22,9 +22,9 @@
   "scripts": {
     "build": "bun --filter wabe-build build:package $(pwd)",
     "check": "tsc --project $(pwd)/tsconfig.json",
-    "lint": "biome lint . --no-errors-on-unmatched --config-path=../../",
+    "lint": "biome lint . --no-errors-on-unmatched",
     "ci": "bun generate:codegen && bun lint $(pwd) && bun check && bun test src",
-    "format": "biome format --write . --config-path=../../",
+    "format": "biome format --write .",
     "dev": "bun run --watch dev/index.ts",
     "generate:codegen": "touch generated/wabe.ts && CODEGEN=true bun dev/index.ts"
   },

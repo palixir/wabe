@@ -26,7 +26,7 @@ export const defaultBeforeCreateForDefaultValue = (
     object.context.wabe.config,
   )
   const allFields = Object.keys(schemaClass.fields)
-  allFields.map((field) => {
+  allFields.forEach((field) => {
     const currentSchemaField = schemaClass.fields[field]
     if (
       !object.isFieldUpdated(field) &&

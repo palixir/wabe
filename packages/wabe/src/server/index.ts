@@ -196,7 +196,7 @@ export class Wabe<T extends WabeTypes> {
       ...(this.config.routes || []),
     ]
 
-    wabeRoutes.map((route) => {
+    wabeRoutes.forEach((route) => {
       const { method } = route
 
       switch (method) {

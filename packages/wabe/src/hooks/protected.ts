@@ -16,7 +16,7 @@ const _checkProtected = (
   const isRoot = hookObject.context.isRoot
 
   if (operationType === OperationType.BeforeRead) {
-    Object.keys(hookObject.select).map((fieldName) => {
+    Object.keys(hookObject.select).forEach((fieldName) => {
       const protectedForCurrentField = schemaClass.fields[fieldName]?.protected
 
       if (!protectedForCurrentField) return
@@ -42,7 +42,7 @@ const _checkProtected = (
   const operation =
     operationType === OperationType.BeforeUpdate ? 'update' : 'create'
 
-  Object.keys(fieldsUpdated).map((fieldName) => {
+  Object.keys(fieldsUpdated).forEach((fieldName) => {
     const protectedForCurrentField = schemaClass.fields[fieldName]?.protected
 
     if (protectedForCurrentField?.protectedOperations.includes(operation)) {

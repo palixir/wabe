@@ -1,32 +1,32 @@
 {
-	"name": "wabe-postgres",
-	"version": "0.5.0",
-	"description": "PostgreSQL adapter for Wabe (official)",
-	"main": "dist/index.js",
-	"types": "dist/index.d.ts",
-	"type": "module",
-	"keywords": [
-		"wabe",
-		"postgres",
-		"postgresql",
-		"database",
-		"adapter"
-	],
-	"scripts": {
+  "name": "wabe-postgres",
+  "version": "0.5.1",
+  "description": "PostgreSQL adapter for Wabe (official)",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "keywords": [
+    "wabe",
+    "postgres",
+    "postgresql",
+    "database",
+    "adapter"
+  ],
+  "scripts": {
     "build": "bun --filter wabe-build build:package $(pwd)",
     "check": "tsc --project $(pwd)/tsconfig.json",
-    "lint": "biome lint . --no-errors-on-unmatched --config-path=../../",
+    "lint": "biome lint . --no-errors-on-unmatched",
     "ci": "bun check && bun lint $(pwd) && bun test src",
-    "format": "biome format --write . --config-path=../../"
+    "format": "biome format --write ."
   },
-	"license": "Apache-2.0",
-	"dependencies": {
-		"p-retry": "5.1.2",
-		"pg": "8.16.0"
-	},
-	"devDependencies": {
-		"@types/pg": "8.11.11",
-		"wabe": "workspace:*",
-		"wabe-postgres-launcher": "workspace:*"
-	}
+  "license": "Apache-2.0",
+  "dependencies": {
+    "p-retry": "5.1.2",
+    "pg": "8.16.0"
+  },
+  "devDependencies": {
+    "@types/pg": "8.11.11",
+    "wabe": "workspace:*",
+    "wabe-postgres-launcher": "workspace:*"
+  }
 }

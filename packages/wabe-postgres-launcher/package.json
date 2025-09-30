@@ -1,22 +1,22 @@
 {
-    "name": "wabe-postgres-launcher",
-    "version": "0.5.0",
-    "license": "Apache-2.0",
-    "main": "dist/index.js",
-    "description": "Package to launch the postgres database for test",
-    "scripts": {
-        "ci": "bun lint",
-        "build": "bun --filter wabe-build build:package $(pwd) node",
-        "lint": "biome lint . --config-path=../../ --no-errors-on-unmatched",
-        "format": "biome format --config-path=../../ --write ."
-    },
-    "dependencies": {
-        "p-queue": "8.1.0",
-        "dockerode": "4.0.5",
-        "tcp-port-used": "1.0.2"
-    },
-    "devDependencies": {
-        "@types/dockerode": "3.3.37",
-        "@types/tcp-port-used": "1.0.4"
-    }
+  "name": "wabe-postgres-launcher",
+  "version": "0.5.0",
+  "license": "Apache-2.0",
+  "main": "dist/index.js",
+  "description": "Package to launch the postgres database for test",
+  "scripts": {
+    "ci": "bun lint",
+    "build": "bun --filter wabe-build build:package $(pwd) node",
+    "lint": "biome lint . --no-errors-on-unmatched",
+    "format": "biome format --write ."
+  },
+  "dependencies": {
+    "p-queue": "8.1.0",
+    "dockerode": "4.0.5",
+    "tcp-port-used": "1.0.2"
+  },
+  "devDependencies": {
+    "@types/dockerode": "3.3.37",
+    "@types/tcp-port-used": "1.0.4"
+  }
 }
