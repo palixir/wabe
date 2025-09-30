@@ -2,7 +2,7 @@
 
 📚 **Documentation:** [https://palixir.github.io/wabe/index](https://palixir.github.io/wabe/index)
 
-**Create your backend with no vendor lock-in**
+**Create your backend without vendor lock-in**
 
 Wabe is an open-source backend-as-a-service (BaaS) built in TypeScript, designed to let you quickly create a complete and secure backend for your Node.js / Bun apps.
 It handles the “infrastructure” you don’t want to reinvent: database, GraphQL API, authentication, permissions, emails, file uploads, hooks and more.
