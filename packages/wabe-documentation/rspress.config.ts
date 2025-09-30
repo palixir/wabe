@@ -75,7 +75,7 @@ export default defineConfig({
           items: [
             {
               text: 'Classes',
-              link: '/documentation/config/schema/classes',
+              link: '/documentation/schema/classes',
             },
             {
               text: 'Resolvers',
@@ -151,7 +151,6 @@ export default defineConfig({
         { text: 'Cron', link: '/documentation/cron' },
         { text: 'File', link: '/documentation/file/index' },
         { text: 'Email', link: '/documentation/email/index' },
-        { text: 'AI', link: '/documentation/ai/index' },
       ],
     },
   },

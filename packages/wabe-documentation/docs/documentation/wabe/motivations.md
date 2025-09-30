@@ -1,9 +1,32 @@
 # Motivations
 
-## What is Wabe ?
+## What is Wabe?
 
-Wabe is a solution that simplifies the creation of your backends in TypeScript. It handles all the complexities of a backend for you and offers an all-in-one solution that can be set up in just a few minutes. It manages the database, authentication, automatic generation of your GraphQL API based on the schema you’ve defined, security with a multi-level permission system, a hook system that allows you to perform actions before or after each database query, and many other features that you can explore by browsing the documentation. And because we know that every application is unique, Wabe allows you to customize everything to meet your needs. You can, for example, add your own authentication methods, your own GraphQL resolvers, your own REST routes, your own enums, your own GraphQL scalars, and much more. Wabe is both a comprehensive and customizable toolbox.
+Wabe is a powerful **Backend-as-a-Service** built with TypeScript that makes creating backends simple and fast. It handles the heavy lifting of backend development, providing an all-in-one solution that you can set up in minutes.
 
-## Why should you use Wabe ?
+With Wabe, you get:
 
-After working with Parse Server for a long time, which also offers a simplified backend solution, I identified several issues that make the tool difficult for many users (especially those not deeply familiar with the project): the absence of TypeScript, unclear documentation, meaning no type safety during development, the lack of key features like typing GraphQL objects without using Nexus, and the project's very limited evolution. On the other hand, recent solutions like Supabase have emerged, but they severely lack customization options. Supabase can be used for relatively simple applications (CRUD), but when it comes to complex applications that require multiple elements, such as connections to external APIs, new GraphQL resolvers with very specific behaviors, etc., it falls short. With Wabe, we aimed to combine the best of both worlds: the modernity of one and the flexibility of the other. It is with this idea in mind that Wabe was born, and it has a bright future ahead!
+- **Automatic database management**
+- **Authentication and security** with a flexible, multi-level permission system
+- **GraphQL API generation** based on your schema
+- **Hooks system** to run custom logic before or after database operations
+- **Full customization**, including custom authentication methods, GraphQL resolvers, REST routes, enums, and scalars
+
+Wabe is designed to be both **comprehensive and flexible**, so you can build exactly the backend your application needs.
+
+## Why use Wabe?
+
+Existing solutions often come with trade-offs:
+
+- **Parse Server**: powerful but not TypeScript-friendly, with unclear documentation and limited evolution.
+- **Supabase**: modern and easy, but limited in customization and complex workflows if you want no vendor lock-in and complex use case.
+
+Wabe combines the **best of both worlds**:
+
+- TypeScript-first approach for **type safety and developer confidence**
+- Flexible architecture that lets you **extend, customize, and integrate** with anything
+- A modern backend that scales with your application's needs
+
+Whether you’re building a simple CRUD app or a complex system with custom GraphQL resolvers, Wabe provides the tools and flexibility to get it done faster and smarter.
+
+Wabe is not just a backend—it’s a **powerful, customizable toolbox** that grows with your application.

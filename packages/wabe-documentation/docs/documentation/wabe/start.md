@@ -1,41 +1,49 @@
-# Quick start
+# Quick Start
 
-## Create backend project
+Get your Wabe backend up and running in minutes! This guide will walk you through creating a new project, installing dependencies, and launching your first server.
 
-For a quick start, we’ll assume you are beginning a new backend project. For simplicity (and also because Wabe was built with it), we will create the project using `Bun`. However, it's important to note that Wabe is also **compatible** with `Node`.
+---
 
-### Install bun
+## 1. Create a backend project
 
-You can found more information [here](https://bun.sh/docs/installation#installing).
+We'll start with a fresh backend project. For simplicity—and because Wabe was built with it—we'll use **Bun**, but Wabe is fully compatible with **Node.js** as well.
+
+### Install Bun
+
+Follow the instructions [here](https://bun.sh/docs/installation#installing) or run:
 
 ```sh
-brew install oven-sh/bun/bun # for macOS and Linux
-or
-npm install -g bun # for Windows
+# macOS / Linux
+brew install oven-sh/bun/bun
+
+# Windows
+npm install -g bun
 ```
 
-### Create project
+### Initialize the project
 
-Create the project with the `bun init` command.
+Create a new project:
 
 ```sh
 bun init
 ```
 
-Now you should have a basic project with an `index.ts` file.
+You should now have a basic project structure with an index.ts file.
 
-## Create your first Wabe app
+## 2. Install Wabe
 
-Let's first add the necessary wabe dependency.
+Add Wabe and the MongoDB launcher:
 
 ```sh
-bun add wabe
+bun add wabe wabe-mongodb
 bun add --dev wabe-mongodb-launcher
 ```
 
-Open the `index.ts` file and past the following code.
+## 3. Create your first Wabe app
 
-```ts
+Open `index.ts and paste the following code:
+
+```typescript
 import { Wabe } from "wabe";
 import { MongoAdapter } from "wabe-mongodb";
 import { runDatabase } from "wabe-mongodb-launcher";
@@ -45,9 +53,7 @@ const run = async () => {
 
   const wabe = new Wabe({
     isProduction: process.env.NODE_ENV === "production",
-    // Root key example (must be long minimal 64 characters, you can generate it online)
-    rootKey:
-      "0uwFvUxM$ceFuF1aEtTtZMa7DUN2NZudqgY5ve5W*QCyb58cwMj9JeoaV@d#%29v&aJzswuudVU1%nAT+rxS0Bh&OkgBYc0PH18*",
+    rootKey: "YOUR_LONG_SECRET_ROOT_KEY_HERE",
     database: {
       adapter: new MongoAdapter({
         databaseName: "WabeApp",
@@ -60,8 +66,8 @@ const run = async () => {
       scalars: [],
       enums: [],
       resolvers: {
-        mutations: {},
         queries: {},
+        mutations: {},
       },
     },
   });
@@ -72,30 +78,35 @@ const run = async () => {
 await run();
 ```
 
-Let’s take a look at what’s happening in this small example. We’re creating a wabe object with minimal configuration.
+### How It Works
 
-- The first element is the `rootKey`, a string that should be as long and varied as possible, which can be included in all requests made to the API by passing it in the `Wabe-Root-Key` header. It grants root access to all requests. It must remain completely secret and should only be used by the backend itself; under no circumstances should it be shared with the frontend. The root key override all security checks.
+- **`rootKey`**: A secret string that grants full access to your API via the `Wabe-Root-Key` header. Keep it safe and never expose it to the frontend.
+- **`database`**: Configure your database adapter. Currently, Wabe supports MongoDB (Postgres coming soon!).
+- **`port`**: The port your server will run on.
+- **`schema`**: Define your backend structure—classes, enums, scalars, and resolvers. We'll explore this in detail in the Schema section.
 
-- Next, we have the `database` information (the type of database; currently, Wabe only supports MongoDB, but support for Postgres is planned).
+Run your server:
 
-- We also see the `port` on which we’re launching the server.
+```sh
+bun run index.ts
+```
 
-- Finally, the `schema` object allows you to specify various elements (your backend classes, enums, scalars, and resolvers). We’ll explore all these elements in more detail in the next section dedicated to the schema.
+---
 
-You can now **run** the `index.ts` file with the following command `bun run index.ts`.
+## 4. Explore the GraphQL Dashboard
 
-## Explore the GraphQL dashboard
+Visit: http://localhost:3001/graphql
 
-Now that you’ve launched your first server with Wabe, you can go to the following address:
-
-`http://localhost:3001/graphql`
-
-You’ll arrive at a GraphiQL interface with an online playground that allows you to test queries (figure 1). Click on "Show documentation explorer" in the top left corner to access the second interface (figure 2).
+You'll see **GraphiQL**, an interactive playground for testing queries and mutations. Click **"Show documentation explorer"** in the top-left corner to view all available queries and types.
 
 ![GraphQL Playground](/graphqlPlayground.webp)
 
-In this interface, you’ll see that some queries are already created. By default, `Wabe` provides three classes: one class for users (with various elements, including authentication), a `Session` class to manage user sessions, and the last one corresponds to `Roles`. Any roles you create (see the Schema section) will be automatically added to the Role class and included in the RoleEnum enum.
+Wabe comes with three default classes:
+
+1. **User** – Handles authentication and user data
+2. **Session** – Manages user sessions
+3. **Role** – Stores roles automatically added to `RoleEnum`
+
+For each class you define, Wabe automatically generates **2 queries and 6 mutations** to interact with your data.
 
 ![GraphQL Playground with all default resolvers](/graphqlPlayground2.webp)
-
-For each class you define, two queries and six mutations will be automatically generated to allow you to interact with your data. This will be explained in more detail in the Schema section.

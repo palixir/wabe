@@ -9,9 +9,9 @@
     "preview": "rspress preview"
   },
   "dependencies": {
-    "rspress": "1.45.6",
     "@heroui/react": "2.6.13",
-    "@heroicons/react": "2.2.0"
+    "lucide-react": "0.544.0",
+    "rspress": "1.45.6"
   },
   "devDependencies": {
     "postcss": "8.4.49",

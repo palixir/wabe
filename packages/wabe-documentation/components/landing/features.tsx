@@ -1,105 +1,104 @@
-import { CircleStackIcon } from '@heroicons/react/24/outline'
-import { BeakerIcon } from '@heroicons/react/24/outline'
 import {
-  ShieldCheckIcon,
-  EnvelopeIcon,
-  DocumentIcon,
-  CpuChipIcon,
-  LockClosedIcon,
-} from '@heroicons/react/24/outline'
+  Database,
+  Beaker,
+  ShieldCheck,
+  Mail,
+  FileText,
+  Lock,
+} from 'lucide-react'
 import { Button, Card, CardBody, CardHeader, Link } from '@heroui/react'
 
-const hours = [
+const features = [
   {
-    title: 'Database integration',
+    title: 'Database Integration',
     description:
-      'Connect to your preferred database and execute queries with a smooth and fully typed interface.',
+      'Connect to your preferred database and execute queries with a smooth, fully typed GraphQL interface.',
     docLink: '/documentation/database/index',
-    icon: <CircleStackIcon width={28} className="text-indigo-500" />,
+    icon: <Database className="w-7 h-7 text-indigo-600" />,
   },
   {
     title: 'Seamless Authentication',
     description:
-      'A fully integrated authentication system with multiple providers (email/password, Google, GitHub etc.), ready to secure access to your application.',
+      'Integrated authentication system with multiple providers (email/password, Google, GitHub, etc.) — ready to secure your app.',
     docLink: '/documentation/authentication',
-    icon: <LockClosedIcon width={28} className="text-blue-500" />,
+    icon: <Lock className="w-7 h-7 text-blue-600" />,
   },
   {
-    title: 'Role-Based Permissions & Backend Security',
+    title: 'Role-Based Permissions & Security',
     description:
-      'Role-based permissions, object-level access control, and backend security features to protect your data and users.',
+      'Fine-grained role-based permissions, object-level access control, and backend security to protect your data.',
     docLink: '/documentation/security',
-    icon: <ShieldCheckIcon width={28} className="text-green-500" />,
+    icon: <ShieldCheck className="w-7 h-7 text-green-600" />,
   },
   {
     title: 'Email Sending',
     description:
-      'Send emails with your preferred email provider (SendGrid, Mailgun, etc.).',
+      'Easily send emails via your preferred provider (SendGrid, Mailgun, Resend, etc.) with built-in integration.',
     docLink: '/documentation/email/index',
-    icon: <EnvelopeIcon width={28} className="text-yellow-500" />,
+    icon: <Mail className="w-7 h-7 text-yellow-600" />,
   },
   {
-    title: 'File storage ',
+    title: 'File Storage',
     description:
-      'Store files in your preferred cloud provider (AWS S3, Google Cloud Storage, etc.) easily.',
+      'Store and manage files in AWS S3, Google Cloud Storage, or any custom adapter effortlessly.',
     docLink: '/documentation/file/index',
-    icon: <DocumentIcon width={28} className="text-indigo-500" />,
+    icon: <FileText className="w-7 h-7 text-purple-600" />,
   },
   {
-    title: 'Schema Creation & Auto-generated CRUD API',
+    title: 'Schema & Auto-Generated API',
     description:
-      'Create fully typed schemas with advanced features like relations and custom scalars, while we generate a complete, fully typed CRUD API for you.',
-
-    icon: <BeakerIcon width={28} className="text-pink-500" />,
-  },
-  {
-    title: 'AI integration',
-    description:
-      'Interact with your AI models with a simple and powerful interface, while we handle the complexity of the underlying APIs.',
-    icon: <CpuChipIcon width={28} className="text-pink-500" />,
-    docLink: '/documentation/ai/index',
+      'Create advanced schemas (relations, scalars, enums) while Wabe generates a complete, fully typed CRUD API for you.',
+    icon: <Beaker className="w-7 h-7 text-pink-600" />,
   },
 ]
 
 const view = () => (
-  <section id="features" className="py-16 ">
+  <section id="features" className="py-20 bg-gray-50">
     <div className="max-w-screen-xl mx-auto px-6">
-      <div className="text-center space-y-4">
-        <h2 className="text-4xl md:text-5xl font-extrabold">
-          Everything in a single place
+      {/* Title Section */}
+      <div className="text-center space-y-4 mb-14">
+        <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900">
+          Everything you need in one place
         </h2>
-        <p className="text-lg text-gray-600">
-          Focus on what matters. Let us handle the essentials.
+        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          Skip the boilerplate. Wabe gives you a complete, production-ready
+          backend out of the box — so you can build faster.
         </p>
       </div>
 
-      <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        {hours.map(({ title, description, docLink, icon }) => (
+      {/* Features Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+        {features.map(({ title, description, docLink, icon }) => (
           <Card
             key={title}
-            className="border border-gray-700 rounded-xl hover:shadow-2xl transform hover:scale-105 transition-transform duration-300"
+            shadow="md"
+            className="rounded-2xl border border-gray-200 hover:shadow-xl transition-all duration-300 group"
           >
-            <CardHeader className="flex items-center gap-3 p-5">
-              <div className="flex items-center justify-center w-12 h-12 border-1 border-gray-700 rounded-full">
+            <CardHeader className="flex items-center gap-4 p-6">
+              <div className="flex items-center justify-center w-14 h-14 rounded-full bg-gray-100 group-hover:scale-110 group-hover:bg-gray-200 transition-transform duration-300">
                 {icon}
               </div>
-              <h3 className="text-lg font-semibold">{title}</h3>
+              <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
             </CardHeader>
-            <CardBody className="p-5 flex flex-col justify-between">
-              <p className="text-gray-600 text-sm">{description}</p>
-              <div className="flex mt-4">
-                {docLink && (
+            <CardBody className="px-6 pb-6 flex flex-col justify-between">
+              <p className="text-gray-600 text-sm leading-relaxed">
+                {description}
+              </p>
+              {docLink && (
+                <div className="mt-5">
                   <Button
                     as={Link}
-                    variant="flat"
-                    size="sm"
                     href={docLink}
+                    size="sm"
+                    color="primary"
+                    variant="flat"
                     target="_blank"
+                    className="font-medium"
                   >
-                    Docs
+                    Read Docs →
                   </Button>
-                )}
-              </div>
+                </div>
+              )}
             </CardBody>
           </Card>
         ))}

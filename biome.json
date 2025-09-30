@@ -6,12 +6,12 @@
       "**/*.js",
       "**/*.vue",
       "**/*.tsx",
-      "!**/dist/**",
+      "!**/dist",
       "**/*.json",
-      "!**/node_modules/**",
-      "!**/build/**",
-      "!**/generated/**",
-      "!**/.nuxt/**"
+      "!**/node_modules",
+      "!**/build",
+      "!**/generated",
+      "!**/.nuxt"
     ],
     "ignoreUnknown": true
   },
@@ -22,7 +22,8 @@
       "recommended": true,
       "suspicious": {
         "noExplicitAny": "off",
-        "useAwait": "error"
+        "useAwait": "error",
+        "noArrayIndexKey": "off"
       },
       "style": {
         "useTemplate": "off",
