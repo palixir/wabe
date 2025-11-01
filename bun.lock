@@ -58,7 +58,7 @@
       "version": "1.0.0",
       "dependencies": {
         "@heroui/react": "2.6.13",
-        "lucide-react": "^0.544.0",
+        "lucide-react": "0.544.0",
         "rspress": "1.45.6",
       },
       "devDependencies": {

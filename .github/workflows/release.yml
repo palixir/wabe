@@ -32,11 +32,6 @@ jobs:
               with:
                   fetch-depth: 0
 
-            - uses: actions/setup-node@v4
-              with:
-                  node-version: 22
-                  registry-url: 'https://registry.npmjs.org'
-
             - uses: oven-sh/setup-bun@v2
               with:
                   bun-version: latest
@@ -71,9 +66,9 @@ jobs:
                   echo "next_version=$next_version" >> $GITHUB_ENV
 
             # We publish on NPM before releasing on GitHub to avoid releasing a version that is not published
-            - run: npm publish --access=public --workspace=${{inputs.package}}
+            - run: cd packages/${{inputs.package}} && bun publish --access=publish
               env:
-                  NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+                  NPM_CONFIG_TOKEN: ${{secrets.NPM_TOKEN}}
 
             - name: Create tag
               uses: actions/github-script@v7
