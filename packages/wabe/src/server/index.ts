@@ -289,6 +289,7 @@ export class Wabe<T extends WabeTypes> {
           },
         },
         graphqlEndpoint: '/graphql',
+        isProduction: this.config.isProduction,
         context: (ctx) => ctx.wabe,
 
         // schema: this.config.graphqlSchema,
