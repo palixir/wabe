@@ -21,12 +21,14 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "p-retry": "5.1.2",
+    "p-retry": "7.1.0",
     "pg": "8.16.0"
   },
   "devDependencies": {
     "@types/pg": "8.11.11",
     "wabe": "workspace:*",
-    "wabe-postgres-launcher": "workspace:*"
+    "wabe-postgres-launcher": "workspace:*",
+    "uuid": "13.0.0",
+    "get-port": "7.1.0"
   }
 }

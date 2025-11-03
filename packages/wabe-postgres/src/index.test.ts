@@ -2,9 +2,9 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'bun:test'
 import { fail } from 'node:assert'
 import getPort from 'get-port'
 import { v4 as uuid } from 'uuid'
-import { notEmpty, Wabe, type WabeContext } from 'wabe'
 import { buildPostgresWhereQueryAndValues, PostgresAdapter } from '.'
 import { setupTests, closeTests } from '../utils/testHelper'
+import { notEmpty, Wabe, type WabeContext } from 'wabe'
 
 describe('Postgres adapter', () => {
   let postgresAdapter: PostgresAdapter<any>

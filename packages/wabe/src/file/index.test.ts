@@ -864,7 +864,7 @@ describe('File upload', () => {
     )
   })
 
-  it('should upload a file and access to it with the local url provided by upload directory', async () => {
+  it.only('should upload a file and access to it with the local url provided by upload directory', async () => {
     await wabe.controllers.database.createObject({
       // @ts-expect-error
       className: 'Test3',

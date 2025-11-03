@@ -13,17 +13,16 @@ import { type Hook, getDefaultHooks } from '../hooks'
 import { generateCodegen } from './generateCodegen'
 import { defaultAuthenticationMethods } from '../authentication/defaultAuthentication'
 import { Wobe, cors, rateLimit } from 'wobe'
-import { WobeGraphqlYogaPlugin } from 'wobe-graphql-yoga'
 import type { Context, CorsOptions, RateLimitOptions } from 'wobe'
 import type { WabeContext } from './interface'
 import { initializeRoles } from '../authentication/roles'
 import type { EmailConfig } from '../email'
 import { EmailController } from '../email/EmailController'
-import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection'
 import { FileController } from '../file/FileController'
 import { defaultSessionHandler } from './defaultHandlers'
 import type { CronConfig } from '../cron'
 import type { FileConfig } from '../file'
+import { WobeGraphqlApolloPlugin } from 'wobe-graphql-apollo'
 
 type SecurityConfig = {
   corsOptions?: CorsOptions
@@ -33,6 +32,8 @@ type SecurityConfig = {
 
 export * from './interface'
 export * from './routes'
+
+export const defaultRoles = ['DashboardAdmin']
 
 export interface WabeConfig<T extends WabeTypes> {
   port: number
@@ -147,8 +148,7 @@ export class Wabe<T extends WabeTypes> {
 
   loadRoleEnum() {
     const roles = [
-      // Default Dashboard Admin role
-      'DashboardAdmin',
+      ...defaultRoles,
       ...(this.config.authentication?.roles || []),
     ]
 
@@ -274,18 +274,30 @@ export class Wabe<T extends WabeTypes> {
     // Set the wabe context
     this.server.beforeHandler(
       // @ts-expect-error
-      this.config.authentication.sessionHandler || defaultSessionHandler(this),
+      this.config.authentication?.sessionHandler || defaultSessionHandler(this),
     )
 
-    this.server.usePlugin(
-      WobeGraphqlYogaPlugin({
-        schema: this.config.graphqlSchema,
-        maskedErrors:
-          this.config.security?.hideSensitiveErrorMessage ||
-          this.config.isProduction,
+    await this.server.usePlugin(
+      await WobeGraphqlApolloPlugin({
+        options: {
+          schema: this.config.graphqlSchema,
+          formatError: (err) => {
+            if (this.config.security?.hideSensitiveErrorMessage)
+              return { message: 'Unexpected error' }
+
+            return err
+          },
+        },
         graphqlEndpoint: '/graphql',
-        plugins: this.config.isProduction ? [useDisableIntrospection()] : [],
-        context: async (ctx): Promise<WabeContext<T>> => ctx.wabe,
+        context: (ctx) => ctx.wabe,
+
+        // schema: this.config.graphqlSchema,
+        // maskedErrors:
+        //   this.config.security?.hideSensitiveErrorMessage ||
+        //   this.config.isProduction,
+        // graphqlEndpoint: '/graphql',
+        // plugins: this.config.isProduction ? [useDisableIntrospection()] : [],
+        // context: async (ctx): Promise<WabeContext<T>> => ctx.wabe,
       }),
     )
 
