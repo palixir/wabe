@@ -22,7 +22,8 @@ import { FileController } from '../file/FileController'
 import { defaultSessionHandler } from './defaultHandlers'
 import type { CronConfig } from '../cron'
 import type { FileConfig } from '../file'
-import { WobeGraphqlApolloPlugin } from 'wobe-graphql-apollo'
+import { WobeGraphqlYogaPlugin } from 'wobe-graphql-yoga'
+import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection'
 
 type SecurityConfig = {
   corsOptions?: CorsOptions
@@ -278,27 +279,14 @@ export class Wabe<T extends WabeTypes> {
     )
 
     await this.server.usePlugin(
-      await WobeGraphqlApolloPlugin({
-        options: {
-          schema: this.config.graphqlSchema,
-          formatError: (err) => {
-            if (this.config.security?.hideSensitiveErrorMessage)
-              return { message: 'Unexpected error' }
-
-            return err
-          },
-        },
+      WobeGraphqlYogaPlugin({
+        schema: this.config.graphqlSchema,
+        maskedErrors:
+          this.config.security?.hideSensitiveErrorMessage ||
+          this.config.isProduction,
         graphqlEndpoint: '/graphql',
-        isProduction: this.config.isProduction,
-        context: (ctx) => ctx.wabe,
-
-        // schema: this.config.graphqlSchema,
-        // maskedErrors:
-        //   this.config.security?.hideSensitiveErrorMessage ||
-        //   this.config.isProduction,
-        // graphqlEndpoint: '/graphql',
-        // plugins: this.config.isProduction ? [useDisableIntrospection()] : [],
-        // context: async (ctx): Promise<WabeContext<T>> => ctx.wabe,
+        plugins: this.config.isProduction ? [useDisableIntrospection()] : [],
+        context: async (ctx): Promise<WabeContext<T>> => ctx.wabe,
       }),
     )
 

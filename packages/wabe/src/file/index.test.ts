@@ -177,7 +177,7 @@ describe('File upload', () => {
     expect(result[0].file.url).toEqual(`http://127.0.0.1:${port}/bucket/a`)
   })
 
-  it('should throw an error if no fil ter is provided', async () => {
+  it('should throw an error if no file adapter is provided', async () => {
     const previousFileController = wabe.controllers.file
     // @ts-expect-error
     wabe.controllers.file = null
@@ -197,6 +197,7 @@ describe('File upload', () => {
 
     formData.append('0', new File(['a'], 'a.text', { type: 'text/plain' }))
 
+    console.log('before fetch')
     const res = await fetch(`http://127.0.0.1:${port}/graphql`, {
       method: 'POST',
       body: formData,
@@ -274,7 +275,27 @@ describe('File upload', () => {
     formData.append(
       'operations',
       JSON.stringify({
-        query: gql`mutation ($file: File!, $file2: File!) {createTest3s(input: {fields: [{file: {file:$file}}, {file: {file:$file2}}]}){edges {node {id, file {name}}}}}`,
+        query: gql`
+					mutation ($file: File!, $file2: File!) {
+						createTest3s(
+							input: {
+								fields: [
+									{ file: { file: $file } }
+									{ file: { file: $file2 } }
+								]
+							}
+						) {
+							edges {
+								node {
+									id
+									file {
+										name
+									}
+								}
+							}
+						}
+					}
+				`,
         variables: { file: null },
       }),
     )
@@ -419,24 +440,22 @@ describe('File upload', () => {
 
     const anonymousClient = getAnonymousClient(port)
 
-    const { test3s } = await anonymousClient.request<any>(
-      gql`
-        query {
-          test3s {
-            edges {
-              node {
-                id
-                file {
-                  name
-                  url
-                  urlGeneratedAt
-                }
-              }
-            }
-          }
-        }
-      `,
-    )
+    const { test3s } = await anonymousClient.request<any>(gql`
+			query {
+				test3s {
+					edges {
+						node {
+							id
+							file {
+								name
+								url
+								urlGeneratedAt
+							}
+						}
+					}
+				}
+			}
+		`)
 
     expect(test3s.edges[0].node.file.name).toEqual('a.text')
     expect(test3s.edges[0].node.file.url).toEqual(
@@ -468,24 +487,22 @@ describe('File upload', () => {
 
     const anonymousClient = getAnonymousClient(port)
 
-    const { test3s } = await anonymousClient.request<any>(
-      gql`
-        query {
-          test3s {
-            edges {
-              node {
-                id
-                file {
-                  name
-                  url
-                  urlGeneratedAt
-                }
-              }
-            }
-          }
-        }
-      `,
-    )
+    const { test3s } = await anonymousClient.request<any>(gql`
+			query {
+				test3s {
+					edges {
+						node {
+							id
+							file {
+								name
+								url
+								urlGeneratedAt
+							}
+						}
+					}
+				}
+			}
+		`)
 
     expect(test3s.edges[0].node.file.name).toEqual('a.text')
     expect(test3s.edges[0].node.file.url).toEqual(
@@ -495,24 +512,22 @@ describe('File upload', () => {
 
     expect(spyFileDevAdapterReadFile).toHaveBeenCalledTimes(1)
 
-    await anonymousClient.request<any>(
-      gql`
-        query {
-          test3s {
-            edges {
-              node {
-                id
-                file {
-                  name
-                  url
-                  urlGeneratedAt
-                }
-              }
-            }
-          }
-        }
-      `,
-    )
+    await anonymousClient.request<any>(gql`
+			query {
+				test3s {
+					edges {
+						node {
+							id
+							file {
+								name
+								url
+								urlGeneratedAt
+							}
+						}
+					}
+				}
+			}
+		`)
 
     // Again once because the cache is not expired
     expect(spyFileDevAdapterReadFile).toHaveBeenCalledTimes(1)
@@ -541,24 +556,22 @@ describe('File upload', () => {
 
     const anonymousClient = getAnonymousClient(port)
 
-    const { test3s } = await anonymousClient.request<any>(
-      gql`
-        query {
-          test3s {
-            edges {
-              node {
-                id
-                file {
-                  name
-                  url
-                  urlGeneratedAt
-                }
-              }
-            }
-          }
-        }
-      `,
-    )
+    const { test3s } = await anonymousClient.request<any>(gql`
+			query {
+				test3s {
+					edges {
+						node {
+							id
+							file {
+								name
+								url
+								urlGeneratedAt
+							}
+						}
+					}
+				}
+			}
+		`)
 
     expect(test3s.edges[0].node.file.name).toEqual('a.text')
     expect(test3s.edges[0].node.file.url).toEqual(
@@ -590,24 +603,22 @@ describe('File upload', () => {
       body: formData2,
     })
 
-    await anonymousClient.request<any>(
-      gql`
-        query {
-          test3s {
-            edges {
-              node {
-                id
-                file {
-                  name
-                  url
-                  urlGeneratedAt
-                }
-              }
-            }
-          }
-        }
-      `,
-    )
+    await anonymousClient.request<any>(gql`
+			query {
+				test3s {
+					edges {
+						node {
+							id
+							file {
+								name
+								url
+								urlGeneratedAt
+							}
+						}
+					}
+				}
+			}
+		`)
 
     // Again once because the file was updated
     expect(spyFileDevAdapterReadFile).toHaveBeenCalledTimes(2)
@@ -636,24 +647,22 @@ describe('File upload', () => {
 
     const anonymousClient = getAnonymousClient(port)
 
-    const { test3s } = await anonymousClient.request<any>(
-      gql`
-        query {
-          test3s {
-            edges {
-              node {
-                id
-                file {
-                  name
-                  url
-                  urlGeneratedAt
-                }
-              }
-            }
-          }
-        }
-      `,
-    )
+    const { test3s } = await anonymousClient.request<any>(gql`
+			query {
+				test3s {
+					edges {
+						node {
+							id
+							file {
+								name
+								url
+								urlGeneratedAt
+							}
+						}
+					}
+				}
+			}
+		`)
 
     expect(test3s.edges[0].node.file.name).toEqual('a.text')
     expect(test3s.edges[0].node.file.url).toEqual(
@@ -684,24 +693,22 @@ describe('File upload', () => {
       id: idOfCreatedObject,
     })
 
-    await anonymousClient.request<any>(
-      gql`
-        query {
-          test3s {
-            edges {
-              node {
-                id
-                file {
-                  name
-                  url
-                  urlGeneratedAt
-                }
-              }
-            }
-          }
-        }
-      `,
-    )
+    await anonymousClient.request<any>(gql`
+			query {
+				test3s {
+					edges {
+						node {
+							id
+							file {
+								name
+								url
+								urlGeneratedAt
+							}
+						}
+					}
+				}
+			}
+		`)
 
     expect(spyFileDevAdapterReadFile).toHaveBeenCalledTimes(1)
   })
@@ -748,24 +755,22 @@ describe('File upload', () => {
       `,
     )
 
-    const { test3s } = await anonymousClient.request<any>(
-      gql`
-        query {
-          test3s {
-            edges {
-              node {
-                id
-                file {
-                  name
-                  url
-                  urlGeneratedAt
-                }
-              }
-            }
-          }
-        }
-      `,
-    )
+    const { test3s } = await anonymousClient.request<any>(gql`
+			query {
+				test3s {
+					edges {
+						node {
+							id
+							file {
+								name
+								url
+								urlGeneratedAt
+							}
+						}
+					}
+				}
+			}
+		`)
 
     expect(test3s.edges.length).toEqual(0)
 
@@ -823,41 +828,45 @@ describe('File upload', () => {
   it('should upload a file providing an url without File scalar', async () => {
     const anonymousClient = getAnonymousClient(port)
 
-    await anonymousClient.request<any>(
-      gql`
-        mutation {
-          createTest3(input: {fields: {file: {url: "https://palixir.github.io/wabe//assets/logo.png"}}}) {
-            test3 {
-              id
-              file {
-                name
-                url
-                urlGeneratedAt
-              }
-            }
-          }
-        }
-      `,
-    )
+    await anonymousClient.request<any>(gql`
+			mutation {
+				createTest3(
+					input: {
+						fields: {
+							file: {
+								url: "https://palixir.github.io/wabe//assets/logo.png"
+							}
+						}
+					}
+				) {
+					test3 {
+						id
+						file {
+							name
+							url
+							urlGeneratedAt
+						}
+					}
+				}
+			}
+		`)
 
-    const { test3s } = await anonymousClient.request<any>(
-      gql`
-        query {
-          test3s {
-            edges {
-              node {
-                id
-                file {
-                  name
-                  url
-                  urlGeneratedAt
-                }
-              }
-            }
-          }
-        }
-      `,
-    )
+    const { test3s } = await anonymousClient.request<any>(gql`
+			query {
+				test3s {
+					edges {
+						node {
+							id
+							file {
+								name
+								url
+								urlGeneratedAt
+							}
+						}
+					}
+				}
+			}
+		`)
 
     expect(test3s.edges[0].node.file.url).toEqual(
       'https://palixir.github.io/wabe//assets/logo.png',

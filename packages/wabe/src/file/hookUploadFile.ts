@@ -19,7 +19,10 @@ const handleFile = async (hookObject: HookObject<any, any>) => {
       if (!file && !url) return
 
       if (url) {
-        hookObject.upsertNewData(keyName, { url, isPresignedUrl: false })
+        hookObject.upsertNewData(keyName, {
+          url,
+          isPresignedUrl: false,
+        })
         return
       }
 

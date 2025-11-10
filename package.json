@@ -1,29 +1,29 @@
 {
-  "name": "main",
-  "version": "1.0.0",
-  "devDependencies": {
-    "@biomejs/biome": "2.2.4",
-    "lefthook": "1.7.18",
-    "typescript": "5.8.2",
-    "tcp-port-used": "1.0.2",
-    "@types/tcp-port-used": "1.0.4",
-    "@types/bun": "latest"
-  },
-  "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
-  "scripts": {
-    "clean": "git clean -fdX",
-    "build": "CI_BUILD=true bun scripts/build.ts",
-    "ci": "bun run scripts/ci.ts",
-    "format": "bun --filter './packages/*' format && biome format --write ./*.json && biome format --write ./scripts/*.ts",
-    "lint": "bun --filter './packages/*' lint",
-    "squash": "base_branch=${1:-main} && git fetch origin $base_branch && branch=$(git branch --show-current) && git checkout $branch && git reset $(git merge-base origin/$base_branch $branch) && git add -A"
-  },
-  "trustedDependencies": [
-    "@biomejs/biome",
-    "lefthook",
-    "mongodb-memory-server"
-  ]
+	"name": "main",
+	"version": "1.0.0",
+	"devDependencies": {
+		"@biomejs/biome": "2.2.4",
+		"lefthook": "1.7.18",
+		"typescript": "5.8.2",
+		"tcp-port-used": "1.0.2",
+		"@types/tcp-port-used": "1.0.4",
+		"@types/bun": "latest"
+	},
+	"private": true,
+	"workspaces": [
+		"packages/*"
+	],
+	"scripts": {
+		"clean": "rm -rf node_modules && git clean -fdXq",
+		"build": "CI_BUILD=true bun scripts/build.ts",
+		"ci": "bun run scripts/ci.ts",
+		"format": "bun --filter './packages/*' format && biome format --write ./*.json && biome format --write ./scripts/*.ts",
+		"lint": "bun --filter './packages/*' lint",
+		"squash": "base_branch=${1:-main} && git fetch origin $base_branch && branch=$(git branch --show-current) && git checkout $branch && git reset $(git merge-base origin/$base_branch $branch) && git add -A"
+	},
+	"trustedDependencies": [
+		"@biomejs/biome",
+		"lefthook",
+		"mongodb-memory-server"
+	]
 }
