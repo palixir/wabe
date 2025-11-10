@@ -49,14 +49,14 @@ describe('Security tests', () => {
     const userClient = getUserClient(port, invalidToken)
 
     const res = await userClient.request<any>(gql`
-      query me {
-          me {
-            user {
-                id
-            }
-        }
-      }
-    `)
+			query me {
+				me {
+					user {
+						id
+					}
+				}
+			}
+		`)
 
     expect(res.me.user).toBeNull()
 
@@ -86,12 +86,12 @@ describe('Security tests', () => {
 
     expect(
       client.request(gql`
-      query tests {
-        tests {
-            totalCount
-        }
-      }
-    `),
+				query tests {
+					tests {
+						totalCount
+					}
+				}
+			`),
     ).rejects.toThrow('Permission denied to read class Test')
 
     await closeTests(wabe)
@@ -121,12 +121,12 @@ describe('Security tests', () => {
 
     expect(
       client.request(gql`
-      query tests {
-        tests {
-            totalCount
-        }
-      }
-    `),
+				query tests {
+					tests {
+						totalCount
+					}
+				}
+			`),
     ).rejects.toThrow('Permission denied to read class Test')
 
     await closeTests(wabe)
@@ -170,14 +170,14 @@ describe('Security tests', () => {
     })
 
     const res = await userClient.request<any>(gql`
-     mutation createTest {
-         createTest(input: {fields: {name: "Test"}}) {
-             test {
-                 id
-             }
-         }
-     }
-     `)
+			mutation createTest {
+				createTest(input: { fields: { name: "Test" } }) {
+					test {
+						id
+					}
+				}
+			}
+		`)
 
     const testId = res.createTest.test.id
 
@@ -195,14 +195,16 @@ describe('Security tests', () => {
 
     expect(
       userClient.request(gql`
-        mutation createTest {
-            createTest(input: {fields: {acl: {users: [{userId: "2"}]}}}) {
-                test {
-                    id
-                }
-            }
-        }
-        `),
+				mutation createTest {
+					createTest(
+						input: { fields: { acl: { users: [{ userId: "2" }] } } }
+					) {
+						test {
+							id
+						}
+					}
+				}
+			`),
     ).rejects.toThrow('You are not authorized to create this field')
 
     await closeTests(wabe)
@@ -356,14 +358,14 @@ describe('Security tests', () => {
     })
 
     const res = await userClient.request<any>(gql`
-        mutation createTest1{
-            createTest1(input: {fields: {name: "test1"}}) {
-                test1 {
-                    id
-                }
-            }
-        }
-    `)
+			mutation createTest1 {
+				createTest1(input: { fields: { name: "test1" } }) {
+					test1 {
+						id
+					}
+				}
+			}
+		`)
 
     expect(
       userClient.request(gql`
@@ -379,16 +381,18 @@ describe('Security tests', () => {
 
     expect(
       userClient.request(gql`
-        mutation deleteTest1s{
-            deleteTest1s(input: {where: {name: {equalTo: "test1"}}}) {
-                edges {
-                    node {
-                        id
-                    }
-                }
-            }
-        }
-      `),
+				mutation deleteTest1s {
+					deleteTest1s(
+						input: { where: { name: { equalTo: "test1" } } }
+					) {
+						edges {
+							node {
+								id
+							}
+						}
+					}
+				}
+			`),
     ).rejects.toThrow('Permission denied to read class Test1')
 
     await closeTests(wabe)
@@ -432,14 +436,14 @@ describe('Security tests', () => {
     })
 
     const res = await userClient.request<any>(gql`
-        mutation createTest1{
-            createTest1(input: {fields: {name: "test1"}}) {
-                test1 {
-                    id
-                }
-            }
-        }
-        `)
+			mutation createTest1 {
+				createTest1(input: { fields: { name: "test1" } }) {
+					test1 {
+						id
+					}
+				}
+			}
+		`)
 
     expect(
       userClient.request(gql`
@@ -455,16 +459,21 @@ describe('Security tests', () => {
 
     expect(
       userClient.request(gql`
-        mutation updateTest1s{
-            updateTest1s(input: {where: {name: {equalTo: "test1"}}, fields: {name: "test1"}}) {
-                edges {
-                    node {
-                        id
-                    }
-                }
-            }
-        }
-      `),
+				mutation updateTest1s {
+					updateTest1s(
+						input: {
+							where: { name: { equalTo: "test1" } }
+							fields: { name: "test1" }
+						}
+					) {
+						edges {
+							node {
+								id
+							}
+						}
+					}
+				}
+			`),
     ).rejects.toThrow('Permission denied to read class Test1')
 
     await closeTests(wabe)
@@ -528,14 +537,20 @@ describe('Security tests', () => {
 
     expect(
       userClient.request<any>(gql`
-        mutation createTest2{
-            createTest2(input: {fields: {field1: {createAndAdd: [{name: "toto"}]}}}){
-                test2{
-                    id
-                }
-            }
-        }
-    `),
+				mutation createTest2 {
+					createTest2(
+						input: {
+							fields: {
+								field1: { createAndAdd: [{ name: "toto" }] }
+							}
+						}
+					) {
+						test2 {
+							id
+						}
+					}
+				}
+			`),
     ).rejects.toThrow('Permission denied to create class Test1')
 
     await closeTests(wabe)
@@ -599,14 +614,20 @@ describe('Security tests', () => {
 
     expect(
       userClient.request<any>(gql`
-        mutation createTest2{
-            createTest2(input: {fields: {field2: {createAndLink: {name: "toto"}}}}){
-                test2{
-                    id
-                }
-            }
-        }
-    `),
+				mutation createTest2 {
+					createTest2(
+						input: {
+							fields: {
+								field2: { createAndLink: { name: "toto" } }
+							}
+						}
+					) {
+						test2 {
+							id
+						}
+					}
+				}
+			`),
     ).rejects.toThrow('Permission denied to create class Test1')
 
     await closeTests(wabe)
@@ -662,14 +683,18 @@ describe('Security tests', () => {
     rootClient = getGraphqlClient(port)
 
     await rootClient.request<any>(gql`
-        mutation createTest2{
-            createTest2(input: {fields: {field1: {createAndAdd: [{name: "toto"}]}}}){
-                test2{
-                    id
-                }
-            }
-        }
-    `)
+			mutation createTest2 {
+				createTest2(
+					input: {
+						fields: { field1: { createAndAdd: [{ name: "toto" }] } }
+					}
+				) {
+					test2 {
+						id
+					}
+				}
+			}
+		`)
 
     const { userClient } = await createUserAndUpdateRole({
       anonymousClient: client,
@@ -680,23 +705,23 @@ describe('Security tests', () => {
 
     expect(
       userClient.request(gql`
-      query test2s{
-          test2s {
-              edges {
-                  node {
-                      id
-                      field1{
-                          edges {
-                              node {
-                                  id
-                              }
-                          }
-                      }
-                  }
-              }
-          }
-      }
-      `),
+				query test2s {
+					test2s {
+						edges {
+							node {
+								id
+								field1 {
+									edges {
+										node {
+											id
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			`),
     ).rejects.toThrow('Permission denied to read class Test1')
 
     await closeTests(wabe)
@@ -752,14 +777,18 @@ describe('Security tests', () => {
     rootClient = getGraphqlClient(port)
 
     await rootClient.request<any>(gql`
-        mutation createTest2{
-            createTest2(input: {fields: {field2: {createAndLink: {name: "toto"}}}}){
-                test2{
-                    id
-                }
-            }
-        }
-    `)
+			mutation createTest2 {
+				createTest2(
+					input: {
+						fields: { field2: { createAndLink: { name: "toto" } } }
+					}
+				) {
+					test2 {
+						id
+					}
+				}
+			}
+		`)
 
     const { userClient } = await createUserAndUpdateRole({
       anonymousClient: client,
@@ -770,19 +799,19 @@ describe('Security tests', () => {
 
     expect(
       userClient.request(gql`
-      query test2s{
-          test2s {
-              edges {
-                  node {
-                      id
-                      field2{
-                          id
-                      }
-                  }
-              }
-          }
-      }
-      `),
+				query test2s {
+					test2s {
+						edges {
+							node {
+								id
+								field2 {
+									id
+								}
+							}
+						}
+					}
+				}
+			`),
     ).rejects.toThrow('Permission denied to read class Test1')
 
     await closeTests(wabe)
@@ -841,14 +870,14 @@ describe('Security tests', () => {
 
     expect(
       adminClient.request<any>(gql`
-      mutation createRole {
-        createRole(input: { fields: {name: "Admin2"} }) {
-            role {
-             id
-            }
-        }
-      }
-    `),
+				mutation createRole {
+					createRole(input: { fields: { name: "Admin2" } }) {
+						role {
+							id
+						}
+					}
+				}
+			`),
     ).rejects.toThrowError('Permission denied to create class Role')
 
     await closeTests(wabe)
@@ -868,25 +897,27 @@ describe('Security tests', () => {
 
     expect(
       adminClient.request<any>(gql`
-      mutation create_Session {
-        create_Session(input: { fields: {accessToken: "token" }}) {
-            _session {
-             id
-            }
-        }
-      }
-    `),
+				mutation create_Session {
+					create_Session(
+						input: { fields: { accessToken: "token" } }
+					) {
+						_session {
+							id
+						}
+					}
+				}
+			`),
     ).rejects.toThrowError('Permission denied to create class _Session')
 
     const res = await adminClient.request<any>(gql`
-        query me {
-            me {
-                user {
-                    id
-                }
-            }
-        }
-    `)
+			query me {
+				me {
+					user {
+						id
+					}
+				}
+			}
+		`)
 
     const session = await wabe.controllers.database.createObject({
       className: '_Session',
@@ -981,14 +1012,14 @@ describe('Security tests', () => {
 
     expect(
       adminClient.request(gql`
-      mutation createTest1{
-          createTest1(input: {fields: {name: "test1"}}) {
-              test1 {
-                  id
-              }
-          }
-      }
-      `),
+				mutation createTest1 {
+					createTest1(input: { fields: { name: "test1" } }) {
+						test1 {
+							id
+						}
+					}
+				}
+			`),
     ).resolves.toEqual(expect.anything())
 
     await wabe.controllers.database.updateObjects({
@@ -1007,14 +1038,14 @@ describe('Security tests', () => {
 
     expect(
       adminClient.request(gql`
-      mutation createTest1{
-          createTest1(input: {fields: {name: "test1"}}) {
-              test1 {
-                  id
-              }
-          }
-      }
-      `),
+				mutation createTest1 {
+					createTest1(input: { fields: { name: "test1" } }) {
+						test1 {
+							id
+						}
+					}
+				}
+			`),
     ).rejects.toThrow('Permission denied to create class Test1')
 
     await closeTests(wabe)
@@ -1053,14 +1084,14 @@ describe('Security tests', () => {
 
     expect(
       adminClient.request(gql`
-      mutation createTest1{
-          createTest1(input: {fields: {name: "test1"}}) {
-              test1 {
-                  id
-              }
-          }
-      }
-      `),
+				mutation createTest1 {
+					createTest1(input: { fields: { name: "test1" } }) {
+						test1 {
+							id
+						}
+					}
+				}
+			`),
     ).resolves.toEqual(expect.anything())
 
     await wabe.controllers.database.updateObjects({
@@ -1078,14 +1109,14 @@ describe('Security tests', () => {
 
     expect(
       adminClient.request(gql`
-      mutation createTest1{
-          createTest1(input: {fields: {name: "test1"}}) {
-              test1 {
-                  id
-              }
-          }
-      }
-      `),
+				mutation createTest1 {
+					createTest1(input: { fields: { name: "test1" } }) {
+						test1 {
+							id
+						}
+					}
+				}
+			`),
     ).resolves.toEqual(expect.anything())
 
     await closeTests(wabe)
@@ -1130,27 +1161,27 @@ describe('Security tests', () => {
     })
 
     await userClient.request<any>(gql`
-    	mutation createTest4{
-    		createTest4(input:{fields:{name: "test"}}){
-    			test4{
-    				id
-    			}
-    		}
-    	}
-    `)
+			mutation createTest4 {
+				createTest4(input: { fields: { name: "test" } }) {
+					test4 {
+						id
+					}
+				}
+			}
+		`)
 
     const res = await userClient2.request<any>(gql`
-          query test4s{
-            test4s {
-              edges {
-                node {
-                  id
-                  name
-                }
-              }
-            }
-          }
-        `)
+			query test4s {
+				test4s {
+					edges {
+						node {
+							id
+							name
+						}
+					}
+				}
+			}
+		`)
 
     expect(res.test4s.edges.length).toEqual(1)
     expect(res.test4s.edges[0].node.name).toEqual('test')
@@ -1197,27 +1228,27 @@ describe('Security tests', () => {
     })
 
     await userClient.request<any>(gql`
-    	mutation createTest4{
-    		createTest4(input:{fields:{name: "test"}}){
-    			test4{
-    				id
-    			}
-    		}
-    	}
-    `)
+			mutation createTest4 {
+				createTest4(input: { fields: { name: "test" } }) {
+					test4 {
+						id
+					}
+				}
+			}
+		`)
 
     const res = await userClient2.request<any>(gql`
-          query test4s{
-            test4s {
-              edges {
-                node {
-                  id
-                  name
-                }
-              }
-            }
-          }
-        `)
+			query test4s {
+				test4s {
+					edges {
+						node {
+							id
+							name
+						}
+					}
+				}
+			}
+		`)
 
     expect(res.test4s.edges.length).toEqual(1)
     expect(res.test4s.edges[0].node.name).toEqual('test')
@@ -1272,38 +1303,38 @@ describe('Security tests', () => {
     })
 
     const res = await userClient.request<any>(gql`
-    	mutation createTest3{
-    		createTest3(input:{fields:{name: "test"}}){
-    			test3{
-    				id
-    			}
-    		}
-    	}
-    `)
+			mutation createTest3 {
+				createTest3(input: { fields: { name: "test" } }) {
+					test3 {
+						id
+					}
+				}
+			}
+		`)
 
     const res2 = await userClient2.request<any>(gql`
-          query test3s{
-            test3s {
-              edges {
-                node {
-                  id
-                }
-              }
-            }
-          }
-        `)
+			query test3s {
+				test3s {
+					edges {
+						node {
+							id
+						}
+					}
+				}
+			}
+		`)
 
     const res3 = await getAnonymousClient(port).request<any>(gql`
-        query test3s{
-          test3s {
-            edges {
-              node {
-                id
-              }
-            }
-          }
-        }
-      `)
+			query test3s {
+				test3s {
+					edges {
+						node {
+							id
+						}
+					}
+				}
+			}
+		`)
 
     expect(res.createTest3.test3.id).toBeDefined()
     expect(res2.test3s.edges.length).toEqual(0)
@@ -1347,25 +1378,25 @@ describe('Security tests', () => {
     expect(
       userClient.request<any>(gql`
 				mutation createTest2 {
-					createTest2(input:{fields:{name: "test"}}){
-						test2{
+					createTest2(input: { fields: { name: "test" } }) {
+						test2 {
 							id
 						}
 					}
 				}
-		`),
+			`),
     ).rejects.toThrow('Permission denied to create class Test2')
 
     expect(() =>
       rootClient.request<any>(gql`
 				mutation createTest2 {
-					createTest2(input:{fields:{name: "test"}}){
-						test2{
+					createTest2(input: { fields: { name: "test" } }) {
+						test2 {
 							id
 						}
 					}
 				}
-		`),
+			`),
     ).not.toThrow()
 
     await closeTests(wabe)
@@ -1436,13 +1467,13 @@ describe('Security tests', () => {
     })
 
     const objectCreated = await rootClient.request<any>(gql`
-				mutation createTest {
-					createTest(input:{fields:{name: "test"}}){
-						test{
-							id
-						}
+			mutation createTest {
+				createTest(input: { fields: { name: "test" } }) {
+					test {
+						id
 					}
 				}
+			}
 		`)
 
     const objectId = objectCreated.createTest.test.id
@@ -1464,16 +1495,16 @@ describe('Security tests', () => {
 		`)
 
     const res = await userClient.request<any>(gql`
-				query tests{
-					tests{
-						edges {
-							node {
-								id
-							}
+			query tests {
+				tests {
+					edges {
+						node {
+							id
 						}
 					}
 				}
-			`)
+			}
+		`)
 
     expect(res.tests.edges.length).toEqual(0)
 
@@ -1545,13 +1576,13 @@ describe('Security tests', () => {
     })
 
     const objectCreated = await rootClient.request<any>(gql`
-				mutation createTest {
-					createTest(input:{fields:{name: "test"}}){
-						test{
-							id
-						}
+			mutation createTest {
+				createTest(input: { fields: { name: "test" } }) {
+					test {
+						id
 					}
 				}
+			}
 		`)
 
     const objectId = objectCreated.createTest.test.id
@@ -1652,13 +1683,13 @@ describe('Security tests', () => {
     })
 
     const objectCreated = await rootClient.request<any>(gql`
-				mutation createTest {
-					createTest(input:{fields:{name: "test"}}){
-						test{
-							id
-						}
+			mutation createTest {
+				createTest(input: { fields: { name: "test" } }) {
+					test {
+						id
 					}
 				}
+			}
 		`)
 
     const objectId = objectCreated.createTest.test.id
@@ -1759,13 +1790,13 @@ describe('Security tests', () => {
     })
 
     const objectCreated = await rootClient.request<any>(gql`
-				mutation createTest {
-					createTest(input:{fields:{name: "test"}}){
-						test{
-							id
-						}
+			mutation createTest {
+				createTest(input: { fields: { name: "test" } }) {
+					test {
+						id
 					}
 				}
+			}
 		`)
 
     const objectId = objectCreated.createTest.test.id
@@ -1866,13 +1897,13 @@ describe('Security tests', () => {
     })
 
     const objectCreated = await rootClient.request<any>(gql`
-				mutation createTest {
-					createTest(input:{fields:{name: "test"}}){
-						test{
-							id
-						}
+			mutation createTest {
+				createTest(input: { fields: { name: "test" } }) {
+					test {
+						id
 					}
 				}
+			}
 		`)
 
     const objectId = objectCreated.createTest.test.id
@@ -1894,16 +1925,16 @@ describe('Security tests', () => {
 		`)
 
     const res = await userClient.request<any>(gql`
-				query tests{
-					tests{
-						edges {
-							node {
-								id
-							}
+			query tests {
+				tests {
+					edges {
+						node {
+							id
 						}
 					}
 				}
-			`)
+			}
+		`)
 
     expect(res.tests.edges.length).toEqual(1)
 
@@ -1975,16 +2006,23 @@ describe('Security tests', () => {
     })
 
     const objectCreated = await rootClient.request<any>(gql`
-				mutation createTest {
-					createTest(input:{fields:{name: "test", pointer: {createAndLink: {name: "tata"}}}}){
-						test{
+			mutation createTest {
+				createTest(
+					input: {
+						fields: {
+							name: "test"
+							pointer: { createAndLink: { name: "tata" } }
+						}
+					}
+				) {
+					test {
+						id
+						pointer {
 							id
-							pointer {
-								id
-							}
 						}
 					}
 				}
+			}
 		`)
 
     const pointerId = objectCreated.createTest.test.pointer.id
@@ -2024,8 +2062,8 @@ describe('Security tests', () => {
 
     expect(
       userClient.request<any>(gql`
-				query tests{
-					tests{
+				query tests {
+					tests {
 						edges {
 							node {
 								id
@@ -2039,8 +2077,8 @@ describe('Security tests', () => {
 
     expect(
       userClient.request<any>(gql`
-				query tests{
-					tests{
+				query tests {
+					tests {
 						edges {
 							node {
 								id
@@ -2123,20 +2161,27 @@ describe('Security tests', () => {
     })
 
     const objectCreated = await rootClient.request<any>(gql`
-				mutation createTest {
-					createTest(input:{fields:{name: "test", relation: {createAndAdd: [{name: "tata"}]}}}){
-						test{
-							id
-							relation {
-								edges {
-									node {
-										id
-									}
+			mutation createTest {
+				createTest(
+					input: {
+						fields: {
+							name: "test"
+							relation: { createAndAdd: [{ name: "tata" }] }
+						}
+					}
+				) {
+					test {
+						id
+						relation {
+							edges {
+								node {
+									id
 								}
 							}
 						}
 					}
 				}
+			}
 		`)
 
     const relationId = objectCreated.createTest.test.relation.edges[0].node.id
@@ -2176,8 +2221,8 @@ describe('Security tests', () => {
 
     expect(
       userClient.request<any>(gql`
-				query tests{
-					tests{
+				query tests {
+					tests {
 						edges {
 							node {
 								id
@@ -2190,24 +2235,24 @@ describe('Security tests', () => {
     ).resolves.toEqual(expect.anything())
 
     const res = await userClient.request<any>(gql`
-				query tests{
-					tests{
-						edges {
-							node {
-								id
-								name
-								relation {
-									edges{
+			query tests {
+				tests {
+					edges {
+						node {
+							id
+							name
+							relation {
+								edges {
 									node {
-									id
-									}
+										id
 									}
 								}
 							}
 						}
 					}
 				}
-			`)
+			}
+		`)
 
     expect(res.tests.edges[0].node.relation.edges.length).toEqual(0)
 
@@ -2281,8 +2326,15 @@ describe('Security tests', () => {
     expect(
       userClient.request<any>(gql`
 				mutation createTest {
-					createTest(input:{fields:{name: "test", pointer: {createAndLink: {name: "tata"}}}}){
-						test{
+					createTest(
+						input: {
+							fields: {
+								name: "test"
+								pointer: { createAndLink: { name: "tata" } }
+							}
+						}
+					) {
+						test {
 							id
 							pointer {
 								id
@@ -2290,7 +2342,7 @@ describe('Security tests', () => {
 						}
 					}
 				}
-		`),
+			`),
     ).rejects.toThrow('Permission denied to create class Test2')
 
     await closeTests(wabe)
@@ -2361,7 +2413,7 @@ describe('Security tests', () => {
     })
 
     const resOfTest = await userClient.request<any>(gql`
-			query tests{
+			query tests {
 				tests {
 					edges {
 						node {
@@ -2455,7 +2507,7 @@ describe('Security tests', () => {
     )
 
     const resOfTest = await userClientAfterRefresh.request<any>(gql`
-			query tests{
+			query tests {
 				tests {
 					edges {
 						node {
@@ -2539,16 +2591,16 @@ describe('Security tests', () => {
 
     expect(
       userClient.request<any>(gql`
-			query tests{
-				tests {
-					edges {
-						node {
-							id
+				query tests {
+					tests {
+						edges {
+							node {
+								id
+							}
 						}
 					}
 				}
-			}
-		`),
+			`),
     ).rejects.toThrow('jwt malformed')
 
     await closeTests(wabe)
@@ -2619,14 +2671,14 @@ describe('Security tests', () => {
     })
 
     const res = await rootClient.request<any>(gql`
-				mutation createTest{
-					createTest(input: {fields: {name: "test"}}){
-						test{
-							id
-						}
+			mutation createTest {
+				createTest(input: { fields: { name: "test" } }) {
+					test {
+						id
 					}
 				}
-			`)
+			}
+		`)
 
     const testId = res.createTest.test.id
 
@@ -2709,16 +2761,16 @@ describe('Security tests', () => {
 
     expect(
       userClient.request<any>(gql`
-			query tests{
-				tests {
-					edges {
-						node {
-							id
+				query tests {
+					tests {
+						edges {
+							node {
+								id
+							}
 						}
 					}
 				}
-			}
-		`),
+			`),
     ).rejects.toThrow('Permission denied to read class Test')
 
     await closeTests(wabe)
@@ -2789,27 +2841,29 @@ describe('Security tests', () => {
     })
 
     await rootClient.request<any>(gql`
-				mutation createTest{
-					createTest(input: {fields: {name: "test"}}){
-						test{
-							id
-						}
-					}
-				}
-			`)
-
-    expect(
-      userClient.request<any>(gql`
-			mutation deleteTests{
-				deleteTests(input: {where: {name: {equalTo: "test"}}}) {
-					edges {
-						node {
-							id
-						}
+			mutation createTest {
+				createTest(input: { fields: { name: "test" } }) {
+					test {
+						id
 					}
 				}
 			}
-		`),
+		`)
+
+    expect(
+      userClient.request<any>(gql`
+				mutation deleteTests {
+					deleteTests(
+						input: { where: { name: { equalTo: "test" } } }
+					) {
+						edges {
+							node {
+								id
+							}
+						}
+					}
+				}
+			`),
     ).rejects.toThrow('Permission denied to delete class Test')
 
     await closeTests(wabe)
@@ -2881,9 +2935,9 @@ describe('Security tests', () => {
 
     expect(
       userClient.request<any>(gql`
-				mutation createTest2{
-					createTest2(input: {fields: {name: "test"}}){
-						test2{
+				mutation createTest2 {
+					createTest2(input: { fields: { name: "test" } }) {
+						test2 {
 							id
 						}
 					}
@@ -2959,14 +3013,14 @@ describe('Security tests', () => {
     })
 
     const res = await rootClient.request<any>(gql`
-				mutation createTest{
-					createTest(input: {fields: {name: "test"}}){
-						test{
-							id
-						}
+			mutation createTest {
+				createTest(input: { fields: { name: "test" } }) {
+					test {
+						id
 					}
 				}
-			`)
+			}
+		`)
 
     expect(
       userClient.request<any>(gql`
@@ -2987,59 +3041,65 @@ describe('Security tests', () => {
 const graphql = {
   deleteTests: gql`
 		mutation deleteTests {
-  		deleteTests(
-    		input: {where: {name: {equalTo: "test"}}}
-  		) {
-    		edges {
-      		node {
-        		id
-      		}
-    		}
-  		}
+			deleteTests(input: { where: { name: { equalTo: "test" } } }) {
+				edges {
+					node {
+						id
+					}
+				}
+			}
 		}
 	`,
   deleteUsers: gql`
 		mutation deleteUser {
-  		deleteUsers(
-    		input: {where: {authentication: {emailPassword: {email: {equalTo: "email@test.fr"}}}}}
-  		) {
-    		edges {
-      		node {
-        		id
-      		}
-    		}
-  		}
+			deleteUsers(
+				input: {
+					where: {
+						authentication: {
+							emailPassword: {
+								email: { equalTo: "email@test.fr" }
+							}
+						}
+					}
+				}
+			) {
+				edges {
+					node {
+						id
+					}
+				}
+			}
 		}
 	`,
   signInWith: gql`
-		 mutation signInWith($input: SignInWithInput!) {
-  		signInWith(input: $input){
-  			id
-  			accessToken
-  			refreshToken
-  		}
+		mutation signInWith($input: SignInWithInput!) {
+			signInWith(input: $input) {
+				id
+				accessToken
+				refreshToken
+			}
 		}
 	`,
   signUpWith: gql`
-		 mutation signUpWith($input: SignUpWithInput!) {
-  		signUpWith(input:	$input){
-  			id
-  			accessToken
-  			refreshToken
-  		}
-  	}
-	 `,
+		mutation signUpWith($input: SignUpWithInput!) {
+			signUpWith(input: $input) {
+				id
+				accessToken
+				refreshToken
+			}
+		}
+	`,
   signOut: gql`
-		 mutation signOut {
+		mutation signOut {
 			signOut
 		}
 	`,
   refresh: gql`
 		mutation refresh($input: RefreshInput!) {
-  		refresh(input: $input) {
-    		accessToken
-    		refreshToken
-  		}
+			refresh(input: $input) {
+				accessToken
+				refreshToken
+			}
 		}
 	`,
 }

@@ -23,7 +23,8 @@
       "suspicious": {
         "noExplicitAny": "off",
         "useAwait": "error",
-        "noArrayIndexKey": "off"
+        "noArrayIndexKey": "off",
+        "noFocusedTests": "error"
       },
       "style": {
         "useTemplate": "off",

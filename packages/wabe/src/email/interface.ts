@@ -9,7 +9,7 @@ export interface EmailSendOptions {
   from: string
   to: Array<string>
   subject: string
-  node?: React.ReactNode
+  node?: any
   html?: string
   text?: string
 }

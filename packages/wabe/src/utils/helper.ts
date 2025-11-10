@@ -21,8 +21,7 @@ export const firstLetterUpperCase = (str: string): string =>
 export const getGraphqlClient = (port: number): GraphQLClient => {
   const client = new GraphQLClient(`http://127.0.0.1:${port}/graphql`, {
     headers: {
-      'Wabe-Root-Key':
-        '0uwFvUxM$ceFuF1aEtTtZMa7DUN2NZudqgY5ve5W*QCyb58cwMj9JeoaV@d#%29v&aJzswuudVU1%nAT+rxS0Bh&OkgBYc0PH18*',
+      'Wabe-Root-Key': 'dev',
     },
   })
 

@@ -24,8 +24,7 @@ export const setupTests = async (
 
   const wabe = new Wabe<DevWabeTypes>({
     isProduction: false,
-    rootKey:
-      '0uwFvUxM$ceFuF1aEtTtZMa7DUN2NZudqgY5ve5W*QCyb58cwMj9JeoaV@d#%29v&aJzswuudVU1%nAT+rxS0Bh&OkgBYc0PH18*',
+    rootKey: 'dev',
     database: {
       // @ts-expect-error
       adapter: await getDatabaseAdapter(databaseId),

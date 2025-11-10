@@ -14,7 +14,7 @@
     "packages/*"
   ],
   "scripts": {
-    "clean": "git clean -fdX",
+    "clean": "rm -rf node_modules && git clean -fdXq",
     "build": "CI_BUILD=true bun scripts/build.ts",
     "ci": "bun run scripts/ci.ts",
     "format": "bun --filter './packages/*' format && biome format --write ./*.json && biome format --write ./scripts/*.ts",

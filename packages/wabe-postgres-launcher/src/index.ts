@@ -29,9 +29,10 @@ export const startPostgres = async (): Promise<void> => {
       const stream = await docker.pull(imageName)
 
       await new Promise((resolve, reject) => {
-        docker.modem.followProgress(stream, (err, res) =>
-          err ? reject(err) : resolve(res),
-        )
+        docker.modem.followProgress(stream, (err, res) => {
+          console.log(err, res)
+          return err ? reject(err) : resolve(res)
+        })
       })
     }
 

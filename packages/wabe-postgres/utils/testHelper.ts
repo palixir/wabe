@@ -119,6 +119,6 @@ export const setupTests = async (
 }
 
 export const closeTests = async (wabe: Wabe<any>) => {
-  await wabe.controllers.database.adapter?.close()
+  await wabe.controllers?.database?.adapter?.close()
   await wabe.close()
 }
