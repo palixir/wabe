@@ -5,16 +5,16 @@ import type { HookObject } from './HookObject'
 // TODO: It should better to do this in after delete to avoid case when deleteUser failed
 // For the moment KISS
 export const defaultDeleteSessionOnDeleteUser = async (
-  object: HookObject<DevWabeTypes, 'User'>,
+	object: HookObject<DevWabeTypes, 'User'>,
 ) => {
-  const userId = object.object?.id
+	const userId = object.object?.id
 
-  await object.context.wabe.controllers.database.deleteObjects({
-    className: '_Session',
-    context: contextWithRoot(object.context),
-    where: {
-      user: { id: { equalTo: userId } },
-    },
-    select: {},
-  })
+	await object.context.wabe.controllers.database.deleteObjects({
+		className: '_Session',
+		context: contextWithRoot(object.context),
+		where: {
+			user: { id: { equalTo: userId } },
+		},
+		select: {},
+	})
 }

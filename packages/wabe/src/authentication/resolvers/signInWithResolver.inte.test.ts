@@ -5,24 +5,24 @@ import { getAdminUserClient, type DevWabeTypes } from 'src/utils/helper'
 import { setupTests, closeTests } from 'src/utils/testHelper'
 
 describe('signInWithResolver integration test', () => {
-  let wabe: Wabe<DevWabeTypes>
+	let wabe: Wabe<DevWabeTypes>
 
-  beforeAll(async () => {
-    const setup = await setupTests()
-    wabe = setup.wabe
-  })
+	beforeAll(async () => {
+		const setup = await setupTests()
+		wabe = setup.wabe
+	})
 
-  afterAll(async () => {
-    await closeTests(wabe)
-  })
+	afterAll(async () => {
+		await closeTests(wabe)
+	})
 
-  it('should return all fields of the user on signInWith resolver', async () => {
-    const adminClient = await getAdminUserClient(wabe.config.port, wabe, {
-      email: 'admin@wabe.dev',
-      password: 'admin',
-    })
-    const res = await adminClient.request<any>(
-      gql`
+	it('should return all fields of the user on signInWith resolver', async () => {
+		const adminClient = await getAdminUserClient(wabe.config.port, wabe, {
+			email: 'admin@wabe.dev',
+			password: 'admin',
+		})
+		const res = await adminClient.request<any>(
+			gql`
       mutation signInWith($input: SignInWithInput!) {
         signInWith(input: $input) {
           user {
@@ -39,21 +39,21 @@ describe('signInWithResolver integration test', () => {
         }
       }
     `,
-      {
-        input: {
-          authentication: {
-            emailPassword: {
-              email: 'admin@wabe.dev',
-              password: 'admin',
-            },
-          },
-        },
-      },
-    )
+			{
+				input: {
+					authentication: {
+						emailPassword: {
+							email: 'admin@wabe.dev',
+							password: 'admin',
+						},
+					},
+				},
+			},
+		)
 
-    expect(res.signInWith.user.role.name).toBe('Admin')
-    expect(res.signInWith.user.authentication.emailPassword).toEqual({
-      email: 'admin@wabe.dev',
-    })
-  })
+		expect(res.signInWith.user.role.name).toBe('Admin')
+		expect(res.signInWith.user.authentication.emailPassword).toEqual({
+			email: 'admin@wabe.dev',
+		})
+	})
 })

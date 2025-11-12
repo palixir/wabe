@@ -6,74 +6,74 @@ import { OTP } from '../OTP'
 import { QRCodeOTP } from './QRCodeOTP'
 
 describe('QRCodeOTPProvider', () => {
-  let wabe: Wabe<DevWabeTypes>
+	let wabe: Wabe<DevWabeTypes>
 
-  beforeAll(async () => {
-    const setup = await setupTests()
-    wabe = setup.wabe
-  })
+	beforeAll(async () => {
+		const setup = await setupTests()
+		wabe = setup.wabe
+	})
 
-  afterAll(async () => {
-    await closeTests(wabe)
-  })
+	afterAll(async () => {
+		await closeTests(wabe)
+	})
 
-  afterEach(async () => {
-    await wabe.controllers.database.clearDatabase()
-  })
+	afterEach(async () => {
+		await wabe.controllers.database.clearDatabase()
+	})
 
-  it('should return the userId if the OTP code is valid', async () => {
-    const createdUser = await wabe.controllers.database.createObject({
-      className: 'User',
-      context: {
-        wabe,
-        isRoot: true,
-      },
-      data: {
-        email: 'email@test.fr',
-      },
-      select: {
-        id: true,
-      },
-    })
+	it('should return the userId if the OTP code is valid', async () => {
+		const createdUser = await wabe.controllers.database.createObject({
+			className: 'User',
+			context: {
+				wabe,
+				isRoot: true,
+			},
+			data: {
+				email: 'email@test.fr',
+			},
+			select: {
+				id: true,
+			},
+		})
 
-    if (!createdUser) throw new Error('User not created')
+		if (!createdUser) throw new Error('User not created')
 
-    const otp = new OTP(wabe.config.rootKey).authenticatorGenerate(
-      createdUser.id,
-    )
+		const otp = new OTP(wabe.config.rootKey).authenticatorGenerate(
+			createdUser.id,
+		)
 
-    const qrCodeOTP = new QRCodeOTP()
+		const qrCodeOTP = new QRCodeOTP()
 
-    expect(
-      await qrCodeOTP.onVerifyChallenge({
-        context: {
-          wabe,
-          isRoot: false,
-        },
-        input: {
-          email: 'email@test.fr',
-          otp,
-        },
-      }),
-    ).toEqual({
-      userId: createdUser.id,
-    })
-  })
+		expect(
+			await qrCodeOTP.onVerifyChallenge({
+				context: {
+					wabe,
+					isRoot: false,
+				},
+				input: {
+					email: 'email@test.fr',
+					otp,
+				},
+			}),
+		).toEqual({
+			userId: createdUser.id,
+		})
+	})
 
-  it("should return null if the user doesn't exist", async () => {
-    const qrCodeOTP = new QRCodeOTP()
+	it("should return null if the user doesn't exist", async () => {
+		const qrCodeOTP = new QRCodeOTP()
 
-    expect(
-      await qrCodeOTP.onVerifyChallenge({
-        context: {
-          wabe,
-          isRoot: false,
-        },
-        input: {
-          email: 'email@test.fr',
-          otp: '123456',
-        },
-      }),
-    ).toEqual(null)
-  })
+		expect(
+			await qrCodeOTP.onVerifyChallenge({
+				context: {
+					wabe,
+					isRoot: false,
+				},
+				input: {
+					email: 'email@test.fr',
+					otp: '123456',
+				},
+			}),
+		).toEqual(null)
+	})
 })

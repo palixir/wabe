@@ -5,99 +5,99 @@ import { getCookieInRequestHeaders } from '../utils'
 import type { DevWabeTypes } from '../utils/helper'
 
 export const defaultSessionHandler =
-  (wabe: Wabe<DevWabeTypes>) =>
-  async (ctx: WobeCustomContext<DevWabeTypes>) => {
-    const headers = ctx.request.headers
-    const isGraphQLCall = ctx.request.url.includes('/graphql')
+	(wabe: Wabe<DevWabeTypes>) =>
+	async (ctx: WobeCustomContext<DevWabeTypes>) => {
+		const headers = ctx.request.headers
+		const isGraphQLCall = ctx.request.url.includes('/graphql')
 
-    const headerRootKey = Buffer.from(headers.get('Wabe-Root-Key') || '')
-    const rootKey = Buffer.from(wabe.config.rootKey)
+		const headerRootKey = Buffer.from(headers.get('Wabe-Root-Key') || '')
+		const rootKey = Buffer.from(wabe.config.rootKey)
 
-    if (
-      headerRootKey.length === rootKey.length &&
-      timingSafeEqual(rootKey, headerRootKey)
-    ) {
-      ctx.wabe = {
-        isRoot: true,
-        wabe,
-        response: ctx.res,
-        isGraphQLCall,
-      }
-      return
-    }
+		if (
+			headerRootKey.length === rootKey.length &&
+			timingSafeEqual(rootKey, headerRootKey)
+		) {
+			ctx.wabe = {
+				isRoot: true,
+				wabe,
+				response: ctx.res,
+				isGraphQLCall,
+			}
+			return
+		}
 
-    const getAccessToken = () => {
-      if (headers.get('Wabe-Access-Token'))
-        return { accessToken: headers.get('Wabe-Access-Token') }
+		const getAccessToken = () => {
+			if (headers.get('Wabe-Access-Token'))
+				return { accessToken: headers.get('Wabe-Access-Token') }
 
-      const isCookieSession =
-        !!wabe.config.authentication?.session?.cookieSession
+			const isCookieSession =
+				!!wabe.config.authentication?.session?.cookieSession
 
-      if (isCookieSession)
-        return {
-          accessToken: getCookieInRequestHeaders(
-            'accessToken',
-            ctx.request.headers,
-          ),
-        }
+			if (isCookieSession)
+				return {
+					accessToken: getCookieInRequestHeaders(
+						'accessToken',
+						ctx.request.headers,
+					),
+				}
 
-      return { accessToken: null }
-    }
+			return { accessToken: null }
+		}
 
-    const { accessToken } = getAccessToken()
+		const { accessToken } = getAccessToken()
 
-    if (!accessToken) {
-      ctx.wabe = {
-        isRoot: false,
-        wabe,
-        response: ctx.res,
-        isGraphQLCall,
-      }
-      return
-    }
+		if (!accessToken) {
+			ctx.wabe = {
+				isRoot: false,
+				wabe,
+				response: ctx.res,
+				isGraphQLCall,
+			}
+			return
+		}
 
-    const session = new Session()
+		const session = new Session()
 
-    const {
-      user,
-      sessionId,
-      accessToken: newAccessToken,
-      refreshToken: newRefreshToken,
-    } = await session.meFromAccessToken(accessToken, {
-      wabe,
-      isRoot: true,
-      isGraphQLCall,
-    })
+		const {
+			user,
+			sessionId,
+			accessToken: newAccessToken,
+			refreshToken: newRefreshToken,
+		} = await session.meFromAccessToken(accessToken, {
+			wabe,
+			isRoot: true,
+			isGraphQLCall,
+		})
 
-    ctx.wabe = {
-      isRoot: false,
-      sessionId,
-      user,
-      wabe,
-      response: ctx.res,
-      isGraphQLCall,
-    }
+		ctx.wabe = {
+			isRoot: false,
+			sessionId,
+			user,
+			wabe,
+			response: ctx.res,
+			isGraphQLCall,
+		}
 
-    if (
-      wabe.config.authentication?.session?.cookieSession &&
-      newAccessToken &&
-      newRefreshToken &&
-      newAccessToken !== accessToken
-    ) {
-      ctx.res.setCookie('accessToken', newAccessToken, {
-        httpOnly: true,
-        path: '/',
-        expires: session.getAccessTokenExpireAt(wabe.config),
-        sameSite: 'None',
-        secure: true,
-      })
+		if (
+			wabe.config.authentication?.session?.cookieSession &&
+			newAccessToken &&
+			newRefreshToken &&
+			newAccessToken !== accessToken
+		) {
+			ctx.res.setCookie('accessToken', newAccessToken, {
+				httpOnly: true,
+				path: '/',
+				expires: session.getAccessTokenExpireAt(wabe.config),
+				sameSite: 'None',
+				secure: true,
+			})
 
-      ctx.res.setCookie('refreshToken', newRefreshToken, {
-        httpOnly: true,
-        path: '/',
-        expires: session.getAccessTokenExpireAt(wabe.config),
-        sameSite: 'None',
-        secure: true,
-      })
-    }
-  }
+			ctx.res.setCookie('refreshToken', newRefreshToken, {
+				httpOnly: true,
+				path: '/',
+				expires: session.getAccessTokenExpireAt(wabe.config),
+				sameSite: 'None',
+				secure: true,
+			})
+		}
+	}

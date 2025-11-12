@@ -5,136 +5,136 @@ import type { WabeTypes, WobeCustomContext } from '../server'
 import type { SelectType } from '../database/interface'
 
 export enum ProviderEnum {
-  google = 'google',
-  github = 'github',
+	google = 'google',
+	github = 'github',
 }
 
 export interface ProviderConfig {
-  clientId: string
-  clientSecret: string
+	clientId: string
+	clientSecret: string
 }
 
 export type AuthenticationEventsOptions<T extends WabeTypes, K> = {
-  context: WabeContext<T>
-  input: K
+	context: WabeContext<T>
+	input: K
 }
 
 export type AuthenticationEventsOptionsWithUserId<
-  T extends WabeTypes,
-  K,
+	T extends WabeTypes,
+	K,
 > = AuthenticationEventsOptions<T, K> & {
-  userId: string
+	userId: string
 }
 
 export type OnSendChallengeOptions<T extends WabeTypes> = {
-  context: WabeContext<T>
-  user: T['types']['User']
+	context: WabeContext<T>
+	user: T['types']['User']
 }
 
 export type OnVerifyChallengeOptions<T extends WabeTypes, K> = {
-  context: WabeContext<T>
-  input: K
+	context: WabeContext<T>
+	input: K
 }
 
 export type ProviderInterface<T extends WabeTypes, K = any> = {
-  onSignIn: (options: AuthenticationEventsOptions<T, K>) => Promise<{
-    user: Partial<User>
-    srp?: {
-      salt: string
-      serverPublic: string
-    }
-  }>
-  onSignUp: (
-    options: AuthenticationEventsOptions<T, K>,
-  ) => Promise<{ authenticationDataToSave: any }>
-  onUpdateAuthenticationData?: (
-    options: AuthenticationEventsOptionsWithUserId<T, K>,
-  ) => Promise<{ authenticationDataToSave: any }>
+	onSignIn: (options: AuthenticationEventsOptions<T, K>) => Promise<{
+		user: Partial<User>
+		srp?: {
+			salt: string
+			serverPublic: string
+		}
+	}>
+	onSignUp: (
+		options: AuthenticationEventsOptions<T, K>,
+	) => Promise<{ authenticationDataToSave: any }>
+	onUpdateAuthenticationData?: (
+		options: AuthenticationEventsOptionsWithUserId<T, K>,
+	) => Promise<{ authenticationDataToSave: any }>
 }
 
 export type SecondaryProviderInterface<T extends WabeTypes, K = any> = {
-  onSendChallenge?: (options: OnSendChallengeOptions<T>) => Promise<void> | void
-  onVerifyChallenge: (
-    options: OnVerifyChallengeOptions<T, K>,
-  ) =>
-    | Promise<{ userId: string; srp?: { serverSessionProof: string } } | null>
-    | ({ userId: string; srp?: { serverSessionProof: string } } | null)
+	onSendChallenge?: (options: OnSendChallengeOptions<T>) => Promise<void> | void
+	onVerifyChallenge: (
+		options: OnVerifyChallengeOptions<T, K>,
+	) =>
+		| Promise<{ userId: string; srp?: { serverSessionProof: string } } | null>
+		| ({ userId: string; srp?: { serverSessionProof: string } } | null)
 }
 
 export type CustomAuthenticationMethods<
-  T extends WabeTypes,
-  U = ProviderInterface<T> | SecondaryProviderInterface<T>,
-  K = SchemaFields<T>,
-  W = SchemaFields<T>,
+	T extends WabeTypes,
+	U = ProviderInterface<T> | SecondaryProviderInterface<T>,
+	K = SchemaFields<T>,
+	W = SchemaFields<T>,
 > = {
-  name: string
-  input: K
-  dataToStore?: W
-  provider: U
-  isSecondaryFactor?: boolean
+	name: string
+	input: K
+	dataToStore?: W
+	provider: U
+	isSecondaryFactor?: boolean
 }
 
 export type RoleConfig = Array<string>
 
 export interface SessionConfig<T extends WabeTypes> {
-  /**
-   * The time in milliseconds that the access token will expire
-   */
-  accessTokenExpiresInMs?: number
-  /**
-   * The time in milliseconds that the refresh token will expire
-   */
-  refreshTokenExpiresInMs?: number
-  /**
-   * Set to true to automatically store the session tokens in cookies
-   */
-  cookieSession?: boolean
-  /**
-   * The JWT secret used to sign the session tokens
-   */
-  jwtSecret: string
-  /**
-   * A selection of fields to include in the JWT token in the "user" fields
-   */
-  jwtTokenFields?: SelectType<T, 'User', keyof T['types']['User']>
+	/**
+	 * The time in milliseconds that the access token will expire
+	 */
+	accessTokenExpiresInMs?: number
+	/**
+	 * The time in milliseconds that the refresh token will expire
+	 */
+	refreshTokenExpiresInMs?: number
+	/**
+	 * Set to true to automatically store the session tokens in cookies
+	 */
+	cookieSession?: boolean
+	/**
+	 * The JWT secret used to sign the session tokens
+	 */
+	jwtSecret: string
+	/**
+	 * A selection of fields to include in the JWT token in the "user" fields
+	 */
+	jwtTokenFields?: SelectType<T, 'User', keyof T['types']['User']>
 }
 
 export interface AuthenticationConfig<T extends WabeTypes> {
-  session?: SessionConfig<T>
-  roles?: RoleConfig
-  successRedirectPath?: string
-  failureRedirectPath?: string
-  frontDomain?: string
-  backDomain?: string
-  providers?: Partial<Record<ProviderEnum, ProviderConfig>>
-  customAuthenticationMethods?: CustomAuthenticationMethods<T>[]
-  sessionHandler?: (context: WobeCustomContext<T>) => void | Promise<void>
-  disableSignUp?: boolean
+	session?: SessionConfig<T>
+	roles?: RoleConfig
+	successRedirectPath?: string
+	failureRedirectPath?: string
+	frontDomain?: string
+	backDomain?: string
+	providers?: Partial<Record<ProviderEnum, ProviderConfig>>
+	customAuthenticationMethods?: CustomAuthenticationMethods<T>[]
+	sessionHandler?: (context: WobeCustomContext<T>) => void | Promise<void>
+	disableSignUp?: boolean
 }
 
 export interface CreateTokenFromAuthorizationCodeOptions {
-  code: string
+	code: string
 }
 
 export interface refreshTokenOptions {
-  refreshToken: string
+	refreshToken: string
 }
 
 export interface Provider {
-  createTokenFromAuthorizationCode(
-    options: CreateTokenFromAuthorizationCodeOptions,
-  ): Promise<void>
-  refreshToken(options: refreshTokenOptions): Promise<void>
+	createTokenFromAuthorizationCode(
+		options: CreateTokenFromAuthorizationCodeOptions,
+	): Promise<void>
+	refreshToken(options: refreshTokenOptions): Promise<void>
 }
 
 export enum AuthenticationProvider {
-  GitHub = 'github',
-  Google = 'google',
-  EmailPassword = 'emailPassword',
-  PhonePassword = 'phonePassword',
+	GitHub = 'github',
+	Google = 'google',
+	EmailPassword = 'emailPassword',
+	PhonePassword = 'phonePassword',
 }
 
 export enum SecondaryFactor {
-  EmailOTP = 'emailOTP',
-  QRCodeOTP = 'qrcodeOTP',
+	EmailOTP = 'emailOTP',
+	QRCodeOTP = 'qrcodeOTP',
 }

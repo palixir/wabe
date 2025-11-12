@@ -6,47 +6,47 @@ import { OTP } from '../../authentication/OTP'
 import { contextWithRoot } from '../../utils/export'
 
 export const sendOtpCodeResolver = async (
-  _: any,
-  { input }: MutationSendOtpCodeArgs,
-  context: WabeContext<DevWabeTypes>,
+	_: any,
+	{ input }: MutationSendOtpCodeArgs,
+	context: WabeContext<DevWabeTypes>,
 ) => {
-  const emailController = context.wabe.controllers.email
+	const emailController = context.wabe.controllers.email
 
-  if (!emailController) throw new Error('Email adapter not defined')
+	if (!emailController) throw new Error('Email adapter not defined')
 
-  const user = await context.wabe.controllers.database.getObjects({
-    className: 'User',
-    where: {
-      email: {
-        equalTo: input.email,
-      },
-    },
-    select: { id: true },
-    first: 1,
-    context: contextWithRoot(context),
-  })
+	const user = await context.wabe.controllers.database.getObjects({
+		className: 'User',
+		where: {
+			email: {
+				equalTo: input.email,
+			},
+		},
+		select: { id: true },
+		first: 1,
+		context: contextWithRoot(context),
+	})
 
-  // We return true if the user doesn't exist to avoid leaking that the user exists or not
-  if (user.length === 0) return true
+	// We return true if the user doesn't exist to avoid leaking that the user exists or not
+	if (user.length === 0) return true
 
-  const userId = user[0]?.id
+	const userId = user[0]?.id
 
-  if (!userId) return false
+	if (!userId) return false
 
-  const otpClass = new OTP(context.wabe.config.rootKey)
+	const otpClass = new OTP(context.wabe.config.rootKey)
 
-  const otp = otpClass.generate(userId)
+	const otp = otpClass.generate(userId)
 
-  const mainEmail = context.wabe.config.email?.mainEmail || 'noreply@wabe.com'
+	const mainEmail = context.wabe.config.email?.mainEmail || 'noreply@wabe.com'
 
-  const template = context.wabe.config.email?.htmlTemplates?.sendOTPCode
+	const template = context.wabe.config.email?.htmlTemplates?.sendOTPCode
 
-  await emailController.send({
-    from: mainEmail,
-    to: [input.email],
-    subject: template?.subject || 'Your OTP code',
-    html: template?.fn ? await template.fn({ otp }) : sendOtpCodeTemplate(otp),
-  })
+	await emailController.send({
+		from: mainEmail,
+		to: [input.email],
+		subject: template?.subject || 'Your OTP code',
+		html: template?.fn ? await template.fn({ otp }) : sendOtpCodeTemplate(otp),
+	})
 
-  return true
+	return true
 }

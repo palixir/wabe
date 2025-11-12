@@ -5,35 +5,35 @@ import { setupTests, closeTests } from '../../utils/testHelper'
 import { gql } from 'graphql-request'
 
 describe('me', () => {
-  let wabe: Wabe<DevWabeTypes>
+	let wabe: Wabe<DevWabeTypes>
 
-  beforeAll(async () => {
-    const setup = await setupTests()
-    wabe = setup.wabe
-  })
+	beforeAll(async () => {
+		const setup = await setupTests()
+		wabe = setup.wabe
+	})
 
-  afterAll(async () => {
-    await closeTests(wabe)
-  })
+	afterAll(async () => {
+		await closeTests(wabe)
+	})
 
-  it('should return information about current user', async () => {
-    const adminClient = await getAdminUserClient(wabe.config.port, wabe, {
-      email: 'admin@wabe.dev',
-      password: 'admin',
-    })
+	it('should return information about current user', async () => {
+		const adminClient = await getAdminUserClient(wabe.config.port, wabe, {
+			email: 'admin@wabe.dev',
+			password: 'admin',
+		})
 
-    const {
-      me: { user },
-    } = await adminClient.request<any>(graphql.me)
+		const {
+			me: { user },
+		} = await adminClient.request<any>(graphql.me)
 
-    expect(user.role.name).toBe('Admin')
+		expect(user.role.name).toBe('Admin')
 
-    expect(user.authentication.emailPassword.email).toBe('admin@wabe.dev')
-  })
+		expect(user.authentication.emailPassword.email).toBe('admin@wabe.dev')
+	})
 })
 
 const graphql = {
-  signUpWith: gql`
+	signUpWith: gql`
 		 mutation signUpWith($input: SignUpWithInput!) {
   		signUpWith(input:	$input){
   			id
@@ -42,7 +42,7 @@ const graphql = {
   		}
   	}
 	 `,
-  me: gql`
+	me: gql`
     query me {
       me {
        user{

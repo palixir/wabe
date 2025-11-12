@@ -5,150 +5,150 @@ import { setupTests, closeTests } from '../utils/testHelper'
 import { gql, type GraphQLClient } from 'graphql-request'
 
 describe('Delete session on delete user', () => {
-  let wabe: Wabe<DevWabeTypes>
-  let port: number
-  let client: GraphQLClient
+	let wabe: Wabe<DevWabeTypes>
+	let port: number
+	let client: GraphQLClient
 
-  beforeAll(async () => {
-    const setup = await setupTests()
-    wabe = setup.wabe
-    port = setup.port
-    client = getGraphqlClient(port)
-  })
+	beforeAll(async () => {
+		const setup = await setupTests()
+		wabe = setup.wabe
+		port = setup.port
+		client = getGraphqlClient(port)
+	})
 
-  afterAll(async () => {
-    await closeTests(wabe)
-  })
+	afterAll(async () => {
+		await closeTests(wabe)
+	})
 
-  beforeEach(async () => {
-    await wabe.controllers.database.clearDatabase()
-  })
+	beforeEach(async () => {
+		await wabe.controllers.database.clearDatabase()
+	})
 
-  it('should delete the session when the user is deleted', async () => {
-    const {
-      signUpWith: { id: userId },
-    } = await client.request<any>(graphql.signUpWith, {
-      input: {
-        authentication: {
-          emailPassword: {
-            email: 'email@test.fr',
-            password: 'password',
-          },
-        },
-      },
-    })
+	it('should delete the session when the user is deleted', async () => {
+		const {
+			signUpWith: { id: userId },
+		} = await client.request<any>(graphql.signUpWith, {
+			input: {
+				authentication: {
+					emailPassword: {
+						email: 'email@test.fr',
+						password: 'password',
+					},
+				},
+			},
+		})
 
-    const { _sessions: sessions1 } = await client.request<any>(graphql.sessions)
+		const { _sessions: sessions1 } = await client.request<any>(graphql.sessions)
 
-    expect(sessions1.edges.length).toEqual(1)
+		expect(sessions1.edges.length).toEqual(1)
 
-    await client.request<any>(graphql.deleteUser, {
-      input: {
-        id: userId,
-      },
-    })
+		await client.request<any>(graphql.deleteUser, {
+			input: {
+				id: userId,
+			},
+		})
 
-    const { _sessions: sessions2 } = await client.request<any>(graphql.sessions)
+		const { _sessions: sessions2 } = await client.request<any>(graphql.sessions)
 
-    expect(sessions2.edges.length).toEqual(0)
-  })
+		expect(sessions2.edges.length).toEqual(0)
+	})
 
-  it('should only delete the sessions of the deleted user', async () => {
-    const {
-      signUpWith: { id: userId },
-    } = await client.request<any>(graphql.signUpWith, {
-      input: {
-        authentication: {
-          emailPassword: {
-            email: 'email@test.fr',
-            password: 'password',
-          },
-        },
-      },
-    })
+	it('should only delete the sessions of the deleted user', async () => {
+		const {
+			signUpWith: { id: userId },
+		} = await client.request<any>(graphql.signUpWith, {
+			input: {
+				authentication: {
+					emailPassword: {
+						email: 'email@test.fr',
+						password: 'password',
+					},
+				},
+			},
+		})
 
-    await client.request<any>(graphql.signUpWith, {
-      input: {
-        authentication: {
-          emailPassword: {
-            email: 'anotherEmail@test.fr',
-            password: 'password',
-          },
-        },
-      },
-    })
+		await client.request<any>(graphql.signUpWith, {
+			input: {
+				authentication: {
+					emailPassword: {
+						email: 'anotherEmail@test.fr',
+						password: 'password',
+					},
+				},
+			},
+		})
 
-    const { _sessions: sessions1 } = await client.request<any>(graphql.sessions)
+		const { _sessions: sessions1 } = await client.request<any>(graphql.sessions)
 
-    expect(sessions1.edges.length).toEqual(2)
+		expect(sessions1.edges.length).toEqual(2)
 
-    await client.request<any>(graphql.deleteUser, {
-      input: {
-        id: userId,
-      },
-    })
+		await client.request<any>(graphql.deleteUser, {
+			input: {
+				id: userId,
+			},
+		})
 
-    const { _sessions: sessions2 } = await client.request<any>(graphql.sessions)
+		const { _sessions: sessions2 } = await client.request<any>(graphql.sessions)
 
-    expect(sessions2.edges.length).toEqual(1)
-  })
+		expect(sessions2.edges.length).toEqual(1)
+	})
 
-  it("should not delete any session if the user doesn't have any session", async () => {
-    const {
-      signUpWith: { id: userId },
-    } = await client.request<any>(graphql.signUpWith, {
-      input: {
-        authentication: {
-          emailPassword: {
-            email: 'email@test.fr',
-            password: 'password',
-          },
-        },
-      },
-    })
+	it("should not delete any session if the user doesn't have any session", async () => {
+		const {
+			signUpWith: { id: userId },
+		} = await client.request<any>(graphql.signUpWith, {
+			input: {
+				authentication: {
+					emailPassword: {
+						email: 'email@test.fr',
+						password: 'password',
+					},
+				},
+			},
+		})
 
-    await client.request<any>(graphql.signUpWith, {
-      input: {
-        authentication: {
-          emailPassword: {
-            email: 'anotherEmail@test.fr',
-            password: 'password',
-          },
-        },
-      },
-    })
+		await client.request<any>(graphql.signUpWith, {
+			input: {
+				authentication: {
+					emailPassword: {
+						email: 'anotherEmail@test.fr',
+						password: 'password',
+					},
+				},
+			},
+		})
 
-    await wabe.controllers.database.deleteObjects({
-      className: '_Session',
-      context: {
-        wabe,
-        isRoot: true,
-      },
-      select: {},
-      where: {
-        user: {
-          id: {
-            equalTo: userId,
-          },
-        },
-      },
-    })
+		await wabe.controllers.database.deleteObjects({
+			className: '_Session',
+			context: {
+				wabe,
+				isRoot: true,
+			},
+			select: {},
+			where: {
+				user: {
+					id: {
+						equalTo: userId,
+					},
+				},
+			},
+		})
 
-    // Delete the user
-    await client.request<any>(graphql.deleteUser, {
-      input: {
-        id: userId,
-      },
-    })
+		// Delete the user
+		await client.request<any>(graphql.deleteUser, {
+			input: {
+				id: userId,
+			},
+		})
 
-    const { _sessions: sessions2 } = await client.request<any>(graphql.sessions)
+		const { _sessions: sessions2 } = await client.request<any>(graphql.sessions)
 
-    expect(sessions2.edges.length).toEqual(1)
-  })
+		expect(sessions2.edges.length).toEqual(1)
+	})
 })
 
 const graphql = {
-  sessions: gql`
+	sessions: gql`
 		query _sessions {
 			_sessions {
 				edges {
@@ -159,7 +159,7 @@ const graphql = {
 			}
 		}
 	`,
-  signUpWith: gql`
+	signUpWith: gql`
     mutation signUpWith($input: SignUpWithInput!) {
         signUpWith(input: $input){
             id
@@ -168,7 +168,7 @@ const graphql = {
         }
       }
     `,
-  deleteUser: gql`
+	deleteUser: gql`
 		mutation deleteUser($input: DeleteUserInput!) {
 			deleteUser(input: $input) {
 				user {

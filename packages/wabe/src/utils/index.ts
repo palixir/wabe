@@ -2,10 +2,10 @@ import type { ClassInterface } from '../schema'
 import type { WabeTypes, WabeConfig, WabeContext } from '../server'
 
 export const contextWithoutGraphQLCall = (
-  context: WabeContext<any>,
+	context: WabeContext<any>,
 ): WabeContext<any> => ({
-  ...context,
-  isGraphQLCall: false,
+	...context,
+	isGraphQLCall: false,
 })
 
 const RFC4648 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
@@ -15,25 +15,25 @@ const CROCKFORD = '0123456789ABCDEFGHJKMNPQRSTVWXYZ'
 type Base32Variant = 'RFC3548' | 'RFC4648' | 'RFC4648-HEX' | 'Crockford'
 
 interface Base32Options {
-  padding?: boolean
+	padding?: boolean
 }
 
 /**
  * Convert supported input types to Uint8Array.
  */
 export const toUint8Array = (
-  data: string | ArrayBuffer | Uint8Array | Buffer,
+	data: string | ArrayBuffer | Uint8Array | Buffer,
 ): Uint8Array => {
-  if (data instanceof Uint8Array) return data
+	if (data instanceof Uint8Array) return data
 
-  if (typeof data === 'string') {
-    const encoder = new TextEncoder()
-    return encoder.encode(data)
-  }
+	if (typeof data === 'string') {
+		const encoder = new TextEncoder()
+		return encoder.encode(data)
+	}
 
-  if (data instanceof ArrayBuffer) return new Uint8Array(data)
+	if (data instanceof ArrayBuffer) return new Uint8Array(data)
 
-  throw new TypeError('Unsupported data type for base32 encoding')
+	throw new TypeError('Unsupported data type for base32 encoding')
 }
 
 /**
@@ -41,138 +41,138 @@ export const toUint8Array = (
  * Base on https://github.com/LinusU/base32-encode/blob/master/index.js
  */
 export const base32Encode = (
-  data: string | ArrayBuffer | Uint8Array | Buffer,
-  variant: Base32Variant,
-  options: Base32Options = {},
+	data: string | ArrayBuffer | Uint8Array | Buffer,
+	variant: Base32Variant,
+	options: Base32Options = {},
 ): string => {
-  let alphabet: string
-  let defaultPadding: boolean
+	let alphabet: string
+	let defaultPadding: boolean
 
-  switch (variant) {
-    case 'RFC3548':
-    case 'RFC4648':
-      alphabet = RFC4648
-      defaultPadding = true
-      break
-    case 'RFC4648-HEX':
-      alphabet = RFC4648_HEX
-      defaultPadding = true
-      break
-    case 'Crockford':
-      alphabet = CROCKFORD
-      defaultPadding = false
-      break
-    default:
-      throw new Error(`Unknown base32 variant: ${variant}`)
-  }
+	switch (variant) {
+		case 'RFC3548':
+		case 'RFC4648':
+			alphabet = RFC4648
+			defaultPadding = true
+			break
+		case 'RFC4648-HEX':
+			alphabet = RFC4648_HEX
+			defaultPadding = true
+			break
+		case 'Crockford':
+			alphabet = CROCKFORD
+			defaultPadding = false
+			break
+		default:
+			throw new Error(`Unknown base32 variant: ${variant}`)
+	}
 
-  const padding =
-    options.padding !== undefined ? options.padding : defaultPadding
-  const view = toUint8Array(data)
+	const padding =
+		options.padding !== undefined ? options.padding : defaultPadding
+	const view = toUint8Array(data)
 
-  let bits = 0
-  let value = 0
-  let output = ''
+	let bits = 0
+	let value = 0
+	let output = ''
 
-  for (let i = 0; i < view.length; i++) {
-    // @ts-expect-error
-    value = (value << 8) | view[i]
-    bits += 8
+	for (let i = 0; i < view.length; i++) {
+		// @ts-expect-error
+		value = (value << 8) | view[i]
+		bits += 8
 
-    while (bits >= 5) {
-      output += alphabet[(value >>> (bits - 5)) & 31]
-      bits -= 5
-    }
-  }
+		while (bits >= 5) {
+			output += alphabet[(value >>> (bits - 5)) & 31]
+			bits -= 5
+		}
+	}
 
-  if (bits > 0) {
-    output += alphabet[(value << (5 - bits)) & 31]
-  }
+	if (bits > 0) {
+		output += alphabet[(value << (5 - bits)) & 31]
+	}
 
-  if (padding) {
-    while (output.length % 8 !== 0) {
-      output += '='
-    }
-  }
+	if (padding) {
+		while (output.length % 8 !== 0) {
+			output += '='
+		}
+	}
 
-  return output
+	return output
 }
 
 export const getNewObjectAfterUpdateNestedProperty = (
-  obj: any,
-  path: string,
-  value: any,
+	obj: any,
+	path: string,
+	value: any,
 ) => {
-  const keys = path.split('.')
-  let current = { ...obj }
+	const keys = path.split('.')
+	let current = { ...obj }
 
-  for (let i = 0; i < keys.length - 1; i++) {
-    const key = keys[i]
+	for (let i = 0; i < keys.length - 1; i++) {
+		const key = keys[i]
 
-    if (!key) continue
+		if (!key) continue
 
-    if (current[key] === undefined) {
-      current[key] = {}
-    }
-    current = current[key]
-  }
+		if (current[key] === undefined) {
+			current[key] = {}
+		}
+		current = current[key]
+	}
 
-  // @ts-expect-error
-  current[keys[keys.length - 1]] = value
-  return obj
+	// @ts-expect-error
+	current[keys[keys.length - 1]] = value
+	return obj
 }
 
 export const getNestedProperty = (obj: any, path: string) => {
-  return path.split('.').reduce((acc, part) => acc?.[part], obj)
+	return path.split('.').reduce((acc, part) => acc?.[part], obj)
 }
 
 export const firstLetterInUpperCase = (str: string) => {
-  const indexOfFirstLetter = str.search(/[a-z]/i)
+	const indexOfFirstLetter = str.search(/[a-z]/i)
 
-  return (
-    str.slice(0, indexOfFirstLetter) +
-    str[indexOfFirstLetter]?.toUpperCase() +
-    str.slice(indexOfFirstLetter + 1)
-  )
+	return (
+		str.slice(0, indexOfFirstLetter) +
+		str[indexOfFirstLetter]?.toUpperCase() +
+		str.slice(indexOfFirstLetter + 1)
+	)
 }
 
 export const firstLetterInLowerCase = (str: string) => {
-  const indexOfFirstLetter = str.search(/[a-z]/i)
+	const indexOfFirstLetter = str.search(/[a-z]/i)
 
-  return (
-    str.slice(0, indexOfFirstLetter) +
-    str[indexOfFirstLetter]?.toLowerCase() +
-    str.slice(indexOfFirstLetter + 1)
-  )
+	return (
+		str.slice(0, indexOfFirstLetter) +
+		str[indexOfFirstLetter]?.toLowerCase() +
+		str.slice(indexOfFirstLetter + 1)
+	)
 }
 
 export const getClassFromClassName = <T extends WabeTypes>(
-  className: string,
-  config: WabeConfig<any>,
+	className: string,
+	config: WabeConfig<any>,
 ): ClassInterface<T> => {
-  const classInSchema = config.schema?.classes?.find(
-    (schemaClass) => schemaClass.name === className,
-  )
+	const classInSchema = config.schema?.classes?.find(
+		(schemaClass) => schemaClass.name === className,
+	)
 
-  if (!classInSchema) throw new Error('Class not found in schema')
+	if (!classInSchema) throw new Error('Class not found in schema')
 
-  return classInSchema
+	return classInSchema
 }
 
 // TODO: Put this in wobe
 export const getCookieInRequestHeaders = (
-  cookieName: string,
-  headers: Headers,
+	cookieName: string,
+	headers: Headers,
 ) => {
-  const cookies = headers.get('Cookie')
+	const cookies = headers.get('Cookie')
 
-  if (!cookies) return
+	if (!cookies) return
 
-  const cookie = cookies.split(';').find((c) => c.includes(cookieName))
+	const cookie = cookies.split(';').find((c) => c.includes(cookieName))
 
-  if (!cookie) return
+	if (!cookie) return
 
-  return cookie.split('=')[1]
+	return cookie.split('=')[1]
 }
 
 /**
@@ -186,16 +186,16 @@ export const getCookieInRequestHeaders = (
  * - trim
  */
 export const tokenize = (value: string) => {
-  const tmpValue = value
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/\s\s+/g, ' ')
+	const tmpValue = value
+		.toLowerCase()
+		.normalize('NFD')
+		.replace(/[\u0300-\u036f]/g, '')
+		.replace(/\s\s+/g, ' ')
 
-  return (
-    tmpValue
-      // Replace all non alpha
-      .replace(/[\W_]+/g, ' ')
-      .trim()
-  )
+	return (
+		tmpValue
+			// Replace all non alpha
+			.replace(/[\W_]+/g, ' ')
+			.trim()
+	)
 }

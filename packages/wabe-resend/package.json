@@ -1,36 +1,36 @@
 {
-  "name": "wabe-resend",
-  "version": "0.5.2",
-  "description": "Resend email adapter for Wabe (official)",
-  "homepage": "https://palixir.github.io/wabe/",
-  "author": {
-    "name": "coratgerl",
-    "url": "https://github.com/coratgerl"
-  },
-  "license": "Apache-2.0",
-  "keywords": [
-    "backend",
-    "wabe",
-    "graphql",
-    "baas"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/palixir/wabe.git"
-  },
-  "main": "dist/index.js",
-  "scripts": {
-    "build": "bun --filter wabe-build build:package $(pwd)",
-    "check": "tsc --project $(pwd)/tsconfig.json",
-    "lint": "biome lint . --no-errors-on-unmatched",
-    "ci": "bun check && bun lint $(pwd) && bun test src",
-    "format": "biome format --write ."
-  },
-  "dependencies": {
-    "resend": "4.5.2"
-  },
-  "devDependencies": {
-    "@types/react": "19.0.10",
-    "wabe": "workspace:*"
-  }
+	"name": "wabe-resend",
+	"version": "0.5.2",
+	"description": "Resend email adapter for Wabe (official)",
+	"homepage": "https://palixir.github.io/wabe/",
+	"author": {
+		"name": "coratgerl",
+		"url": "https://github.com/coratgerl"
+	},
+	"license": "Apache-2.0",
+	"keywords": [
+		"backend",
+		"wabe",
+		"graphql",
+		"baas"
+	],
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/palixir/wabe.git"
+	},
+	"main": "dist/index.js",
+	"scripts": {
+		"build": "bun --filter wabe-build build:package $(pwd)",
+		"check": "tsc --project $(pwd)/tsconfig.json",
+		"lint": "biome lint . --no-errors-on-unmatched",
+		"ci": "bun check && bun lint $(pwd) && bun test src",
+		"format": "biome format --write ."
+	},
+	"dependencies": {
+		"resend": "4.5.2"
+	},
+	"devDependencies": {
+		"@types/react": "19.0.10",
+		"wabe": "workspace:*"
+	}
 }

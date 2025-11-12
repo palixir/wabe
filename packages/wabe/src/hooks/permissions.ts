@@ -4,110 +4,110 @@ import type { HookObject } from './HookObject'
 import { OperationType } from './index'
 
 const convertOperationTypeToPermission = (operationType: OperationType) => {
-  const template: Record<OperationType, PermissionsOperations> = {
-    [OperationType.BeforeCreate]: 'create',
-    [OperationType.AfterCreate]: 'create',
-    [OperationType.BeforeRead]: 'read',
-    [OperationType.AfterRead]: 'read',
-    [OperationType.BeforeDelete]: 'delete',
-    [OperationType.AfterDelete]: 'delete',
-    [OperationType.BeforeUpdate]: 'update',
-    [OperationType.AfterUpdate]: 'update',
-  }
+	const template: Record<OperationType, PermissionsOperations> = {
+		[OperationType.BeforeCreate]: 'create',
+		[OperationType.AfterCreate]: 'create',
+		[OperationType.BeforeRead]: 'read',
+		[OperationType.AfterRead]: 'read',
+		[OperationType.BeforeDelete]: 'delete',
+		[OperationType.AfterDelete]: 'delete',
+		[OperationType.BeforeUpdate]: 'update',
+		[OperationType.AfterUpdate]: 'update',
+	}
 
-  return template[operationType]
+	return template[operationType]
 }
 
 export const _getPermissionPropertiesOfAClass = ({
-  className,
-  operation,
-  context,
+	className,
+	operation,
+	context,
 }: {
-  className: string
-  operation: PermissionsOperations
-  context: WabeContext<any>
+	className: string
+	operation: PermissionsOperations
+	context: WabeContext<any>
 }) => {
-  const wabeClass = context.wabe.config.schema?.classes?.find(
-    (c) => c.name === className,
-  )
+	const wabeClass = context.wabe.config.schema?.classes?.find(
+		(c) => c.name === className,
+	)
 
-  if (!wabeClass) throw new Error(`Class ${className} not found in schema`)
+	if (!wabeClass) throw new Error(`Class ${className} not found in schema`)
 
-  const permission = wabeClass.permissions?.[operation]
+	const permission = wabeClass.permissions?.[operation]
 
-  return permission
+	return permission
 }
 
 export const _checkCLP = async (
-  object: HookObject<any, any>,
-  operationType: OperationType,
+	object: HookObject<any, any>,
+	operationType: OperationType,
 ) => {
-  if (object.context.isRoot) return
+	if (object.context.isRoot) return
 
-  const permissionOperation = convertOperationTypeToPermission(operationType)
+	const permissionOperation = convertOperationTypeToPermission(operationType)
 
-  if (!permissionOperation) throw new Error('Bad operation type provided')
+	if (!permissionOperation) throw new Error('Bad operation type provided')
 
-  const permissionProperties = await _getPermissionPropertiesOfAClass({
-    className: object.className,
-    operation: permissionOperation,
-    context: object.context,
-  })
+	const permissionProperties = await _getPermissionPropertiesOfAClass({
+		className: object.className,
+		operation: permissionOperation,
+		context: object.context,
+	})
 
-  // If no permission is defined by default we throw an error, Zero trust principle
-  if (!permissionProperties)
-    throw new Error(
-      `Permission denied to ${permissionOperation} class ${object.className}`,
-    )
+	// If no permission is defined by default we throw an error, Zero trust principle
+	if (!permissionProperties)
+		throw new Error(
+			`Permission denied to ${permissionOperation} class ${object.className}`,
+		)
 
-  const sessionId = object.context.sessionId
+	const sessionId = object.context.sessionId
 
-  if (
-    !permissionProperties.requireAuthentication &&
-    !permissionProperties.authorizedRoles
-  )
-    return
+	if (
+		!permissionProperties.requireAuthentication &&
+		!permissionProperties.authorizedRoles
+	)
+		return
 
-  // User is not corrected but requireAuthentication is on true
-  if (!sessionId || !object.getUser())
-    throw new Error(
-      `Permission denied to ${permissionOperation} class ${object.className}`,
-    )
+	// User is not corrected but requireAuthentication is on true
+	if (!sessionId || !object.getUser())
+		throw new Error(
+			`Permission denied to ${permissionOperation} class ${object.className}`,
+		)
 
-  if (permissionProperties.authorizedRoles?.includes('everyone')) return
+	if (permissionProperties.authorizedRoles?.includes('everyone')) return
 
-  // authorizedRoles is empty
-  if (
-    permissionProperties.authorizedRoles?.length === 0 ||
-    !permissionProperties
-  )
-    throw new Error(
-      `Permission denied to ${permissionOperation} class ${object.className}`,
-    )
+	// authorizedRoles is empty
+	if (
+		permissionProperties.authorizedRoles?.length === 0 ||
+		!permissionProperties
+	)
+		throw new Error(
+			`Permission denied to ${permissionOperation} class ${object.className}`,
+		)
 
-  const roleName = object.context.user?.role?.name
+	const roleName = object.context.user?.role?.name
 
-  // No role name found
-  if (!roleName)
-    throw new Error(
-      `Permission denied to ${permissionOperation} class ${object.className}`,
-    )
+	// No role name found
+	if (!roleName)
+		throw new Error(
+			`Permission denied to ${permissionOperation} class ${object.className}`,
+		)
 
-  // The role of the user is not included in the authorizedRoles
-  if (!permissionProperties.authorizedRoles?.includes(roleName))
-    throw new Error(
-      `Permission denied to ${permissionOperation} class ${object.className}`,
-    )
+	// The role of the user is not included in the authorizedRoles
+	if (!permissionProperties.authorizedRoles?.includes(roleName))
+		throw new Error(
+			`Permission denied to ${permissionOperation} class ${object.className}`,
+		)
 }
 
 export const defaultCheckPermissionOnRead = (object: HookObject<any, any>) =>
-  _checkCLP(object, OperationType.BeforeRead)
+	_checkCLP(object, OperationType.BeforeRead)
 
 export const defaultCheckPermissionOnCreate = (object: HookObject<any, any>) =>
-  _checkCLP(object, OperationType.BeforeCreate)
+	_checkCLP(object, OperationType.BeforeCreate)
 
 export const defaultCheckPermissionOnUpdate = (object: HookObject<any, any>) =>
-  _checkCLP(object, OperationType.BeforeUpdate)
+	_checkCLP(object, OperationType.BeforeUpdate)
 
 export const defaultCheckPermissionOnDelete = (object: HookObject<any, any>) =>
-  _checkCLP(object, OperationType.BeforeDelete)
+	_checkCLP(object, OperationType.BeforeDelete)

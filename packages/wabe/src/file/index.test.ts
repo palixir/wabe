@@ -1,12 +1,12 @@
 import {
-  afterAll,
-  afterEach,
-  beforeAll,
-  describe,
-  expect,
-  it,
-  mock,
-  spyOn,
+	afterAll,
+	afterEach,
+	beforeAll,
+	describe,
+	expect,
+	it,
+	mock,
+	spyOn,
 } from 'bun:test'
 import { FileDevAdapter, type Wabe } from '..'
 import { type DevWabeTypes, getAnonymousClient } from '../utils/helper'
@@ -14,268 +14,268 @@ import { setupTests, closeTests } from '../utils/testHelper'
 import { gql } from 'graphql-request'
 
 describe('File upload', () => {
-  let wabe: Wabe<DevWabeTypes>
-  let port: number
+	let wabe: Wabe<DevWabeTypes>
+	let port: number
 
-  const spyFileDevAdapterUploadFile = spyOn(
-    FileDevAdapter.prototype,
-    'uploadFile',
-  )
-  const spyFileDevAdapterReadFile = spyOn(FileDevAdapter.prototype, 'readFile')
+	const spyFileDevAdapterUploadFile = spyOn(
+		FileDevAdapter.prototype,
+		'uploadFile',
+	)
+	const spyFileDevAdapterReadFile = spyOn(FileDevAdapter.prototype, 'readFile')
 
-  const mockBeforeUpload = mock()
+	const mockBeforeUpload = mock()
 
-  beforeAll(async () => {
-    const setup = await setupTests([
-      {
-        name: 'Test3',
-        fields: {
-          file: { type: 'File' },
-        },
-        permissions: {
-          read: {
-            requireAuthentication: false,
-          },
-          create: {
-            requireAuthentication: false,
-          },
-          update: {
-            requireAuthentication: false,
-          },
-          delete: {
-            requireAuthentication: false,
-          },
-        },
-      },
-    ])
-    wabe = setup.wabe
-    port = setup.port
+	beforeAll(async () => {
+		const setup = await setupTests([
+			{
+				name: 'Test3',
+				fields: {
+					file: { type: 'File' },
+				},
+				permissions: {
+					read: {
+						requireAuthentication: false,
+					},
+					create: {
+						requireAuthentication: false,
+					},
+					update: {
+						requireAuthentication: false,
+					},
+					delete: {
+						requireAuthentication: false,
+					},
+				},
+			},
+		])
+		wabe = setup.wabe
+		port = setup.port
 
-    spyFileDevAdapterReadFile.mockClear()
-    spyFileDevAdapterUploadFile.mockClear()
+		spyFileDevAdapterReadFile.mockClear()
+		spyFileDevAdapterUploadFile.mockClear()
 
-    const fileConfig = wabe.config.file
+		const fileConfig = wabe.config.file
 
-    if (fileConfig) fileConfig.beforeUpload = mockBeforeUpload
-  })
+		if (fileConfig) fileConfig.beforeUpload = mockBeforeUpload
+	})
 
-  afterAll(async () => {
-    await closeTests(wabe)
-  })
+	afterAll(async () => {
+		await closeTests(wabe)
+	})
 
-  afterEach(async () => {
-    spyFileDevAdapterUploadFile.mockClear()
-    spyFileDevAdapterReadFile.mockClear()
-    mockBeforeUpload.mockClear()
+	afterEach(async () => {
+		spyFileDevAdapterUploadFile.mockClear()
+		spyFileDevAdapterReadFile.mockClear()
+		mockBeforeUpload.mockClear()
 
-    await wabe.controllers.database.deleteObjects({
-      // @ts-expect-error
-      className: 'Test3',
-      context: {
-        isRoot: true,
-        wabe,
-      },
-      where: {},
-      select: {},
-    })
-  })
+		await wabe.controllers.database.deleteObjects({
+			// @ts-expect-error
+			className: 'Test3',
+			context: {
+				isRoot: true,
+				wabe,
+			},
+			where: {},
+			select: {},
+		})
+	})
 
-  it('should call beforeUpload if specified in the file config', async () => {
-    await wabe.controllers.database.createObject({
-      // @ts-expect-error
-      className: 'Test3',
-      context: {
-        isRoot: true,
-        wabe,
-      },
-      data: {
-        // @ts-expect-error
-        file: {
-          file: new File(['a'], 'a', { type: 'text/plain' }),
-        },
-      },
-      select: {},
-    })
+	it('should call beforeUpload if specified in the file config', async () => {
+		await wabe.controllers.database.createObject({
+			// @ts-expect-error
+			className: 'Test3',
+			context: {
+				isRoot: true,
+				wabe,
+			},
+			data: {
+				// @ts-expect-error
+				file: {
+					file: new File(['a'], 'a', { type: 'text/plain' }),
+				},
+			},
+			select: {},
+		})
 
-    expect(mockBeforeUpload).toHaveBeenCalledTimes(1)
-    const fileArg = mockBeforeUpload.mock.calls[0]?.[0]
-    expect(fileArg?.name).toEqual('a')
-    expect(await fileArg?.text()).toEqual('a')
+		expect(mockBeforeUpload).toHaveBeenCalledTimes(1)
+		const fileArg = mockBeforeUpload.mock.calls[0]?.[0]
+		expect(fileArg?.name).toEqual('a')
+		expect(await fileArg?.text()).toEqual('a')
 
-    // should return the same file if no file is returned by beforeUpload
-    expect(spyFileDevAdapterUploadFile).toHaveBeenCalledTimes(1)
-    const fileArg2 = spyFileDevAdapterUploadFile.mock.calls[0]?.[0]
-    expect(fileArg2?.name).toEqual('a')
-    expect(await fileArg2?.text()).toEqual('a')
-  })
+		// should return the same file if no file is returned by beforeUpload
+		expect(spyFileDevAdapterUploadFile).toHaveBeenCalledTimes(1)
+		const fileArg2 = spyFileDevAdapterUploadFile.mock.calls[0]?.[0]
+		expect(fileArg2?.name).toEqual('a')
+		expect(await fileArg2?.text()).toEqual('a')
+	})
 
-  it('should call beforeUpload and return the file returned by beforeUpload', async () => {
-    mockBeforeUpload.mockImplementationOnce(
-      () => new File(['b'], 'b.txt', { type: 'text/plain' }),
-    )
+	it('should call beforeUpload and return the file returned by beforeUpload', async () => {
+		mockBeforeUpload.mockImplementationOnce(
+			() => new File(['b'], 'b.txt', { type: 'text/plain' }),
+		)
 
-    await wabe.controllers.database.createObject({
-      // @ts-expect-error
-      className: 'Test3',
-      context: {
-        isRoot: true,
-        wabe,
-      },
-      data: {
-        // @ts-expect-error
-        file: {
-          file: new File(['a'], 'a', { type: 'text/plain' }),
-        },
-      },
-      select: {},
-    })
+		await wabe.controllers.database.createObject({
+			// @ts-expect-error
+			className: 'Test3',
+			context: {
+				isRoot: true,
+				wabe,
+			},
+			data: {
+				// @ts-expect-error
+				file: {
+					file: new File(['a'], 'a', { type: 'text/plain' }),
+				},
+			},
+			select: {},
+		})
 
-    expect(mockBeforeUpload).toHaveBeenCalledTimes(1)
-    const fileArg = mockBeforeUpload.mock.calls[0]?.[0]
-    expect(fileArg?.name).toEqual('a')
-    expect(await fileArg?.text()).toEqual('a')
+		expect(mockBeforeUpload).toHaveBeenCalledTimes(1)
+		const fileArg = mockBeforeUpload.mock.calls[0]?.[0]
+		expect(fileArg?.name).toEqual('a')
+		expect(await fileArg?.text()).toEqual('a')
 
-    // should return the same file if no file is returned by beforeUpload
-    expect(spyFileDevAdapterUploadFile).toHaveBeenCalledTimes(1)
-    const fileArg2 = spyFileDevAdapterUploadFile.mock.calls[0]?.[0]
-    expect(fileArg2?.name).toEqual('b.txt')
-    expect(await fileArg2?.text()).toEqual('b')
-  })
+		// should return the same file if no file is returned by beforeUpload
+		expect(spyFileDevAdapterUploadFile).toHaveBeenCalledTimes(1)
+		const fileArg2 = spyFileDevAdapterUploadFile.mock.calls[0]?.[0]
+		expect(fileArg2?.name).toEqual('b.txt')
+		expect(await fileArg2?.text()).toEqual('b')
+	})
 
-  it('should not crash when there is no extension for the uploaded file', async () => {
-    await wabe.controllers.database.createObject({
-      // @ts-expect-error
-      className: 'Test3',
-      context: {
-        isRoot: true,
-        wabe,
-      },
-      data: {
-        // @ts-expect-error
-        file: {
-          file: new File(['a'], 'a', { type: 'text/plain' }),
-        },
-      },
-      select: {},
-    })
+	it('should not crash when there is no extension for the uploaded file', async () => {
+		await wabe.controllers.database.createObject({
+			// @ts-expect-error
+			className: 'Test3',
+			context: {
+				isRoot: true,
+				wabe,
+			},
+			data: {
+				// @ts-expect-error
+				file: {
+					file: new File(['a'], 'a', { type: 'text/plain' }),
+				},
+			},
+			select: {},
+		})
 
-    const result = await wabe.controllers.database.getObjects({
-      // @ts-expect-error
-      className: 'Test3',
-      context: {
-        isRoot: true,
-        wabe,
-      },
-      where: {},
-      // @ts-expect-error
-      select: { file: true, id: true },
-    })
+		const result = await wabe.controllers.database.getObjects({
+			// @ts-expect-error
+			className: 'Test3',
+			context: {
+				isRoot: true,
+				wabe,
+			},
+			where: {},
+			// @ts-expect-error
+			select: { file: true, id: true },
+		})
 
-    // @ts-expect-error
-    expect(result[0].file.name).toEqual('a')
-    // @ts-expect-error
-    expect(result[0].file.url).toEqual(`http://127.0.0.1:${port}/bucket/a`)
-  })
+		// @ts-expect-error
+		expect(result[0].file.name).toEqual('a')
+		// @ts-expect-error
+		expect(result[0].file.url).toEqual(`http://127.0.0.1:${port}/bucket/a`)
+	})
 
-  it('should throw an error if no file adapter is provided', async () => {
-    const previousFileController = wabe.controllers.file
-    // @ts-expect-error
-    wabe.controllers.file = null
+	it('should throw an error if no file adapter is provided', async () => {
+		const previousFileController = wabe.controllers.file
+		// @ts-expect-error
+		wabe.controllers.file = null
 
-    const formData = new FormData()
+		const formData = new FormData()
 
-    formData.append(
-      'operations',
-      JSON.stringify({
-        query:
-          'mutation ($file: File!) {createTest3(input: {fields: {file: {file:$file}}}){test3{id, file {name, isPresignedUrl}}}}',
-        variables: { file: null },
-      }),
-    )
+		formData.append(
+			'operations',
+			JSON.stringify({
+				query:
+					'mutation ($file: File!) {createTest3(input: {fields: {file: {file:$file}}}){test3{id, file {name, isPresignedUrl}}}}',
+				variables: { file: null },
+			}),
+		)
 
-    formData.append('map', JSON.stringify({ 0: ['variables.file'] }))
+		formData.append('map', JSON.stringify({ 0: ['variables.file'] }))
 
-    formData.append('0', new File(['a'], 'a.text', { type: 'text/plain' }))
+		formData.append('0', new File(['a'], 'a.text', { type: 'text/plain' }))
 
-    console.log('before fetch')
-    const res = await fetch(`http://127.0.0.1:${port}/graphql`, {
-      method: 'POST',
-      body: formData,
-    })
+		console.log('before fetch')
+		const res = await fetch(`http://127.0.0.1:${port}/graphql`, {
+			method: 'POST',
+			body: formData,
+		})
 
-    expect(await res.text()).toContain('No file adapter found')
+		expect(await res.text()).toContain('No file adapter found')
 
-    wabe.controllers.file = previousFileController
-  })
+		wabe.controllers.file = previousFileController
+	})
 
-  it("should upload a file with the database controller's method", async () => {
-    await wabe.controllers.database.createObject({
-      // @ts-expect-error
-      className: 'Test3',
-      context: {
-        isRoot: true,
-        wabe,
-      },
-      data: {
-        // @ts-expect-error
-        file: {
-          file: new File(['a'], 'a.text', { type: 'text/plain' }),
-        },
-      },
-      select: {},
-    })
+	it("should upload a file with the database controller's method", async () => {
+		await wabe.controllers.database.createObject({
+			// @ts-expect-error
+			className: 'Test3',
+			context: {
+				isRoot: true,
+				wabe,
+			},
+			data: {
+				// @ts-expect-error
+				file: {
+					file: new File(['a'], 'a.text', { type: 'text/plain' }),
+				},
+			},
+			select: {},
+		})
 
-    const result = await wabe.controllers.database.getObjects({
-      // @ts-expect-error
-      className: 'Test3',
-      context: {
-        isRoot: true,
-        wabe,
-      },
-      where: {},
-      // @ts-expect-error
-      select: { file: true, id: true },
-    })
+		const result = await wabe.controllers.database.getObjects({
+			// @ts-expect-error
+			className: 'Test3',
+			context: {
+				isRoot: true,
+				wabe,
+			},
+			where: {},
+			// @ts-expect-error
+			select: { file: true, id: true },
+		})
 
-    // @ts-expect-error
-    expect(result[0].file.name).toEqual('a.text')
-    // @ts-expect-error
-    expect(result[0].file.url).toEqual(`http://127.0.0.1:${port}/bucket/a.text`)
+		// @ts-expect-error
+		expect(result[0].file.name).toEqual('a.text')
+		// @ts-expect-error
+		expect(result[0].file.url).toEqual(`http://127.0.0.1:${port}/bucket/a.text`)
 
-    const res = await wabe.controllers.database.updateObject({
-      // @ts-expect-error
-      className: 'Test3',
-      context: {
-        isRoot: true,
-        wabe,
-      },
-      where: {},
-      // @ts-expect-error
-      select: { file: true, id: true },
-      data: {
-        // @ts-expect-error
-        file: {
-          url: 'https://palixir.github.io/wabe//assets/logo.png',
-        },
-      },
-      id: result?.[0]?.id || '',
-    })
+		const res = await wabe.controllers.database.updateObject({
+			// @ts-expect-error
+			className: 'Test3',
+			context: {
+				isRoot: true,
+				wabe,
+			},
+			where: {},
+			// @ts-expect-error
+			select: { file: true, id: true },
+			data: {
+				// @ts-expect-error
+				file: {
+					url: 'https://palixir.github.io/wabe//assets/logo.png',
+				},
+			},
+			id: result?.[0]?.id || '',
+		})
 
-    // @ts-expect-error
-    expect(res.file.url).toEqual(
-      'https://palixir.github.io/wabe//assets/logo.png',
-    )
-    // @ts-expect-error
-    expect(res.file.isPresignedUrl).toEqual(false)
-  })
+		// @ts-expect-error
+		expect(res.file.url).toEqual(
+			'https://palixir.github.io/wabe//assets/logo.png',
+		)
+		// @ts-expect-error
+		expect(res.file.isPresignedUrl).toEqual(false)
+	})
 
-  it('should upload multiple objects with the same file', async () => {
-    const formData = new FormData()
+	it('should upload multiple objects with the same file', async () => {
+		const formData = new FormData()
 
-    formData.append(
-      'operations',
-      JSON.stringify({
-        query: gql`
+		formData.append(
+			'operations',
+			JSON.stringify({
+				query: gql`
 					mutation ($file: File!, $file2: File!) {
 						createTest3s(
 							input: {
@@ -296,151 +296,151 @@ describe('File upload', () => {
 						}
 					}
 				`,
-        variables: { file: null },
-      }),
-    )
+				variables: { file: null },
+			}),
+		)
 
-    formData.append(
-      'map',
-      JSON.stringify({ 0: ['variables.file'], 1: ['variables.file2'] }),
-    )
-    formData.append('0', new File(['a'], 'a.text', { type: 'text/plain' }))
-    formData.append('1', new File(['b'], 'b.text', { type: 'text/plain' }))
+		formData.append(
+			'map',
+			JSON.stringify({ 0: ['variables.file'], 1: ['variables.file2'] }),
+		)
+		formData.append('0', new File(['a'], 'a.text', { type: 'text/plain' }))
+		formData.append('1', new File(['b'], 'b.text', { type: 'text/plain' }))
 
-    const res = await fetch(`http://127.0.0.1:${port}/graphql`, {
-      method: 'POST',
-      body: formData,
-    })
+		const res = await fetch(`http://127.0.0.1:${port}/graphql`, {
+			method: 'POST',
+			body: formData,
+		})
 
-    const jsonRes = await res.json()
+		const jsonRes = await res.json()
 
-    // Return the url in dev adapter it's the file name
-    expect(jsonRes.data.createTest3s.edges[0].node.file.name).toEqual('a.text')
-    expect(jsonRes.data.createTest3s.edges[1].node.file.name).toEqual('b.text')
+		// Return the url in dev adapter it's the file name
+		expect(jsonRes.data.createTest3s.edges[0].node.file.name).toEqual('a.text')
+		expect(jsonRes.data.createTest3s.edges[1].node.file.name).toEqual('b.text')
 
-    expect(spyFileDevAdapterUploadFile).toHaveBeenCalledTimes(2)
-    const fileArg = spyFileDevAdapterUploadFile.mock.calls[0]?.[0]
-    expect(fileArg?.name).toEqual('a.text')
-    expect(await fileArg?.text()).toEqual('a')
+		expect(spyFileDevAdapterUploadFile).toHaveBeenCalledTimes(2)
+		const fileArg = spyFileDevAdapterUploadFile.mock.calls[0]?.[0]
+		expect(fileArg?.name).toEqual('a.text')
+		expect(await fileArg?.text()).toEqual('a')
 
-    const fileArg2 = spyFileDevAdapterUploadFile.mock.calls[1]?.[0]
-    expect(fileArg2?.name).toEqual('b.text')
-    expect(await fileArg2?.text()).toEqual('b')
-  })
+		const fileArg2 = spyFileDevAdapterUploadFile.mock.calls[1]?.[0]
+		expect(fileArg2?.name).toEqual('b.text')
+		expect(await fileArg2?.text()).toEqual('b')
+	})
 
-  it('should upload a file on request on type File on create request', async () => {
-    const formData = new FormData()
+	it('should upload a file on request on type File on create request', async () => {
+		const formData = new FormData()
 
-    formData.append(
-      'operations',
-      JSON.stringify({
-        query:
-          'mutation ($file: File!) {createTest3(input: {fields: {file: {file:$file}}}){test3{id, file {name, isPresignedUrl}}}}',
-        variables: { file: null },
-      }),
-    )
+		formData.append(
+			'operations',
+			JSON.stringify({
+				query:
+					'mutation ($file: File!) {createTest3(input: {fields: {file: {file:$file}}}){test3{id, file {name, isPresignedUrl}}}}',
+				variables: { file: null },
+			}),
+		)
 
-    formData.append('map', JSON.stringify({ 0: ['variables.file'] }))
+		formData.append('map', JSON.stringify({ 0: ['variables.file'] }))
 
-    formData.append('0', new File(['a'], 'a.text', { type: 'text/plain' }))
+		formData.append('0', new File(['a'], 'a.text', { type: 'text/plain' }))
 
-    const res = await fetch(`http://127.0.0.1:${port}/graphql`, {
-      method: 'POST',
-      body: formData,
-    })
+		const res = await fetch(`http://127.0.0.1:${port}/graphql`, {
+			method: 'POST',
+			body: formData,
+		})
 
-    const jsonRes = await res.json()
+		const jsonRes = await res.json()
 
-    // Return the url in dev adapter it's the file name
-    expect(jsonRes.data.createTest3.test3.file.name).toEqual('a.text')
-    expect(jsonRes.data.createTest3.test3.file.isPresignedUrl).toEqual(true)
+		// Return the url in dev adapter it's the file name
+		expect(jsonRes.data.createTest3.test3.file.name).toEqual('a.text')
+		expect(jsonRes.data.createTest3.test3.file.isPresignedUrl).toEqual(true)
 
-    expect(spyFileDevAdapterUploadFile).toHaveBeenCalledTimes(1)
-    const fileArg = spyFileDevAdapterUploadFile.mock.calls[0]?.[0]
-    expect(fileArg?.name).toEqual('a.text')
-    expect(await fileArg?.text()).toEqual('a')
-  })
+		expect(spyFileDevAdapterUploadFile).toHaveBeenCalledTimes(1)
+		const fileArg = spyFileDevAdapterUploadFile.mock.calls[0]?.[0]
+		expect(fileArg?.name).toEqual('a.text')
+		expect(await fileArg?.text()).toEqual('a')
+	})
 
-  it('should upload a file on request on type File on update request', async () => {
-    const formData = new FormData()
+	it('should upload a file on request on type File on update request', async () => {
+		const formData = new FormData()
 
-    formData.append(
-      'operations',
-      JSON.stringify({
-        query:
-          'mutation ($file: File!) {createTest3(input: {fields: {file: {file:$file}}}){test3{id, file { name }}}}',
-        variables: { file: null },
-      }),
-    )
+		formData.append(
+			'operations',
+			JSON.stringify({
+				query:
+					'mutation ($file: File!) {createTest3(input: {fields: {file: {file:$file}}}){test3{id, file { name }}}}',
+				variables: { file: null },
+			}),
+		)
 
-    formData.append('map', JSON.stringify({ 0: ['variables.file'] }))
+		formData.append('map', JSON.stringify({ 0: ['variables.file'] }))
 
-    formData.append('0', new File(['a'], 'a.text', { type: 'text/plain' }))
+		formData.append('0', new File(['a'], 'a.text', { type: 'text/plain' }))
 
-    const res = await fetch(`http://127.0.0.1:${port}/graphql`, {
-      method: 'POST',
-      body: formData,
-    })
+		const res = await fetch(`http://127.0.0.1:${port}/graphql`, {
+			method: 'POST',
+			body: formData,
+		})
 
-    const jsonRes = await res.json()
+		const jsonRes = await res.json()
 
-    const idOfCreatedObject = jsonRes.data.createTest3.test3.id
+		const idOfCreatedObject = jsonRes.data.createTest3.test3.id
 
-    const formData2 = new FormData()
+		const formData2 = new FormData()
 
-    formData2.append(
-      'operations',
-      JSON.stringify({
-        query: `mutation ($file: File!) {updateTest3(input: {id: "${idOfCreatedObject}",fields: {file: {file:$file}}}){test3{id, file { name }}}}`,
-        variables: { file: null },
-      }),
-    )
+		formData2.append(
+			'operations',
+			JSON.stringify({
+				query: `mutation ($file: File!) {updateTest3(input: {id: "${idOfCreatedObject}",fields: {file: {file:$file}}}){test3{id, file { name }}}}`,
+				variables: { file: null },
+			}),
+		)
 
-    formData2.append('map', JSON.stringify({ 0: ['variables.file'] }))
+		formData2.append('map', JSON.stringify({ 0: ['variables.file'] }))
 
-    formData2.append('0', new File(['b'], 'b.text', { type: 'text/plain' }))
+		formData2.append('0', new File(['b'], 'b.text', { type: 'text/plain' }))
 
-    const updatedRes = await fetch(`http://127.0.0.1:${port}/graphql`, {
-      method: 'POST',
-      body: formData2,
-    })
+		const updatedRes = await fetch(`http://127.0.0.1:${port}/graphql`, {
+			method: 'POST',
+			body: formData2,
+		})
 
-    const jsonUpdatedRes = await updatedRes.json()
+		const jsonUpdatedRes = await updatedRes.json()
 
-    // Return the url in dev adapter it's the file name
-    expect(jsonUpdatedRes.data.updateTest3.test3.file.name).toEqual('b.text')
+		// Return the url in dev adapter it's the file name
+		expect(jsonUpdatedRes.data.updateTest3.test3.file.name).toEqual('b.text')
 
-    // 2 for create and update
-    expect(spyFileDevAdapterUploadFile).toHaveBeenCalledTimes(2)
-    const fileArg = spyFileDevAdapterUploadFile.mock.calls[1]?.[0]
-    expect(fileArg?.name).toEqual('b.text')
-    expect(await fileArg?.text()).toEqual('b')
-  })
+		// 2 for create and update
+		expect(spyFileDevAdapterUploadFile).toHaveBeenCalledTimes(2)
+		const fileArg = spyFileDevAdapterUploadFile.mock.calls[1]?.[0]
+		expect(fileArg?.name).toEqual('b.text')
+		expect(await fileArg?.text()).toEqual('b')
+	})
 
-  it('should return the url of the file on after read request', async () => {
-    const formData = new FormData()
+	it('should return the url of the file on after read request', async () => {
+		const formData = new FormData()
 
-    formData.append(
-      'operations',
-      JSON.stringify({
-        query:
-          'mutation ($file: File!) {createTest3(input: {fields: {file: {file:$file}}}){test3{id, file { name}}}}',
-        variables: { file: null },
-      }),
-    )
+		formData.append(
+			'operations',
+			JSON.stringify({
+				query:
+					'mutation ($file: File!) {createTest3(input: {fields: {file: {file:$file}}}){test3{id, file { name}}}}',
+				variables: { file: null },
+			}),
+		)
 
-    formData.append('map', JSON.stringify({ 0: ['variables.file'] }))
+		formData.append('map', JSON.stringify({ 0: ['variables.file'] }))
 
-    formData.append('0', new File(['a'], 'a.text', { type: 'text/plain' }))
+		formData.append('0', new File(['a'], 'a.text', { type: 'text/plain' }))
 
-    await fetch(`http://127.0.0.1:${port}/graphql`, {
-      method: 'POST',
-      body: formData,
-    })
+		await fetch(`http://127.0.0.1:${port}/graphql`, {
+			method: 'POST',
+			body: formData,
+		})
 
-    const anonymousClient = getAnonymousClient(port)
+		const anonymousClient = getAnonymousClient(port)
 
-    const { test3s } = await anonymousClient.request<any>(gql`
+		const { test3s } = await anonymousClient.request<any>(gql`
 			query {
 				test3s {
 					edges {
@@ -457,37 +457,37 @@ describe('File upload', () => {
 			}
 		`)
 
-    expect(test3s.edges[0].node.file.name).toEqual('a.text')
-    expect(test3s.edges[0].node.file.url).toEqual(
-      `http://127.0.0.1:${port}/bucket/a.text`,
-    )
-    expect(new Date(test3s.edges[0].node.file.urlGeneratedAt)).toBeDate()
-  })
+		expect(test3s.edges[0].node.file.name).toEqual('a.text')
+		expect(test3s.edges[0].node.file.url).toEqual(
+			`http://127.0.0.1:${port}/bucket/a.text`,
+		)
+		expect(new Date(test3s.edges[0].node.file.urlGeneratedAt)).toBeDate()
+	})
 
-  it('should not read the file again in the bucket if the cache is not expired', async () => {
-    const formData = new FormData()
+	it('should not read the file again in the bucket if the cache is not expired', async () => {
+		const formData = new FormData()
 
-    formData.append(
-      'operations',
-      JSON.stringify({
-        query:
-          'mutation ($file: File!) {createTest3(input: {fields: {file: {file:$file}}}){test3{id, file { name}}}}',
-        variables: { file: null },
-      }),
-    )
+		formData.append(
+			'operations',
+			JSON.stringify({
+				query:
+					'mutation ($file: File!) {createTest3(input: {fields: {file: {file:$file}}}){test3{id, file { name}}}}',
+				variables: { file: null },
+			}),
+		)
 
-    formData.append('map', JSON.stringify({ 0: ['variables.file'] }))
+		formData.append('map', JSON.stringify({ 0: ['variables.file'] }))
 
-    formData.append('0', new File(['a'], 'a.text', { type: 'text/plain' }))
+		formData.append('0', new File(['a'], 'a.text', { type: 'text/plain' }))
 
-    await fetch(`http://127.0.0.1:${port}/graphql`, {
-      method: 'POST',
-      body: formData,
-    })
+		await fetch(`http://127.0.0.1:${port}/graphql`, {
+			method: 'POST',
+			body: formData,
+		})
 
-    const anonymousClient = getAnonymousClient(port)
+		const anonymousClient = getAnonymousClient(port)
 
-    const { test3s } = await anonymousClient.request<any>(gql`
+		const { test3s } = await anonymousClient.request<any>(gql`
 			query {
 				test3s {
 					edges {
@@ -504,15 +504,15 @@ describe('File upload', () => {
 			}
 		`)
 
-    expect(test3s.edges[0].node.file.name).toEqual('a.text')
-    expect(test3s.edges[0].node.file.url).toEqual(
-      `http://127.0.0.1:${port}/bucket/a.text`,
-    )
-    expect(new Date(test3s.edges[0].node.file.urlGeneratedAt)).toBeDate()
+		expect(test3s.edges[0].node.file.name).toEqual('a.text')
+		expect(test3s.edges[0].node.file.url).toEqual(
+			`http://127.0.0.1:${port}/bucket/a.text`,
+		)
+		expect(new Date(test3s.edges[0].node.file.urlGeneratedAt)).toBeDate()
 
-    expect(spyFileDevAdapterReadFile).toHaveBeenCalledTimes(1)
+		expect(spyFileDevAdapterReadFile).toHaveBeenCalledTimes(1)
 
-    await anonymousClient.request<any>(gql`
+		await anonymousClient.request<any>(gql`
 			query {
 				test3s {
 					edges {
@@ -529,34 +529,34 @@ describe('File upload', () => {
 			}
 		`)
 
-    // Again once because the cache is not expired
-    expect(spyFileDevAdapterReadFile).toHaveBeenCalledTimes(1)
-  })
+		// Again once because the cache is not expired
+		expect(spyFileDevAdapterReadFile).toHaveBeenCalledTimes(1)
+	})
 
-  it('should reset the cache if the file is updated', async () => {
-    const formData = new FormData()
+	it('should reset the cache if the file is updated', async () => {
+		const formData = new FormData()
 
-    formData.append(
-      'operations',
-      JSON.stringify({
-        query:
-          'mutation ($file: File!) {createTest3(input: {fields: {file: {file:$file}}}){test3{id, file { name}}}}',
-        variables: { file: null },
-      }),
-    )
+		formData.append(
+			'operations',
+			JSON.stringify({
+				query:
+					'mutation ($file: File!) {createTest3(input: {fields: {file: {file:$file}}}){test3{id, file { name}}}}',
+				variables: { file: null },
+			}),
+		)
 
-    formData.append('map', JSON.stringify({ 0: ['variables.file'] }))
+		formData.append('map', JSON.stringify({ 0: ['variables.file'] }))
 
-    formData.append('0', new File(['a'], 'a.text', { type: 'text/plain' }))
+		formData.append('0', new File(['a'], 'a.text', { type: 'text/plain' }))
 
-    await fetch(`http://127.0.0.1:${port}/graphql`, {
-      method: 'POST',
-      body: formData,
-    })
+		await fetch(`http://127.0.0.1:${port}/graphql`, {
+			method: 'POST',
+			body: formData,
+		})
 
-    const anonymousClient = getAnonymousClient(port)
+		const anonymousClient = getAnonymousClient(port)
 
-    const { test3s } = await anonymousClient.request<any>(gql`
+		const { test3s } = await anonymousClient.request<any>(gql`
 			query {
 				test3s {
 					edges {
@@ -573,37 +573,37 @@ describe('File upload', () => {
 			}
 		`)
 
-    expect(test3s.edges[0].node.file.name).toEqual('a.text')
-    expect(test3s.edges[0].node.file.url).toEqual(
-      `http://127.0.0.1:${port}/bucket/a.text`,
-    )
-    expect(new Date(test3s.edges[0].node.file.urlGeneratedAt)).toBeDate()
+		expect(test3s.edges[0].node.file.name).toEqual('a.text')
+		expect(test3s.edges[0].node.file.url).toEqual(
+			`http://127.0.0.1:${port}/bucket/a.text`,
+		)
+		expect(new Date(test3s.edges[0].node.file.urlGeneratedAt)).toBeDate()
 
-    expect(spyFileDevAdapterReadFile).toHaveBeenCalledTimes(1)
+		expect(spyFileDevAdapterReadFile).toHaveBeenCalledTimes(1)
 
-    const idOfCreatedObject = test3s.edges[0].node.id
+		const idOfCreatedObject = test3s.edges[0].node.id
 
-    const formData2 = new FormData()
+		const formData2 = new FormData()
 
-    formData2.append(
-      'operations',
-      JSON.stringify({
-        query: `mutation ($file: File!) {updateTest3(input: {id: "${idOfCreatedObject}",fields: {file: {file:$file}}}){test3{id, file { name }}}}`,
-        variables: { file: null },
-      }),
-    )
+		formData2.append(
+			'operations',
+			JSON.stringify({
+				query: `mutation ($file: File!) {updateTest3(input: {id: "${idOfCreatedObject}",fields: {file: {file:$file}}}){test3{id, file { name }}}}`,
+				variables: { file: null },
+			}),
+		)
 
-    formData2.append('map', JSON.stringify({ 0: ['variables.file'] }))
+		formData2.append('map', JSON.stringify({ 0: ['variables.file'] }))
 
-    formData2.append('0', new File(['b'], 'b.text', { type: 'text/plain' }))
+		formData2.append('0', new File(['b'], 'b.text', { type: 'text/plain' }))
 
-    // We update the file
-    await fetch(`http://127.0.0.1:${port}/graphql`, {
-      method: 'POST',
-      body: formData2,
-    })
+		// We update the file
+		await fetch(`http://127.0.0.1:${port}/graphql`, {
+			method: 'POST',
+			body: formData2,
+		})
 
-    await anonymousClient.request<any>(gql`
+		await anonymousClient.request<any>(gql`
 			query {
 				test3s {
 					edges {
@@ -620,34 +620,34 @@ describe('File upload', () => {
 			}
 		`)
 
-    // Again once because the file was updated
-    expect(spyFileDevAdapterReadFile).toHaveBeenCalledTimes(2)
-  })
+		// Again once because the file was updated
+		expect(spyFileDevAdapterReadFile).toHaveBeenCalledTimes(2)
+	})
 
-  it('should reset the cache if the url is updated', async () => {
-    const formData = new FormData()
+	it('should reset the cache if the url is updated', async () => {
+		const formData = new FormData()
 
-    formData.append(
-      'operations',
-      JSON.stringify({
-        query:
-          'mutation ($file: File!) {createTest3(input: {fields: {file: {file:$file}}}){test3{id, file { name}}}}',
-        variables: { file: null },
-      }),
-    )
+		formData.append(
+			'operations',
+			JSON.stringify({
+				query:
+					'mutation ($file: File!) {createTest3(input: {fields: {file: {file:$file}}}){test3{id, file { name}}}}',
+				variables: { file: null },
+			}),
+		)
 
-    formData.append('map', JSON.stringify({ 0: ['variables.file'] }))
+		formData.append('map', JSON.stringify({ 0: ['variables.file'] }))
 
-    formData.append('0', new File(['a'], 'a.text', { type: 'text/plain' }))
+		formData.append('0', new File(['a'], 'a.text', { type: 'text/plain' }))
 
-    await fetch(`http://127.0.0.1:${port}/graphql`, {
-      method: 'POST',
-      body: formData,
-    })
+		await fetch(`http://127.0.0.1:${port}/graphql`, {
+			method: 'POST',
+			body: formData,
+		})
 
-    const anonymousClient = getAnonymousClient(port)
+		const anonymousClient = getAnonymousClient(port)
 
-    const { test3s } = await anonymousClient.request<any>(gql`
+		const { test3s } = await anonymousClient.request<any>(gql`
 			query {
 				test3s {
 					edges {
@@ -664,36 +664,36 @@ describe('File upload', () => {
 			}
 		`)
 
-    expect(test3s.edges[0].node.file.name).toEqual('a.text')
-    expect(test3s.edges[0].node.file.url).toEqual(
-      `http://127.0.0.1:${port}/bucket/a.text`,
-    )
-    expect(new Date(test3s.edges[0].node.file.urlGeneratedAt)).toBeDate()
+		expect(test3s.edges[0].node.file.name).toEqual('a.text')
+		expect(test3s.edges[0].node.file.url).toEqual(
+			`http://127.0.0.1:${port}/bucket/a.text`,
+		)
+		expect(new Date(test3s.edges[0].node.file.urlGeneratedAt)).toBeDate()
 
-    expect(spyFileDevAdapterReadFile).toHaveBeenCalledTimes(1)
+		expect(spyFileDevAdapterReadFile).toHaveBeenCalledTimes(1)
 
-    const idOfCreatedObject = test3s.edges[0].node.id
+		const idOfCreatedObject = test3s.edges[0].node.id
 
-    await wabe.controllers.database.updateObject({
-      // @ts-expect-error
-      className: 'Test3',
-      context: {
-        isRoot: true,
-        wabe,
-      },
-      where: {},
-      // @ts-expect-error
-      select: { file: true, id: true },
-      data: {
-        // @ts-expect-error
-        file: {
-          url: 'https://palixir.github.io/wabe//assets/logo.png',
-        },
-      },
-      id: idOfCreatedObject,
-    })
+		await wabe.controllers.database.updateObject({
+			// @ts-expect-error
+			className: 'Test3',
+			context: {
+				isRoot: true,
+				wabe,
+			},
+			where: {},
+			// @ts-expect-error
+			select: { file: true, id: true },
+			data: {
+				// @ts-expect-error
+				file: {
+					url: 'https://palixir.github.io/wabe//assets/logo.png',
+				},
+			},
+			id: idOfCreatedObject,
+		})
 
-    await anonymousClient.request<any>(gql`
+		await anonymousClient.request<any>(gql`
 			query {
 				test3s {
 					edges {
@@ -710,41 +710,41 @@ describe('File upload', () => {
 			}
 		`)
 
-    expect(spyFileDevAdapterReadFile).toHaveBeenCalledTimes(1)
-  })
+		expect(spyFileDevAdapterReadFile).toHaveBeenCalledTimes(1)
+	})
 
-  it('should delete the file on the bucket after delete the object', async () => {
-    const formData = new FormData()
+	it('should delete the file on the bucket after delete the object', async () => {
+		const formData = new FormData()
 
-    formData.append(
-      'operations',
-      JSON.stringify({
-        query:
-          'mutation ($file: File!) {createTest3(input: {fields: {file: {file:$file}}}){test3{id, file { name}}}}',
-        variables: { file: null },
-      }),
-    )
+		formData.append(
+			'operations',
+			JSON.stringify({
+				query:
+					'mutation ($file: File!) {createTest3(input: {fields: {file: {file:$file}}}){test3{id, file { name}}}}',
+				variables: { file: null },
+			}),
+		)
 
-    formData.append('map', JSON.stringify({ 0: ['variables.file'] }))
+		formData.append('map', JSON.stringify({ 0: ['variables.file'] }))
 
-    formData.append('0', new File(['a'], 'a.text', { type: 'text/plain' }))
+		formData.append('0', new File(['a'], 'a.text', { type: 'text/plain' }))
 
-    const res = await fetch(`http://127.0.0.1:${port}/graphql`, {
-      method: 'POST',
-      body: formData,
-    })
+		const res = await fetch(`http://127.0.0.1:${port}/graphql`, {
+			method: 'POST',
+			body: formData,
+		})
 
-    const jsonRes = await res.json()
+		const jsonRes = await res.json()
 
-    const id = jsonRes.data.createTest3.test3.id
+		const id = jsonRes.data.createTest3.test3.id
 
-    const url = await wabe.config.file?.adapter.readFile('a.text')
-    expect(url).not.toBeNull()
+		const url = await wabe.config.file?.adapter.readFile('a.text')
+		expect(url).not.toBeNull()
 
-    const anonymousClient = getAnonymousClient(port)
+		const anonymousClient = getAnonymousClient(port)
 
-    await anonymousClient.request<any>(
-      gql`
+		await anonymousClient.request<any>(
+			gql`
         mutation {
           deleteTest3(input: {id: "${id}"}) {
             test3 {
@@ -753,9 +753,9 @@ describe('File upload', () => {
           }
         }
       `,
-    )
+		)
 
-    const { test3s } = await anonymousClient.request<any>(gql`
+		const { test3s } = await anonymousClient.request<any>(gql`
 			query {
 				test3s {
 					edges {
@@ -772,47 +772,47 @@ describe('File upload', () => {
 			}
 		`)
 
-    expect(test3s.edges.length).toEqual(0)
+		expect(test3s.edges.length).toEqual(0)
 
-    const url2 = await wabe.config.file?.adapter.readFile('a.text')
-    expect(url2).toBeNull()
-  })
+		const url2 = await wabe.config.file?.adapter.readFile('a.text')
+		expect(url2).toBeNull()
+	})
 
-  it('should not delete a file if the file not exists', async () => {
-    const formData = new FormData()
+	it('should not delete a file if the file not exists', async () => {
+		const formData = new FormData()
 
-    formData.append(
-      'operations',
-      JSON.stringify({
-        query:
-          'mutation ($file: File!) {createTest3(input: {fields: {file: {file:$file}}}){test3{id, file { name}}}}',
-        variables: { file: null },
-      }),
-    )
+		formData.append(
+			'operations',
+			JSON.stringify({
+				query:
+					'mutation ($file: File!) {createTest3(input: {fields: {file: {file:$file}}}){test3{id, file { name}}}}',
+				variables: { file: null },
+			}),
+		)
 
-    formData.append('map', JSON.stringify({ 0: ['variables.file'] }))
+		formData.append('map', JSON.stringify({ 0: ['variables.file'] }))
 
-    formData.append('0', new File(['a'], 'a.text', { type: 'text/plain' }))
+		formData.append('0', new File(['a'], 'a.text', { type: 'text/plain' }))
 
-    const res = await fetch(`http://127.0.0.1:${port}/graphql`, {
-      method: 'POST',
-      body: formData,
-    })
+		const res = await fetch(`http://127.0.0.1:${port}/graphql`, {
+			method: 'POST',
+			body: formData,
+		})
 
-    const jsonRes = await res.json()
+		const jsonRes = await res.json()
 
-    const id = jsonRes.data.createTest3.test3.id
+		const id = jsonRes.data.createTest3.test3.id
 
-    const url = await wabe.config.file?.adapter.readFile('a.text')
-    expect(url).not.toBeNull()
+		const url = await wabe.config.file?.adapter.readFile('a.text')
+		expect(url).not.toBeNull()
 
-    await wabe.config.file?.adapter.deleteFile('a.text')
+		await wabe.config.file?.adapter.deleteFile('a.text')
 
-    const anonymousClient = getAnonymousClient(port)
+		const anonymousClient = getAnonymousClient(port)
 
-    expect(
-      anonymousClient.request<any>(
-        gql`
+		expect(
+			anonymousClient.request<any>(
+				gql`
         mutation {
           deleteTest3(input: {id: "${id}"}) {
             test3 {
@@ -821,14 +821,14 @@ describe('File upload', () => {
           }
         }
       `,
-      ),
-    ).resolves.toEqual(expect.anything())
-  })
+			),
+		).resolves.toEqual(expect.anything())
+	})
 
-  it('should upload a file providing an url without File scalar', async () => {
-    const anonymousClient = getAnonymousClient(port)
+	it('should upload a file providing an url without File scalar', async () => {
+		const anonymousClient = getAnonymousClient(port)
 
-    await anonymousClient.request<any>(gql`
+		await anonymousClient.request<any>(gql`
 			mutation {
 				createTest3(
 					input: {
@@ -851,7 +851,7 @@ describe('File upload', () => {
 			}
 		`)
 
-    const { test3s } = await anonymousClient.request<any>(gql`
+		const { test3s } = await anonymousClient.request<any>(gql`
 			query {
 				test3s {
 					edges {
@@ -868,52 +868,52 @@ describe('File upload', () => {
 			}
 		`)
 
-    expect(test3s.edges[0].node.file.url).toEqual(
-      'https://palixir.github.io/wabe//assets/logo.png',
-    )
-  })
+		expect(test3s.edges[0].node.file.url).toEqual(
+			'https://palixir.github.io/wabe//assets/logo.png',
+		)
+	})
 
-  it('should upload a file and access to it with the local url provided by upload directory', async () => {
-    await wabe.controllers.database.createObject({
-      // @ts-expect-error
-      className: 'Test3',
-      context: {
-        isRoot: true,
-        wabe,
-      },
-      data: {
-        // @ts-expect-error
-        file: {
-          file: new File(['this is the content'], 'a.txt', {
-            type: 'text/plain',
-          }),
-        },
-      },
-      select: {},
-    })
+	it('should upload a file and access to it with the local url provided by upload directory', async () => {
+		await wabe.controllers.database.createObject({
+			// @ts-expect-error
+			className: 'Test3',
+			context: {
+				isRoot: true,
+				wabe,
+			},
+			data: {
+				// @ts-expect-error
+				file: {
+					file: new File(['this is the content'], 'a.txt', {
+						type: 'text/plain',
+					}),
+				},
+			},
+			select: {},
+		})
 
-    const result = await wabe.controllers.database.getObjects({
-      // @ts-expect-error
-      className: 'Test3',
-      context: {
-        isRoot: true,
-        wabe,
-      },
-      where: {},
-      // @ts-expect-error
-      select: { file: true, id: true },
-    })
+		const result = await wabe.controllers.database.getObjects({
+			// @ts-expect-error
+			className: 'Test3',
+			context: {
+				isRoot: true,
+				wabe,
+			},
+			where: {},
+			// @ts-expect-error
+			select: { file: true, id: true },
+		})
 
-    // @ts-expect-error
-    expect(result[0].file.name).toEqual('a.txt')
-    // @ts-expect-error
-    expect(result[0].file.url).toEqual(`http://127.0.0.1:${port}/bucket/a.txt`)
+		// @ts-expect-error
+		expect(result[0].file.name).toEqual('a.txt')
+		// @ts-expect-error
+		expect(result[0].file.url).toEqual(`http://127.0.0.1:${port}/bucket/a.txt`)
 
-    // @ts-expect-error
-    const url = result?.[0]?.file?.url
+		// @ts-expect-error
+		const url = result?.[0]?.file?.url
 
-    const res = await fetch(url)
+		const res = await fetch(url)
 
-    expect(await res.text()).toEqual('this is the content')
-  })
+		expect(await res.text()).toEqual('this is the content')
+	})
 })

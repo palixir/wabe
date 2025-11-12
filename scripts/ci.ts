@@ -8,20 +8,20 @@ const excludedPackages = ['wabe-build', 'wabe-documentation']
 const otherPackagesToRunAfterMainPackages = ['wabe-mongodb', 'wabe-postgres']
 
 const packagesWithoutDatabaseAdapters = packages.filter(
-  (packageDirectory) =>
-    ![...excludedPackages, ...otherPackagesToRunAfterMainPackages].includes(
-      packageDirectory.name,
-    ),
+	(packageDirectory) =>
+		![...excludedPackages, ...otherPackagesToRunAfterMainPackages].includes(
+			packageDirectory.name,
+		),
 )
 
 const firstCommand = packagesWithoutDatabaseAdapters
-  .map(({ name }) => `bun --filter ./packages/${name} ci`)
-  .join(' && ')
+	.map(({ name }) => `bun --filter ./packages/${name} ci`)
+	.join(' && ')
 
 // Include wabe-mongodb and wabe-postgres
 const secondCommand = otherPackagesToRunAfterMainPackages
-  .map((name) => `bun --filter ./packages/${name} ci`)
-  .join(' && ')
+	.map((name) => `bun --filter ./packages/${name} ci`)
+	.join(' && ')
 
 await $`sh -c ${firstCommand}`
 

@@ -3,19 +3,19 @@ import type { WabeContext } from '../../server/interface'
 import type { DevWabeTypes } from '../../utils/helper'
 
 export const sendEmailResolver = (
-  _: any,
-  { input }: MutationSendEmailArgs,
-  context: WabeContext<DevWabeTypes>,
+	_: any,
+	{ input }: MutationSendEmailArgs,
+	context: WabeContext<DevWabeTypes>,
 ) => {
-  if (!context.user && !context.isRoot) throw new Error('Permission denied')
+	if (!context.user && !context.isRoot) throw new Error('Permission denied')
 
-  const emailController = context.wabe.controllers.email
+	const emailController = context.wabe.controllers.email
 
-  if (!emailController) throw new Error('Email adapter not defined')
+	if (!emailController) throw new Error('Email adapter not defined')
 
-  return emailController.send({
-    ...input,
-    text: input.text ?? undefined,
-    html: input.html ?? undefined,
-  })
+	return emailController.send({
+		...input,
+		text: input.text ?? undefined,
+		html: input.html ?? undefined,
+	})
 }

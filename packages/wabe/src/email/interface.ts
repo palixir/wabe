@@ -1,26 +1,26 @@
 export type HtmlTemplates = {
-  sendOTPCode: {
-    fn: (options: { otp: string }) => string | Promise<string>
-    subject: string
-  }
+	sendOTPCode: {
+		fn: (options: { otp: string }) => string | Promise<string>
+		subject: string
+	}
 }
 
 export interface EmailSendOptions {
-  from: string
-  to: Array<string>
-  subject: string
-  node?: any
-  html?: string
-  text?: string
+	from: string
+	to: Array<string>
+	subject: string
+	node?: any
+	html?: string
+	text?: string
 }
 
 export interface EmailAdapter {
-  /**
-   * Send an email using the provided adapter
-   * @param options Mail options (expeditor, recipient, subject ...)
-   * @return The id of the email sended, throw an error if something wrong
-   */
-  send(options: EmailSendOptions): Promise<string>
+	/**
+	 * Send an email using the provided adapter
+	 * @param options Mail options (expeditor, recipient, subject ...)
+	 * @return The id of the email sended, throw an error if something wrong
+	 */
+	send(options: EmailSendOptions): Promise<string>
 }
 
 /**
@@ -30,7 +30,7 @@ export interface EmailAdapter {
  * @property templates The html templates to use for a specific email. If not provided, Wabe will use the default templates
  */
 export interface EmailConfig {
-  adapter: EmailAdapter
-  mainEmail?: string
-  htmlTemplates?: HtmlTemplates
+	adapter: EmailAdapter
+	mainEmail?: string
+	htmlTemplates?: HtmlTemplates
 }

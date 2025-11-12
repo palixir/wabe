@@ -1,19 +1,19 @@
 {
-  "compilerOptions": {
-    "lib": ["ESNext", "DOM"],
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "strict": true,
-    "skipLibCheck": true,
-    "noFallthroughCasesInSwitch": true,
-    "allowJs": true,
-    "jsx": "react-jsx",
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "declarationDir": "./dist",
-    "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
-    "noEmit": false
-  }
+	"compilerOptions": {
+		"lib": ["ESNext", "DOM"],
+		"target": "ESNext",
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"strict": true,
+		"skipLibCheck": true,
+		"noFallthroughCasesInSwitch": true,
+		"allowJs": true,
+		"jsx": "react-jsx",
+		"declaration": true,
+		"emitDeclarationOnly": true,
+		"declarationDir": "./dist",
+		"allowImportingTsExtensions": true,
+		"verbatimModuleSyntax": true,
+		"noEmit": false
+	}
 }
