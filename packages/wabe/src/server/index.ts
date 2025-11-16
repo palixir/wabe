@@ -5,7 +5,7 @@ import {
 	Schema,
 	type SchemaInterface,
 } from '../schema/Schema'
-import { GraphQLObjectType, GraphQLSchema } from 'graphql'
+import { GraphQLError, GraphQLObjectType, GraphQLSchema } from 'graphql'
 import { GraphQLSchema as WabeGraphQLSchema } from '../graphql'
 import type { AuthenticationConfig } from '../authentication/interface'
 import { type WabeRoute, defaultRoutes } from './routes'
@@ -23,7 +23,6 @@ import { defaultSessionHandler } from './defaultHandlers'
 import type { CronConfig } from '../cron'
 import type { FileConfig } from '../file'
 import { WobeGraphqlYogaPlugin } from 'wobe-graphql-yoga'
-import { useDisableIntrospection } from '@graphql-yoga/plugin-disable-introspection'
 
 type SecurityConfig = {
 	corsOptions?: CorsOptions
@@ -285,7 +284,38 @@ export class Wabe<T extends WabeTypes> {
 					this.config.security?.hideSensitiveErrorMessage ||
 					this.config.isProduction,
 				graphqlEndpoint: '/graphql',
-				plugins: this.config.isProduction ? [useDisableIntrospection()] : [],
+				plugins: [
+					{
+						// @ts-expect-error
+						onValidate: ({ addValidationRule }) => {
+							// @ts-expect-error
+							addValidationRule((context) => {
+								return {
+									// @ts-expect-error
+									Field(node) {
+										const introspectionFields = [
+											'__schema',
+											'__type',
+											'__typeKind',
+											'__field',
+											'__inputValue',
+											'__enumValue',
+											'__directive',
+										]
+
+										if (introspectionFields.includes(node.name.value)) {
+											context.reportError(
+												new GraphQLError(
+													'GraphQL introspection is not allowed in production',
+												),
+											)
+										}
+									},
+								}
+							})
+						},
+					},
+				],
 				context: async (ctx): Promise<WabeContext<T>> => ctx.wabe,
 			}),
 		)

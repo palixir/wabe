@@ -29,7 +29,6 @@
 		"generate:codegen": "touch generated/wabe.ts && CODEGEN=true bun dev/index.ts"
 	},
 	"dependencies": {
-		"@graphql-yoga/plugin-disable-introspection": "2.10.9",
 		"croner": "9.0.0",
 		"graphql": "16.12.0",
 		"js-srp6a": "1.0.2",

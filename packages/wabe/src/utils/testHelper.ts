@@ -17,13 +17,14 @@ export const getDatabaseAdapter = async (databaseName: string) => {
 
 export const setupTests = async (
 	additionalClasses: ClassInterface<any>[] = [],
+	isProduction = false,
 ) => {
 	const databaseId = uuid()
 
 	const port = await getPort()
 
 	const wabe = new Wabe<DevWabeTypes>({
-		isProduction: false,
+		isProduction,
 		rootKey: 'dev',
 		database: {
 			// @ts-expect-error
