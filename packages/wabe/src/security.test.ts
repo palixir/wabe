@@ -22,6 +22,49 @@ describe('Security tests', () => {
 		await wabe.close()
 	})
 
+	it('should block GraphQL introspection queries for anonymous and authenticated users for isProduction server', async () => {
+		const setup = await setupTests([], true)
+		wabe = setup.wabe
+		port = setup.port
+		client = getAnonymousClient(port)
+		rootClient = getGraphqlClient(port)
+
+		// Test pour un utilisateur anonyme
+		expect(
+			client.request(gql`
+				query IntrospectionQuery {
+					__schema {
+						types {
+							name
+						}
+					}
+				}
+			`),
+		).rejects.toThrow('GraphQL introspection is not allowed in production')
+
+		// Test pour un utilisateur authentifié (même un admin)
+		const { userClient } = await createUserAndUpdateRole({
+			anonymousClient: client,
+			port,
+			roleName: 'Admin',
+			rootClient,
+		})
+
+		expect(
+			userClient.request(gql`
+				query IntrospectionQuery {
+					__schema {
+						types {
+							name
+						}
+					}
+				}
+			`),
+		).rejects.toThrow('GraphQL introspection is not allowed in production')
+
+		await closeTests(wabe)
+	})
+
 	it('should return null if the accessToken is an invalid accessToken', async () => {
 		const setup = await setupTests()
 		wabe = setup.wabe
