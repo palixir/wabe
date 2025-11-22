@@ -30,6 +30,9 @@ export const setupTests = async (
 				cookieSession: true,
 			},
 		},
+		security: {
+			disableCSRFProtection: true,
+		},
 		port,
 		schema: {
 			classes: [

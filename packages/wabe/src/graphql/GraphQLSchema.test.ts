@@ -28,6 +28,9 @@ const createWabe = async (schema: SchemaInterface<DevWabeTypes>) => {
 			// @ts-expect-error
 			adapter: await getDatabaseAdapter(databaseId),
 		},
+		security: {
+			disableCSRFProtection: true,
+		},
 	})
 
 	await wabe.start()
