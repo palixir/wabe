@@ -64,6 +64,8 @@ export const startPostgres = async (): Promise<void> => {
 
 		console.info('PostgreSQL started')
 	} catch (error: any) {
+		console.error('An error occurred:', error)
+
 		if (error.message.includes('there a typo in the url or port')) {
 			console.error('You need to run Docker on your machine')
 			process.exit(1)
@@ -87,7 +89,5 @@ export const startPostgres = async (): Promise<void> => {
 		} catch (cleanupError) {
 			console.error('Error during cleanup:', cleanupError)
 		}
-
-		console.error('An error occurred:', error)
 	}
 }
