@@ -10,6 +10,47 @@ import { getDatabaseAdapter } from '../utils/testHelper'
 import { RoleEnum } from 'generated/wabe'
 
 describe('Server', () => {
+	it('should throw error if no jwt secret provided but cookie session choosen', async () => {
+		const databaseId = uuid()
+
+		const port = await getPort()
+		const wabe = new Wabe({
+			isProduction: false,
+			rootKey:
+				'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+			database: {
+				// @ts-expect-error
+				adapter: await getDatabaseAdapter(databaseId),
+			},
+			port,
+			authentication: {
+				// @ts-expect-error
+				session: {
+					cookieSession: true,
+				},
+			},
+			routes: [
+				{
+					handler: (ctx) => ctx.res.send('Hello World!'),
+					path: '/hello',
+					method: 'GET',
+				},
+			],
+			schema: {
+				classes: [
+					{
+						name: 'Collection1',
+						fields: { name: { type: 'String' } },
+					},
+				],
+			},
+		})
+
+		expect(wabe.start()).rejects.toThrow(
+			'Authentication with cookie needs jwt secret',
+		)
+	})
+
 	it('should mask graphql errors message', async () => {
 		spyOn(console, 'error').mockReturnValue()
 		const databaseId = uuid()
