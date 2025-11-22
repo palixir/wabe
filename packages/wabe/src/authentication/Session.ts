@@ -101,7 +101,10 @@ export class Session {
 			}
 
 		// CSRF check
-		if (context.wabe.config.security?.csrfProtection) {
+		if (
+			context.wabe.config.security?.disableCSRFProtection !== undefined &&
+			!context.wabe.config.security.disableCSRFProtection
+		) {
 			const secretKey =
 				context.wabe.config.authentication?.session?.jwtSecret || 'dev'
 

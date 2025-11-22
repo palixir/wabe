@@ -317,3 +317,24 @@ const run = async () => {
 
 await run();
 ```
+
+## Disable CSRF protection
+
+By default the CSRF protection is enable but you can disable it (not recommended). On your front-end you will need to transfer the csrfToken that is returned in a non httpOnly cookie by Wabe into the header Wabe-Csrf-Token.
+
+```ts
+import { Wabe } from "wabe";
+
+const run = async () => {
+  const wabe = new Wabe({
+    // ... other configuration fields
+    security: {
+      disableCSRFProtection: true,
+    },
+  });
+
+  await wabe.start();
+};
+
+await run();
+```

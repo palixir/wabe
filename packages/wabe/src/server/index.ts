@@ -28,7 +28,7 @@ type SecurityConfig = {
 	corsOptions?: CorsOptions
 	rateLimit?: RateLimitOptions
 	hideSensitiveErrorMessage?: boolean
-	csrfProtection?: boolean
+	disableCSRFProtection?: boolean
 }
 
 export * from './interface'

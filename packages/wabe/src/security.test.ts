@@ -42,7 +42,7 @@ describe('Security tests', () => {
 					},
 				},
 			],
-			{ csrfProtection: true },
+			{ disableCSRFProtection: false },
 		)
 
 		wabe = setup.wabe

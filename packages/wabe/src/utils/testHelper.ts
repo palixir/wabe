@@ -19,7 +19,7 @@ export const setupTests = async (
 	additionalClasses: ClassInterface<any>[] = [],
 	options: {
 		isProduction?: boolean
-		csrfProtection?: boolean
+		disableCSRFProtection?: boolean
 	} = {},
 ) => {
 	const databaseId = uuid()
@@ -34,7 +34,8 @@ export const setupTests = async (
 			adapter: await getDatabaseAdapter(databaseId),
 		},
 		security: {
-			csrfProtection: !!options.csrfProtection,
+			// To make test easier keep default value to true
+			disableCSRFProtection: options.disableCSRFProtection ?? true,
 		},
 		authentication: {
 			roles: ['Client', 'Client2', 'Client3', 'Admin'],
