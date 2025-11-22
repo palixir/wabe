@@ -36,11 +36,15 @@ export const getAnonymousClient = (port: number): GraphQLClient => {
 
 export const getUserClient = (
 	port: number,
-	accessToken: string,
+	options: {
+		accessToken?: string
+		csrfToken?: string
+	},
 ): GraphQLClient => {
 	const client = new GraphQLClient(`http://127.0.0.1:${port}/graphql`, {
 		headers: {
-			'Wabe-Access-Token': accessToken,
+			'Wabe-Access-Token': options.accessToken || '',
+			'Wabe-Csrf-Token': options.csrfToken || '',
 		},
 	})
 
@@ -136,6 +140,7 @@ export const createUserAndUpdateRole = async ({
         id
         accessToken
         refreshToken
+		csrfToken
       }
     }
   `,
@@ -175,7 +180,9 @@ export const createUserAndUpdateRole = async ({
 			}
 		`)
 
-	const userClient = getUserClient(port, res.signUpWith.accessToken)
+	const userClient = getUserClient(port, {
+		accessToken: res.signUpWith.accessToken,
+	})
 
 	return {
 		userClient,
@@ -183,5 +190,6 @@ export const createUserAndUpdateRole = async ({
 		userId: res.signUpWith.id,
 		refreshToken: res.signUpWith.refreshToken,
 		accessToken: res.signUpWith.accessToken,
+		csrfToken: res.signUpWith.csrfToken,
 	}
 }

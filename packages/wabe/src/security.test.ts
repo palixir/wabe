@@ -22,8 +22,144 @@ describe('Security tests', () => {
 		await wabe.close()
 	})
 
+	it('should block requests without a valid CSRF token', async () => {
+		const setup = await setupTests(
+			[
+				{
+					name: 'TestCSRF',
+					fields: {
+						name: { type: 'String' },
+					},
+					permissions: {
+						create: {
+							authorizedRoles: ['Client'],
+							requireAuthentication: true,
+						},
+						read: {
+							authorizedRoles: ['Client'],
+							requireAuthentication: true,
+						},
+					},
+				},
+			],
+			{ csrfProtection: true },
+		)
+
+		wabe = setup.wabe
+		port = setup.port
+		client = getAnonymousClient(port)
+		rootClient = getGraphqlClient(port)
+
+		const { userClient, accessToken, csrfToken } =
+			await createUserAndUpdateRole({
+				anonymousClient: client,
+				port,
+				roleName: 'Client',
+				rootClient,
+			})
+
+		expect(
+			userClient.request(gql`
+			mutation createTestCSRF {
+			  createTestCSRF(input: { fields: { name: "CSRF Test" } }) {
+				testCSRF {
+				  id
+				}
+			  }
+			}
+		  `),
+		).rejects.toThrow('Permission denied to create class TestCSRF')
+
+		const invalidCsrfClient = getUserClient(port, {
+			accessToken,
+			csrfToken: 'invalid-csrf-token',
+		})
+		expect(
+			invalidCsrfClient.request(gql`
+			mutation createTestCSRF {
+			  createTestCSRF(input: { fields: { name: "CSRF Test" } }) {
+				testCSRF {
+				  id
+				}
+			  }
+			}
+		  `),
+		).rejects.toThrow('Permission denied to create class TestCSRF')
+
+		const validCsrfClient = getUserClient(port, {
+			accessToken,
+			csrfToken,
+		})
+
+		const res = await validCsrfClient.request<any>(gql`
+			mutation createTestCSRF {
+			  createTestCSRF(input: { fields: { name: "CSRF Test" } }) {
+				testCSRF {
+				  id
+				}
+			  }
+			}
+		  `)
+
+		expect(res.createTestCSRF.testCSRF.id).toBeDefined()
+
+		await closeTests(wabe)
+	})
+
+	it('should not block requests without a valid CSRF token if security.csrfToken is to false', async () => {
+		const setup = await setupTests([
+			{
+				name: 'TestCSRF',
+				fields: {
+					name: { type: 'String' },
+				},
+				permissions: {
+					create: {
+						authorizedRoles: ['Client'],
+						requireAuthentication: true,
+					},
+					read: {
+						authorizedRoles: ['Client'],
+						requireAuthentication: true,
+					},
+				},
+			},
+		])
+
+		wabe = setup.wabe
+		port = setup.port
+		client = getAnonymousClient(port)
+		rootClient = getGraphqlClient(port)
+
+		const { accessToken } = await createUserAndUpdateRole({
+			anonymousClient: client,
+			port,
+			roleName: 'Client',
+			rootClient,
+		})
+
+		const invalidCsrfClient = getUserClient(port, {
+			accessToken,
+			csrfToken: 'invalid-csrf-token',
+		})
+
+		const res = await invalidCsrfClient.request<any>(gql`
+			mutation createTestCSRF {
+			  createTestCSRF(input: { fields: { name: "CSRF Test" } }) {
+				testCSRF {
+				  id
+				}
+			  }
+			}
+		  `)
+
+		expect(res.createTestCSRF.testCSRF.id).toBeDefined()
+
+		await closeTests(wabe)
+	})
+
 	it('should block GraphQL introspection queries for anonymous and authenticated users for isProduction server', async () => {
-		const setup = await setupTests([], true)
+		const setup = await setupTests([], { isProduction: true })
 		wabe = setup.wabe
 		port = setup.port
 		client = getAnonymousClient(port)
@@ -89,7 +225,7 @@ describe('Security tests', () => {
 			'dev',
 		)
 
-		const userClient = getUserClient(port, invalidToken)
+		const userClient = getUserClient(port, { accessToken: invalidToken })
 
 		const res = await userClient.request<any>(gql`
 			query me {
@@ -2544,10 +2680,9 @@ describe('Security tests', () => {
 			},
 		})
 
-		const userClientAfterRefresh = getUserClient(
-			port,
-			resAfterRefresh.refresh.accessToken,
-		)
+		const userClientAfterRefresh = getUserClient(port, {
+			accessToken: resAfterRefresh.refresh.accessToken,
+		})
 
 		const resOfTest = await userClientAfterRefresh.request<any>(gql`
 			query tests {
@@ -2630,7 +2765,7 @@ describe('Security tests', () => {
 			rootClient,
 		})
 
-		const userClient = getUserClient(port, 'invalidToken')
+		const userClient = getUserClient(port, { accessToken: 'invalidToken' })
 
 		expect(
 			userClient.request<any>(gql`

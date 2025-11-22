@@ -56,6 +56,15 @@ export const defaultSessionHandler =
 			return
 		}
 
+		const getCsrfToken = () => {
+			if (headers.get('Wabe-Csrf-Token'))
+				return { csrfToken: headers.get('Wabe-Csrf-Token') || '' }
+
+			return { csrfToken: '' }
+		}
+
+		const { csrfToken } = getCsrfToken()
+
 		const session = new Session()
 
 		const {
@@ -63,11 +72,14 @@ export const defaultSessionHandler =
 			sessionId,
 			accessToken: newAccessToken,
 			refreshToken: newRefreshToken,
-		} = await session.meFromAccessToken(accessToken, {
-			wabe,
-			isRoot: true,
-			isGraphQLCall,
-		})
+		} = await session.meFromAccessToken(
+			{ accessToken, csrfToken },
+			{
+				wabe,
+				isRoot: true,
+				isGraphQLCall,
+			},
+		)
 
 		ctx.wabe = {
 			isRoot: false,

@@ -63,7 +63,9 @@ const createUserAndUpdateRole = async ({
 			}
 		`)
 
-	const userClient = getUserClient(port, res.signUpWith.accessToken)
+	const userClient = getUserClient(port, {
+		accessToken: res.signUpWith.accessToken,
+	})
 
 	return {
 		userClient,

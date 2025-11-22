@@ -69,7 +69,9 @@ describe('hooks/session', () => {
 			},
 		})
 
-		const userClient = getUserClient(port, res.signUpWith.accessToken)
+		const userClient = getUserClient(port, {
+			accessToken: res.signUpWith.accessToken,
+		})
 
 		await userClient.request<any>(graphql.signInWith, {
 			input: {

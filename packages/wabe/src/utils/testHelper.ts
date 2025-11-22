@@ -17,18 +17,24 @@ export const getDatabaseAdapter = async (databaseName: string) => {
 
 export const setupTests = async (
 	additionalClasses: ClassInterface<any>[] = [],
-	isProduction = false,
+	options: {
+		isProduction?: boolean
+		csrfProtection?: boolean
+	} = {},
 ) => {
 	const databaseId = uuid()
 
 	const port = await getPort()
 
 	const wabe = new Wabe<DevWabeTypes>({
-		isProduction,
+		isProduction: !!options.isProduction,
 		rootKey: 'dev',
 		database: {
 			// @ts-expect-error
 			adapter: await getDatabaseAdapter(databaseId),
+		},
+		security: {
+			csrfProtection: !!options.csrfProtection,
 		},
 		authentication: {
 			roles: ['Client', 'Client2', 'Client3', 'Admin'],

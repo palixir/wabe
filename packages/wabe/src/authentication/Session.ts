@@ -1,4 +1,5 @@
 import jwt, { verify } from 'jsonwebtoken'
+import crypto from 'node:crypto'
 import type { WabeContext } from '../server/interface'
 import type { User } from '../../generated/wabe'
 import type { WabeConfig } from '../server'
@@ -34,7 +35,7 @@ export class Session {
 	}
 
 	async meFromAccessToken(
-		accessToken: string,
+		{ accessToken, csrfToken }: { accessToken: string; csrfToken: string },
 		context: WabeContext<DevWabeTypes>,
 	): Promise<{
 		sessionId: string | null
@@ -99,6 +100,46 @@ export class Session {
 				refreshToken: null,
 			}
 
+		// CSRF check
+		if (context.wabe.config.security?.csrfProtection) {
+			const secretKey =
+				context.wabe.config.authentication?.session?.jwtSecret || 'dev'
+
+			const [receivedHmacHex, receivedRandomValue] = csrfToken.split('.')
+
+			if (!receivedHmacHex || !receivedRandomValue)
+				return {
+					sessionId: null,
+					user: null,
+					accessToken: null,
+					refreshToken: null,
+				}
+
+			const currentSessionId = session.id
+
+			const message = `${currentSessionId.length}!${currentSessionId}!${receivedRandomValue?.length}!${receivedRandomValue}`
+
+			const expectedHmac = crypto
+				.createHmac('sha256', secretKey)
+				.update(message)
+				.digest('hex')
+
+			const isValid = crypto.timingSafeEqual(
+				Buffer.from(receivedHmacHex || '', 'hex'),
+				Buffer.from(expectedHmac, 'hex'),
+			)
+
+			if (!isValid)
+				return {
+					sessionId: null,
+					user: null,
+					accessToken: null,
+					refreshToken: null,
+				}
+		}
+
+		// User check
+
 		const user = session.user
 
 		const userWithRole = await context.wabe.controllers.database.getObject({
@@ -154,6 +195,9 @@ export class Session {
 				})
 			: undefined
 
+		const secretKey =
+			context.wabe.config.authentication?.session?.jwtSecret || 'dev'
+
 		this.accessToken = jwt.sign(
 			{
 				userId,
@@ -161,7 +205,7 @@ export class Session {
 				iat: Date.now(),
 				exp: this.getAccessTokenExpireAt(context.wabe.config).getTime(),
 			},
-			context.wabe.config.authentication?.session?.jwtSecret || 'dev',
+			secretKey,
 		)
 
 		this.refreshToken = jwt.sign(
@@ -171,7 +215,7 @@ export class Session {
 				iat: Date.now(),
 				exp: this.getRefreshTokenExpireAt(context.wabe.config).getTime(),
 			},
-			context.wabe.config.authentication?.session?.jwtSecret || 'dev',
+			secretKey,
 		)
 
 		const res = await context.wabe.controllers.database.createObject({
@@ -191,9 +235,21 @@ export class Session {
 
 		if (!res) throw new Error('Session not created')
 
+		const sessionId = res.id
+		const randomValue = crypto.randomBytes(16).toString('hex')
+		const message = `${sessionId.length}!${sessionId}!${randomValue.length}!${randomValue}`
+
+		const hmac = crypto
+			.createHmac('sha256', secretKey)
+			.update(message)
+			.digest('hex')
+
+		const csrfToken = `${hmac}.${randomValue}`
+
 		return {
 			accessToken: this.accessToken,
 			refreshToken: this.refreshToken,
+			csrfToken,
 			sessionId: res.id,
 		}
 	}

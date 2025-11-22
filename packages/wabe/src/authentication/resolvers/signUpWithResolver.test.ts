@@ -160,6 +160,9 @@ describe('SignUpWith', () => {
       mutation signUpWith($input: SignUpWithInput!) {
           signUpWith(input: $input) {
               id
+			  accessToken
+			  refreshToken
+			  csrfToken
           }
       }
     `,
@@ -176,5 +179,8 @@ describe('SignUpWith', () => {
 		)
 
 		expect(res.signUpWith.id).toEqual(expect.any(String))
+		expect(res.signUpWith.accessToken).toEqual(expect.any(String))
+		expect(res.signUpWith.refreshToken).toEqual(expect.any(String))
+		expect(res.signUpWith.csrfToken).toEqual(expect.any(String))
 	})
 })

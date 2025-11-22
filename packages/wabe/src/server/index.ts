@@ -19,7 +19,7 @@ import { initializeRoles } from '../authentication/roles'
 import type { EmailConfig } from '../email'
 import { EmailController } from '../email/EmailController'
 import { FileController } from '../file/FileController'
-import { defaultSessionHandler } from './defaultHandlers'
+import { defaultSessionHandler } from './defaultSessionHandler'
 import type { CronConfig } from '../cron'
 import type { FileConfig } from '../file'
 import { WobeGraphqlYogaPlugin } from 'wobe-graphql-yoga'
@@ -28,6 +28,7 @@ type SecurityConfig = {
 	corsOptions?: CorsOptions
 	rateLimit?: RateLimitOptions
 	hideSensitiveErrorMessage?: boolean
+	csrfProtection?: boolean
 }
 
 export * from './interface'
