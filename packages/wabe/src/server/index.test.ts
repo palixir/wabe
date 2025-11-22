@@ -462,7 +462,7 @@ describe('Server', () => {
 			},
 		})
 
-		const userClient = getUserClient(port2, accessToken)
+		const userClient = getUserClient(port2, { accessToken })
 
 		await userClient.request<any>(
 			gql`

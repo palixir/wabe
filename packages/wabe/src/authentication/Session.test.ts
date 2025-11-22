@@ -206,7 +206,10 @@ describe('Session', () => {
 
 		const { accessToken } = await session.create('userId', context)
 
-		const res = await session.meFromAccessToken(accessToken, context)
+		const res = await session.meFromAccessToken(
+			{ accessToken, csrfToken: '' },
+			context,
+		)
 
 		expect(res.user).toBeNull()
 		expect(res.sessionId).toBeNull()
@@ -255,7 +258,7 @@ describe('Session', () => {
 		const { accessToken } = await session.create('userId', context)
 
 		const { sessionId, user } = await session.meFromAccessToken(
-			accessToken,
+			{ accessToken, csrfToken: '' },
 			context,
 		)
 

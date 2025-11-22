@@ -1746,6 +1746,7 @@ type SignInWithOutput {
   user: User
   accessToken: String
   refreshToken: String
+  csrfToken: String
   srp: SignInWithOutputSRPOutputSignInWith
 }
 
@@ -1797,6 +1798,7 @@ type SignUpWithOutput {
   id: String
   accessToken: String!
   refreshToken: String!
+  csrfToken: String
 }
 
 input SignUpWithInput {

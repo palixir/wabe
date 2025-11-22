@@ -60,7 +60,10 @@ export const signInWithResolver = async (
 
 	const session = new Session()
 
-	const { refreshToken, accessToken } = await session.create(userId, context)
+	const { refreshToken, accessToken, csrfToken } = await session.create(
+		userId,
+		context,
+	)
 
 	if (context.wabe.config.authentication?.session?.cookieSession) {
 		const accessTokenExpiresAt = session.getAccessTokenExpireAt(
@@ -73,7 +76,7 @@ export const signInWithResolver = async (
 		context.response?.setCookie('refreshToken', refreshToken, {
 			httpOnly: true,
 			path: '/',
-			sameSite: 'None',
+			sameSite: 'Strict',
 			secure: true,
 			expires: refreshTokenExpiresAt,
 		})
@@ -81,11 +84,19 @@ export const signInWithResolver = async (
 		context.response?.setCookie('accessToken', accessToken, {
 			httpOnly: true,
 			path: '/',
-			sameSite: 'None',
+			sameSite: 'Strict',
+			secure: true,
+			expires: accessTokenExpiresAt,
+		})
+
+		context.response?.setCookie('csrfToken', csrfToken, {
+			httpOnly: true,
+			path: '/',
+			sameSite: 'Strict',
 			secure: true,
 			expires: accessTokenExpiresAt,
 		})
 	}
 
-	return { accessToken, refreshToken, user, srp }
+	return { accessToken, refreshToken, csrfToken, user, srp }
 }
