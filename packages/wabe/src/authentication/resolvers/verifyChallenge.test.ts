@@ -97,6 +97,7 @@ describe('verifyChallenge', () => {
 			accessToken: 'accessToken',
 			refreshToken: 'refreshToken',
 			sessionId: 'sessionId',
+			csrfToken: 'csrfToken',
 		})
 
 		mockOnVerifyChallenge.mockResolvedValue({ userId: 'userId' } as never)
