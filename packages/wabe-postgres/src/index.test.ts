@@ -440,6 +440,9 @@ describe('Postgres adapter', () => {
 				}),
 			},
 			port,
+			security: {
+				disableCSRFProtection: true,
+			},
 			schema: {
 				classes: [
 					{
