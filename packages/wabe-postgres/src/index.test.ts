@@ -469,6 +469,9 @@ describe('Postgres adapter', () => {
 					databaseName: databaseId,
 				}),
 			},
+			security: {
+				disableCSRFProtection: true,
+			},
 			port: port2,
 			schema: {
 				classes: [
