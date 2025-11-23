@@ -218,6 +218,13 @@ export class Wabe<T extends WabeTypes> {
 	}
 
 	async start() {
+		if (
+			!this.config.authentication?.session?.jwtSecret &&
+			(this.config.authentication?.session?.cookieSession ||
+				!this.config.security?.disableCSRFProtection)
+		)
+			throw new Error('Authentication with cookie needs jwt secret')
+
 		const wabeSchema = new Schema(this.config)
 
 		this.config.schema = wabeSchema.schema

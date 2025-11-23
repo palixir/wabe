@@ -28,6 +28,9 @@ export const setupTests = async (
 			},
 		},
 		port,
+		security: {
+			disableCSRFProtection: true,
+		},
 		schema: {
 			classes: [
 				...additionalClasses,

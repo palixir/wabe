@@ -10,6 +10,85 @@ import { getDatabaseAdapter } from '../utils/testHelper'
 import { RoleEnum } from 'generated/wabe'
 
 describe('Server', () => {
+	it('should throw error if no jwt secret provided but cookie session choosen', async () => {
+		const databaseId = uuid()
+
+		const port = await getPort()
+		const wabe = new Wabe({
+			isProduction: false,
+			rootKey:
+				'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+			database: {
+				// @ts-expect-error
+				adapter: await getDatabaseAdapter(databaseId),
+			},
+			port,
+			authentication: {
+				// @ts-expect-error
+				session: {
+					cookieSession: true,
+				},
+			},
+			routes: [
+				{
+					handler: (ctx) => ctx.res.send('Hello World!'),
+					path: '/hello',
+					method: 'GET',
+				},
+			],
+			schema: {
+				classes: [
+					{
+						name: 'Collection1',
+						fields: { name: { type: 'String' } },
+					},
+				],
+			},
+		})
+
+		expect(wabe.start()).rejects.toThrow(
+			'Authentication with cookie needs jwt secret',
+		)
+	})
+
+	it('should throw error if no jwt secret provided but csrf protection is enabled', async () => {
+		const databaseId = uuid()
+
+		const port = await getPort()
+		const wabe = new Wabe({
+			isProduction: false,
+			rootKey:
+				'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+			database: {
+				// @ts-expect-error
+				adapter: await getDatabaseAdapter(databaseId),
+			},
+			port,
+			security: {
+				disableCSRFProtection: false,
+			},
+			routes: [
+				{
+					handler: (ctx) => ctx.res.send('Hello World!'),
+					path: '/hello',
+					method: 'GET',
+				},
+			],
+			schema: {
+				classes: [
+					{
+						name: 'Collection1',
+						fields: { name: { type: 'String' } },
+					},
+				],
+			},
+		})
+
+		expect(wabe.start()).rejects.toThrow(
+			'Authentication with cookie needs jwt secret',
+		)
+	})
+
 	it('should mask graphql errors message', async () => {
 		spyOn(console, 'error').mockReturnValue()
 		const databaseId = uuid()
@@ -25,6 +104,7 @@ describe('Server', () => {
 			},
 			security: {
 				hideSensitiveErrorMessage: true,
+				disableCSRFProtection: true,
 			},
 			port,
 			schema: {
@@ -68,6 +148,9 @@ describe('Server', () => {
 				// @ts-expect-error
 				adapter: await getDatabaseAdapter(databaseId),
 			},
+			security: {
+				disableCSRFProtection: true,
+			},
 			port,
 			routes: [
 				{
@@ -104,6 +187,9 @@ describe('Server', () => {
 			database: {
 				// @ts-expect-error
 				adapter: await getDatabaseAdapter(databaseId),
+			},
+			security: {
+				disableCSRFProtection: true,
 			},
 			port,
 			schema: {
@@ -158,6 +244,9 @@ describe('Server', () => {
 				// @ts-expect-error
 				adapter: await getDatabaseAdapter(databaseId),
 			},
+			security: {
+				disableCSRFProtection: true,
+			},
 			port,
 			schema: {
 				classes: [
@@ -191,6 +280,9 @@ describe('Server', () => {
 				adapter: await getDatabaseAdapter(databaseId),
 			},
 			port,
+			security: {
+				disableCSRFProtection: true,
+			},
 			schema: {
 				classes: [
 					{
@@ -223,6 +315,9 @@ describe('Server', () => {
 						// @ts-expect-error
 						adapter: await getDatabaseAdapter(databaseId),
 					},
+					security: {
+						disableCSRFProtection: true,
+					},
 					port,
 					hooks: [
 						{
@@ -244,6 +339,9 @@ describe('Server', () => {
 						// @ts-expect-error
 						adapter: await getDatabaseAdapter(databaseId),
 					},
+					security: {
+						disableCSRFProtection: true,
+					},
 					port,
 					hooks: [],
 				}),
@@ -260,6 +358,9 @@ describe('Server', () => {
 						adapter: await getDatabaseAdapter(databaseId),
 					},
 					port,
+					security: {
+						disableCSRFProtection: true,
+					},
 					hooks: [
 						{
 							operationType: OperationType.BeforeCreate,
@@ -284,6 +385,9 @@ describe('Server', () => {
 				adapter: await getDatabaseAdapter(databaseId),
 			},
 			port,
+			security: {
+				disableCSRFProtection: true,
+			},
 		})
 
 		await wabe.start()
@@ -311,6 +415,9 @@ describe('Server', () => {
 				adapter: await getDatabaseAdapter(databaseId),
 			},
 			port,
+			security: {
+				disableCSRFProtection: true,
+			},
 			schema: {
 				classes: [
 					{
@@ -350,6 +457,9 @@ describe('Server', () => {
 				adapter: await getDatabaseAdapter(databaseId),
 			},
 			port,
+			security: {
+				disableCSRFProtection: true,
+			},
 			schema: {
 				classes: [
 					{
@@ -396,6 +506,9 @@ describe('Server', () => {
 				roles: ['Client'],
 			},
 			port,
+			security: {
+				disableCSRFProtection: true,
+			},
 		})
 
 		await wabeMain.start()
@@ -423,6 +536,9 @@ describe('Server', () => {
 						},
 					}
 				},
+			},
+			security: {
+				disableCSRFProtection: true,
 			},
 			schema: {
 				classes: [

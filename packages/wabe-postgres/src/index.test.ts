@@ -440,6 +440,9 @@ describe('Postgres adapter', () => {
 				}),
 			},
 			port,
+			security: {
+				disableCSRFProtection: true,
+			},
 			schema: {
 				classes: [
 					{
@@ -465,6 +468,9 @@ describe('Postgres adapter', () => {
 					databaseUrl: 'postgresql://wabe:wabe@localhost:5432',
 					databaseName: databaseId,
 				}),
+			},
+			security: {
+				disableCSRFProtection: true,
 			},
 			port: port2,
 			schema: {
