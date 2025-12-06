@@ -221,10 +221,14 @@ describe('Session', () => {
 				accessToken: { equalTo: accessToken },
 				OR: [
 					{
-						accessTokenExpiresAt: { greaterThanOrEqualTo: expect.any(Date) },
+						accessTokenExpiresAt: {
+							greaterThanOrEqualTo: expect.any(Date),
+						},
 					},
 					{
-						refreshTokenExpiresAt: { greaterThanOrEqualTo: expect.any(Date) },
+						refreshTokenExpiresAt: {
+							greaterThanOrEqualTo: expect.any(Date),
+						},
 					},
 				],
 			},
@@ -259,7 +263,16 @@ describe('Session', () => {
 
 		const { sessionId, user } = await session.meFromAccessToken(
 			{ accessToken, csrfToken: '' },
-			context,
+			{
+				...context,
+				wabe: {
+					...context.wabe,
+					config: {
+						...context.wabe.config,
+						security: { disableCSRFProtection: true },
+					},
+				},
+			},
 		)
 
 		expect(mockGetObjects).toHaveBeenCalledTimes(1)
@@ -269,10 +282,14 @@ describe('Session', () => {
 				accessToken: { equalTo: accessToken },
 				OR: [
 					{
-						accessTokenExpiresAt: { greaterThanOrEqualTo: expect.any(Date) },
+						accessTokenExpiresAt: {
+							greaterThanOrEqualTo: expect.any(Date),
+						},
 					},
 					{
-						refreshTokenExpiresAt: { greaterThanOrEqualTo: expect.any(Date) },
+						refreshTokenExpiresAt: {
+							greaterThanOrEqualTo: expect.any(Date),
+						},
 					},
 				],
 			},
@@ -314,14 +331,20 @@ describe('Session', () => {
 		expect(decodedAccessToken).not.toBeNull()
 		expect(decodedAccessToken.userId).toEqual('userId')
 		expect(decodedAccessToken.exp).toBeGreaterThanOrEqual(
-			fifteenMinutes.getTime(),
+			Math.floor(fifteenMinutes.getTime() / 1000),
 		)
-		expect(decodedAccessToken.iat).toBeGreaterThanOrEqual(Date.now() - 500) // minus 500ms to avoid flaky
+		expect(decodedAccessToken.iat).toBeGreaterThanOrEqual(
+			Math.floor((Date.now() - 500) / 1000),
+		) // minus 500ms to avoid flaky
 
 		expect(decodedRefreshToken).not.toBeNull()
 		expect(decodedRefreshToken.userId).toEqual('userId')
-		expect(decodedRefreshToken.exp).toBeGreaterThanOrEqual(thirtyDays.getTime())
-		expect(decodedRefreshToken.iat).toBeGreaterThanOrEqual(Date.now() - 500) // minus 500ms to avoid flaky
+		expect(decodedRefreshToken.exp).toBeGreaterThanOrEqual(
+			Math.floor(thirtyDays.getTime() / 1000),
+		)
+		expect(decodedRefreshToken.iat).toBeGreaterThanOrEqual(
+			Math.floor((Date.now() - 500) / 1000),
+		) // minus 500ms to avoid flaky
 
 		expect(mockCreateObject).toHaveBeenCalledTimes(1)
 		expect(mockCreateObject).toHaveBeenCalledWith({
@@ -438,6 +461,57 @@ describe('Session', () => {
 		expect(refreshTokenExpiresAt.getTime()).toBeGreaterThan(
 			Date.now() + 1000 * 60 * 60 * 24 * 30 - 1000,
 		)
+	})
+
+	it('should return null if access token is invalid (malformed)', async () => {
+		const session = new Session()
+
+		const res = await session.meFromAccessToken(
+			{ accessToken: 'not-a-jwt', csrfToken: '' },
+			context,
+		)
+
+		expect(res.accessToken).toBeNull()
+		expect(res.user).toBeNull()
+		expect(res.sessionId).toBeNull()
+	})
+
+	it('should enforce CSRF by default when cookies are used', async () => {
+		const session = new Session()
+
+		mockGetObjects.mockResolvedValue([
+			{
+				id: 'sessionId',
+				refreshToken: 'refreshToken',
+				refreshTokenExpiresAt: new Date(Date.now() + 1000 * 60 * 60),
+				accessTokenExpiresAt: new Date(Date.now() + 1000 * 60 * 15),
+				user: {
+					id: 'userId',
+				},
+			},
+		])
+
+		const res = await session.meFromAccessToken(
+			{ accessToken: 'valid.jwt.token', csrfToken: '' },
+			{
+				isRoot: true,
+				wabe: {
+					controllers,
+					config: {
+						authentication: {
+							session: { jwtSecret: 'dev' },
+						},
+						security: {
+							// disableCSRFProtection undefined => protection ON
+						},
+					},
+				},
+			} as any,
+		)
+
+		expect(res.accessToken).toBeNull()
+		expect(res.user).toBeNull()
+		expect(res.sessionId).toBeNull()
 	})
 
 	it('should not refresh session if the access token does not already take 75% of time', () => {

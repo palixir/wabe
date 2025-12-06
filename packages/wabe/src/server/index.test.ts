@@ -8,6 +8,7 @@ import { getAnonymousClient, getUserClient } from '../utils/helper'
 import { gql } from 'graphql-request'
 import { getDatabaseAdapter } from '../utils/testHelper'
 import { RoleEnum } from 'generated/wabe'
+import * as WobeYoga from 'wobe-graphql-yoga'
 
 describe('Server', () => {
 	it('should throw error if no jwt secret provided but cookie session choosen', async () => {
@@ -47,7 +48,7 @@ describe('Server', () => {
 		})
 
 		expect(wabe.start()).rejects.toThrow(
-			'Authentication with cookie needs jwt secret',
+			'Authentication session requires jwt secret',
 		)
 	})
 
@@ -64,6 +65,10 @@ describe('Server', () => {
 				adapter: await getDatabaseAdapter(databaseId),
 			},
 			port,
+			authentication: {
+				// @ts-expect-error
+				session: {},
+			},
 			security: {
 				disableCSRFProtection: false,
 			},
@@ -85,8 +90,65 @@ describe('Server', () => {
 		})
 
 		expect(wabe.start()).rejects.toThrow(
-			'Authentication with cookie needs jwt secret',
+			'Authentication session requires jwt secret',
 		)
+	})
+
+	it('should pass graphql options to yoga plugin', async () => {
+		const databaseId = uuid()
+
+		const receivedOptions: any[] = []
+		const originalPlugin = WobeYoga.WobeGraphqlYogaPlugin
+		const pluginSpy = spyOn(
+			WobeYoga,
+			'WobeGraphqlYogaPlugin',
+		).mockImplementation((options: any) => {
+			receivedOptions.push(options)
+			return originalPlugin(options)
+		})
+
+		const port = await getPort()
+		const wabe = new Wabe({
+			isProduction: true,
+			rootKey:
+				'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+			database: {
+				// @ts-expect-error
+				adapter: await getDatabaseAdapter(databaseId),
+			},
+			port,
+			authentication: {
+				session: {
+					jwtSecret: 'secret',
+				},
+			},
+			security: {
+				disableCSRFProtection: true,
+				allowIntrospectionInProduction: true,
+				maxGraphqlDepth: 60,
+			},
+			schema: {
+				classes: [
+					{
+						name: 'Collection1',
+						fields: { name: { type: 'String' } },
+					},
+				],
+			},
+		})
+
+		try {
+			await wabe.start()
+		} finally {
+			await wabe.close()
+			pluginSpy.mockRestore()
+		}
+
+		expect(receivedOptions.length).toBeGreaterThan(0)
+		const args = receivedOptions[0]
+		expect(args?.allowIntrospection).toBe(true)
+		expect(args?.maxDepth).toBe(60)
+		expect(args?.allowMultipleOperations).toBe(true)
 	})
 
 	it('should mask graphql errors message', async () => {
@@ -127,10 +189,10 @@ describe('Server', () => {
 
 		expect(
 			graphqlClient.request<any>(gql`
-      query tata {
-          tata
-      }
-    `),
+				query tata {
+					tata
+				}
+			`),
 		).rejects.toThrow('Unexpected error')
 
 		await wabe.close()
@@ -503,6 +565,7 @@ describe('Server', () => {
 				adapter: await getDatabaseAdapter(databaseId),
 			},
 			authentication: {
+				session: { jwtSecret: 'secret' },
 				roles: ['Client'],
 			},
 			port,
@@ -522,6 +585,7 @@ describe('Server', () => {
 				adapter: await getDatabaseAdapter(databaseId),
 			},
 			authentication: {
+				session: { jwtSecret: 'secret' },
 				sessionHandler: (ctx) => {
 					ctx.wabe = {
 						wabe: wabeSlave1,
@@ -582,14 +646,14 @@ describe('Server', () => {
 
 		await userClient.request<any>(
 			gql`
-      mutation createTest1($input: CreateTest1Input!) {
-        createTest1(input: $input) {
-          test1 {
-            name
-          }
-        }
-      }
-      `,
+				mutation createTest1($input: CreateTest1Input!) {
+					createTest1(input: $input) {
+						test1 {
+							name
+						}
+					}
+				}
+			`,
 			{
 				input: {
 					fields: {
@@ -601,16 +665,16 @@ describe('Server', () => {
 
 		expect(
 			userClient.request<any>(gql`
-      query test1s {
-          test1s {
-            edges {
-                node {
-                    name
-                }
-            }
-          }
-      }
-      `),
+				query test1s {
+					test1s {
+						edges {
+							node {
+								name
+							}
+						}
+					}
+				}
+			`),
 		).rejects.toThrow('Permission denied to read class Test1')
 
 		await wabeSlave1.close()
@@ -621,12 +685,12 @@ describe('Server', () => {
 
 const graphql = {
 	signUpWith: gql`
-		 mutation signUpWith($input: SignUpWithInput!) {
-  		signUpWith(input:	$input){
-  			id
-  			accessToken
-  			refreshToken
-  		}
-  	}
-	 `,
+		mutation signUpWith($input: SignUpWithInput!) {
+			signUpWith(input: $input) {
+				id
+				accessToken
+				refreshToken
+			}
+		}
+	`,
 }

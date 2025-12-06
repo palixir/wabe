@@ -60,14 +60,14 @@ describe('Security tests', () => {
 
 		expect(
 			userClient.request(gql`
-			mutation createTestCSRF {
-			  createTestCSRF(input: { fields: { name: "CSRF Test" } }) {
-				testCSRF {
-				  id
+				mutation createTestCSRF {
+					createTestCSRF(input: { fields: { name: "CSRF Test" } }) {
+						testCSRF {
+							id
+						}
+					}
 				}
-			  }
-			}
-		  `),
+			`),
 		).rejects.toThrow('Permission denied to create class TestCSRF')
 
 		const invalidCsrfClient = getUserClient(port, {
@@ -76,14 +76,14 @@ describe('Security tests', () => {
 		})
 		expect(
 			invalidCsrfClient.request(gql`
-			mutation createTestCSRF {
-			  createTestCSRF(input: { fields: { name: "CSRF Test" } }) {
-				testCSRF {
-				  id
+				mutation createTestCSRF {
+					createTestCSRF(input: { fields: { name: "CSRF Test" } }) {
+						testCSRF {
+							id
+						}
+					}
 				}
-			  }
-			}
-		  `),
+			`),
 		).rejects.toThrow('Permission denied to create class TestCSRF')
 
 		const validCsrfClient = getUserClient(port, {
@@ -93,13 +93,13 @@ describe('Security tests', () => {
 
 		const res = await validCsrfClient.request<any>(gql`
 			mutation createTestCSRF {
-			  createTestCSRF(input: { fields: { name: "CSRF Test" } }) {
-				testCSRF {
-				  id
+				createTestCSRF(input: { fields: { name: "CSRF Test" } }) {
+					testCSRF {
+						id
+					}
 				}
-			  }
 			}
-		  `)
+		`)
 
 		expect(res.createTestCSRF.testCSRF.id).toBeDefined()
 
@@ -145,13 +145,13 @@ describe('Security tests', () => {
 
 		const res = await invalidCsrfClient.request<any>(gql`
 			mutation createTestCSRF {
-			  createTestCSRF(input: { fields: { name: "CSRF Test" } }) {
-				testCSRF {
-				  id
+				createTestCSRF(input: { fields: { name: "CSRF Test" } }) {
+					testCSRF {
+						id
+					}
 				}
-			  }
 			}
-		  `)
+		`)
 
 		expect(res.createTestCSRF.testCSRF.id).toBeDefined()
 
@@ -2779,7 +2779,7 @@ describe('Security tests', () => {
 					}
 				}
 			`),
-		).rejects.toThrow('jwt malformed')
+		).rejects.toThrow('Permission denied to read class Test')
 
 		await closeTests(wabe)
 	})

@@ -29,6 +29,8 @@ type SecurityConfig = {
 	rateLimit?: RateLimitOptions
 	hideSensitiveErrorMessage?: boolean
 	disableCSRFProtection?: boolean
+	allowIntrospectionInProduction?: boolean
+	maxGraphqlDepth?: number
 }
 
 export * from './interface'
@@ -219,11 +221,10 @@ export class Wabe<T extends WabeTypes> {
 
 	async start() {
 		if (
-			!this.config.authentication?.session?.jwtSecret &&
-			(this.config.authentication?.session?.cookieSession ||
-				!this.config.security?.disableCSRFProtection)
+			this.config.authentication?.session &&
+			!this.config.authentication.session.jwtSecret
 		)
-			throw new Error('Authentication with cookie needs jwt secret')
+			throw new Error('Authentication session requires jwt secret')
 
 		const wabeSchema = new Schema(this.config)
 
@@ -282,8 +283,12 @@ export class Wabe<T extends WabeTypes> {
 		// Set the wabe context
 		this.server.beforeHandler(
 			// @ts-expect-error
-			this.config.authentication?.sessionHandler || defaultSessionHandler(this),
+			this.config.authentication?.sessionHandler ||
+				// @ts-expect-error
+				defaultSessionHandler(this),
 		)
+
+		const maxDepth = this.config.security?.maxGraphqlDepth ?? 50
 
 		await this.server.usePlugin(
 			WobeGraphqlYogaPlugin({
@@ -291,6 +296,10 @@ export class Wabe<T extends WabeTypes> {
 				maskedErrors:
 					this.config.security?.hideSensitiveErrorMessage ||
 					this.config.isProduction,
+				allowIntrospection:
+					!!this.config.security?.allowIntrospectionInProduction,
+				maxDepth,
+				allowMultipleOperations: true,
 				graphqlEndpoint: '/graphql',
 				plugins: [
 					{
