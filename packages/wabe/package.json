@@ -36,8 +36,8 @@
 		"libphonenumber-js": "1.11.18",
 		"otplib": "12.0.1",
 		"p-retry": "7.1.0",
-		"wobe": "1.1.13",
-		"wobe-graphql-yoga": "1.2.8"
+		"wobe": "1.1.14",
+		"wobe-graphql-yoga": "1.2.9"
 	},
 	"devDependencies": {
 		"@types/jsonwebtoken": "9.0.6",
