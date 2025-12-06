@@ -1099,12 +1099,12 @@ enum PostOrder {
 enum _SessionOrder {
   user_ASC
   user_DESC
-  accessToken_ASC
-  accessToken_DESC
+  accessTokenEncrypted_ASC
+  accessTokenEncrypted_DESC
   accessTokenExpiresAt_ASC
   accessTokenExpiresAt_DESC
-  refreshToken_ASC
-  refreshToken_DESC
+  refreshTokenEncrypted_ASC
+  refreshTokenEncrypted_DESC
   refreshTokenExpiresAt_ASC
   refreshTokenExpiresAt_DESC
   acl_ASC
