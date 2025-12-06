@@ -116,9 +116,9 @@ export type Post = {
 export type _Session = {
 	id: string,
 	user: User,
-	accessToken: string,
+	accessTokenEncrypted: string,
 	accessTokenExpiresAt: string,
-	refreshToken?: string,
+	refreshTokenEncrypted: string,
 	refreshTokenExpiresAt: string,
 	acl?: ACLObject,
 	createdAt?: string,
@@ -181,9 +181,9 @@ export type WherePost = {
 export type Where_Session = {
 	id: string,
 	user: User,
-	accessToken: string,
+	accessTokenEncrypted: string,
 	accessTokenExpiresAt: Date,
-	refreshToken?: string,
+	refreshTokenEncrypted: string,
 	refreshTokenExpiresAt: Date,
 	acl?: ACLObject,
 	createdAt?: Date,

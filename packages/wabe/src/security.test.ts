@@ -1078,7 +1078,7 @@ describe('Security tests', () => {
 			adminClient.request<any>(gql`
 				mutation create_Session {
 					create_Session(
-						input: { fields: { accessToken: "token" } }
+						input: { fields: { accessTokenEncrypted: "token", accessTokenExpiresAt: "2025-01-01T00:00:00.000Z", refreshTokenEncrypted: "refresh", refreshTokenExpiresAt: "2025-01-02T00:00:00.000Z" } }
 					) {
 						_session {
 							id
@@ -1105,10 +1105,10 @@ describe('Security tests', () => {
 				isRoot: true,
 			},
 			data: {
-				accessToken: 'token',
+				accessTokenEncrypted: 'token',
 				user: res.me.user.id,
 				accessTokenExpiresAt: new Date(),
-				refreshToken: 'refreshToken',
+				refreshTokenEncrypted: 'refreshToken',
 				refreshTokenExpiresAt: new Date(),
 			},
 			select: { id: true },
@@ -1121,7 +1121,7 @@ describe('Security tests', () => {
 		expect(
 			adminClient.request<any>(gql`
       mutation update_Session {
-        update_Session(input: { id: "${sessionId}", fields: {accessToken: "token2"} }) {
+        update_Session(input: { id: "${sessionId}", fields: {accessTokenEncrypted: "token2"} }) {
             _session {
              id
             }

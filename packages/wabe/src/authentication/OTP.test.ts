@@ -40,7 +40,7 @@ describe('OTP', () => {
 		// Directly test the timeout is flaky we only test that the correct value is passed to totp
 		const otp = new OTP('rootKey')
 
-		expect(otp.internalTotp.options.window).toEqual([5, 0])
+		expect(otp.internalTotp.options.window).toEqual([1, 0])
 	})
 
 	it('should generate a valid keyuri', () => {

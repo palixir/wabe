@@ -1,4 +1,9 @@
-import { randomBytes } from 'node:crypto'
+import {
+	randomBytes,
+	createCipheriv,
+	createDecipheriv,
+	createHmac,
+} from 'node:crypto'
 import { promisify } from 'node:util'
 
 const params = {
@@ -72,3 +77,45 @@ export const verifyArgon2 = async (password: string, hash: string) => {
 
 export const isArgon2Hash = (value: string): boolean =>
 	typeof value === 'string' && value.startsWith('$argon2')
+
+/**
+ * Deterministic AES-256-GCM encryption for tokens.
+ * IV is derived via HMAC-SHA256(key, token) to allow equality checks without storing plaintext.
+ * Caller must provide a strong 32-byte key (already derived/hashed).
+ */
+export const encryptDeterministicToken = (
+	token: string,
+	key: Buffer,
+): string => {
+	const iv = createHmac('sha256', key).update(token).digest().subarray(0, 12)
+	const cipher = createCipheriv('aes-256-gcm', key, iv)
+	const encrypted = Buffer.concat([
+		cipher.update(token, 'utf8'),
+		cipher.final(),
+	])
+	const tag = cipher.getAuthTag()
+	return `${iv.toString('hex')}:${tag.toString('hex')}:${encrypted.toString('hex')}`
+}
+
+export const decryptDeterministicToken = (
+	encryptedToken: string | undefined,
+	key: Buffer,
+): string | null => {
+	if (!encryptedToken) return null
+	const [ivHex, tagHex, valueHex] = encryptedToken.split(':')
+	if (!ivHex || !tagHex || !valueHex) return null
+	try {
+		const iv = Buffer.from(ivHex, 'hex')
+		const tag = Buffer.from(tagHex, 'hex')
+		const encryptedValue = Buffer.from(valueHex, 'hex')
+		const decipher = createDecipheriv('aes-256-gcm', key, iv)
+		decipher.setAuthTag(tag)
+		const decrypted = Buffer.concat([
+			decipher.update(encryptedValue),
+			decipher.final(),
+		])
+		return decrypted.toString('utf8')
+	} catch {
+		return null
+	}
+}

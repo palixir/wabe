@@ -747,15 +747,15 @@ describe('Postgres adapter', () => {
 			className: '_Session',
 			data: [
 				{
-					accessToken: 'accessToken',
-					refreshToken: 'refreshToken',
+					accessTokenEncrypted: 'accessTokenEncrypted',
+					refreshTokenEncrypted: 'refreshTokenEncrypted',
 					accessTokenExpiresAt: new Date(),
 					refreshTokenExpiresAt: new Date(),
 					user: 'id',
 				},
 				{
-					accessToken: 'accessToken',
-					refreshToken: 'refreshToken',
+					accessTokenEncrypted: 'accessTokenEncrypted',
+					refreshTokenEncrypted: 'refreshTokenEncrypted',
 					accessTokenExpiresAt: new Date(),
 					refreshTokenExpiresAt: new Date(),
 					user: 'id',
