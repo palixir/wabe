@@ -121,7 +121,11 @@ export type ResolverType<T extends WabeTypes> = {
 } & (
 	| { type: WabePrimaryTypes | T['enums'] | T['scalars'] }
 	| { type: 'Object'; outputObject: ClassInterface<T> }
-	| { type: 'Array'; typeValue: WabePrimaryTypes; typeValueRequired?: boolean }
+	| {
+			type: 'Array'
+			typeValue: WabePrimaryTypes
+			typeValueRequired?: boolean
+	  }
 	| {
 			type: 'Array'
 			typeValue: 'Object'
@@ -474,7 +478,7 @@ export class Schema<T extends WabeTypes> {
 					required: true,
 					class: 'User',
 				},
-				accessToken: {
+				accessTokenEncrypted: {
 					type: 'String',
 					required: true,
 				},
@@ -482,8 +486,9 @@ export class Schema<T extends WabeTypes> {
 					type: 'Date',
 					required: true,
 				},
-				refreshToken: {
+				refreshTokenEncrypted: {
 					type: 'String',
+					required: true,
 				},
 				refreshTokenExpiresAt: {
 					type: 'Date',

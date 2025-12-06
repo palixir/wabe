@@ -1,7 +1,24 @@
 import { describe, expect, it, mock, beforeEach } from 'bun:test'
 import { fail } from 'node:assert'
+import crypto from 'node:crypto'
 import jwt, { type JwtPayload } from 'jsonwebtoken'
 import { Session } from './Session'
+
+const encryptToken = (token: string, secret: string) => {
+	const key = crypto.createHash('sha256').update(secret).digest()
+	const iv = crypto
+		.createHmac('sha256', key)
+		.update(token)
+		.digest()
+		.subarray(0, 12)
+	const cipher = crypto.createCipheriv('aes-256-gcm', key, iv)
+	const encrypted = Buffer.concat([
+		cipher.update(token, 'utf8'),
+		cipher.final(),
+	])
+	const tag = cipher.getAuthTag()
+	return `${iv.toString('hex')}:${tag.toString('hex')}:${encrypted.toString('hex')}`
+}
 
 describe('Session', () => {
 	const mockGetObject = mock(() => Promise.resolve({}) as any)
@@ -76,6 +93,19 @@ describe('Session', () => {
 			id: 'userId',
 			email: 'user@email.com',
 		})
+
+		expect(mockCreateObject).toHaveBeenCalledWith({
+			className: '_Session',
+			context: expect.any(Object),
+			data: {
+				accessTokenEncrypted: expect.any(String),
+				accessTokenExpiresAt: expect.any(Date),
+				refreshTokenEncrypted: expect.any(String),
+				refreshTokenExpiresAt: expect.any(Date),
+				user: 'userId',
+			},
+			select: { id: true },
+		})
 	})
 
 	it('should set all data set in the jwtTokenFields on refresh session', async () => {
@@ -87,7 +117,7 @@ describe('Session', () => {
 		mockGetObjects.mockResolvedValue([
 			{
 				id: 'sessionId',
-				refreshToken: oldRefreshToken,
+				refreshTokenEncrypted: encryptToken(oldRefreshToken, 'dev'),
 				refreshTokenExpiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
 				user: {
 					id: 'userId',
@@ -170,7 +200,7 @@ describe('Session', () => {
 		mockGetObjects.mockResolvedValue([
 			{
 				id: 'sessionId',
-				refreshToken: oldRefreshToken,
+				refreshTokenEncrypted: encryptToken(oldRefreshToken, 'dev'),
 				refreshTokenExpiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
 				user: {
 					id: 'userId',
@@ -218,7 +248,7 @@ describe('Session', () => {
 		expect(mockGetObjects).toHaveBeenCalledWith({
 			className: '_Session',
 			where: {
-				accessToken: { equalTo: accessToken },
+				accessTokenEncrypted: { equalTo: encryptToken(accessToken, 'dev') },
 				OR: [
 					{
 						accessTokenExpiresAt: {
@@ -238,7 +268,7 @@ describe('Session', () => {
 				user: true,
 				accessTokenExpiresAt: true,
 				refreshTokenExpiresAt: true,
-				refreshToken: true,
+				refreshTokenEncrypted: true,
 			},
 			context: expect.any(Object),
 		})
@@ -248,7 +278,7 @@ describe('Session', () => {
 		mockGetObjects.mockResolvedValue([
 			{
 				id: 'sessionId',
-				refreshToken: 'refreshToken',
+				refreshTokenEncrypted: encryptToken('refreshToken', 'dev'),
 				user: {
 					id: 'userId',
 					email: 'userEmail',
@@ -279,7 +309,7 @@ describe('Session', () => {
 		expect(mockGetObjects).toHaveBeenCalledWith({
 			className: '_Session',
 			where: {
-				accessToken: { equalTo: accessToken },
+				accessTokenEncrypted: { equalTo: encryptToken(accessToken, 'dev') },
 				OR: [
 					{
 						accessTokenExpiresAt: {
@@ -299,7 +329,7 @@ describe('Session', () => {
 				user: true,
 				accessTokenExpiresAt: true,
 				refreshTokenExpiresAt: true,
-				refreshToken: true,
+				refreshTokenEncrypted: true,
 			},
 			context: expect.any(Object),
 		})
@@ -313,7 +343,7 @@ describe('Session', () => {
 		const session = new Session()
 
 		const fifteenMinutes = new Date(Date.now() + 1000 * 60 * 15)
-		const thirtyDays = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30)
+		const sevenDays = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7)
 
 		const { accessToken, refreshToken } = await session.create(
 			'userId',
@@ -340,7 +370,7 @@ describe('Session', () => {
 		expect(decodedRefreshToken).not.toBeNull()
 		expect(decodedRefreshToken.userId).toEqual('userId')
 		expect(decodedRefreshToken.exp).toBeGreaterThanOrEqual(
-			Math.floor(thirtyDays.getTime() / 1000),
+			Math.floor(sevenDays.getTime() / 1000),
 		)
 		expect(decodedRefreshToken.iat).toBeGreaterThanOrEqual(
 			Math.floor((Date.now() - 500) / 1000),
@@ -351,9 +381,9 @@ describe('Session', () => {
 			className: '_Session',
 			context: expect.any(Object),
 			data: {
-				accessToken,
+				accessTokenEncrypted: expect.any(String),
 				accessTokenExpiresAt: expect.any(Date),
-				refreshToken,
+				refreshTokenEncrypted: expect.any(String),
 				refreshTokenExpiresAt: expect.any(Date),
 				user: 'userId',
 			},
@@ -393,7 +423,7 @@ describe('Session', () => {
 		mockGetObjects.mockResolvedValue([
 			{
 				id: 'sessionId',
-				refreshToken: oldRefreshToken,
+				refreshTokenEncrypted: encryptToken(oldRefreshToken, 'dev'),
 				refreshTokenExpiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
 				user: {
 					id: 'userId',
@@ -415,7 +445,10 @@ describe('Session', () => {
 		expect(mockGetObjects).toHaveBeenCalledWith({
 			className: '_Session',
 			where: {
-				accessToken: { equalTo: oldAccessToken },
+				accessTokenEncrypted: { equalTo: encryptToken(oldAccessToken, 'dev') },
+				refreshTokenEncrypted: {
+					equalTo: encryptToken(oldRefreshToken, 'dev'),
+				},
 			},
 			select: {
 				id: true,
@@ -426,7 +459,7 @@ describe('Session', () => {
 						name: true,
 					},
 				},
-				refreshToken: true,
+				refreshTokenEncrypted: true,
 				refreshTokenExpiresAt: true,
 			},
 			context: expect.any(Object),
@@ -438,9 +471,9 @@ describe('Session', () => {
 			context: expect.any(Object),
 			id: 'sessionId',
 			data: {
-				accessToken: expect.any(String),
+				accessTokenEncrypted: expect.any(String),
 				accessTokenExpiresAt: expect.any(Date),
-				refreshToken: expect.any(String),
+				refreshTokenEncrypted: expect.any(String),
 				refreshTokenExpiresAt: expect.any(Date),
 			},
 			select: {},
@@ -459,7 +492,7 @@ describe('Session', () => {
 
 		// -1000 to avoid flaky
 		expect(refreshTokenExpiresAt.getTime()).toBeGreaterThan(
-			Date.now() + 1000 * 60 * 60 * 24 * 30 - 1000,
+			Date.now() + 1000 * 60 * 60 * 24 * 7 - 1000,
 		)
 	})
 
@@ -482,7 +515,7 @@ describe('Session', () => {
 		mockGetObjects.mockResolvedValue([
 			{
 				id: 'sessionId',
-				refreshToken: 'refreshToken',
+				refreshTokenEncrypted: encryptToken('refreshToken', 'dev'),
 				refreshTokenExpiresAt: new Date(Date.now() + 1000 * 60 * 60),
 				accessTokenExpiresAt: new Date(Date.now() + 1000 * 60 * 15),
 				user: {
@@ -559,7 +592,10 @@ describe('Session', () => {
 		expect(mockGetObjects).toHaveBeenCalledWith({
 			className: '_Session',
 			where: {
-				accessToken: { equalTo: oldAccessToken },
+				accessTokenEncrypted: { equalTo: encryptToken(oldAccessToken, 'dev') },
+				refreshTokenEncrypted: {
+					equalTo: encryptToken(oldRefreshToken, 'dev'),
+				},
 			},
 			select: {
 				id: true,
@@ -570,7 +606,7 @@ describe('Session', () => {
 						name: true,
 					},
 				},
-				refreshToken: true,
+				refreshTokenEncrypted: true,
 				refreshTokenExpiresAt: true,
 			},
 			context: expect.any(Object),
@@ -581,7 +617,7 @@ describe('Session', () => {
 		mockGetObjects.mockResolvedValue([
 			{
 				id: 'sessionId',
-				refreshToken: 'refreshToken',
+				refreshTokenEncrypted: encryptToken('refreshToken', 'dev'),
 				refreshTokenExpiresAt: new Date(Date.now() - 1000),
 				user: {
 					id: 'userId',
@@ -606,7 +642,7 @@ describe('Session', () => {
 		mockGetObjects.mockResolvedValue([
 			{
 				id: 'sessionId',
-				refreshToken: 'refreshToken',
+				refreshTokenEncrypted: encryptToken('otherRefreshToken', 'dev'),
 				refreshTokenExpiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
 				user: {
 					id: 'userId',

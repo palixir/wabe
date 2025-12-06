@@ -425,9 +425,9 @@ input PostRelationInput {
 type _Session {
   id: ID!
   user: User
-  accessToken: String!
+  accessTokenEncrypted: String!
   accessTokenExpiresAt: Date!
-  refreshToken: String
+  refreshTokenEncrypted: String!
   refreshTokenExpiresAt: Date!
   acl: _SessionACLObject
   createdAt: Date
@@ -454,9 +454,9 @@ type _SessionACLObjectRolesACL {
 
 input _SessionInput {
   user: UserPointerInput
-  accessToken: String!
+  accessTokenEncrypted: String!
   accessTokenExpiresAt: Date!
-  refreshToken: String
+  refreshTokenEncrypted: String!
   refreshTokenExpiresAt: Date!
   acl: _SessionACLObjectInput
   createdAt: Date
@@ -490,9 +490,9 @@ input _SessionPointerInput {
 
 input _SessionCreateFieldsInput {
   user: UserPointerInput
-  accessToken: String
+  accessTokenEncrypted: String
   accessTokenExpiresAt: Date
-  refreshToken: String
+  refreshTokenEncrypted: String
   refreshTokenExpiresAt: Date
   acl: _SessionACLObjectCreateFieldsInput
   createdAt: Date
@@ -937,9 +937,9 @@ input RoleACLObjectRolesACLWhereInput {
 input _SessionWhereInput {
   id: IdWhereInput
   user: UserWhereInput
-  accessToken: StringWhereInput
+  accessTokenEncrypted: StringWhereInput
   accessTokenExpiresAt: DateWhereInput
-  refreshToken: StringWhereInput
+  refreshTokenEncrypted: StringWhereInput
   refreshTokenExpiresAt: DateWhereInput
   acl: _SessionACLObjectWhereInput
   createdAt: DateWhereInput
@@ -1507,9 +1507,9 @@ input Update_SessionInput {
 
 input _SessionUpdateFieldsInput {
   user: UserPointerInput
-  accessToken: String
+  accessTokenEncrypted: String
   accessTokenExpiresAt: Date
-  refreshToken: String
+  refreshTokenEncrypted: String
   refreshTokenExpiresAt: Date
   acl: _SessionACLObjectUpdateFieldsInput
   createdAt: Date

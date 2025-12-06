@@ -291,7 +291,7 @@ describe('SignInWith', () => {
 
 		// - 1000 to avoid flaky
 		expect(refreshTokenExpiresIn.getTime() - Date.now()).toBeGreaterThanOrEqual(
-			1000 * 30 * 24 * 60 * 60 - 1000,
+			1000 * 7 * 24 * 60 * 60 - 1000,
 		)
 		expect(accessTokenExpiresIn.getTime() - Date.now()).toBeGreaterThanOrEqual(
 			1000 * 15 * 60 - 1000,
