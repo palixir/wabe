@@ -257,6 +257,36 @@ describe('setupAcl', () => {
 					},
 				},
 			},
+			{
+				name: 'SetupACL8',
+				fields: {
+					test: {
+						type: 'String',
+					},
+				},
+				permissions: {
+					create: {
+						requireAuthentication: false,
+					},
+					read: {
+						requireAuthentication: false,
+					},
+					acl: async (hookObject) => {
+						await hookObject.addACL('users', {
+							userId: hookObject.context.user?.id || '',
+							read: true,
+							write: true,
+						})
+
+						await hookObject.addACL('roles', {
+							// @ts-expect-error
+							role: 'Client',
+							read: true,
+							write: true,
+						})
+					},
+				},
+			},
 		])
 
 		wabe = setup.wabe
@@ -319,9 +349,9 @@ describe('setupAcl', () => {
 		})
 
 		const res = await userClient.request<any>(gql`
-        mutation createSetupACL {
-          createSetupACL(input: {fields: {test: "test"}}) {
-            setupACL {
+        mutation createSetupACL8 {
+          createSetupACL8(input: {fields: {test: "test"}}) {
+            setupACL8 {
               id
               acl {
                 users {
@@ -341,30 +371,23 @@ describe('setupAcl', () => {
     `)
 
 		// User
-		expect(res.createSetupACL.setupACL.acl.users[0].userId).toEqual(userId)
-		expect(res.createSetupACL.setupACL.acl.users[0].read).toEqual(true)
-		expect(res.createSetupACL.setupACL.acl.users[0].write).toEqual(true)
+		expect(res.createSetupACL8.setupACL8.acl.users[0].userId).toEqual(userId)
+		expect(res.createSetupACL8.setupACL8.acl.users[0].read).toEqual(true)
+		expect(res.createSetupACL8.setupACL8.acl.users[0].write).toEqual(true)
 
 		// Role
 		expect(
 			await getRoleNameFromId(
-				res.createSetupACL.setupACL.acl.roles[0].roleId,
+				res.createSetupACL8.setupACL8.acl.roles[0].roleId,
 				rootClient,
 			),
 		).toEqual('Client')
-		expect(res.createSetupACL.setupACL.acl.roles[0].read).toEqual(true)
-		expect(res.createSetupACL.setupACL.acl.roles[0].write).toEqual(true)
+		expect(res.createSetupACL8.setupACL8.acl.roles[0].read).toEqual(true)
+		expect(res.createSetupACL8.setupACL8.acl.roles[0].write).toEqual(true)
 	})
 
 	it('should not update acl object if the acl function is not present in permissions in the class', async () => {
-		const { userClient } = await createUserAndUpdateRole({
-			anonymousClient,
-			port,
-			roleName: 'Client',
-			rootClient,
-		})
-
-		const res = await userClient.request<any>(gql`
+		const res = await rootClient.request<any>(gql`
         mutation createSetupACL2 {
           createSetupACL2(input: {fields: {test: "test"}}) {
             setupACL2 {
@@ -390,14 +413,7 @@ describe('setupAcl', () => {
 	})
 
 	it('should set read and write to false if the null value is provided for users and roles', async () => {
-		const { userClient } = await createUserAndUpdateRole({
-			anonymousClient,
-			port,
-			roleName: 'Client',
-			rootClient,
-		})
-
-		await userClient.request<any>(gql`
+		await rootClient.request<any>(gql`
         mutation createSetupACL3 {
           createSetupACL3(input: {fields: {test: "test"}}) {
             setupACL3 {
@@ -439,14 +455,7 @@ describe('setupAcl', () => {
 	})
 
 	it('should call acl function if provided', async () => {
-		const { userClient } = await createUserAndUpdateRole({
-			anonymousClient,
-			port,
-			roleName: 'Client',
-			rootClient,
-		})
-
-		await userClient.request<any>(gql`
+		await rootClient.request<any>(gql`
         mutation createSetupACL4 {
           createSetupACL4(input: {fields: {test: "test"}}) {
             setupACL4 {
@@ -460,14 +469,7 @@ describe('setupAcl', () => {
 	})
 
 	it('should get different role id for read and write if roles are different', async () => {
-		const { userClient } = await createUserAndUpdateRole({
-			anonymousClient,
-			port,
-			roleName: 'Client',
-			rootClient,
-		})
-
-		const res = await userClient.request<any>(gql`
+		const res = await rootClient.request<any>(gql`
         mutation createSetupACL5 {
           createSetupACL5(input: {fields: {test: "test"}}) {
             setupACL5 {

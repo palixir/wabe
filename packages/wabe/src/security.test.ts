@@ -13,13 +13,16 @@ import {
 import { setupTests, closeTests } from './utils/testHelper'
 
 describe('Security tests', () => {
-	let wabe: Wabe<DevWabeTypes>
+	let wabe: Wabe<DevWabeTypes> | undefined
 	let port: number
 	let client: GraphQLClient
 	let rootClient: GraphQLClient
 
 	afterEach(async () => {
-		await wabe.close()
+		if (!wabe) return
+
+		await closeTests(wabe)
+		wabe = undefined
 	})
 
 	it('should block requests without a valid CSRF token', async () => {
@@ -154,6 +157,174 @@ describe('Security tests', () => {
 		`)
 
 		expect(res.createTestCSRF.testCSRF.id).toBeDefined()
+
+		await closeTests(wabe)
+	})
+
+	it('should not return protected fields in creation response when user is not authorized to read them', async () => {
+		const setup = await setupTests([
+			{
+				name: 'Secret',
+				fields: {
+					name: { type: 'String' },
+					secret: {
+						type: 'String',
+						protected: {
+							protectedOperations: ['read'],
+							authorizedRoles: ['Admin'],
+						},
+					},
+				},
+				permissions: {
+					create: {
+						requireAuthentication: true,
+						authorizedRoles: ['Client'],
+					},
+					read: {
+						requireAuthentication: true,
+						authorizedRoles: ['Client'],
+					},
+				},
+			},
+		])
+
+		wabe = setup.wabe
+		port = setup.port
+		client = getAnonymousClient(port)
+		rootClient = getGraphqlClient(port)
+
+		const { userClient } = await createUserAndUpdateRole({
+			anonymousClient: client,
+			port,
+			roleName: 'Client',
+			rootClient,
+		})
+
+		await expect(
+			userClient.request<any>(gql`
+				mutation createSecret {
+					createSecret(
+						input: { fields: { name: "n", secret: "s" } }
+					) {
+						secret {
+							id
+							secret
+						}
+					}
+				}
+			`),
+		).rejects.toThrow('You are not authorized to read this field')
+
+		await closeTests(wabe)
+	})
+
+	it('should not return created object when ACL denies read access', async () => {
+		const setup = await setupTests([
+			{
+				name: 'NoReadAfterCreate',
+				fields: {
+					name: { type: 'String' },
+				},
+				permissions: {
+					create: {
+						requireAuthentication: true,
+						authorizedRoles: ['Client'],
+					},
+					read: {
+						requireAuthentication: true,
+						authorizedRoles: ['Client'],
+					},
+					acl: async (hookObject) => {
+						await hookObject.addACL('users', null)
+						await hookObject.addACL('roles', null)
+					},
+				},
+			},
+		])
+
+		wabe = setup.wabe
+		port = setup.port
+		client = getAnonymousClient(port)
+		rootClient = getGraphqlClient(port)
+
+		const { userClient } = await createUserAndUpdateRole({
+			anonymousClient: client,
+			port,
+			roleName: 'Client',
+			rootClient,
+		})
+
+		await expect(
+			userClient.request<any>(gql`
+				mutation createNoReadAfterCreate {
+					createNoReadAfterCreate(input: { fields: { name: "n" } }) {
+						noReadAfterCreate {
+							id
+							name
+						}
+					}
+				}
+			`),
+		).rejects.toThrow(/Permission denied|Object not found/)
+
+		await closeTests(wabe)
+	})
+
+	it('should apply ACL filtering to count queries', async () => {
+		const setup = await setupTests([
+			{
+				name: 'CountAcl',
+				fields: {
+					name: { type: 'String' },
+				},
+				permissions: {
+					create: {
+						requireAuthentication: true,
+						authorizedRoles: ['Client'],
+					},
+					read: {
+						requireAuthentication: true,
+						authorizedRoles: ['Client'],
+					},
+					acl: async (hookObject) => {
+						await hookObject.addACL('users', null)
+						await hookObject.addACL('roles', null)
+					},
+				},
+			},
+		])
+
+		wabe = setup.wabe
+		port = setup.port
+		client = getAnonymousClient(port)
+		rootClient = getGraphqlClient(port)
+
+		const { userClient } = await createUserAndUpdateRole({
+			anonymousClient: client,
+			port,
+			roleName: 'Client',
+			rootClient,
+		})
+
+		await rootClient.request<any>(gql`
+			mutation createCountAcl {
+				createCountAcl(input: { fields: { name: "toto" } }) {
+					countAcl {
+						id
+					}
+				}
+			}
+		`)
+
+		const res = await userClient.request<any>(gql`
+			query countAcls {
+				countAcls {
+					totalCount
+				}
+			}
+		`)
+
+		expect(res.countAcls.totalCount).toEqual(0)
 
 		await closeTests(wabe)
 	})
@@ -536,7 +707,7 @@ describe('Security tests', () => {
 			rootClient,
 		})
 
-		const res = await userClient.request<any>(gql`
+		const res = await rootClient.request<any>(gql`
 			mutation createTest1 {
 				createTest1(input: { fields: { name: "test1" } }) {
 					test1 {
@@ -614,7 +785,7 @@ describe('Security tests', () => {
 			rootClient,
 		})
 
-		const res = await userClient.request<any>(gql`
+		const res = await rootClient.request<any>(gql`
 			mutation createTest1 {
 				createTest1(input: { fields: { name: "test1" } }) {
 					test1 {
@@ -1078,7 +1249,14 @@ describe('Security tests', () => {
 			adminClient.request<any>(gql`
 				mutation create_Session {
 					create_Session(
-						input: { fields: { accessTokenEncrypted: "token", accessTokenExpiresAt: "2025-01-01T00:00:00.000Z", refreshTokenEncrypted: "refresh", refreshTokenExpiresAt: "2025-01-02T00:00:00.000Z" } }
+						input: {
+							fields: {
+								accessTokenEncrypted: "token"
+								accessTokenExpiresAt: "2025-01-01T00:00:00.000Z"
+								refreshTokenEncrypted: "refresh"
+								refreshTokenExpiresAt: "2025-01-02T00:00:00.000Z"
+							}
+						}
 					) {
 						_session {
 							id

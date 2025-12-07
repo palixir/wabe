@@ -259,14 +259,19 @@ export class DatabaseController<T extends WabeTypes> {
 												{
 													acl: {
 														users: {
-															notContains: { userId },
+															notContains: {
+																userId,
+															},
 														},
 													},
 												},
 												{
 													acl: {
 														roles: {
-															contains: { roleId, [operation]: true },
+															contains: {
+																roleId,
+																[operation]: true,
+															},
 														},
 													},
 												},
@@ -399,6 +404,12 @@ export class DatabaseController<T extends WabeTypes> {
 		context,
 		where,
 	}: CountOptions<T, K>): Promise<number> {
+		const whereWithACLCondition = this._buildWhereWithACL(
+			where || {},
+			context,
+			'read',
+		)
+
 		const hook = initializeHook({
 			className,
 			context,
@@ -409,7 +420,11 @@ export class DatabaseController<T extends WabeTypes> {
 			operationType: OperationType.BeforeRead,
 		})
 
-		const count = await this.adapter.count({ className, context, where })
+		const count = await this.adapter.count({
+			className,
+			context,
+			where: whereWithACLCondition,
+		})
 
 		await hook?.runOnSingleObject({
 			operationType: OperationType.AfterRead,
@@ -614,7 +629,7 @@ export class DatabaseController<T extends WabeTypes> {
 			operationType: OperationType.BeforeCreate,
 		})
 
-		const { id } = await this.adapter.createObject({
+		const res = await this.adapter.createObject({
 			className,
 			context,
 			select,
@@ -623,18 +638,20 @@ export class DatabaseController<T extends WabeTypes> {
 
 		await hook.runOnSingleObject({
 			operationType: OperationType.AfterCreate,
-			id,
+			id: res.id,
 		})
 
 		if (select && Object.keys(select).length === 0) return null
 
 		return this.getObject({
 			className,
-			context: contextWithRoot(context),
+			context: {
+				...context,
+				// @ts-expect-error
+				user: className === 'User' ? res : context.user,
+			},
 			select,
-			id,
-			// Because if you create an object, exceptionnaly you can read it after creation
-			_skipHooks: true,
+			id: res.id,
 		})
 	}
 
@@ -704,12 +721,14 @@ export class DatabaseController<T extends WabeTypes> {
 
 		return this.getObjects({
 			className,
-			context,
+			context: {
+				...context,
+				// @ts-expect-error
+				user: className === 'User' ? data[0] : context.user,
+			},
 			select,
 			// @ts-expect-error
 			where: { id: { in: ids } },
-			// Because if you create an object, exceptionnaly you can read it after creation
-			_skipHooks: true,
 			first,
 			offset,
 			order,

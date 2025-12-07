@@ -14,10 +14,13 @@ import {
 export const extractFieldsFromSetNode = (
 	selectionSet: SelectionSetNode,
 	className: string,
+	options?: { ignoreClassField?: boolean },
 ): Record<string, any> => {
 	const ignoredFields = ['edges', 'node', 'clientMutationId', 'ok']
+	const shouldIgnoreClassField = options?.ignoreClassField ?? true
 
-	if (className) ignoredFields.push(firstLetterInLowerCase(className))
+	if (shouldIgnoreClassField && className)
+		ignoredFields.push(firstLetterInLowerCase(className))
 
 	return selectionSet.selections?.reduce(
 		(acc, selection) => {
@@ -34,7 +37,9 @@ export const extractFieldsFromSetNode = (
 					//@ts-expect-error
 					selection.selectionSet,
 					className,
+					{ ignoreClassField: false },
 				)
+
 				if (ignoredFields.indexOf(currentValue) === -1)
 					return {
 						...acc,
