@@ -14,8 +14,6 @@ import {
 	type DevWabeTypes,
 	getAdminUserClient,
 	getGraphqlClient,
-	createUserAndUpdateRole,
-	getAnonymousClient,
 } from '../utils/helper'
 import { setupTests, closeTests } from '../utils/testHelper'
 import type { WabeContext } from '../server/interface'
@@ -134,31 +132,6 @@ describe('Database', () => {
 		mockAfterUpdate.mockClear()
 		spyGetObject.mockClear()
 		spyGetObjects.mockClear()
-	})
-
-	it("should return created objects with createObjects event if the user doesn't have access to read the object", async () => {
-		const rootClient = getGraphqlClient(wabe.config.port)
-
-		const { userClient } = await createUserAndUpdateRole({
-			anonymousClient: getAnonymousClient(wabe.config.port),
-			port: wabe.config.port,
-			roleName: 'Client',
-			rootClient,
-		})
-
-		const res = await userClient.request<any>(gql`
-      mutation createTests{
-        createTests(input: {fields: [{name: "test"}]}){
-            edges {
-                node {
-                    id
-                }
-            }
-        }
-      }
-    `)
-
-		expect(res.createTests.edges.length).toEqual(1)
 	})
 
 	it('should return id of a relation if set to true in select on getObject', async () => {

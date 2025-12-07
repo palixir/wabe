@@ -197,7 +197,6 @@ describe('File upload', () => {
 
 		formData.append('0', new File(['a'], 'a.text', { type: 'text/plain' }))
 
-		console.log('before fetch')
 		const res = await fetch(`http://127.0.0.1:${port}/graphql`, {
 			method: 'POST',
 			body: formData,
