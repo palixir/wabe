@@ -359,6 +359,7 @@ describe('DatabaseController', () => {
 		expect(mockRunOnSingleObject).toHaveBeenNthCalledWith(2, {
 			operationType: hooks.OperationType.AfterRead,
 			id: 'id',
+			object: {},
 		})
 	})
 
@@ -392,7 +393,7 @@ describe('DatabaseController', () => {
 		})
 		expect(mockRunOnMultipleObject).toHaveBeenNthCalledWith(2, {
 			operationType: hooks.OperationType.AfterRead,
-			where: { id: { equalTo: 'id' } },
+			objects: [],
 		})
 	})
 

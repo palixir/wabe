@@ -38,6 +38,17 @@ const getFile = async (hookObject: HookObject<any, any>) => {
 				const fileUrlFromBucket =
 					await hookObject.context.wabe.controllers.file?.readFile(fileName)
 
+				const newUrl = fileUrlFromBucket || fileInfo.url
+				const newUrlGeneratedAt = new Date()
+
+				// Mutate the object returned to the caller so AfterRead effects are visible immediately
+				// @ts-expect-error
+				hookObject.object[fieldName] = {
+					...fileInfo,
+					urlGeneratedAt: newUrlGeneratedAt,
+					url: newUrl,
+				}
+
 				return hookObject.context.wabe.controllers.database.updateObject({
 					className: hookObject.className,
 					context: hookObject.context,
@@ -45,8 +56,8 @@ const getFile = async (hookObject: HookObject<any, any>) => {
 					data: {
 						[fieldName]: {
 							...fileInfo,
-							urlGeneratedAt: new Date(),
-							url: fileUrlFromBucket || fileInfo.url,
+							urlGeneratedAt: newUrlGeneratedAt,
+							url: newUrl,
 						},
 					},
 					_skipHooks: true,
