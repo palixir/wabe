@@ -480,15 +480,6 @@ export class DatabaseController<T extends WabeTypes> {
 			selectWithoutPointers,
 		)
 
-		// For read operation we don't need to get all the objects between, because the data is not mutated
-		// We should only run before and after hooks, and then get the data with request to only return after
-		// possible mutated data in the hooks
-		// A little tricky but logic
-		await hook?.runOnSingleObject({
-			operationType: OperationType.AfterRead,
-			id,
-		})
-
 		const objectToReturn = await this.adapter.getObject({
 			className,
 			id,
@@ -498,8 +489,7 @@ export class DatabaseController<T extends WabeTypes> {
 			where: whereWithACLCondition,
 		})
 
-		// @ts-expect-error
-		return {
+		const finalObject = {
 			...objectToReturn,
 			...(await this._getFinalObjectWithPointerAndRelation({
 				context,
@@ -511,6 +501,15 @@ export class DatabaseController<T extends WabeTypes> {
 				_skipHooks,
 			})),
 		}
+
+		const afterReadResult = await hook?.runOnSingleObject({
+			operationType: OperationType.AfterRead,
+			id,
+			// @ts-expect-error
+			object: finalObject,
+		})
+
+		return afterReadResult?.object || finalObject
 	}
 
 	async getObjects<
@@ -568,15 +567,6 @@ export class DatabaseController<T extends WabeTypes> {
 			where: whereWithACLCondition,
 		})
 
-		// For read operation we don't need to get all the objects between, because the data is not mutated
-		// We should only run before and after hooks, and then get the data with request to only return after
-		// possible mutated data in the hooks
-		// A little tricky but logic
-		await hook?.runOnMultipleObjects({
-			operationType: OperationType.AfterRead,
-			where: whereWithACLCondition,
-		})
-
 		const objectsToReturn = await this.adapter.getObjects({
 			className,
 			context: contextWithRoot(context),
@@ -588,7 +578,7 @@ export class DatabaseController<T extends WabeTypes> {
 			order,
 		})
 
-		return Promise.all(
+		const objectsWithPointers = await Promise.all(
 			objectsToReturn.map(async (object) => {
 				return {
 					...object,
@@ -603,7 +593,16 @@ export class DatabaseController<T extends WabeTypes> {
 					})),
 				}
 			}),
-		) as Promise<OutputType<T, K, W>[]>
+		)
+
+		const afterReadResults = await hook?.runOnMultipleObjects({
+			operationType: OperationType.AfterRead,
+			// @ts-expect-error
+			objects: objectsWithPointers,
+		})
+
+		return (afterReadResults?.objects ||
+			objectsWithPointers) as unknown as Promise<OutputType<T, K, W>[]>
 	}
 
 	async createObject<

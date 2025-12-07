@@ -161,13 +161,16 @@ export const initializeHook = <
 			operationType: OperationType
 			id?: string
 			originalObject?: OutputType<DevWabeTypes, any, any>
+			object?: OutputType<DevWabeTypes, any, any>
 		}): Promise<MutationData<T, K, any>> => {
 			if (hooksOrderByPriorities.length === 0)
 				return { object: undefined, newData: undefined }
 
-			const object = await computeObject({
-				id: options.id,
-			})
+			const object =
+				options.object ??
+				(await computeObject({
+					id: options.id,
+				}))
 
 			const hookObject = new HookObject<DevWabeTypes, K>({
 				className,
@@ -203,14 +206,17 @@ export const initializeHook = <
 			where?: WhereType<any, any>
 			ids?: string[]
 			originalObjects?: OutputType<DevWabeTypes, any, any>[]
+			objects?: OutputType<DevWabeTypes, any, any>[]
 		}) => {
 			if (hooksOrderByPriorities.length === 0)
 				return { objects: [], newData: [newData || {}] }
 
-			const objects = await computeObjects({
-				where: options.where,
-				ids: options.ids || [],
-			})
+			const objects =
+				options.objects ||
+				(await computeObjects({
+					where: options.where,
+					ids: options.ids || [],
+				}))
 
 			const objectsToUseInMap =
 				(options.operationType === OperationType.AfterDelete
