@@ -360,7 +360,9 @@ describe('GraphqlSchema', () => {
 		`)
 
 		expect(updateResult.updateTestClass.testClass.field).toBe('updatedField')
-		expect(updateResult.updateTestClass.testClass.id).toBe(createResult.createTestClass.testClass.id)
+		expect(updateResult.updateTestClass.testClass.id).toBe(
+			createResult.createTestClass.testClass.id,
+		)
 
 		await wabe.close()
 	})
@@ -411,7 +413,9 @@ describe('GraphqlSchema', () => {
 		`)
 
 		expect(deleteResult.deleteTestClass.testClass.field).toBe('fieldToDelete')
-		expect(deleteResult.deleteTestClass.testClass.id).toBe(createResult.createTestClass.testClass.id)
+		expect(deleteResult.deleteTestClass.testClass.id).toBe(
+			createResult.createTestClass.testClass.id,
+		)
 
 		await wabe.close()
 	})
