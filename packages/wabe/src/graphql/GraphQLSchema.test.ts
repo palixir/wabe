@@ -226,6 +226,258 @@ describe('GraphqlSchema', () => {
 		})
 	})
 
+	it('should works with fragment', async () => {
+		const { wabe } = await createWabe({
+			classes: [
+				{
+					name: 'TestClass',
+					fields: {
+						field: {
+							type: 'String',
+						},
+					},
+				},
+			],
+		})
+
+		const rootClient = getGraphqlClient(wabe.config.port)
+
+		await rootClient.request<any>(gql`
+			mutation createTestClass {
+				createTestClass(input: { fields: { field: "field" } }) {
+					testClass {
+						id
+					}
+				}
+			}
+		`)
+
+		const result = await rootClient.request<any>(gql`
+		  fragment Test on TestClass {
+				id
+				field
+			}
+
+      query testClasses {
+          testClasses{
+            edges {
+                node {
+                    ...Test
+                }
+            }
+          }
+      }
+      `)
+
+		expect(result.testClasses.edges[0].node.field).toBe('field')
+
+		await wabe.close()
+	})
+
+	it('should work with fragments in create mutation', async () => {
+		const { wabe } = await createWabe({
+			classes: [
+				{
+					name: 'TestClass',
+					fields: {
+						field: {
+							type: 'String',
+						},
+					},
+				},
+			],
+		})
+
+		const rootClient = getGraphqlClient(wabe.config.port)
+
+		const result = await rootClient.request<any>(gql`
+			fragment TestClassFields on TestClass {
+				id
+				field
+			}
+
+			mutation createTestClass {
+				createTestClass(input: { fields: { field: "testField" } }) {
+					testClass {
+						...TestClassFields
+					}
+				}
+			}
+		`)
+
+		expect(result.createTestClass.testClass.field).toBe('testField')
+		expect(result.createTestClass.testClass.id).toBeDefined()
+
+		await wabe.close()
+	})
+
+	it('should work with fragments in update mutation', async () => {
+		const { wabe } = await createWabe({
+			classes: [
+				{
+					name: 'TestClass',
+					fields: {
+						field: {
+							type: 'String',
+						},
+					},
+				},
+			],
+		})
+
+		const rootClient = getGraphqlClient(wabe.config.port)
+
+		// Create an object first
+		const createResult = await rootClient.request<any>(gql`
+			mutation createTestClass {
+				createTestClass(input: { fields: { field: "originalField" } }) {
+					testClass {
+						id
+					}
+				}
+			}
+		`)
+
+		// Update using fragment
+		const updateResult = await rootClient.request<any>(gql`
+			fragment TestClassFields on TestClass {
+				id
+				field
+			}
+
+			mutation updateTestClass {
+				updateTestClass(
+					input: {
+						id: "${createResult.createTestClass.testClass.id}"
+						fields: { field: "updatedField" }
+					}
+				) {
+					testClass {
+						...TestClassFields
+					}
+				}
+			}
+		`)
+
+		expect(updateResult.updateTestClass.testClass.field).toBe('updatedField')
+		expect(updateResult.updateTestClass.testClass.id).toBe(
+			createResult.createTestClass.testClass.id,
+		)
+
+		await wabe.close()
+	})
+
+	it('should work with fragments in delete mutation', async () => {
+		const { wabe } = await createWabe({
+			classes: [
+				{
+					name: 'TestClass',
+					fields: {
+						field: {
+							type: 'String',
+						},
+					},
+				},
+			],
+		})
+
+		const rootClient = getGraphqlClient(wabe.config.port)
+
+		// Create an object first
+		const createResult = await rootClient.request<any>(gql`
+			mutation createTestClass {
+				createTestClass(input: { fields: { field: "fieldToDelete" } }) {
+					testClass {
+						id
+					}
+				}
+			}
+		`)
+
+		// Delete using fragment
+		const deleteResult = await rootClient.request<any>(gql`
+			fragment TestClassFields on TestClass {
+				id
+				field
+			}
+
+			mutation deleteTestClass {
+				deleteTestClass(
+					input: { id: "${createResult.createTestClass.testClass.id}" }
+				) {
+					testClass {
+						...TestClassFields
+					}
+				}
+			}
+		`)
+
+		expect(deleteResult.deleteTestClass.testClass.field).toBe('fieldToDelete')
+		expect(deleteResult.deleteTestClass.testClass.id).toBe(
+			createResult.createTestClass.testClass.id,
+		)
+
+		await wabe.close()
+	})
+
+	it('should work with nested fragments', async () => {
+		const { wabe } = await createWabe({
+			classes: [
+				{
+					name: 'TestClass',
+					fields: {
+						field1: {
+							type: 'String',
+						},
+						field2: {
+							type: 'String',
+						},
+					},
+				},
+			],
+		})
+
+		const rootClient = getGraphqlClient(wabe.config.port)
+
+		await rootClient.request<any>(gql`
+			mutation createTestClass {
+				createTestClass(input: { fields: { field1: "value1", field2: "value2" } }) {
+					testClass {
+						id
+					}
+				}
+			}
+		`)
+
+		const result = await rootClient.request<any>(gql`
+			fragment BasicFields on TestClass {
+				id
+				field1
+			}
+
+			fragment ExtendedFields on TestClass {
+				...BasicFields
+				field2
+			}
+
+			query testClasses {
+				testClasses {
+					edges {
+						node {
+							...ExtendedFields
+						}
+					}
+				}
+			}
+		`)
+
+		expect(result.testClasses.edges[0].node.field1).toBe('value1')
+		expect(result.testClasses.edges[0].node.field2).toBe('value2')
+		expect(result.testClasses.edges[0].node.id).toBeDefined()
+
+		await wabe.close()
+	})
+
 	it('should be able to only get ok output on query / mutation that returns connection object', async () => {
 		const { wabe, client } = await createWabe({
 			classes: [
