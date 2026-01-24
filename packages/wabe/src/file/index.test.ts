@@ -197,7 +197,6 @@ describe('File upload', () => {
 
 		formData.append('0', new File(['a'], 'a.text', { type: 'text/plain' }))
 
-		console.log('before fetch')
 		const res = await fetch(`http://127.0.0.1:${port}/graphql`, {
 			method: 'POST',
 			body: formData,
@@ -462,6 +461,67 @@ describe('File upload', () => {
 			`http://127.0.0.1:${port}/bucket/a.text`,
 		)
 		expect(new Date(test3s.edges[0].node.file.urlGeneratedAt)).toBeDate()
+	})
+
+	it('should return the url of the file on after read request for multiple objects', async () => {
+		const upload = async (fileName: string, content: string) => {
+			const formData = new FormData()
+
+			formData.append(
+				'operations',
+				JSON.stringify({
+					query:
+						'mutation ($file: File!) {createTest3(input: {fields: {file: {file:$file}}}){test3{id, file { name}}}}',
+					variables: { file: null },
+				}),
+			)
+
+			formData.append('map', JSON.stringify({ 0: ['variables.file'] }))
+
+			formData.append(
+				'0',
+				new File([content], fileName, { type: 'text/plain' }),
+			)
+
+			await fetch(`http://127.0.0.1:${port}/graphql`, {
+				method: 'POST',
+				body: formData,
+			})
+		}
+
+		await upload('a.text', 'a')
+		await upload('b.text', 'b')
+
+		const anonymousClient = getAnonymousClient(port)
+
+		const { test3s } = await anonymousClient.request<any>(gql`
+			query {
+				test3s {
+					edges {
+						node {
+							id
+							file {
+								name
+								url
+								urlGeneratedAt
+							}
+						}
+					}
+				}
+			}
+		`)
+
+		const files = test3s.edges.map((edge: any) => edge.node.file)
+
+		expect(files).toHaveLength(2)
+		expect(files.map((f: any) => f.name)).toEqual(
+			expect.arrayContaining(['a.text', 'b.text']),
+		)
+
+		files.forEach((file: any) => {
+			expect(file.url).toEqual(`http://127.0.0.1:${port}/bucket/${file.name}`)
+			expect(new Date(file.urlGeneratedAt)).toBeDate()
+		})
 	})
 
 	it('should not read the file again in the bucket if the cache is not expired', async () => {

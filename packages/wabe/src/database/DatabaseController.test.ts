@@ -359,6 +359,7 @@ describe('DatabaseController', () => {
 		expect(mockRunOnSingleObject).toHaveBeenNthCalledWith(2, {
 			operationType: hooks.OperationType.AfterRead,
 			id: 'id',
+			object: {},
 		})
 	})
 
@@ -392,7 +393,7 @@ describe('DatabaseController', () => {
 		})
 		expect(mockRunOnMultipleObject).toHaveBeenNthCalledWith(2, {
 			operationType: hooks.OperationType.AfterRead,
-			where: { id: { equalTo: 'id' } },
+			objects: [],
 		})
 	})
 
@@ -489,7 +490,7 @@ describe('DatabaseController', () => {
 			select: { id: true },
 		})
 
-		expect(mockInitializeHook).toHaveBeenCalledTimes(1)
+		expect(mockInitializeHook).toHaveBeenCalledTimes(2)
 		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
 			context: {
@@ -501,7 +502,7 @@ describe('DatabaseController', () => {
 			select: { id: true },
 		})
 
-		expect(mockRunOnSingleObject).toHaveBeenCalledTimes(2)
+		expect(mockRunOnSingleObject).toHaveBeenCalledTimes(4)
 		expect(mockRunOnSingleObject).toHaveBeenNthCalledWith(1, {
 			operationType: hooks.OperationType.BeforeCreate,
 		})
@@ -528,7 +529,7 @@ describe('DatabaseController', () => {
 			select: { id: true },
 		})
 
-		expect(mockInitializeHook).toHaveBeenCalledTimes(1)
+		expect(mockInitializeHook).toHaveBeenCalledTimes(2)
 		expect(mockInitializeHook).toHaveBeenCalledWith({
 			className: 'TestClass',
 			context: {
@@ -540,7 +541,7 @@ describe('DatabaseController', () => {
 			select: { id: true },
 		})
 
-		expect(mockRunOnMultipleObject).toHaveBeenCalledTimes(2)
+		expect(mockRunOnMultipleObject).toHaveBeenCalledTimes(4)
 		expect(mockRunOnMultipleObject).toHaveBeenNthCalledWith(1, {
 			operationType: hooks.OperationType.BeforeCreate,
 		})

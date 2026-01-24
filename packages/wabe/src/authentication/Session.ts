@@ -1,10 +1,48 @@
-import jwt, { verify } from 'jsonwebtoken'
+import jwt, { verify, type SignOptions } from 'jsonwebtoken'
 import crypto from 'node:crypto'
 import type { WabeContext } from '../server/interface'
 import type { User } from '../../generated/wabe'
 import type { WabeConfig } from '../server'
 import { contextWithRoot } from '../utils/export'
 import type { DevWabeTypes } from '../utils/helper'
+import {
+	encryptDeterministicToken,
+	decryptDeterministicToken,
+} from '../utils/crypto'
+
+const getJwtSecret = (context: WabeContext<DevWabeTypes>): string => {
+	const secret = context.wabe.config.authentication?.session?.jwtSecret
+	if (!secret) throw new Error('Authentication session requires jwtSecret')
+	return secret
+}
+
+const safeVerify = (
+	token: string,
+	secret: string,
+	options: Pick<SignOptions, 'audience' | 'issuer'> = {},
+) => {
+	try {
+		return !!verify(token, secret, options)
+	} catch {
+		return false
+	}
+}
+
+const getTokenSecret = (context: WabeContext<DevWabeTypes>): string =>
+	context.wabe.config.authentication?.session?.tokenSecret ??
+	getJwtSecret(context)
+
+const getTokenEncryptionKey = (context: WabeContext<DevWabeTypes>) =>
+	crypto.createHash('sha256').update(getTokenSecret(context)).digest()
+
+const getJwtVerifyOptions = (context: WabeContext<DevWabeTypes>) => {
+	const opts: Pick<SignOptions, 'audience' | 'issuer'> = {}
+	const audience = context.wabe.config.authentication?.session?.jwtAudience
+	const issuer = context.wabe.config.authentication?.session?.jwtIssuer
+	if (audience) opts.audience = audience
+	if (issuer) opts.issuer = issuer
+	return opts
+}
 
 export class Session {
 	private accessToken: string | undefined = undefined
@@ -23,7 +61,7 @@ export class Session {
 		const customExpiresInMs =
 			config?.authentication?.session?.refreshTokenExpiresInMs
 
-		if (!customExpiresInMs) return 1000 * 60 * 60 * 24 * 30 // 30 days in ms
+		if (!customExpiresInMs) return 1000 * 60 * 60 * 24 * 7 // 7 days in ms
 
 		return customExpiresInMs
 	}
@@ -43,13 +81,8 @@ export class Session {
 		accessToken: string | null
 		refreshToken?: string | null
 	}> {
-		if (
-			!verify(
-				accessToken,
-				context.wabe.config.authentication?.session?.jwtSecret || 'dev',
-				{},
-			)
-		) {
+		const verifyOptions = getJwtVerifyOptions(context)
+		if (!safeVerify(accessToken, getJwtSecret(context), verifyOptions)) {
 			return {
 				sessionId: null,
 				user: null,
@@ -58,16 +91,25 @@ export class Session {
 			}
 		}
 
+		const encryptedAccessToken = encryptDeterministicToken(
+			accessToken,
+			getTokenEncryptionKey(context),
+		)
+
 		const sessions = await context.wabe.controllers.database.getObjects({
 			className: '_Session',
 			where: {
-				accessToken: { equalTo: accessToken },
+				accessTokenEncrypted: { equalTo: encryptedAccessToken },
 				OR: [
 					{
-						accessTokenExpiresAt: { greaterThanOrEqualTo: new Date() },
+						accessTokenExpiresAt: {
+							greaterThanOrEqualTo: new Date(),
+						},
 					},
 					{
-						refreshTokenExpiresAt: { greaterThanOrEqualTo: new Date() },
+						refreshTokenExpiresAt: {
+							greaterThanOrEqualTo: new Date(),
+						},
 					},
 				],
 			},
@@ -76,7 +118,7 @@ export class Session {
 				user: true,
 				accessTokenExpiresAt: true,
 				refreshTokenExpiresAt: true,
-				refreshToken: true,
+				refreshTokenEncrypted: true,
 			},
 			first: 1,
 			context,
@@ -100,14 +142,11 @@ export class Session {
 				refreshToken: null,
 			}
 
-		// CSRF check
+		// CSRF check only for cookie-based sessions (enabled by default unless explicitly disabled)
 		if (
-			context.wabe.config.security?.disableCSRFProtection !== undefined &&
-			!context.wabe.config.security.disableCSRFProtection
+			context.wabe.config.authentication?.session?.cookieSession &&
+			context.wabe.config.security?.disableCSRFProtection !== true
 		) {
-			const secretKey =
-				context.wabe.config.authentication?.session?.jwtSecret || 'dev'
-
 			const [receivedHmacHex, receivedRandomValue] = csrfToken.split('.')
 
 			if (!receivedHmacHex || !receivedRandomValue)
@@ -122,8 +161,12 @@ export class Session {
 
 			const message = `${currentSessionId.length}!${currentSessionId}!${receivedRandomValue?.length}!${receivedRandomValue}`
 
+			const csrfSecret =
+				context.wabe.config.authentication?.session?.csrfSecret ||
+				getJwtSecret(context)
+
 			const expectedHmac = crypto
-				.createHmac('sha256', secretKey)
+				.createHmac('sha256', csrfSecret)
 				.update(message)
 				.digest('hex')
 
@@ -158,10 +201,23 @@ export class Session {
 		if (
 			new Date(session.accessTokenExpiresAt) < new Date() &&
 			new Date(session.refreshTokenExpiresAt) >= new Date() &&
-			session.refreshToken
+			session.refreshTokenEncrypted
 		) {
+			const decryptedRefreshToken = decryptDeterministicToken(
+				session.refreshTokenEncrypted as string,
+				getTokenEncryptionKey(context),
+			)
+
+			if (!decryptedRefreshToken)
+				return {
+					sessionId: null,
+					user: null,
+					accessToken: null,
+					refreshToken: null,
+				}
+
 			const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
-				await this.refresh(accessToken, session.refreshToken, context)
+				await this.refresh(accessToken, decryptedRefreshToken, context)
 
 			return {
 				sessionId: session.id,
@@ -181,13 +237,18 @@ export class Session {
 				role: userWithRole?.role,
 			},
 			accessToken,
-			refreshToken: session.refreshToken,
+			refreshToken: decryptDeterministicToken(
+				session.refreshTokenEncrypted as string,
+				getTokenEncryptionKey(context),
+			),
 		}
 	}
 
 	async create(userId: string, context: WabeContext<DevWabeTypes>) {
 		const jwtTokenFields =
 			context.wabe.config.authentication?.session?.jwtTokenFields
+
+		const nowSeconds = Math.floor(Date.now() / 1000)
 
 		const result = jwtTokenFields
 			? await context.wabe.controllers.database.getObject({
@@ -198,36 +259,56 @@ export class Session {
 				})
 			: undefined
 
-		const secretKey =
-			context.wabe.config.authentication?.session?.jwtSecret || 'dev'
+		const secretKey = getJwtSecret(context)
+
+		const signOptions: SignOptions = { jwtid: crypto.randomUUID() }
+		const audience = context.wabe.config.authentication?.session?.jwtAudience
+		const issuer = context.wabe.config.authentication?.session?.jwtIssuer
+		if (audience) signOptions.audience = audience
+		if (issuer) signOptions.issuer = issuer
 
 		this.accessToken = jwt.sign(
 			{
 				userId,
 				user: result,
-				iat: Date.now(),
-				exp: this.getAccessTokenExpireAt(context.wabe.config).getTime(),
+				iat: nowSeconds,
+				exp: Math.floor(
+					this.getAccessTokenExpireAt(context.wabe.config).getTime() / 1000,
+				),
 			},
 			secretKey,
+			signOptions,
 		)
 
 		this.refreshToken = jwt.sign(
 			{
 				userId,
 				user: result,
-				iat: Date.now(),
-				exp: this.getRefreshTokenExpireAt(context.wabe.config).getTime(),
+				iat: nowSeconds,
+				exp: Math.floor(
+					this.getRefreshTokenExpireAt(context.wabe.config).getTime() / 1000,
+				),
 			},
 			secretKey,
+			signOptions,
+		)
+
+		const accessTokenEncrypted = encryptDeterministicToken(
+			this.accessToken,
+			getTokenEncryptionKey(context),
+		)
+		const refreshTokenEncrypted = encryptDeterministicToken(
+			this.refreshToken,
+			getTokenEncryptionKey(context),
 		)
 
 		const res = await context.wabe.controllers.database.createObject({
 			className: '_Session',
 			context: contextWithRoot(context),
 			data: {
-				accessToken: this.accessToken,
+				accessTokenEncrypted,
 				accessTokenExpiresAt: this.getAccessTokenExpireAt(context.wabe.config),
-				refreshToken: this.refreshToken,
+				refreshTokenEncrypted,
 				refreshTokenExpiresAt: this.getRefreshTokenExpireAt(
 					context.wabe.config,
 				),
@@ -242,8 +323,11 @@ export class Session {
 		const randomValue = crypto.randomBytes(16).toString('hex')
 		const message = `${sessionId.length}!${sessionId}!${randomValue.length}!${randomValue}`
 
+		const csrfSecret =
+			context.wabe.config.authentication?.session?.csrfSecret || secretKey
+
 		const hmac = crypto
-			.createHmac('sha256', secretKey)
+			.createHmac('sha256', csrfSecret)
 			.update(message)
 			.digest('hex')
 
@@ -262,34 +346,36 @@ export class Session {
 		refreshToken: string,
 		context: WabeContext<DevWabeTypes>,
 	) {
-		if (
-			!verify(
-				accessToken,
-				context.wabe.config.authentication?.session?.jwtSecret || 'dev',
-				{},
-			)
-		)
+		const secretKey = getJwtSecret(context)
+
+		const verifyOptions = getJwtVerifyOptions(context)
+
+		if (!safeVerify(accessToken, secretKey, verifyOptions))
 			return {
 				accessToken: null,
 				refreshToken: null,
 			}
 
-		if (
-			!verify(
-				refreshToken,
-				context.wabe.config.authentication?.session?.jwtSecret || 'dev',
-				{},
-			)
-		)
+		if (!safeVerify(refreshToken, secretKey, verifyOptions))
 			return {
 				accessToken: null,
 				refreshToken: null,
 			}
+
+		const accessTokenEncrypted = encryptDeterministicToken(
+			accessToken,
+			getTokenEncryptionKey(context),
+		)
+		const incomingRefreshTokenEncrypted = encryptDeterministicToken(
+			refreshToken,
+			getTokenEncryptionKey(context),
+		)
 
 		const session = await context.wabe.controllers.database.getObjects({
 			className: '_Session',
 			where: {
-				accessToken: { equalTo: accessToken },
+				accessTokenEncrypted: { equalTo: accessTokenEncrypted },
+				refreshTokenEncrypted: { equalTo: incomingRefreshTokenEncrypted },
 			},
 			select: {
 				id: true,
@@ -300,7 +386,7 @@ export class Session {
 						name: true,
 					},
 				},
-				refreshToken: true,
+				refreshTokenEncrypted: true,
 				refreshTokenExpiresAt: true,
 			},
 			context: contextWithRoot(context),
@@ -317,27 +403,23 @@ export class Session {
 		const {
 			refreshTokenExpiresAt,
 			user,
-			refreshToken: databaseRefreshToken,
+			refreshTokenEncrypted: storedRefreshTokenEncrypted,
 			id,
 		} = session[0]
 
 		if (new Date(refreshTokenExpiresAt) < new Date(Date.now()))
 			throw new Error('Refresh token expired')
 
-		const expiresInMs = this._getRefreshTokenExpiresInMs(context.wabe.config)
+		const decryptedRefreshToken =
+			decryptDeterministicToken(
+				storedRefreshTokenEncrypted,
+				getTokenEncryptionKey(context),
+			) || refreshToken
 
-		// We refresh only if the refresh token is about to expire (75% of the time)
-		if (
-			!this._isRefreshTokenExpired(new Date(refreshTokenExpiresAt), expiresInMs)
-		)
-			return {
-				accessToken,
-				refreshToken,
-			}
-
-		if (refreshToken !== databaseRefreshToken)
+		if (!decryptedRefreshToken || decryptedRefreshToken !== refreshToken)
 			throw new Error('Invalid refresh token')
 
+		// Always rotate tokens on refresh
 		const userId = user?.id
 
 		if (!userId)
@@ -358,24 +440,47 @@ export class Session {
 				})
 			: undefined
 
+		const nowSeconds = Math.floor(Date.now() / 1000)
+
+		const signOptions: SignOptions = { jwtid: crypto.randomUUID() }
+		const audience = context.wabe.config.authentication?.session?.jwtAudience
+		const issuer = context.wabe.config.authentication?.session?.jwtIssuer
+		if (audience) signOptions.audience = audience
+		if (issuer) signOptions.issuer = issuer
+
 		const newAccessToken = jwt.sign(
 			{
 				userId,
 				user: result,
-				iat: Date.now(),
-				exp: this.getAccessTokenExpireAt(context.wabe.config).getTime(),
+				iat: nowSeconds,
+				exp: Math.floor(
+					this.getAccessTokenExpireAt(context.wabe.config).getTime() / 1000,
+				),
 			},
-			context.wabe.config.authentication?.session?.jwtSecret || 'dev',
+			secretKey,
+			signOptions,
 		)
 
 		const newRefreshToken = jwt.sign(
 			{
 				userId,
 				user: result,
-				iat: Date.now(),
-				exp: this.getRefreshTokenExpireAt(context.wabe.config).getTime(),
+				iat: nowSeconds,
+				exp: Math.floor(
+					this.getRefreshTokenExpireAt(context.wabe.config).getTime() / 1000,
+				),
 			},
-			context.wabe.config.authentication?.session?.jwtSecret || 'dev',
+			secretKey,
+			signOptions,
+		)
+
+		const newAccessTokenEncrypted = encryptDeterministicToken(
+			newAccessToken,
+			getTokenEncryptionKey(context),
+		)
+		const newRefreshTokenEncrypted = encryptDeterministicToken(
+			newRefreshToken,
+			getTokenEncryptionKey(context),
 		)
 
 		await context.wabe.controllers.database.updateObject({
@@ -383,9 +488,9 @@ export class Session {
 			context: contextWithRoot(context),
 			id,
 			data: {
-				accessToken: newAccessToken,
+				accessTokenEncrypted: newAccessTokenEncrypted,
 				accessTokenExpiresAt: this.getAccessTokenExpireAt(context.wabe.config),
-				refreshToken: newRefreshToken,
+				refreshTokenEncrypted: newRefreshTokenEncrypted,
 				refreshTokenExpiresAt: this.getRefreshTokenExpireAt(
 					context.wabe.config,
 				),

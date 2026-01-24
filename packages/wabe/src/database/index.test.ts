@@ -14,8 +14,6 @@ import {
 	type DevWabeTypes,
 	getAdminUserClient,
 	getGraphqlClient,
-	createUserAndUpdateRole,
-	getAnonymousClient,
 } from '../utils/helper'
 import { setupTests, closeTests } from '../utils/testHelper'
 import type { WabeContext } from '../server/interface'
@@ -134,31 +132,6 @@ describe('Database', () => {
 		mockAfterUpdate.mockClear()
 		spyGetObject.mockClear()
 		spyGetObjects.mockClear()
-	})
-
-	it("should return created objects with createObjects event if the user doesn't have access to read the object", async () => {
-		const rootClient = getGraphqlClient(wabe.config.port)
-
-		const { userClient } = await createUserAndUpdateRole({
-			anonymousClient: getAnonymousClient(wabe.config.port),
-			port: wabe.config.port,
-			roleName: 'Client',
-			rootClient,
-		})
-
-		const res = await userClient.request<any>(gql`
-      mutation createTests{
-        createTests(input: {fields: [{name: "test"}]}){
-            edges {
-                node {
-                    id
-                }
-            }
-        }
-      }
-    `)
-
-		expect(res.createTests.edges.length).toEqual(1)
 	})
 
 	it('should return id of a relation if set to true in select on getObject', async () => {
@@ -1066,6 +1039,68 @@ describe('Database', () => {
 		expect(res?.age).toEqual(21)
 
 		expect(mockUpdateObject).toHaveBeenCalledTimes(1)
+	})
+
+	it('should apply afterRead hook mutations to returned object', async () => {
+		wabe.config.hooks = [
+			...getDefaultHooks(),
+			{
+				className: 'User',
+				operationType: OperationType.AfterRead,
+				priority: 2,
+				callback: (hookObject) => {
+					// Mutate the object to ensure the returned value is affected by AfterRead
+					// @ts-expect-error
+					hookObject.object.name = 'mutated-by-after-read'
+				},
+			},
+		]
+
+		const created = await context.wabe.controllers.database.createObject({
+			className: 'User',
+			context,
+			data: { name: 'original-name' },
+			select: { id: true },
+		})
+
+		const res = await context.wabe.controllers.database.getObject({
+			className: 'User',
+			context,
+			id: created?.id || '',
+			select: { id: true, name: true },
+		})
+
+		expect(res?.name).toEqual('mutated-by-after-read')
+	})
+
+	it('should apply afterRead hook mutations to returned objects list', async () => {
+		wabe.config.hooks = [
+			...getDefaultHooks(),
+			{
+				className: 'User',
+				operationType: OperationType.AfterRead,
+				priority: 2,
+				callback: (hookObject) => {
+					// @ts-expect-error
+					hookObject.object.name = 'mutated-by-after-read-list'
+				},
+			},
+		]
+
+		await context.wabe.controllers.database.createObjects({
+			className: 'User',
+			context,
+			select: { id: true },
+			data: [{ name: 'original-name' }],
+		})
+
+		const res = await context.wabe.controllers.database.getObjects({
+			className: 'User',
+			context,
+			select: { id: true, name: true },
+		})
+
+		expect(res[0]?.name).toEqual('mutated-by-after-read-list')
 	})
 
 	it('should get the good value in output of createObjects after mutation on after hook', async () => {

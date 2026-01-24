@@ -107,7 +107,7 @@ export const defaultSessionHandler =
 			ctx.res.setCookie('refreshToken', newRefreshToken, {
 				httpOnly: true,
 				path: '/',
-				expires: session.getAccessTokenExpireAt(wabe.config),
+				expires: session.getRefreshTokenExpireAt(wabe.config),
 				sameSite: 'None',
 				secure: true,
 			})

@@ -259,14 +259,19 @@ export class DatabaseController<T extends WabeTypes> {
 												{
 													acl: {
 														users: {
-															notContains: { userId },
+															notContains: {
+																userId,
+															},
 														},
 													},
 												},
 												{
 													acl: {
 														roles: {
-															contains: { roleId, [operation]: true },
+															contains: {
+																roleId,
+																[operation]: true,
+															},
 														},
 													},
 												},
@@ -399,6 +404,12 @@ export class DatabaseController<T extends WabeTypes> {
 		context,
 		where,
 	}: CountOptions<T, K>): Promise<number> {
+		const whereWithACLCondition = this._buildWhereWithACL(
+			where || {},
+			context,
+			'read',
+		)
+
 		const hook = initializeHook({
 			className,
 			context,
@@ -409,7 +420,11 @@ export class DatabaseController<T extends WabeTypes> {
 			operationType: OperationType.BeforeRead,
 		})
 
-		const count = await this.adapter.count({ className, context, where })
+		const count = await this.adapter.count({
+			className,
+			context,
+			where: whereWithACLCondition,
+		})
 
 		await hook?.runOnSingleObject({
 			operationType: OperationType.AfterRead,
@@ -465,15 +480,6 @@ export class DatabaseController<T extends WabeTypes> {
 			selectWithoutPointers,
 		)
 
-		// For read operation we don't need to get all the objects between, because the data is not mutated
-		// We should only run before and after hooks, and then get the data with request to only return after
-		// possible mutated data in the hooks
-		// A little tricky but logic
-		await hook?.runOnSingleObject({
-			operationType: OperationType.AfterRead,
-			id,
-		})
-
 		const objectToReturn = await this.adapter.getObject({
 			className,
 			id,
@@ -483,8 +489,7 @@ export class DatabaseController<T extends WabeTypes> {
 			where: whereWithACLCondition,
 		})
 
-		// @ts-expect-error
-		return {
+		const finalObject = {
 			...objectToReturn,
 			...(await this._getFinalObjectWithPointerAndRelation({
 				context,
@@ -496,6 +501,15 @@ export class DatabaseController<T extends WabeTypes> {
 				_skipHooks,
 			})),
 		}
+
+		const afterReadResult = await hook?.runOnSingleObject({
+			operationType: OperationType.AfterRead,
+			id,
+			// @ts-expect-error
+			object: finalObject,
+		})
+
+		return afterReadResult?.object || finalObject
 	}
 
 	async getObjects<
@@ -553,15 +567,6 @@ export class DatabaseController<T extends WabeTypes> {
 			where: whereWithACLCondition,
 		})
 
-		// For read operation we don't need to get all the objects between, because the data is not mutated
-		// We should only run before and after hooks, and then get the data with request to only return after
-		// possible mutated data in the hooks
-		// A little tricky but logic
-		await hook?.runOnMultipleObjects({
-			operationType: OperationType.AfterRead,
-			where: whereWithACLCondition,
-		})
-
 		const objectsToReturn = await this.adapter.getObjects({
 			className,
 			context: contextWithRoot(context),
@@ -573,7 +578,7 @@ export class DatabaseController<T extends WabeTypes> {
 			order,
 		})
 
-		return Promise.all(
+		const objectsWithPointers = await Promise.all(
 			objectsToReturn.map(async (object) => {
 				return {
 					...object,
@@ -588,7 +593,16 @@ export class DatabaseController<T extends WabeTypes> {
 					})),
 				}
 			}),
-		) as Promise<OutputType<T, K, W>[]>
+		)
+
+		const afterReadResults = await hook?.runOnMultipleObjects({
+			operationType: OperationType.AfterRead,
+			// @ts-expect-error
+			objects: objectsWithPointers,
+		})
+
+		return (afterReadResults?.objects ||
+			objectsWithPointers) as unknown as Promise<OutputType<T, K, W>[]>
 	}
 
 	async createObject<
@@ -614,7 +628,7 @@ export class DatabaseController<T extends WabeTypes> {
 			operationType: OperationType.BeforeCreate,
 		})
 
-		const { id } = await this.adapter.createObject({
+		const res = await this.adapter.createObject({
 			className,
 			context,
 			select,
@@ -623,18 +637,20 @@ export class DatabaseController<T extends WabeTypes> {
 
 		await hook.runOnSingleObject({
 			operationType: OperationType.AfterCreate,
-			id,
+			id: res.id,
 		})
 
 		if (select && Object.keys(select).length === 0) return null
 
 		return this.getObject({
 			className,
-			context: contextWithRoot(context),
+			context: {
+				...context,
+				// @ts-expect-error
+				user: className === 'User' ? res : context.user,
+			},
 			select,
-			id,
-			// Because if you create an object, exceptionnaly you can read it after creation
-			_skipHooks: true,
+			id: res.id,
 		})
 	}
 
@@ -704,12 +720,14 @@ export class DatabaseController<T extends WabeTypes> {
 
 		return this.getObjects({
 			className,
-			context,
+			context: {
+				...context,
+				// @ts-expect-error
+				user: className === 'User' ? data[0] : context.user,
+			},
 			select,
 			// @ts-expect-error
 			where: { id: { in: ids } },
-			// Because if you create an object, exceptionnaly you can read it after creation
-			_skipHooks: true,
 			first,
 			offset,
 			order,

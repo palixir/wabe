@@ -39,10 +39,13 @@ export const extractFieldsFromSetNode = (
 	selectionSet: SelectionSetNode,
 	className: string,
 	fragments?: Record<string, FragmentDefinitionNode>,
+	options?: { ignoreClassField?: boolean },
 ): Record<string, any> => {
 	const ignoredFields = ['edges', 'node', 'clientMutationId', 'ok']
+	const shouldIgnoreClassField = options?.ignoreClassField ?? true
 
-	if (className) ignoredFields.push(firstLetterInLowerCase(className))
+	if (shouldIgnoreClassField && className)
+		ignoredFields.push(firstLetterInLowerCase(className))
 
 	return selectionSet.selections?.reduce(
 		(acc, selection) => {
@@ -63,17 +66,16 @@ export const extractFieldsFromSetNode = (
 			const currentValue = selection.name.value
 
 			if (
-				//@ts-expect-error
 				selection.selectionSet?.selections &&
-				//@ts-expect-error
 				selection.selectionSet?.selections?.length > 0
 			) {
 				const res = extractFieldsFromSetNode(
-					//@ts-expect-error
 					selection.selectionSet,
 					className,
 					fragments,
+					{ ignoreClassField: false },
 				)
+
 				if (ignoredFields.indexOf(currentValue) === -1)
 					return {
 						...acc,

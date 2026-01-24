@@ -3,7 +3,7 @@ import type { TOTP } from 'otplib/core'
 import { createHash } from 'node:crypto'
 import { base32Encode } from 'src/utils'
 
-const TWO_MINUTES = 5
+const ONE_WINDOW = 1
 
 export class OTP {
 	private secret: string
@@ -12,7 +12,7 @@ export class OTP {
 	constructor(rootKey: string) {
 		this.secret = rootKey
 		this.internalTotp = totp.clone({
-			window: [TWO_MINUTES, 0],
+			window: [ONE_WINDOW, 0],
 		})
 	}
 

@@ -54,10 +54,11 @@ export type ProviderInterface<T extends WabeTypes, K = any> = {
 
 export type SecondaryProviderInterface<T extends WabeTypes, K = any> = {
 	onSendChallenge?: (options: OnSendChallengeOptions<T>) => Promise<void> | void
-	onVerifyChallenge: (
-		options: OnVerifyChallengeOptions<T, K>,
-	) =>
-		| Promise<{ userId: string; srp?: { serverSessionProof: string } } | null>
+	onVerifyChallenge: (options: OnVerifyChallengeOptions<T, K>) =>
+		| Promise<{
+				userId: string
+				srp?: { serverSessionProof: string }
+		  } | null>
 		| ({ userId: string; srp?: { serverSessionProof: string } } | null)
 }
 
@@ -93,6 +94,22 @@ export interface SessionConfig<T extends WabeTypes> {
 	 * The JWT secret used to sign the session tokens
 	 */
 	jwtSecret: string
+	/**
+	 * Optional audience to embed and verify in JWTs
+	 */
+	jwtAudience?: string
+	/**
+	 * Optional issuer to embed and verify in JWTs
+	 */
+	jwtIssuer?: string
+	/**
+	 * Secret dedicated to CSRF token HMAC (defaults to jwtSecret)
+	 */
+	csrfSecret?: string
+	/**
+	 * Secret used to encrypt session tokens at rest (defaults to jwtSecret)
+	 */
+	tokenSecret?: string
 	/**
 	 * A selection of fields to include in the JWT token in the "user" fields
 	 */
