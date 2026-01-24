@@ -1,4 +1,9 @@
-import type { GraphQLResolveInfo, SelectionSetNode } from 'graphql'
+import type {
+	GraphQLResolveInfo,
+	SelectionSetNode,
+	FragmentSpreadNode,
+	FragmentDefinitionNode,
+} from 'graphql'
 import type { WabeTypes } from '..'
 import type { WabeContext } from '../server/interface'
 import { contextWithoutGraphQLCall, firstLetterInLowerCase } from '../utils'
@@ -11,9 +16,29 @@ import {
 	remove,
 } from './pointerAndRelationFunction'
 
+const expandFragmentSpread = (
+	fragmentSpread: FragmentSpreadNode,
+	fragments: Record<string, FragmentDefinitionNode>,
+	className: string,
+): Record<string, any> => {
+	const fragmentName = fragmentSpread.name.value
+	const fragmentDef = fragments[fragmentName]
+
+	if (!fragmentDef) {
+		throw new Error(`Fragment "${fragmentName}" not found`)
+	}
+
+	return extractFieldsFromSetNode(
+		fragmentDef.selectionSet,
+		className,
+		fragments,
+	)
+}
+
 export const extractFieldsFromSetNode = (
 	selectionSet: SelectionSetNode,
 	className: string,
+	fragments?: Record<string, FragmentDefinitionNode>,
 ): Record<string, any> => {
 	const ignoredFields = ['edges', 'node', 'clientMutationId', 'ok']
 
@@ -21,6 +46,19 @@ export const extractFieldsFromSetNode = (
 
 	return selectionSet.selections?.reduce(
 		(acc, selection) => {
+			// Handle fragment spreads
+			if (selection.kind === 'FragmentSpread') {
+				if (!fragments) {
+					throw new Error('Fragment spreads require fragments to be provided')
+				}
+				const fragmentFields = expandFragmentSpread(
+					selection as FragmentSpreadNode,
+					fragments,
+					className,
+				)
+				return { ...acc, ...fragmentFields }
+			}
+
 			//@ts-expect-error
 			const currentValue = selection.name.value
 
@@ -34,6 +72,7 @@ export const extractFieldsFromSetNode = (
 					//@ts-expect-error
 					selection.selectionSet,
 					className,
+					fragments,
 				)
 				if (ignoredFields.indexOf(currentValue) === -1)
 					return {
@@ -60,7 +99,11 @@ const getFieldsFromInfo = (info: GraphQLResolveInfo, className: string) => {
 
 	if (!selectionSet) throw new Error('No output fields provided')
 
-	const fields = extractFieldsFromSetNode(selectionSet, className)
+	const fields = extractFieldsFromSetNode(
+		selectionSet,
+		className,
+		info.fragments,
+	)
 
 	if (!fields) throw new Error('No fields provided')
 
