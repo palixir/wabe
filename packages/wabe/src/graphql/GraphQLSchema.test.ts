@@ -226,7 +226,7 @@ describe('GraphqlSchema', () => {
 		})
 	})
 
-	it('should works with fragment', async () => {
+	it('should work with fragments in all operations (query, create, update, delete) and nested fragments', async () => {
 		const { wabe } = await createWabe({
 			classes: [
 				{
@@ -235,197 +235,6 @@ describe('GraphqlSchema', () => {
 						field: {
 							type: 'String',
 						},
-					},
-				},
-			],
-		})
-
-		const rootClient = getGraphqlClient(wabe.config.port)
-
-		await rootClient.request<any>(gql`
-			mutation createTestClass {
-				createTestClass(input: { fields: { field: "field" } }) {
-					testClass {
-						id
-					}
-				}
-			}
-		`)
-
-		const result = await rootClient.request<any>(gql`
-		  fragment Test on TestClass {
-				id
-				field
-			}
-
-      query testClasses {
-          testClasses{
-            edges {
-                node {
-                    ...Test
-                }
-            }
-          }
-      }
-      `)
-
-		expect(result.testClasses.edges[0].node.field).toBe('field')
-
-		await wabe.close()
-	})
-
-	it('should work with fragments in create mutation', async () => {
-		const { wabe } = await createWabe({
-			classes: [
-				{
-					name: 'TestClass',
-					fields: {
-						field: {
-							type: 'String',
-						},
-					},
-				},
-			],
-		})
-
-		const rootClient = getGraphqlClient(wabe.config.port)
-
-		const result = await rootClient.request<any>(gql`
-			fragment TestClassFields on TestClass {
-				id
-				field
-			}
-
-			mutation createTestClass {
-				createTestClass(input: { fields: { field: "testField" } }) {
-					testClass {
-						...TestClassFields
-					}
-				}
-			}
-		`)
-
-		expect(result.createTestClass.testClass.field).toBe('testField')
-		expect(result.createTestClass.testClass.id).toBeDefined()
-
-		await wabe.close()
-	})
-
-	it('should work with fragments in update mutation', async () => {
-		const { wabe } = await createWabe({
-			classes: [
-				{
-					name: 'TestClass',
-					fields: {
-						field: {
-							type: 'String',
-						},
-					},
-				},
-			],
-		})
-
-		const rootClient = getGraphqlClient(wabe.config.port)
-
-		// Create an object first
-		const createResult = await rootClient.request<any>(gql`
-			mutation createTestClass {
-				createTestClass(input: { fields: { field: "originalField" } }) {
-					testClass {
-						id
-					}
-				}
-			}
-		`)
-
-		// Update using fragment
-		const updateResult = await rootClient.request<any>(gql`
-			fragment TestClassFields on TestClass {
-				id
-				field
-			}
-
-			mutation updateTestClass {
-				updateTestClass(
-					input: {
-						id: "${createResult.createTestClass.testClass.id}"
-						fields: { field: "updatedField" }
-					}
-				) {
-					testClass {
-						...TestClassFields
-					}
-				}
-			}
-		`)
-
-		expect(updateResult.updateTestClass.testClass.field).toBe('updatedField')
-		expect(updateResult.updateTestClass.testClass.id).toBe(
-			createResult.createTestClass.testClass.id,
-		)
-
-		await wabe.close()
-	})
-
-	it('should work with fragments in delete mutation', async () => {
-		const { wabe } = await createWabe({
-			classes: [
-				{
-					name: 'TestClass',
-					fields: {
-						field: {
-							type: 'String',
-						},
-					},
-				},
-			],
-		})
-
-		const rootClient = getGraphqlClient(wabe.config.port)
-
-		// Create an object first
-		const createResult = await rootClient.request<any>(gql`
-			mutation createTestClass {
-				createTestClass(input: { fields: { field: "fieldToDelete" } }) {
-					testClass {
-						id
-					}
-				}
-			}
-		`)
-
-		// Delete using fragment
-		const deleteResult = await rootClient.request<any>(gql`
-			fragment TestClassFields on TestClass {
-				id
-				field
-			}
-
-			mutation deleteTestClass {
-				deleteTestClass(
-					input: { id: "${createResult.createTestClass.testClass.id}" }
-				) {
-					testClass {
-						...TestClassFields
-					}
-				}
-			}
-		`)
-
-		expect(deleteResult.deleteTestClass.testClass.field).toBe('fieldToDelete')
-		expect(deleteResult.deleteTestClass.testClass.id).toBe(
-			createResult.createTestClass.testClass.id,
-		)
-
-		await wabe.close()
-	})
-
-	it('should work with nested fragments', async () => {
-		const { wabe } = await createWabe({
-			classes: [
-				{
-					name: 'TestClass',
-					fields: {
 						field1: {
 							type: 'String',
 						},
@@ -439,17 +248,131 @@ describe('GraphqlSchema', () => {
 
 		const rootClient = getGraphqlClient(wabe.config.port)
 
-		await rootClient.request<any>(gql`
+		// Define fragments for all operations
+		const fragments = `
+			fragment BasicFields on TestClass {
+				id
+				field
+			}
+
+			fragment ExtendedFields on TestClass {
+				...BasicFields
+				field1
+				field2
+			}
+		`
+
+		// Test CREATE operation with fragments
+		const createResult = await rootClient.request<any>(gql`
+			${fragments}
 			mutation createTestClass {
-				createTestClass(input: { fields: { field1: "value1", field2: "value2" } }) {
+				createTestClass(input: { fields: { field: "testField", field1: "value1", field2: "value2" } }) {
 					testClass {
-						id
+						...ExtendedFields
 					}
 				}
 			}
 		`)
 
-		const result = await rootClient.request<any>(gql`
+		expect(createResult.createTestClass.testClass.field).toBe('testField')
+		expect(createResult.createTestClass.testClass.field1).toBe('value1')
+		expect(createResult.createTestClass.testClass.field2).toBe('value2')
+		expect(createResult.createTestClass.testClass.id).toBeDefined()
+
+		const objectId = createResult.createTestClass.testClass.id
+
+		// Test QUERY operation with fragments (simple fragment)
+		const queryResult = await rootClient.request<any>(gql`
+			fragment Test on TestClass {
+				id
+				field
+			}
+
+			query testClasses {
+				testClasses{
+					edges {
+						node {
+							...Test
+						}
+					}
+				}
+			}
+		`)
+
+		expect(queryResult.testClasses.edges[0].node.field).toBe('testField')
+		expect(queryResult.testClasses.edges[0].node.id).toBe(objectId)
+
+		// Test UPDATE operation with fragments
+		const updateResult = await rootClient.request<any>(gql`
+			${fragments}
+			mutation updateTestClass {
+				updateTestClass(
+					input: {
+						id: "${objectId}"
+						fields: { field: "updatedField", field1: "updated1", field2: "updated2" }
+					}
+				) {
+					testClass {
+						...ExtendedFields
+					}
+				}
+			}
+		`)
+
+		expect(updateResult.updateTestClass.testClass.field).toBe('updatedField')
+		expect(updateResult.updateTestClass.testClass.field1).toBe('updated1')
+		expect(updateResult.updateTestClass.testClass.field2).toBe('updated2')
+		expect(updateResult.updateTestClass.testClass.id).toBe(objectId)
+
+		// Test DELETE operation with fragments
+		const deleteResult = await rootClient.request<any>(gql`
+			${fragments}
+			mutation deleteTestClass {
+				deleteTestClass(
+					input: { id: "${objectId}" }
+				) {
+					testClass {
+						...ExtendedFields
+					}
+				}
+			}
+		`)
+
+		expect(deleteResult.deleteTestClass.testClass.field).toBe('updatedField')
+		expect(deleteResult.deleteTestClass.testClass.field1).toBe('updated1')
+		expect(deleteResult.deleteTestClass.testClass.field2).toBe('updated2')
+		expect(deleteResult.deleteTestClass.testClass.id).toBe(objectId)
+
+		await wabe.close()
+	})
+
+	it('should work with fragments in all operations (query, create, update, delete) and nested fragments', async () => {
+		const { wabe } = await createWabe({
+			classes: [
+				{
+					name: 'TestClass',
+					fields: {
+						field1: {
+							type: 'String',
+						},
+						field2: {
+							type: 'String',
+						},
+						field3: {
+							type: 'String',
+						},
+						field4: {
+							type: 'String',
+						},
+					},
+				},
+			],
+		})
+
+		const rootClient = getGraphqlClient(wabe.config.port)
+
+		// Define fragments for all operations
+		const fragments = `
 			fragment BasicFields on TestClass {
 				id
 				field1
@@ -460,20 +383,245 @@ describe('GraphqlSchema', () => {
 				field2
 			}
 
-			query testClasses {
-				testClasses {
-					edges {
-						node {
-							...ExtendedFields
-						}
+			fragment FullFields on TestClass {
+				...ExtendedFields
+				field3
+			}
+
+			fragment CompleteFields on TestClass {
+				...FullFields
+				field4
+			}
+		`
+
+		// Test CREATE operation with fragments of fragments
+		const createResult = await rootClient.request<any>(gql`
+			${fragments}
+			mutation createTestClass {
+				createTestClass(input: { fields: { field1: "created1", field2: "created2", field3: "created3", field4: "created4" } }) {
+					testClass {
+						...CompleteFields
 					}
 				}
 			}
 		`)
 
-		expect(result.testClasses.edges[0].node.field1).toBe('value1')
-		expect(result.testClasses.edges[0].node.field2).toBe('value2')
-		expect(result.testClasses.edges[0].node.id).toBeDefined()
+		expect(createResult.createTestClass.testClass.field1).toBe('created1')
+		expect(createResult.createTestClass.testClass.field2).toBe('created2')
+		expect(createResult.createTestClass.testClass.field3).toBe('created3')
+		expect(createResult.createTestClass.testClass.field4).toBe('created4')
+		expect(createResult.createTestClass.testClass.id).toBeDefined()
+
+		const objectId = createResult.createTestClass.testClass.id
+
+		// Test QUERY operation with fragments of fragments
+		const queryResult = await rootClient.request<any>(gql`
+			${fragments}
+			query testClass {
+				testClass(id: "${objectId}") {
+					...CompleteFields
+				}
+			}
+		`)
+
+		expect(queryResult.testClass.field1).toBe('created1')
+		expect(queryResult.testClass.field2).toBe('created2')
+		expect(queryResult.testClass.field3).toBe('created3')
+		expect(queryResult.testClass.field4).toBe('created4')
+		expect(queryResult.testClass.id).toBe(objectId)
+
+		// Test UPDATE operation with fragments of fragments
+		const updateResult = await rootClient.request<any>(gql`
+			${fragments}
+			mutation updateTestClass {
+				updateTestClass(
+					input: {
+						id: "${objectId}"
+						fields: { field1: "updated1", field2: "updated2", field3: "updated3", field4: "updated4" }
+					}
+				) {
+					testClass {
+						...CompleteFields
+					}
+				}
+			}
+		`)
+
+		expect(updateResult.updateTestClass.testClass.field1).toBe('updated1')
+		expect(updateResult.updateTestClass.testClass.field2).toBe('updated2')
+		expect(updateResult.updateTestClass.testClass.field3).toBe('updated3')
+		expect(updateResult.updateTestClass.testClass.field4).toBe('updated4')
+		expect(updateResult.updateTestClass.testClass.id).toBe(objectId)
+
+		// Test DELETE operation with fragments of fragments
+		const deleteResult = await rootClient.request<any>(gql`
+			${fragments}
+			mutation deleteTestClass {
+				deleteTestClass(input: { id: "${objectId}" }) {
+					testClass {
+						...CompleteFields
+					}
+				}
+			}
+		`)
+
+		expect(deleteResult.deleteTestClass.testClass.field1).toBe('updated1')
+		expect(deleteResult.deleteTestClass.testClass.field2).toBe('updated2')
+		expect(deleteResult.deleteTestClass.testClass.field3).toBe('updated3')
+		expect(deleteResult.deleteTestClass.testClass.field4).toBe('updated4')
+		expect(deleteResult.deleteTestClass.testClass.id).toBe(objectId)
+
+		await wabe.close()
+	})
+
+	it('should work with fragments across related classes in all operations', async () => {
+		const { wabe } = await createWabe({
+			classes: [
+				{
+					name: 'PremierClasse',
+					fields: {
+						field1: {
+							type: 'String',
+						},
+					},
+				},
+				{
+					name: 'DeuxiemeClasse',
+					fields: {
+						field2: {
+							type: 'String',
+						},
+						premierClasses: {
+							type: 'Relation',
+							// @ts-expect-error
+							class: 'PremierClasse',
+						},
+					},
+				},
+			],
+		})
+
+		const rootClient = getGraphqlClient(wabe.config.port)
+
+		// Define fragments for related classes
+		const fragments = `
+			fragment TestPremierClasse on PremierClasse {
+				id
+				field1
+			}
+
+			fragment TestDeuxiemeClasse on DeuxiemeClasse {
+				id
+				field2
+				premierClasses {
+					edges {
+						node {
+							...TestPremierClasse
+						}
+					}
+				}
+			}
+		`
+
+		// Create a PremierClasse object first
+		const premierClasseResult = await rootClient.request<any>(gql`
+			mutation createPremierClasse {
+				createPremierClasse(input: { fields: { field1: "premierValue" } }) {
+					premierClasse {
+						id
+						field1
+					}
+				}
+			}
+		`)
+
+		const premierClasseId = premierClasseResult.createPremierClasse.premierClasse.id
+
+		// Test CREATE operation with fragments across related classes
+		const createResult = await rootClient.request<any>(gql`
+			${fragments}
+			mutation createDeuxiemeClasse {
+				createDeuxiemeClasse(
+					input: {
+						fields: {
+							field2: "deuxiemeValue"
+							premierClasses: {
+								createAndAdd: [{ field1: "nestedPremierValue" }]
+							}
+						}
+					}
+				) {
+					deuxiemeClasse {
+						...TestDeuxiemeClasse
+					}
+				}
+			}
+		`)
+
+		expect(createResult.createDeuxiemeClasse.deuxiemeClasse.field2).toBe('deuxiemeValue')
+		expect(createResult.createDeuxiemeClasse.deuxiemeClasse.id).toBeDefined()
+		expect(createResult.createDeuxiemeClasse.deuxiemeClasse.premierClasses.edges.length).toBe(1)
+		expect(createResult.createDeuxiemeClasse.deuxiemeClasse.premierClasses.edges[0].node.field1).toBe('nestedPremierValue')
+		expect(createResult.createDeuxiemeClasse.deuxiemeClasse.premierClasses.edges[0].node.id).toBeDefined()
+
+		const deuxiemeClasseId = createResult.createDeuxiemeClasse.deuxiemeClasse.id
+
+		// Test QUERY operation with fragments across related classes
+		const queryResult = await rootClient.request<any>(gql`
+			${fragments}
+			query deuxiemeClass {
+				deuxiemeClasse(id: "${deuxiemeClasseId}") {
+					...TestDeuxiemeClasse
+				}
+			}
+		`)
+
+		expect(queryResult.deuxiemeClasse.field2).toBe('deuxiemeValue')
+		expect(queryResult.deuxiemeClasse.id).toBe(deuxiemeClasseId)
+		expect(queryResult.deuxiemeClasse.premierClasses.edges.length).toBe(1)
+		expect(queryResult.deuxiemeClasse.premierClasses.edges[0].node.field1).toBe('nestedPremierValue')
+
+		// Test UPDATE operation with fragments across related classes
+		const updateResult = await rootClient.request<any>(gql`
+			${fragments}
+			mutation updateDeuxiemeClasse {
+				updateDeuxiemeClasse(
+					input: {
+						id: "${deuxiemeClasseId}"
+						fields: {
+							field2: "updatedDeuxiemeValue"
+							premierClasses: {
+								add: ["${premierClasseId}"]
+							}
+						}
+					}
+				) {
+					deuxiemeClasse {
+						...TestDeuxiemeClasse
+					}
+				}
+			}
+		`)
+
+		expect(updateResult.updateDeuxiemeClasse.deuxiemeClasse.field2).toBe('updatedDeuxiemeValue')
+		expect(updateResult.updateDeuxiemeClasse.deuxiemeClasse.id).toBe(deuxiemeClasseId)
+		expect(updateResult.updateDeuxiemeClasse.deuxiemeClasse.premierClasses.edges.length).toBe(2)
+
+		// Test DELETE operation with fragments across related classes
+		const deleteResult = await rootClient.request<any>(gql`
+			${fragments}
+			mutation deleteDeuxiemeClasse {
+				deleteDeuxiemeClasse(input: { id: "${deuxiemeClasseId}" }) {
+					deuxiemeClasse {
+						...TestDeuxiemeClasse
+					}
+				}
+			}
+		`)
+
+		expect(deleteResult.deleteDeuxiemeClasse.deuxiemeClasse.field2).toBe('updatedDeuxiemeValue')
+		expect(deleteResult.deleteDeuxiemeClasse.deuxiemeClasse.id).toBe(deuxiemeClasseId)
+		expect(deleteResult.deleteDeuxiemeClasse.deuxiemeClasse.premierClasses.edges.length).toBe(2)
 
 		await wabe.close()
 	})
