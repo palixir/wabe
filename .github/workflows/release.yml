@@ -35,7 +35,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-          registry-url: "https://registry.npmjs.org"
+          registries: "https://registry.npmjs.org"
 
       - run: bun install
       - run: bun run build
@@ -66,7 +66,7 @@ jobs:
           echo "next_version=$next_version" >> $GITHUB_ENV
 
       # We publish on NPM before releasing on GitHub to avoid releasing a version that is not published
-      - run: cd packages/${{inputs.package}} && bun publish --access publish
+      - run: cd packages/${{inputs.package}} && bun publish --access public
         env:
           NPM_CONFIG_TOKEN: ${{secrets.NPM_TOKEN}}
 
