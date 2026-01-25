@@ -1200,8 +1200,7 @@ describe('Database', () => {
 		expect(mockAfterUpdate).toHaveBeenCalledTimes(1)
 	})
 
-	it.only("should empty array if equalTo value is undefined and don't match with any object in database", async () => {
-		console.log('this query')
+	it("should empty array if equalTo value is undefined and don't match with any object in database", async () => {
 		const roles = await context.wabe.controllers.database.getObjects({
 			className: 'Role',
 			context: contextWithRoot(context),

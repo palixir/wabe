@@ -766,6 +766,7 @@ input StringWhereInput {
   notEqualTo: String
   in: [String]
   notIn: [String]
+  exists: Boolean
 }
 
 input IntWhereInput {
@@ -777,6 +778,7 @@ input IntWhereInput {
   greaterThanOrEqualTo: Int
   in: [Int]
   notIn: [Int]
+  exists: Boolean
 }
 
 input EmailWhereInput {
@@ -784,6 +786,7 @@ input EmailWhereInput {
   notEqualTo: Email
   in: [Email]
   notIn: [Email]
+  exists: Boolean
 }
 
 input UserACLObjectWhereInput {
@@ -806,6 +809,7 @@ input BooleanWhereInput {
   notEqualTo: Boolean
   in: [Boolean]
   notIn: [Boolean]
+  exists: Boolean
 }
 
 input UserACLObjectRolesACLWhereInput {
@@ -825,6 +829,7 @@ input DateWhereInput {
   lessThanOrEqualTo: Date
   greaterThan: Date
   greaterThanOrEqualTo: Date
+  exists: Boolean
 }
 
 input SearchWhereInput {
@@ -865,6 +870,7 @@ input PhoneWhereInput {
   notEqualTo: Phone
   in: [Phone]
   notIn: [Phone]
+  exists: Boolean
 }
 
 input UserAuthenticationEmailPasswordWhereInput {
@@ -892,6 +898,7 @@ input UserAuthenticationGithubWhereInput {
 input AnyWhereInput {
   equalTo: Any
   notEqualTo: Any
+  exists: Boolean
 }
 
 """
@@ -1050,6 +1057,7 @@ input ArrayWhereInput {
   notEqualTo: Any
   contains: Any
   notContains: Any
+  exists: Boolean
 }
 
 input PostACLObjectWhereInput {

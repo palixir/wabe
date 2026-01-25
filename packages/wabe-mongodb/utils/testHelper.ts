@@ -39,6 +39,7 @@ export const setupTests = async (
 					fields: {
 						field1: { type: 'String' },
 						int: { type: 'Int' },
+						float: { type: 'Float' },
 						array: { type: 'Array', typeValue: 'String' },
 						date: { type: 'Date' },
 						enum: { type: 'AuthenticationProvider' },

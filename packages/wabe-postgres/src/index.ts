@@ -102,8 +102,8 @@ export const buildPostgresWhereQueryAndValues = <
 				? `${parentKey}->'${keyToWrite}'`
 				: `"${keyToWrite}"`
 
-			if (value?.equalTo || value?.equalTo === null) {
-				if (value.equalTo === null) {
+			if ('equalTo' in (value || {})) {
+				if (value?.equalTo === null || value?.equalTo === undefined) {
 					acc.conditions.push(`${fullKey} IS NULL`)
 					return acc
 				}
@@ -113,6 +113,22 @@ export const buildPostgresWhereQueryAndValues = <
 					Array.isArray(value.equalTo)
 						? JSON.stringify(value.equalTo)
 						: value.equalTo,
+				)
+				acc.paramIndex++
+				return acc
+			}
+
+			if ('notEqualTo' in (value || {})) {
+				if (value?.notEqualTo === null || value?.notEqualTo === undefined) {
+					acc.conditions.push(`${fullKey} IS NOT NULL`)
+					return acc
+				}
+
+				acc.conditions.push(`${fullKey} IS DISTINCT FROM $${acc.paramIndex}`)
+				acc.values.push(
+					Array.isArray(value.notEqualTo)
+						? JSON.stringify(value.notEqualTo)
+						: value.notEqualTo,
 				)
 				acc.paramIndex++
 				return acc
@@ -143,22 +159,6 @@ export const buildPostgresWhereQueryAndValues = <
 				} else {
 					acc.conditions.push(`"${keyToWrite}" IS NULL`)
 				}
-				return acc
-			}
-
-			if (value?.notEqualTo || value?.notEqualTo === null) {
-				if (value.notEqualTo === null) {
-					acc.conditions.push(`${fullKey} IS NOT NULL`)
-					return acc
-				}
-
-				acc.conditions.push(`${fullKey} IS DISTINCT FROM $${acc.paramIndex}`)
-				acc.values.push(
-					Array.isArray(value.notEqualTo)
-						? JSON.stringify(value.notEqualTo)
-						: value.notEqualTo,
-				)
-				acc.paramIndex++
 				return acc
 			}
 
@@ -627,25 +627,47 @@ export class PostgresAdapter<T extends WabeTypes>
 		const client = await this.pool.connect()
 
 		try {
-			const columns = Object.keys(data[0] || {}).map((column) => `"${column}"`)
-			const placeholders = data.map(
-				(_, index) =>
-					`(${columns.map((_, i) => `$${index * columns.length + i + 1}`).join(', ')})`,
+			if (data.length === 0) return []
+
+			// Every line is empty
+			if (data.every((item) => Object.keys(item).length === 0)) {
+				const placeholders = data.map(() => 'DEFAULT VALUES').join(', ')
+
+				const result = await client.query(
+					`INSERT INTO "${String(className)}" ${placeholders} RETURNING _id`,
+				)
+
+				return result.rows.map((row) => ({ id: row._id }))
+			}
+
+			const allColumns = Array.from(
+				new Set(data.flatMap((item) => Object.keys(item))),
 			)
-			const values = data.flatMap((item) => computeValuesFromData(item))
+
+			const columns = allColumns.map((column) => `"${column}"`)
+
+			const values = data.flatMap((item: any) =>
+				allColumns.map((col) => {
+					const value = item[col]
+					return Array.isArray(value) ? JSON.stringify(value) : (value ?? null)
+				}),
+			)
+
+			const placeholders = data.map((_, rowIndex) => {
+				const offset = rowIndex * allColumns.length
+				return `(${allColumns
+					.map((_, colIndex) => `$${offset + colIndex + 1}`)
+					.join(', ')})`
+			})
 
 			const result = await client.query(
-				columns.length === 0
-					? `INSERT INTO "${String(className)}" DEFAULT VALUES RETURNING _id`
-					: `INSERT INTO "${String(className)}" (${columns.join(', ')}) VALUES ${placeholders.join(', ')} RETURNING _id`,
+				`INSERT INTO "${String(className)}" (${columns.join(
+					', ',
+				)}) VALUES ${placeholders.join(', ')} RETURNING _id`,
 				values,
 			)
 
-			const rows = result.rows as Array<Record<string, any>>
-
-			return rows.map((row) => ({
-				id: row._id,
-			}))
+			return result.rows.map((row) => ({ id: row._id }))
 		} finally {
 			client.release()
 		}
