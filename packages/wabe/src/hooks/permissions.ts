@@ -38,7 +38,7 @@ export const _getPermissionPropertiesOfAClass = ({
 	return permission
 }
 
-export const _checkCLP = async (
+export const _checkCLP = (
 	object: HookObject<any, any>,
 	operationType: OperationType,
 ) => {

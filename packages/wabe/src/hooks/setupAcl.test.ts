@@ -348,7 +348,7 @@ describe('setupAcl', () => {
 			rootClient,
 		})
 
-		const res = await userClient.request<any>(gql`
+		const setupResult = await userClient.request<any>(gql`
         mutation createSetupACL8 {
           createSetupACL8(input: {fields: {test: "test"}}) {
             setupACL8 {
@@ -370,20 +370,37 @@ describe('setupAcl', () => {
         }
     `)
 
+		const res = await rootClient.request<any>(gql`
+          query setupACL8 {
+              setupACL8(id: "${setupResult.createSetupACL8.setupACL8.id}") {
+                id
+                acl {
+                  users {
+                    userId
+                    read
+                    write
+                  }
+                  roles {
+                    roleId
+                    read
+                    write
+                  }
+                }
+              }
+            }
+          `)
+
 		// User
-		expect(res.createSetupACL8.setupACL8.acl.users[0].userId).toEqual(userId)
-		expect(res.createSetupACL8.setupACL8.acl.users[0].read).toEqual(true)
-		expect(res.createSetupACL8.setupACL8.acl.users[0].write).toEqual(true)
+		expect(res.setupACL8.acl.users[0].userId).toEqual(userId)
+		expect(res.setupACL8.acl.users[0].read).toEqual(true)
+		expect(res.setupACL8.acl.users[0].write).toEqual(true)
 
 		// Role
 		expect(
-			await getRoleNameFromId(
-				res.createSetupACL8.setupACL8.acl.roles[0].roleId,
-				rootClient,
-			),
+			await getRoleNameFromId(res.setupACL8.acl.roles[0].roleId, rootClient),
 		).toEqual('Client')
-		expect(res.createSetupACL8.setupACL8.acl.roles[0].read).toEqual(true)
-		expect(res.createSetupACL8.setupACL8.acl.roles[0].write).toEqual(true)
+		expect(res.setupACL8.acl.roles[0].read).toEqual(true)
+		expect(res.setupACL8.acl.roles[0].write).toEqual(true)
 	})
 
 	it('should not update acl object if the acl function is not present in permissions in the class', async () => {
@@ -469,7 +486,7 @@ describe('setupAcl', () => {
 	})
 
 	it('should get different role id for read and write if roles are different', async () => {
-		const res = await rootClient.request<any>(gql`
+		const setupResult = await rootClient.request<any>(gql`
         mutation createSetupACL5 {
           createSetupACL5(input: {fields: {test: "test"}}) {
             setupACL5 {
@@ -491,21 +508,35 @@ describe('setupAcl', () => {
         }
     `)
 
-		expect(res.createSetupACL5.setupACL5.acl.users).toHaveLength(0)
+		const res = await rootClient.request<any>(gql`
+          query setupACL5 {
+              setupACL5(id: "${setupResult.createSetupACL5.setupACL5.id}") {
+                id
+                acl {
+                  users {
+                    userId
+                    read
+                    write
+                  }
+                  roles {
+                    roleId
+                    read
+                    write
+                  }
+                }
+              }
+            }
+          `)
+
+		expect(res.setupACL5.acl.users).toHaveLength(0)
 
 		// Role
 		expect(
-			await getRoleNameFromId(
-				res.createSetupACL5.setupACL5.acl.roles[0].roleId,
-				rootClient,
-			),
+			await getRoleNameFromId(res.setupACL5.acl.roles[0].roleId, rootClient),
 		).toEqual('Client')
 
 		expect(
-			await getRoleNameFromId(
-				res.createSetupACL5.setupACL5.acl.roles[1].roleId,
-				rootClient,
-			),
+			await getRoleNameFromId(res.setupACL5.acl.roles[1].roleId, rootClient),
 		).toEqual('Client2')
 	})
 

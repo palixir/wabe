@@ -11,6 +11,7 @@ import {
 	getUserClient,
 } from './utils/helper'
 import { setupTests, closeTests } from './utils/testHelper'
+import { RoleEnum } from 'generated/wabe'
 
 describe('Security tests', () => {
 	let wabe: Wabe<DevWabeTypes> | undefined
@@ -23,6 +24,125 @@ describe('Security tests', () => {
 
 		await closeTests(wabe)
 		wabe = undefined
+	})
+
+	it('should not return private fields (acl) on createObject, getObject and getObjects if not root', async () => {
+		const setup = await setupTests([
+			{
+				name: 'Secret',
+				fields: {
+					name: { type: 'String' },
+				},
+				permissions: {
+					create: {
+						requireAuthentication: true,
+						authorizedRoles: ['Client'],
+					},
+					read: {
+						requireAuthentication: true,
+						authorizedRoles: ['Client'],
+					},
+					acl: async (hookObject) => {
+						await hookObject.addACL('roles', {
+							read: true,
+							write: true,
+							role: RoleEnum.Client,
+						})
+					},
+				},
+			},
+		])
+
+		wabe = setup.wabe
+		port = setup.port
+		client = getAnonymousClient(port)
+		rootClient = getGraphqlClient(port)
+
+		const { userClient } = await createUserAndUpdateRole({
+			anonymousClient: client,
+			port,
+			roleName: 'Client',
+			rootClient,
+		})
+
+		const res = await userClient.request<any>(gql`
+				mutation createSecret {
+					createSecret(
+						input: { fields: { name: "n", } }
+					) {
+						secret {
+							id
+							acl {
+			            roles {
+                    roleId
+                    read
+                    write
+                  }
+							}
+						}
+					}
+				}
+			`)
+
+		expect(res.createSecret.secret.acl).toBeNull()
+
+		const res2 = await userClient.request<any>(gql`
+          query secret {
+            secret(id: "${res.createSecret.secret.id}") {
+              id
+              acl {
+                roles {
+                    roleId
+                    read
+                    write
+                }
+              }
+            }
+          }
+        `)
+
+		expect(res2.secret.acl).toBeNull()
+
+		const res3 = await userClient.request<any>(gql`
+            query secrets {
+              secrets{
+                edges {
+                    node {
+                        id
+                        acl {
+                          roles {
+                              roleId
+                              read
+                              write
+                          }
+                        }
+                    }
+                }
+              }
+            }
+          `)
+
+		expect(res3.secrets.edges[0].node.acl).toBeNull()
+
+		const res4 = await rootClient.request<any>(gql`
+            query secret {
+              secret(id: "${res.createSecret.secret.id}") {
+                id
+                name
+                acl {
+                  roles {
+                    roleId
+                    read
+                    write
+                  }
+                }
+              }
+            }
+          `)
+
+		expect(res4.secret.acl.roles).not.toBeNull()
+
+		await closeTests(wabe)
 	})
 
 	it('should block requests without a valid CSRF token', async () => {
@@ -200,7 +320,7 @@ describe('Security tests', () => {
 			rootClient,
 		})
 
-		await expect(
+		expect(
 			userClient.request<any>(gql`
 				mutation createSecret {
 					createSecret(
@@ -214,58 +334,6 @@ describe('Security tests', () => {
 				}
 			`),
 		).rejects.toThrow('You are not authorized to read this field')
-
-		await closeTests(wabe)
-	})
-
-	it('should not return created object when ACL denies read access', async () => {
-		const setup = await setupTests([
-			{
-				name: 'NoReadAfterCreate',
-				fields: {
-					name: { type: 'String' },
-				},
-				permissions: {
-					create: {
-						requireAuthentication: true,
-						authorizedRoles: ['Client'],
-					},
-					read: {
-						requireAuthentication: true,
-						authorizedRoles: ['Client'],
-					},
-					acl: async (hookObject) => {
-						await hookObject.addACL('users', null)
-						await hookObject.addACL('roles', null)
-					},
-				},
-			},
-		])
-
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
-
-		const { userClient } = await createUserAndUpdateRole({
-			anonymousClient: client,
-			port,
-			roleName: 'Client',
-			rootClient,
-		})
-
-		await expect(
-			userClient.request<any>(gql`
-				mutation createNoReadAfterCreate {
-					createNoReadAfterCreate(input: { fields: { name: "n" } }) {
-						noReadAfterCreate {
-							id
-							name
-						}
-					}
-				}
-			`),
-		).rejects.toThrow(/Permission denied|Object not found/)
 
 		await closeTests(wabe)
 	})

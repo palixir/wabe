@@ -107,7 +107,7 @@ describe('Permissions', () => {
 				select: {},
 			})
 
-			expect(_checkCLP(obj, OperationType.BeforeRead)).rejects.toThrow(
+			expect(() => _checkCLP(obj, OperationType.BeforeRead)).toThrow(
 				'Permission denied to read class TestClass4',
 			)
 		})
@@ -141,13 +141,13 @@ describe('Permissions', () => {
 				select: {},
 			})
 
-			expect(_checkCLP(obj, OperationType.BeforeRead)).rejects.toThrow(
+			expect(() => _checkCLP(obj, OperationType.BeforeRead)).toThrow(
 				'Permission denied to read class TestClass5',
 			)
 		})
 
-		it('should get the permission for a given className', async () => {
-			const permission = await _getPermissionPropertiesOfAClass({
+		it('should get the permission for a given className', () => {
+			const permission = _getPermissionPropertiesOfAClass({
 				className: 'TestClass',
 				operation: 'read',
 				context,
@@ -158,7 +158,7 @@ describe('Permissions', () => {
 				authorizedRoles: [RoleEnum.Admin],
 			})
 
-			const permission2 = await _getPermissionPropertiesOfAClass({
+			const permission2 = _getPermissionPropertiesOfAClass({
 				className: 'TestClass2',
 				operation: 'read',
 				context,
@@ -185,7 +185,7 @@ describe('Permissions', () => {
 				select: {},
 			})
 
-			expect(_checkCLP(obj, OperationType.BeforeRead)).rejects.toThrow(
+			expect(() => _checkCLP(obj, OperationType.BeforeRead)).toThrow(
 				'Permission denied to read class TestClass',
 			)
 		})
@@ -251,7 +251,7 @@ describe('Permissions', () => {
 				select: {},
 			})
 
-			expect(_checkCLP(obj, OperationType.BeforeRead)).rejects.toThrow(
+			expect(() => _checkCLP(obj, OperationType.BeforeRead)).toThrow(
 				'Permission denied to read class TestClass3',
 			)
 		})
@@ -288,7 +288,7 @@ describe('Permissions', () => {
 				select: {},
 			})
 
-			expect(_checkCLP(obj, OperationType.BeforeRead)).rejects.toThrow(
+			expect(() => _checkCLP(obj, OperationType.BeforeRead)).toThrow(
 				'Permission denied to read class TestClass',
 			)
 		})
@@ -351,7 +351,7 @@ describe('Permissions', () => {
 			const spyBeforeRead = spyOn(
 				permissions,
 				'defaultCheckPermissionOnRead',
-			).mockResolvedValue()
+			).mockReturnValue()
 
 			permissions.defaultCheckPermissionOnRead({} as never)
 
@@ -365,7 +365,7 @@ describe('Permissions', () => {
 			const spyBeforeCreate = spyOn(
 				permissions,
 				'defaultCheckPermissionOnCreate',
-			).mockResolvedValue()
+			).mockReturnValue()
 
 			permissions.defaultCheckPermissionOnCreate({
 				sessionId: 'sessionId',
@@ -385,7 +385,7 @@ describe('Permissions', () => {
 			const spyBeforeUpdate = spyOn(
 				permissions,
 				'defaultCheckPermissionOnUpdate',
-			).mockResolvedValue()
+			).mockReturnValue()
 
 			permissions.defaultCheckPermissionOnUpdate({
 				sessionId: 'sessionId',
@@ -405,7 +405,7 @@ describe('Permissions', () => {
 			const spyBeforeDelete = spyOn(
 				permissions,
 				'defaultCheckPermissionOnDelete',
-			).mockResolvedValue()
+			).mockReturnValue()
 
 			permissions.defaultCheckPermissionOnDelete({
 				sessionId: 'sessionId',

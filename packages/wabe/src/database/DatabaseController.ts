@@ -1,10 +1,10 @@
+import { selectFieldsWithoutPrivateFields } from 'src/utils/helper'
 import type { WabeTypes } from '../..'
 import { OperationType, initializeHook } from '../hooks'
 import type { SchemaInterface } from '../schema'
 import type { WabeContext } from '../server/interface'
 import { contextWithRoot } from '../utils/export'
 import { notEmpty } from '../utils/export'
-import { Session } from '../authentication/Session'
 import type {
 	CountOptions,
 	CreateObjectOptions,
@@ -58,7 +58,9 @@ export class DatabaseController<T extends WabeTypes> {
 				realClass.fields[fieldName]?.type === 'Relation',
 		)
 
-		return Object.entries(select).reduce(
+		return Object.entries(
+			context.isRoot ? select : selectFieldsWithoutPrivateFields(select),
+		).reduce(
 			(acc, [fieldName, value]) => {
 				// If not pointer or relation
 				if (!pointerOrRelationFields.includes(fieldName))
@@ -643,29 +645,10 @@ export class DatabaseController<T extends WabeTypes> {
 
 		if (select && Object.keys(select).length === 0) return null
 
-		if (className === 'User') {
-			const session = new Session()
-
-			// @ts-expect-error
-			const result = await session.create(res.id, context)
-
-			return this.getObject({
-				className,
-				context: {
-					...context,
-					// @ts-expect-error
-					user: res,
-					sessionId: result.sessionId,
-				},
-				select,
-				id: res.id,
-			})
-		}
-
 		return this.getObject({
 			className,
-			context,
-			select,
+			context: contextWithRoot(context),
+			select: selectFieldsWithoutPrivateFields(select),
 			id: res.id,
 		})
 	}

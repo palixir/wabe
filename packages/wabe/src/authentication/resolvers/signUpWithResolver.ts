@@ -1,4 +1,3 @@
-import { contextWithRoot } from 'src/utils/export'
 import type { SignUpWithInput } from '../../../generated/wabe'
 import type { WabeContext } from '../../server/interface'
 import { Session } from '../Session'
@@ -18,17 +17,6 @@ export const signUpWithResolver = async (
 ) => {
 	if (context.wabe.config.authentication?.disableSignUp)
 		throw new Error('SignUp is disabled')
-
-	const role = await context.wabe.controllers.database.getObjects({
-		className: 'Role',
-		context: contextWithRoot(context),
-		select: { id: true, name: true },
-		where: {
-			name: {
-				equalTo: input.role,
-			},
-		},
-	})
 
 	// Create object call the provider signUp
 	const res = await context.wabe.controllers.database.createObject({

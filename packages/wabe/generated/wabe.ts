@@ -317,8 +317,7 @@ export type SignInWithAuthenticationGithub = {
 }
 
 export type SignUpWithInput = {
-	authentication: SignUpWithAuthentication,
-	role?: RoleEnum
+	authentication: SignUpWithAuthentication
 }
 
 export type MutationSignUpWithArgs = {
