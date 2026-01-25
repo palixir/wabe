@@ -1,4 +1,5 @@
 import type { MutationData, OutputType, Select, WhereType } from '../database'
+import { contextWithoutGraphQLCall } from '../utils'
 import { defaultAfterDeleteFile } from '../file/hookDeleteFile'
 import { defaultAfterReadFile } from '../file/hookReadFile'
 import {
@@ -7,7 +8,7 @@ import {
 } from '../file/hookUploadFile'
 import type { WabeConfig, WabeTypes } from '../server'
 import type { WabeContext } from '../server/interface'
-import { contextWithRoot } from '../utils/export'
+
 import type { DevWabeTypes } from '../utils/helper'
 import { HookObject } from './HookObject'
 import {
@@ -47,7 +48,6 @@ import {
 	defaultCallAuthenticationProviderOnBeforeCreateUser,
 	defaultCallAuthenticationProviderOnBeforeUpdateUser,
 } from './authentication'
-import { contextWithoutGraphQLCall } from 'src/utils'
 
 export enum OperationType {
 	AfterCreate = 'afterCreate',
@@ -106,11 +106,20 @@ export const initializeHook = <
 	newData,
 	context,
 	select,
+	objectLoader,
+	objectsLoader,
 }: {
 	className: K
 	newData?: MutationData<DevWabeTypes, any, any>
 	select: Select
 	context: WabeContext<any>
+	objectLoader?: (
+		id: string,
+	) => Promise<OutputType<DevWabeTypes, any, any> | null>
+	objectsLoader?: (opts: {
+		where?: WhereType<DevWabeTypes, any>
+		ids: string[]
+	}) => Promise<OutputType<DevWabeTypes, any, any>[]>
 }) => {
 	const computeObject = ({
 		id,
@@ -123,12 +132,10 @@ export const initializeHook = <
 		// @ts-expect-error
 		if (!id) return {}
 
-		return context.wabe.controllers.database.getObject({
-			className,
-			context: contextWithoutGraphQLCall(contextWithRoot(context)),
-			id,
-			_skipHooks: true,
-		})
+		// @ts-expect-error
+		if (!objectLoader) return {}
+
+		return objectLoader(id)
 	}
 
 	const computeObjects = async ({
@@ -141,12 +148,9 @@ export const initializeHook = <
 		// @ts-expect-error
 		if (!where && ids.length === 0) return [{}] // Because we have a map below, so we need to have at least one turn
 
-		const res = await context.wabe.controllers.database.getObjects({
-			className,
-			context: contextWithoutGraphQLCall(contextWithRoot(context)),
-			where: where ? where : { id: { in: ids } },
-			_skipHooks: true,
-		})
+		if (!objectsLoader) return [{}] as any
+
+		const res = await objectsLoader({ where, ids })
 
 		// @ts-expect-error
 		if (res.length === 0) return [{}] // Because we have a map below, so we need to have at least one turn
@@ -168,9 +172,11 @@ export const initializeHook = <
 
 			const object =
 				options.object ??
-				(await computeObject({
-					id: options.id,
-				}))
+				(options.operationType === OperationType.AfterDelete
+					? ({} as any)
+					: await computeObject({
+							id: options.id,
+						}))
 
 			const hookObject = new HookObject<DevWabeTypes, K>({
 				className,

@@ -5,6 +5,7 @@ import type { SchemaInterface } from '../schema'
 import type { WabeContext } from '../server/interface'
 import { contextWithRoot } from '../utils/export'
 import { notEmpty } from '../utils/export'
+import type { DevWabeTypes } from '../utils/helper'
 import type {
 	CountOptions,
 	CreateObjectOptions,
@@ -252,6 +253,103 @@ export class DatabaseController<T extends WabeTypes> {
 		}
 	}
 
+	/**
+	 * Private helper to load a single object for hooks (skips hooks to avoid recursion)
+	 */
+	_loadObjectForHooks(className: keyof T['types'], context: WabeContext<T>) {
+		return (id: string) =>
+			this.getObject({
+				className,
+				context: contextWithRoot(context),
+				id,
+				_skipHooks: true,
+			})
+	}
+
+	/**
+	 * Private helper to load multiple objects for hooks (skips hooks to avoid recursion)
+	 */
+	_loadObjectsForHooks(className: keyof T['types'], context: WabeContext<T>) {
+		return ({
+			where,
+			ids,
+		}: {
+			where?: WhereType<DevWabeTypes, any>
+			ids: string[]
+		}) =>
+			this.getObjects({
+				className,
+				context: contextWithRoot(context),
+				// @ts-expect-error
+				where: where ? where : { id: { in: ids } },
+				_skipHooks: true,
+			})
+	}
+
+	/**
+	 * Generic executor for single object operations (create, update, delete, read)
+	 * Encapsulates the hook lifecycle: Init -> Before -> Adapter -> After
+	 */
+	async _executeSingleOperationWithHooks<
+		K extends keyof T['types'],
+		U extends keyof T['types'][K],
+	>({
+		operationTypeBefore,
+		operationTypeAfter,
+		className,
+		context,
+		data,
+		select,
+		id,
+		adapterCallback,
+		inputObject,
+	}: {
+		operationTypeBefore: OperationType
+		operationTypeAfter: OperationType
+		className: K
+		context: WabeContext<T>
+		data?: any
+		select?: Select
+		id?: string
+		inputObject?: OutputType<T, K, U>
+		adapterCallback: (
+			newData: any,
+		) => Promise<OutputType<T, K, U> | { id: string } | null>
+	}) {
+		const hook = initializeHook({
+			className,
+			context,
+			newData: data,
+			// @ts-expect-error
+			select,
+			objectLoader: this._loadObjectForHooks(className, context),
+			objectsLoader: this._loadObjectsForHooks(className, context),
+		})
+
+		const { newData, object: objectFromHook } = await hook.runOnSingleObject({
+			operationType: operationTypeBefore,
+			id,
+
+			object: inputObject,
+		})
+
+		const res = await adapterCallback(newData || data)
+
+		if (!res) return null
+
+		// If the operation is delete, we use the objectFromHook (snapshot before delete)
+		// Otherwise we use the result from adapter (which might be just { id })
+		// loading the full object if needed happens inside runOnSingleObject if 'id' is passed
+		await hook.runOnSingleObject({
+			operationType: operationTypeAfter,
+			id: res.id,
+
+			originalObject: objectFromHook,
+		})
+
+		return res
+	}
+
 	_getFinalObjectWithPointerAndRelation({
 		pointers,
 		context,
@@ -426,6 +524,8 @@ export class DatabaseController<T extends WabeTypes> {
 					className,
 					context,
 					select: selectWithoutPointers,
+					objectLoader: this._loadObjectForHooks(className, context),
+					objectsLoader: this._loadObjectsForHooks(className, context),
 				})
 			: undefined
 
@@ -528,6 +628,8 @@ export class DatabaseController<T extends WabeTypes> {
 					className,
 					select: selectWithoutPointers,
 					context,
+					objectLoader: this._loadObjectForHooks(className, context),
+					objectsLoader: this._loadObjectsForHooks(className, context),
 				})
 			: undefined
 
@@ -585,29 +687,27 @@ export class DatabaseController<T extends WabeTypes> {
 		select,
 	}: CreateObjectOptions<T, K, U, W>): Promise<OutputType<T, K, W>> {
 		// Here data.file is null but should not be
-		const hook = initializeHook({
+
+		const result = await this._executeSingleOperationWithHooks<K, W>({
+			operationTypeBefore: OperationType.BeforeCreate,
+			operationTypeAfter: OperationType.AfterCreate,
 			className,
 			context,
-			newData: data,
-			// @ts-expect-error
-			select,
+			data,
+			select: select as Select,
+			adapterCallback: async (newData) => {
+				const res = await this.adapter.createObject({
+					className,
+					context,
+					select,
+					data: newData || data,
+				})
+
+				return { id: res.id }
+			},
 		})
 
-		const { newData } = await hook.runOnSingleObject({
-			operationType: OperationType.BeforeCreate,
-		})
-
-		const res = await this.adapter.createObject({
-			className,
-			context,
-			select,
-			data: newData || data,
-		})
-
-		await hook.runOnSingleObject({
-			operationType: OperationType.AfterCreate,
-			id: res.id,
-		})
+		const res = result as { id: string }
 
 		if (select && Object.keys(select).length === 0) return null
 
@@ -643,6 +743,8 @@ export class DatabaseController<T extends WabeTypes> {
 					newData,
 					// @ts-expect-error
 					select,
+					objectLoader: this._loadObjectForHooks(className, context),
+					objectsLoader: this._loadObjectsForHooks(className, context),
 				}),
 			),
 		)
@@ -711,36 +813,49 @@ export class DatabaseController<T extends WabeTypes> {
 		select,
 		_skipHooks,
 	}: UpdateObjectOptions<T, K, U, W>): Promise<OutputType<T, K, W>> {
-		const hook = !_skipHooks
-			? initializeHook({
-					className,
-					context,
-					newData: data,
-					// @ts-expect-error
-					select,
-				})
-			: undefined
+		if (_skipHooks) {
+			const whereWithACLCondition = this._buildWhereWithACL(
+				{},
+				context,
+				'write',
+			)
 
-		const resultsAfterBeforeUpdate = await hook?.runOnSingleObject({
-			operationType: OperationType.BeforeUpdate,
-			id,
-		})
+			return this.adapter.updateObject({
+				className,
+				select,
+				id,
+				context,
+				data,
+				where: whereWithACLCondition,
+			}) as Promise<OutputType<T, K, W>>
+		}
 
-		const whereWithACLCondition = this._buildWhereWithACL({}, context, 'write')
-
-		await this.adapter.updateObject({
+		await this._executeSingleOperationWithHooks<K, W>({
+			operationTypeBefore: OperationType.BeforeUpdate,
+			operationTypeAfter: OperationType.AfterUpdate,
 			className,
-			select,
-			id,
 			context,
-			data: resultsAfterBeforeUpdate?.newData || data,
-			where: whereWithACLCondition,
-		})
-
-		await hook?.runOnSingleObject({
-			operationType: OperationType.AfterUpdate,
+			data,
 			id,
-			originalObject: resultsAfterBeforeUpdate?.object,
+			select: select as Select,
+			adapterCallback: async (newData) => {
+				const whereWithACLCondition = this._buildWhereWithACL(
+					{},
+					context,
+					'write',
+				)
+
+				await this.adapter.updateObject({
+					className,
+					select,
+					id,
+					context,
+					data: newData || data,
+					where: whereWithACLCondition,
+				})
+
+				return { id }
+			},
 		})
 
 		if (select && Object.keys(select).length === 0) return null
@@ -782,6 +897,8 @@ export class DatabaseController<T extends WabeTypes> {
 					newData: data,
 					// @ts-expect-error
 					select,
+					objectLoader: this._loadObjectForHooks(className, context),
+					objectsLoader: this._loadObjectsForHooks(className, context),
 				})
 			: undefined
 
@@ -838,44 +955,54 @@ export class DatabaseController<T extends WabeTypes> {
 		id,
 		select,
 	}: DeleteObjectOptions<T, K, U>): Promise<OutputType<T, K, U>> {
-		const hook = initializeHook({
+		const result = (await this._executeSingleOperationWithHooks<K, U>({
+			operationTypeBefore: OperationType.BeforeDelete,
+			operationTypeAfter: OperationType.AfterDelete,
 			className,
 			context,
-			// @ts-expect-error
-			select,
-		})
-
-		const whereWithACLCondition = this._buildWhereWithACL({}, context, 'write')
-
-		let objectBeforeDelete = null
-
-		if (select && Object.keys(select).length > 0)
-			objectBeforeDelete = await this.getObject({
-				className,
-				select,
-				id,
-				context,
-			})
-
-		const resultOfBeforeDelete = await hook.runOnSingleObject({
-			operationType: OperationType.BeforeDelete,
 			id,
-		})
+			select: select as Select,
+			adapterCallback: async (_newData) => {
+				const whereWithACLCondition = this._buildWhereWithACL(
+					{},
+					context,
+					'write',
+				)
 
-		await this.adapter.deleteObject({
-			className,
-			context,
-			select,
-			id,
-			where: whereWithACLCondition,
-		})
+				// We need to fetch the object before deleting it if we want to return it
+				// But executeSingleOperationWithHooks already fetched it in runOnSingleObject if an id is present
+				// Wait, runOnSingleObject fetches it for the hook context 'object', but does not return it unless we use it.
+				// However, if we utilize _executeSingleOperationWithHooks, the 'object' from before-hook is kept.
+				// But _executeSingleOperationWithHooks logic for delete is slightly different regarding return value:
+				// Delete usually returns the deleted object.
+				// Update: My abstraction returns 'res' from adapterCallback.
+				// So I need to return the object here.
 
-		await hook.runOnSingleObject({
-			operationType: OperationType.AfterDelete,
-			originalObject: resultOfBeforeDelete.object,
-		})
+				let objectBeforeDelete = null
 
-		return objectBeforeDelete
+				if (select && Object.keys(select).length > 0)
+					objectBeforeDelete = await this.getObject({
+						className,
+						context,
+						select,
+						id,
+					})
+
+				await this.adapter.deleteObject({
+					className,
+					context,
+					id,
+
+					where: whereWithACLCondition,
+				})
+
+				return objectBeforeDelete || { id }
+			},
+		})) as unknown as OutputType<T, K, U>
+
+		if (select && Object.keys(select).length === 0) return null as any
+
+		return result
 	}
 
 	async deleteObjects<
@@ -902,6 +1029,8 @@ export class DatabaseController<T extends WabeTypes> {
 			context,
 			// @ts-expect-error
 			select,
+			objectLoader: this._loadObjectForHooks(className, context),
+			objectsLoader: this._loadObjectsForHooks(className, context),
 		})
 
 		const whereWithACLCondition = this._buildWhereWithACL(
