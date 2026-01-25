@@ -83,7 +83,7 @@ type TypeFieldFile = {
 }
 
 type TypeFieldCustomScalars<T extends WabeTypes> = {
-	type: T['scalars']
+	type: T['scalars'] extends '' ? never : T['scalars']
 	required?: boolean
 	defaultValue?: any
 }
