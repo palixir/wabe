@@ -35,6 +35,7 @@ type WhereScalar<T> = {
 	notIn?: T[]
 	contains?: T
 	notContains?: T
+	exists?: boolean
 }
 
 type WhereObject<T> = {
