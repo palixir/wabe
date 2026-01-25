@@ -1803,6 +1803,7 @@ type SignUpWithOutput {
 
 input SignUpWithInput {
   authentication: SignUpWithAuthenticationInput!
+  role: RoleEnum
 }
 
 input SignUpWithAuthenticationInput {

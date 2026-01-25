@@ -397,6 +397,10 @@ export class Schema<T extends WabeTypes> {
 								args: {
 									input: {
 										authentication: authenticationInput,
+										role: {
+											type: 'RoleEnum',
+											required: false,
+										},
 									},
 								},
 								resolve: signUpWithResolver,

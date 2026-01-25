@@ -649,8 +649,6 @@ export class DatabaseController<T extends WabeTypes> {
 			// @ts-expect-error
 			const result = await session.create(res.id, context)
 
-			console.log(newData)
-
 			return this.getObject({
 				className,
 				context: {

@@ -90,7 +90,6 @@ export const _checkCLP = async (
 
 	// No role name found
 	if (!roleName) {
-		console.log('here')
 		throw new Error(
 			`Permission denied to ${permissionOperation} class ${object.className}`,
 		)
