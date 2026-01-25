@@ -13,6 +13,7 @@ import type { Wabe } from '../server'
 import {
 	type DevWabeTypes,
 	getAdminUserClient,
+	getAnonymousClient,
 	getGraphqlClient,
 } from '../utils/helper'
 import { setupTests, closeTests } from '../utils/testHelper'
@@ -132,6 +133,60 @@ describe('Database', () => {
 		mockAfterUpdate.mockClear()
 		spyGetObject.mockClear()
 		spyGetObjects.mockClear()
+	})
+
+	it('should allow to signUp with anonymous user and read his own data', async () => {
+		const setup = await setupTests([
+			{
+				name: 'User',
+				fields: {},
+				searchableFields: ['email', 'firstName', 'lastName'],
+				permissions: {
+					read: {
+						authorizedRoles: ['Admin', 'Client'],
+						requireAuthentication: true,
+					},
+					update: {
+						authorizedRoles: ['Admin', 'Client'],
+						requireAuthentication: true,
+					},
+					delete: {
+						authorizedRoles: ['Admin', 'Client'],
+						requireAuthentication: true,
+					},
+				},
+			},
+		])
+
+		const client = getAnonymousClient(setup.port)
+
+		const res = await client.request<any>(
+			gql`
+    mutation signUpWith($input: SignUpWithInput!) {
+      signUpWith(input: $input) {
+        id
+        accessToken
+        refreshToken
+        csrfToken
+      }
+    }
+  `,
+			{
+				input: {
+					authentication: {
+						emailPassword: {
+							email: 'test@example.com',
+							password: 'password',
+						},
+					},
+				},
+			},
+		)
+
+		expect(res.signUpWith.id).toBeDefined()
+		expect(res.signUpWith.accessToken).toBeDefined()
+		expect(res.signUpWith.refreshToken).toBeDefined()
+		expect(res.signUpWith.csrfToken).toBeDefined()
 	})
 
 	it('should return id of a relation if set to true in select on getObject', async () => {

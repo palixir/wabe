@@ -8,6 +8,8 @@ import type { HookObject } from '../hooks/HookObject'
 import { signUpWithResolver } from '../authentication/resolvers/signUpWithResolver'
 import { signInWithResolver } from '../authentication/resolvers/signInWithResolver'
 
+export const defaultPrivateFields = ['acl']
+
 export type WabePrimaryTypes =
 	| 'String'
 	| 'Int'

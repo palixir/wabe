@@ -7,6 +7,7 @@ import {
 	type WabeSchemaTypes,
 } from '../../generated/wabe'
 import type { Wabe, WabeTypes } from '../server'
+import { defaultPrivateFields } from 'src/schema'
 
 export interface DevWabeTypes extends WabeTypes {
 	types: WabeSchemaTypes
@@ -14,6 +15,18 @@ export interface DevWabeTypes extends WabeTypes {
 	enums: WabeSchemaEnums
 	where: WabeSchemaWhereTypes
 }
+
+export const selectFieldsWithoutPrivateFields = <T extends Record<string, any>>(
+	select?: T,
+): T =>
+	Object.entries(select || {}).reduce((acc, [key, value]) => {
+		if (defaultPrivateFields.includes(key)) return acc
+
+		return {
+			...acc,
+			[key]: value,
+		}
+	}, {} as T)
 
 export const firstLetterUpperCase = (str: string): string =>
 	str.charAt(0).toUpperCase() + str.slice(1)
@@ -140,7 +153,7 @@ export const createUserAndUpdateRole = async ({
         id
         accessToken
         refreshToken
-		csrfToken
+        csrfToken
       }
     }
   `,

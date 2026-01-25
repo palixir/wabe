@@ -1,3 +1,4 @@
+import { selectFieldsWithoutPrivateFields } from 'src/utils/helper'
 import type { WabeTypes } from '../..'
 import { OperationType, initializeHook } from '../hooks'
 import type { SchemaInterface } from '../schema'
@@ -57,7 +58,9 @@ export class DatabaseController<T extends WabeTypes> {
 				realClass.fields[fieldName]?.type === 'Relation',
 		)
 
-		return Object.entries(select).reduce(
+		return Object.entries(
+			context.isRoot ? select : selectFieldsWithoutPrivateFields(select),
+		).reduce(
 			(acc, [fieldName, value]) => {
 				// If not pointer or relation
 				if (!pointerOrRelationFields.includes(fieldName))
@@ -644,12 +647,8 @@ export class DatabaseController<T extends WabeTypes> {
 
 		return this.getObject({
 			className,
-			context: {
-				...context,
-				// @ts-expect-error
-				user: className === 'User' ? res : context.user,
-			},
-			select,
+			context: contextWithRoot(context),
+			select: selectFieldsWithoutPrivateFields(select),
 			id: res.id,
 		})
 	}
