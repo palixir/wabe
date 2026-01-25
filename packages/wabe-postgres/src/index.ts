@@ -118,6 +118,34 @@ export const buildPostgresWhereQueryAndValues = <
 				return acc
 			}
 
+			if (value?.exists === true) {
+				if (parentKey) {
+					acc.conditions.push(
+						`${parentKey} IS NOT NULL
+       AND ${parentKey} ? '${keyToWrite}'
+       AND ${parentKey}->'${keyToWrite}' IS NOT NULL
+       AND ${parentKey}->'${keyToWrite}' <> 'null'::jsonb`,
+					)
+				} else {
+					acc.conditions.push(`"${keyToWrite}" IS NOT NULL`)
+				}
+				return acc
+			}
+
+			if (value?.exists === false) {
+				if (parentKey) {
+					acc.conditions.push(
+						`${parentKey} IS NULL
+       OR NOT (${parentKey} ? '${keyToWrite}')
+       OR ${parentKey}->'${keyToWrite}' IS NULL
+       OR ${parentKey}->'${keyToWrite}' = 'null'::jsonb`,
+					)
+				} else {
+					acc.conditions.push(`"${keyToWrite}" IS NULL`)
+				}
+				return acc
+			}
+
 			if (value?.notEqualTo || value?.notEqualTo === null) {
 				if (value.notEqualTo === null) {
 					acc.conditions.push(`${fullKey} IS NOT NULL`)

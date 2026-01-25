@@ -1996,4 +1996,112 @@ describe('Mongo adapter', () => {
 		)
 		expect(res[0]?.authentication?.emailPassword?.password).toBeUndefined()
 	})
+
+	it('should filter documents where field exists (exists: true)', async () => {
+		// Create test documents using the adapter
+		await mongoAdapter.createObjects({
+			className: 'Test',
+			data: [
+				{ name: 'Document with name', age: 25 },
+				{ name: 'Another document with name', age: 30 },
+				// @ts-expect-error
+				{ age: 35 }, // No name field
+			],
+			context,
+		})
+
+		// Test exists: true using the adapter
+		const results = await mongoAdapter.getObjects({
+			className: 'Test',
+			where: { name: { exists: true } },
+			context,
+		})
+
+		expect(results.length).toBe(2)
+		expect(results.every((doc) => doc?.name !== undefined)).toBe(true)
+	})
+
+	it('should filter documents where field does not exist (exists: false)', async () => {
+		// Create test documents using the adapter
+		await mongoAdapter.createObjects({
+			className: 'Test',
+			data: [
+				{ name: 'Document with name', age: 25 },
+				// @ts-expect-error
+				{ age: 30 }, // No name field
+				// @ts-expect-error
+				{ age: 35 }, // No name field
+			],
+			context,
+		})
+
+		// Test exists: false using the adapter
+		const results = await mongoAdapter.getObjects({
+			className: 'Test',
+			where: { name: { exists: false } },
+			context,
+		})
+
+		expect(results.length).toBe(2)
+		expect(
+			results.every((doc) => doc?.name === undefined || doc?.name === null),
+		).toBe(true)
+	})
+
+	it('should handle exists with null values correctly', async () => {
+		await mongoAdapter.createObjects({
+			className: 'Test',
+			data: [
+				{ name: 'Document with name', age: 25 },
+				{ name: null, age: 30 },
+				// @ts-expect-error
+				{ age: 35 },
+			],
+			context,
+		})
+
+		// Test exists: true
+		const resultsTrue = await mongoAdapter.getObjects({
+			className: 'Test',
+			where: { name: { exists: true } },
+			context,
+		})
+
+		expect(resultsTrue.length).toBe(1)
+
+		// Test exists: false - should use $eq: null, which matches both null values and missing fields
+		const resultsFalse = await mongoAdapter.getObjects({
+			className: 'Test',
+			where: { name: { exists: false } },
+			context,
+		})
+
+		// Note: In MongoDB, $eq: null matches both documents where field is null AND where field doesn't exist
+		expect(resultsFalse.length).toBe(2)
+		expect(resultsFalse.some((doc) => doc?.age === 30)).toBe(true)
+		expect(resultsFalse.some((doc) => doc?.age === 35)).toBe(true)
+	})
+
+	it('should handle exists with JSON fields and null array in object', async () => {
+		// Create test documents with JSON data using the adapter
+		await mongoAdapter.createObjects({
+			className: 'Test',
+			data: [
+				{ object: { array: [{ string: 'John' }] }, int: 25 },
+				{ object: { array: null }, int: 30 },
+				{ object: null, int: 35 },
+			],
+			context,
+		})
+
+		const results = await mongoAdapter.getObjects({
+			className: 'Test',
+			// @ts-expect-error
+			where: { object: { array: { exists: true } } },
+			context,
+		})
+
+		expect(results.length).toBe(1)
+		expect(results.some((row) => row?.int === 25)).toBe(true)
+	})
 })

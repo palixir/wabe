@@ -1963,4 +1963,125 @@ describe('Postgres adapter', () => {
 		)
 		expect(res[0]?.authentication?.emailPassword?.password).toEqual('password')
 	})
+
+	it('should filter documents where field exists (exists: true)', async () => {
+		// Create test documents using the adapter
+		await postgresAdapter.createObjects({
+			className: 'Test',
+			data: [
+				{ field1: 'Document with field1', int: 25 },
+				{ field1: 'Another document with field1', int: 30 },
+				{ field1: null, int: 35 }, // field1 is null
+			],
+			context,
+		})
+
+		// Test exists: true using the adapter
+		const results = await postgresAdapter.getObjects({
+			className: 'Test',
+			where: { field1: { exists: true } },
+			context,
+		})
+
+		expect(results.length).toBe(2)
+		expect(results.every((row) => row?.field1 !== null)).toBe(true)
+	})
+
+	it('should filter documents where field does not exist (exists: false)', async () => {
+		// Create test documents using the adapter
+		await postgresAdapter.createObjects({
+			className: 'Test',
+			data: [
+				{ field1: 'Document with field1', int: 25 },
+				{ field1: null, int: 30 },
+				{ field1: null, int: 35 },
+			],
+			context,
+		})
+
+		// Test exists: false using the adapter
+		const results = await postgresAdapter.getObjects({
+			className: 'Test',
+			where: { field1: { exists: false } },
+			context,
+		})
+
+		expect(results.length).toBe(2)
+		expect(results.every((row) => row?.field1 === null)).toBe(true)
+	})
+
+	it('should work with complex queries combining exists and other operators', async () => {
+		// Create test documents using the adapter
+		await postgresAdapter.createObjects({
+			className: 'Test',
+			data: [
+				{ field1: 'John', int: 25 },
+				{ field1: 'Jane', int: 30 },
+				{ field1: null, int: 35 },
+				{ field1: 'Bob', int: null },
+			],
+			context,
+		})
+
+		// Test complex query: field1 exists AND int > 25
+		const results = await postgresAdapter.getObjects({
+			className: 'Test',
+			// @ts-expect-error
+			where: {
+				AND: [{ field1: { exists: true } }, { int: { greaterThan: 25 } }],
+			},
+			context,
+		})
+
+		expect(results.length).toBe(1)
+		expect(results[0]?.field1).toBe('Jane')
+		expect(results[0]?.int).toBe(30)
+	})
+
+	it('should handle exists with JSON fields', async () => {
+		// Create test documents with JSON data using the adapter
+		await postgresAdapter.createObjects({
+			className: 'Test',
+			data: [
+				{ object: { array: [{ string: 'John' }] }, int: 25 },
+				{ object: { array: [{ string: 'Jane' }] }, int: 30 },
+				{ object: null, int: 35 },
+			],
+			context,
+		})
+
+		const results = await postgresAdapter.getObjects({
+			className: 'Test',
+			// @ts-expect-error
+			where: { object: { array: { exists: true } } },
+			context,
+		})
+
+		expect(results.length).toBe(2)
+		expect(results.some((row) => row?.int === 25)).toBe(true)
+		expect(results.some((row) => row?.int === 30)).toBe(true)
+	})
+
+	it('should handle exists with JSON fields and null array in object', async () => {
+		// Create test documents with JSON data using the adapter
+		await postgresAdapter.createObjects({
+			className: 'Test',
+			data: [
+				{ object: { array: [{ string: 'John' }] }, int: 25 },
+				{ object: { array: null }, int: 30 },
+				{ object: null, int: 35 },
+			],
+			context,
+		})
+
+		const results = await postgresAdapter.getObjects({
+			className: 'Test',
+			// @ts-expect-error
+			where: { object: { array: { exists: true } } },
+			context,
+		})
+
+		expect(results.length).toBe(1)
+		expect(results.some((row) => row?.int === 25)).toBe(true)
+	})
 })
