@@ -1199,6 +1199,20 @@ describe('Database', () => {
 
 		expect(mockAfterUpdate).toHaveBeenCalledTimes(1)
 	})
+
+	it.only("should empty array if equalTo value is undefined and don't match with any object in database", async () => {
+		console.log('this query')
+		const roles = await context.wabe.controllers.database.getObjects({
+			className: 'Role',
+			context: contextWithRoot(context),
+			select: { id: true, name: true },
+			where: {
+				name: { equalTo: undefined },
+			},
+		})
+
+		expect(roles).toEqual([])
+	})
 })
 
 const graphql = {
