@@ -166,9 +166,14 @@ export class DatabaseController<T extends WabeTypes> {
 				...acc,
 				// If we don't found any object we just execute the query with the default where
 				// Without any transformation for pointer or relation
-				[typedWhereKey]: {
-					in: objects.map((object) => object?.id).filter(notEmpty),
-				},
+				// Ensure the 'in' condition is not empty to avoid unauthorized access
+				...(objects.length > 0
+					? {
+							[typedWhereKey]: {
+								in: objects.map((object) => object?.id).filter(notEmpty),
+							},
+						}
+					: {}),
 			}
 		}, Promise.resolve({}))
 
