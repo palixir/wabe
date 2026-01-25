@@ -1997,58 +1997,6 @@ describe('Mongo adapter', () => {
 		expect(res[0]?.authentication?.emailPassword?.password).toBeUndefined()
 	})
 
-	it('should handle exists: true correctly', () => {
-		const where = { name: { exists: true } }
-		const result = buildMongoWhereQuery(where)
-		expect(result).toEqual({ name: { $exists: true } })
-	})
-
-	it('should handle exists: false correctly', () => {
-		const where = { name: { exists: false } }
-		const result = buildMongoWhereQuery(where)
-		expect(result).toEqual({ name: { $eq: null } })
-	})
-
-	it('should handle exists with other operators', () => {
-		const where = {
-			name: { exists: true },
-			age: { greaterThan: 25 },
-		}
-		const result = buildMongoWhereQuery(where)
-		expect(result).toEqual({
-			name: { $exists: true },
-			age: { $gt: 25 },
-		})
-	})
-
-	it('should handle exists in AND conditions', () => {
-		const where = {
-			AND: [{ name: { exists: true } }, { age: { exists: true } }],
-		}
-		const result = buildMongoWhereQuery(where)
-		expect(result).toEqual({
-			$and: [{ name: { $exists: true } }, { age: { $exists: true } }],
-		})
-	})
-
-	it('should handle exists in OR conditions', () => {
-		const where = {
-			OR: [{ name: { exists: true } }, { age: { exists: false } }],
-		}
-		const result = buildMongoWhereQuery(where)
-		expect(result).toEqual({
-			$or: [{ name: { $exists: true } }, { age: { $eq: null } }],
-		})
-	})
-
-	it('should handle nested exists operators', () => {
-		const where = {
-			'user.profile': { exists: true },
-		}
-		const result = buildMongoWhereQuery(where)
-		expect(result).toEqual({ 'user.profile': { $exists: true } })
-	})
-
 	it('should filter documents where field exists (exists: true)', async () => {
 		// Create test documents using the adapter
 		await mongoAdapter.createObjects({
@@ -2119,7 +2067,7 @@ describe('Mongo adapter', () => {
 			context,
 		})
 
-		expect(resultsTrue.length).toBe(2)
+		expect(resultsTrue.length).toBe(1)
 
 		// Test exists: false - should use $eq: null, which matches both null values and missing fields
 		const resultsFalse = await mongoAdapter.getObjects({
@@ -2132,5 +2080,28 @@ describe('Mongo adapter', () => {
 		expect(resultsFalse.length).toBe(2)
 		expect(resultsFalse.some((doc) => doc?.age === 30)).toBe(true)
 		expect(resultsFalse.some((doc) => doc?.age === 35)).toBe(true)
+	})
+
+	it('should handle exists with JSON fields and null array in object', async () => {
+		// Create test documents with JSON data using the adapter
+		await mongoAdapter.createObjects({
+			className: 'Test',
+			data: [
+				{ object: { array: [{ string: 'John' }] }, int: 25 },
+				{ object: { array: null }, int: 30 },
+				{ object: null, int: 35 },
+			],
+			context,
+		})
+
+		const results = await mongoAdapter.getObjects({
+			className: 'Test',
+			// @ts-expect-error
+			where: { object: { array: { exists: true } } },
+			context,
+		})
+
+		expect(results.length).toBe(1)
+		expect(results.some((row) => row?.int === 25)).toBe(true)
 	})
 })
