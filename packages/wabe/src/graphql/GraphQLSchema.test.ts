@@ -535,7 +535,8 @@ describe('GraphqlSchema', () => {
 			}
 		`)
 
-		const premierClasseId = premierClasseResult.createPremierClasse.premierClasse.id
+		const premierClasseId =
+			premierClasseResult.createPremierClasse.premierClasse.id
 
 		// Test CREATE operation with fragments across related classes
 		const createResult = await rootClient.request<any>(gql`
@@ -558,11 +559,22 @@ describe('GraphqlSchema', () => {
 			}
 		`)
 
-		expect(createResult.createDeuxiemeClasse.deuxiemeClasse.field2).toBe('deuxiemeValue')
+		expect(createResult.createDeuxiemeClasse.deuxiemeClasse.field2).toBe(
+			'deuxiemeValue',
+		)
 		expect(createResult.createDeuxiemeClasse.deuxiemeClasse.id).toBeDefined()
-		expect(createResult.createDeuxiemeClasse.deuxiemeClasse.premierClasses.edges.length).toBe(1)
-		expect(createResult.createDeuxiemeClasse.deuxiemeClasse.premierClasses.edges[0].node.field1).toBe('nestedPremierValue')
-		expect(createResult.createDeuxiemeClasse.deuxiemeClasse.premierClasses.edges[0].node.id).toBeDefined()
+		expect(
+			createResult.createDeuxiemeClasse.deuxiemeClasse.premierClasses.edges
+				.length,
+		).toBe(1)
+		expect(
+			createResult.createDeuxiemeClasse.deuxiemeClasse.premierClasses.edges[0]
+				.node.field1,
+		).toBe('nestedPremierValue')
+		expect(
+			createResult.createDeuxiemeClasse.deuxiemeClasse.premierClasses.edges[0]
+				.node.id,
+		).toBeDefined()
 
 		const deuxiemeClasseId = createResult.createDeuxiemeClasse.deuxiemeClasse.id
 
@@ -579,7 +591,9 @@ describe('GraphqlSchema', () => {
 		expect(queryResult.deuxiemeClasse.field2).toBe('deuxiemeValue')
 		expect(queryResult.deuxiemeClasse.id).toBe(deuxiemeClasseId)
 		expect(queryResult.deuxiemeClasse.premierClasses.edges.length).toBe(1)
-		expect(queryResult.deuxiemeClasse.premierClasses.edges[0].node.field1).toBe('nestedPremierValue')
+		expect(queryResult.deuxiemeClasse.premierClasses.edges[0].node.field1).toBe(
+			'nestedPremierValue',
+		)
 
 		// Test UPDATE operation with fragments across related classes
 		const updateResult = await rootClient.request<any>(gql`
@@ -603,9 +617,16 @@ describe('GraphqlSchema', () => {
 			}
 		`)
 
-		expect(updateResult.updateDeuxiemeClasse.deuxiemeClasse.field2).toBe('updatedDeuxiemeValue')
-		expect(updateResult.updateDeuxiemeClasse.deuxiemeClasse.id).toBe(deuxiemeClasseId)
-		expect(updateResult.updateDeuxiemeClasse.deuxiemeClasse.premierClasses.edges.length).toBe(2)
+		expect(updateResult.updateDeuxiemeClasse.deuxiemeClasse.field2).toBe(
+			'updatedDeuxiemeValue',
+		)
+		expect(updateResult.updateDeuxiemeClasse.deuxiemeClasse.id).toBe(
+			deuxiemeClasseId,
+		)
+		expect(
+			updateResult.updateDeuxiemeClasse.deuxiemeClasse.premierClasses.edges
+				.length,
+		).toBe(2)
 
 		// Test DELETE operation with fragments across related classes
 		const deleteResult = await rootClient.request<any>(gql`
@@ -619,9 +640,16 @@ describe('GraphqlSchema', () => {
 			}
 		`)
 
-		expect(deleteResult.deleteDeuxiemeClasse.deuxiemeClasse.field2).toBe('updatedDeuxiemeValue')
-		expect(deleteResult.deleteDeuxiemeClasse.deuxiemeClasse.id).toBe(deuxiemeClasseId)
-		expect(deleteResult.deleteDeuxiemeClasse.deuxiemeClasse.premierClasses.edges.length).toBe(2)
+		expect(deleteResult.deleteDeuxiemeClasse.deuxiemeClasse.field2).toBe(
+			'updatedDeuxiemeValue',
+		)
+		expect(deleteResult.deleteDeuxiemeClasse.deuxiemeClasse.id).toBe(
+			deuxiemeClasseId,
+		)
+		expect(
+			deleteResult.deleteDeuxiemeClasse.deuxiemeClasse.premierClasses.edges
+				.length,
+		).toBe(2)
 
 		await wabe.close()
 	})
