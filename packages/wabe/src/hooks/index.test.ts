@@ -3,7 +3,7 @@ import * as index from './index'
 import { OperationType } from './index'
 
 describe('Hooks', () => {
-	const mockGetObject = mock(() => {})
+	const mockGetObject = mock(async (..._args: any[]) => ({}) as any)
 	const mockGetObjects = mock(() => {})
 	const mockCallback1 = mock(() => {})
 	const mockCallback2 = mock(() => {})
@@ -69,6 +69,16 @@ describe('Hooks', () => {
 			},
 			newData: { name: 'test' },
 			select: {},
+			objectLoader: (id) =>
+				mockGetObject({
+					className: 'ClassTest',
+					context: {
+						isRoot: true,
+						wabe: { controllers, config },
+					},
+					id,
+					_skipHooks: true,
+				}),
 		})
 
 		await hooks.runOnSingleObject({
@@ -91,6 +101,17 @@ describe('Hooks', () => {
 			},
 			newData: { name: 'test' },
 			select: {},
+			objectLoader: (id) =>
+				mockGetObject({
+					className: 'ClassName',
+					context: {
+						isRoot: true,
+						wabe: { controllers, config },
+						isGraphQLCall: false,
+					},
+					id,
+					_skipHooks: true,
+				}),
 		})
 
 		await hooks.runOnSingleObject({
@@ -139,6 +160,16 @@ describe('Hooks', () => {
 			},
 			newData: { name: 'test' },
 			select: {},
+			objectLoader: (id) =>
+				mockGetObject({
+					className: 'ClassTest',
+					context: {
+						isRoot: true,
+						wabe: { controllers, config },
+					},
+					id,
+					_skipHooks: true,
+				}),
 		})
 
 		await hooks.runOnSingleObject({
@@ -173,6 +204,16 @@ describe('Hooks', () => {
 			},
 			newData: { name: 'test' },
 			select: {},
+			objectLoader: (id) =>
+				mockGetObject({
+					className: 'ClassTest',
+					context: {
+						isRoot: true,
+						wabe: { controllers, config },
+					},
+					id,
+					_skipHooks: true,
+				}),
 		})
 
 		await hooks.runOnSingleObject({
@@ -195,6 +236,16 @@ describe('Hooks', () => {
 			},
 			newData: { name: 'test' },
 			select: {},
+			objectLoader: (id) =>
+				mockGetObject({
+					className: 'ClassTest',
+					context: {
+						isRoot: true,
+						wabe: { controllers, config },
+					},
+					id,
+					_skipHooks: true,
+				}),
 		})
 
 		await hooks.runOnSingleObject({

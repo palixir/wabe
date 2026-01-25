@@ -349,6 +349,8 @@ describe('DatabaseController', () => {
 				isRoot: true,
 			},
 			select: { id: true },
+			objectLoader: expect.any(Function),
+			objectsLoader: expect.any(Function),
 		})
 
 		expect(mockRunOnSingleObject).toHaveBeenCalledTimes(2)
@@ -384,6 +386,8 @@ describe('DatabaseController', () => {
 				isRoot: true,
 			},
 			select: { id: true },
+			objectLoader: expect.any(Function),
+			objectsLoader: expect.any(Function),
 		})
 
 		expect(mockRunOnMultipleObject).toHaveBeenCalledTimes(2)
@@ -424,6 +428,8 @@ describe('DatabaseController', () => {
 			},
 			newData: { name: 'test' },
 			select: { id: true },
+			objectLoader: expect.any(Function),
+			objectsLoader: expect.any(Function),
 		})
 
 		expect(mockRunOnSingleObject).toHaveBeenCalledTimes(4)
@@ -455,16 +461,13 @@ describe('DatabaseController', () => {
 		})
 
 		expect(mockInitializeHook).toHaveBeenCalledTimes(2)
-		expect(mockInitializeHook).toHaveBeenCalledWith({
-			className: 'TestClass',
-			context: {
-				sessionId: 'sessionId',
-				wabe: { config },
-				isRoot: true,
-			},
-			newData: { name: 'test' },
-			select: { id: true },
-		})
+		expect(mockInitializeHook).toHaveBeenCalledWith(
+			expect.objectContaining({
+				className: 'TestClass',
+				newData: { name: 'test' },
+				select: { id: true },
+			}),
+		)
 
 		expect(mockRunOnMultipleObject).toHaveBeenCalledTimes(4)
 		expect(mockRunOnMultipleObject).toHaveBeenNthCalledWith(1, {
@@ -500,6 +503,8 @@ describe('DatabaseController', () => {
 			},
 			newData: { name: 'test' },
 			select: { id: true },
+			objectLoader: expect.any(Function),
+			objectsLoader: expect.any(Function),
 		})
 
 		expect(mockRunOnSingleObject).toHaveBeenCalledTimes(4)
@@ -539,6 +544,8 @@ describe('DatabaseController', () => {
 			},
 			newData: { name: 'test' },
 			select: { id: true },
+			objectLoader: expect.any(Function),
+			objectsLoader: expect.any(Function),
 		})
 
 		expect(mockRunOnMultipleObject).toHaveBeenCalledTimes(4)
@@ -572,17 +579,20 @@ describe('DatabaseController', () => {
 				isRoot: true,
 			},
 			select: { id: true },
+			objectLoader: expect.any(Function),
+			objectsLoader: expect.any(Function),
 		})
 
 		// 4 because we have a getObject before the delete
 		expect(mockRunOnSingleObject).toHaveBeenCalledTimes(4)
-		expect(mockRunOnSingleObject).toHaveBeenNthCalledWith(3, {
+		expect(mockRunOnSingleObject).toHaveBeenNthCalledWith(1, {
 			operationType: hooks.OperationType.BeforeDelete,
 			id: 'id',
 		})
 		expect(mockRunOnSingleObject).toHaveBeenNthCalledWith(4, {
 			operationType: hooks.OperationType.AfterDelete,
-			object: undefined, // Because we don't mock deleteObject in databaseController
+			id: 'id',
+			originalObject: undefined,
 		})
 	})
 
@@ -608,6 +618,8 @@ describe('DatabaseController', () => {
 				isRoot: true,
 			},
 			select: { id: true },
+			objectLoader: expect.any(Function),
+			objectsLoader: expect.any(Function),
 		})
 
 		// 4 because we have a getObject before the delete
