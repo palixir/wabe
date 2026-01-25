@@ -1996,4 +1996,147 @@ describe('Mongo adapter', () => {
 		)
 		expect(res[0]?.authentication?.emailPassword?.password).toBeUndefined()
 	})
+
+	it('should handle exists: true correctly', () => {
+		const where = { name: { exists: true } }
+		const result = buildMongoWhereQuery(where)
+		expect(result).toEqual({ name: { $exists: true } })
+	})
+
+	it('should handle exists: false correctly', () => {
+		const where = { name: { exists: false } }
+		const result = buildMongoWhereQuery(where)
+		expect(result).toEqual({ name: { $eq: null } })
+	})
+
+	it('should handle exists with other operators', () => {
+		const where = {
+			name: { exists: true },
+			age: { greaterThan: 25 },
+		}
+		const result = buildMongoWhereQuery(where)
+		expect(result).toEqual({
+			name: { $exists: true },
+			age: { $gt: 25 },
+		})
+	})
+
+	it('should handle exists in AND conditions', () => {
+		const where = {
+			AND: [{ name: { exists: true } }, { age: { exists: true } }],
+		}
+		const result = buildMongoWhereQuery(where)
+		expect(result).toEqual({
+			$and: [{ name: { $exists: true } }, { age: { $exists: true } }],
+		})
+	})
+
+	it('should handle exists in OR conditions', () => {
+		const where = {
+			OR: [{ name: { exists: true } }, { age: { exists: false } }],
+		}
+		const result = buildMongoWhereQuery(where)
+		expect(result).toEqual({
+			$or: [{ name: { $exists: true } }, { age: { $eq: null } }],
+		})
+	})
+
+	it('should handle nested exists operators', () => {
+		const where = {
+			'user.profile': { exists: true },
+		}
+		const result = buildMongoWhereQuery(where)
+		expect(result).toEqual({ 'user.profile': { $exists: true } })
+	})
+
+	it('should filter documents where field exists (exists: true)', async () => {
+		// Create a test collection
+		const collection = mongoAdapter.database?.collection('test_exists')
+		if (!collection) fail('Collection not found')
+
+		// Insert test documents
+		await collection.insertMany([
+			{ name: 'Document with name', age: 25 },
+			{ name: 'Another document with name', age: 30 },
+			{ age: 35 }, // No name field
+		])
+
+		// Test exists: true
+		const where = { name: { exists: true } }
+		const mongoWhere = buildMongoWhereQuery(where)
+		const results = await collection.find(mongoWhere).toArray()
+
+		expect(results.length).toBe(2)
+		expect(results.every((doc) => 'name' in doc)).toBe(true)
+	})
+
+	it('should filter documents where field does not exist (exists: false)', async () => {
+		// Create a test collection
+		const collection = mongoAdapter.database?.collection('test_exists')
+		if (!collection) fail('Collection not found')
+
+		// Insert test documents
+		await collection.insertMany([
+			{ name: 'Document with name', age: 25 },
+			{ age: 30 }, // No name field
+			{ age: 35 }, // No name field
+		])
+
+		// Test exists: false
+		const where = { name: { exists: false } }
+		const mongoWhere = buildMongoWhereQuery(where)
+		const results = await collection.find(mongoWhere).toArray()
+
+		expect(results.length).toBe(2)
+		expect(results.every((doc) => !('name' in doc))).toBe(true)
+	})
+
+	it('should handle exists with null values correctly', async () => {
+		const collection = mongoAdapter.database?.collection('test_exists_null')
+		if (!collection) fail('Collection not found')
+
+		await collection.insertMany([
+			{ name: 'Document with name', age: 25 },
+			{ name: null, age: 30 },
+			{ age: 35 },
+		])
+
+		const whereTrue = { name: { exists: true } }
+		const mongoWhereTrue = buildMongoWhereQuery(whereTrue)
+		const resultsTrue = await collection.find(mongoWhereTrue).toArray()
+
+		expect(resultsTrue.length).toBe(2)
+
+		// Test exists: false - should use $eq: null, which matches both null values and missing fields
+		const whereFalse = { name: { exists: false } }
+		const mongoWhereFalse = buildMongoWhereQuery(whereFalse)
+		const resultsFalse = await collection.find(mongoWhereFalse).toArray()
+
+		// Note: In MongoDB, $eq: null matches both documents where field is null AND where field doesn't exist
+		expect(resultsFalse.length).toBe(2)
+		expect(resultsFalse.some((doc) => doc.age === 30)).toBe(true)
+		expect(resultsFalse.some((doc) => doc.age === 35)).toBe(true)
+	})
+
+	it('should work with complex queries combining exists and other operators', async () => {
+		const collection = mongoAdapter.database?.collection('test_exists_complex')
+		if (!collection) fail('Collection not found')
+
+		await collection.insertMany([
+			{ name: 'John', age: 25, active: true },
+			{ name: 'Jane', age: 30, active: false },
+			{ age: 35, active: true }, // No name field
+			{ name: 'Bob', active: true }, // No age field
+		])
+
+		const where = {
+			AND: [{ name: { exists: true } }, { age: { greaterThan: 25 } }],
+		}
+		const mongoWhere = buildMongoWhereQuery(where)
+		const results = await collection.find(mongoWhere).toArray()
+
+		expect(results.length).toBe(1)
+		expect(results[0]?.name).toBe('Jane')
+		expect(results[0]?.age).toBe(30)
+	})
 })
