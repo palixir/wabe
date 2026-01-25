@@ -1199,6 +1199,95 @@ describe('Database', () => {
 
 		expect(mockAfterUpdate).toHaveBeenCalledTimes(1)
 	})
+
+	it('should filter objects where field exists (exists: true)', async () => {
+		await context.wabe.controllers.database.createObjects({
+			className: 'Test',
+			data: [
+				{ name: 'Object with name', otherField: 'other' },
+				{ name: 'Another object with name', otherField: 'other' },
+				// @ts-expect-error
+				{ otherField: 'No name field' },
+			],
+			context,
+			select: {},
+		})
+
+		// Test exists: true - should return only objects with name field
+		const objectsWithName = await context.wabe.controllers.database.getObjects({
+			className: 'Test',
+			where: { name: { exists: true } },
+			context,
+			select: { name: true },
+		})
+
+		expect(objectsWithName.length).toBe(2)
+		expect(objectsWithName.every((obj) => obj?.name)).toBe(true)
+	})
+
+	it('should filter objects where field does not exist (exists: false)', async () => {
+		await context.wabe.controllers.database.createObjects({
+			className: 'Test',
+			data: [
+				{
+					name: 'Object with name',
+					otherField: 'other',
+					anotherField: 'another',
+				},
+				// @ts-expect-error
+				{ otherField: 'No name field' },
+				// @ts-expect-error
+				{ anotherField: 'Also no name' },
+			],
+			context,
+			select: {},
+		})
+
+		// Test exists: false - should return only objects without name field
+		const objectsWithoutName =
+			await context.wabe.controllers.database.getObjects({
+				className: 'Test',
+				where: { name: { exists: false } },
+				context,
+				select: { name: true },
+			})
+
+		expect(objectsWithoutName.length).toBe(2)
+		expect(objectsWithoutName.every((obj) => !obj?.name)).toBe(true)
+	})
+
+	it('should work with exists on AND/OR conditions', async () => {
+		await context.wabe.controllers.database.createObjects({
+			className: 'Test',
+			data: [
+				{ name: 'John', age: 25 },
+				{ name: 'Jane', age: 30 },
+				// @ts-expect-error
+				{ age: 35 },
+				// @ts-expect-error
+				{ name: 'Bob' },
+			],
+			context,
+			select: {},
+		})
+
+		// Test with AND condition
+		const objectsWithNameAndAge =
+			await context.wabe.controllers.database.getObjects({
+				className: 'Test',
+				// @ts-expect-error
+				where: {
+					AND: [{ name: { exists: true } }, { age: { exists: true } }],
+				},
+				context,
+				select: { name: true, age: true },
+			})
+
+		expect(objectsWithNameAndAge.length).toBe(2)
+		expect(objectsWithNameAndAge.every((obj) => obj?.name && obj?.age)).toBe(
+			true,
+		)
+	})
 })
 
 const graphql = {

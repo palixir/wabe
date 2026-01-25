@@ -103,6 +103,7 @@ export const AnyWhereInput = new GraphQLInputObjectType({
 	fields: {
 		equalTo: { type: AnyScalarType },
 		notEqualTo: { type: AnyScalarType },
+		exists: { type: GraphQLBoolean },
 	},
 })
 
@@ -123,6 +124,7 @@ export const ArrayWhereInput = new GraphQLInputObjectType({
 		notEqualTo: { type: AnyScalarType },
 		contains: { type: AnyScalarType },
 		notContains: { type: AnyScalarType },
+		exists: { type: GraphQLBoolean },
 	},
 })
 
@@ -137,6 +139,7 @@ export const DateWhereInput = new GraphQLInputObjectType({
 		lessThanOrEqualTo: { type: DateScalarType },
 		greaterThan: { type: DateScalarType },
 		greaterThanOrEqualTo: { type: DateScalarType },
+		exists: { type: GraphQLBoolean },
 	},
 })
 
@@ -147,6 +150,7 @@ export const EmailWhereInput = new GraphQLInputObjectType({
 		notEqualTo: { type: EmailScalarType },
 		in: { type: new GraphQLList(EmailScalarType) },
 		notIn: { type: new GraphQLList(EmailScalarType) },
+		exists: { type: GraphQLBoolean },
 	},
 })
 
@@ -157,6 +161,7 @@ export const PhoneWhereInput = new GraphQLInputObjectType({
 		notEqualTo: { type: PhoneScalarType },
 		in: { type: new GraphQLList(PhoneScalarType) },
 		notIn: { type: new GraphQLList(PhoneScalarType) },
+		exists: { type: GraphQLBoolean },
 	},
 })
 
@@ -177,6 +182,7 @@ export const StringWhereInput = new GraphQLInputObjectType({
 		notEqualTo: { type: GraphQLString },
 		in: { type: new GraphQLList(GraphQLString) },
 		notIn: { type: new GraphQLList(GraphQLString) },
+		exists: { type: GraphQLBoolean },
 	},
 })
 
@@ -191,6 +197,7 @@ export const IntWhereInput = new GraphQLInputObjectType({
 		greaterThanOrEqualTo: { type: GraphQLInt },
 		in: { type: new GraphQLList(GraphQLInt) },
 		notIn: { type: new GraphQLList(GraphQLInt) },
+		exists: { type: GraphQLBoolean },
 	},
 })
 
@@ -205,6 +212,7 @@ export const FloatWhereInput = new GraphQLInputObjectType({
 		greaterThanOrEqualTo: { type: GraphQLFloat },
 		in: { type: new GraphQLList(GraphQLFloat) },
 		notIn: { type: new GraphQLList(GraphQLFloat) },
+		exists: { type: GraphQLBoolean },
 	},
 })
 
@@ -215,5 +223,6 @@ export const BooleanWhereInput = new GraphQLInputObjectType({
 		notEqualTo: { type: GraphQLBoolean },
 		in: { type: new GraphQLList(GraphQLBoolean) },
 		notIn: { type: new GraphQLList(GraphQLBoolean) },
+		exists: { type: GraphQLBoolean },
 	},
 })
