@@ -2084,4 +2084,41 @@ describe('Postgres adapter', () => {
 		expect(results.length).toBe(1)
 		expect(results.some((row) => row?.int === 25)).toBe(true)
 	})
+
+	it('should handle correctly equalTo and notEqualTo undefined', async () => {
+		// Create test documents with JSON data using the adapter
+		await postgresAdapter.createObjects({
+			className: 'Test',
+			// @ts-expect-error
+			data: [{ object: null, field1: 'John', float: 2.5 }, { int: 35 }],
+			context,
+		})
+
+		const results = await postgresAdapter.getObjects({
+			className: 'Test',
+			where: { int: { equalTo: undefined } },
+			context,
+		})
+
+		expect(results.length).toBe(1)
+		expect(results.some((row) => row?.field1 === 'John')).toBe(true)
+
+		const results2 = await postgresAdapter.getObjects({
+			className: 'Test',
+			where: { int: { notEqualTo: undefined } },
+			context,
+		})
+
+		expect(results2.length).toBe(1)
+		expect(results2.some((row) => row?.int === 35)).toBe(true)
+
+		const results3 = await postgresAdapter.getObjects({
+			className: 'Test',
+			where: { int: { equalTo: undefined }, float: { greaterThan: 2 } },
+			context,
+		})
+
+		expect(results3.length).toBe(1)
+		expect(results3.some((row) => row?.field1 === 'John')).toBe(true)
+	})
 })
