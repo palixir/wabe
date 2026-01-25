@@ -72,18 +72,49 @@ export const buildMongoWhereQuery = <
 				}
 			if (value?.notContains || value?.notContains === null)
 				acc[keyToWrite] = { $ne: value.notContains }
-			if (value?.equalTo || value?.equalTo === null)
+			if (value?.exists === true) acc[keyToWrite] = { $exists: true, $ne: null }
+			if (value?.exists === false) acc[keyToWrite] = { $eq: null }
+
+			const hasEqualTo = Object.hasOwn(value || {}, 'equalTo')
+			const hasNotEqualTo = Object.hasOwn(value || {}, 'notEqualTo')
+
+			// equalTo: undefined → field does not exist
+			if (hasEqualTo && value?.equalTo === undefined) {
+				acc[keyToWrite] = { $exists: false }
+			}
+
+			// notEqualTo: undefined → field exists
+			if (hasNotEqualTo && value?.notEqualTo === undefined) {
+				acc[keyToWrite] = { $exists: true }
+			}
+
+			// equalTo: null → field === null
+			if (hasEqualTo && value?.equalTo === null) {
+				acc[keyToWrite] = null
+			}
+
+			// notEqualTo: null → field exists AND !== null
+			if (hasNotEqualTo && value?.notEqualTo === null) {
+				acc[keyToWrite] = { $ne: null, $exists: true }
+			}
+
+			// equalTo: value
+			if (hasEqualTo) {
 				acc[keyToWrite] =
-					keyToWrite === '_id' && typeof value.equalTo === 'string'
-						? ObjectId.createFromHexString(value.equalTo)
-						: value.equalTo
-			if (value?.notEqualTo || value?.notEqualTo === null)
+					keyToWrite === '_id' && typeof value?.equalTo === 'string'
+						? ObjectId.createFromHexString(value?.equalTo)
+						: value?.equalTo
+			}
+
+			// notEqualTo: value
+			if (hasNotEqualTo) {
 				acc[keyToWrite] = {
 					$ne:
-						keyToWrite === '_id' && typeof value.notEqualTo === 'string'
-							? ObjectId.createFromHexString(value.notEqualTo)
-							: value.notEqualTo,
+						keyToWrite === '_id' && typeof value?.notEqualTo === 'string'
+							? ObjectId.createFromHexString(value?.notEqualTo)
+							: value?.notEqualTo,
 				}
+			}
 
 			if (value?.greaterThan || value?.greaterThan === null)
 				acc[keyToWrite] = { $gt: value.greaterThan }

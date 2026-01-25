@@ -4396,4 +4396,252 @@ describe('GraphqlSchema', () => {
 
 		await wabe.close()
 	})
+
+	it('should filter objects where field exists (exists: true)', async () => {
+		const { client, wabe } = await createWabe({
+			classes: [
+				{
+					name: 'TestClass',
+					fields: {
+						name: {
+							type: 'String',
+						},
+						age: {
+							type: 'Int',
+						},
+						active: {
+							type: 'Boolean',
+						},
+					},
+				},
+			],
+		})
+
+		// Create objects with and without the name field
+		await client.request<any>(gql`
+			mutation createObjects {
+				createTestClasses(input: {
+					fields: [
+						{name: "Object with name"},
+						{name: "Another object with name"},
+						{age: 25}
+					]
+				}) {
+					ok
+				}
+			}
+		`)
+
+		// Test exists: true - should return only objects with name field
+		const res = await client.request<any>(gql`
+			query testExistsTrue {
+				testClasses(where: {name: {exists: true}}) {
+					totalCount
+					edges {
+						node {
+							id
+							name
+						}
+					}
+				}
+			}
+		`)
+
+		expect(res.testClasses.totalCount).toBe(2)
+		expect(res.testClasses.edges.length).toBe(2)
+		expect(res.testClasses.edges.every((edge: any) => edge.node.name)).toBe(
+			true,
+		)
+
+		await wabe.close()
+	})
+
+	it('should filter objects where field does not exist (exists: false)', async () => {
+		const { client, wabe } = await createWabe({
+			classes: [
+				{
+					name: 'TestClass',
+					fields: {
+						name: {
+							type: 'String',
+						},
+						age: {
+							type: 'Int',
+						},
+						active: {
+							type: 'Boolean',
+						},
+					},
+				},
+			],
+		})
+
+		// Create objects with and without the name field
+		await client.request<any>(gql`
+			mutation createObjects {
+				createTestClasses(input: {
+					fields: [
+						{name: "Object with name"},
+						{age: 25},
+						{active: true}
+					]
+				}) {
+					ok
+				}
+			}
+		`)
+
+		// Test exists: false - should return only objects without name field
+		const res = await client.request<any>(gql`
+			query testExistsFalse {
+				testClasses(where: {name: {exists: false}}) {
+					totalCount
+					edges {
+						node {
+							id
+							name
+						}
+					}
+				}
+			}
+		`)
+
+		expect(res.testClasses.totalCount).toBe(2)
+		expect(res.testClasses.edges.length).toBe(2)
+		expect(res.testClasses.edges.every((edge: any) => !edge.node.name)).toBe(
+			true,
+		)
+
+		await wabe.close()
+	})
+
+	it('should work with AND conditions', async () => {
+		const { client, wabe } = await createWabe({
+			classes: [
+				{
+					name: 'TestClass',
+					fields: {
+						name: {
+							type: 'String',
+						},
+						age: {
+							type: 'Int',
+						},
+						active: {
+							type: 'Boolean',
+						},
+					},
+				},
+			],
+		})
+		// Create objects with different field combinations
+		await client.request<any>(gql`
+			mutation createObjects {
+				createTestClasses(input: {
+					fields: [
+						{name: "John", age: 25},
+						{name: "Jane", age: 30},
+						{age: 35},
+						{name: "Bob"}
+					]
+				}) {
+					ok
+				}
+			}
+		`)
+
+		// Test with AND condition
+		const res = await client.request<any>(gql`
+			query testExistsWithAnd {
+				testClasses(where: {
+					AND: [
+						{name: {exists: true}},
+						{age: {exists: true}}
+					]
+				}) {
+					totalCount
+					edges {
+						node {
+							id
+							name
+							age
+						}
+					}
+				}
+			}
+		`)
+
+		expect(res.testClasses.totalCount).toBe(2)
+		expect(res.testClasses.edges.length).toBe(2)
+		expect(
+			res.testClasses.edges.every(
+				(edge: any) => edge.node.name && edge.node.age,
+			),
+		).toBe(true)
+
+		await wabe.close()
+	})
+
+	it('should work with OR conditions', async () => {
+		const { client, wabe } = await createWabe({
+			classes: [
+				{
+					name: 'TestClass',
+					fields: {
+						name: {
+							type: 'String',
+						},
+						age: {
+							type: 'Int',
+						},
+						active: {
+							type: 'Boolean',
+						},
+					},
+				},
+			],
+		})
+
+		// Create objects with different field combinations
+		await client.request<any>(gql`
+			mutation createObjects {
+				createTestClasses(input: {
+					fields: [
+						{name: "John", age: 25},
+						{name: "Jane"},
+						{age: 30}
+					]
+				}) {
+					ok
+				}
+			}
+		`)
+
+		// Test with OR condition - objects that have either name OR age
+		const res = await client.request<any>(gql`
+			query testExistsWithOr {
+				testClasses(where: {
+					OR: [
+						{name: {exists: true}},
+						{age: {exists: true}}
+					]
+				}) {
+					totalCount
+					edges {
+						node {
+							id
+							name
+							age
+						}
+					}
+				}
+			}
+		`)
+
+		// All 3 objects should match (2 have name, 2 have age, 1 has both)
+		expect(res.testClasses.totalCount).toBe(3)
+		expect(res.testClasses.edges.length).toBe(3)
+
+		await wabe.close()
+	})
 })

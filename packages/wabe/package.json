@@ -1,6 +1,6 @@
 {
 	"name": "wabe",
-	"version": "0.6.10",
+	"version": "0.6.11",
 	"description": "Your backend without vendor lock-in in Typescript",
 	"homepage": "https://palixir.github.io/wabe/",
 	"author": {

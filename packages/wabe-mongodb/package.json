@@ -1,6 +1,6 @@
 {
 	"name": "wabe-mongodb",
-	"version": "0.5.2",
+	"version": "0.5.3",
 	"description": "MongoDB adapter for Wabe (official)",
 	"homepage": "https://palixir.github.io/wabe/",
 	"author": {
