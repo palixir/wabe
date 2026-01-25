@@ -48,7 +48,7 @@ export const _checkCLP = async (
 
 	if (!permissionOperation) throw new Error('Bad operation type provided')
 
-	const permissionProperties = await _getPermissionPropertiesOfAClass({
+	const permissionProperties = _getPermissionPropertiesOfAClass({
 		className: object.className,
 		operation: permissionOperation,
 		context: object.context,
@@ -69,10 +69,11 @@ export const _checkCLP = async (
 		return
 
 	// User is not corrected but requireAuthentication is on true
-	if (!sessionId || !object.getUser())
+	if (!sessionId || !object.getUser()) {
 		throw new Error(
 			`Permission denied to ${permissionOperation} class ${object.className}`,
 		)
+	}
 
 	if (permissionProperties.authorizedRoles?.includes('everyone')) return
 
@@ -88,10 +89,12 @@ export const _checkCLP = async (
 	const roleName = object.context.user?.role?.name
 
 	// No role name found
-	if (!roleName)
+	if (!roleName) {
+		console.log('here')
 		throw new Error(
 			`Permission denied to ${permissionOperation} class ${object.className}`,
 		)
+	}
 
 	// The role of the user is not included in the authorizedRoles
 	if (!permissionProperties.authorizedRoles?.includes(roleName))

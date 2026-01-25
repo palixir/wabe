@@ -4,6 +4,7 @@ import type { SchemaInterface } from '../schema'
 import type { WabeContext } from '../server/interface'
 import { contextWithRoot } from '../utils/export'
 import { notEmpty } from '../utils/export'
+import { Session } from '../authentication/Session'
 import type {
 	CountOptions,
 	CreateObjectOptions,
@@ -642,13 +643,30 @@ export class DatabaseController<T extends WabeTypes> {
 
 		if (select && Object.keys(select).length === 0) return null
 
+		if (className === 'User') {
+			const session = new Session()
+
+			// @ts-expect-error
+			const result = await session.create(res.id, context)
+
+			console.log(newData)
+
+			return this.getObject({
+				className,
+				context: {
+					...context,
+					// @ts-expect-error
+					user: res,
+					sessionId: result.sessionId,
+				},
+				select,
+				id: res.id,
+			})
+		}
+
 		return this.getObject({
 			className,
-			context: {
-				...context,
-				// @ts-expect-error
-				user: className === 'User' ? res : context.user,
-			},
+			context,
 			select,
 			id: res.id,
 		})

@@ -140,7 +140,7 @@ export const createUserAndUpdateRole = async ({
         id
         accessToken
         refreshToken
-		csrfToken
+        csrfToken
       }
     }
   `,

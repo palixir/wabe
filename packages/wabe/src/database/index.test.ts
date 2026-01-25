@@ -11,8 +11,10 @@ import {
 } from 'bun:test'
 import type { Wabe } from '../server'
 import {
+	createUserAndUpdateRole,
 	type DevWabeTypes,
 	getAdminUserClient,
+	getAnonymousClient,
 	getGraphqlClient,
 } from '../utils/helper'
 import { setupTests, closeTests } from '../utils/testHelper'
@@ -132,6 +134,43 @@ describe('Database', () => {
 		mockAfterUpdate.mockClear()
 		spyGetObject.mockClear()
 		spyGetObjects.mockClear()
+	})
+
+	it.only('should allow to signUp with anonymous user and read his own data', async () => {
+		const setup = await setupTests([
+			{
+				name: 'User',
+				fields: {},
+				searchableFields: ['email', 'firstName', 'lastName'],
+				permissions: {
+					read: {
+						authorizedRoles: ['Admin', 'Client'],
+						requireAuthentication: true,
+					},
+					update: {
+						authorizedRoles: ['Admin', 'Client'],
+						requireAuthentication: true,
+					},
+					delete: {
+						authorizedRoles: ['Admin', 'Client'],
+						requireAuthentication: true,
+					},
+				},
+			},
+		])
+
+		const client = getAnonymousClient(setup.port)
+		const rootClient = getGraphqlClient(setup.port)
+
+		console.log('signUp')
+
+		const { userClient, accessToken, csrfToken } =
+			await createUserAndUpdateRole({
+				anonymousClient: client,
+				port: setup.port,
+				roleName: 'Client',
+				rootClient,
+			})
 	})
 
 	it('should return id of a relation if set to true in select on getObject', async () => {
