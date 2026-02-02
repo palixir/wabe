@@ -60,7 +60,7 @@ export const signInWithResolver = async (
 
 	const session = new Session()
 
-	const { refreshToken, accessToken, csrfToken } = await session.create(
+	const { refreshToken, accessToken } = await session.create(
 		userId,
 		context,
 	)
@@ -89,14 +89,8 @@ export const signInWithResolver = async (
 			expires: accessTokenExpiresAt,
 		})
 
-		context.response?.setCookie('csrfToken', csrfToken, {
-			httpOnly: true,
-			path: '/',
-			sameSite: 'Strict',
-			secure: true,
-			expires: accessTokenExpiresAt,
-		})
+
 	}
 
-	return { accessToken, refreshToken, csrfToken, user, srp }
+	return { accessToken, refreshToken, user, srp }
 }

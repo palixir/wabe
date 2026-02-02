@@ -34,7 +34,7 @@ export const signUpWithResolver = async (
 
 	if (!createdUserId) throw new Error('User not created')
 
-	const { accessToken, refreshToken, csrfToken } = await session.create(
+	const { accessToken, refreshToken } = await session.create(
 		createdUserId,
 		context,
 	)
@@ -56,14 +56,8 @@ export const signUpWithResolver = async (
 			expires: session.getAccessTokenExpireAt(context.wabe.config),
 		})
 
-		context.response?.setCookie('csrfToken', csrfToken, {
-			httpOnly: true,
-			path: '/',
-			sameSite: 'Strict',
-			secure: true,
-			expires: session.getAccessTokenExpireAt(context.wabe.config),
-		})
+
 	}
 
-	return { accessToken, refreshToken, csrfToken, id: createdUserId }
+	return { accessToken, refreshToken, id: createdUserId }
 }

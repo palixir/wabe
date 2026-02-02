@@ -173,7 +173,7 @@ describe('Security tests', () => {
 		client = getAnonymousClient(port)
 		rootClient = getGraphqlClient(port)
 
-		const { userClient, accessToken, csrfToken } =
+		const { userClient, accessToken } =
 			await createUserAndUpdateRole({
 				anonymousClient: client,
 				port,
@@ -195,7 +195,6 @@ describe('Security tests', () => {
 
 		const invalidCsrfClient = getUserClient(port, {
 			accessToken,
-			csrfToken: 'invalid-csrf-token',
 		})
 		expect(
 			invalidCsrfClient.request(gql`
@@ -211,7 +210,6 @@ describe('Security tests', () => {
 
 		const validCsrfClient = getUserClient(port, {
 			accessToken,
-			csrfToken,
 		})
 
 		const res = await validCsrfClient.request<any>(gql`
@@ -263,7 +261,6 @@ describe('Security tests', () => {
 
 		const invalidCsrfClient = getUserClient(port, {
 			accessToken,
-			csrfToken: 'invalid-csrf-token',
 		})
 
 		const res = await invalidCsrfClient.request<any>(gql`

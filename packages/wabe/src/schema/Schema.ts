@@ -349,10 +349,7 @@ export class Schema<T extends WabeTypes> {
 										refreshToken: {
 											type: 'String',
 										},
-										csrfToken: {
-											type: 'String',
-											required: false,
-										},
+
 										srp: {
 											type: 'Object',
 											object: {
@@ -390,10 +387,7 @@ export class Schema<T extends WabeTypes> {
 											type: 'String',
 											required: true,
 										},
-										csrfToken: {
-											type: 'String',
-											required: false,
-										},
+
 									},
 								},
 								args: {
