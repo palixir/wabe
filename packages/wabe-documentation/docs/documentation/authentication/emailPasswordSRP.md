@@ -3,23 +3,26 @@
 
 ## Overview
 
-The Secure Remote Password (SRP) protocol is a secure password-based authentication and key-exchange protocol.
-SRP is resistant to dictionary attacks and does not require the storage of passwords in the database, enhancing security by
-eliminating the risk of password exposure in case of a data breach. This method ensures that even if the server is compromised,
-the user's password remains secure.
+The Secure Remote Password (SRP) protocol is a cryptographically secure password-based authentication and key-exchange protocol. SRP provides several security advantages:
 
-## SRP Authentication flow
+- **No password storage**: User passwords are never stored in the database
+- **Resistance to dictionary attacks**: Even with compromised database, passwords remain secure
+- **Mutual authentication**: Both client and server authenticate each other
+- **Perfect forward secrecy**: Session keys are not compromised even if long-term keys are
 
-### Sign Up
+SRP is particularly suitable for applications requiring high security standards where traditional password storage poses risks.
 
-To sign up a user with SRP, follow these steps:
+## SRP Authentication Flow
 
-1. **Generate salt and verifier:**
-   - Generate a salt using the SRP client.
-   - Derive a private key from the salt and the user's password.
-   - Create a verifier from the private key.
+The SRP authentication process involves several steps that ensure secure credential exchange without transmitting passwords.
 
-   **Client-side code example:**
+### Sign Up Process
+
+1. **Client-side preparation:**
+   - Generate cryptographic salt
+   - Derive private key from salt and password
+   - Create verifier from private key
+
    ```javascript
    import { createSRPClient } from 'js-srp6a'
 
@@ -29,8 +32,9 @@ To sign up a user with SRP, follow these steps:
    const verifier = client.deriveVerifier(privateKey);
    ```
 
-2. **Send sign up request:**
-   - Use the `signUpWith` mutation to send the email, salt, and verifier to the server.
+2. **Server registration:**
+   - Send email, salt, and verifier via `signUpWith` mutation
+   - Server stores salt and verifier (never stores password)
 
    ```graphql
    mutation signUpWith($input: SignUpWithInput!) {
@@ -40,7 +44,7 @@ To sign up a user with SRP, follow these steps:
    }
    ```
 
-   **Input:**
+   **Variables:**
    ```json
    {
      "input": {
@@ -55,20 +59,18 @@ To sign up a user with SRP, follow these steps:
    }
    ```
 
-### Sign In
+### Sign In Process
 
-To sign in a user with SRP, follow these steps:
+1. **Ephemeral key generation:**
+   - Client generates temporary key pair for this session
 
-1. **Generate ephemeral key:**
-   - Generate an ephemeral key pair using the SRP client.
-
-   **Client-side code example:**
    ```javascript
    const clientEphemeral = client.generateEphemeral();
    ```
 
-2. **Send sign in request:**
-   - Use the `signInWith` mutation to send the email and the client's public ephemeral key to the server.
+2. **Initial authentication request:**
+   - Client sends email and public ephemeral key
+   - Server responds with salt and its public ephemeral key
 
    ```graphql
    mutation signInWith($input: SignInWithInput!) {
@@ -81,7 +83,7 @@ To sign in a user with SRP, follow these steps:
    }
    ```
 
-   **Input:**
+   **Variables:**
    ```json
    {
      "input": {
@@ -95,16 +97,15 @@ To sign in a user with SRP, follow these steps:
    }
    ```
 
-3. **Derive session:**
-   - Derive the session using the client's ephemeral secret, the server's public key, the salt, and the private key.
+3. **Session derivation:**
+   - Client derives session key using ephemeral secret, server public key, salt, and private key
 
-   **Client-side code example:**
    ```javascript
    const clientSession = await client.deriveSession(
      clientEphemeral.secret,
      signInWith.srp.serverPublic,
      salt,
-     '', // Because we don't hash the username
+     '', // Username not hashed in this implementation
      privateKey
    );
    ```

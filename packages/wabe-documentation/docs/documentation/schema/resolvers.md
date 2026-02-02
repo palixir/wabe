@@ -1,10 +1,27 @@
 # Resolvers
 
-In the `schema` object of the `Wabe` configuration, you can also define resolvers. These resolvers correspond to GraphQL resolvers (when we integrate automatic REST API generation, they will correspond to REST endpoints). They are divided into two categories: on one side, queries, which allow you to request data or return a result without performing any mutations on the data in the database; and on the other side, mutations, which, as their name suggests, allow you to modify the data in the database.
+Resolvers extend Wabe's functionality by allowing you to define custom GraphQL queries and mutations. They complement the automatically generated CRUD operations with your own business logic.
+
+## Resolver Types
+
+Wabe supports two types of resolvers:
+
+- **Queries**: Read-only operations that retrieve data or perform calculations without modifying the database
+- **Mutations**: Operations that modify data in the database or perform side effects
+
+Both types follow the same structure but serve different purposes in your GraphQL API.
 
 ## Queries
 
-For each `query` you choose to create, you can give it a name (in the example below, "helloWorld"). You can also specify a return type (supported types in Wabe include String, Int, Float, Boolean, File, etc.). Additionally, you can provide arguments if needed. Finally, you must assign it a resolver function that contains the code to execute when your query is called.
+Query resolvers allow you to define custom read operations. Each query requires:
+
+- **name**: Unique identifier for the query
+- **type**: Return type (can be any Wabe-supported type including custom scalars and enums)
+- **description**: Optional description (appears in GraphQL documentation)
+- **args**: Input arguments with their types and requirements
+- **resolve**: Function that executes when the query is called
+
+The resolver function receives standard GraphQL resolver parameters: `root`, `args`, and `context`.
 
 ```ts
 import { Wabe } from "wabe";
@@ -44,7 +61,13 @@ await run();
 
 ## Mutations
 
-Just like with queries, you can create `mutations` (such as "sumAndUpdateResult" in the example below) with a return type, arguments (within the input object), and a resolver function.
+Mutation resolvers follow the same structure as queries but are designed for operations that modify data or perform side effects. They typically:
+
+- Accept input arguments (usually grouped in an `input` object)
+- Perform database operations or other side effects
+- Return the result of the operation
+
+Mutations use the same resolver function signature as queries.
 
 ```ts
 import { Wabe } from "wabe";

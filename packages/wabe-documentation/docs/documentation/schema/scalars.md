@@ -1,8 +1,16 @@
 # Scalars
 
-With Wabe, you can create your own `scalars` (a TypeScript type will also be generated if you have codegen enabled). After **restarting** your server (to trigger the codegen), you can easily use them as a field type, as shown in the example below.
+Custom scalars allow you to extend Wabe's type system with your own data types. When codegen is enabled, Wabe automatically generates TypeScript types for your custom scalars.
 
-To define them, you can specify the same fields as for a GraphQL scalar (parseValue, parseLiteral, serialize, see [here](https://www.apollographql.com/docs/apollo-server/schema/custom-scalars/#serialize) for more information).
+## Creating Custom Scalars
+
+Custom scalars follow the GraphQL scalar specification and require implementing:
+
+- **parseValue**: Convert input values from variables
+- **parseLiteral**: Convert input values from AST literals  
+- **serialize**: Convert output values for responses
+
+After defining a scalar and restarting your server (to trigger codegen), you can use it as a field type in your classes.
 
 ```ts
 import { Wabe } from "wabe";

@@ -1,8 +1,21 @@
 # Database
 
-We have seen that Wabe offers a very rich GraphQL API for interacting with the data stored in the database. There is also another way, using the `DatabaseController` directly to execute your queries. This controller is accessible within the `WabeContext` (`context.wabe.controllers.database`).
+Wabe provides two ways to interact with your database:
 
-**Note:** It is important to note, that the `DatabaseController` does not provide interfaces for interacting with "search," or with pointers and relations as offered by the GraphQL API.
+1. **GraphQL API**: A rich, automatically generated API for CRUD operations
+2. **DatabaseController**: Direct database access for more control
+
+The `DatabaseController` is accessible within the `WabeContext` (`context.wabe.controllers.database`) and provides direct access to database operations.
+
+**Note:** The `DatabaseController` provides basic CRUD operations but does not include advanced features like full-text search or complex pointer/relation handling that are available through the GraphQL API.
+
+## Supported Database Adapters
+
+Wabe currently supports:
+- **MongoDB** via `wabe-mongodb` package
+- **PostgreSQL** via `wabe-postgres` package
+
+Both adapters implement the same interface, allowing you to switch between databases with minimal code changes.
 
 ## Queries
 
