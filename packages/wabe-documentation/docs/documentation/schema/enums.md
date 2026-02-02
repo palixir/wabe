@@ -1,6 +1,14 @@
 # Enums
 
-With Wabe, you can create your own `enums` (a TypeScript enum will also be generated if you have codegen enabled). After **restarting** your server (to trigger the codegen), you can easily use it as a field type, as shown in the example below.
+Enums allow you to define a set of named constants that can be used as field types. When codegen is enabled, Wabe automatically generates TypeScript enums for your definitions.
+
+## Creating Enums
+
+Enums are defined in the schema configuration and can be used as field types after the server restarts (triggering codegen). Each enum consists of:
+
+- **name**: The enum identifier
+- **description**: Optional description (appears in GraphQL documentation)
+- **values**: Key-value pairs representing the enum options
 
 ```ts
 import { Wabe } from "wabe";

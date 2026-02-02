@@ -1,10 +1,15 @@
 # 📁 File Management with Wabe
 
-Wabe allows you to store and manage files effortlessly, with full integration into the GraphQL API. You can upload, read, and delete files via the API, and Wabe will automatically handle storage and database operations behind the scenes—no extra setup required.
+Wabe provides comprehensive file management capabilities with seamless integration into the GraphQL API. Files can be uploaded, retrieved, and deleted through the API, with Wabe handling all storage operations automatically.
 
 ## ⚙️ Configuration
 
-Wabe provides customizable options for file management. For instance, you can configure a storage adapter such as `Buns3Adapter` and define a `beforeUpload` hook to perform custom actions (e.g., encryption) before the file is saved.
+Wabe's file management system is highly configurable. You can specify storage adapters (like `Buns3Adapter` for S3-compatible storage) and implement hooks for preprocessing files before they are stored.
+
+### Supported Storage Adapters
+
+- **Buns3Adapter**: S3-compatible storage using Bun's built-in S3 client
+- Custom adapters can be implemented by conforming to the `FileAdapter` interface
 
 ### Example Setup
 

@@ -1,23 +1,23 @@
 # Classes
 
-The schema object in your Wabe app configuration allows you to define the schema for the various classes your application requires. For example, you might have a "Company" class with a name field if your application needs to store client companies and their names.
+Classes are the core building blocks of your Wabe application's data model. Each class represents a collection of objects with defined fields and behaviors. The schema configuration allows you to define the structure and capabilities of these classes.
 
-## Create a simple class
+## Supported Field Types
 
-`Wabe` allows you to create classes with some typed fields inside. For the moment `Wabe` supports natively following types (but you can create your own with `Scalars`) :
+Wabe supports the following native field types (with the ability to extend through custom scalars):
 
-- String
-- Int
-- Float
-- Boolean
-- Date
-- Email
-- File
-- Object
-- Array
-- Pointer
-- Relation
-- Hash
+- **String**: Text data
+- **Int**: Integer numbers
+- **Float**: Decimal numbers
+- **Boolean**: True/false values
+- **Date**: Date and time values (stored as ISO strings)
+- **Email**: Email addresses with validation
+- **File**: File references with automatic storage handling
+- **Object**: Nested object structures
+- **Array**: Arrays of values (can specify element type)
+- **Pointer**: Single reference to another class object
+- **Relation**: Multiple references to objects of another class
+- **Hash**: Secure password hashing
 
 The `classes` array allow you to create new classe in your project with some fields. In the example below, a company class had a required name and a logo.
 
@@ -199,7 +199,13 @@ await run();
 
 ## Indexes
 
-When configuring your class, you have the option to specify which fields you want to `index`. To do this, simply define the field name and the order (ASC for ascending order and DESC for descending order). The `order` parameter only impacts the performance of your query, not the order in which you receive the results.
+Indexes improve query performance by creating optimized data structures for specific fields. When defining indexes, you specify:
+
+- **field**: The field name to index
+- **order**: Sort order (ASC for ascending, DESC for descending)
+- **unique**: Whether the index should enforce uniqueness (optional)
+
+Indexes are automatically created when your application starts and the database is initialized.
 
 ```ts
 import { Wabe } from "wabe";
@@ -237,7 +243,18 @@ await run();
 
 ## Permissions
 
-When configuring your class, you have the option to set specific access `permissions` for that class. These permissions allow you to specify rights for `creating`, `updating`, `deleting`, and `reading` the class data. For each of the four CRUD operations, you can define whether authentication is required to perform the operation and which roles are authorized to execute it for more granular control.
+Wabe provides fine-grained permission control for each class through its permission system. You can configure access rights for all CRUD operations:
+
+- **create**: Who can create new objects
+- **read**: Who can view existing objects  
+- **update**: Who can modify existing objects
+- **delete**: Who can remove objects
+
+For each operation, you can specify:
+- **requireAuthentication**: Whether users must be authenticated
+- **authorizedRoles**: Specific roles that have permission (optional)
+
+Permissions are enforced at both the GraphQL API level and when using the DatabaseController directly.
 
 ```ts
 import { Wabe } from "wabe";
@@ -291,11 +308,15 @@ await run();
 
 ## Search
 
-Wabe offers the ability to simplify `searches` based on a term or a part of it directly from the frontend. To do this, you need to define the fields you want to be searchable from the frontend in the `searchableFields` array. Each time data is inserted or updated in the fields listed in this array, a process will be triggered to split the content into several segments.
+Wabe's search functionality enables efficient full-text searching across your data. When you mark fields as searchable, Wabe automatically:
 
-For example, the word "test" would generate ["t", "te", "tes", "test"] in a default field name `search` presents in each classes. The original field will **keep** "test" in database. This allows easy searching from the frontend, without performance overhead, for the term "t", "te", "tes", or "test", and to find the corresponding object in the database.
+1. Creates a `search` field in your class
+2. Generates search tokens for each searchable field
+3. Updates these tokens whenever data changes
 
-We will explain in more detail in the GraphQL API section how to easily interact with the search field through the GraphQL API.
+For example, the word "test" generates tokens ["t", "te", "tes", "test"], allowing partial matches. The original field content remains unchanged in the database.
+
+Search is optimized for performance and can be accessed through the GraphQL API using specialized search queries.
 
 ```ts
 import { Wabe } from "wabe";

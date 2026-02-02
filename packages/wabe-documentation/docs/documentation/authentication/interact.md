@@ -1,12 +1,18 @@
-# Interact with authentications methods
+# Authentication Methods
 
-To interact with your various authentication methods, you can use the `GraphQL API`, which by default provides `mutations`for signing up, logging in, and logging out. Here’s how you can perform these three actions:
+Wabe provides built-in authentication functionality accessible through the GraphQL API. The API includes mutations for user registration, login, and logout operations.
 
-When logging in or out, the inputs you pass as parameters to the mutation correspond to the `inputs` defined during the configuration of the `authentication` method. When logging in or signing up, a session is created (if you have chosen a session system based on cookies, a cookie will also be created).
+## Authentication Flow
 
-## Sign up
+- **Sign Up**: Create new user accounts
+- **Sign In**: Authenticate existing users and create sessions
+- **Sign Out**: Terminate user sessions
 
-You can disable signUp with the parameters `disableSignUp` in the authentication object :
+Authentication mutations accept input parameters that correspond to the authentication methods you've configured. Successful login/signup operations create sessions, and cookie-based session systems will set appropriate cookies.
+
+## Sign Up
+
+The sign-up functionality can be disabled by setting `disableSignUp: true` in the authentication configuration. When enabled, it allows new users to create accounts.
 
 ```ts
 import { Wabe } from "wabe";
