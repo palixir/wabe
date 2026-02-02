@@ -180,6 +180,5 @@ describe('SignUpWith', () => {
 		expect(res.signUpWith.id).toEqual(expect.any(String))
 		expect(res.signUpWith.accessToken).toEqual(expect.any(String))
 		expect(res.signUpWith.refreshToken).toEqual(expect.any(String))
-
 	})
 })

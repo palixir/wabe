@@ -55,8 +55,6 @@ export const signUpWithResolver = async (
 			secure: true,
 			expires: session.getAccessTokenExpireAt(context.wabe.config),
 		})
-
-
 	}
 
 	return { accessToken, refreshToken, id: createdUserId }

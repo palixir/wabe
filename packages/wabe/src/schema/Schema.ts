@@ -387,7 +387,6 @@ export class Schema<T extends WabeTypes> {
 											type: 'String',
 											required: true,
 										},
-
 									},
 								},
 								args: {

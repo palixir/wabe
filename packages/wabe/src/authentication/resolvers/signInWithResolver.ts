@@ -60,10 +60,7 @@ export const signInWithResolver = async (
 
 	const session = new Session()
 
-	const { refreshToken, accessToken } = await session.create(
-		userId,
-		context,
-	)
+	const { refreshToken, accessToken } = await session.create(userId, context)
 
 	if (context.wabe.config.authentication?.session?.cookieSession) {
 		const accessTokenExpiresAt = session.getAccessTokenExpireAt(
@@ -88,8 +85,6 @@ export const signInWithResolver = async (
 			secure: true,
 			expires: accessTokenExpiresAt,
 		})
-
-
 	}
 
 	return { accessToken, refreshToken, user, srp }

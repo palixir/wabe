@@ -173,13 +173,12 @@ describe('Security tests', () => {
 		client = getAnonymousClient(port)
 		rootClient = getGraphqlClient(port)
 
-		const { userClient, accessToken } =
-			await createUserAndUpdateRole({
-				anonymousClient: client,
-				port,
-				roleName: 'Client',
-				rootClient,
-			})
+		const { userClient, accessToken } = await createUserAndUpdateRole({
+			anonymousClient: client,
+			port,
+			roleName: 'Client',
+			rootClient,
+		})
 
 		expect(
 			userClient.request(gql`
