@@ -1,21 +1,8 @@
 {
 	"$schema": "https://biomejs.dev/schemas/2.2.4/schema.json",
 	"files": {
-		"includes": [
-			"**/*.ts",
-			"**/*.js",
-			"**/*.vue",
-			"**/*.tsx",
-			"!**/dist",
-			"**/*.json",
-			"!**/node_modules",
-			"!**/build",
-			"!**/generated",
-			"!**/.nuxt"
-		],
 		"ignoreUnknown": true
 	},
-	"assist": { "actions": { "source": { "organizeImports": "off" } } },
 	"linter": {
 		"enabled": true,
 		"rules": {
