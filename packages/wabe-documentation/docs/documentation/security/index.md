@@ -318,9 +318,13 @@ const run = async () => {
 await run();
 ```
 
-## Disable CSRF protection
+## CSRF Protection
 
-By default the CSRF protection is enable but you can disable it (not recommended). On your front-end you will need to transfer the csrfToken that is returned in a non httpOnly cookie by Wabe into the header Wabe-Csrf-Token.
+Wabe provides built-in CSRF (Cross-Site Request Forgery) protection for cookie-based sessions. This security feature helps prevent unauthorized actions from being performed on behalf of authenticated users.
+
+CSRF protection is automatically enabled when using cookie-based sessions (`cookieSession: true`). Wabe generates and validates CSRF tokens to ensure that requests originate from your legitimate application and not from malicious sites.
+
+### Basic Configuration
 
 ```ts
 import { Wabe } from "wabe";
@@ -328,8 +332,14 @@ import { Wabe } from "wabe";
 const run = async () => {
   const wabe = new Wabe({
     // ... other configuration fields
+    authentication: {
+      session: {
+        cookieSession: true, // Enables CSRF protection
+        csrfSecret: "your-custom-csrf-secret-key", // Optional: Custom secret
+      },
+    },
     security: {
-      disableCSRFProtection: true,
+      disableCSRFProtection: false, // Default: protection enabled
     },
   });
 
@@ -338,3 +348,7 @@ const run = async () => {
 
 await run();
 ```
+
+> ⚠️ **Security Warning**: Disabling CSRF protection (`disableCSRFProtection: true`) is not recommended for production environments.
+
+For complete details about how CSRF protection works, frontend integration, token format, validation process, and best practices, refer to the [Sessions documentation](/documentation/authentication/sessions#csrf-protection).
