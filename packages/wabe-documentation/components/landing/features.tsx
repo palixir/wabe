@@ -10,44 +10,44 @@ import { Button, Card, CardBody, CardHeader, Link } from '@heroui/react'
 
 const features = [
   {
-    title: 'Database Integration',
+    title: '⚡ Instant Database Setup',
     description:
-      'Connect to your preferred database and execute queries with a smooth, fully typed GraphQL interface.',
+      'Connect any database and get a fully-typed GraphQL API instantly. No boilerplate, just power.',
     docLink: '/documentation/database/index',
     icon: <Database className="w-7 h-7 text-indigo-600" />,
   },
   {
-    title: 'Seamless Authentication',
+    title: '🔐 Enterprise-Grade Auth',
     description:
-      'Integrated authentication system with multiple providers (email/password, Google, GitHub, etc.) — ready to secure your app.',
+      'Built-in authentication with email/password, Google, GitHub, and more. Secure by default.',
     docLink: '/documentation/authentication',
     icon: <Lock className="w-7 h-7 text-blue-600" />,
   },
   {
-    title: 'Role-Based Permissions & Security',
+    title: '🛡️ Military-Grade Security',
     description:
-      'Fine-grained role-based permissions, object-level access control, and backend security to protect your data.',
+      'Role-based permissions, object-level security, and comprehensive protection for your data.',
     docLink: '/documentation/security',
     icon: <ShieldCheck className="w-7 h-7 text-green-600" />,
   },
   {
-    title: 'Email Sending',
+    title: '📧 Powerful Email System',
     description:
-      'Easily send emails via your preferred provider (SendGrid, Mailgun, Resend, etc.) with built-in integration.',
+      'Seamless email integration with SendGrid, Mailgun, Resend, and more. Built for scale.',
     docLink: '/documentation/email/index',
     icon: <Mail className="w-7 h-7 text-yellow-600" />,
   },
   {
-    title: 'File Storage',
+    title: '💾 Flexible File Storage',
     description:
-      'Store and manage files in AWS S3, Google Cloud Storage, or any custom adapter effortlessly.',
+      'Effortless file management with S3, Google Cloud, or custom adapters. Upload, store, retrieve.',
     docLink: '/documentation/file/index',
     icon: <FileText className="w-7 h-7 text-purple-600" />,
   },
   {
-    title: 'Schema & Auto-Generated API',
+    title: '🤖 Auto-Generated GraphQL',
     description:
-      'Create advanced schemas (relations, scalars, enums) while Wabe generates a complete, fully typed CRUD API for you.',
+      'Define your schema and get a complete, fully-typed CRUD API automatically. Magic at work.',
     icon: <Beaker className="w-7 h-7 text-pink-600" />,
   },
 ]
@@ -57,12 +57,12 @@ const view = () => (
     <div className="max-w-screen-xl mx-auto px-6">
       {/* Title Section */}
       <div className="text-center space-y-4 mb-14">
-        <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900">
-          Everything you need in one place
+        <h2 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-teal-600">
+          🚀 All-in-One Backend Solution
         </h2>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-          Skip the boilerplate. Wabe gives you a complete, production-ready
-          backend out of the box — so you can build faster.
+        <p className="text-lg text-gray-600 max-w-2xl mx-auto font-medium">
+          No more boilerplate. Wabe delivers a complete, production-ready backend
+          with everything built-in — so you can launch faster than ever.
         </p>
       </div>
 
@@ -102,6 +102,17 @@ const view = () => (
             </CardBody>
           </Card>
         ))}
+      </div>
+
+      {/* Additional Features Section */}
+      <div className="mt-16 text-center">
+        <h3 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-teal-600 mb-4">
+          And So Much More... ✨
+        </h3>
+        <p className="text-gray-600 max-w-2xl mx-auto">
+          Wabe comes packed with additional features like hooks system, cron jobs, REST routes,
+          custom resolvers, and seamless integration with modern frontend frameworks.
+        </p>
       </div>
     </div>
   </section>
