@@ -12,6 +12,7 @@ import {
 } from './utils/helper'
 import { setupTests, closeTests } from './utils/testHelper'
 import { RoleEnum } from 'generated/wabe'
+import { Session } from './authentication/Session'
 
 describe('Security tests', () => {
 	let wabe: Wabe<DevWabeTypes> | undefined
@@ -173,7 +174,7 @@ describe('Security tests', () => {
 		client = getAnonymousClient(port)
 		rootClient = getGraphqlClient(port)
 
-		const { userClient, accessToken } = await createUserAndUpdateRole({
+		const { userClient, accessToken, userId } = await createUserAndUpdateRole({
 			anonymousClient: client,
 			port,
 			roleName: 'Client',
@@ -207,8 +208,16 @@ describe('Security tests', () => {
 			`),
 		).rejects.toThrow('Permission denied to create class TestCSRF')
 
+		const session = new Session()
+
+		const { csrfToken, accessToken: validAccessToken } = await session.create(
+			userId,
+			{ wabe, isRoot: false },
+		)
+
 		const validCsrfClient = getUserClient(port, {
-			accessToken,
+			accessToken: validAccessToken,
+			csrfToken,
 		})
 
 		const res = await validCsrfClient.request<any>(gql`

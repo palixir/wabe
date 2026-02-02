@@ -204,6 +204,7 @@ describe('SignInWith', () => {
 		).mockResolvedValue({
 			refreshToken: 'refreshToken',
 			accessToken: 'accessToken',
+			csrfToken: 'csrfToken',
 		} as any)
 
 		const mockSetCookie = mock(() => {})
@@ -273,6 +274,14 @@ describe('SignInWith', () => {
 				expires: expect.any(Date),
 			},
 		)
+
+		expect(mockSetCookie).toHaveBeenNthCalledWith(3, 'csrfToken', 'csrfToken', {
+			httpOnly: true,
+			path: '/',
+			secure: true,
+			sameSite: 'Strict',
+			expires: expect.any(Date),
+		})
 
 		// @ts-expect-error
 		const refreshTokenExpiresIn = mockSetCookie.mock.calls[0][2].expires

@@ -319,9 +319,24 @@ export class Session {
 
 		if (!res) throw new Error('Session not created')
 
+		const sessionId = res.id
+		const randomValue = crypto.randomBytes(16).toString('hex')
+		const message = `${sessionId.length}!${sessionId}!${randomValue.length}!${randomValue}`
+
+		const csrfSecret =
+			context.wabe.config.authentication?.session?.csrfSecret || secretKey
+
+		const hmac = crypto
+			.createHmac('sha256', csrfSecret)
+			.update(message)
+			.digest('hex')
+
+		const csrfToken = `${hmac}.${randomValue}`
+
 		return {
 			accessToken: this.accessToken,
 			refreshToken: this.refreshToken,
+			csrfToken,
 			sessionId: res.id,
 		}
 	}
