@@ -2,19 +2,19 @@
 	"name": "wabe-mongodb",
 	"version": "0.5.3",
 	"description": "MongoDB adapter for Wabe (official)",
+	"keywords": [
+		"baas",
+		"backend",
+		"graphql",
+		"mongodb",
+		"wabe"
+	],
 	"homepage": "https://palixir.github.io/wabe/",
+	"license": "Apache-2.0",
 	"author": {
 		"name": "coratgerl",
 		"url": "https://github.com/coratgerl"
 	},
-	"license": "Apache-2.0",
-	"keywords": [
-		"backend",
-		"wabe",
-		"graphql",
-		"baas",
-		"mongodb"
-	],
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/palixir/wabe.git"
@@ -23,19 +23,19 @@
 	"scripts": {
 		"build": "bun --filter wabe-build build:package $(pwd)",
 		"check": "tsc --project $(pwd)/tsconfig.json",
-		"lint": "biome lint . --no-errors-on-unmatched",
+		"lint": "oxlint .",
 		"ci": "bun check && bun lint $(pwd) && bun test src",
-		"format": "biome format --write ."
+		"format": "oxfmt --write ."
 	},
 	"dependencies": {
 		"mongodb": "6.17.0",
 		"p-retry": "7.1.0"
 	},
 	"devDependencies": {
-		"wabe": "workspace:*",
-		"wabe-mongodb-launcher": "workspace:*",
 		"get-port": "7.1.0",
 		"uuid": "13.0.0",
-		"wabe-build": "workspace:*"
+		"wabe": "workspace:*",
+		"wabe-build": "workspace:*",
+		"wabe-mongodb-launcher": "workspace:*"
 	}
 }

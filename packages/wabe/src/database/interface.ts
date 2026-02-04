@@ -39,9 +39,7 @@ type WhereScalar<T> = {
 }
 
 type WhereObject<T> = {
-	[P in keyof T]: IsScalar<T[P]> extends false
-		? WhereObject<Partial<T[P]>>
-		: WhereScalar<T[P]>
+	[P in keyof T]: IsScalar<T[P]> extends false ? WhereObject<Partial<T[P]>> : WhereScalar<T[P]>
 }
 
 type WhereAggregation<T extends WabeTypes, K = keyof T['where']> = {
@@ -55,9 +53,7 @@ type WhereConditional<T extends WabeTypes, K = keyof T['where']> = {
 	AND?: Array<WhereType<T, K>>
 }
 
-export type WhereType<T extends WabeTypes, K = keyof T['where']> = Partial<
-	WhereAggregation<T, K>
-> &
+export type WhereType<T extends WabeTypes, K = keyof T['where']> = Partial<WhereAggregation<T, K>> &
 	WhereConditional<T, K>
 
 type SelectObject<T, K extends WabeTypes, Depth extends number = 3> = {
@@ -65,18 +61,10 @@ type SelectObject<T, K extends WabeTypes, Depth extends number = 3> = {
 		? boolean
 		: IsArray<T[P]> extends true
 			? T[P] extends Array<infer Item>
-				?
-						| (Depth extends 0
-								? boolean
-								: SelectObject<Partial<Item>, K, Decrement<Depth>>)
-						| boolean
+				? (Depth extends 0 ? boolean : SelectObject<Partial<Item>, K, Decrement<Depth>>) | boolean
 				: boolean
 			: IsObject<[P], K> extends true
-				?
-						| (Depth extends 0
-								? boolean
-								: SelectObject<Partial<T[P]>, K, Decrement<Depth>>)
-						| boolean
+				? (Depth extends 0 ? boolean : SelectObject<Partial<T[P]>, K, Decrement<Depth>>) | boolean
 				: boolean
 }
 
@@ -92,21 +80,13 @@ export type SelectType<
 		? boolean
 		: IsArray<ExtractType<T, K, P>> extends true
 			? ExtractType<T, K, P> extends Array<infer Item>
-				?
-						| (Depth extends 0
-								? boolean
-								: SelectObject<Partial<Item>, T, Decrement<Depth>>)
-						| boolean
+				? (Depth extends 0 ? boolean : SelectObject<Partial<Item>, T, Decrement<Depth>>) | boolean
 				: boolean
 			: ExtractType<T, K, P> extends object
 				?
 						| (Depth extends 0
 								? boolean
-								: SelectObject<
-										Partial<ExtractType<T, K, P>>,
-										T,
-										Decrement<Depth>
-									>)
+								: SelectObject<Partial<ExtractType<T, K, P>>, T, Decrement<Depth>>)
 						| boolean
 				: boolean
 }>
@@ -259,10 +239,7 @@ export interface DeleteObjectsOptions<
 export interface DatabaseAdapter<T extends WabeTypes> {
 	close(): Promise<void>
 
-	createClassIfNotExist(
-		className: string,
-		schema: SchemaInterface<T>,
-	): Promise<any> | any
+	createClassIfNotExist(className: string, schema: SchemaInterface<T>): Promise<any> | any
 
 	initializeDatabase(schema: SchemaInterface<T>): Promise<void>
 	clearDatabase(): Promise<void>
@@ -276,31 +253,41 @@ export interface DatabaseAdapter<T extends WabeTypes> {
 		K extends keyof T['types'],
 		U extends keyof T['types'][K],
 		W extends keyof T['types'][K],
-	>(params: GetObjectsOptions<T, K, U, W>): Promise<OutputType<T, K, W>[]>
+	>(
+		params: GetObjectsOptions<T, K, U, W>,
+	): Promise<OutputType<T, K, W>[]>
 
 	createObject<
 		K extends keyof T['types'],
 		U extends keyof T['types'][K],
 		W extends keyof T['types'][K],
-	>(params: CreateObjectOptions<T, K, U, W>): Promise<{ id: string }>
+	>(
+		params: CreateObjectOptions<T, K, U, W>,
+	): Promise<{ id: string }>
 	createObjects<
 		K extends keyof T['types'],
 		U extends keyof T['types'][K],
 		W extends keyof T['types'][K],
 		X extends keyof T['types'][K],
-	>(params: CreateObjectsOptions<T, K, U, W, X>): Promise<Array<{ id: string }>>
+	>(
+		params: CreateObjectsOptions<T, K, U, W, X>,
+	): Promise<Array<{ id: string }>>
 
 	updateObject<
 		K extends keyof T['types'],
 		U extends keyof T['types'][K],
 		W extends keyof T['types'][K],
-	>(params: UpdateObjectOptions<T, K, U, W>): Promise<{ id: string }>
+	>(
+		params: UpdateObjectOptions<T, K, U, W>,
+	): Promise<{ id: string }>
 	updateObjects<
 		K extends keyof T['types'],
 		U extends keyof T['types'][K],
 		W extends keyof T['types'][K],
 		X extends keyof T['types'][K],
-	>(params: UpdateObjectsOptions<T, K, U, W, X>): Promise<Array<{ id: string }>>
+	>(
+		params: UpdateObjectsOptions<T, K, U, W, X>,
+	): Promise<Array<{ id: string }>>
 
 	deleteObject<K extends keyof T['types'], U extends keyof T['types'][K]>(
 		params: DeleteObjectOptions<T, K, U>,
@@ -309,5 +296,7 @@ export interface DatabaseAdapter<T extends WabeTypes> {
 		K extends keyof T['types'],
 		U extends keyof T['types'][K],
 		W extends keyof T['types'][K],
-	>(params: DeleteObjectsOptions<T, K, U, W>): Promise<void>
+	>(
+		params: DeleteObjectsOptions<T, K, U, W>,
+	): Promise<void>
 }

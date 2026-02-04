@@ -5,11 +5,7 @@ import { gql } from 'graphql-request'
 import { v4 as uuid } from 'uuid'
 import { Schema, type SchemaInterface } from '../schema'
 import { Wabe } from '../server'
-import {
-	type DevWabeTypes,
-	getAnonymousClient,
-	getGraphqlClient,
-} from '../utils/helper'
+import { type DevWabeTypes, getAnonymousClient, getGraphqlClient } from '../utils/helper'
 import { GraphQLSchema as WabeGraphQLSchema } from './GraphQLSchema'
 import { getTypeFromGraphQLSchema } from './parseGraphqlSchema'
 import { getDatabaseAdapter } from '../utils/testHelper'
@@ -289,7 +285,7 @@ describe('GraphqlSchema', () => {
 			}
 
 			query testClasses {
-				testClasses{
+				testClasses {
 					edges {
 						node {
 							...Test
@@ -535,8 +531,7 @@ describe('GraphqlSchema', () => {
 			}
 		`)
 
-		const premierClasseId =
-			premierClasseResult.createPremierClasse.premierClasse.id
+		const premierClasseId = premierClasseResult.createPremierClasse.premierClasse.id
 
 		// Test CREATE operation with fragments across related classes
 		const createResult = await rootClient.request<any>(gql`
@@ -559,21 +554,14 @@ describe('GraphqlSchema', () => {
 			}
 		`)
 
-		expect(createResult.createDeuxiemeClasse.deuxiemeClasse.field2).toBe(
-			'deuxiemeValue',
-		)
+		expect(createResult.createDeuxiemeClasse.deuxiemeClasse.field2).toBe('deuxiemeValue')
 		expect(createResult.createDeuxiemeClasse.deuxiemeClasse.id).toBeDefined()
+		expect(createResult.createDeuxiemeClasse.deuxiemeClasse.premierClasses.edges.length).toBe(1)
 		expect(
-			createResult.createDeuxiemeClasse.deuxiemeClasse.premierClasses.edges
-				.length,
-		).toBe(1)
-		expect(
-			createResult.createDeuxiemeClasse.deuxiemeClasse.premierClasses.edges[0]
-				.node.field1,
+			createResult.createDeuxiemeClasse.deuxiemeClasse.premierClasses.edges[0].node.field1,
 		).toBe('nestedPremierValue')
 		expect(
-			createResult.createDeuxiemeClasse.deuxiemeClasse.premierClasses.edges[0]
-				.node.id,
+			createResult.createDeuxiemeClasse.deuxiemeClasse.premierClasses.edges[0].node.id,
 		).toBeDefined()
 
 		const deuxiemeClasseId = createResult.createDeuxiemeClasse.deuxiemeClasse.id
@@ -617,16 +605,9 @@ describe('GraphqlSchema', () => {
 			}
 		`)
 
-		expect(updateResult.updateDeuxiemeClasse.deuxiemeClasse.field2).toBe(
-			'updatedDeuxiemeValue',
-		)
-		expect(updateResult.updateDeuxiemeClasse.deuxiemeClasse.id).toBe(
-			deuxiemeClasseId,
-		)
-		expect(
-			updateResult.updateDeuxiemeClasse.deuxiemeClasse.premierClasses.edges
-				.length,
-		).toBe(2)
+		expect(updateResult.updateDeuxiemeClasse.deuxiemeClasse.field2).toBe('updatedDeuxiemeValue')
+		expect(updateResult.updateDeuxiemeClasse.deuxiemeClasse.id).toBe(deuxiemeClasseId)
+		expect(updateResult.updateDeuxiemeClasse.deuxiemeClasse.premierClasses.edges.length).toBe(2)
 
 		// Test DELETE operation with fragments across related classes
 		const deleteResult = await rootClient.request<any>(gql`
@@ -640,16 +621,9 @@ describe('GraphqlSchema', () => {
 			}
 		`)
 
-		expect(deleteResult.deleteDeuxiemeClasse.deuxiemeClasse.field2).toBe(
-			'updatedDeuxiemeValue',
-		)
-		expect(deleteResult.deleteDeuxiemeClasse.deuxiemeClasse.id).toBe(
-			deuxiemeClasseId,
-		)
-		expect(
-			deleteResult.deleteDeuxiemeClasse.deuxiemeClasse.premierClasses.edges
-				.length,
-		).toBe(2)
+		expect(deleteResult.deleteDeuxiemeClasse.deuxiemeClasse.field2).toBe('updatedDeuxiemeValue')
+		expect(deleteResult.deleteDeuxiemeClasse.deuxiemeClasse.id).toBe(deuxiemeClasseId)
+		expect(deleteResult.deleteDeuxiemeClasse.deuxiemeClasse.premierClasses.edges.length).toBe(2)
 
 		await wabe.close()
 	})
@@ -675,20 +649,20 @@ describe('GraphqlSchema', () => {
 		})
 
 		await client.request(gql`
-      mutation deleteTestClasses {
-        deleteTestClasses(input: { where: { field1: { equalTo: "field1" } } }) {
-          ok
-        }
-      }
-      `)
+			mutation deleteTestClasses {
+				deleteTestClasses(input: { where: { field1: { equalTo: "field1" } } }) {
+					ok
+				}
+			}
+		`)
 
 		await client.request(gql`
-      query testsClasses {
-        testClasses {
-          ok
-        }
-      }
-      `)
+			query testsClasses {
+				testClasses {
+					ok
+				}
+			}
+		`)
 
 		await wabe.close()
 	})
@@ -996,40 +970,40 @@ describe('GraphqlSchema', () => {
 		// French mobile not valid
 		expect(
 			client.request<any>(gql`
-			mutation createTestClass {
-				createTestClass(input: { fields: { phone: "+3361234578" } }) {
-					testClass {
-						phone
+				mutation createTestClass {
+					createTestClass(input: { fields: { phone: "+3361234578" } }) {
+						testClass {
+							phone
+						}
 					}
 				}
-			}
-		`),
+			`),
 		).rejects.toThrow('Expected value of type "Phone", found "+3361234578"')
 
 		// USA californian not valid
 		expect(
 			client.request<any>(gql`
-    	mutation createTestClass {
-    		createTestClass(input: { fields: { phone: "+1415555267" } }) {
-    			testClass {
-    				phone
-    			}
-    		}
-    	}
-    `),
+				mutation createTestClass {
+					createTestClass(input: { fields: { phone: "+1415555267" } }) {
+						testClass {
+							phone
+						}
+					}
+				}
+			`),
 		).rejects.toThrow('Expected value of type "Phone", found "+1415555267"')
 
 		// Brasil mobile not valid
 		expect(
 			client.request<any>(gql`
-    	mutation createTestClass {
-    		createTestClass(input: { fields: { phone: "+5511234567" } }) {
-    			testClass {
-    				phone
-    			}
-    		}
-    	}
-    `),
+				mutation createTestClass {
+					createTestClass(input: { fields: { phone: "+5511234567" } }) {
+						testClass {
+							phone
+						}
+					}
+				}
+			`),
 		).rejects.toThrow('Expected value of type "Phone", found "+5511234567"')
 
 		await wabe.close()
@@ -1108,16 +1082,12 @@ describe('GraphqlSchema', () => {
 
 		const res = await anonymousClient.request<any>(
 			gql`
-          mutation createTestClass {
-            createTestClass(
-              input: {
-                fields: { name: "A" },
-              }
-            ) {
-              ok
-            }
-          }
-        `,
+				mutation createTestClass {
+					createTestClass(input: { fields: { name: "A" } }) {
+						ok
+					}
+				}
+			`,
 			{},
 		)
 
@@ -1156,18 +1126,14 @@ describe('GraphqlSchema', () => {
 
 		const res = await client.request<any>(
 			gql`
-          mutation createTestClass {
-            createTestClass(
-              input: {
-                fields: { name: "A" },
-              }
-            ) {
-              testClass{
-                  id
-              }
-            }
-          }
-        `,
+				mutation createTestClass {
+					createTestClass(input: { fields: { name: "A" } }) {
+						testClass {
+							id
+						}
+					}
+				}
+			`,
 			{},
 		)
 
@@ -1218,18 +1184,14 @@ describe('GraphqlSchema', () => {
 
 		const res = await client.request<any>(
 			gql`
-          mutation createTestClass {
-            createTestClass(
-              input: {
-                fields: { name: "A" },
-              }
-            ) {
-              testClass{
-                  id
-              }
-            }
-          }
-        `,
+				mutation createTestClass {
+					createTestClass(input: { fields: { name: "A" } }) {
+						testClass {
+							id
+						}
+					}
+				}
+			`,
 			{},
 		)
 
@@ -1274,42 +1236,40 @@ describe('GraphqlSchema', () => {
 
 		await client.request<any>(
 			gql`
-          mutation createTestClasses {
-            createTestClasses(
-              input: {
-                fields: [
-                  { name: "A", age: 20 },
-                  { name: "B", age: 19 },
-                  { name: "C", age: 18 },
-                  { name: "D", age: 17 },
-                ]
-              }
-            ) {
-              edges {
-                node {
-                  name
-                }
-              }
-            }
-          }
-        `,
+				mutation createTestClasses {
+					createTestClasses(
+						input: {
+							fields: [
+								{ name: "A", age: 20 }
+								{ name: "B", age: 19 }
+								{ name: "C", age: 18 }
+								{ name: "D", age: 17 }
+							]
+						}
+					) {
+						edges {
+							node {
+								name
+							}
+						}
+					}
+				}
+			`,
 			{},
 		)
 
 		const res = await client.request<any>(
 			gql`
-          query testClasses {
-            testClasses(
-              order: [name_DESC, age_ASC]
-            ) {
-              edges {
-                node {
-                  name
-                }
-              }
-            }
-          }
-        `,
+				query testClasses {
+					testClasses(order: [name_DESC, age_ASC]) {
+						edges {
+							node {
+								name
+							}
+						}
+					}
+				}
+			`,
 			{},
 		)
 
@@ -1337,43 +1297,33 @@ describe('GraphqlSchema', () => {
 
 		await client.request<any>(
 			gql`
-          mutation createTestClasses {
-            createTestClasses(
-              input: {
-                fields: [
-                  { name: "test1" },
-                  { name: "test2" },
-                  { name: "test3" },
-                  { name: "test4" },
-                ]
-              }
-            ) {
-              edges {
-                node {
-                  name
-                }
-              }
-            }
-          }
-        `,
+				mutation createTestClasses {
+					createTestClasses(
+						input: { fields: [{ name: "test1" }, { name: "test2" }, { name: "test3" }, { name: "test4" }] }
+					) {
+						edges {
+							node {
+								name
+							}
+						}
+					}
+				}
+			`,
 			{},
 		)
 
 		const res = await client.request<any>(
 			gql`
-          query testClasses {
-            testClasses(
-              where: { name: { equalTo: "test1" } }
-              order: [name_ASC]
-            ) {
-              edges {
-                node {
-                  name
-                }
-              }
-            }
-          }
-        `,
+				query testClasses {
+					testClasses(where: { name: { equalTo: "test1" } }, order: [name_ASC]) {
+						edges {
+							node {
+								name
+							}
+						}
+					}
+				}
+			`,
 			{},
 		)
 
@@ -1403,9 +1353,7 @@ describe('GraphqlSchema', () => {
 		await client.request<any>(
 			gql`
 				mutation createTestClass {
-					createTestClass(
-						input: { fields: { name: "test", age: 30 } }
-					) {
+					createTestClass(input: { fields: { name: "test", age: 30 } }) {
 						testClass {
 							name
 						}
@@ -1417,81 +1365,60 @@ describe('GraphqlSchema', () => {
 
 		const res = await client.request<any>(
 			gql`
-    	query testClasses {
-    		testClasses(
-    			where: {
-    				AND: [
-    					{ age: { equalTo: 30 } }
-    					{ search: { contains: "t" } }
-    				]
-    			}
-    		) {
-    			totalCount
-    		}
-    	}
-    `,
+				query testClasses {
+					testClasses(where: { AND: [{ age: { equalTo: 30 } }, { search: { contains: "t" } }] }) {
+						totalCount
+					}
+				}
+			`,
 		)
 
 		expect(res.testClasses.totalCount).toEqual(1)
 
 		const res2 = await client.request<any>(
 			gql`
-    	query testClasses {
-    		testClasses(where: { search: { contains: "invalid" } }) {
-    			totalCount
-    		}
-    	}
-    `,
+				query testClasses {
+					testClasses(where: { search: { contains: "invalid" } }) {
+						totalCount
+					}
+				}
+			`,
 		)
 
 		expect(res2.testClasses.totalCount).toEqual(0)
 
 		const res3 = await client.request<any>(
 			gql`
-    	query testClasses {
-    		testClasses(where: { search: { contains: "test" } }) {
-    			totalCount
-    		}
-    	}
-    `,
+				query testClasses {
+					testClasses(where: { search: { contains: "test" } }) {
+						totalCount
+					}
+				}
+			`,
 		)
 
 		expect(res3.testClasses.totalCount).toEqual(1)
 
 		const res4 = await client.request<any>(
 			gql`
-    	query testClasses {
-    		testClasses(
-    			where: {
-    				AND: [
-    					{ age: { equalTo: 1111 } }
-    					{ search: { contains: "test" } }
-    				]
-    			}
-    		) {
-    			totalCount
-    		}
-    	}
-    `,
+				query testClasses {
+					testClasses(where: { AND: [{ age: { equalTo: 1111 } }, { search: { contains: "test" } }] }) {
+						totalCount
+					}
+				}
+			`,
 		)
 
 		expect(res4.testClasses.totalCount).toEqual(0)
 
 		const res5 = await client.request<any>(
 			gql`
-    	query testClasses {
-    		testClasses(
-    			where: {
-    				AND: [
-    					{ age: { equalTo: 30 } }
-    					{ search: { contains: "" } }
-    				]
-    			}
-    		) {
-    			totalCount
-    		}
-    	}
-    `,
+				query testClasses {
+					testClasses(where: { AND: [{ age: { equalTo: 30 } }, { search: { contains: "" } }] }) {
+						totalCount
+					}
+				}
+			`,
 		)
 
 		expect(res5.testClasses.totalCount).toEqual(1)
@@ -1533,11 +1460,7 @@ describe('GraphqlSchema', () => {
 		await client.request<any>(
 			gql`
 				mutation createTestClass {
-					createTestClass(
-						input: {
-							fields: { field1: { field2: "test", field3: 1 } }
-						}
-					) {
+					createTestClass(input: { fields: { field1: { field2: "test", field3: 1 } } }) {
 						testClass {
 							field1 {
 								field2
@@ -1574,12 +1497,7 @@ describe('GraphqlSchema', () => {
 				createUser(
 					input: {
 						fields: {
-							authentication: {
-								emailPassword: {
-									email: "test@gmail.com"
-									password: "password"
-								}
-							}
+							authentication: { emailPassword: { email: "test@gmail.com", password: "password" } }
 						}
 					}
 				) {
@@ -1710,13 +1628,7 @@ describe('GraphqlSchema', () => {
 
 		const res = await client.request<any>(gql`
 			mutation createTestClass {
-				createTestClass(
-					input: {
-						fields: {
-							field1: [{ name: "test" }, { name: "test2" }]
-						}
-					}
-				) {
+				createTestClass(input: { fields: { field1: [{ name: "test" }, { name: "test2" }] } }) {
 					testClass {
 						id
 						field1 {
@@ -1727,10 +1639,7 @@ describe('GraphqlSchema', () => {
 			}
 		`)
 
-		expect(res.createTestClass.testClass.field1).toEqual([
-			{ name: 'test' },
-			{ name: 'test2' },
-		])
+		expect(res.createTestClass.testClass.field1).toEqual([{ name: 'test' }, { name: 'test2' }])
 
 		await wabe.close()
 	})
@@ -2366,8 +2275,7 @@ describe('GraphqlSchema', () => {
 								},
 							},
 						},
-						resolve: (_: any, args: any) =>
-							args.input.subObject.sum.a + args.input.subObject.sum.b,
+						resolve: (_: any, args: any) => args.input.subObject.sum.a + args.input.subObject.sum.b,
 					},
 				},
 			},
@@ -2376,9 +2284,7 @@ describe('GraphqlSchema', () => {
 		const request = await client.request<any>(
 			gql`
 				mutation customMutation {
-					customMutation(
-						input: { subObject: { sum: { a: 1, b: 2 } } }
-					)
+					customMutation(input: { subObject: { sum: { a: 1, b: 2 } } })
 				}
 			`,
 			{},
@@ -2488,11 +2394,7 @@ describe('GraphqlSchema', () => {
 		await client.request<any>(
 			gql`
 				mutation createTestClass {
-					createTestClass(
-						input: {
-							fields: { field1: { field2: "test", field3: 1 } }
-						}
-					) {
+					createTestClass(input: { fields: { field1: { field2: "test", field3: 1 } } }) {
 						testClass {
 							field1 {
 								field2
@@ -2506,9 +2408,7 @@ describe('GraphqlSchema', () => {
 
 		const request = await client.request<any>(
 			gql`
-				query testClasses(
-					$field1WhereInput: TestClassSubObjectWhereInput
-				) {
+				query testClasses($field1WhereInput: TestClassSubObjectWhereInput) {
 					testClasses(where: { field1: $field1WhereInput }) {
 						edges {
 							node {
@@ -2565,12 +2465,7 @@ describe('GraphqlSchema', () => {
 			gql`
 				mutation createTestClass {
 					createTestClass2(
-						input: {
-							fields: {
-								name: "name"
-								field2: { createAndLink: { field1: "field1" } }
-							}
-						}
+						input: { fields: { name: "name", field2: { createAndLink: { field1: "field1" } } } }
 					) {
 						testClass2 {
 							name
@@ -2696,16 +2591,7 @@ describe('GraphqlSchema', () => {
 			gql`
 				mutation createTestClass2s {
 					createTestClass2s(
-						input: {
-							fields: [
-								{
-									name: "name"
-									field2: {
-										createAndLink: { field1: "field1" }
-									}
-								}
-							]
-						}
+						input: { fields: [{ name: "name", field2: { createAndLink: { field1: "field1" } } }] }
 					) {
 						edges {
 							node {
@@ -2758,12 +2644,7 @@ describe('GraphqlSchema', () => {
 			gql`
 				mutation createTestClass {
 					createTestClass2(
-						input: {
-							fields: {
-								name: "name"
-								field2: { createAndLink: { field1: "field1" } }
-							}
-						}
+						input: { fields: { name: "name", field2: { createAndLink: { field1: "field1" } } } }
 					) {
 						testClass2 {
 							name
@@ -2782,9 +2663,7 @@ describe('GraphqlSchema', () => {
 
 		const queryRes = await client.request<any>(gql`
 			query testClass2s {
-				testClass2s(
-					where: { field2: { field1: { equalTo: "field1" } } }
-				) {
+				testClass2s(where: { field2: { field1: { equalTo: "field1" } } }) {
 					edges {
 						node {
 							name
@@ -2831,12 +2710,7 @@ describe('GraphqlSchema', () => {
 			gql`
 				mutation createTestClass {
 					createTestClass2(
-						input: {
-							fields: {
-								name: "name"
-								field2: { createAndLink: { field1: "field1" } }
-							}
-						}
+						input: { fields: { name: "name", field2: { createAndLink: { field1: "field1" } } } }
 					) {
 						testClass2 {
 							name
@@ -2856,10 +2730,7 @@ describe('GraphqlSchema', () => {
 		const updateRes = await client.request<any>(gql`
 			mutation updateTestClass2s {
 				updateTestClass2s(
-					input: {
-						fields: { name: "name2" }
-						where: { field2: { field1: { equalTo: "field1" } } }
-					}
+					input: { fields: { name: "name2" }, where: { field2: { field1: { equalTo: "field1" } } } }
 				) {
 					edges {
 						node {
@@ -2907,12 +2778,7 @@ describe('GraphqlSchema', () => {
 			gql`
 				mutation createTestClass {
 					createTestClass2(
-						input: {
-							fields: {
-								name: "name"
-								field2: { createAndLink: { field1: "field1" } }
-							}
-						}
+						input: { fields: { name: "name", field2: { createAndLink: { field1: "field1" } } } }
 					) {
 						testClass2 {
 							name
@@ -2931,11 +2797,7 @@ describe('GraphqlSchema', () => {
 
 		const deleteRes = await client.request<any>(gql`
 			mutation deleteTestClass2s {
-				deleteTestClass2s(
-					input: {
-						where: { field2: { field1: { equalTo: "field1" } } }
-					}
-				) {
+				deleteTestClass2s(input: { where: { field2: { field1: { equalTo: "field1" } } } }) {
 					edges {
 						node {
 							name
@@ -2982,12 +2844,7 @@ describe('GraphqlSchema', () => {
 			gql`
 				mutation createTestClass {
 					createTestClass2(
-						input: {
-							fields: {
-								name: "name"
-								field2: { createAndLink: { field1: "field1" } }
-							}
-						}
+						input: { fields: { name: "name", field2: { createAndLink: { field1: "field1" } } } }
 					) {
 						testClass2 {
 							id
@@ -3028,9 +2885,7 @@ describe('GraphqlSchema', () => {
 		`)
 
 		expect(resAfterUpdate.updateTestClass2.testClass2.name).toBe('name')
-		expect(resAfterUpdate.updateTestClass2.testClass2.field2.field1).toBe(
-			'field1AfterUpdate',
-		)
+		expect(resAfterUpdate.updateTestClass2.testClass2.field2.field1).toBe('field1AfterUpdate')
 
 		await wabe.close()
 	})
@@ -3115,9 +2970,7 @@ describe('GraphqlSchema', () => {
 		)
 
 		expect(resAfterUpdate.updateTestClass2.testClass2.name).toBe('name')
-		expect(resAfterUpdate.updateTestClass2.testClass2.field2.field1).toBe(
-			'field1',
-		)
+		expect(resAfterUpdate.updateTestClass2.testClass2.field2.field1).toBe('field1')
 
 		await wabe.close()
 	})
@@ -3241,9 +3094,7 @@ describe('GraphqlSchema', () => {
 		await client.request<any>(
 			gql`
 				mutation createTestClass2s {
-					createTestClass2s(
-						input: { fields: [{ name: "name" }, { name: "name2" }] }
-					) {
+					createTestClass2s(input: { fields: [{ name: "name" }, { name: "name2" }] }) {
 						edges {
 							node {
 								name
@@ -3261,13 +3112,7 @@ describe('GraphqlSchema', () => {
 					updateTestClass2s(
 						input: {
 							where: { name: { equalTo: "name" } }
-							fields: {
-								field2: {
-									createAndLink: {
-										field1: "field1UpdateMultiple"
-									}
-								}
-							}
+							fields: { field2: { createAndLink: { field1: "field1UpdateMultiple" } } }
 						}
 					) {
 						edges {
@@ -3323,12 +3168,7 @@ describe('GraphqlSchema', () => {
 			gql`
 				mutation createTestClass {
 					createTestClass2(
-						input: {
-							fields: {
-								name: "name"
-								field2: { createAndLink: { field1: "field1" } }
-							}
-						}
+						input: { fields: { name: "name", field2: { createAndLink: { field1: "field1" } } } }
 					) {
 						testClass2 {
 							id
@@ -3360,9 +3200,7 @@ describe('GraphqlSchema', () => {
 		`)
 
 		expect(resAfterDelete.deleteTestClass2.testClass2.name).toBe('name')
-		expect(resAfterDelete.deleteTestClass2.testClass2.field2.field1).toBe(
-			'field1',
-		)
+		expect(resAfterDelete.deleteTestClass2.testClass2.field2.field1).toBe('field1')
 
 		await wabe.close()
 	})
@@ -3430,9 +3268,7 @@ describe('GraphqlSchema', () => {
 		expect(field2AfterUpdate1[0]?.field2.length).toBe(2)
 
 		expect(res.createTestClass2.testClass2.name).toBe('name')
-		expect(res.createTestClass2.testClass2.field2.edges[0].node.field1).toBe(
-			'field1',
-		)
+		expect(res.createTestClass2.testClass2.field2.edges[0].node.field1).toBe('field1')
 
 		await wabe.close()
 	})
@@ -3499,9 +3335,7 @@ describe('GraphqlSchema', () => {
 		`)
 
 		expect(resAfterAdd.createTestClass2.testClass2.name).toBe('name')
-		expect(
-			resAfterAdd.createTestClass2.testClass2.field2.edges[0].node.field1,
-		).toBe('field1')
+		expect(resAfterAdd.createTestClass2.testClass2.field2.edges[0].node.field1).toBe('field1')
 
 		await wabe.close()
 	})
@@ -3536,14 +3370,7 @@ describe('GraphqlSchema', () => {
 		const res = await client.request<any>(gql`
 			mutation createTestClass2s {
 				createTestClass2s(
-					input: {
-						fields: [
-							{
-								name: "name"
-								field2: { createAndAdd: [{ field1: "field1" }] }
-							}
-						]
-					}
+					input: { fields: [{ name: "name", field2: { createAndAdd: [{ field1: "field1" }] } }] }
 				) {
 					edges {
 						node {
@@ -3562,9 +3389,7 @@ describe('GraphqlSchema', () => {
 		`)
 
 		expect(res.createTestClass2s.edges[0].node.name).toBe('name')
-		expect(
-			res.createTestClass2s.edges[0].node.field2.edges[0].node.field1,
-		).toBe('field1')
+		expect(res.createTestClass2s.edges[0].node.field2.edges[0].node.field1).toBe('field1')
 
 		await wabe.close()
 	})
@@ -3635,9 +3460,7 @@ describe('GraphqlSchema', () => {
 		`)
 
 		expect(resAfterAdd.createTestClass2s.edges[0].node.name).toBe('name')
-		expect(
-			resAfterAdd.createTestClass2s.edges[0].node.field2.edges[0].node.field1,
-		).toBe('field1')
+		expect(resAfterAdd.createTestClass2s.edges[0].node.field2.edges[0].node.field1).toBe('field1')
 
 		await wabe.close()
 	})
@@ -3706,9 +3529,7 @@ describe('GraphqlSchema', () => {
 		`)
 
 		expect(resAfterUpdate.updateTestClass2.testClass2.name).toBe('name')
-		expect(
-			resAfterUpdate.updateTestClass2.testClass2.field2.edges[0].node.field1,
-		).toBe('field1')
+		expect(resAfterUpdate.updateTestClass2.testClass2.field2.edges[0].node.field1).toBe('field1')
 
 		await wabe.close()
 	})
@@ -3850,12 +3671,8 @@ describe('GraphqlSchema', () => {
 		expect(field2AfterUpdate2[0]?.field2.length).toBe(2)
 
 		expect(resAfterUpdate2.updateTestClass2.testClass2.name).toBe('name')
-		expect(
-			resAfterUpdate2.updateTestClass2.testClass2.field2.edges.length,
-		).toBe(2)
-		expect(
-			resAfterUpdate2.updateTestClass2.testClass2.field2.edges[0].node.field1,
-		).toBe('field1')
+		expect(resAfterUpdate2.updateTestClass2.testClass2.field2.edges.length).toBe(2)
+		expect(resAfterUpdate2.updateTestClass2.testClass2.field2.edges[0].node.field1).toBe('field1')
 
 		await wabe.close()
 	})
@@ -3890,12 +3707,7 @@ describe('GraphqlSchema', () => {
 		const resAfterAdd = await client.request<any>(gql`
 			mutation createTestClass2 {
 				createTestClass2(
-					input: {
-						fields: {
-							name: "name"
-							field2: { createAndAdd: [{ field1: "field1" }] }
-						}
-					}
+					input: { fields: { name: "name", field2: { createAndAdd: [{ field1: "field1" }] } } }
 				) {
 					testClass2 {
 						id
@@ -3939,9 +3751,7 @@ describe('GraphqlSchema', () => {
 		`)
 
 		expect(resAfterUpdate.updateTestClass2.testClass2.name).toBe('name')
-		expect(
-			resAfterUpdate.updateTestClass2.testClass2.field2.edges.length,
-		).toEqual(0)
+		expect(resAfterUpdate.updateTestClass2.testClass2.field2.edges.length).toEqual(0)
 
 		await wabe.close()
 	})
@@ -4012,10 +3822,9 @@ describe('GraphqlSchema', () => {
 		`)
 
 		expect(resAfterUpdate.updateTestClass2s.edges[0].node.name).toBe('name')
-		expect(
-			resAfterUpdate.updateTestClass2s.edges[0].node.field2.edges[0].node
-				.field1,
-		).toBe('field1')
+		expect(resAfterUpdate.updateTestClass2s.edges[0].node.field2.edges[0].node.field1).toBe(
+			'field1',
+		)
 
 		await wabe.close()
 	})
@@ -4150,10 +3959,9 @@ describe('GraphqlSchema', () => {
 		])
 
 		expect(resAfterUpdate.updateTestClass2s.edges[0].node.name).toBe('name')
-		expect(
-			resAfterUpdate.updateTestClass2s.edges[0].node.field2.edges[0].node
-				.field1,
-		).toBe('field1')
+		expect(resAfterUpdate.updateTestClass2s.edges[0].node.field2.edges[0].node.field1).toBe(
+			'field1',
+		)
 
 		await wabe.close()
 	})
@@ -4188,12 +3996,7 @@ describe('GraphqlSchema', () => {
 		const resAfterAdd = await client.request<any>(gql`
 			mutation createTestClass2 {
 				createTestClass2(
-					input: {
-						fields: {
-							name: "name"
-							field2: { createAndAdd: [{ field1: "field1" }] }
-						}
-					}
+					input: { fields: { name: "name", field2: { createAndAdd: [{ field1: "field1" }] } } }
 				) {
 					testClass2 {
 						id
@@ -4265,21 +4068,19 @@ describe('GraphqlSchema', () => {
 		expect(field2AfterUpdate2[0]?.field2).toEqual([])
 
 		expect(resAfterUpdate.updateTestClass2s.edges[0].node.name).toBe('name')
-		expect(
-			resAfterUpdate.updateTestClass2s.edges[0].node.field2.edges.length,
-		).toBe(0)
+		expect(resAfterUpdate.updateTestClass2s.edges[0].node.field2.edges.length).toBe(0)
 
 		const resAfterRemove = await client.request<any>(gql`
-        query testClasses {
-          testClasses{
-            edges {
-              node {
-                field1
-              }
-            }
-          }
-        }
-      `)
+			query testClasses {
+				testClasses {
+					edges {
+						node {
+							field1
+						}
+					}
+				}
+			}
+		`)
 
 		expect(resAfterRemove.testClasses.edges.length).toBe(0)
 
@@ -4316,12 +4117,7 @@ describe('GraphqlSchema', () => {
 		const resAfterAdd = await client.request<any>(gql`
 			mutation createTestClass2 {
 				createTestClass2(
-					input: {
-						fields: {
-							name: "name"
-							field2: { createAndAdd: [{ field1: "field1" }] }
-						}
-					}
+					input: { fields: { name: "name", field2: { createAndAdd: [{ field1: "field1" }] } } }
 				) {
 					testClass2 {
 						id
@@ -4376,21 +4172,19 @@ describe('GraphqlSchema', () => {
 		expect(field2AfterUpdate2[0]?.field2.length).toBe(0)
 
 		expect(resAfterUpdate.updateTestClass2.testClass2.name).toBe('name')
-		expect(resAfterUpdate.updateTestClass2.testClass2.field2.edges.length).toBe(
-			0,
-		)
+		expect(resAfterUpdate.updateTestClass2.testClass2.field2.edges.length).toBe(0)
 
 		const resAfterRemove = await client.request<any>(gql`
-        query testClasses {
-          testClasses{
-            edges {
-              node {
-                field1
-              }
-            }
-          }
-        }
-      `)
+			query testClasses {
+				testClasses {
+					edges {
+						node {
+							field1
+						}
+					}
+				}
+			}
+		`)
 
 		expect(resAfterRemove.testClasses.edges.length).toBe(0)
 
@@ -4420,13 +4214,11 @@ describe('GraphqlSchema', () => {
 		// Create objects with and without the name field
 		await client.request<any>(gql`
 			mutation createObjects {
-				createTestClasses(input: {
-					fields: [
-						{name: "Object with name"},
-						{name: "Another object with name"},
-						{age: 25}
-					]
-				}) {
+				createTestClasses(
+					input: {
+						fields: [{ name: "Object with name" }, { name: "Another object with name" }, { age: 25 }]
+					}
+				) {
 					ok
 				}
 			}
@@ -4435,7 +4227,7 @@ describe('GraphqlSchema', () => {
 		// Test exists: true - should return only objects with name field
 		const res = await client.request<any>(gql`
 			query testExistsTrue {
-				testClasses(where: {name: {exists: true}}) {
+				testClasses(where: { name: { exists: true } }) {
 					totalCount
 					edges {
 						node {
@@ -4449,9 +4241,7 @@ describe('GraphqlSchema', () => {
 
 		expect(res.testClasses.totalCount).toBe(2)
 		expect(res.testClasses.edges.length).toBe(2)
-		expect(res.testClasses.edges.every((edge: any) => edge.node.name)).toBe(
-			true,
-		)
+		expect(res.testClasses.edges.every((edge: any) => edge.node.name)).toBe(true)
 
 		await wabe.close()
 	})
@@ -4479,13 +4269,9 @@ describe('GraphqlSchema', () => {
 		// Create objects with and without the name field
 		await client.request<any>(gql`
 			mutation createObjects {
-				createTestClasses(input: {
-					fields: [
-						{name: "Object with name"},
-						{age: 25},
-						{active: true}
-					]
-				}) {
+				createTestClasses(
+					input: { fields: [{ name: "Object with name" }, { age: 25 }, { active: true }] }
+				) {
 					ok
 				}
 			}
@@ -4494,7 +4280,7 @@ describe('GraphqlSchema', () => {
 		// Test exists: false - should return only objects without name field
 		const res = await client.request<any>(gql`
 			query testExistsFalse {
-				testClasses(where: {name: {exists: false}}) {
+				testClasses(where: { name: { exists: false } }) {
 					totalCount
 					edges {
 						node {
@@ -4508,9 +4294,7 @@ describe('GraphqlSchema', () => {
 
 		expect(res.testClasses.totalCount).toBe(2)
 		expect(res.testClasses.edges.length).toBe(2)
-		expect(res.testClasses.edges.every((edge: any) => !edge.node.name)).toBe(
-			true,
-		)
+		expect(res.testClasses.edges.every((edge: any) => !edge.node.name)).toBe(true)
 
 		await wabe.close()
 	})
@@ -4537,14 +4321,11 @@ describe('GraphqlSchema', () => {
 		// Create objects with different field combinations
 		await client.request<any>(gql`
 			mutation createObjects {
-				createTestClasses(input: {
-					fields: [
-						{name: "John", age: 25},
-						{name: "Jane", age: 30},
-						{age: 35},
-						{name: "Bob"}
-					]
-				}) {
+				createTestClasses(
+					input: {
+						fields: [{ name: "John", age: 25 }, { name: "Jane", age: 30 }, { age: 35 }, { name: "Bob" }]
+					}
+				) {
 					ok
 				}
 			}
@@ -4553,12 +4334,7 @@ describe('GraphqlSchema', () => {
 		// Test with AND condition
 		const res = await client.request<any>(gql`
 			query testExistsWithAnd {
-				testClasses(where: {
-					AND: [
-						{name: {exists: true}},
-						{age: {exists: true}}
-					]
-				}) {
+				testClasses(where: { AND: [{ name: { exists: true } }, { age: { exists: true } }] }) {
 					totalCount
 					edges {
 						node {
@@ -4573,11 +4349,7 @@ describe('GraphqlSchema', () => {
 
 		expect(res.testClasses.totalCount).toBe(2)
 		expect(res.testClasses.edges.length).toBe(2)
-		expect(
-			res.testClasses.edges.every(
-				(edge: any) => edge.node.name && edge.node.age,
-			),
-		).toBe(true)
+		expect(res.testClasses.edges.every((edge: any) => edge.node.name && edge.node.age)).toBe(true)
 
 		await wabe.close()
 	})
@@ -4605,13 +4377,7 @@ describe('GraphqlSchema', () => {
 		// Create objects with different field combinations
 		await client.request<any>(gql`
 			mutation createObjects {
-				createTestClasses(input: {
-					fields: [
-						{name: "John", age: 25},
-						{name: "Jane"},
-						{age: 30}
-					]
-				}) {
+				createTestClasses(input: { fields: [{ name: "John", age: 25 }, { name: "Jane" }, { age: 30 }] }) {
 					ok
 				}
 			}
@@ -4620,12 +4386,7 @@ describe('GraphqlSchema', () => {
 		// Test with OR condition - objects that have either name OR age
 		const res = await client.request<any>(gql`
 			query testExistsWithOr {
-				testClasses(where: {
-					OR: [
-						{name: {exists: true}},
-						{age: {exists: true}}
-					]
-				}) {
+				testClasses(where: { OR: [{ name: { exists: true } }, { age: { exists: true } }] }) {
 					totalCount
 					edges {
 						node {

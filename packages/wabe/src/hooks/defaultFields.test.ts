@@ -29,16 +29,8 @@ describe('Default fields', () => {
 			defaultBeforeCreateForCreatedAt(hookObject)
 
 			expect(spyHookObjectUpsertNewData).toHaveBeenCalledTimes(2)
-			expect(spyHookObjectUpsertNewData).toHaveBeenNthCalledWith(
-				1,
-				'createdAt',
-				expect.any(Date),
-			)
-			expect(spyHookObjectUpsertNewData).toHaveBeenNthCalledWith(
-				2,
-				'updatedAt',
-				expect.any(Date),
-			)
+			expect(spyHookObjectUpsertNewData).toHaveBeenNthCalledWith(1, 'createdAt', expect.any(Date))
+			expect(spyHookObjectUpsertNewData).toHaveBeenNthCalledWith(2, 'updatedAt', expect.any(Date))
 
 			const createdAt = spyHookObjectUpsertNewData.mock.calls[0]?.[1]
 
@@ -68,10 +60,7 @@ describe('Default fields', () => {
 
 			defaultBeforeUpdateForUpdatedAt(hookObject)
 			expect(spyHookObjectUpsertNewData).toHaveBeenCalledTimes(1)
-			expect(spyHookObjectUpsertNewData).toHaveBeenCalledWith(
-				'updatedAt',
-				expect.any(Date),
-			)
+			expect(spyHookObjectUpsertNewData).toHaveBeenCalledWith('updatedAt', expect.any(Date))
 
 			const updatedAt = spyHookObjectUpsertNewData.mock.calls[0]?.[1]
 

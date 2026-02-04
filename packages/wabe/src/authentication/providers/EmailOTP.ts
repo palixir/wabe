@@ -15,13 +15,8 @@ type EmailOTPInterface = {
 	otp: string
 }
 
-export class EmailOTP
-	implements SecondaryProviderInterface<DevWabeTypes, EmailOTPInterface>
-{
-	async onSendChallenge({
-		context,
-		user,
-	}: OnSendChallengeOptions<DevWabeTypes>) {
+export class EmailOTP implements SecondaryProviderInterface<DevWabeTypes, EmailOTPInterface> {
+	async onSendChallenge({ context, user }: OnSendChallengeOptions<DevWabeTypes>) {
 		const emailController = context.wabe.controllers.email
 
 		if (!emailController) throw new Error('Email controller not found')
@@ -42,9 +37,7 @@ export class EmailOTP
 			from: mainEmail,
 			to: [user.email],
 			subject: template?.subject || 'Your OTP code',
-			html: template?.fn
-				? await template.fn({ otp })
-				: sendOtpCodeTemplate(otp),
+			html: template?.fn ? await template.fn({ otp }) : sendOtpCodeTemplate(otp),
 		})
 	}
 
@@ -78,9 +71,7 @@ export class EmailOTP
 		const userId = realUser?.id ?? DUMMY_USER_ID
 
 		const isDevBypass =
-			!context.wabe.config.isProduction &&
-			input.otp === '000000' &&
-			realUser !== null
+			!context.wabe.config.isProduction && input.otp === '000000' && realUser !== null
 
 		const otpClass = new OTP(context.wabe.config.rootKey)
 

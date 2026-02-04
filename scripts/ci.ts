@@ -9,9 +9,7 @@ const otherPackagesToRunAfterMainPackages = ['wabe-mongodb', 'wabe-postgres']
 
 const packagesWithoutDatabaseAdapters = packages.filter(
 	(packageDirectory) =>
-		![...excludedPackages, ...otherPackagesToRunAfterMainPackages].includes(
-			packageDirectory.name,
-		),
+		![...excludedPackages, ...otherPackagesToRunAfterMainPackages].includes(packageDirectory.name),
 )
 
 const firstCommand = packagesWithoutDatabaseAdapters

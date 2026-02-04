@@ -22,10 +22,7 @@ describe('signOut', () => {
 	} as any
 
 	it('should sign out the current user', async () => {
-		const spyDeleteSession = spyOn(
-			Session.prototype,
-			'delete',
-		).mockResolvedValue(undefined)
+		const spyDeleteSession = spyOn(Session.prototype, 'delete').mockResolvedValue(undefined)
 
 		const res = await signOutResolver(undefined, {}, context)
 

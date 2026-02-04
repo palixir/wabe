@@ -7,10 +7,7 @@ describe('defaultSessionHandler', () => {
 		const refreshExpiry = new Date('2030-01-01T00:00:00.000Z')
 		const accessExpiry = new Date('2029-01-01T00:00:00.000Z')
 
-		const spyMeFromAccessToken = spyOn(
-			Session.prototype,
-			'meFromAccessToken',
-		).mockResolvedValue({
+		const spyMeFromAccessToken = spyOn(Session.prototype, 'meFromAccessToken').mockResolvedValue({
 			user: { id: 'userId' } as any,
 			sessionId: 'sessionId',
 			accessToken: 'newAccess',
@@ -53,8 +50,7 @@ describe('defaultSessionHandler', () => {
 		await handler(ctx)
 
 		const refreshCookie = setCookie.mock.calls.find(
-			(call: unknown) =>
-				Array.isArray(call) && call.length > 0 && call[0] === 'refreshToken',
+			(call: unknown) => Array.isArray(call) && call.length > 0 && call[0] === 'refreshToken',
 		) as [string, string, { expires?: Date }] | undefined
 
 		expect(refreshCookie?.[2]?.expires).toEqual(refreshExpiry)

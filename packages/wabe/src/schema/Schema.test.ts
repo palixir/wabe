@@ -401,9 +401,7 @@ describe('Schema', () => {
 			},
 		} as any)
 
-		const userClass = schema.schema?.classes?.find(
-			(schemaClass) => schemaClass.name === 'User',
-		)
+		const userClass = schema.schema?.classes?.find((schemaClass) => schemaClass.name === 'User')
 
 		expect(userClass?.permissions).toEqual({
 			// Default permissions

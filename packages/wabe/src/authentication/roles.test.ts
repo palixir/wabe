@@ -28,12 +28,7 @@ describe('roles', () => {
 		})
 
 		expect(res.length).toEqual(4)
-		expect(res.map((role) => role?.name)).toEqual([
-			'Client',
-			'Client2',
-			'Client3',
-			'Admin',
-		])
+		expect(res.map((role) => role?.name)).toEqual(['Client', 'Client2', 'Client3', 'Admin'])
 	})
 
 	it('should not create all roles if there already exist', async () => {
@@ -49,11 +44,6 @@ describe('roles', () => {
 		})
 
 		expect(res.length).toEqual(4)
-		expect(res.map((role) => role?.name)).toEqual([
-			'Client',
-			'Client2',
-			'Client3',
-			'Admin',
-		])
+		expect(res.map((role) => role?.name)).toEqual(['Client', 'Client2', 'Client3', 'Admin'])
 	})
 })

@@ -11,20 +11,14 @@ type GoogleInterface = {
 	codeVerifier: string
 }
 
-export class Google
-	implements ProviderInterface<DevWabeTypes, GoogleInterface>
-{
+export class Google implements ProviderInterface<DevWabeTypes, GoogleInterface> {
 	name = 'google'
-	onSignIn(
-		options: AuthenticationEventsOptions<DevWabeTypes, GoogleInterface>,
-	) {
+	onSignIn(options: AuthenticationEventsOptions<DevWabeTypes, GoogleInterface>) {
 		return oAuthAuthentication(AuthenticationProvider.Google)(options)
 	}
 
 	// @ts-expect-error
 	onSignUp() {
-		throw new Error(
-			'SignUp is not implemented for Oauth provider, you should use signIn instead.',
-		)
+		throw new Error('SignUp is not implemented for Oauth provider, you should use signIn instead.')
 	}
 }

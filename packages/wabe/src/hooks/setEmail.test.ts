@@ -165,21 +165,21 @@ describe('setEmail', () => {
 
 const graphql = {
 	signUpWith: gql`
-    mutation signUpWith($input: SignUpWithInput!) {
-      signUpWith(input: $input) {
-        id
-      }
-    }
-  `,
+		mutation signUpWith($input: SignUpWithInput!) {
+			signUpWith(input: $input) {
+				id
+			}
+		}
+	`,
 	user: gql`
-    query user($id: ID!) {
-      user(id: $id) {
-        id
-        email
-        provider
-      }
-    }
-  `,
+		query user($id: ID!) {
+			user(id: $id) {
+				id
+				email
+				provider
+			}
+		}
+	`,
 	createUser: gql`
 		mutation createUser($input: CreateUserInput!) {
 			createUser(input: $input) {
@@ -204,7 +204,7 @@ const graphql = {
 	`,
 	deleteUsers: gql`
 		mutation deleteUsers {
-			deleteUsers(input: {}){
+			deleteUsers(input: {}) {
 				edges {
 					node {
 						id

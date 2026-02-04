@@ -11,20 +11,14 @@ type GitHubInterface = {
 	codeVerifier: string
 }
 
-export class GitHub
-	implements ProviderInterface<DevWabeTypes, GitHubInterface>
-{
+export class GitHub implements ProviderInterface<DevWabeTypes, GitHubInterface> {
 	name = 'github'
-	onSignIn(
-		options: AuthenticationEventsOptions<DevWabeTypes, GitHubInterface>,
-	) {
+	onSignIn(options: AuthenticationEventsOptions<DevWabeTypes, GitHubInterface>) {
 		return oAuthAuthentication(AuthenticationProvider.GitHub)(options)
 	}
 
 	// @ts-expect-error
 	onSignUp() {
-		throw new Error(
-			'SignUp is not implemented for Oauth provider, you should use signIn instead.',
-		)
+		throw new Error('SignUp is not implemented for Oauth provider, you should use signIn instead.')
 	}
 }

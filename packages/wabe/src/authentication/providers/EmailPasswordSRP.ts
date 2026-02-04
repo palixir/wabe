@@ -20,9 +20,10 @@ type EmailPasswordSRPInterface = {
 	verifier?: string
 }
 
-export class EmailPasswordSRP
-	implements ProviderInterface<DevWabeTypes, EmailPasswordSRPInterface>
-{
+export class EmailPasswordSRP implements ProviderInterface<
+	DevWabeTypes,
+	EmailPasswordSRPInterface
+> {
 	async onSignIn({
 		input,
 		context,
@@ -52,8 +53,7 @@ export class EmailPasswordSRP
 		const user = users[0]
 
 		const salt = user?.authentication?.emailPasswordSRP?.salt ?? DUMMY_SALT
-		const verifier =
-			user?.authentication?.emailPasswordSRP?.verifier ?? DUMMY_VERIFIER
+		const verifier = user?.authentication?.emailPasswordSRP?.verifier ?? DUMMY_VERIFIER
 
 		let ephemeral: Ephemeral
 		try {
@@ -117,17 +117,14 @@ export interface EmailPasswordSRPChallengeInterface {
 	clientSessionProof: string
 }
 
-export class EmailPasswordSRPChallenge
-	implements
-		SecondaryProviderInterface<DevWabeTypes, EmailPasswordSRPChallengeInterface>
-{
+export class EmailPasswordSRPChallenge implements SecondaryProviderInterface<
+	DevWabeTypes,
+	EmailPasswordSRPChallengeInterface
+> {
 	async onVerifyChallenge({
 		context,
 		input,
-	}: OnVerifyChallengeOptions<
-		DevWabeTypes,
-		EmailPasswordSRPChallengeInterface
-	>) {
+	}: OnVerifyChallengeOptions<DevWabeTypes, EmailPasswordSRPChallengeInterface>) {
 		const server = createSRPServer('SHA-256', 3072)
 
 		const users = await context.wabe.controllers.database.getObjects({
@@ -149,10 +146,8 @@ export class EmailPasswordSRPChallenge
 		const user = users[0]
 
 		const salt = user?.authentication?.emailPasswordSRP?.salt ?? DUMMY_SALT
-		const verifier =
-			user?.authentication?.emailPasswordSRP?.verifier ?? DUMMY_VERIFIER
-		const serverSecret =
-			user?.authentication?.emailPasswordSRP?.serverSecret ?? 'deadbeef'
+		const verifier = user?.authentication?.emailPasswordSRP?.verifier ?? DUMMY_VERIFIER
+		const serverSecret = user?.authentication?.emailPasswordSRP?.serverSecret ?? 'deadbeef'
 
 		let serverSession: Session
 		try {

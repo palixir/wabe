@@ -1,12 +1,4 @@
-import {
-	describe,
-	beforeAll,
-	afterAll,
-	it,
-	expect,
-	afterEach,
-	mock,
-} from 'bun:test'
+import { describe, beforeAll, afterAll, it, expect, afterEach, mock } from 'bun:test'
 import { gql, type GraphQLClient } from 'graphql-request'
 import {
 	getAnonymousClient,
@@ -306,36 +298,36 @@ describe('setupAcl', () => {
 
 	it('should not access to an object created with anonymous client when only user that create the object can access to it with ACL', async () => {
 		await anonymousClient.request<any>(gql`
-        mutation createUser {
-          createUser(input:{fields:{name: "test" }}){
-            user{
-              id
-              acl {
-                  users {
-                      userId
-                  }
-              }
-            }
-          }
-        }
-    `)
+			mutation createUser {
+				createUser(input: { fields: { name: "test" } }) {
+					user {
+						id
+						acl {
+							users {
+								userId
+							}
+						}
+					}
+				}
+			}
+		`)
 
 		const res = await rootClient.request<any>(gql`
-        query users {
-            users (where: {name: {equalTo: "test"}}) {
-              edges {
-                node {
-                  id
-                  acl {
-                    users {
-                      userId
-                    }
-                  }
-                }
-              }
-            }
-        }
-      `)
+			query users {
+				users(where: { name: { equalTo: "test" } }) {
+					edges {
+						node {
+							id
+							acl {
+								users {
+									userId
+								}
+							}
+						}
+					}
+				}
+			}
+		`)
 
 		expect(res.users.edges[0].node.acl).not.toBeNull()
 	})
@@ -349,26 +341,26 @@ describe('setupAcl', () => {
 		})
 
 		const setupResult = await userClient.request<any>(gql`
-        mutation createSetupACL8 {
-          createSetupACL8(input: {fields: {test: "test"}}) {
-            setupACL8 {
-              id
-              acl {
-                users {
-                  userId
-                  read
-                  write
-                }
-                roles {
-                roleId
-                  read
-                  write
-                }
-              }
-            }
-          }
-        }
-    `)
+			mutation createSetupACL8 {
+				createSetupACL8(input: { fields: { test: "test" } }) {
+					setupACL8 {
+						id
+						acl {
+							users {
+								userId
+								read
+								write
+							}
+							roles {
+								roleId
+								read
+								write
+							}
+						}
+					}
+				}
+			}
+		`)
 
 		const res = await rootClient.request<any>(gql`
           query setupACL8 {
@@ -396,73 +388,71 @@ describe('setupAcl', () => {
 		expect(res.setupACL8.acl.users[0].write).toEqual(true)
 
 		// Role
-		expect(
-			await getRoleNameFromId(res.setupACL8.acl.roles[0].roleId, rootClient),
-		).toEqual('Client')
+		expect(await getRoleNameFromId(res.setupACL8.acl.roles[0].roleId, rootClient)).toEqual('Client')
 		expect(res.setupACL8.acl.roles[0].read).toEqual(true)
 		expect(res.setupACL8.acl.roles[0].write).toEqual(true)
 	})
 
 	it('should not update acl object if the acl function is not present in permissions in the class', async () => {
 		const res = await rootClient.request<any>(gql`
-        mutation createSetupACL2 {
-          createSetupACL2(input: {fields: {test: "test"}}) {
-            setupACL2 {
-              id
-              acl {
-                users {
-                  userId
-                  read
-                  write
-                }
-                roles {
-                roleId
-                  read
-                  write
-                }
-              }
-            }
-          }
-        }
-    `)
+			mutation createSetupACL2 {
+				createSetupACL2(input: { fields: { test: "test" } }) {
+					setupACL2 {
+						id
+						acl {
+							users {
+								userId
+								read
+								write
+							}
+							roles {
+								roleId
+								read
+								write
+							}
+						}
+					}
+				}
+			}
+		`)
 
 		expect(res.createSetupACL2.setupACL2.acl).toBeNull()
 	})
 
 	it('should set read and write to false if the null value is provided for users and roles', async () => {
 		await rootClient.request<any>(gql`
-        mutation createSetupACL3 {
-          createSetupACL3(input: {fields: {test: "test"}}) {
-            setupACL3 {
-              id
-            }
-          }
-        }
-    `)
+			mutation createSetupACL3 {
+				createSetupACL3(input: { fields: { test: "test" } }) {
+					setupACL3 {
+						id
+					}
+				}
+			}
+		`)
 
 		const res = await rootClient.request<any>(gql`
-        query setupACL3s {
-            setupACL3s {
-              edges {
-                node {
-                  id
-                  acl {
-                    users {
-                      userId
-                      read
-                      write
-                    }
-                    roles {
-                      roleId
-                      read
-                      write
-                    }
-                  }
-                }
-              }
-            }
-          }
-      `)
+			query setupACL3s {
+				setupACL3s {
+					edges {
+						node {
+							id
+							acl {
+								users {
+									userId
+									read
+									write
+								}
+								roles {
+									roleId
+									read
+									write
+								}
+							}
+						}
+					}
+				}
+			}
+		`)
 
 		// User
 		expect(res.setupACL3s.edges[0].node.acl.users).toHaveLength(0)
@@ -473,40 +463,40 @@ describe('setupAcl', () => {
 
 	it('should call acl function if provided', async () => {
 		await rootClient.request<any>(gql`
-        mutation createSetupACL4 {
-          createSetupACL4(input: {fields: {test: "test"}}) {
-            setupACL4 {
-              id
-            }
-          }
-        }
-    `)
+			mutation createSetupACL4 {
+				createSetupACL4(input: { fields: { test: "test" } }) {
+					setupACL4 {
+						id
+					}
+				}
+			}
+		`)
 
 		expect(mockCallback).toHaveBeenCalledTimes(1)
 	})
 
 	it('should get different role id for read and write if roles are different', async () => {
 		const setupResult = await rootClient.request<any>(gql`
-        mutation createSetupACL5 {
-          createSetupACL5(input: {fields: {test: "test"}}) {
-            setupACL5 {
-              id
-              acl {
-                users {
-                  userId
-                  read
-                  write
-                }
-                roles {
-                  roleId
-                  read
-                  write
-                }
-              }
-            }
-          }
-        }
-    `)
+			mutation createSetupACL5 {
+				createSetupACL5(input: { fields: { test: "test" } }) {
+					setupACL5 {
+						id
+						acl {
+							users {
+								userId
+								read
+								write
+							}
+							roles {
+								roleId
+								read
+								write
+							}
+						}
+					}
+				}
+			}
+		`)
 
 		const res = await rootClient.request<any>(gql`
           query setupACL5 {
@@ -531,61 +521,69 @@ describe('setupAcl', () => {
 		expect(res.setupACL5.acl.users).toHaveLength(0)
 
 		// Role
-		expect(
-			await getRoleNameFromId(res.setupACL5.acl.roles[0].roleId, rootClient),
-		).toEqual('Client')
+		expect(await getRoleNameFromId(res.setupACL5.acl.roles[0].roleId, rootClient)).toEqual('Client')
 
-		expect(
-			await getRoleNameFromId(res.setupACL5.acl.roles[1].roleId, rootClient),
-		).toEqual('Client2')
+		expect(await getRoleNameFromId(res.setupACL5.acl.roles[1].roleId, rootClient)).toEqual(
+			'Client2',
+		)
 	})
 
 	it('should not setup acl if the acl field is already provided in the creation', async () => {
 		await rootClient.request<any>(gql`
-        mutation createSetupACL6 {
-          createSetupACL6(input: {fields: {test: "test", acl: {users: [{userId: "test", read: true, write: true}], roles: [{roleId: "test", read: true, write: true}]}}}) {
-            setupACL6 {
-              id
-              acl {
-                users {
-                  userId
-                  read
-                  write
-                }
-                roles {
-                  roleId
-                  read
-                  write
-                }
-              }
-            }
-          }
-        }
-    `)
+			mutation createSetupACL6 {
+				createSetupACL6(
+					input: {
+						fields: {
+							test: "test"
+							acl: {
+								users: [{ userId: "test", read: true, write: true }]
+								roles: [{ roleId: "test", read: true, write: true }]
+							}
+						}
+					}
+				) {
+					setupACL6 {
+						id
+						acl {
+							users {
+								userId
+								read
+								write
+							}
+							roles {
+								roleId
+								read
+								write
+							}
+						}
+					}
+				}
+			}
+		`)
 
 		const res = await rootClient.request<any>(gql`
-        query setupACLs {
-            setupACL6s{
-              edges {
-                node {
-                  id
-                  acl {
-                    users {
-                      userId
-                      read
-                      write
-                    }
-                    roles {
-                      roleId
-                      read
-                      write
-                    }
-                  }
-                }
-              }
-            }
-          }
-      `)
+			query setupACLs {
+				setupACL6s {
+					edges {
+						node {
+							id
+							acl {
+								users {
+									userId
+									read
+									write
+								}
+								roles {
+									roleId
+									read
+									write
+								}
+							}
+						}
+					}
+				}
+			}
+		`)
 
 		expect(res.setupACL6s.edges[0].node.acl).toEqual({
 			users: [{ userId: 'test', read: true, write: true }],
@@ -597,24 +595,24 @@ describe('setupAcl', () => {
 const graphql = {
 	deleteUsers: gql`
 		mutation deleteUser {
-  		deleteUsers(
-    		input: {where: {authentication: {emailPassword: {email: {equalTo: "email@test.fr"}}}}}
-  		) {
-    		edges {
-      		node {
-        		id
-      		}
-    		}
-  		}
+			deleteUsers(
+				input: { where: { authentication: { emailPassword: { email: { equalTo: "email@test.fr" } } } } }
+			) {
+				edges {
+					node {
+						id
+					}
+				}
+			}
 		}
 	`,
 	signUpWith: gql`
-		 mutation signUpWith($input: SignUpWithInput!) {
-  		signUpWith(input:	$input){
-  			id
-  			accessToken
-  			refreshToken
-  		}
-  	}
-	 `,
+		mutation signUpWith($input: SignUpWithInput!) {
+			signUpWith(input: $input) {
+				id
+				accessToken
+				refreshToken
+			}
+		}
+	`,
 }

@@ -1,19 +1,7 @@
-import {
-	describe,
-	afterAll,
-	beforeAll,
-	it,
-	spyOn,
-	expect,
-	beforeEach,
-} from 'bun:test'
+import { describe, afterAll, beforeAll, it, spyOn, expect, beforeEach } from 'bun:test'
 import { gql, type GraphQLClient } from 'graphql-request'
 import type { Wabe } from '../../server'
-import {
-	type DevWabeTypes,
-	getGraphqlClient,
-	getAnonymousClient,
-} from '../../utils/helper'
+import { type DevWabeTypes, getGraphqlClient, getAnonymousClient } from '../../utils/helper'
 import { setupTests, closeTests } from '../../utils/testHelper'
 import { EmailDevAdapter } from '../../email/DevAdapter'
 
@@ -130,24 +118,24 @@ describe('sendOtpCodeResolver', () => {
 
 const graphql = {
 	createUser: gql`
-      mutation createUser($input: CreateUserInput!) {
-        createUser(input: $input) {
-          user {
-            id
-          }
-        }
-      }
-    `,
+		mutation createUser($input: CreateUserInput!) {
+			createUser(input: $input) {
+				user {
+					id
+				}
+			}
+		}
+	`,
 	createUserWithAnonymous: gql`
-      mutation createUser($input: CreateUserInput!) {
-        createUser(input: $input) {
-          ok
-        }
-      }
-    `,
+		mutation createUser($input: CreateUserInput!) {
+			createUser(input: $input) {
+				ok
+			}
+		}
+	`,
 	sendOtpCode: gql`
-      mutation sendOtpCode($input: SendOtpCodeInput!) {
-        sendOtpCode(input: $input)
-      }
-  `,
+		mutation sendOtpCode($input: SendOtpCodeInput!) {
+			sendOtpCode(input: $input)
+		}
+	`,
 }

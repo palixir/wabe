@@ -1,12 +1,4 @@
-import {
-	describe,
-	expect,
-	it,
-	spyOn,
-	beforeAll,
-	afterAll,
-	afterEach,
-} from 'bun:test'
+import { describe, expect, it, spyOn, beforeAll, afterAll, afterEach } from 'bun:test'
 import { EmailOTP } from './EmailOTP'
 import type { DevWabeTypes } from '../../utils/helper'
 import { setupTests, closeTests } from '../../utils/testHelper'
@@ -16,10 +8,7 @@ import { OTP } from '../OTP'
 
 describe('EmailOTPProvider', () => {
 	const spyEmailSend = spyOn(EmailDevAdapter.prototype, 'send')
-	const spySendOtpCodeTemplate = spyOn(
-		sendOtpCodeTemplate,
-		'sendOtpCodeTemplate',
-	)
+	const spySendOtpCodeTemplate = spyOn(sendOtpCodeTemplate, 'sendOtpCodeTemplate')
 
 	let wabe: Wabe<DevWabeTypes>
 

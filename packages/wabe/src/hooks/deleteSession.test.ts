@@ -160,14 +160,14 @@ const graphql = {
 		}
 	`,
 	signUpWith: gql`
-    mutation signUpWith($input: SignUpWithInput!) {
-        signUpWith(input: $input){
-            id
-            accessToken
-            refreshToken
-        }
-      }
-    `,
+		mutation signUpWith($input: SignUpWithInput!) {
+			signUpWith(input: $input) {
+				id
+				accessToken
+				refreshToken
+			}
+		}
+	`,
 	deleteUser: gql`
 		mutation deleteUser($input: DeleteUserInput!) {
 			deleteUser(input: $input) {

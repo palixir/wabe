@@ -1,12 +1,4 @@
-import {
-	describe,
-	it,
-	expect,
-	mock,
-	afterEach,
-	spyOn,
-	afterAll,
-} from 'bun:test'
+import { describe, it, expect, mock, afterEach, spyOn, afterAll } from 'bun:test'
 import type { WhereType } from '.'
 import * as hooks from '../hooks/index'
 import type { WabeContext } from '../server/interface'
@@ -183,11 +175,7 @@ describe('DatabaseController', () => {
 			} as any,
 		}
 
-		const newWhere = databaseController._buildWhereWithACL(
-			where,
-			context,
-			'read',
-		)
+		const newWhere = databaseController._buildWhereWithACL(where, context, 'read')
 
 		expect(newWhere).toEqual(where)
 	})
@@ -210,11 +198,7 @@ describe('DatabaseController', () => {
 			} as any,
 		}
 
-		const newWhere = databaseController._buildWhereWithACL(
-			where,
-			context,
-			'read',
-		)
+		const newWhere = databaseController._buildWhereWithACL(where, context, 'read')
 
 		// Soit user y est donc read doit etre à true soit user y est pas et donc role read doit etre à true
 
@@ -268,11 +252,7 @@ describe('DatabaseController', () => {
 			} as any,
 		}
 
-		const newWhere = databaseController._buildWhereWithACL(
-			where,
-			context,
-			'write',
-		)
+		const newWhere = databaseController._buildWhereWithACL(where, context, 'write')
 
 		expect(newWhere).toEqual({
 			AND: [
@@ -306,11 +286,7 @@ describe('DatabaseController', () => {
 			user: {} as any,
 		}
 
-		const newWhere = databaseController._buildWhereWithACL(
-			where,
-			context,
-			'read',
-		)
+		const newWhere = databaseController._buildWhereWithACL(where, context, 'read')
 
 		expect(newWhere).toEqual({
 			AND: [{ id: { equalTo: 'id' } }, { acl: { equalTo: null } }],

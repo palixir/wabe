@@ -90,10 +90,7 @@ describe('verifyChallenge', () => {
 	})
 
 	it('should return userId if the verifyChallenge is correct', async () => {
-		const spyCreateSession = spyOn(
-			Session.prototype,
-			'create',
-		).mockResolvedValue({
+		const spyCreateSession = spyOn(Session.prototype, 'create').mockResolvedValue({
 			accessToken: 'accessToken',
 			refreshToken: 'refreshToken',
 			sessionId: 'sessionId',

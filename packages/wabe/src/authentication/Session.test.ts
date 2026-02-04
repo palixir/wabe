@@ -6,16 +6,9 @@ import { Session } from './Session'
 
 const encryptToken = (token: string, secret: string) => {
 	const key = crypto.createHash('sha256').update(secret).digest()
-	const iv = crypto
-		.createHmac('sha256', key)
-		.update(token)
-		.digest()
-		.subarray(0, 12)
+	const iv = crypto.createHmac('sha256', key).update(token).digest().subarray(0, 12)
 	const cipher = crypto.createCipheriv('aes-256-gcm', key, iv)
-	const encrypted = Buffer.concat([
-		cipher.update(token, 'utf8'),
-		cipher.final(),
-	])
+	const encrypted = Buffer.concat([cipher.update(token, 'utf8'), cipher.final()])
 	const tag = cipher.getAuthTag()
 	return `${iv.toString('hex')}:${tag.toString('hex')}:${encrypted.toString('hex')}`
 }
@@ -111,8 +104,10 @@ describe('Session', () => {
 	it('should set all data set in the jwtTokenFields on refresh session', async () => {
 		const session = new Session()
 
-		const { accessToken: oldAccessToken, refreshToken: oldRefreshToken } =
-			await session.create('userId', context)
+		const { accessToken: oldAccessToken, refreshToken: oldRefreshToken } = await session.create(
+			'userId',
+			context,
+		)
 
 		mockGetObjects.mockResolvedValue([
 			{
@@ -135,24 +130,20 @@ describe('Session', () => {
 			email: true,
 		}
 
-		const { accessToken, refreshToken } = await session.refresh(
-			oldAccessToken,
-			oldRefreshToken,
-			{
-				isRoot: true,
-				wabe: {
-					controllers,
-					config: {
-						authentication: {
-							session: {
-								jwtSecret: 'dev',
-								jwtTokenFields,
-							},
+		const { accessToken, refreshToken } = await session.refresh(oldAccessToken, oldRefreshToken, {
+			isRoot: true,
+			wabe: {
+				controllers,
+				config: {
+					authentication: {
+						session: {
+							jwtSecret: 'dev',
+							jwtTokenFields,
 						},
 					},
 				},
-			} as any,
-		)
+			},
+		} as any)
 
 		if (!accessToken || !refreshToken) fail()
 
@@ -178,10 +169,7 @@ describe('Session', () => {
 
 		const session = new Session()
 
-		const { accessToken, refreshToken } = await session.create(
-			'userId',
-			context,
-		)
+		const { accessToken, refreshToken } = await session.create('userId', context)
 
 		const decodedAccessToken = jwt.decode(accessToken) as JwtPayload
 		const decodedRefreshToken = jwt.decode(refreshToken) as JwtPayload
@@ -194,8 +182,10 @@ describe('Session', () => {
 	it('should not set user fields if not jwtTokenFields is set on refresh session', async () => {
 		const session = new Session()
 
-		const { accessToken: oldAccessToken, refreshToken: oldRefreshToken } =
-			await session.create('userId', context)
+		const { accessToken: oldAccessToken, refreshToken: oldRefreshToken } = await session.create(
+			'userId',
+			context,
+		)
 
 		mockGetObjects.mockResolvedValue([
 			{
@@ -236,10 +226,7 @@ describe('Session', () => {
 
 		const { accessToken } = await session.create('userId', context)
 
-		const res = await session.meFromAccessToken(
-			{ accessToken, csrfToken: '' },
-			context,
-		)
+		const res = await session.meFromAccessToken({ accessToken, csrfToken: '' }, context)
 
 		expect(res.user).toBeNull()
 		expect(res.sessionId).toBeNull()
@@ -345,10 +332,7 @@ describe('Session', () => {
 		const fifteenMinutes = new Date(Date.now() + 1000 * 60 * 15)
 		const sevenDays = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7)
 
-		const { accessToken, refreshToken } = await session.create(
-			'userId',
-			context,
-		)
+		const { accessToken, refreshToken } = await session.create('userId', context)
 
 		expect(accessToken).not.toBeUndefined()
 		expect(refreshToken).not.toBeUndefined()
@@ -363,18 +347,12 @@ describe('Session', () => {
 		expect(decodedAccessToken.exp).toBeGreaterThanOrEqual(
 			Math.floor(fifteenMinutes.getTime() / 1000),
 		)
-		expect(decodedAccessToken.iat).toBeGreaterThanOrEqual(
-			Math.floor((Date.now() - 500) / 1000),
-		) // minus 500ms to avoid flaky
+		expect(decodedAccessToken.iat).toBeGreaterThanOrEqual(Math.floor((Date.now() - 500) / 1000)) // minus 500ms to avoid flaky
 
 		expect(decodedRefreshToken).not.toBeNull()
 		expect(decodedRefreshToken.userId).toEqual('userId')
-		expect(decodedRefreshToken.exp).toBeGreaterThanOrEqual(
-			Math.floor(sevenDays.getTime() / 1000),
-		)
-		expect(decodedRefreshToken.iat).toBeGreaterThanOrEqual(
-			Math.floor((Date.now() - 500) / 1000),
-		) // minus 500ms to avoid flaky
+		expect(decodedRefreshToken.exp).toBeGreaterThanOrEqual(Math.floor(sevenDays.getTime() / 1000))
+		expect(decodedRefreshToken.iat).toBeGreaterThanOrEqual(Math.floor((Date.now() - 500) / 1000)) // minus 500ms to avoid flaky
 
 		expect(mockCreateObject).toHaveBeenCalledTimes(1)
 		expect(mockCreateObject).toHaveBeenCalledWith({
@@ -417,8 +395,10 @@ describe('Session', () => {
 	it('should refresh a session', async () => {
 		const session = new Session()
 
-		const { accessToken: oldAccessToken, refreshToken: oldRefreshToken } =
-			await session.create('userId', context)
+		const { accessToken: oldAccessToken, refreshToken: oldRefreshToken } = await session.create(
+			'userId',
+			context,
+		)
 
 		mockGetObjects.mockResolvedValue([
 			{
@@ -479,16 +459,13 @@ describe('Session', () => {
 			select: {},
 		})
 
-		const accessTokenExpiresAt = mockUpdateObject.mock.calls[0][0].data
-			.accessTokenExpiresAt as Date
+		const accessTokenExpiresAt = mockUpdateObject.mock.calls[0][0].data.accessTokenExpiresAt as Date
 
 		const refreshTokenExpiresAt = mockUpdateObject.mock.calls[0][0].data
 			.refreshTokenExpiresAt as Date
 
 		// -1000 to avoid flaky
-		expect(accessTokenExpiresAt.getTime()).toBeGreaterThan(
-			Date.now() + 1000 * 60 * 15 - 1000,
-		)
+		expect(accessTokenExpiresAt.getTime()).toBeGreaterThan(Date.now() + 1000 * 60 * 15 - 1000)
 
 		// -1000 to avoid flaky
 		expect(refreshTokenExpiresAt.getTime()).toBeGreaterThan(
@@ -524,23 +501,20 @@ describe('Session', () => {
 			},
 		])
 
-		const res = await session.meFromAccessToken(
-			{ accessToken: 'valid.jwt.token', csrfToken: '' },
-			{
-				isRoot: true,
-				wabe: {
-					controllers,
-					config: {
-						authentication: {
-							session: { jwtSecret: 'dev' },
-						},
-						security: {
-							// disableCSRFProtection undefined => protection ON
-						},
+		const res = await session.meFromAccessToken({ accessToken: 'valid.jwt.token', csrfToken: '' }, {
+			isRoot: true,
+			wabe: {
+				controllers,
+				config: {
+					authentication: {
+						session: { jwtSecret: 'dev' },
+					},
+					security: {
+						// disableCSRFProtection undefined => protection ON
 					},
 				},
-			} as any,
-		)
+			},
+		} as any)
 
 		expect(res.accessToken).toBeNull()
 		expect(res.user).toBeNull()
@@ -560,15 +534,9 @@ describe('Session', () => {
 		// Expired since 20 minutes
 		const date3 = new Date(Date.now() - 1000 * 60 * 20)
 
-		expect(session._isRefreshTokenExpired(date1, refreshTokenAgeInMs)).toBe(
-			false,
-		)
-		expect(session._isRefreshTokenExpired(date2, refreshTokenAgeInMs)).toBe(
-			true,
-		)
-		expect(session._isRefreshTokenExpired(date3, refreshTokenAgeInMs)).toBe(
-			true,
-		)
+		expect(session._isRefreshTokenExpired(date1, refreshTokenAgeInMs)).toBe(false)
+		expect(session._isRefreshTokenExpired(date2, refreshTokenAgeInMs)).toBe(true)
+		expect(session._isRefreshTokenExpired(date3, refreshTokenAgeInMs)).toBe(true)
 	})
 
 	it('should return null on refresh session if session not found', async () => {
@@ -576,8 +544,10 @@ describe('Session', () => {
 
 		const session = new Session()
 
-		const { accessToken: oldAccessToken, refreshToken: oldRefreshToken } =
-			await session.create('userId', context)
+		const { accessToken: oldAccessToken, refreshToken: oldRefreshToken } = await session.create(
+			'userId',
+			context,
+		)
 
 		const { accessToken, refreshToken } = await session.refresh(
 			oldAccessToken,
@@ -628,10 +598,7 @@ describe('Session', () => {
 
 		const session = new Session()
 
-		const { refreshToken, accessToken } = await session.create(
-			'userId',
-			context,
-		)
+		const { refreshToken, accessToken } = await session.create('userId', context)
 
 		expect(session.refresh(accessToken, refreshToken, context)).rejects.toThrow(
 			'Refresh token expired',
@@ -653,10 +620,7 @@ describe('Session', () => {
 
 		const session = new Session()
 
-		const { refreshToken, accessToken } = await session.create(
-			'userId',
-			context,
-		)
+		const { refreshToken, accessToken } = await session.create('userId', context)
 
 		expect(session.refresh(accessToken, refreshToken, context)).rejects.toThrow(
 			'Invalid refresh token',

@@ -2,18 +2,18 @@
 	"name": "wabe",
 	"version": "0.6.11",
 	"description": "Your backend without vendor lock-in in Typescript",
+	"keywords": [
+		"baas",
+		"backend",
+		"graphql",
+		"wabe"
+	],
 	"homepage": "https://palixir.github.io/wabe/",
+	"license": "Apache-2.0",
 	"author": {
 		"name": "coratgerl",
 		"url": "https://github.com/coratgerl"
 	},
-	"license": "Apache-2.0",
-	"keywords": [
-		"backend",
-		"wabe",
-		"graphql",
-		"baas"
-	],
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/palixir/wabe.git"
@@ -22,9 +22,9 @@
 	"scripts": {
 		"build": "bun --filter wabe-build build:package $(pwd)",
 		"check": "tsc --project $(pwd)/tsconfig.json",
-		"lint": "biome lint . --no-errors-on-unmatched",
+		"lint": "oxlint .",
 		"ci": "bun generate:codegen && bun lint $(pwd) && bun check && bun test src",
-		"format": "biome format --write .",
+		"format": "oxfmt --write .",
 		"dev": "bun run --watch dev/index.ts",
 		"generate:codegen": "touch generated/wabe.ts && CODEGEN=true bun dev/index.ts"
 	},
@@ -42,13 +42,13 @@
 	"devDependencies": {
 		"@types/jsonwebtoken": "9.0.6",
 		"@types/uuid": "9.0.6",
-		"graphql-request": "6.1.0",
 		"get-port": "7.1.0",
+		"graphql-request": "6.1.0",
 		"uuid": "13.0.0",
-		"wabe-mongodb-launcher": "workspace:*",
-		"wabe-pluralize": "workspace:*",
+		"wabe": "workspace:*",
 		"wabe-build": "workspace:*",
 		"wabe-mongodb": "workspace:*",
-		"wabe": "workspace:*"
+		"wabe-mongodb-launcher": "workspace:*",
+		"wabe-pluralize": "workspace:*"
 	}
 }

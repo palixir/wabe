@@ -1,9 +1,6 @@
 import { contextWithRoot } from '../..'
 import type { DevWabeTypes } from '../../utils/helper'
-import type {
-	OnVerifyChallengeOptions,
-	SecondaryProviderInterface,
-} from '../interface'
+import type { OnVerifyChallengeOptions, SecondaryProviderInterface } from '../interface'
 import { OTP } from '../OTP'
 
 const DUMMY_USER_ID = '00000000-0000-0000-0000-000000000000'
@@ -13,9 +10,7 @@ type QRCodeOTPInterface = {
 	otp: string
 }
 
-export class QRCodeOTP
-	implements SecondaryProviderInterface<DevWabeTypes, QRCodeOTPInterface>
-{
+export class QRCodeOTP implements SecondaryProviderInterface<DevWabeTypes, QRCodeOTPInterface> {
 	async onSendChallenge() {
 		// The user should check the application and get the OTP code
 	}
@@ -50,9 +45,7 @@ export class QRCodeOTP
 		const userId = realUser?.id ?? DUMMY_USER_ID
 
 		const isDevBypass =
-			!context.wabe.config.isProduction &&
-			input.otp === '000000' &&
-			realUser !== null
+			!context.wabe.config.isProduction && input.otp === '000000' && realUser !== null
 
 		const otpClass = new OTP(context.wabe.config.rootKey)
 

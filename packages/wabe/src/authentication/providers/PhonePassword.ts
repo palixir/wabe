@@ -15,9 +15,7 @@ type PhonePasswordInterface = {
 	otp?: string
 }
 
-export class PhonePassword
-	implements ProviderInterface<DevWabeTypes, PhonePasswordInterface>
-{
+export class PhonePassword implements ProviderInterface<DevWabeTypes, PhonePasswordInterface> {
 	async onSignIn({
 		input,
 		context,
@@ -51,16 +49,9 @@ export class PhonePassword
 
 		const passwordHashToCheck = userDatabasePassword ?? DUMMY_PASSWORD_HASH
 
-		const isPasswordEquals = await verifyArgon2(
-			input.password,
-			passwordHashToCheck,
-		)
+		const isPasswordEquals = await verifyArgon2(input.password, passwordHashToCheck)
 
-		if (
-			!user ||
-			!isPasswordEquals ||
-			input.phone !== user.authentication?.phonePassword?.phone
-		)
+		if (!user || !isPasswordEquals || input.phone !== user.authentication?.phonePassword?.phone)
 			throw new Error('Invalid authentication credentials')
 
 		return {
@@ -98,10 +89,7 @@ export class PhonePassword
 		userId,
 		input,
 		context,
-	}: AuthenticationEventsOptionsWithUserId<
-		DevWabeTypes,
-		PhonePasswordInterface
-	>) {
+	}: AuthenticationEventsOptionsWithUserId<DevWabeTypes, PhonePasswordInterface>) {
 		const users = await context.wabe.controllers.database.getObjects({
 			className: 'User',
 			where: {
@@ -120,9 +108,7 @@ export class PhonePassword
 		return {
 			authenticationDataToSave: {
 				phone: input.phone ?? user?.authentication?.phonePassword?.phone,
-				password: input.password
-					? input.password
-					: user?.authentication?.phonePassword?.password,
+				password: input.password ? input.password : user?.authentication?.phonePassword?.password,
 			},
 		}
 	}

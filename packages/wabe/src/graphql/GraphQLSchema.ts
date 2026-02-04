@@ -34,12 +34,7 @@ import {
 	queryForMultipleObject,
 	queryForOneObject,
 } from './resolvers'
-import {
-	DateScalarType,
-	FileScalarType,
-	IdWhereInput,
-	SearchWhereInput,
-} from './types'
+import { DateScalarType, FileScalarType, IdWhereInput, SearchWhereInput } from './types'
 
 type AllPossibleObject =
 	| 'object'
@@ -74,9 +69,7 @@ export class GraphQLSchema {
 
 		const graphqlParser = GraphqlParser({ scalars, enums })
 
-		classes.map((wabeClass) =>
-			this.createCompleteObject(graphqlParser, wabeClass),
-		)
+		classes.map((wabeClass) => this.createCompleteObject(graphqlParser, wabeClass))
 
 		const queriesMutationAndObjects = classes.reduce(
 			(acc, current) => {
@@ -449,13 +442,11 @@ export class GraphQLSchema {
 			fields: (): any => ({
 				id: { type: IdWhereInput },
 				...graphqlParserWithInput.getGraphqlFields(nameWithoutSpace),
-				...{
-					OR: {
-						type: new GraphQLList(inputObject),
-					},
-					AND: {
-						type: new GraphQLList(inputObject),
-					},
+				OR: {
+					type: new GraphQLList(inputObject),
+				},
+				AND: {
+					type: new GraphQLList(inputObject),
 				},
 				search: { type: SearchWhereInput },
 			}),
@@ -547,9 +538,7 @@ export class GraphQLSchema {
 	}
 
 	_getGraphQLOutputType(
-		currentQueryOrMutation:
-			| QueryResolver<DevWabeTypes>
-			| MutationResolver<DevWabeTypes>,
+		currentQueryOrMutation: QueryResolver<DevWabeTypes> | MutationResolver<DevWabeTypes>,
 		graphqlParser: GraphqlParserFactory<DevWabeTypes>,
 		currentArgs: SchemaFields<DevWabeTypes>,
 	): GraphQLOutputType | undefined {
@@ -563,16 +552,11 @@ export class GraphQLSchema {
 			return new GraphQLObjectType({
 				name: currentQueryOrMutation.outputObject.name,
 				fields: () =>
-					objectGraphqlParser.getGraphqlFields(
-						currentQueryOrMutation.outputObject.name,
-					),
+					objectGraphqlParser.getGraphqlFields(currentQueryOrMutation.outputObject.name),
 			})
 		}
 
-		if (
-			currentQueryOrMutation.type === 'Array' &&
-			currentQueryOrMutation.typeValue === 'Object'
-		) {
+		if (currentQueryOrMutation.type === 'Array' && currentQueryOrMutation.typeValue === 'Object') {
 			const outputObject = graphqlParser({
 				schemaFields: currentQueryOrMutation.outputObject.fields,
 				graphqlObjectType: 'Object',
@@ -581,10 +565,7 @@ export class GraphQLSchema {
 
 			const graphqlObject = new GraphQLObjectType({
 				name: currentQueryOrMutation.outputObject.name,
-				fields: () =>
-					outputObject.getGraphqlFields(
-						currentQueryOrMutation.outputObject.name,
-					),
+				fields: () => outputObject.getGraphqlFields(currentQueryOrMutation.outputObject.name),
 			})
 
 			return new GraphQLList(
@@ -630,19 +611,13 @@ export class GraphQLSchema {
 					allObjects: this.allObjects,
 				})
 
-				const outputType = this._getGraphQLOutputType(
-					currentMutation,
-					graphqlParser,
-					input,
-				)
+				const outputType = this._getGraphQLOutputType(currentMutation, graphqlParser, input)
 
 				if (!outputType) throw new Error('Invalid mutation output type')
 
 				const graphqlInput = new GraphQLInputObjectType({
 					name: `${currentKeyWithFirstLetterUpperCase}Input`,
-					fields: graphqlParserWithInput.getGraphqlFields(
-						currentKeyWithFirstLetterUpperCase,
-					),
+					fields: graphqlParserWithInput.getGraphqlFields(currentKeyWithFirstLetterUpperCase),
 				})
 
 				acc[currentKey] = {
@@ -683,11 +658,7 @@ export class GraphQLSchema {
 					allObjects: this.allObjects,
 				})
 
-				const outputType = this._getGraphQLOutputType(
-					currentQuery,
-					graphqlParser,
-					currentArgs,
-				)
+				const outputType = this._getGraphQLOutputType(currentQuery, graphqlParser, currentArgs)
 
 				if (!outputType) throw new Error('Invalid mutation output type')
 
@@ -724,8 +695,7 @@ export class GraphQLSchema {
 				type: object,
 				description: object.description,
 				args: { id: { type: GraphQLID } },
-				resolve: (root, args, ctx, info) =>
-					queryForOneObject(root, args, ctx, info, className),
+				resolve: (root, args, ctx, info) => queryForOneObject(root, args, ctx, info, className),
 			},
 			[pluralize(classNameWithFirstLetterLowerCase)]: {
 				type: new GraphQLNonNull(connectionObject),
@@ -846,13 +816,7 @@ export class GraphQLSchema {
 				description: object.description,
 				args: { input: { type: new GraphQLNonNull(createInputType) } },
 				resolve: (root, args, ctx, info) =>
-					mutationToCreateObject(
-						root,
-						args,
-						ctx,
-						info,
-						className as keyof WabeTypes['types'],
-					),
+					mutationToCreateObject(root, args, ctx, info, className as keyof WabeTypes['types']),
 			},
 			[`create${pluralize(className)}`]: {
 				type: new GraphQLNonNull(connectionObject),
@@ -872,13 +836,7 @@ export class GraphQLSchema {
 				description: object.description,
 				args: { input: { type: new GraphQLNonNull(updateInputType) } },
 				resolve: (root, args, ctx, info) =>
-					mutationToUpdateObject(
-						root,
-						args,
-						ctx,
-						info,
-						className as keyof WabeTypes['types'],
-					),
+					mutationToUpdateObject(root, args, ctx, info, className as keyof WabeTypes['types']),
 			},
 			[`update${pluralize(className)}`]: {
 				type: new GraphQLNonNull(connectionObject),
@@ -902,13 +860,7 @@ export class GraphQLSchema {
 					},
 				},
 				resolve: (root, args, ctx, info) =>
-					mutationToDeleteObject(
-						root,
-						args,
-						ctx,
-						info,
-						className as keyof WabeTypes['types'],
-					),
+					mutationToDeleteObject(root, args, ctx, info, className as keyof WabeTypes['types']),
 			},
 			[`delete${pluralize(className)}`]: {
 				type: new GraphQLNonNull(connectionObject),

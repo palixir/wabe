@@ -59,9 +59,9 @@ describe('Authentication utils', () => {
 	})
 
 	it('should throw an error if no authentication methods is provided', () => {
-		expect(() =>
-			getAuthenticationMethod([], { wabe: { config } } as any),
-		).toThrow('One authentication method is required at the time')
+		expect(() => getAuthenticationMethod([], { wabe: { config } } as any)).toThrow(
+			'One authentication method is required at the time',
+		)
 	})
 
 	it('should throw an error if no one authentication method is found', () => {
@@ -73,9 +73,7 @@ describe('Authentication utils', () => {
 	})
 
 	it('should find a secondary factor method', () => {
-		expect(
-			getAuthenticationMethod(['otp'], { wabe: { config } } as any),
-		).toEqual({
+		expect(getAuthenticationMethod(['otp'], { wabe: { config } } as any)).toEqual({
 			name: 'otp',
 			input: expect.any(Object),
 			provider: expect.any(Object),

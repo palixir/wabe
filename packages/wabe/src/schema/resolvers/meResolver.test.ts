@@ -34,29 +34,29 @@ describe('me', () => {
 
 const graphql = {
 	signUpWith: gql`
-		 mutation signUpWith($input: SignUpWithInput!) {
-  		signUpWith(input:	$input){
-  			id
-  			accessToken
-  			refreshToken
-  		}
-  	}
-	 `,
+		mutation signUpWith($input: SignUpWithInput!) {
+			signUpWith(input: $input) {
+				id
+				accessToken
+				refreshToken
+			}
+		}
+	`,
 	me: gql`
-    query me {
-      me {
-       user{
-           id
-           authentication{
-               emailPassword{
-                   email
-               }
-           }
-           role {
-               name
-           }
-       }
-      }
-    }
-  `,
+		query me {
+			me {
+				user {
+					id
+					authentication {
+						emailPassword {
+							email
+						}
+					}
+					role {
+						name
+					}
+				}
+			}
+		}
+	`,
 }

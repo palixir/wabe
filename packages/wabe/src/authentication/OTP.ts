@@ -17,9 +17,7 @@ export class OTP {
 	}
 
 	deriveSecret(userId: string): string {
-		const hash = createHash('sha256')
-			.update(`${this.secret}:${userId}`)
-			.digest()
+		const hash = createHash('sha256').update(`${this.secret}:${userId}`).digest()
 
 		return base32Encode(hash, 'RFC4648', { padding: false })
 	}

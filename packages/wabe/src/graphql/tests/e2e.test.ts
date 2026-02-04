@@ -122,18 +122,17 @@ describe('GraphQL : E2E', () => {
 
 		it("should throw an error object not found if the object doesn't exist", async () => {
 			// Just to get valid id
-			const fakeObjectWithValidId =
-				await wabe.controllers.database.createObject({
-					className: 'User',
-					data: {
-						name: 'Lucas',
-						age: 23,
-					},
-					context: {
-						wabe,
-						isRoot: true,
-					},
-				})
+			const fakeObjectWithValidId = await wabe.controllers.database.createObject({
+				className: 'User',
+				data: {
+					name: 'Lucas',
+					age: 23,
+				},
+				context: {
+					wabe,
+					isRoot: true,
+				},
+			})
 
 			if (!fakeObjectWithValidId?.id) throw new Error('Failed test')
 
@@ -267,9 +266,7 @@ describe('GraphQL : E2E', () => {
 				},
 			})
 
-			expect(users.edges).toEqual([
-				{ node: { id: expect.anything(), name: 'Lucas2', age: 24 } },
-			])
+			expect(users.edges).toEqual([{ node: { id: expect.anything(), name: 'Lucas2', age: 24 } }])
 
 			const users2 = await client.request<any>(graphql.users, {
 				where: {
@@ -406,19 +403,16 @@ describe('GraphQL : E2E', () => {
 				refreshToken: expect.any(String),
 			})
 
-			const { signInWith: signInWith2 } = await client.request<any>(
-				graphql.signInWith,
-				{
-					input: {
-						authentication: {
-							emailPassword: {
-								email: 'email@test.fr',
-								password: 'password',
-							},
+			const { signInWith: signInWith2 } = await client.request<any>(graphql.signInWith, {
+				input: {
+					authentication: {
+						emailPassword: {
+							email: 'email@test.fr',
+							password: 'password',
 						},
 					},
 				},
-			)
+			})
 
 			expect(signInWith2).toEqual({
 				accessToken: expect.any(String),
@@ -470,7 +464,7 @@ describe('GraphQL : E2E', () => {
 const graphql = {
 	signUpWith: gql`
 		mutation signUpWith($input: SignUpWithInput!) {
-			signUpWith(input: $input){
+			signUpWith(input: $input) {
 				accessToken
 				refreshToken
 			}
@@ -478,7 +472,7 @@ const graphql = {
 	`,
 	signInWith: gql`
 		mutation signInWith($input: SignInWithInput!) {
-			signInWith(input: $input){
+			signInWith(input: $input) {
 				accessToken
 				refreshToken
 			}

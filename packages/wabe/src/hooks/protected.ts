@@ -22,11 +22,7 @@ const _checkProtected = (
 			if (!protectedForCurrentField) return
 
 			if (protectedForCurrentField?.protectedOperations.includes('read')) {
-				if (
-					isRoot &&
-					protectedForCurrentField.authorizedRoles.includes('rootOnly')
-				)
-					return
+				if (isRoot && protectedForCurrentField.authorizedRoles.includes('rootOnly')) return
 
 				// @ts-expect-error
 				if (!protectedForCurrentField.authorizedRoles.includes(userRole))
@@ -39,18 +35,13 @@ const _checkProtected = (
 
 	const fieldsUpdated = hookObject.getNewData()
 
-	const operation =
-		operationType === OperationType.BeforeUpdate ? 'update' : 'create'
+	const operation = operationType === OperationType.BeforeUpdate ? 'update' : 'create'
 
 	Object.keys(fieldsUpdated).forEach((fieldName) => {
 		const protectedForCurrentField = schemaClass.fields[fieldName]?.protected
 
 		if (protectedForCurrentField?.protectedOperations.includes(operation)) {
-			if (
-				isRoot &&
-				protectedForCurrentField.authorizedRoles.includes('rootOnly')
-			)
-				return
+			if (isRoot && protectedForCurrentField.authorizedRoles.includes('rootOnly')) return
 
 			// @ts-expect-error
 			if (!protectedForCurrentField.authorizedRoles.includes(userRole))
@@ -59,14 +50,11 @@ const _checkProtected = (
 	})
 }
 
-export const defaultCheckProtectedOnBeforeRead = (
-	object: HookObject<DevWabeTypes, any>,
-) => _checkProtected(object, OperationType.BeforeRead)
+export const defaultCheckProtectedOnBeforeRead = (object: HookObject<DevWabeTypes, any>) =>
+	_checkProtected(object, OperationType.BeforeRead)
 
-export const defaultCheckProtectedOnBeforeUpdate = (
-	object: HookObject<DevWabeTypes, any>,
-) => _checkProtected(object, OperationType.BeforeUpdate)
+export const defaultCheckProtectedOnBeforeUpdate = (object: HookObject<DevWabeTypes, any>) =>
+	_checkProtected(object, OperationType.BeforeUpdate)
 
-export const defaultCheckProtectedOnBeforeCreate = (
-	object: HookObject<DevWabeTypes, any>,
-) => _checkProtected(object, OperationType.BeforeCreate)
+export const defaultCheckProtectedOnBeforeCreate = (object: HookObject<DevWabeTypes, any>) =>
+	_checkProtected(object, OperationType.BeforeCreate)

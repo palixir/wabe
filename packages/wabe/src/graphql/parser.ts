@@ -60,10 +60,7 @@ export const templateScalarType: Record<WabePrimaryTypes, GraphQLScalarType> = {
 	Hash: GraphQLString,
 }
 
-export const templateWhereInput: Record<
-	WabePrimaryTypes | 'Array',
-	GraphQLInputObjectType
-> = {
+export const templateWhereInput: Record<WabePrimaryTypes | 'Array', GraphQLInputObjectType> = {
 	String: StringWhereInput,
 	Int: IntWhereInput,
 	Float: FloatWhereInput,
@@ -87,9 +84,7 @@ interface GraphqlParserConstructorOptions {
 	enums: GraphQLEnumType[]
 }
 
-export type GraphqlParserFactory<T extends WabeTypes> = (
-	options: GraphqlParserFactoryOptions,
-) => {
+export type GraphqlParserFactory<T extends WabeTypes> = (options: GraphqlParserFactoryOptions) => {
 	_parseWabeObject(options: ParseObjectOptions): any
 	_parseWabeWhereInputObject(options: ParseObjectOptions): any
 	_parseWabeInputObject(options: ParseObjectOptions): any
@@ -108,11 +103,7 @@ export type GraphqlParserConstructor = <T extends WabeTypes>(
 
 export const GraphqlParser: GraphqlParserConstructor =
 	({ scalars, enums }: GraphqlParserConstructorOptions) =>
-	({
-		graphqlObjectType,
-		schemaFields,
-		allObjects,
-	}: GraphqlParserFactoryOptions) => {
+	({ graphqlObjectType, schemaFields, allObjects }: GraphqlParserFactoryOptions) => {
 		// Get graphql fields from a wabe object
 		const _getGraphqlFieldsFromAnObject = ({
 			objectToParse,
@@ -133,9 +124,7 @@ export const GraphqlParser: GraphqlParserConstructor =
 				(acc, key) => {
 					const currentField = fields[key]
 
-					const keyWithFirstLetterUppercase = `${key
-						.charAt(0)
-						.toUpperCase()}${key.slice(1)}`
+					const keyWithFirstLetterUppercase = `${key.charAt(0).toUpperCase()}${key.slice(1)}`
 
 					if (currentField?.type === 'Object') {
 						acc[key] = {
@@ -162,9 +151,7 @@ export const GraphqlParser: GraphqlParserConstructor =
 							)
 
 							acc[key] = {
-								type: currentField.required
-									? new GraphQLNonNull(objectList)
-									: objectList,
+								type: currentField.required ? new GraphQLNonNull(objectList) : objectList,
 							}
 						}
 
@@ -326,13 +313,11 @@ export const GraphqlParser: GraphqlParserConstructor =
 				description: description,
 				fields: (): any => ({
 					...graphqlFields,
-					...{
-						OR: {
-							type: new GraphQLList(graphqlObject),
-						},
-						AND: {
-							type: new GraphQLList(graphqlObject),
-						},
+					OR: {
+						type: new GraphQLList(graphqlObject),
+					},
+					AND: {
+						type: new GraphQLList(graphqlObject),
 					},
 				}),
 			})
@@ -382,11 +367,7 @@ export const GraphqlParser: GraphqlParserConstructor =
 			requiredValue,
 			isWhereType = false,
 		}: {
-			type:
-				| WabePrimaryTypes
-				| 'Array'
-				| keyof WabeTypes['enums']
-				| WabeTypes['scalars']
+			type: WabePrimaryTypes | 'Array' | keyof WabeTypes['enums'] | WabeTypes['scalars']
 			typeValue?: WabePrimaryTypes
 			requiredValue?: boolean
 			isWhereType?: boolean
@@ -396,8 +377,7 @@ export const GraphqlParser: GraphqlParserConstructor =
 			const enumExist = enums.find((e) => e.name === type)
 
 			if (isWhereType) {
-				if (!Object.keys(templateWhereInput).includes(type))
-					return AnyWhereInput
+				if (!Object.keys(templateWhereInput).includes(type)) return AnyWhereInput
 
 				return templateWhereInput[type as WabePrimaryTypes]
 			}
@@ -440,9 +420,7 @@ export const GraphqlParser: GraphqlParserConstructor =
 						switch (graphqlObjectType) {
 							case 'Object': {
 								acc[key] = {
-									type: isRelation
-										? graphqlObject?.connectionObject
-										: graphqlObject?.object,
+									type: isRelation ? graphqlObject?.connectionObject : graphqlObject?.object,
 								}
 
 								break
@@ -516,9 +494,7 @@ export const GraphqlParser: GraphqlParserConstructor =
 							)
 
 							acc[key] = {
-								type: currentField.required
-									? new GraphQLNonNull(objectList)
-									: objectList,
+								type: currentField.required ? new GraphQLNonNull(objectList) : objectList,
 							}
 
 							return acc

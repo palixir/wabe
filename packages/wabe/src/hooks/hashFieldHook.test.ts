@@ -75,9 +75,7 @@ describe('hashFieldHook', () => {
 
 		await hashFieldHook(hookObject)
 
-		expect(
-			hookObject.getNewData().authentication.emailPassword.password,
-		).not.toBe('mysecret')
+		expect(hookObject.getNewData().authentication.emailPassword.password).not.toBe('mysecret')
 
 		const isValid = await verifyArgon2(
 			'mysecret',
@@ -102,18 +100,12 @@ describe('hashFieldHook', () => {
 
 		expect(hookObject.getNewData().twoHashes.hash1).not.toBe('mysecret')
 
-		const isValid = await verifyArgon2(
-			'mysecret',
-			hookObject.getNewData().twoHashes.hash1,
-		)
+		const isValid = await verifyArgon2('mysecret', hookObject.getNewData().twoHashes.hash1)
 		expect(isValid).toBe(true)
 
 		expect(hookObject.getNewData().twoHashes.hash2).not.toBe('mysecret')
 
-		const isValid2 = await verifyArgon2(
-			'mysecret',
-			hookObject.getNewData().twoHashes.hash2,
-		)
+		const isValid2 = await verifyArgon2('mysecret', hookObject.getNewData().twoHashes.hash2)
 		expect(isValid2).toBe(true)
 	})
 
@@ -129,10 +121,7 @@ describe('hashFieldHook', () => {
 		expect(hookObject.getNewData().password).not.toBe('mysecret')
 		expect(hookObject.getNewData().email).toBe('test@example.com')
 
-		const isValid = await verifyArgon2(
-			'mysecret',
-			hookObject.getNewData().password,
-		)
+		const isValid = await verifyArgon2('mysecret', hookObject.getNewData().password)
 		expect(isValid).toBe(true)
 	})
 

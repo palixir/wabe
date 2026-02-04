@@ -2,10 +2,7 @@ import type { MutationData, OutputType, Select, WhereType } from '../database'
 import { contextWithoutGraphQLCall } from '../utils'
 import { defaultAfterDeleteFile } from '../file/hookDeleteFile'
 import { defaultAfterReadFile } from '../file/hookReadFile'
-import {
-	defaultBeforeCreateUpload,
-	defaultBeforeUpdateUpload,
-} from '../file/hookUploadFile'
+import { defaultBeforeCreateUpload, defaultBeforeUpdateUpload } from '../file/hookUploadFile'
 import type { WabeConfig, WabeTypes } from '../server'
 import type { WabeContext } from '../server/interface'
 
@@ -38,10 +35,7 @@ import {
 	defaultBeforeUpdateSessionOnUser,
 } from './session'
 import { defaultSetEmail, defaultSetEmailOnUpdate } from './setEmail'
-import {
-	defaultSetupAclBeforeCreate,
-	defaultSetupAclOnUserAfterCreate,
-} from './setupAcl'
+import { defaultSetupAclBeforeCreate, defaultSetupAclOnUserAfterCreate } from './setupAcl'
 import { hashFieldHook } from './hashFieldHook'
 import { defaultBeforeCreateUser } from './createUser'
 import {
@@ -98,10 +92,7 @@ const _getHooksOrderByPriorities = (config: WabeConfig<any>) =>
 		}, [] as number[])
 		.sort((a, b) => a - b) || []
 
-export const initializeHook = <
-	T extends WabeTypes,
-	K extends keyof T['types'],
->({
+export const initializeHook = <T extends WabeTypes, K extends keyof T['types']>({
 	className,
 	newData,
 	context,
@@ -113,19 +104,13 @@ export const initializeHook = <
 	newData?: MutationData<DevWabeTypes, any, any>
 	select: Select
 	context: WabeContext<any>
-	objectLoader?: (
-		id: string,
-	) => Promise<OutputType<DevWabeTypes, any, any> | null>
+	objectLoader?: (id: string) => Promise<OutputType<DevWabeTypes, any, any> | null>
 	objectsLoader?: (opts: {
 		where?: WhereType<DevWabeTypes, any>
 		ids: string[]
 	}) => Promise<OutputType<DevWabeTypes, any, any>[]>
 }) => {
-	const computeObject = ({
-		id,
-	}: {
-		id?: string
-	}): Promise<OutputType<DevWabeTypes, any, any>> => {
+	const computeObject = ({ id }: { id?: string }): Promise<OutputType<DevWabeTypes, any, any>> => {
 		// If we don't have an id, like for example after delete, we return an empty object
 		// Hook after delete will be called but we should not have any object
 		// Same of before create
@@ -167,8 +152,7 @@ export const initializeHook = <
 			originalObject?: OutputType<DevWabeTypes, any, any>
 			object?: OutputType<DevWabeTypes, any, any>
 		}): Promise<MutationData<T, K, any>> => {
-			if (hooksOrderByPriorities.length === 0)
-				return { object: undefined, newData: undefined }
+			if (hooksOrderByPriorities.length === 0) return { object: undefined, newData: undefined }
 
 			const object =
 				options.object ??
@@ -199,9 +183,7 @@ export const initializeHook = <
 					config: context.wabe.config,
 				})
 
-				await Promise.all(
-					hooksToCompute.map((hook) => hook.callback(hookObject)),
-				)
+				await Promise.all(hooksToCompute.map((hook) => hook.callback(hookObject)))
 			}, Promise.resolve())
 
 			return { object, newData: hookObject.getNewData() }
@@ -214,8 +196,7 @@ export const initializeHook = <
 			originalObjects?: OutputType<DevWabeTypes, any, any>[]
 			objects?: OutputType<DevWabeTypes, any, any>[]
 		}) => {
-			if (hooksOrderByPriorities.length === 0)
-				return { objects: [], newData: [newData || {}] }
+			if (hooksOrderByPriorities.length === 0) return { objects: [], newData: [newData || {}] }
 
 			const objects =
 				options.objects ||
@@ -225,9 +206,8 @@ export const initializeHook = <
 				}))
 
 			const objectsToUseInMap =
-				(options.operationType === OperationType.AfterDelete
-					? options.originalObjects
-					: objects) || []
+				(options.operationType === OperationType.AfterDelete ? options.originalObjects : objects) ||
+				[]
 
 			const newDataAfterHooks = await Promise.all(
 				objectsToUseInMap.map(async (object) => {
@@ -256,9 +236,7 @@ export const initializeHook = <
 							config: context.wabe.config,
 						})
 
-						await Promise.all(
-							hooksToCompute.map((hook) => hook.callback(hookObject)),
-						)
+						await Promise.all(hooksToCompute.map((hook) => hook.callback(hookObject)))
 					}, Promise.resolve())
 
 					return hookObject.getNewData()

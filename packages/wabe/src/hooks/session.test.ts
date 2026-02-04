@@ -1,11 +1,7 @@
 import { describe, beforeAll, afterAll, expect, it, beforeEach } from 'bun:test'
 import { gql } from 'graphql-request'
 import type { Wabe } from '../server'
-import {
-	type DevWabeTypes,
-	getAnonymousClient,
-	getUserClient,
-} from '../utils/helper'
+import { type DevWabeTypes, getAnonymousClient, getUserClient } from '../utils/helper'
 import { setupTests, closeTests } from '../utils/testHelper'
 
 describe('hooks/session', () => {
@@ -122,17 +118,17 @@ describe('hooks/session', () => {
 
 const graphql = {
 	signUpWith: gql`
-    mutation signUpWith($input: SignUpWithInput!) {
-        signUpWith(input: $input){
-            accessToken
-        }
-    }
-    `,
+		mutation signUpWith($input: SignUpWithInput!) {
+			signUpWith(input: $input) {
+				accessToken
+			}
+		}
+	`,
 	signInWith: gql`
-    mutation signInWith($input: SignInWithInput!) {
-        signInWith(input: $input){
-            accessToken
-        }
-    }
-    `,
+		mutation signInWith($input: SignInWithInput!) {
+			signInWith(input: $input) {
+				accessToken
+			}
+		}
+	`,
 }

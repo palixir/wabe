@@ -138,9 +138,7 @@ export interface refreshTokenOptions {
 }
 
 export interface Provider {
-	createTokenFromAuthorizationCode(
-		options: CreateTokenFromAuthorizationCodeOptions,
-	): Promise<void>
+	createTokenFromAuthorizationCode(options: CreateTokenFromAuthorizationCodeOptions): Promise<void>
 	refreshToken(options: refreshTokenOptions): Promise<void>
 }
 

@@ -31,12 +31,12 @@ describe('EmailPasswordSRP', () => {
 
 		await anonymousClient.request<any>(
 			gql`
-        mutation signUpWith($input: SignUpWithInput!) {
-          signUpWith(input: $input) {
-            accessToken
-          }
-        }
-      `,
+				mutation signUpWith($input: SignUpWithInput!) {
+					signUpWith(input: $input) {
+						accessToken
+					}
+				}
+			`,
 			{
 				input: {
 					authentication: {
@@ -55,15 +55,15 @@ describe('EmailPasswordSRP', () => {
 
 		const { signInWith } = await anonymousClient.request<any>(
 			gql`
-      mutation signInWith($input: SignInWithInput!) {
-        signInWith(input: $input) {
-          srp {
-            salt
-            serverPublic
-          }
-        }
-      }
-    `,
+				mutation signInWith($input: SignInWithInput!) {
+					signInWith(input: $input) {
+						srp {
+							salt
+							serverPublic
+						}
+					}
+				}
+			`,
 			{
 				input: {
 					authentication: {
@@ -86,14 +86,14 @@ describe('EmailPasswordSRP', () => {
 
 		const { verifyChallenge } = await anonymousClient.request<any>(
 			gql`
-        mutation verifyChallenge($input: VerifyChallengeInput!) {
-            verifyChallenge(input: $input) {
-            srp {
-              serverSessionProof
-            }
-          }
-        }
-      `,
+				mutation verifyChallenge($input: VerifyChallengeInput!) {
+					verifyChallenge(input: $input) {
+						srp {
+							serverSessionProof
+						}
+					}
+				}
+			`,
 			{
 				input: {
 					secondFA: {
@@ -130,12 +130,12 @@ describe('EmailPasswordSRP', () => {
 
 		await anonymousClient.request<any>(
 			gql`
-         mutation signUpWith($input: SignUpWithInput!) {
-           signUpWith(input: $input) {
-             accessToken
-           }
-         }
-       `,
+				mutation signUpWith($input: SignUpWithInput!) {
+					signUpWith(input: $input) {
+						accessToken
+					}
+				}
+			`,
 			{
 				input: {
 					authentication: {
@@ -149,12 +149,15 @@ describe('EmailPasswordSRP', () => {
 
 		const { signInWith } = await anonymousClient.request<any>(
 			gql`
-         mutation signInWith($input: SignInWithInput!) {
-           signInWith(input: $input) {
-             srp { salt serverPublic }
-           }
-         }
-       `,
+				mutation signInWith($input: SignInWithInput!) {
+					signInWith(input: $input) {
+						srp {
+							salt
+							serverPublic
+						}
+					}
+				}
+			`,
 			{
 				input: {
 					authentication: {
@@ -168,10 +171,7 @@ describe('EmailPasswordSRP', () => {
 		)
 
 		// Derive with wrong password
-		const wrongPrivateKey = await client.deriveSafePrivateKey(
-			salt,
-			wrongPassword,
-		)
+		const wrongPrivateKey = await client.deriveSafePrivateKey(salt, wrongPassword)
 		const wrongClientSession = await client.deriveSession(
 			clientEphemeral.secret,
 			signInWith.srp.serverPublic,
@@ -183,12 +183,14 @@ describe('EmailPasswordSRP', () => {
 		expect(
 			anonymousClient.request<any>(
 				gql`
-           mutation verifyChallenge($input: VerifyChallengeInput!) {
-             verifyChallenge(input: $input) {
-               srp { serverSessionProof }
-             }
-           }
-         `,
+					mutation verifyChallenge($input: VerifyChallengeInput!) {
+						verifyChallenge(input: $input) {
+							srp {
+								serverSessionProof
+							}
+						}
+					}
+				`,
 				{
 					input: {
 						secondFA: {

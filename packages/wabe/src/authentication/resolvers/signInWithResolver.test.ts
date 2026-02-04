@@ -198,10 +198,7 @@ describe('SignInWith', () => {
 	})
 
 	it('should signInWith email and password when the user already exist (on cookieSession)', async () => {
-		const mockCreateSession = spyOn(
-			Session.prototype,
-			'create',
-		).mockResolvedValue({
+		const mockCreateSession = spyOn(Session.prototype, 'create').mockResolvedValue({
 			refreshToken: 'refreshToken',
 			accessToken: 'accessToken',
 			csrfToken: 'csrfToken',
@@ -249,31 +246,21 @@ describe('SignInWith', () => {
 		})
 
 		expect(mockSetCookie).toHaveBeenCalledTimes(3)
-		expect(mockSetCookie).toHaveBeenNthCalledWith(
-			1,
-			'refreshToken',
-			'refreshToken',
-			{
-				httpOnly: true,
-				path: '/',
-				secure: true,
-				sameSite: 'Strict',
-				expires: expect.any(Date),
-			},
-		)
+		expect(mockSetCookie).toHaveBeenNthCalledWith(1, 'refreshToken', 'refreshToken', {
+			httpOnly: true,
+			path: '/',
+			secure: true,
+			sameSite: 'Strict',
+			expires: expect.any(Date),
+		})
 
-		expect(mockSetCookie).toHaveBeenNthCalledWith(
-			2,
-			'accessToken',
-			'accessToken',
-			{
-				httpOnly: true,
-				path: '/',
-				secure: true,
-				sameSite: 'Strict',
-				expires: expect.any(Date),
-			},
-		)
+		expect(mockSetCookie).toHaveBeenNthCalledWith(2, 'accessToken', 'accessToken', {
+			httpOnly: true,
+			path: '/',
+			secure: true,
+			sameSite: 'Strict',
+			expires: expect.any(Date),
+		})
 
 		expect(mockSetCookie).toHaveBeenNthCalledWith(3, 'csrfToken', 'csrfToken', {
 			httpOnly: true,

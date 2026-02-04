@@ -1,0 +1,7 @@
+{
+	"$schema": "./node_modules/oxfmt/configuration_schema.json",
+	"ignorePatterns": [],
+	"singleQuote": true,
+	"semi": false,
+	"useTabs": true
+}

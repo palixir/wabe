@@ -24,5 +24,4 @@ export const base64URLencode = (content: string) => {
 	return result.split('=')[0].replaceAll('+', '-').replaceAll('/', '_')
 }
 
-export const generateRandomValues = () =>
-	crypto.randomBytes(60).toString('base64url')
+export const generateRandomValues = () => crypto.randomBytes(60).toString('base64url')

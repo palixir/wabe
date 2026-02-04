@@ -1,9 +1,4 @@
-import {
-	randomBytes,
-	createCipheriv,
-	createDecipheriv,
-	createHmac,
-} from 'node:crypto'
+import { randomBytes, createCipheriv, createDecipheriv, createHmac } from 'node:crypto'
 import { promisify } from 'node:util'
 
 const params = {
@@ -18,8 +13,7 @@ const params = {
  * @return : Returns the PHC format of the hashed text
  */
 export const hashArgon2 = async (text: string) => {
-	if (process.versions.bun)
-		return Bun.password.hash(text, { algorithm: 'argon2id' })
+	if (process.versions.bun) return Bun.password.hash(text, { algorithm: 'argon2id' })
 
 	// Node support
 	const argon2 = promisify(require('node:crypto').argon2)
@@ -40,8 +34,7 @@ export const hashArgon2 = async (text: string) => {
  * @return : Returns true if the password matchs with the hash, false otherwise
  */
 export const verifyArgon2 = async (password: string, hash: string) => {
-	if (process.versions.bun)
-		return Bun.password.verify(password, hash, 'argon2id')
+	if (process.versions.bun) return Bun.password.verify(password, hash, 'argon2id')
 
 	// Node support
 	const [, algorithm, , paramString, nonceHex, storedHashHex] = hash.split('$')
@@ -83,16 +76,10 @@ export const isArgon2Hash = (value: string): boolean =>
  * IV is derived via HMAC-SHA256(key, token) to allow equality checks without storing plaintext.
  * Caller must provide a strong 32-byte key (already derived/hashed).
  */
-export const encryptDeterministicToken = (
-	token: string,
-	key: Buffer,
-): string => {
+export const encryptDeterministicToken = (token: string, key: Buffer): string => {
 	const iv = createHmac('sha256', key).update(token).digest().subarray(0, 12)
 	const cipher = createCipheriv('aes-256-gcm', key, iv)
-	const encrypted = Buffer.concat([
-		cipher.update(token, 'utf8'),
-		cipher.final(),
-	])
+	const encrypted = Buffer.concat([cipher.update(token, 'utf8'), cipher.final()])
 	const tag = cipher.getAuthTag()
 	return `${iv.toString('hex')}:${tag.toString('hex')}:${encrypted.toString('hex')}`
 }
@@ -110,10 +97,7 @@ export const decryptDeterministicToken = (
 		const encryptedValue = Buffer.from(valueHex, 'hex')
 		const decipher = createDecipheriv('aes-256-gcm', key, iv)
 		decipher.setAuthTag(tag)
-		const decrypted = Buffer.concat([
-			decipher.update(encryptedValue),
-			decipher.final(),
-		])
+		const decrypted = Buffer.concat([decipher.update(encryptedValue), decipher.final()])
 		return decrypted.toString('utf8')
 	} catch {
 		return null

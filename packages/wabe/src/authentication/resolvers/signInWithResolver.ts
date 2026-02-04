@@ -2,10 +2,7 @@ import type { SignInWithInput } from '../../../generated/wabe'
 import type { WabeContext } from '../../server/interface'
 import type { DevWabeTypes } from '../../utils/helper'
 import { Session } from '../Session'
-import type {
-	ProviderInterface,
-	SecondaryProviderInterface,
-} from '../interface'
+import type { ProviderInterface, SecondaryProviderInterface } from '../interface'
 import { getAuthenticationMethod } from '../utils'
 
 // 0 - Get the authentication method
@@ -21,10 +18,10 @@ export const signInWithResolver = async (
 	},
 	context: WabeContext<DevWabeTypes>,
 ) => {
-	const { provider, name } = getAuthenticationMethod<
-		DevWabeTypes,
-		ProviderInterface<DevWabeTypes>
-	>(Object.keys(input.authentication || {}), context)
+	const { provider, name } = getAuthenticationMethod<DevWabeTypes, ProviderInterface<DevWabeTypes>>(
+		Object.keys(input.authentication || {}),
+		context,
+	)
 
 	const inputOfTheGoodAuthenticationMethod =
 		// @ts-expect-error
@@ -60,18 +57,11 @@ export const signInWithResolver = async (
 
 	const session = new Session()
 
-	const { refreshToken, accessToken, csrfToken } = await session.create(
-		userId,
-		context,
-	)
+	const { refreshToken, accessToken, csrfToken } = await session.create(userId, context)
 
 	if (context.wabe.config.authentication?.session?.cookieSession) {
-		const accessTokenExpiresAt = session.getAccessTokenExpireAt(
-			context.wabe.config,
-		)
-		const refreshTokenExpiresAt = session.getRefreshTokenExpireAt(
-			context.wabe.config,
-		)
+		const accessTokenExpiresAt = session.getAccessTokenExpireAt(context.wabe.config)
+		const refreshTokenExpiresAt = session.getRefreshTokenExpireAt(context.wabe.config)
 
 		context.response?.setCookie('refreshToken', refreshToken, {
 			httpOnly: true,

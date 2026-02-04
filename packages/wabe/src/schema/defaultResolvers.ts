@@ -63,8 +63,7 @@ export const defaultMutations: {
 	},
 	sendEmail: {
 		type: 'String',
-		description:
-			'Send basic email with text and html, returns the id of the email',
+		description: 'Send basic email with text and html, returns the id of the email',
 		args: {
 			input: {
 				from: {

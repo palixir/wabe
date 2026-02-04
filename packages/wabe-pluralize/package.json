@@ -1,14 +1,14 @@
 {
 	"name": "wabe-pluralize",
 	"version": "0.0.1",
+	"description": "Package to pluralize a word in english",
 	"license": "Apache-2.0",
 	"main": "src/index.ts",
-	"description": "Package to pluralize a word in english",
 	"scripts": {
 		"build": "bun --filter wabe-build build:package $(pwd)",
 		"check": "tsc --project $(pwd)/tsconfig.json",
 		"ci": "bun lint && bun test",
-		"lint": "biome lint $(pwd)/src/*.ts --no-errors-on-unmatched",
-		"format": "biome format --write ."
+		"lint": "oxlint .",
+		"format": "oxfmt --write ."
 	}
 }

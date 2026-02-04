@@ -30,10 +30,7 @@ export interface FileAdapter {
 	 * @param urlExpiresIn: number Number of seconds to expire the url
 	 * @returns The url of file or null if the file doesn't exist
 	 */
-	readFile(
-		fileName: string,
-		options?: ReadFileOptions,
-	): Promise<string | null> | string | null
+	readFile(fileName: string, options?: ReadFileOptions): Promise<string | null> | string | null
 	/*+
 	 * Delete a file
 	 * @param fileName: string

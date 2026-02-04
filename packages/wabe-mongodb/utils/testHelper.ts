@@ -3,9 +3,7 @@ import { type ClassInterface, Wabe } from 'wabe'
 import getPort from 'get-port'
 import { MongoAdapter } from '../src'
 
-export const setupTests = async (
-	additionalClasses: ClassInterface<any>[] = [],
-) => {
+export const setupTests = async (additionalClasses: ClassInterface<any>[] = []) => {
 	const databaseId = uuid()
 
 	const port = await getPort()

@@ -43,15 +43,9 @@ export class DatabaseController<T extends WabeTypes> {
 	/**
 	 * Get field type and target class information
 	 */
-	_getFieldType(
-		originClassName: string,
-		fieldName: string,
-		context: WabeContext<T>,
-	) {
+	_getFieldType(originClassName: string, fieldName: string, context: WabeContext<T>) {
 		const realClass = this._getClass(originClassName, context)
-		return realClass?.fields[fieldName] as
-			| { type: string; class?: string }
-			| undefined
+		return realClass?.fields[fieldName] as { type: string; class?: string } | undefined
 	}
 
 	_getSelectMinusPointersAndRelations({
@@ -81,8 +75,7 @@ export class DatabaseController<T extends WabeTypes> {
 
 		for (const [fieldName, value] of selectEntries) {
 			const field = realClass.fields[fieldName]
-			const isPointerOrRelation =
-				field?.type === 'Pointer' || field?.type === 'Relation'
+			const isPointerOrRelation = field?.type === 'Pointer' || field?.type === 'Relation'
 
 			if (!isPointerOrRelation) {
 				selectWithoutPointers[fieldName] = true
@@ -108,8 +101,7 @@ export class DatabaseController<T extends WabeTypes> {
 
 		const field = this._getFieldType(originClassName, pointerField, context)
 		return (
-			field?.type === expectedType &&
-			field.class?.toLowerCase() === currentClassName.toLowerCase()
+			field?.type === expectedType && field.class?.toLowerCase() === currentClassName.toLowerCase()
 		)
 	}
 
@@ -132,11 +124,7 @@ export class DatabaseController<T extends WabeTypes> {
 			if (typedWhereKey === 'AND' || typedWhereKey === 'OR') {
 				const newWhere = await Promise.all(
 					(where[typedWhereKey] as any).map((whereObject: any) =>
-						this._getWhereObjectWithPointerOrRelation(
-							className,
-							whereObject,
-							context,
-						),
+						this._getWhereObjectWithPointerOrRelation(className, whereObject, context),
 					),
 				)
 
@@ -275,13 +263,7 @@ export class DatabaseController<T extends WabeTypes> {
 	 * Private helper to load multiple objects for hooks (skips hooks to avoid recursion)
 	 */
 	_loadObjectsForHooks(className: keyof T['types'], context: WabeContext<T>) {
-		return ({
-			where,
-			ids,
-		}: {
-			where?: WhereType<DevWabeTypes, any>
-			ids: string[]
-		}) =>
+		return ({ where, ids }: { where?: WhereType<DevWabeTypes, any>; ids: string[] }) =>
 			this.getObjects({
 				className,
 				context: contextWithRoot(context),
@@ -317,9 +299,7 @@ export class DatabaseController<T extends WabeTypes> {
 		select?: Select
 		id?: string
 		inputObject?: OutputType<T, K, U>
-		adapterCallback: (
-			newData: any,
-		) => Promise<OutputType<T, K, U> | { id: string } | null>
+		adapterCallback: (newData: any) => Promise<OutputType<T, K, U> | { id: string } | null>
 	}) {
 		const hook = initializeHook({
 			className,
@@ -369,10 +349,7 @@ export class DatabaseController<T extends WabeTypes> {
 		_skipHooks?: boolean
 	}) {
 		return Object.entries(pointers).reduce(
-			async (
-				acc,
-				[pointerField, { className: currentClassName, select: currentSelect }],
-			) => {
+			async (acc, [pointerField, { className: currentClassName, select: currentSelect }]) => {
 				const accObject = await acc
 
 				const isPointer = this._isFieldOfType(
@@ -414,9 +391,7 @@ export class DatabaseController<T extends WabeTypes> {
 				)
 
 				if (isRelation && object[pointerField]) {
-					const selectWithoutTotalCount = Object.entries(
-						currentSelect || {},
-					).reduce(
+					const selectWithoutTotalCount = Object.entries(currentSelect || {}).reduce(
 						(acc2, [key, value]) => {
 							if (key === 'totalCount') return acc2
 
@@ -460,10 +435,7 @@ export class DatabaseController<T extends WabeTypes> {
 		await this.adapter.close()
 	}
 
-	createClassIfNotExist(
-		className: string,
-		schema: SchemaInterface<T>,
-	): Promise<any> {
+	createClassIfNotExist(className: string, schema: SchemaInterface<T>): Promise<any> {
 		return this.adapter.createClassIfNotExist(className, schema)
 	}
 
@@ -476,11 +448,7 @@ export class DatabaseController<T extends WabeTypes> {
 		context,
 		where,
 	}: CountOptions<T, K>): Promise<number> {
-		const whereWithACLCondition = this._buildWhereWithACL(
-			where || {},
-			context,
-			'read',
-		)
+		const whereWithACLCondition = this._buildWhereWithACL(where || {}, context, 'read')
 
 		const hook = initializeHook({
 			className,
@@ -517,12 +485,11 @@ export class DatabaseController<T extends WabeTypes> {
 		id,
 		where,
 	}: GetObjectOptions<T, K, U>): Promise<OutputType<T, K, U>> {
-		const { pointers, selectWithoutPointers } =
-			this._getSelectMinusPointersAndRelations({
-				className,
-				context,
-				select: select as SelectWithObject,
-			})
+		const { pointers, selectWithoutPointers } = this._getSelectMinusPointersAndRelations({
+			className,
+			context,
+			select: select as SelectWithObject,
+		})
 
 		const hook = !_skipHooks
 			? initializeHook({
@@ -539,20 +506,13 @@ export class DatabaseController<T extends WabeTypes> {
 			id,
 		})
 
-		const whereWithACLCondition = this._buildWhereWithACL(
-			where || {},
-			context,
-			'read',
-		)
+		const whereWithACLCondition = this._buildWhereWithACL(where || {}, context, 'read')
 
-		const selectWithPointersAndRelationsToGetId = Object.keys(pointers).reduce(
-			(acc, fieldName) => {
-				acc[fieldName] = true
+		const selectWithPointersAndRelationsToGetId = Object.keys(pointers).reduce((acc, fieldName) => {
+			acc[fieldName] = true
 
-				return acc
-			},
-			selectWithoutPointers,
-		)
+			return acc
+		}, selectWithoutPointers)
 
 		const objectToReturn = await this.adapter.getObject({
 			className,
@@ -600,12 +560,11 @@ export class DatabaseController<T extends WabeTypes> {
 		offset,
 		order,
 	}: GetObjectsOptions<T, K, U, W>): Promise<OutputType<T, K, W>[]> {
-		const { pointers, selectWithoutPointers } =
-			this._getSelectMinusPointersAndRelations({
-				className,
-				context,
-				select: select as SelectWithObject,
-			})
+		const { pointers, selectWithoutPointers } = this._getSelectMinusPointersAndRelations({
+			className,
+			context,
+			select: select as SelectWithObject,
+		})
 
 		const whereWithPointer = await this._getWhereObjectWithPointerOrRelation(
 			className,
@@ -613,20 +572,13 @@ export class DatabaseController<T extends WabeTypes> {
 			context,
 		)
 
-		const whereWithACLCondition = this._buildWhereWithACL(
-			whereWithPointer || {},
-			context,
-			'read',
-		)
+		const whereWithACLCondition = this._buildWhereWithACL(whereWithPointer || {}, context, 'read')
 
-		const selectWithPointersAndRelationsToGetId = Object.keys(pointers).reduce(
-			(acc, fieldName) => {
-				acc[fieldName] = true
+		const selectWithPointersAndRelationsToGetId = Object.keys(pointers).reduce((acc, fieldName) => {
+			acc[fieldName] = true
 
-				return acc
-			},
-			selectWithoutPointers,
-		)
+			return acc
+		}, selectWithoutPointers)
 
 		const hook = !_skipHooks
 			? initializeHook({
@@ -677,8 +629,9 @@ export class DatabaseController<T extends WabeTypes> {
 			objects: objectsWithPointers,
 		})
 
-		return (afterReadResults?.objects ||
-			objectsWithPointers) as unknown as Promise<OutputType<T, K, W>[]>
+		return (afterReadResults?.objects || objectsWithPointers) as unknown as Promise<
+			OutputType<T, K, W>[]
+		>
 	}
 
 	async createObject<
@@ -819,11 +772,7 @@ export class DatabaseController<T extends WabeTypes> {
 		_skipHooks,
 	}: UpdateObjectOptions<T, K, U, W>): Promise<OutputType<T, K, W>> {
 		if (_skipHooks) {
-			const whereWithACLCondition = this._buildWhereWithACL(
-				{},
-				context,
-				'write',
-			)
+			const whereWithACLCondition = this._buildWhereWithACL({}, context, 'write')
 
 			return this.adapter.updateObject({
 				className,
@@ -844,11 +793,7 @@ export class DatabaseController<T extends WabeTypes> {
 			id,
 			select: select as Select,
 			adapterCallback: async (newData) => {
-				const whereWithACLCondition = this._buildWhereWithACL(
-					{},
-					context,
-					'write',
-				)
+				const whereWithACLCondition = this._buildWhereWithACL({}, context, 'write')
 
 				await this.adapter.updateObject({
 					className,
@@ -907,11 +852,7 @@ export class DatabaseController<T extends WabeTypes> {
 				})
 			: undefined
 
-		const whereWithACLCondition = this._buildWhereWithACL(
-			whereObject,
-			context,
-			'write',
-		)
+		const whereWithACLCondition = this._buildWhereWithACL(whereObject, context, 'write')
 
 		const resultsAfterBeforeUpdate = await hook?.runOnMultipleObjects({
 			operationType: OperationType.BeforeUpdate,
@@ -951,10 +892,7 @@ export class DatabaseController<T extends WabeTypes> {
 		})
 	}
 
-	async deleteObject<
-		K extends keyof T['types'],
-		U extends keyof T['types'][K],
-	>({
+	async deleteObject<K extends keyof T['types'], U extends keyof T['types'][K]>({
 		context,
 		className,
 		id,
@@ -968,11 +906,7 @@ export class DatabaseController<T extends WabeTypes> {
 			id,
 			select: select as Select,
 			adapterCallback: async (_newData) => {
-				const whereWithACLCondition = this._buildWhereWithACL(
-					{},
-					context,
-					'write',
-				)
+				const whereWithACLCondition = this._buildWhereWithACL({}, context, 'write')
 
 				// We need to fetch the object before deleting it if we want to return it
 				// But executeSingleOperationWithHooks already fetched it in runOnSingleObject if an id is present
@@ -1038,11 +972,7 @@ export class DatabaseController<T extends WabeTypes> {
 			objectsLoader: this._loadObjectsForHooks(className, context),
 		})
 
-		const whereWithACLCondition = this._buildWhereWithACL(
-			whereObject,
-			context,
-			'write',
-		)
+		const whereWithACLCondition = this._buildWhereWithACL(whereObject, context, 'write')
 
 		let objectsBeforeDelete: OutputType<T, K, W>[] = []
 

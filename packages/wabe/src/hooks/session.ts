@@ -68,9 +68,7 @@ export const defaultAfterDeleteSession = async (
 	})
 }
 
-export const defaultBeforeUpdateSessionOnUser = (
-	hookObject: HookObject<DevWabeTypes, 'User'>,
-) => {
+export const defaultBeforeUpdateSessionOnUser = (hookObject: HookObject<DevWabeTypes, 'User'>) => {
 	if (hookObject.context.isRoot) return
 
 	if (hookObject.isFieldUpdated('sessions'))

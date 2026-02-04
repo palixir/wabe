@@ -222,7 +222,7 @@ describe('Permissions', () => {
 				select: {},
 			})
 
-			expect(_checkCLP(obj, OperationType.BeforeRead)).resolves
+			_checkCLP(obj, OperationType.BeforeRead)
 		})
 
 		it('should throw permission denied if authorized roles is everyone but requireAuthentication is true and client is anonymous', () => {
@@ -323,7 +323,7 @@ describe('Permissions', () => {
 				select: {},
 			})
 
-			expect(_checkCLP(obj, OperationType.BeforeRead)).resolves
+			_checkCLP(obj, OperationType.BeforeRead)
 		})
 
 		it('should not throw permission denied if client is root', () => {
@@ -344,14 +344,11 @@ describe('Permissions', () => {
 				select: {},
 			})
 
-			expect(_checkCLP(obj, OperationType.BeforeRead)).resolves
+			_checkCLP(obj, OperationType.BeforeRead)
 		})
 
 		it('should call _checkPermission on beforeRead', () => {
-			const spyBeforeRead = spyOn(
-				permissions,
-				'defaultCheckPermissionOnRead',
-			).mockReturnValue()
+			const spyBeforeRead = spyOn(permissions, 'defaultCheckPermissionOnRead').mockReturnValue()
 
 			permissions.defaultCheckPermissionOnRead({} as never)
 
@@ -362,10 +359,7 @@ describe('Permissions', () => {
 		})
 
 		it('should call _checkPermission on beforeCreate', () => {
-			const spyBeforeCreate = spyOn(
-				permissions,
-				'defaultCheckPermissionOnCreate',
-			).mockReturnValue()
+			const spyBeforeCreate = spyOn(permissions, 'defaultCheckPermissionOnCreate').mockReturnValue()
 
 			permissions.defaultCheckPermissionOnCreate({
 				sessionId: 'sessionId',
@@ -382,10 +376,7 @@ describe('Permissions', () => {
 		})
 
 		it('should call _checkPermission on beforeUpdate', () => {
-			const spyBeforeUpdate = spyOn(
-				permissions,
-				'defaultCheckPermissionOnUpdate',
-			).mockReturnValue()
+			const spyBeforeUpdate = spyOn(permissions, 'defaultCheckPermissionOnUpdate').mockReturnValue()
 
 			permissions.defaultCheckPermissionOnUpdate({
 				sessionId: 'sessionId',
@@ -402,10 +393,7 @@ describe('Permissions', () => {
 		})
 
 		it('should call _checkPermission on beforeDelete', () => {
-			const spyBeforeDelete = spyOn(
-				permissions,
-				'defaultCheckPermissionOnDelete',
-			).mockReturnValue()
+			const spyBeforeDelete = spyOn(permissions, 'defaultCheckPermissionOnDelete').mockReturnValue()
 
 			permissions.defaultCheckPermissionOnDelete({
 				sessionId: 'sessionId',

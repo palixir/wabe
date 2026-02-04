@@ -45,11 +45,9 @@ describe('Oauth2Client', () => {
 			'https://authorizationendpoint/?response_type=code&client_id=clientId&scope=scope1+scope2&redirect_uri=https%3A%2F%2FredirectURI',
 		)
 
-		const authorizationURLWithCodeVerifier = oauthClient.createAuthorizationURL(
-			{
-				codeVerifier: 'codeVerifier',
-			},
-		)
+		const authorizationURLWithCodeVerifier = oauthClient.createAuthorizationURL({
+			codeVerifier: 'codeVerifier',
+		})
 
 		const codeChallenge = base64URLencode('codeVerifier')
 
@@ -169,14 +167,10 @@ describe('Oauth2Client', () => {
 		if (!receivedRequest) fail()
 		expect(receivedRequest.url).toEqual('https://tokenendpoint/')
 		expect(receivedRequest.method).toEqual('POST')
-		expect(receivedRequest.headers.get('content-type')).toEqual(
-			'application/x-www-form-urlencoded',
-		)
+		expect(receivedRequest.headers.get('content-type')).toEqual('application/x-www-form-urlencoded')
 		expect(receivedRequest.headers.get('accept')).toEqual('application/json')
 		expect(receivedRequest.headers.get('user-agent')).toEqual('wabe')
-		expect(receivedRequest.headers.get('authorization')).toEqual(
-			`Basic ${encodeCredentials}`,
-		)
+		expect(receivedRequest.headers.get('authorization')).toEqual(`Basic ${encodeCredentials}`)
 
 		mockFetch.mockRestore()
 	})

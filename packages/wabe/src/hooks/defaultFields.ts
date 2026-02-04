@@ -2,25 +2,17 @@ import { getClassFromClassName } from '../utils'
 import type { DevWabeTypes } from '../utils/helper'
 import type { HookObject } from './HookObject'
 
-export const defaultBeforeCreateForCreatedAt = (
-	object: HookObject<any, any>,
-) => {
-	if (!object.isFieldUpdated('createdAt'))
-		object.upsertNewData('createdAt', new Date())
+export const defaultBeforeCreateForCreatedAt = (object: HookObject<any, any>) => {
+	if (!object.isFieldUpdated('createdAt')) object.upsertNewData('createdAt', new Date())
 
-	if (!object.isFieldUpdated('updatedAt'))
-		object.upsertNewData('updatedAt', new Date())
+	if (!object.isFieldUpdated('updatedAt')) object.upsertNewData('updatedAt', new Date())
 }
 
-export const defaultBeforeUpdateForUpdatedAt = (
-	object: HookObject<any, any>,
-) => {
+export const defaultBeforeUpdateForUpdatedAt = (object: HookObject<any, any>) => {
 	object.upsertNewData('updatedAt', new Date())
 }
 
-export const defaultBeforeCreateForDefaultValue = (
-	object: HookObject<any, any>,
-) => {
+export const defaultBeforeCreateForDefaultValue = (object: HookObject<any, any>) => {
 	const schemaClass = getClassFromClassName<DevWabeTypes>(
 		object.className,
 		object.context.wabe.config,

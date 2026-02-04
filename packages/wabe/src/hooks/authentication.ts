@@ -6,11 +6,7 @@ import type { HookObject } from './HookObject'
 export const defaultCallAuthenticationProviderOnBeforeCreateUser = async (
 	hookObject: HookObject<any, any>,
 ) => {
-	if (
-		!hookObject.isFieldUpdated('authentication') ||
-		hookObject.getNewData().isOauth
-	)
-		return
+	if (!hookObject.isFieldUpdated('authentication') || hookObject.getNewData().isOauth) return
 
 	const context = hookObject.context
 
@@ -19,10 +15,10 @@ export const defaultCallAuthenticationProviderOnBeforeCreateUser = async (
 	// Exception for SRP
 	if (authentication.emailPasswordSRP) return
 
-	const { provider, name } = getAuthenticationMethod<
-		DevWabeTypes,
-		ProviderInterface<DevWabeTypes>
-	>(Object.keys(authentication), context)
+	const { provider, name } = getAuthenticationMethod<DevWabeTypes, ProviderInterface<DevWabeTypes>>(
+		Object.keys(authentication),
+		context,
+	)
 
 	const inputOfTheGoodAuthenticationMethod = authentication[name]
 
@@ -39,11 +35,7 @@ export const defaultCallAuthenticationProviderOnBeforeCreateUser = async (
 export const defaultCallAuthenticationProviderOnBeforeUpdateUser = async (
 	hookObject: HookObject<any, any>,
 ) => {
-	if (
-		!hookObject.isFieldUpdated('authentication') ||
-		hookObject.getNewData().isOauth
-	)
-		return
+	if (!hookObject.isFieldUpdated('authentication') || hookObject.getNewData().isOauth) return
 
 	const context = hookObject.context
 
@@ -52,10 +44,10 @@ export const defaultCallAuthenticationProviderOnBeforeUpdateUser = async (
 	// Exception for SRP
 	if (authentication.emailPasswordSRP) return
 
-	const { provider, name } = getAuthenticationMethod<
-		DevWabeTypes,
-		ProviderInterface<DevWabeTypes>
-	>(Object.keys(authentication), context)
+	const { provider, name } = getAuthenticationMethod<DevWabeTypes, ProviderInterface<DevWabeTypes>>(
+		Object.keys(authentication),
+		context,
+	)
 
 	if (!provider.onUpdateAuthenticationData) return
 
@@ -63,12 +55,11 @@ export const defaultCallAuthenticationProviderOnBeforeUpdateUser = async (
 
 	if (!hookObject.object?.id) return
 
-	const { authenticationDataToSave } =
-		await provider.onUpdateAuthenticationData({
-			context,
-			input: inputOfTheGoodAuthenticationMethod,
-			userId: hookObject.object.id,
-		})
+	const { authenticationDataToSave } = await provider.onUpdateAuthenticationData({
+		context,
+		input: inputOfTheGoodAuthenticationMethod,
+		userId: hookObject.object.id,
+	})
 
 	hookObject.upsertNewData('authentication', {
 		[name]: authenticationDataToSave,

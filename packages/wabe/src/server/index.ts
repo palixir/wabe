@@ -1,10 +1,6 @@
 import type { DatabaseConfig } from '../database'
 import { DatabaseController } from '../database/DatabaseController'
-import {
-	type EnumInterface,
-	Schema,
-	type SchemaInterface,
-} from '../schema/Schema'
+import { type EnumInterface, Schema, type SchemaInterface } from '../schema/Schema'
 import { GraphQLError, GraphQLObjectType, GraphQLSchema } from 'graphql'
 import { GraphQLSchema as WabeGraphQLSchema } from '../graphql'
 import type { AuthenticationConfig } from '../authentication/interface'
@@ -117,13 +113,10 @@ export class Wabe<T extends WabeTypes> {
 			crons,
 		}
 
-		this.server = new Wobe<WobeCustomContext<T>>({ hostname }).get(
-			'/health',
-			(context) => {
-				context.res.status = 200
-				context.res.send('OK')
-			},
-		)
+		this.server = new Wobe<WobeCustomContext<T>>({ hostname }).get('/health', (context) => {
+			context.res.status = 200
+			context.res.send('OK')
+		})
 
 		this.controllers = {
 			database: new DatabaseController<T>(database.adapter),
@@ -150,10 +143,7 @@ export class Wabe<T extends WabeTypes> {
 	}
 
 	loadRoleEnum() {
-		const roles = [
-			...defaultRoles,
-			...(this.config.authentication?.roles || []),
-		]
+		const roles = [...defaultRoles, ...(this.config.authentication?.roles || [])]
 
 		const roleEnum: EnumInterface = {
 			name: 'RoleEnum',
@@ -191,9 +181,7 @@ export class Wabe<T extends WabeTypes> {
 
 	loadRoutes() {
 		const wabeRoutes = [
-			...defaultRoutes(
-				this.config.file?.devDirectory || `${__dirname}/../../bucket`,
-			),
+			...defaultRoutes(this.config.file?.devDirectory || `${__dirname}/../../bucket`),
 			...(this.config.routes || []),
 		]
 
@@ -220,10 +208,7 @@ export class Wabe<T extends WabeTypes> {
 	}
 
 	async start() {
-		if (
-			this.config.authentication?.session &&
-			!this.config.authentication.session.jwtSecret
-		)
+		if (this.config.authentication?.session && !this.config.authentication.session.jwtSecret)
 			throw new Error('Authentication session requires jwt secret')
 
 		const wabeSchema = new Schema(this.config)
@@ -293,11 +278,8 @@ export class Wabe<T extends WabeTypes> {
 		await this.server.usePlugin(
 			WobeGraphqlYogaPlugin({
 				schema: this.config.graphqlSchema,
-				maskedErrors:
-					this.config.security?.hideSensitiveErrorMessage ||
-					this.config.isProduction,
-				allowIntrospection:
-					!!this.config.security?.allowIntrospectionInProduction,
+				maskedErrors: this.config.security?.hideSensitiveErrorMessage || this.config.isProduction,
+				allowIntrospection: !!this.config.security?.allowIntrospectionInProduction,
 				maxDepth,
 				allowMultipleOperations: true,
 				graphqlEndpoint: '/graphql',
@@ -322,9 +304,7 @@ export class Wabe<T extends WabeTypes> {
 
 										if (introspectionFields.includes(node.name.value)) {
 											context.reportError(
-												new GraphQLError(
-													'GraphQL introspection is not allowed in production',
-												),
+												new GraphQLError('GraphQL introspection is not allowed in production'),
 											)
 										}
 									},
@@ -338,7 +318,7 @@ export class Wabe<T extends WabeTypes> {
 		)
 
 		// @ts-expect-error
-		await Promise.all([initializeRoles(this)])
+		await initializeRoles(this)
 
 		this.server.listen(this.config.port, ({ port }) => {
 			if (!process.env.TEST) console.log(`Server is running on port ${port}`)

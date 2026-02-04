@@ -16,9 +16,7 @@ export interface DevWabeTypes extends WabeTypes {
 	where: WabeSchemaWhereTypes
 }
 
-export const selectFieldsWithoutPrivateFields = <T extends Record<string, any>>(
-	select?: T,
-): T =>
+export const selectFieldsWithoutPrivateFields = <T extends Record<string, any>>(select?: T): T =>
 	Object.entries(select || {}).reduce((acc, [key, value]) => {
 		if (defaultPrivateFields.includes(key)) return acc
 
@@ -85,13 +83,13 @@ export const getAdminUserClient = async (
 
 	const res = await getGraphqlClient(port).request<any>(
 		gql`
-      mutation signUpWith($input: SignUpWithInput!) {
-        signUpWith(input: $input) {
-          id
-          accessToken
-        }
-      }
-    `,
+			mutation signUpWith($input: SignUpWithInput!) {
+				signUpWith(input: $input) {
+					id
+					accessToken
+				}
+			}
+		`,
 		{
 			input: {
 				authentication: {
@@ -148,14 +146,14 @@ export const createUserAndUpdateRole = async ({
 
 	const res = await anonymousClient.request<any>(
 		gql`
-    mutation signUpWith($input: SignUpWithInput!) {
-      signUpWith(input: $input) {
-        id
-        accessToken
-        refreshToken
-      }
-    }
-  `,
+			mutation signUpWith($input: SignUpWithInput!) {
+				signUpWith(input: $input) {
+					id
+					accessToken
+					refreshToken
+				}
+			}
+		`,
 		{
 			input: {
 				authentication: {
