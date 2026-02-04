@@ -940,7 +940,7 @@ describe('Mongo adapter', () => {
 			select: { age: true, id: true },
 		})
 
-		if (!insertedObjects) fail
+		if (!insertedObjects) fail()
 
 		expect(insertedObjects[0]?.id).toBeDefined()
 	})

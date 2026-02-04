@@ -8,7 +8,7 @@
 		"build": "bun --filter wabe-build build:package $(pwd)",
 		"check": "tsc --project $(pwd)/tsconfig.json",
 		"ci": "bun lint && bun test",
-		"lint": "biome lint $(pwd)/src/*.ts --no-errors-on-unmatched",
+		"lint": "oxlint .",
 		"format": "oxfmt --write ."
 	}
 }

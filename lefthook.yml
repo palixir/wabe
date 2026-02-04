@@ -1,6 +1,6 @@
 pre-commit:
-    parallel: true
-    commands:
-        check:
-            glob: '*.{js,ts,jsx,tsx}'
-            run: bun format && bun biome check --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
+  parallel: true
+  commands:
+    check:
+      glob: '*.{js,ts,jsx,tsx}'
+      run: bun format && bun oxfmt check {staged_files}

@@ -57,13 +57,12 @@ export const buildMongoWhereQuery = <T extends WabeTypes, K extends keyof T['typ
 			const keyToWrite = key === 'id' ? '_id' : key
 
 			if (value?.contains || value?.contains === null)
-				acc[keyToWrite] = {
-					...(typeof value.contains === 'object' && !Array.isArray(value.contains)
+				acc[keyToWrite] =
+					typeof value.contains === 'object' && !Array.isArray(value.contains)
 						? { $elemMatch: value.contains }
 						: {
 								$all: Array.isArray(value.contains) ? value.contains : [value.contains],
-							}),
-				}
+							}
 			if (value?.notContains || value?.notContains === null)
 				acc[keyToWrite] = { $ne: value.notContains }
 			if (value?.exists === true) acc[keyToWrite] = { $exists: true, $ne: null }
@@ -270,7 +269,7 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
 
 		return {
 			...resultWithout_Id,
-			...{ id: _id.toString() },
+			id: _id.toString(),
 		} as OutputType<T, K, U>
 	}
 
@@ -303,7 +302,7 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
 
 			return {
 				...resultWithout_Id,
-				...{ id: _id.toString() },
+				id: _id.toString(),
 			} as OutputType<T, K, W>
 		})
 	}
