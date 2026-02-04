@@ -1,10 +1,7 @@
 import type { WabeContext } from '../../server/interface'
 import { contextWithRoot } from '../../utils/export'
 import type { DevWabeTypes } from '../../utils/helper'
-import {
-	type AuthenticationEventsOptions,
-	AuthenticationProvider,
-} from '../interface'
+import { type AuthenticationEventsOptions, AuthenticationProvider } from '../interface'
 import { Google } from '../oauth'
 import { GitHub } from '../oauth/GitHub'
 
@@ -34,10 +31,7 @@ export const oAuthAuthentication =
 	async ({
 		context,
 		input,
-	}: AuthenticationEventsOptions<
-		DevWabeTypes,
-		OAuthAuthenticationInterface
-	>) => {
+	}: AuthenticationEventsOptions<DevWabeTypes, OAuthAuthenticationInterface>) => {
 		const { authorizationCode, codeVerifier } = input
 
 		const provider = getProvider(context, oAuthProvider)

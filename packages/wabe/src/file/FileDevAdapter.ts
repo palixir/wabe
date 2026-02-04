@@ -26,10 +26,7 @@ export class FileDevAdapter implements FileAdapter {
 		await writeFile(path.join(fullPath, file.name), fileContent)
 	}
 
-	async readFile(
-		fileName: string,
-		options?: ReadFileOptions,
-	): Promise<string | null> {
+	async readFile(fileName: string, options?: ReadFileOptions): Promise<string | null> {
 		const filePath = path.join(this.rootPath, this.basePath, fileName)
 
 		try {

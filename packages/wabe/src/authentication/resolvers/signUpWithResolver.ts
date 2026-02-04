@@ -15,8 +15,7 @@ export const signUpWithResolver = async (
 	},
 	context: WabeContext<any>,
 ) => {
-	if (context.wabe.config.authentication?.disableSignUp)
-		throw new Error('SignUp is disabled')
+	if (context.wabe.config.authentication?.disableSignUp) throw new Error('SignUp is disabled')
 
 	// Create object call the provider signUp
 	const res = await context.wabe.controllers.database.createObject({
@@ -34,10 +33,7 @@ export const signUpWithResolver = async (
 
 	if (!createdUserId) throw new Error('User not created')
 
-	const { accessToken, refreshToken, csrfToken } = await session.create(
-		createdUserId,
-		context,
-	)
+	const { accessToken, refreshToken, csrfToken } = await session.create(createdUserId, context)
 
 	if (context.wabe.config.authentication?.session?.cookieSession) {
 		context.response?.setCookie('refreshToken', refreshToken, {

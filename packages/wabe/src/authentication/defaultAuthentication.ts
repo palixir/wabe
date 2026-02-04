@@ -1,21 +1,16 @@
 import type { WabeTypes } from '..'
-import type {
-	CustomAuthenticationMethods,
-	ProviderInterface,
-} from './interface'
+import type { CustomAuthenticationMethods, ProviderInterface } from './interface'
 import { GitHub, QRCodeOTP } from './providers'
 import { Google } from './providers'
 import { EmailOTP } from './providers/EmailOTP'
 import { EmailPassword } from './providers/EmailPassword'
-import {
-	EmailPasswordSRPChallenge,
-	EmailPasswordSRP,
-} from './providers/EmailPasswordSRP'
+import { EmailPasswordSRPChallenge, EmailPasswordSRP } from './providers/EmailPasswordSRP'
 import { PhonePassword } from './providers/PhonePassword'
 
-export const defaultAuthenticationMethods = <
-	T extends WabeTypes,
->(): CustomAuthenticationMethods<T, ProviderInterface<T>>[] => [
+export const defaultAuthenticationMethods = <T extends WabeTypes>(): CustomAuthenticationMethods<
+	T,
+	ProviderInterface<T>
+>[] => [
 	{
 		name: 'emailPasswordSRPChallenge',
 		input: {

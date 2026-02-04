@@ -15,9 +15,7 @@ type EmailPasswordInterface = {
 const DUMMY_PASSWORD_HASH =
 	'$argon2id$v=19$m=65536,t=2,p=1$wHZB9xRS/Mbo7L3SL9e935Ag5K+T2EuT/XgB8akwZgo$SPf8EZ4T1HYkuIll4v2hSzNCH7woX3VrZJo3yWg5u8U'
 
-export class EmailPassword
-	implements ProviderInterface<DevWabeTypes, EmailPasswordInterface>
-{
+export class EmailPassword implements ProviderInterface<DevWabeTypes, EmailPasswordInterface> {
 	async onSignIn({
 		input,
 		context,
@@ -51,16 +49,9 @@ export class EmailPassword
 
 		const passwordHashToCheck = userDatabasePassword ?? DUMMY_PASSWORD_HASH
 
-		const isPasswordEquals = await verifyArgon2(
-			input.password,
-			passwordHashToCheck,
-		)
+		const isPasswordEquals = await verifyArgon2(input.password, passwordHashToCheck)
 
-		if (
-			!user ||
-			!isPasswordEquals ||
-			input.email !== user.authentication?.emailPassword?.email
-		)
+		if (!user || !isPasswordEquals || input.email !== user.authentication?.emailPassword?.email)
 			throw new Error('Invalid authentication credentials')
 
 		return {
@@ -99,10 +90,7 @@ export class EmailPassword
 		userId,
 		input,
 		context,
-	}: AuthenticationEventsOptionsWithUserId<
-		DevWabeTypes,
-		EmailPasswordInterface
-	>) {
+	}: AuthenticationEventsOptionsWithUserId<DevWabeTypes, EmailPasswordInterface>) {
 		const users = await context.wabe.controllers.database.getObjects({
 			className: 'User',
 			where: {
@@ -121,9 +109,7 @@ export class EmailPassword
 		return {
 			authenticationDataToSave: {
 				email: input.email ?? user?.authentication?.emailPassword?.email,
-				password: input.password
-					? input.password
-					: user?.authentication?.emailPassword?.password,
+				password: input.password ? input.password : user?.authentication?.emailPassword?.password,
 			},
 		}
 	}

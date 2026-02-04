@@ -62,9 +62,7 @@ const irregularNoun = [
 ]
 
 export const pluralize = (noun: string): string => {
-	const irregular = irregularNoun.find(
-		(irregular) => irregular.singular === noun,
-	)
+	const irregular = irregularNoun.find((irregular) => irregular.singular === noun)
 	if (irregular) return irregular.plural
 
 	if (
@@ -80,8 +78,7 @@ export const pluralize = (noun: string): string => {
 
 	if (!element) return `${noun}s`
 
-	if (noun.endsWith('y') && !'aeiou'.includes(element))
-		return `${noun.slice(0, -1)}ies`
+	if (noun.endsWith('y') && !'aeiou'.includes(element)) return `${noun.slice(0, -1)}ies`
 
 	return `${noun}s`
 }

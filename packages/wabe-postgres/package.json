@@ -2,33 +2,33 @@
 	"name": "wabe-postgres",
 	"version": "0.5.2",
 	"description": "PostgreSQL adapter for Wabe (official)",
-	"main": "dist/index.js",
-	"types": "dist/index.d.ts",
-	"type": "module",
 	"keywords": [
-		"wabe",
+		"adapter",
+		"database",
 		"postgres",
 		"postgresql",
-		"database",
-		"adapter"
+		"wabe"
 	],
+	"license": "Apache-2.0",
+	"type": "module",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
 	"scripts": {
 		"build": "bun --filter wabe-build build:package $(pwd)",
 		"check": "tsc --project $(pwd)/tsconfig.json",
-		"lint": "biome lint . --no-errors-on-unmatched",
+		"lint": "oxlint .",
 		"ci": "bun check && bun lint $(pwd) && bun test src --timeout 60000",
-		"format": "biome format --write ."
+		"format": "oxfmt --write ."
 	},
-	"license": "Apache-2.0",
 	"dependencies": {
 		"p-retry": "7.1.0",
 		"pg": "8.16.0"
 	},
 	"devDependencies": {
 		"@types/pg": "8.11.11",
-		"wabe": "workspace:*",
-		"wabe-postgres-launcher": "workspace:*",
+		"get-port": "7.1.0",
 		"uuid": "13.0.0",
-		"get-port": "7.1.0"
+		"wabe": "workspace:*",
+		"wabe-postgres-launcher": "workspace:*"
 	}
 }

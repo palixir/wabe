@@ -25,10 +25,7 @@ export type WabeCustomTypes = 'Array' | 'Object'
 
 export type WabeRelationTypes = 'Pointer' | 'Relation'
 
-export type WabeFieldTypes =
-	| WabeCustomTypes
-	| WabePrimaryTypes
-	| WabeRelationTypes
+export type WabeFieldTypes = WabeCustomTypes | WabePrimaryTypes | WabeRelationTypes
 
 export type WabeObject<T extends WabeTypes> = {
 	name: string
@@ -168,9 +165,7 @@ export interface PermissionProperties<T extends WabeTypes> {
  * Callback to define the ACL object before insert of the object in the database
  * Can be done with a beforeCreate hook but for simplicity we can define it here
  */
-export type ACLProperties = (
-	hookObject: HookObject<any, any>,
-) => void | Promise<void>
+export type ACLProperties = (hookObject: HookObject<any, any>) => void | Promise<void>
 
 export type ClassPermissions<T extends WabeTypes> = Partial<
 	Record<PermissionsOperations, PermissionProperties<T>> & {
@@ -235,15 +230,11 @@ export class Schema<T extends WabeTypes> {
 		return [
 			{
 				name: 'AuthenticationProvider',
-				values: Object.fromEntries(
-					Object.values(AuthenticationProvider).map((key) => [key, key]),
-				),
+				values: Object.fromEntries(Object.values(AuthenticationProvider).map((key) => [key, key])),
 			},
 			{
 				name: 'SecondaryFactor',
-				values: Object.fromEntries(
-					Object.values(SecondaryFactor).map((key) => [key, key]),
-				),
+				values: Object.fromEntries(Object.values(SecondaryFactor).map((key) => [key, key])),
 			},
 		]
 	}
@@ -251,56 +242,46 @@ export class Schema<T extends WabeTypes> {
 	mergeResolvers(defaultResolvers: TypeResolver<T>): TypeResolver<T> {
 		return {
 			mutations: {
-				...(this.config.schema?.resolvers?.mutations || {}),
+				...this.config.schema?.resolvers?.mutations,
 				...defaultResolvers.mutations,
 			},
 			queries: {
-				...(this.config.schema?.resolvers?.queries || {}),
+				...this.config.schema?.resolvers?.queries,
 				...defaultResolvers.queries,
 			},
 		}
 	}
 
 	defaultResolvers(): TypeResolver<T> {
-		const customAuthenticationConfig =
-			this.config.authentication?.customAuthenticationMethods || []
+		const customAuthenticationConfig = this.config.authentication?.customAuthenticationMethods || []
 
 		const allPrimaryAuthenticationMethodsInput = customAuthenticationConfig
 			.filter((authenticationMethod) => !authenticationMethod.isSecondaryFactor)
-			.reduce(
-				(acc, authenticationMethod) => {
-					acc[authenticationMethod.name] = {
-						type: 'Object',
-						object: {
-							name: authenticationMethod.name,
-							fields: authenticationMethod.input,
-						},
-					}
-
-					return acc
-				},
-				{} as SchemaFields<T>,
-			)
-
-		const allSecondaryFactorAuthenticationMethodsInput =
-			customAuthenticationConfig
-				.filter(
-					(authenticationMethod) => authenticationMethod.isSecondaryFactor,
-				)
-				.reduce(
-					(acc, authenticationMethod) => {
-						acc[authenticationMethod.name] = {
-							type: 'Object',
-							object: {
-								name: authenticationMethod.name,
-								fields: authenticationMethod.input,
-							},
-						}
-
-						return acc
+			.reduce((acc, authenticationMethod) => {
+				acc[authenticationMethod.name] = {
+					type: 'Object',
+					object: {
+						name: authenticationMethod.name,
+						fields: authenticationMethod.input,
 					},
-					{} as SchemaFields<T>,
-				)
+				}
+
+				return acc
+			}, {} as SchemaFields<T>)
+
+		const allSecondaryFactorAuthenticationMethodsInput = customAuthenticationConfig
+			.filter((authenticationMethod) => authenticationMethod.isSecondaryFactor)
+			.reduce((acc, authenticationMethod) => {
+				acc[authenticationMethod.name] = {
+					type: 'Object',
+					object: {
+						name: authenticationMethod.name,
+						fields: authenticationMethod.input,
+					},
+				}
+
+				return acc
+			}, {} as SchemaFields<T>)
 
 		const authenticationInputObject: TypeFieldObject<T> = {
 			type: 'Object',
@@ -566,30 +547,25 @@ export class Schema<T extends WabeTypes> {
 	}
 
 	userClass(): ClassInterface<T> {
-		const customAuthenticationConfig =
-			this.config.authentication?.customAuthenticationMethods || []
+		const customAuthenticationConfig = this.config.authentication?.customAuthenticationMethods || []
 
 		const allAuthenticationDataToStoreObject = customAuthenticationConfig
 			.filter(
 				(authenticationMethod) =>
-					authenticationMethod.dataToStore &&
-					!authenticationMethod.isSecondaryFactor,
+					authenticationMethod.dataToStore && !authenticationMethod.isSecondaryFactor,
 			)
-			.reduce(
-				(acc, authenticationMethod) => {
-					if (authenticationMethod.dataToStore)
-						acc[authenticationMethod.name] = {
-							type: 'Object',
-							object: {
-								name: authenticationMethod.name,
-								fields: authenticationMethod.dataToStore,
-							},
-						}
+			.reduce((acc, authenticationMethod) => {
+				if (authenticationMethod.dataToStore)
+					acc[authenticationMethod.name] = {
+						type: 'Object',
+						object: {
+							name: authenticationMethod.name,
+							fields: authenticationMethod.dataToStore,
+						},
+					}
 
-					return acc
-				},
-				{} as SchemaFields<T>,
-			)
+				return acc
+			}, {} as SchemaFields<T>)
 
 		const authenticationObject: TypeFieldObject<T> = {
 			type: 'Object',
@@ -600,9 +576,7 @@ export class Schema<T extends WabeTypes> {
 		}
 
 		const fields: SchemaFields<T> = {
-			...(customAuthenticationConfig.length > 0
-				? { authentication: authenticationObject }
-				: {}),
+			...(customAuthenticationConfig.length > 0 ? { authentication: authenticationObject } : {}),
 			provider: {
 				type: 'AuthenticationProvider',
 			},
@@ -742,39 +716,32 @@ export class Schema<T extends WabeTypes> {
 	}
 
 	mergeClass(newClass: ClassInterface<T>[]): ClassInterface<T>[] {
-		const allUniqueClassName = [
-			...new Set(newClass.map((classItem) => classItem.name)),
-		]
+		const allUniqueClassName = [...new Set(newClass.map((classItem) => classItem.name))]
 
 		return allUniqueClassName.map((uniqueClass) => {
-			const allClassWithSameName = newClass.filter(
-				(localClass) => localClass.name === uniqueClass,
-			)
+			const allClassWithSameName = newClass.filter((localClass) => localClass.name === uniqueClass)
 
-			return allClassWithSameName.reduce(
-				(acc, classItem) => {
-					return {
-						...acc,
-						...classItem,
-						fields: {
-							// We merge fields that have the same name and then we add the new fields
-							...acc.fields,
-							...classItem.fields,
-							...this.defaultFields(),
-						},
-						permissions:
-							classItem.permissions || acc.permissions
-								? {
-										// Order is important because we put the provided schema before so we always consider
-										// the provided schema as the source of truth
-										...classItem.permissions,
-										...acc.permissions,
-									}
-								: undefined,
-					}
-				},
-				allClassWithSameName[0] as ClassInterface<T>,
-			)
+			return allClassWithSameName.reduce((acc, classItem) => {
+				return {
+					...acc,
+					...classItem,
+					fields: {
+						// We merge fields that have the same name and then we add the new fields
+						...acc.fields,
+						...classItem.fields,
+						...this.defaultFields(),
+					},
+					permissions:
+						classItem.permissions || acc.permissions
+							? {
+									// Order is important because we put the provided schema before so we always consider
+									// the provided schema as the source of truth
+									...classItem.permissions,
+									...acc.permissions,
+								}
+							: undefined,
+				}
+			}, allClassWithSameName[0] as ClassInterface<T>)
 		})
 	}
 

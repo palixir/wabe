@@ -24,10 +24,7 @@ describe('GitHub oauth', () => {
 			'createAuthorizationURL',
 		).mockReturnValue(new URL('https://url') as never)
 
-		const authorizationUrl = githubOauth.createAuthorizationURL(
-			'state',
-			'codeVerifier',
-		)
+		const authorizationUrl = githubOauth.createAuthorizationURL('state', 'codeVerifier')
 
 		expect(authorizationUrl.toString()).toBe(
 			'https://url/?access_type=offline&prompt=select_account',
@@ -52,25 +49,19 @@ describe('GitHub oauth', () => {
 			expires_in: 3600,
 		})
 
-		const res = await githubOauth.validateAuthorizationCode(
-			'code',
-			'codeVerifier',
-		)
+		const res = await githubOauth.validateAuthorizationCode('code', 'codeVerifier')
 
 		expect(spyOauth2ClientValidateAuthorizationCode).toHaveBeenCalledTimes(1)
-		expect(spyOauth2ClientValidateAuthorizationCode).toHaveBeenCalledWith(
-			'code',
-			{
-				authenticateWith: 'request_body',
-				credentials: 'clientSecret',
-				codeVerifier: 'codeVerifier',
-			},
-		)
+		expect(spyOauth2ClientValidateAuthorizationCode).toHaveBeenCalledWith('code', {
+			authenticateWith: 'request_body',
+			credentials: 'clientSecret',
+			codeVerifier: 'codeVerifier',
+		})
 
 		// +100 to avoid flaky
-		expect(
-			(res.accessTokenExpiresAt?.getTime() || 0) + 100,
-		).toBeGreaterThanOrEqual(Date.now() + 3600 * 1000)
+		expect((res.accessTokenExpiresAt?.getTime() || 0) + 100).toBeGreaterThanOrEqual(
+			Date.now() + 3600 * 1000,
+		)
 
 		spyOauth2ClientValidateAuthorizationCode.mockRestore()
 	})
@@ -87,18 +78,13 @@ describe('GitHub oauth', () => {
 		const res = await githubOauth.refreshAccessToken('refresh_token')
 
 		expect(spyOauth2ClientRefreshAccessToken).toHaveBeenCalledTimes(1)
-		expect(spyOauth2ClientRefreshAccessToken).toHaveBeenCalledWith(
-			'refresh_token',
-			{
-				authenticateWith: 'request_body',
-				credentials: 'clientSecret',
-			},
-		)
+		expect(spyOauth2ClientRefreshAccessToken).toHaveBeenCalledWith('refresh_token', {
+			authenticateWith: 'request_body',
+			credentials: 'clientSecret',
+		})
 
 		expect(res.accessToken).toBe('access_token')
-		expect(res.accessTokenExpiresAt?.getTime()).toBeGreaterThanOrEqual(
-			Date.now() + 3600 * 1000,
-		)
+		expect(res.accessTokenExpiresAt?.getTime()).toBeGreaterThanOrEqual(Date.now() + 3600 * 1000)
 
 		spyOauth2ClientRefreshAccessToken.mockRestore()
 	})

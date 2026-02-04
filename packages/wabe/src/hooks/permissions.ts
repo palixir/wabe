@@ -27,9 +27,7 @@ export const _getPermissionPropertiesOfAClass = ({
 	operation: PermissionsOperations
 	context: WabeContext<any>
 }) => {
-	const wabeClass = context.wabe.config.schema?.classes?.find(
-		(c) => c.name === className,
-	)
+	const wabeClass = context.wabe.config.schema?.classes?.find((c) => c.name === className)
 
 	if (!wabeClass) throw new Error(`Class ${className} not found in schema`)
 
@@ -38,10 +36,7 @@ export const _getPermissionPropertiesOfAClass = ({
 	return permission
 }
 
-export const _checkCLP = (
-	object: HookObject<any, any>,
-	operationType: OperationType,
-) => {
+export const _checkCLP = (object: HookObject<any, any>, operationType: OperationType) => {
 	if (object.context.isRoot) return
 
 	const permissionOperation = convertOperationTypeToPermission(operationType)
@@ -56,50 +51,33 @@ export const _checkCLP = (
 
 	// If no permission is defined by default we throw an error, Zero trust principle
 	if (!permissionProperties)
-		throw new Error(
-			`Permission denied to ${permissionOperation} class ${object.className}`,
-		)
+		throw new Error(`Permission denied to ${permissionOperation} class ${object.className}`)
 
 	const sessionId = object.context.sessionId
 
-	if (
-		!permissionProperties.requireAuthentication &&
-		!permissionProperties.authorizedRoles
-	)
-		return
+	if (!permissionProperties.requireAuthentication && !permissionProperties.authorizedRoles) return
 
 	// User is not corrected but requireAuthentication is on true
 	if (!sessionId || !object.getUser()) {
-		throw new Error(
-			`Permission denied to ${permissionOperation} class ${object.className}`,
-		)
+		throw new Error(`Permission denied to ${permissionOperation} class ${object.className}`)
 	}
 
 	if (permissionProperties.authorizedRoles?.includes('everyone')) return
 
 	// authorizedRoles is empty
-	if (
-		permissionProperties.authorizedRoles?.length === 0 ||
-		!permissionProperties
-	)
-		throw new Error(
-			`Permission denied to ${permissionOperation} class ${object.className}`,
-		)
+	if (permissionProperties.authorizedRoles?.length === 0 || !permissionProperties)
+		throw new Error(`Permission denied to ${permissionOperation} class ${object.className}`)
 
 	const roleName = object.context.user?.role?.name
 
 	// No role name found
 	if (!roleName) {
-		throw new Error(
-			`Permission denied to ${permissionOperation} class ${object.className}`,
-		)
+		throw new Error(`Permission denied to ${permissionOperation} class ${object.className}`)
 	}
 
 	// The role of the user is not included in the authorizedRoles
 	if (!permissionProperties.authorizedRoles?.includes(roleName))
-		throw new Error(
-			`Permission denied to ${permissionOperation} class ${object.className}`,
-		)
+		throw new Error(`Permission denied to ${permissionOperation} class ${object.className}`)
 }
 
 export const defaultCheckPermissionOnRead = (object: HookObject<any, any>) =>

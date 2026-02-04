@@ -1,13 +1,4 @@
-import {
-	afterAll,
-	afterEach,
-	beforeAll,
-	describe,
-	expect,
-	it,
-	mock,
-	spyOn,
-} from 'bun:test'
+import { afterAll, afterEach, beforeAll, describe, expect, it, mock, spyOn } from 'bun:test'
 import { FileDevAdapter, type Wabe } from '..'
 import { type DevWabeTypes, getAnonymousClient } from '../utils/helper'
 import { setupTests, closeTests } from '../utils/testHelper'
@@ -17,10 +8,7 @@ describe('File upload', () => {
 	let wabe: Wabe<DevWabeTypes>
 	let port: number
 
-	const spyFileDevAdapterUploadFile = spyOn(
-		FileDevAdapter.prototype,
-		'uploadFile',
-	)
+	const spyFileDevAdapterUploadFile = spyOn(FileDevAdapter.prototype, 'uploadFile')
 	const spyFileDevAdapterReadFile = spyOn(FileDevAdapter.prototype, 'readFile')
 
 	const mockBeforeUpload = mock()
@@ -110,9 +98,7 @@ describe('File upload', () => {
 	})
 
 	it('should call beforeUpload and return the file returned by beforeUpload', async () => {
-		mockBeforeUpload.mockImplementationOnce(
-			() => new File(['b'], 'b.txt', { type: 'text/plain' }),
-		)
+		mockBeforeUpload.mockImplementationOnce(() => new File(['b'], 'b.txt', { type: 'text/plain' }))
 
 		await wabe.controllers.database.createObject({
 			// @ts-expect-error
@@ -261,9 +247,7 @@ describe('File upload', () => {
 		})
 
 		// @ts-expect-error
-		expect(res.file.url).toEqual(
-			'https://palixir.github.io/wabe//assets/logo.png',
-		)
+		expect(res.file.url).toEqual('https://palixir.github.io/wabe//assets/logo.png')
 		// @ts-expect-error
 		expect(res.file.isPresignedUrl).toEqual(false)
 	})
@@ -276,14 +260,7 @@ describe('File upload', () => {
 			JSON.stringify({
 				query: gql`
 					mutation ($file: File!, $file2: File!) {
-						createTest3s(
-							input: {
-								fields: [
-									{ file: { file: $file } }
-									{ file: { file: $file2 } }
-								]
-							}
-						) {
+						createTest3s(input: { fields: [{ file: { file: $file } }, { file: { file: $file2 } }] }) {
 							edges {
 								node {
 									id
@@ -299,10 +276,7 @@ describe('File upload', () => {
 			}),
 		)
 
-		formData.append(
-			'map',
-			JSON.stringify({ 0: ['variables.file'], 1: ['variables.file2'] }),
-		)
+		formData.append('map', JSON.stringify({ 0: ['variables.file'], 1: ['variables.file2'] }))
 		formData.append('0', new File(['a'], 'a.text', { type: 'text/plain' }))
 		formData.append('1', new File(['b'], 'b.text', { type: 'text/plain' }))
 
@@ -457,9 +431,7 @@ describe('File upload', () => {
 		`)
 
 		expect(test3s.edges[0].node.file.name).toEqual('a.text')
-		expect(test3s.edges[0].node.file.url).toEqual(
-			`http://127.0.0.1:${port}/bucket/a.text`,
-		)
+		expect(test3s.edges[0].node.file.url).toEqual(`http://127.0.0.1:${port}/bucket/a.text`)
 		expect(new Date(test3s.edges[0].node.file.urlGeneratedAt)).toBeDate()
 	})
 
@@ -478,10 +450,7 @@ describe('File upload', () => {
 
 			formData.append('map', JSON.stringify({ 0: ['variables.file'] }))
 
-			formData.append(
-				'0',
-				new File([content], fileName, { type: 'text/plain' }),
-			)
+			formData.append('0', new File([content], fileName, { type: 'text/plain' }))
 
 			await fetch(`http://127.0.0.1:${port}/graphql`, {
 				method: 'POST',
@@ -514,9 +483,7 @@ describe('File upload', () => {
 		const files = test3s.edges.map((edge: any) => edge.node.file)
 
 		expect(files).toHaveLength(2)
-		expect(files.map((f: any) => f.name)).toEqual(
-			expect.arrayContaining(['a.text', 'b.text']),
-		)
+		expect(files.map((f: any) => f.name)).toEqual(expect.arrayContaining(['a.text', 'b.text']))
 
 		files.forEach((file: any) => {
 			expect(file.url).toEqual(`http://127.0.0.1:${port}/bucket/${file.name}`)
@@ -565,9 +532,7 @@ describe('File upload', () => {
 		`)
 
 		expect(test3s.edges[0].node.file.name).toEqual('a.text')
-		expect(test3s.edges[0].node.file.url).toEqual(
-			`http://127.0.0.1:${port}/bucket/a.text`,
-		)
+		expect(test3s.edges[0].node.file.url).toEqual(`http://127.0.0.1:${port}/bucket/a.text`)
 		expect(new Date(test3s.edges[0].node.file.urlGeneratedAt)).toBeDate()
 
 		expect(spyFileDevAdapterReadFile).toHaveBeenCalledTimes(1)
@@ -634,9 +599,7 @@ describe('File upload', () => {
 		`)
 
 		expect(test3s.edges[0].node.file.name).toEqual('a.text')
-		expect(test3s.edges[0].node.file.url).toEqual(
-			`http://127.0.0.1:${port}/bucket/a.text`,
-		)
+		expect(test3s.edges[0].node.file.url).toEqual(`http://127.0.0.1:${port}/bucket/a.text`)
 		expect(new Date(test3s.edges[0].node.file.urlGeneratedAt)).toBeDate()
 
 		expect(spyFileDevAdapterReadFile).toHaveBeenCalledTimes(1)
@@ -725,9 +688,7 @@ describe('File upload', () => {
 		`)
 
 		expect(test3s.edges[0].node.file.name).toEqual('a.text')
-		expect(test3s.edges[0].node.file.url).toEqual(
-			`http://127.0.0.1:${port}/bucket/a.text`,
-		)
+		expect(test3s.edges[0].node.file.url).toEqual(`http://127.0.0.1:${port}/bucket/a.text`)
 		expect(new Date(test3s.edges[0].node.file.urlGeneratedAt)).toBeDate()
 
 		expect(spyFileDevAdapterReadFile).toHaveBeenCalledTimes(1)
@@ -891,13 +852,7 @@ describe('File upload', () => {
 		await anonymousClient.request<any>(gql`
 			mutation {
 				createTest3(
-					input: {
-						fields: {
-							file: {
-								url: "https://palixir.github.io/wabe//assets/logo.png"
-							}
-						}
-					}
+					input: { fields: { file: { url: "https://palixir.github.io/wabe//assets/logo.png" } } }
 				) {
 					test3 {
 						id
@@ -928,9 +883,7 @@ describe('File upload', () => {
 			}
 		`)
 
-		expect(test3s.edges[0].node.file.url).toEqual(
-			'https://palixir.github.io/wabe//assets/logo.png',
-		)
+		expect(test3s.edges[0].node.file.url).toEqual('https://palixir.github.io/wabe//assets/logo.png')
 	})
 
 	it('should upload a file and access to it with the local url provided by upload directory', async () => {

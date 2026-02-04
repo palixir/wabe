@@ -20,10 +20,10 @@ export const verifyChallengeResolver = async (
 
 	if (listOfFactor.length > 1) throw new Error('Only one factor is allowed')
 
-	const { provider, name } = getAuthenticationMethod<
-		any,
-		SecondaryProviderInterface<DevWabeTypes>
-	>(listOfFactor, context)
+	const { provider, name } = getAuthenticationMethod<any, SecondaryProviderInterface<DevWabeTypes>>(
+		listOfFactor,
+		context,
+	)
 
 	const result = await provider.onVerifyChallenge({
 		context,
@@ -35,18 +35,11 @@ export const verifyChallengeResolver = async (
 
 	const session = new Session()
 
-	const { accessToken, refreshToken } = await session.create(
-		result.userId,
-		context,
-	)
+	const { accessToken, refreshToken } = await session.create(result.userId, context)
 
 	if (context.wabe.config.authentication?.session?.cookieSession) {
-		const accessTokenExpiresAt = session.getAccessTokenExpireAt(
-			context.wabe.config,
-		)
-		const refreshTokenExpiresAt = session.getRefreshTokenExpireAt(
-			context.wabe.config,
-		)
+		const accessTokenExpiresAt = session.getAccessTokenExpireAt(context.wabe.config)
+		const refreshTokenExpiresAt = session.getRefreshTokenExpireAt(context.wabe.config)
 
 		context.response?.setCookie('refreshToken', refreshToken, {
 			httpOnly: true,

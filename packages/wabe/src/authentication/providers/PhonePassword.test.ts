@@ -1,12 +1,4 @@
-import {
-	describe,
-	expect,
-	it,
-	mock,
-	spyOn,
-	afterEach,
-	afterAll,
-} from 'bun:test'
+import { describe, expect, it, mock, spyOn, afterEach, afterAll } from 'bun:test'
 import * as crypto from '../../utils/crypto'
 
 import { PhonePassword } from './PhonePassword'
@@ -87,10 +79,7 @@ describe('Phone password', () => {
 		})
 
 		expect(spyArgonPasswordVerify).toHaveBeenCalledTimes(1)
-		expect(spyArgonPasswordVerify).toHaveBeenCalledWith(
-			'password',
-			'hashedPassword',
-		)
+		expect(spyArgonPasswordVerify).toHaveBeenCalledWith('password', 'hashedPassword')
 	})
 
 	it('should not signIn with phone password if password is undefined', () => {

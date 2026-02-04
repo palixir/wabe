@@ -1,9 +1,7 @@
 import type { ClassInterface } from '../schema'
 import type { WabeTypes, WabeConfig, WabeContext } from '../server'
 
-export const contextWithoutGraphQLCall = (
-	context: WabeContext<any>,
-): WabeContext<any> => ({
+export const contextWithoutGraphQLCall = (context: WabeContext<any>): WabeContext<any> => ({
 	...context,
 	isGraphQLCall: false,
 })
@@ -21,9 +19,7 @@ interface Base32Options {
 /**
  * Convert supported input types to Uint8Array.
  */
-export const toUint8Array = (
-	data: string | ArrayBuffer | Uint8Array | Buffer,
-): Uint8Array => {
+export const toUint8Array = (data: string | ArrayBuffer | Uint8Array | Buffer): Uint8Array => {
 	if (data instanceof Uint8Array) return data
 
 	if (typeof data === 'string') {
@@ -66,8 +62,7 @@ export const base32Encode = (
 			throw new Error(`Unknown base32 variant: ${variant}`)
 	}
 
-	const padding =
-		options.padding !== undefined ? options.padding : defaultPadding
+	const padding = options.padding !== undefined ? options.padding : defaultPadding
 	const view = toUint8Array(data)
 
 	let bits = 0
@@ -98,11 +93,7 @@ export const base32Encode = (
 	return output
 }
 
-export const getNewObjectAfterUpdateNestedProperty = (
-	obj: any,
-	path: string,
-	value: any,
-) => {
+export const getNewObjectAfterUpdateNestedProperty = (obj: any, path: string, value: any) => {
 	const keys = path.split('.')
 	let current = { ...obj }
 
@@ -160,10 +151,7 @@ export const getClassFromClassName = <T extends WabeTypes>(
 }
 
 // TODO: Put this in wobe
-export const getCookieInRequestHeaders = (
-	cookieName: string,
-	headers: Headers,
-) => {
+export const getCookieInRequestHeaders = (cookieName: string, headers: Headers) => {
 	const cookies = headers.get('Cookie')
 
 	if (!cookies) return

@@ -5,10 +5,7 @@ export interface GraphqlSchemaOutput {
 	output?: string
 }
 
-const _getQueryFields = (
-	name: string,
-	schema: GraphQLSchema,
-): GraphqlSchemaOutput => {
+const _getQueryFields = (name: string, schema: GraphQLSchema): GraphqlSchemaOutput => {
 	const query = schema.getQueryType()?.getFields()[name]
 
 	if (!query) throw new Error('Type not found in schema')
@@ -26,10 +23,7 @@ const _getQueryFields = (
 	}
 }
 
-const _getMutationFields = (
-	name: string,
-	schema: GraphQLSchema,
-): GraphqlSchemaOutput => {
+const _getMutationFields = (name: string, schema: GraphQLSchema): GraphqlSchemaOutput => {
 	const mutation = schema.getMutationType()?.getFields()[name]
 
 	if (!mutation) throw new Error('Type not found in schema')
@@ -47,10 +41,7 @@ const _getMutationFields = (
 	}
 }
 
-const _getTypeFields = (
-	name: string,
-	schema: GraphQLSchema,
-): GraphqlSchemaOutput => {
+const _getTypeFields = (name: string, schema: GraphQLSchema): GraphqlSchemaOutput => {
 	const type = schema.getType(name)
 
 	if (!type) throw new Error('Type not found in schema')

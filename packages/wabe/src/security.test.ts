@@ -53,23 +53,21 @@ describe('Security tests', () => {
 		})
 
 		const res = await userClient.request<any>(gql`
-				mutation createSecret {
-					createSecret(
-						input: { fields: { name: "n", } }
-					) {
-						secret {
-							id
-							acl {
-			            roles {
-                    roleId
-                    read
-                    write
-                  }
+			mutation createSecret {
+				createSecret(input: { fields: { name: "n" } }) {
+					secret {
+						id
+						acl {
+							roles {
+								roleId
+								read
+								write
 							}
 						}
 					}
 				}
-			`)
+			}
+		`)
 
 		expect(res.createSecret.secret.acl).toBeNull()
 
@@ -91,23 +89,23 @@ describe('Security tests', () => {
 		expect(res2.secret.acl).toBeNull()
 
 		const res3 = await userClient.request<any>(gql`
-            query secrets {
-              secrets{
-                edges {
-                    node {
-                        id
-                        acl {
-                          roles {
-                              roleId
-                              read
-                              write
-                          }
-                        }
-                    }
-                }
-              }
-            }
-          `)
+			query secrets {
+				secrets {
+					edges {
+						node {
+							id
+							acl {
+								roles {
+									roleId
+									read
+									write
+								}
+							}
+						}
+					}
+				}
+			}
+		`)
 
 		expect(res3.secrets.edges[0].node.acl).toBeNull()
 
@@ -196,10 +194,10 @@ describe('Security tests', () => {
 
 		const session = new Session()
 
-		const { csrfToken, accessToken: validAccessToken } = await session.create(
-			userId,
-			{ wabe, isRoot: false },
-		)
+		const { csrfToken, accessToken: validAccessToken } = await session.create(userId, {
+			wabe,
+			isRoot: false,
+		})
 
 		const validCsrfClient = getUserClient(port, {
 			accessToken: validAccessToken,
@@ -314,9 +312,7 @@ describe('Security tests', () => {
 		expect(
 			userClient.request<any>(gql`
 				mutation createSecret {
-					createSecret(
-						input: { fields: { name: "n", secret: "s" } }
-					) {
+					createSecret(input: { fields: { name: "n", secret: "s" } }) {
 						secret {
 							id
 							secret
@@ -601,9 +597,7 @@ describe('Security tests', () => {
 		expect(
 			userClient.request(gql`
 				mutation createTest {
-					createTest(
-						input: { fields: { acl: { users: [{ userId: "2" }] } } }
-					) {
+					createTest(input: { fields: { acl: { users: [{ userId: "2" }] } } }) {
 						test {
 							id
 						}
@@ -783,9 +777,7 @@ describe('Security tests', () => {
 		expect(
 			userClient.request(gql`
 				mutation deleteTest1s {
-					deleteTest1s(
-						input: { where: { name: { equalTo: "test1" } } }
-					) {
+					deleteTest1s(input: { where: { name: { equalTo: "test1" } } }) {
 						edges {
 							node {
 								id
@@ -860,12 +852,7 @@ describe('Security tests', () => {
 		expect(
 			userClient.request(gql`
 				mutation updateTest1s {
-					updateTest1s(
-						input: {
-							where: { name: { equalTo: "test1" } }
-							fields: { name: "test1" }
-						}
-					) {
+					updateTest1s(input: { where: { name: { equalTo: "test1" } }, fields: { name: "test1" } }) {
 						edges {
 							node {
 								id
@@ -938,13 +925,7 @@ describe('Security tests', () => {
 		expect(
 			userClient.request<any>(gql`
 				mutation createTest2 {
-					createTest2(
-						input: {
-							fields: {
-								field1: { createAndAdd: [{ name: "toto" }] }
-							}
-						}
-					) {
+					createTest2(input: { fields: { field1: { createAndAdd: [{ name: "toto" }] } } }) {
 						test2 {
 							id
 						}
@@ -1015,13 +996,7 @@ describe('Security tests', () => {
 		expect(
 			userClient.request<any>(gql`
 				mutation createTest2 {
-					createTest2(
-						input: {
-							fields: {
-								field2: { createAndLink: { name: "toto" } }
-							}
-						}
-					) {
+					createTest2(input: { fields: { field2: { createAndLink: { name: "toto" } } } }) {
 						test2 {
 							id
 						}
@@ -1084,11 +1059,7 @@ describe('Security tests', () => {
 
 		await rootClient.request<any>(gql`
 			mutation createTest2 {
-				createTest2(
-					input: {
-						fields: { field1: { createAndAdd: [{ name: "toto" }] } }
-					}
-				) {
+				createTest2(input: { fields: { field1: { createAndAdd: [{ name: "toto" }] } } }) {
 					test2 {
 						id
 					}
@@ -1178,11 +1149,7 @@ describe('Security tests', () => {
 
 		await rootClient.request<any>(gql`
 			mutation createTest2 {
-				createTest2(
-					input: {
-						fields: { field2: { createAndLink: { name: "toto" } } }
-					}
-				) {
+				createTest2(input: { fields: { field2: { createAndLink: { name: "toto" } } } }) {
 					test2 {
 						id
 					}
@@ -2402,14 +2369,7 @@ describe('Security tests', () => {
 
 		const objectCreated = await rootClient.request<any>(gql`
 			mutation createTest {
-				createTest(
-					input: {
-						fields: {
-							name: "test"
-							pointer: { createAndLink: { name: "tata" } }
-						}
-					}
-				) {
+				createTest(input: { fields: { name: "test", pointer: { createAndLink: { name: "tata" } } } }) {
 					test {
 						id
 						pointer {
@@ -2557,14 +2517,7 @@ describe('Security tests', () => {
 
 		const objectCreated = await rootClient.request<any>(gql`
 			mutation createTest {
-				createTest(
-					input: {
-						fields: {
-							name: "test"
-							relation: { createAndAdd: [{ name: "tata" }] }
-						}
-					}
-				) {
+				createTest(input: { fields: { name: "test", relation: { createAndAdd: [{ name: "tata" }] } } }) {
 					test {
 						id
 						relation {
@@ -2721,14 +2674,7 @@ describe('Security tests', () => {
 		expect(
 			userClient.request<any>(gql`
 				mutation createTest {
-					createTest(
-						input: {
-							fields: {
-								name: "test"
-								pointer: { createAndLink: { name: "tata" } }
-							}
-						}
-					) {
+					createTest(input: { fields: { name: "test", pointer: { createAndLink: { name: "tata" } } } }) {
 						test {
 							id
 							pointer {
@@ -2881,13 +2827,12 @@ describe('Security tests', () => {
 		const client = getAnonymousClient(port)
 		const rootClient = getGraphqlClient(port)
 
-		const { userClient, refreshToken, accessToken } =
-			await createUserAndUpdateRole({
-				anonymousClient: client,
-				port,
-				roleName: 'Client',
-				rootClient,
-			})
+		const { userClient, refreshToken, accessToken } = await createUserAndUpdateRole({
+			anonymousClient: client,
+			port,
+			roleName: 'Client',
+			rootClient,
+		})
 
 		const resAfterRefresh = await userClient.request<any>(graphql.refresh, {
 			input: {
@@ -3247,9 +3192,7 @@ describe('Security tests', () => {
 		expect(
 			userClient.request<any>(gql`
 				mutation deleteTests {
-					deleteTests(
-						input: { where: { name: { equalTo: "test" } } }
-					) {
+					deleteTests(input: { where: { name: { equalTo: "test" } } }) {
 						edges {
 							node {
 								id
@@ -3447,15 +3390,7 @@ const graphql = {
 	deleteUsers: gql`
 		mutation deleteUser {
 			deleteUsers(
-				input: {
-					where: {
-						authentication: {
-							emailPassword: {
-								email: { equalTo: "email@test.fr" }
-							}
-						}
-					}
-				}
+				input: { where: { authentication: { emailPassword: { email: { equalTo: "email@test.fr" } } } } }
 			) {
 				edges {
 					node {

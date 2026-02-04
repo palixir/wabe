@@ -23,22 +23,22 @@ describe('signInWithResolver integration test', () => {
 		})
 		const res = await adminClient.request<any>(
 			gql`
-      mutation signInWith($input: SignInWithInput!) {
-        signInWith(input: $input) {
-          user {
-            id
-            authentication {
-              emailPassword {
-                email
-              }
-            }
-            role {
-                name
-            }
-          }
-        }
-      }
-    `,
+				mutation signInWith($input: SignInWithInput!) {
+					signInWith(input: $input) {
+						user {
+							id
+							authentication {
+								emailPassword {
+									email
+								}
+							}
+							role {
+								name
+							}
+						}
+					}
+				}
+			`,
 			{
 				input: {
 					authentication: {

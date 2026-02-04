@@ -162,14 +162,14 @@ describe('Database', () => {
 
 		const res = await client.request<any>(
 			gql`
-    mutation signUpWith($input: SignUpWithInput!) {
-      signUpWith(input: $input) {
-        id
-        accessToken
-        refreshToken
-      }
-    }
-  `,
+				mutation signUpWith($input: SignUpWithInput!) {
+					signUpWith(input: $input) {
+						id
+						accessToken
+						refreshToken
+					}
+				}
+			`,
 			{
 				input: {
 					authentication: {
@@ -191,21 +191,21 @@ describe('Database', () => {
 		const rootClient = getGraphqlClient(wabe.config.port)
 
 		const createdObject = await rootClient.request<any>(gql`
-        mutation createTest2{
-            createTest2(input: {fields : {test3: {createAndAdd: [{name: "test"}]}}}) {
-                test2{
-                    id
-                    test3{
-                        edges {
-                            node {
-                                name
-                            }
-                        }
-                    }
-                }
-            }
-        }
-      `)
+			mutation createTest2 {
+				createTest2(input: { fields: { test3: { createAndAdd: [{ name: "test" }] } } }) {
+					test2 {
+						id
+						test3 {
+							edges {
+								node {
+									name
+								}
+							}
+						}
+					}
+				}
+			}
+		`)
 
 		const res = await wabe.controllers.database.getObject({
 			// @ts-expect-error
@@ -231,36 +231,36 @@ describe('Database', () => {
 		const rootClient = getGraphqlClient(wabe.config.port)
 
 		const res = await rootClient.request<any>(gql`
-        mutation createTest2{
-            createTest2(input: {fields : {userTest: {createAndAdd: [{name: "test"}]}}}) {
-                test2{
-                    id
-                    userTest{
-                        edges {
-                            node {
-                                name
-                            }
-                        }
-                    }
-                }
-            }
-        }
-      `)
+			mutation createTest2 {
+				createTest2(input: { fields: { userTest: { createAndAdd: [{ name: "test" }] } } }) {
+					test2 {
+						id
+						userTest {
+							edges {
+								node {
+									name
+								}
+							}
+						}
+					}
+				}
+			}
+		`)
 
 		expect(res.createTest2.test2.userTest.edges[0].node.name).toEqual('test')
 
 		const res2 = await rootClient.request<any>(gql`
-        mutation createTest2{
-            createTest2(input: {fields : {userTest2: {createAndLink: {name: "test"}}}}) {
-                test2{
-                    id
-                    userTest2{
-                        name
-                    }
-                }
-            }
-        }
-      `)
+			mutation createTest2 {
+				createTest2(input: { fields: { userTest2: { createAndLink: { name: "test" } } } }) {
+					test2 {
+						id
+						userTest2 {
+							name
+						}
+					}
+				}
+			}
+		`)
 
 		expect(res2.createTest2.test2.userTest2.name).toEqual('test')
 	})
@@ -269,42 +269,42 @@ describe('Database', () => {
 		const rootClient = getGraphqlClient(wabe.config.port)
 
 		await rootClient.request<any>(gql`
-        mutation createTest2{
-            createTest2(input: {fields : {age: 20}}) {
-                test2{
-                    id
-                    userTest2{
-                        id
-                    }
-                }
-            }
-        }
-    `)
+			mutation createTest2 {
+				createTest2(input: { fields: { age: 20 } }) {
+					test2 {
+						id
+						userTest2 {
+							id
+						}
+					}
+				}
+			}
+		`)
 
 		await rootClient.request<any>(gql`
-        mutation createTest2{
-            createTest2(input: {fields : {userTest2: {createAndLink: {name: "test"}}}}) {
-                test2{
-                    id
-                }
-            }
-        }
-      `)
+			mutation createTest2 {
+				createTest2(input: { fields: { userTest2: { createAndLink: { name: "test" } } } }) {
+					test2 {
+						id
+					}
+				}
+			}
+		`)
 
 		const res = await rootClient.request<any>(gql`
-      query test2s{
-        test2s{
-          edges {
-              node {
-                id
-                userTest2{
-                    id
-                }
-              }
-          }
-        }
-      }
-    `)
+			query test2s {
+				test2s {
+					edges {
+						node {
+							id
+							userTest2 {
+								id
+							}
+						}
+					}
+				}
+			}
+		`)
 
 		expect(res.test2s.edges[0].node.userTest2).toBeNull()
 		expect(res.test2s.edges[1].node.userTest2.id).toBeDefined()
@@ -314,57 +314,57 @@ describe('Database', () => {
 		const rootClient = getGraphqlClient(wabe.config.port)
 
 		await rootClient.request<any>(gql`
-        mutation createTest2{
-            createTest2(input: {fields : {age: 20}}) {
-                test2{
-                    id
-                    userTest{
-                        edges {
-                            node {
-                                name
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    `)
+			mutation createTest2 {
+				createTest2(input: { fields: { age: 20 } }) {
+					test2 {
+						id
+						userTest {
+							edges {
+								node {
+									name
+								}
+							}
+						}
+					}
+				}
+			}
+		`)
 
 		await rootClient.request<any>(gql`
-        mutation createTest2{
-            createTest2(input: {fields : {userTest: {createAndAdd: [{name: "test"}]}}}) {
-                test2{
-                    id
-                    userTest{
-                        edges {
-                            node {
-                                name
-                            }
-                        }
-                    }
-                }
-            }
-        }
-      `)
+			mutation createTest2 {
+				createTest2(input: { fields: { userTest: { createAndAdd: [{ name: "test" }] } } }) {
+					test2 {
+						id
+						userTest {
+							edges {
+								node {
+									name
+								}
+							}
+						}
+					}
+				}
+			}
+		`)
 
 		const res = await rootClient.request<any>(gql`
-      query test2s{
-        test2s{
-          edges {
-              node {
-                id
-                userTest{
-                edges {
-                    node {
-                    name
-                    }
-                }
-                }
-              }
-          }
-        }
-      }
-    `)
+			query test2s {
+				test2s {
+					edges {
+						node {
+							id
+							userTest {
+								edges {
+									node {
+										name
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		`)
 
 		expect(res.test2s.edges[0].node.userTest).toBeNull()
 		expect(res.test2s.edges[1].node.userTest.edges.length).toEqual(1)
@@ -876,14 +876,10 @@ describe('Database', () => {
 	})
 
 	it("should return all elements of a class when the object doesn't have ACL but the user is connected", async () => {
-		const adminClient = await getAdminUserClient(
-			context.wabe.config.port,
-			context.wabe,
-			{
-				email: 'email@test.fr',
-				password: 'password',
-			},
-		)
+		const adminClient = await getAdminUserClient(context.wabe.config.port, context.wabe, {
+			email: 'email@test.fr',
+			password: 'password',
+		})
 
 		await wabe.controllers.database.createObject({
 			className: 'User',
@@ -907,12 +903,7 @@ describe('Database', () => {
 		await wabe.controllers.database.createObjects({
 			className: 'User',
 			context,
-			data: [
-				{ name: 'test1' },
-				{ name: 'test2' },
-				{ name: 'test3' },
-				{ name: 'test4' },
-			],
+			data: [{ name: 'test1' }, { name: 'test2' }, { name: 'test3' }, { name: 'test4' }],
 			select: {},
 		})
 
@@ -1310,13 +1301,12 @@ describe('Database', () => {
 		})
 
 		// Test exists: false - should return only objects without name field
-		const objectsWithoutName =
-			await context.wabe.controllers.database.getObjects({
-				className: 'Test',
-				where: { name: { exists: false } },
-				context,
-				select: { name: true },
-			})
+		const objectsWithoutName = await context.wabe.controllers.database.getObjects({
+			className: 'Test',
+			where: { name: { exists: false } },
+			context,
+			select: { name: true },
+		})
 
 		expect(objectsWithoutName.length).toBe(2)
 		expect(objectsWithoutName.every((obj) => !obj?.name)).toBe(true)
@@ -1338,48 +1328,45 @@ describe('Database', () => {
 		})
 
 		// Test with AND condition
-		const objectsWithNameAndAge =
-			await context.wabe.controllers.database.getObjects({
-				className: 'Test',
-				// @ts-expect-error
-				where: {
-					AND: [{ name: { exists: true } }, { age: { exists: true } }],
-				},
-				context,
-				select: { name: true, age: true },
-			})
+		const objectsWithNameAndAge = await context.wabe.controllers.database.getObjects({
+			className: 'Test',
+			// @ts-expect-error
+			where: {
+				AND: [{ name: { exists: true } }, { age: { exists: true } }],
+			},
+			context,
+			select: { name: true, age: true },
+		})
 
 		expect(objectsWithNameAndAge.length).toBe(2)
-		expect(objectsWithNameAndAge.every((obj) => obj?.name && obj?.age)).toBe(
-			true,
-		)
+		expect(objectsWithNameAndAge.every((obj) => obj?.name && obj?.age)).toBe(true)
 	})
 })
 
 const graphql = {
 	signUpWith: gql`
-      mutation signUpWith($input: SignUpWithInput!) {
-        signUpWith(input:	$input){
-          id
-          accessToken
-          refreshToken
-        }
-      }
-    `,
+		mutation signUpWith($input: SignUpWithInput!) {
+			signUpWith(input: $input) {
+				id
+				accessToken
+				refreshToken
+			}
+		}
+	`,
 	users: gql`
-    query users {
-      users {
-        edges {
-            node {
-               id
-               email
-               role {
-                 id
-                 name
-               }
-            }
-        }
-      }
-    }
-    `,
+		query users {
+			users {
+				edges {
+					node {
+						id
+						email
+						role {
+							id
+							name
+						}
+					}
+				}
+			}
+		}
+	`,
 }

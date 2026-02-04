@@ -28,11 +28,7 @@ const expandFragmentSpread = (
 		throw new Error(`Fragment "${fragmentName}" not found`)
 	}
 
-	return extractFieldsFromSetNode(
-		fragmentDef.selectionSet,
-		className,
-		fragments,
-	)
+	return extractFieldsFromSetNode(fragmentDef.selectionSet, className, fragments)
 }
 
 export const extractFieldsFromSetNode = (
@@ -44,8 +40,7 @@ export const extractFieldsFromSetNode = (
 	const ignoredFields = ['edges', 'node', 'clientMutationId', 'ok']
 	const shouldIgnoreClassField = options?.ignoreClassField ?? true
 
-	if (shouldIgnoreClassField && className)
-		ignoredFields.push(firstLetterInLowerCase(className))
+	if (shouldIgnoreClassField && className) ignoredFields.push(firstLetterInLowerCase(className))
 
 	return selectionSet.selections?.reduce(
 		(acc, selection) => {
@@ -65,16 +60,10 @@ export const extractFieldsFromSetNode = (
 			//@ts-expect-error
 			const currentValue = selection.name.value
 
-			if (
-				selection.selectionSet?.selections &&
-				selection.selectionSet?.selections?.length > 0
-			) {
-				const res = extractFieldsFromSetNode(
-					selection.selectionSet,
-					className,
-					fragments,
-					{ ignoreClassField: false },
-				)
+			if (selection.selectionSet?.selections && selection.selectionSet?.selections?.length > 0) {
+				const res = extractFieldsFromSetNode(selection.selectionSet, className, fragments, {
+					ignoreClassField: false,
+				})
 
 				if (ignoredFields.indexOf(currentValue) === -1)
 					return {
@@ -101,11 +90,7 @@ const getFieldsFromInfo = (info: GraphQLResolveInfo, className: string) => {
 
 	if (!selectionSet) throw new Error('No output fields provided')
 
-	const fields = extractFieldsFromSetNode(
-		selectionSet,
-		className,
-		info.fragments,
-	)
+	const fields = extractFieldsFromSetNode(selectionSet, className, info.fragments)
 
 	if (!fields) throw new Error('No fields provided')
 
@@ -137,17 +122,12 @@ export const getFieldsOfClassName = ({
 
 		// If the name of the field is include in the field provided
 		// For example if a pointer field name "Role" is include in the field "role.name"
-		if (
-			Object.keys(classFields).find((classField) => field.includes(classField))
-		)
-			return true
+		if (Object.keys(classFields).find((classField) => field.includes(classField))) return true
 
 		return false
 	})
 
-	const othersFields = fields.filter(
-		(field) => !sameFieldsAsClass.includes(field),
-	)
+	const othersFields = fields.filter((field) => !sameFieldsAsClass.includes(field))
 
 	return { classFields: sameFieldsAsClass, othersFields }
 }
@@ -227,9 +207,7 @@ export const executeRelationOnFields = ({
 	)
 }
 
-const transformOrder = (
-	order?: Array<string>,
-): Record<string, 'ASC' | 'DESC'> =>
+const transformOrder = (order?: Array<string>): Record<string, 'ASC' | 'DESC'> =>
 	order?.reduce(
 		(acc, currentOrder) => {
 			const result = Object.entries(currentOrder)[0]
@@ -312,13 +290,12 @@ export const mutationToCreateObject = async (
 	})
 
 	return {
-		[firstLetterInLowerCase(className)]:
-			await context.wabe.controllers.database.createObject({
-				className,
-				data: updatedFieldsToCreate,
-				select,
-				context,
-			}),
+		[firstLetterInLowerCase(className)]: await context.wabe.controllers.database.createObject({
+			className,
+			data: updatedFieldsToCreate,
+			select,
+			context,
+		}),
 		ok: true,
 	}
 }
@@ -376,14 +353,13 @@ export const mutationToUpdateObject = async (
 	})
 
 	return {
-		[firstLetterInLowerCase(className)]:
-			await context.wabe.controllers.database.updateObject({
-				className,
-				id: args.input?.id,
-				data: updatedFields,
-				select,
-				context,
-			}),
+		[firstLetterInLowerCase(className)]: await context.wabe.controllers.database.updateObject({
+			className,
+			id: args.input?.id,
+			data: updatedFields,
+			select,
+			context,
+		}),
 		ok: true,
 	}
 }
@@ -431,13 +407,12 @@ export const mutationToDeleteObject = async (
 	const select = getFieldsFromInfo(info, className)
 
 	return {
-		[firstLetterInLowerCase(className)]:
-			await context.wabe.controllers.database.deleteObject({
-				className,
-				id: args.input?.id,
-				select,
-				context,
-			}),
+		[firstLetterInLowerCase(className)]: await context.wabe.controllers.database.deleteObject({
+			className,
+			id: args.input?.id,
+			select,
+			context,
+		}),
 		ok: true,
 	}
 }

@@ -43,9 +43,7 @@ describe('Postgres adapter', () => {
 
 			// Delete all data from each table
 			await Promise.all(
-				tablesResult.rows.map((row) =>
-					client.query(`TRUNCATE TABLE "${row.tablename}" CASCADE`),
-				),
+				tablesResult.rows.map((row) => client.query(`TRUNCATE TABLE "${row.tablename}" CASCADE`)),
 			)
 		} finally {
 			client.release()
@@ -409,10 +407,7 @@ describe('Postgres adapter', () => {
 
 		expect(initialCheck.rows[0].exists).toBe(false)
 
-		await postgresAdapter.createClassIfNotExist(
-			'Test',
-			context.wabe.config.schema || {},
-		)
+		await postgresAdapter.createClassIfNotExist('Test', context.wabe.config.schema || {})
 
 		const finalCheck = await client.query(`
         SELECT EXISTS (
@@ -509,9 +504,7 @@ describe('Postgres adapter', () => {
 		})
 
 		expect(res.length).toEqual(1)
-		expect(res[0]).toEqual(
-			expect.objectContaining({ field1: 'test', field2: 'test2' }),
-		)
+		expect(res[0]).toEqual(expect.objectContaining({ field1: 'test', field2: 'test2' }))
 
 		await wabe2.close()
 
@@ -1958,9 +1951,7 @@ describe('Postgres adapter', () => {
 		})
 
 		expect(res.length).toEqual(1)
-		expect(res[0]?.authentication?.emailPassword?.email).toEqual(
-			'email@test.fr',
-		)
+		expect(res[0]?.authentication?.emailPassword?.email).toEqual('email@test.fr')
 		expect(res[0]?.authentication?.emailPassword?.password).toEqual('password')
 	})
 

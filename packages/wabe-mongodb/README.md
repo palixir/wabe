@@ -58,30 +58,30 @@ bun install wabe-mongodb
 ## 🎯 Basic example
 
 ```ts
-import { Wabe } from "wabe";
-import { MongoAdapter } from "wabe-mongodb";
+import { Wabe } from 'wabe'
+import { MongoAdapter } from 'wabe-mongodb'
 
 const run = async () => {
-  // Ensure your database is running before run the file
+	// Ensure your database is running before run the file
 
-  const wabe = new Wabe({
-    isProduction: process.env.NODE_ENV === "production",
-    // Root key example (must be long minimal 64 characters, you can generate it online)
-    rootKey:
-      "0uwFvUxM$ceFuF1aEtTtZMa7DUN2NZudqgY5ve5W*QCyb58cwMj9JeoaV@d#%29v&aJzswuudVU1%nAT+rxS0Bh&OkgBYc0PH18*",
-    database: {
-      adapter: new MongoAdapter({
-        databaseName: "WabeApp",
-        databaseUrl: "mongodb://127.0.0.1:27045",
-      }),
-    },
-    port: 3000,
-  });
+	const wabe = new Wabe({
+		isProduction: process.env.NODE_ENV === 'production',
+		// Root key example (must be long minimal 64 characters, you can generate it online)
+		rootKey:
+			'0uwFvUxM$ceFuF1aEtTtZMa7DUN2NZudqgY5ve5W*QCyb58cwMj9JeoaV@d#%29v&aJzswuudVU1%nAT+rxS0Bh&OkgBYc0PH18*',
+		database: {
+			adapter: new MongoAdapter({
+				databaseName: 'WabeApp',
+				databaseUrl: 'mongodb://127.0.0.1:27045',
+			}),
+		},
+		port: 3000,
+	})
 
-  await wabe.start();
-};
+	await wabe.start()
+}
 
-await run();
+await run()
 ```
 
 Then, from your frontend, call the auto-generated GraphQL API:

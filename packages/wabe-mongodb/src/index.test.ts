@@ -1,12 +1,4 @@
-import {
-	afterAll,
-	beforeAll,
-	beforeEach,
-	describe,
-	expect,
-	it,
-	spyOn,
-} from 'bun:test'
+import { afterAll, beforeAll, beforeEach, describe, expect, it, spyOn } from 'bun:test'
 import { fail } from 'node:assert'
 import { ObjectId } from 'mongodb'
 import { notEmpty, type Wabe, type WabeContext } from 'wabe'
@@ -393,12 +385,11 @@ describe('Mongo adapter', () => {
 	})
 
 	it('should retry on connection error', async () => {
-		const spyMongoClientConnect = spyOn(
-			mongoAdapter.client,
-			'connect',
-		).mockImplementationOnce(() => {
-			throw new Error('Connection error')
-		})
+		const spyMongoClientConnect = spyOn(mongoAdapter.client, 'connect').mockImplementationOnce(
+			() => {
+				throw new Error('Connection error')
+			},
+		)
 
 		await mongoAdapter.initializeDatabase(wabe.config.schema || {})
 
@@ -914,10 +905,7 @@ describe('Mongo adapter', () => {
 	it('should create class', () => {
 		if (!mongoAdapter.database) fail()
 
-		const spyCollection = spyOn(
-			mongoAdapter.database,
-			'collection',
-		).mockReturnValue({} as any)
+		const spyCollection = spyOn(mongoAdapter.database, 'collection').mockReturnValue({} as any)
 
 		mongoAdapter.createClassIfNotExist('User', context.wabe.config.schema || {})
 
@@ -997,9 +985,7 @@ describe('Mongo adapter', () => {
 			className: 'User',
 			where: {
 				id: {
-					equalTo: ObjectId.createFromHexString(
-						insertedObjects[0]?.id || '',
-					).toString(),
+					equalTo: ObjectId.createFromHexString(insertedObjects[0]?.id || '').toString(),
 				},
 			},
 			context,
@@ -1893,16 +1879,8 @@ describe('Mongo adapter', () => {
 		expect(where).toEqual({
 			name: 'John',
 			age: { $gt: 20 },
-			$or: [
-				{ age: { $lt: 10 } },
-				{ name: 'John' },
-				{ $or: [{ name: 'Tata' }] },
-			],
-			$and: [
-				{ age: { $lt: 10 } },
-				{ name: 'John' },
-				{ $and: [{ name: 'Tata' }] },
-			],
+			$or: [{ age: { $lt: 10 } }, { name: 'John' }, { $or: [{ name: 'Tata' }] }],
+			$and: [{ age: { $lt: 10 } }, { name: 'John' }, { $and: [{ name: 'Tata' }] }],
 		})
 	})
 
@@ -1955,9 +1933,7 @@ describe('Mongo adapter', () => {
 		})
 
 		expect(res.length).toEqual(1)
-		expect(res[0]?.authentication?.emailPassword?.email).toEqual(
-			'email@test.fr',
-		)
+		expect(res[0]?.authentication?.emailPassword?.email).toEqual('email@test.fr')
 		expect(res[0]?.authentication?.emailPassword?.password).toEqual('password')
 	})
 
@@ -1991,9 +1967,7 @@ describe('Mongo adapter', () => {
 		})
 
 		expect(res.length).toEqual(1)
-		expect(res[0]?.authentication?.emailPassword?.email).toEqual(
-			'email@test.fr',
-		)
+		expect(res[0]?.authentication?.emailPassword?.email).toEqual('email@test.fr')
 		expect(res[0]?.authentication?.emailPassword?.password).toBeUndefined()
 	})
 
@@ -2043,9 +2017,7 @@ describe('Mongo adapter', () => {
 		})
 
 		expect(results.length).toBe(2)
-		expect(
-			results.every((doc) => doc?.name === undefined || doc?.name === null),
-		).toBe(true)
+		expect(results.every((doc) => doc?.name === undefined || doc?.name === null)).toBe(true)
 	})
 
 	it('should handle exists with null values correctly', async () => {

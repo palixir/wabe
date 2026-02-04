@@ -1,26 +1,18 @@
 import type { HookObject } from './HookObject'
 import type { WabeTypes } from '../server'
-import {
-	getNestedProperty,
-	getNewObjectAfterUpdateNestedProperty,
-} from '../utils'
+import { getNestedProperty, getNewObjectAfterUpdateNestedProperty } from '../utils'
 import { OperationType } from '.'
 import { hashArgon2, isArgon2Hash } from 'src/utils/crypto'
 
-const hashField = ({
-	value,
-}: {
-	value: ReturnType<typeof HookObject.prototype.getNewData>
-}) => {
+const hashField = ({ value }: { value: ReturnType<typeof HookObject.prototype.getNewData> }) => {
 	if (!value || typeof value !== 'string' || isArgon2Hash(value)) return value
 
 	return hashArgon2(value)
 }
 
-export async function hashFieldHook<
-	T extends WabeTypes,
-	K extends keyof WabeTypes['types'],
->(hookObject: HookObject<T, K>) {
+export async function hashFieldHook<T extends WabeTypes, K extends keyof WabeTypes['types']>(
+	hookObject: HookObject<T, K>,
+) {
 	if (
 		hookObject.operationType !== OperationType.BeforeCreate &&
 		hookObject.operationType !== OperationType.BeforeUpdate

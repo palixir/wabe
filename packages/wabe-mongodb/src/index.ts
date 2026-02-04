@@ -43,10 +43,7 @@ export const buildMongoOrderQuery = <
 	)
 }
 
-export const buildMongoWhereQuery = <
-	T extends WabeTypes,
-	K extends keyof T['types'],
->(
+export const buildMongoWhereQuery = <T extends WabeTypes, K extends keyof T['types']>(
 	where?: WhereType<T, K>,
 ): Record<string, any> => {
 	if (!where) return {}
@@ -61,13 +58,10 @@ export const buildMongoWhereQuery = <
 
 			if (value?.contains || value?.contains === null)
 				acc[keyToWrite] = {
-					...(typeof value.contains === 'object' &&
-					!Array.isArray(value.contains)
+					...(typeof value.contains === 'object' && !Array.isArray(value.contains)
 						? { $elemMatch: value.contains }
 						: {
-								$all: Array.isArray(value.contains)
-									? value.contains
-									: [value.contains],
+								$all: Array.isArray(value.contains) ? value.contains : [value.contains],
 							}),
 				}
 			if (value?.notContains || value?.notContains === null)
@@ -121,8 +115,7 @@ export const buildMongoWhereQuery = <
 			if (value?.greaterThanOrEqualTo || value?.greaterThanOrEqualTo === null)
 				acc[keyToWrite] = { $gte: value.greaterThanOrEqualTo }
 
-			if (value?.lessThan || value?.lessThan === null)
-				acc[keyToWrite] = { $lt: value.lessThan }
+			if (value?.lessThan || value?.lessThan === null) acc[keyToWrite] = { $lt: value.lessThan }
 			if (value?.lessThanOrEqualTo || value?.lessThanOrEqualTo === null)
 				acc[keyToWrite] = { $lte: value.lessThanOrEqualTo }
 
@@ -189,19 +182,12 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
 		await this.client.close()
 	}
 
-	createClassIfNotExist(
-		className: keyof T['types'],
-		schema: SchemaInterface<T>,
-	) {
-		if (!this.database)
-			throw new Error('Connection to database is not established')
+	createClassIfNotExist(className: keyof T['types'], schema: SchemaInterface<T>) {
+		if (!this.database) throw new Error('Connection to database is not established')
 
-		const schemaClass = schema?.classes?.find(
-			(currentClass) => currentClass.name === className,
-		)
+		const schemaClass = schema?.classes?.find((currentClass) => currentClass.name === className)
 
-		if (!schemaClass)
-			throw new Error(`${className as string} is not defined in schema`)
+		if (!schemaClass) throw new Error(`${className as string} is not defined in schema`)
 
 		// @ts-expect-error
 		const collection = this.database.collection(className)
@@ -235,8 +221,7 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
 	}
 
 	async clearDatabase() {
-		if (!this.database)
-			throw new Error('Connection to database is not established')
+		if (!this.database) throw new Error('Connection to database is not established')
 
 		const collections = await this.database.collections()
 
@@ -248,8 +233,7 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
 	}
 
 	count<K extends keyof T['types']>(params: CountOptions<T, K>) {
-		if (!this.database)
-			throw new Error('Connection to database is not established')
+		if (!this.database) throw new Error('Connection to database is not established')
 
 		const { className, where } = params
 
@@ -264,8 +248,7 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
 	async getObject<K extends keyof T['types'], U extends keyof T['types'][K]>(
 		params: GetObjectOptions<T, K, U>,
 	): Promise<OutputType<T, K, U>> {
-		if (!this.database)
-			throw new Error('Connection to database is not established')
+		if (!this.database) throw new Error('Connection to database is not established')
 
 		const { className, id, select, where } = params
 
@@ -296,8 +279,7 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
 		U extends keyof T['types'][K],
 		W extends keyof T['types'][K],
 	>(params: GetObjectsOptions<T, K, U, W>): Promise<OutputType<T, K, W>[]> {
-		if (!this.database)
-			throw new Error('Connection to database is not established')
+		if (!this.database) throw new Error('Connection to database is not established')
 
 		const { className, select, where, offset, first, order } = params
 
@@ -331,8 +313,7 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
 		U extends keyof T['types'][K],
 		W extends keyof T['types'][K],
 	>(params: CreateObjectOptions<T, K, U, W>) {
-		if (!this.database)
-			throw new Error('Connection to database is not established')
+		if (!this.database) throw new Error('Connection to database is not established')
 
 		const { className, data } = params
 
@@ -350,8 +331,7 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
 		W extends keyof T['types'][K],
 		X extends keyof T['types'][K],
 	>(params: CreateObjectsOptions<T, K, U, W, X>) {
-		if (!this.database)
-			throw new Error('Connection to database is not established')
+		if (!this.database) throw new Error('Connection to database is not established')
 
 		const { className, data } = params
 
@@ -370,8 +350,7 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
 		U extends keyof T['types'][K],
 		W extends keyof T['types'][K],
 	>(params: UpdateObjectOptions<T, K, U, W>) {
-		if (!this.database)
-			throw new Error('Connection to database is not established')
+		if (!this.database) throw new Error('Connection to database is not established')
 
 		const { className, id, data, where } = params
 
@@ -401,8 +380,7 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
 		W extends keyof T['types'][K],
 		X extends keyof T['types'][K],
 	>(params: UpdateObjectsOptions<T, K, U, W, X>) {
-		if (!this.database)
-			throw new Error('Connection to database is not established')
+		if (!this.database) throw new Error('Connection to database is not established')
 
 		const { className, where, data, offset, first, order, context } = params
 
@@ -411,21 +389,20 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
 		// @ts-expect-error
 		const collection = this.database.collection(className)
 
-		const objectsBeforeUpdate =
-			await context.wabe.controllers.database.getObjects({
-				className,
-				where,
-				// @ts-expect-error
-				select: { id: true },
-				offset,
-				first,
-				// Root because we need the id at least for hook
-				context: {
-					...context,
-					isRoot: true,
-				},
-				order,
-			})
+		const objectsBeforeUpdate = await context.wabe.controllers.database.getObjects({
+			className,
+			where,
+			// @ts-expect-error
+			select: { id: true },
+			offset,
+			first,
+			// Root because we need the id at least for hook
+			context: {
+				...context,
+				isRoot: true,
+			},
+			order,
+		})
 
 		if (objectsBeforeUpdate.length === 0) return []
 
@@ -444,8 +421,7 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
 	async deleteObject<K extends keyof T['types'], U extends keyof T['types'][K]>(
 		params: DeleteObjectOptions<T, K, U>,
 	) {
-		if (!this.database)
-			throw new Error('Connection to database is not established')
+		if (!this.database) throw new Error('Connection to database is not established')
 
 		const { className, id } = params
 
@@ -467,8 +443,7 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
 		U extends keyof T['types'][K],
 		W extends keyof T['types'][K],
 	>(params: DeleteObjectsOptions<T, K, U, W>) {
-		if (!this.database)
-			throw new Error('Connection to database is not established')
+		if (!this.database) throw new Error('Connection to database is not established')
 
 		const { className, where } = params
 

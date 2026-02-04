@@ -26,9 +26,7 @@ export const defaultSetEmail = (object: HookObject<DevWabeTypes, 'User'>) => {
 	updateEmail(object)
 }
 
-export const defaultSetEmailOnUpdate = (
-	object: HookObject<DevWabeTypes, 'User'>,
-) => {
+export const defaultSetEmailOnUpdate = (object: HookObject<DevWabeTypes, 'User'>) => {
 	if (object.isFieldUpdated('email')) return
 
 	updateEmail(object)

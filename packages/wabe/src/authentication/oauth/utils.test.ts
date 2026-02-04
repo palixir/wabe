@@ -12,9 +12,7 @@ describe('Oauth utils', () => {
 
 		const result = base64URLencode(content)
 
-		expect(resultWithPadding).toBe(
-			'n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg=',
-		)
+		expect(resultWithPadding).toBe('n4bQgYhMfWWaL+qgxVrQFaO/TxsrC4Is0V1sFbDwCgg=')
 		expect(result).toBe('n4bQgYhMfWWaL-qgxVrQFaO_TxsrC4Is0V1sFbDwCgg')
 	})
 

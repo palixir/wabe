@@ -60,19 +60,13 @@ export class Google implements OAuth2ProviderWithPKCE {
 		return url
 	}
 
-	async validateAuthorizationCode(
-		code: string,
-		codeVerifier: string,
-	): Promise<Tokens> {
+	async validateAuthorizationCode(code: string, codeVerifier: string): Promise<Tokens> {
 		const { access_token, expires_in, refresh_token, id_token } =
-			await this.client.validateAuthorizationCode<AuthorizationCodeResponseBody>(
-				code,
-				{
-					authenticateWith: 'request_body',
-					credentials: this.clientSecret,
-					codeVerifier,
-				},
-			)
+			await this.client.validateAuthorizationCode<AuthorizationCodeResponseBody>(code, {
+				authenticateWith: 'request_body',
+				credentials: this.clientSecret,
+				codeVerifier,
+			})
 
 		return {
 			accessToken: access_token,
@@ -84,13 +78,10 @@ export class Google implements OAuth2ProviderWithPKCE {
 
 	async refreshAccessToken(refreshToken: string): Promise<Tokens> {
 		const { access_token, expires_in } =
-			await this.client.refreshAccessToken<RefreshTokenResponseBody>(
-				refreshToken,
-				{
-					authenticateWith: 'request_body',
-					credentials: this.clientSecret,
-				},
-			)
+			await this.client.refreshAccessToken<RefreshTokenResponseBody>(refreshToken, {
+				authenticateWith: 'request_body',
+				credentials: this.clientSecret,
+			})
 
 		return {
 			accessToken: access_token,

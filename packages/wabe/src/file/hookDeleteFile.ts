@@ -15,13 +15,11 @@ const deleteFile = async (hookObject: HookObject<any, any>) => {
 
 				if (!fileName) return Promise.resolve()
 
-				if (!hookObject.context.wabe.controllers.file)
-					throw new Error('No file adapter found')
+				if (!hookObject.context.wabe.controllers.file) throw new Error('No file adapter found')
 
 				return hookObject.context.wabe.controllers.file?.deleteFile(fileName)
 			}),
 	)
 }
 
-export const defaultAfterDeleteFile = (hookObject: HookObject<any, any>) =>
-	deleteFile(hookObject)
+export const defaultAfterDeleteFile = (hookObject: HookObject<any, any>) => deleteFile(hookObject)

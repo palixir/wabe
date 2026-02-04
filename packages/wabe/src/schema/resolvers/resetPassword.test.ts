@@ -1,10 +1,6 @@
 import { describe, it, afterAll, beforeAll, expect, beforeEach } from 'bun:test'
 import { gql, type GraphQLClient } from 'graphql-request'
-import {
-	type DevWabeTypes,
-	getAnonymousClient,
-	getGraphqlClient,
-} from '../../utils/helper'
+import { type DevWabeTypes, getAnonymousClient, getGraphqlClient } from '../../utils/helper'
 import { setupTests, closeTests } from '../../utils/testHelper'
 import type { Wabe } from '../../server'
 import { OTP } from 'src'
@@ -50,16 +46,16 @@ describe('resetPasswordResolver', () => {
 		const {
 			users: { edges },
 		} = await getGraphqlClient(port).request<any>(gql`
-        query users {
-          users (where: {email: {equalTo: "toto@toto.fr"}}) {
-            edges {
-              node {
-                id
-              }
-            }
-          }
-        }
-    `)
+			query users {
+				users(where: { email: { equalTo: "toto@toto.fr" } }) {
+					edges {
+						node {
+							id
+						}
+					}
+				}
+			}
+		`)
 
 		const userId = edges[0].node.id
 
@@ -313,33 +309,33 @@ describe('resetPasswordResolver', () => {
 
 const graphql = {
 	signInWith: gql`
-      mutation signInWith($input: SignInWithInput!) {
-        signInWith(input: $input){
-          user {
-              id
-          }
-        }
-      }
-    `,
+		mutation signInWith($input: SignInWithInput!) {
+			signInWith(input: $input) {
+				user {
+					id
+				}
+			}
+		}
+	`,
 	createUser: gql`
-      mutation createUser($input: CreateUserInput!) {
-        createUser(input: $input) {
-          ok
-        }
-      }
-    `,
+		mutation createUser($input: CreateUserInput!) {
+			createUser(input: $input) {
+				ok
+			}
+		}
+	`,
 	createUserWithRoot: gql`
-      mutation createUser($input: CreateUserInput!) {
-        createUser(input: $input) {
-          user {
-            id
-          }
-        }
-      }
-    `,
+		mutation createUser($input: CreateUserInput!) {
+			createUser(input: $input) {
+				user {
+					id
+				}
+			}
+		}
+	`,
 	resetPassword: gql`
-      mutation resetPassword($input: ResetPasswordInput!) {
-        resetPassword(input: $input)
-      }
-  `,
+		mutation resetPassword($input: ResetPasswordInput!) {
+			resetPassword(input: $input)
+		}
+	`,
 }

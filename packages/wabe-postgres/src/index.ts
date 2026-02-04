@@ -19,9 +19,7 @@ import type {
 	SchemaInterface,
 } from 'wabe'
 
-const getSQLColumnCreateTableFromType = <T extends WabeTypes>(
-	type: TypeField<T>,
-) => {
+const getSQLColumnCreateTableFromType = <T extends WabeTypes>(type: TypeField<T>) => {
 	switch (type.type) {
 		case 'String':
 			return `TEXT${type.required ? ' NOT NULL' : ' DEFAULT NULL'}`
@@ -74,10 +72,7 @@ export const buildPostgresOrderQuery = <
 	return `ORDER BY ${orderClauses.join(', ')}`
 }
 
-export const buildPostgresWhereQueryAndValues = <
-	T extends WabeTypes,
-	K extends keyof T['types'],
->(
+export const buildPostgresWhereQueryAndValues = <T extends WabeTypes, K extends keyof T['types']>(
 	where?: WhereType<T, K>,
 	startParamIndex = 1,
 	parentKey?: string,
@@ -86,21 +81,16 @@ export const buildPostgresWhereQueryAndValues = <
 
 	const objectKeys = Object.keys(where) as Array<keyof WhereType<T, K>>
 
-	if (objectKeys.length === 0)
-		return { query: '', values: [], paramIndex: startParamIndex }
+	if (objectKeys.length === 0) return { query: '', values: [], paramIndex: startParamIndex }
 
 	const acc = objectKeys.reduce(
 		(acc, key) => {
 			const value = where[key]
 			const keyToWrite = key === 'id' ? '_id' : String(key)
 
-			const fullKey = parentKey
-				? `${parentKey}->>'${keyToWrite}'`
-				: `"${keyToWrite}"`
+			const fullKey = parentKey ? `${parentKey}->>'${keyToWrite}'` : `"${keyToWrite}"`
 
-			const simpleFullKey = parentKey
-				? `${parentKey}->'${keyToWrite}'`
-				: `"${keyToWrite}"`
+			const simpleFullKey = parentKey ? `${parentKey}->'${keyToWrite}'` : `"${keyToWrite}"`
 
 			if ('equalTo' in (value || {})) {
 				if (value?.equalTo === null || value?.equalTo === undefined) {
@@ -110,9 +100,7 @@ export const buildPostgresWhereQueryAndValues = <
 
 				acc.conditions.push(`${fullKey} = $${acc.paramIndex}`)
 				acc.values.push(
-					Array.isArray(value.equalTo)
-						? JSON.stringify(value.equalTo)
-						: value.equalTo,
+					Array.isArray(value.equalTo) ? JSON.stringify(value.equalTo) : value.equalTo,
 				)
 				acc.paramIndex++
 				return acc
@@ -126,9 +114,7 @@ export const buildPostgresWhereQueryAndValues = <
 
 				acc.conditions.push(`${fullKey} IS DISTINCT FROM $${acc.paramIndex}`)
 				acc.values.push(
-					Array.isArray(value.notEqualTo)
-						? JSON.stringify(value.notEqualTo)
-						: value.notEqualTo,
+					Array.isArray(value.notEqualTo) ? JSON.stringify(value.notEqualTo) : value.notEqualTo,
 				)
 				acc.paramIndex++
 				return acc
@@ -191,9 +177,7 @@ export const buildPostgresWhereQueryAndValues = <
 			}
 
 			if (value?.in && Array.isArray(value.in) && value.in.length > 0) {
-				const placeholders = value.in
-					.map(() => `$${acc.paramIndex++}`)
-					.join(', ')
+				const placeholders = value.in.map(() => `$${acc.paramIndex++}`).join(', ')
 
 				acc.conditions.push(`${fullKey} IN (${placeholders})`)
 
@@ -201,14 +185,8 @@ export const buildPostgresWhereQueryAndValues = <
 				return acc
 			}
 
-			if (
-				value?.notIn &&
-				Array.isArray(value.notIn) &&
-				value.notIn.length > 0
-			) {
-				const placeholders = value.notIn
-					.map(() => `$${acc.paramIndex++}`)
-					.join(', ')
+			if (value?.notIn && Array.isArray(value.notIn) && value.notIn.length > 0) {
+				const placeholders = value.notIn.map(() => `$${acc.paramIndex++}`).join(', ')
 				acc.conditions.push(`${fullKey} NOT IN (${placeholders})`)
 				acc.values.push(...value.notIn)
 				return acc
@@ -249,9 +227,7 @@ export const buildPostgresWhereQueryAndValues = <
 					return { query, values: orValues }
 				})
 
-				const orQueries = orConditions
-					.filter(({ query }) => query)
-					.map(({ query }) => `${query}`)
+				const orQueries = orConditions.filter(({ query }) => query).map(({ query }) => `${query}`)
 
 				if (orQueries.length > 0) {
 					acc.conditions.push(`(${orQueries.join(' OR ')})`)
@@ -276,9 +252,7 @@ export const buildPostgresWhereQueryAndValues = <
 					return { query, values: andValues }
 				})
 
-				const andQueries = andConditions
-					.filter(({ query }) => query)
-					.map(({ query }) => `${query}`)
+				const andQueries = andConditions.filter(({ query }) => query).map(({ query }) => `${query}`)
 
 				if (andQueries.length > 0) {
 					acc.conditions.push(`(${andQueries.join(' AND ')})`)
@@ -328,9 +302,7 @@ const computeValuesFromData = (data: Record<string, any>) => {
 	})
 }
 
-export class PostgresAdapter<T extends WabeTypes>
-	implements DatabaseAdapter<T>
-{
+export class PostgresAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
 	public options: AdapterOptions
 	public postgresPool: Pool
 	public pool: Pool
@@ -352,13 +324,11 @@ export class PostgresAdapter<T extends WabeTypes>
 		const client = await this.postgresPool.connect()
 
 		try {
-			const res = await client.query(
-				'SELECT datname FROM pg_database WHERE datname = $1',
-				[this.options.databaseName],
-			)
+			const res = await client.query('SELECT datname FROM pg_database WHERE datname = $1', [
+				this.options.databaseName,
+			])
 
-			if (res.rowCount === 0)
-				await client.query(`CREATE DATABASE "${this.options.databaseName}"`)
+			if (res.rowCount === 0) await client.query(`CREATE DATABASE "${this.options.databaseName}"`)
 
 			await Promise.all(
 				(schema.classes || []).map((classSchema) => {
@@ -395,16 +365,10 @@ export class PostgresAdapter<T extends WabeTypes>
 		if (!this.postgresPool.ended) await this.postgresPool.end()
 	}
 
-	async createClassIfNotExist(
-		className: keyof T['types'],
-		schema: SchemaInterface<T>,
-	) {
-		const schemaClass = schema?.classes?.find(
-			(currentClass) => currentClass.name === className,
-		)
+	async createClassIfNotExist(className: keyof T['types'], schema: SchemaInterface<T>) {
+		const schemaClass = schema?.classes?.find((currentClass) => currentClass.name === className)
 
-		if (!schemaClass)
-			throw new Error(`${String(className)} is not defined in schema`)
+		if (!schemaClass) throw new Error(`${String(className)} is not defined in schema`)
 
 		const client = await this.pool.connect()
 
@@ -514,8 +478,7 @@ export class PostgresAdapter<T extends WabeTypes>
 						.map((key) => `"${key === 'id' ? '_id' : key}"`)
 				: []
 
-			const selectExpression =
-				selectFields.length > 0 ? selectFields.join(', ') : '*'
+			const selectExpression = selectFields.length > 0 ? selectFields.join(', ') : '*'
 
 			const result = await client.query(
 				`SELECT ${selectExpression} FROM "${String(
@@ -562,8 +525,7 @@ export class PostgresAdapter<T extends WabeTypes>
 						.map((key) => `"${key === 'id' ? '_id' : key}"`)
 				: []
 
-			const selectExpression =
-				selectFields.length > 0 ? selectFields.join(', ') : '*'
+			const selectExpression = selectFields.length > 0 ? selectFields.join(', ') : '*'
 
 			const result = await client.query(
 				`SELECT ${selectExpression} FROM "${String(
@@ -619,9 +581,7 @@ export class PostgresAdapter<T extends WabeTypes>
 		U extends keyof T['types'][K],
 		W extends keyof T['types'][K],
 		X extends keyof T['types'][K],
-	>(
-		params: CreateObjectsOptions<T, K, U, W, X>,
-	): Promise<Array<{ id: string }>> {
+	>(params: CreateObjectsOptions<T, K, U, W, X>): Promise<Array<{ id: string }>> {
 		const { className, data } = params
 
 		const client = await this.pool.connect()
@@ -640,9 +600,7 @@ export class PostgresAdapter<T extends WabeTypes>
 				return result.rows.map((row) => ({ id: row._id }))
 			}
 
-			const allColumns = Array.from(
-				new Set(data.flatMap((item) => Object.keys(item))),
-			)
+			const allColumns = Array.from(new Set(data.flatMap((item) => Object.keys(item))))
 
 			const columns = allColumns.map((column) => `"${column}"`)
 
@@ -655,9 +613,7 @@ export class PostgresAdapter<T extends WabeTypes>
 
 			const placeholders = data.map((_, rowIndex) => {
 				const offset = rowIndex * allColumns.length
-				return `(${allColumns
-					.map((_, colIndex) => `$${offset + colIndex + 1}`)
-					.join(', ')})`
+				return `(${allColumns.map((_, colIndex) => `$${offset + colIndex + 1}`).join(', ')})`
 			})
 
 			const result = await client.query(
@@ -684,16 +640,11 @@ export class PostgresAdapter<T extends WabeTypes>
 
 		try {
 			const dataKeys = Object.keys(data)
-			const { query, values } = buildPostgresWhereQueryAndValues(
-				where,
-				dataKeys.length + 2,
-			)
+			const { query, values } = buildPostgresWhereQueryAndValues(where, dataKeys.length + 2)
 
 			const whereClause = query ? `AND ${query}` : ''
 
-			const setClause = dataKeys
-				.map((key, index) => `"${key}" = $${index + 2}`)
-				.join(', ')
+			const setClause = dataKeys.map((key, index) => `"${key}" = $${index + 2}`).join(', ')
 
 			const result = await client.query(
 				`UPDATE "${String(className)}" SET ${setClause} WHERE _id = $1 ${whereClause} RETURNING _id`,
@@ -713,34 +664,29 @@ export class PostgresAdapter<T extends WabeTypes>
 		U extends keyof T['types'][K],
 		W extends keyof T['types'][K],
 		X extends keyof T['types'][K],
-	>(
-		params: UpdateObjectsOptions<T, K, U, W, X>,
-	): Promise<Array<{ id: string }>> {
+	>(params: UpdateObjectsOptions<T, K, U, W, X>): Promise<Array<{ id: string }>> {
 		const { className, where, data, offset, first, context, order } = params
 
 		const client = await this.pool.connect()
 
 		try {
-			const objectsBeforeUpdate =
-				await context.wabe.controllers.database.getObjects({
-					className,
-					where,
-					// @ts-expect-error
-					select: { id: true },
-					offset,
-					first,
-					context: {
-						...context,
-						isRoot: true,
-					},
-					order,
-				})
+			const objectsBeforeUpdate = await context.wabe.controllers.database.getObjects({
+				className,
+				where,
+				// @ts-expect-error
+				select: { id: true },
+				offset,
+				first,
+				context: {
+					...context,
+					isRoot: true,
+				},
+				order,
+			})
 
 			if (objectsBeforeUpdate.length === 0) return []
 
-			const objectIds = objectsBeforeUpdate
-				.filter(Boolean)
-				.map((obj: any) => obj.id) as string[]
+			const objectIds = objectsBeforeUpdate.filter(Boolean).map((obj: any) => obj.id) as string[]
 
 			await Promise.all(
 				objectIds.map(async (id) => {
@@ -755,9 +701,7 @@ export class PostgresAdapter<T extends WabeTypes>
 				}),
 			)
 
-			return objectsBeforeUpdate
-				.filter(Boolean)
-				.map((obj: any) => ({ id: obj.id }))
+			return objectsBeforeUpdate.filter(Boolean).map((obj: any) => ({ id: obj.id }))
 		} finally {
 			client.release()
 		}
@@ -800,10 +744,7 @@ export class PostgresAdapter<T extends WabeTypes>
 
 			const whereClause = query ? `WHERE ${query}` : ''
 
-			await client.query(
-				`DELETE FROM "${String(className)}" ${whereClause}`,
-				values,
-			)
+			await client.query(`DELETE FROM "${String(className)}" ${whereClause}`, values)
 		} finally {
 			client.release()
 		}

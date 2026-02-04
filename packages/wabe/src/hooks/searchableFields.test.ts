@@ -75,14 +75,7 @@ describe('searchablesFields', () => {
 			}),
 		).toEqual(['0', 'c', 'ce', 'cec', 'ceci'])
 
-		expect(stringExtraction('es pace')).toEqual([
-			'e',
-			'es',
-			'p',
-			'pa',
-			'pac',
-			'pace',
-		])
+		expect(stringExtraction('es pace')).toEqual(['e', 'es', 'p', 'pa', 'pac', 'pace'])
 	})
 
 	it('should complete the search fields of each object on insert', () => {
@@ -114,13 +107,7 @@ describe('searchablesFields', () => {
 
 		defaultSearchableFieldsBeforeCreate(hookObject)
 
-		expect(hookObject.getNewData().search).toEqual([
-			't',
-			'te',
-			'tes',
-			'test',
-			'20',
-		])
+		expect(hookObject.getNewData().search).toEqual(['t', 'te', 'tes', 'test', '20'])
 	})
 
 	it('should complete the search fields of each object on update', () => {
@@ -155,12 +142,6 @@ describe('searchablesFields', () => {
 
 		defaultSearchableFieldsBeforeUpdate(hookObject)
 
-		expect(hookObject.getNewData().search).toEqual([
-			't',
-			'ta',
-			'tat',
-			'tata',
-			'20',
-		])
+		expect(hookObject.getNewData().search).toEqual(['t', 'ta', 'tat', 'tata', '20'])
 	})
 })

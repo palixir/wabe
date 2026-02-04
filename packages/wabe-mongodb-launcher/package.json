@@ -1,14 +1,14 @@
 {
 	"name": "wabe-mongodb-launcher",
 	"version": "0.5.2",
+	"description": "Package to launch the mongodb for test",
 	"license": "Apache-2.0",
 	"main": "dist/index.js",
-	"description": "Package to launch the mongodb for test",
 	"scripts": {
 		"ci": "bun lint",
 		"build": "bun --filter wabe-build build:package $(pwd)",
-		"lint": "biome lint . --no-errors-on-unmatched",
-		"format": "biome format --write ."
+		"lint": "oxlint .",
+		"format": "oxfmt --write ."
 	},
 	"dependencies": {
 		"mongodb-memory-server": "10.1.4",

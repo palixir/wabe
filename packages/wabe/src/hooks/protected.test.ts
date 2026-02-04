@@ -97,41 +97,41 @@ describe('Protected hook', () => {
 		})
 
 		await userClient.request<any>(gql`
-      mutation createTest {
-          createTest(input: {fields: {name: "test"}}) {
-              test {
-                  name
-              }
-          }
-      }
-      `)
+			mutation createTest {
+				createTest(input: { fields: { name: "test" } }) {
+					test {
+						name
+					}
+				}
+			}
+		`)
 
 		expect(
 			userClient.request<any>(gql`
-     query tests {
-         tests {
-             edges {
-                 node {
-                     notOperation
-                 }
-             }
-         }
-     }
-     `),
+				query tests {
+					tests {
+						edges {
+							node {
+								notOperation
+							}
+						}
+					}
+				}
+			`),
 		).resolves.toEqual(expect.anything())
 
 		expect(
 			userClient2.request<any>(gql`
-     query tests {
-         tests {
-             edges {
-                 node {
-                     notOperation
-                 }
-             }
-         }
-     }
-     `),
+				query tests {
+					tests {
+						edges {
+							node {
+								notOperation
+							}
+						}
+					}
+				}
+			`),
 		).resolves.toEqual(expect.anything())
 	})
 
@@ -151,15 +151,15 @@ describe('Protected hook', () => {
 		})
 
 		const res = await userClient.request<any>(gql`
-      mutation createTest {
-          createTest(input: {fields: {name: "test"}}) {
-              test {
-                  id
-                  name
-              }
-          }
-      }
-      `)
+			mutation createTest {
+				createTest(input: { fields: { name: "test" } }) {
+					test {
+						id
+						name
+					}
+				}
+			}
+		`)
 
 		expect(
 			userClient.request<any>(gql`
@@ -198,41 +198,41 @@ describe('Protected hook', () => {
 		})
 
 		await userClient.request<any>(gql`
-      mutation createTest {
-          createTest(input: {fields: {name: "test"}}) {
-              test {
-                  name
-              }
-          }
-      }
-      `)
+			mutation createTest {
+				createTest(input: { fields: { name: "test" } }) {
+					test {
+						name
+					}
+				}
+			}
+		`)
 
 		expect(
 			userClient.request<any>(gql`
-     query tests {
-         tests {
-             edges {
-                 node {
-                     name
-                 }
-             }
-         }
-     }
-     `),
+				query tests {
+					tests {
+						edges {
+							node {
+								name
+							}
+						}
+					}
+				}
+			`),
 		).resolves.toEqual(expect.anything())
 
 		expect(
 			userClient2.request<any>(gql`
-     query tests {
-         tests {
-             edges {
-                 node {
-                     name
-                 }
-             }
-         }
-     }
-     `),
+				query tests {
+					tests {
+						edges {
+							node {
+								name
+							}
+						}
+					}
+				}
+			`),
 		).rejects.toThrowError('You are not authorized to read this field')
 	})
 
@@ -252,15 +252,15 @@ describe('Protected hook', () => {
 		})
 
 		const res = await userClient.request<any>(gql`
-      mutation createTest {
-          createTest(input: {fields: {name: "test"}}) {
-              test {
-                  id
-                  name
-              }
-          }
-      }
-      `)
+			mutation createTest {
+				createTest(input: { fields: { name: "test" } }) {
+					test {
+						id
+						name
+					}
+				}
+			}
+		`)
 
 		await userClient.request<any>(gql`
      mutation updateTest {
@@ -301,56 +301,56 @@ describe('Protected hook', () => {
 		})
 
 		await userClient.request<any>(gql`
-      mutation createTest {
-          createTest(input: {fields: {noOne: "test"}}) {
-              test {
-                  id
-                  name
-              }
-          }
-      }
-      `)
+			mutation createTest {
+				createTest(input: { fields: { noOne: "test" } }) {
+					test {
+						id
+						name
+					}
+				}
+			}
+		`)
 
 		expect(
 			rootClient.request<any>(gql`
-          query tests {
-              tests {
-                  edges {
-                      node {
-                          noOne
-                      }
-                  }
-              }
-          }
-     `),
+				query tests {
+					tests {
+						edges {
+							node {
+								noOne
+							}
+						}
+					}
+				}
+			`),
 		).rejects.toThrowError('You are not authorized to read this field')
 
 		expect(
 			userClient.request<any>(gql`
-          query tests {
-              tests {
-                  edges {
-                      node {
-                          noOne
-                      }
-                  }
-              }
-          }
-     `),
+				query tests {
+					tests {
+						edges {
+							node {
+								noOne
+							}
+						}
+					}
+				}
+			`),
 		).rejects.toThrowError('You are not authorized to read this field')
 
 		expect(
 			userClient2.request<any>(gql`
-          query tests {
-              tests {
-                  edges {
-                      node {
-                          noOne
-                      }
-                  }
-              }
-          }
-     `),
+				query tests {
+					tests {
+						edges {
+							node {
+								noOne
+							}
+						}
+					}
+				}
+			`),
 		).rejects.toThrowError('You are not authorized to read this field')
 	})
 
@@ -370,15 +370,15 @@ describe('Protected hook', () => {
 		})
 
 		const res = await userClient.request<any>(gql`
-      mutation createTest {
-          createTest(input: {fields: {noOne: "test"}}) {
-              test {
-                  id
-                  name
-              }
-          }
-      }
-      `)
+			mutation createTest {
+				createTest(input: { fields: { noOne: "test" } }) {
+					test {
+						id
+						name
+					}
+				}
+			}
+		`)
 
 		expect(
 			rootClient.request<any>(gql`
@@ -433,55 +433,55 @@ describe('Protected hook', () => {
 		})
 
 		await rootClient.request<any>(gql`
-      mutation createTest {
-          createTest(input: {fields: {name: "test"}}) {
-              test {
-                  id
-              }
-          }
-      }
-    `)
+			mutation createTest {
+				createTest(input: { fields: { name: "test" } }) {
+					test {
+						id
+					}
+				}
+			}
+		`)
 
 		expect(
 			rootClient.request<any>(gql`
-        query tests {
-            tests {
-                edges {
-                    node {
-                        rootOnly
-                    }
-                }
-            }
-        }
-      `),
+				query tests {
+					tests {
+						edges {
+							node {
+								rootOnly
+							}
+						}
+					}
+				}
+			`),
 		).resolves.toEqual(expect.anything())
 
 		expect(
 			userClient.request<any>(gql`
-        query tests {
-            tests {
-                edges {
-                    node {
-                        rootOnly
-                    }
-                }
-            }
-        }
-      `),
+				query tests {
+					tests {
+						edges {
+							node {
+								rootOnly
+							}
+						}
+					}
+				}
+			`),
 		).rejects.toThrow('You are not authorized to read this field')
 
 		expect(
 			userClient2.request<any>(gql`
-        query tests {
-            tests {
-                edges {
-                    node {
-                        rootOnly
-                    }
-                }
-            }
-        }
-      `),
+				query tests {
+					tests {
+						edges {
+							node {
+								rootOnly
+							}
+						}
+					}
+				}
+			`),
 		).rejects.toThrowError('You are not authorized to read this field')
 	})
 
@@ -501,14 +501,14 @@ describe('Protected hook', () => {
 		})
 
 		const res = await rootClient.request<any>(gql`
-      mutation createTest {
-          createTest(input: {fields: {name: "test"}}) {
-              test {
-                  id
-              }
-          }
-      }
-    `)
+			mutation createTest {
+				createTest(input: { fields: { name: "test" } }) {
+					test {
+						id
+					}
+				}
+			}
+		`)
 
 		// Root client should be able to update
 		expect(

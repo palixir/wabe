@@ -19,10 +19,7 @@ import { GitHub } from '../../authentication/oauth/GitHub'
 */
 
 // https://www.rfc-editor.org/rfc/rfc7636#section-4.4 not precise the storage of codeVerifier
-export const oauthHandlerCallback = async (
-	context: Context,
-	wabeContext: WabeContext<any>,
-) => {
+export const oauthHandlerCallback = async (context: Context, wabeContext: WabeContext<any>) => {
 	try {
 		const state = decodeURIComponent(context.query.state || '')
 		const code = decodeURIComponent(context.query.code || '')
@@ -34,9 +31,7 @@ export const oauthHandlerCallback = async (
 		const codeVerifier = context.getCookie('code_verifier')
 		const provider = context.getCookie('provider')
 
-		const { signInWith } = await getGraphqlClient(
-			wabeContext.wabe.config.port,
-		).request<any>(
+		const { signInWith } = await getGraphqlClient(wabeContext.wabe.config.port).request<any>(
 			gql`
 				mutation signInWith(
 					$authorizationCode: String!
@@ -65,8 +60,7 @@ export const oauthHandlerCallback = async (
 
 		const { accessToken, refreshToken } = signInWith
 
-		const isCookieSession =
-			!!wabeContext.wabe.config.authentication?.session?.cookieSession
+		const isCookieSession = !!wabeContext.wabe.config.authentication?.session?.cookieSession
 
 		context.res.setCookie('accessToken', accessToken, {
 			// If cookie session we put httpOnly to true, otherwise the front will need to get it
@@ -74,8 +68,8 @@ export const oauthHandlerCallback = async (
 			httpOnly: isCookieSession,
 			path: '/',
 			maxAge:
-				(wabeContext.wabe.config.authentication?.session
-					?.accessTokenExpiresInMs || 60 * 15 * 1000) / 1000, // 15 minutes in seconds
+				(wabeContext.wabe.config.authentication?.session?.accessTokenExpiresInMs ||
+					60 * 15 * 1000) / 1000, // 15 minutes in seconds
 			sameSite: 'None',
 			secure: true,
 		})
@@ -86,19 +80,15 @@ export const oauthHandlerCallback = async (
 			httpOnly: isCookieSession,
 			path: '/',
 			maxAge:
-				(wabeContext.wabe.config.authentication?.session
-					?.accessTokenExpiresInMs || 60 * 15 * 1000) / 1000, // 15 minutes in seconds
+				(wabeContext.wabe.config.authentication?.session?.accessTokenExpiresInMs ||
+					60 * 15 * 1000) / 1000, // 15 minutes in seconds
 			sameSite: 'None',
 			secure: true,
 		})
 
-		context.redirect(
-			wabeContext.wabe.config.authentication?.successRedirectPath || '/',
-		)
+		context.redirect(wabeContext.wabe.config.authentication?.successRedirectPath || '/')
 	} catch {
-		context.redirect(
-			wabeContext.wabe.config.authentication?.failureRedirectPath || '/',
-		)
+		context.redirect(wabeContext.wabe.config.authentication?.failureRedirectPath || '/')
 	}
 }
 
@@ -137,13 +127,9 @@ export const authHandler = (
 				secure: true,
 			})
 
-			const authorizationURL = googleOauth.createAuthorizationURL(
-				state,
-				codeVerifier,
-				{
-					scopes: ['email'],
-				},
-			)
+			const authorizationURL = googleOauth.createAuthorizationURL(state, codeVerifier, {
+				scopes: ['email'],
+			})
 
 			context.redirect(authorizationURL.toString())
 
@@ -169,13 +155,9 @@ export const authHandler = (
 				secure: true,
 			})
 
-			const authorizationURL = githubOauth.createAuthorizationURL(
-				state,
-				codeVerifier,
-				{
-					scopes: ['email'],
-				},
-			)
+			const authorizationURL = githubOauth.createAuthorizationURL(state, codeVerifier, {
+				scopes: ['email'],
+			})
 
 			context.redirect(authorizationURL.toString())
 

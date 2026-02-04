@@ -25,12 +25,12 @@ describe('SignUpWith', () => {
 
 		await anonymousClient.request<any>(
 			gql`
-      mutation signUpWith($input: SignUpWithInput!) {
-          signUpWith(input: $input) {
-              id
-          }
-      }
-    `,
+				mutation signUpWith($input: SignUpWithInput!) {
+					signUpWith(input: $input) {
+						id
+					}
+				}
+			`,
 			{
 				input: {
 					authentication: {
@@ -46,12 +46,12 @@ describe('SignUpWith', () => {
 		expect(
 			anonymousClient.request<any>(
 				gql`
-      mutation signUpWith($input: SignUpWithInput!) {
-          signUpWith(input: $input) {
-              id
-          }
-      }
-    `,
+					mutation signUpWith($input: SignUpWithInput!) {
+						signUpWith(input: $input) {
+							id
+						}
+					}
+				`,
 				{
 					input: {
 						authentication: {
@@ -75,9 +75,7 @@ describe('SignUpWith', () => {
 		}
 		const anonymousClient = getAnonymousClient(wabe.config.port)
 
-		const userSchema = wabe.config.schema?.classes?.find(
-			(classItem) => classItem.name === 'User',
-		)
+		const userSchema = wabe.config.schema?.classes?.find((classItem) => classItem.name === 'User')
 
 		if (!userSchema) throw new Error('Failed to find user schema')
 
@@ -87,12 +85,12 @@ describe('SignUpWith', () => {
 		expect(
 			anonymousClient.request<any>(
 				gql`
-      mutation signUpWith($input: SignUpWithInput!) {
-        signUpWith(input: $input) {
-          id
-        }
-      }
-      `,
+					mutation signUpWith($input: SignUpWithInput!) {
+						signUpWith(input: $input) {
+							id
+						}
+					}
+				`,
 				{
 					input: {
 						authentication: {
@@ -117,9 +115,7 @@ describe('SignUpWith', () => {
 	it('should block the signUpWith if the user creation is blocked for anonymous (the creation is done with root to avoid ACL issues)', () => {
 		const anonymousClient = getAnonymousClient(wabe.config.port)
 
-		const userSchema = wabe.config.schema?.classes?.find(
-			(classItem) => classItem.name === 'User',
-		)
+		const userSchema = wabe.config.schema?.classes?.find((classItem) => classItem.name === 'User')
 
 		if (!userSchema) throw new Error('Failed to find user schema')
 
@@ -129,12 +125,12 @@ describe('SignUpWith', () => {
 		expect(
 			anonymousClient.request<any>(
 				gql`
-      mutation signUpWith($input: SignUpWithInput!) {
-        signUpWith(input: $input) {
-          id
-        }
-      }
-      `,
+					mutation signUpWith($input: SignUpWithInput!) {
+						signUpWith(input: $input) {
+							id
+						}
+					}
+				`,
 				{
 					input: {
 						authentication: {
@@ -157,14 +153,14 @@ describe('SignUpWith', () => {
 
 		const res = await anonymousClient.request<any>(
 			gql`
-      mutation signUpWith($input: SignUpWithInput!) {
-          signUpWith(input: $input) {
-              id
-			  accessToken
-			  refreshToken
-          }
-      }
-    `,
+				mutation signUpWith($input: SignUpWithInput!) {
+					signUpWith(input: $input) {
+						id
+						accessToken
+						refreshToken
+					}
+				}
+			`,
 			{
 				input: {
 					authentication: {

@@ -42,8 +42,7 @@ export const EmailScalarType = new GraphQLScalarType({
 	parseValue(value: any): string {
 		if (typeof value !== 'string') throw new Error('Invalid email')
 
-		if (!value.match(/^[^@\s]+@[^@\s]+\.[^@\s]+$/))
-			throw new Error('Invalid email')
+		if (!value.match(/^[^@\s]+@[^@\s]+\.[^@\s]+$/)) throw new Error('Invalid email')
 
 		return value
 	},

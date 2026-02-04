@@ -12,9 +12,7 @@ const otherPackagesToRunBeforeMainPackages = [
 
 const packagesWithoutDatabaseLaunchersAndExcludedPackages = packages.filter(
 	(packageDirectory) =>
-		![...excludedPackages, ...otherPackagesToRunBeforeMainPackages].includes(
-			packageDirectory.name,
-		),
+		![...excludedPackages, ...otherPackagesToRunBeforeMainPackages].includes(packageDirectory.name),
 )
 
 const firstCommand = otherPackagesToRunBeforeMainPackages

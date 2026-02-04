@@ -12,10 +12,7 @@ type AddACLOpptions = {
 	write: boolean
 } | null
 
-export class HookObject<
-	T extends WabeTypes,
-	K extends keyof WabeTypes['types'],
-> {
+export class HookObject<T extends WabeTypes, K extends keyof WabeTypes['types']> {
 	public className: K
 	private newData: MutationData<T, K, keyof T['types'][K]> | undefined
 	public operationType: OperationType

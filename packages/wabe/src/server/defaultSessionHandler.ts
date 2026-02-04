@@ -5,18 +5,14 @@ import { getCookieInRequestHeaders } from '../utils'
 import type { DevWabeTypes } from '../utils/helper'
 
 export const defaultSessionHandler =
-	(wabe: Wabe<DevWabeTypes>) =>
-	async (ctx: WobeCustomContext<DevWabeTypes>) => {
+	(wabe: Wabe<DevWabeTypes>) => async (ctx: WobeCustomContext<DevWabeTypes>) => {
 		const headers = ctx.request.headers
 		const isGraphQLCall = ctx.request.url.includes('/graphql')
 
 		const headerRootKey = Buffer.from(headers.get('Wabe-Root-Key') || '')
 		const rootKey = Buffer.from(wabe.config.rootKey)
 
-		if (
-			headerRootKey.length === rootKey.length &&
-			timingSafeEqual(rootKey, headerRootKey)
-		) {
+		if (headerRootKey.length === rootKey.length && timingSafeEqual(rootKey, headerRootKey)) {
 			ctx.wabe = {
 				isRoot: true,
 				wabe,
@@ -27,18 +23,13 @@ export const defaultSessionHandler =
 		}
 
 		const getAccessToken = () => {
-			if (headers.get('Wabe-Access-Token'))
-				return { accessToken: headers.get('Wabe-Access-Token') }
+			if (headers.get('Wabe-Access-Token')) return { accessToken: headers.get('Wabe-Access-Token') }
 
-			const isCookieSession =
-				!!wabe.config.authentication?.session?.cookieSession
+			const isCookieSession = !!wabe.config.authentication?.session?.cookieSession
 
 			if (isCookieSession)
 				return {
-					accessToken: getCookieInRequestHeaders(
-						'accessToken',
-						ctx.request.headers,
-					),
+					accessToken: getCookieInRequestHeaders('accessToken', ctx.request.headers),
 				}
 
 			return { accessToken: null }
@@ -57,8 +48,7 @@ export const defaultSessionHandler =
 		}
 
 		const getCsrfToken = () => {
-			if (headers.get('Wabe-Csrf-Token'))
-				return { csrfToken: headers.get('Wabe-Csrf-Token') || '' }
+			if (headers.get('Wabe-Csrf-Token')) return { csrfToken: headers.get('Wabe-Csrf-Token') || '' }
 
 			return { csrfToken: '' }
 		}

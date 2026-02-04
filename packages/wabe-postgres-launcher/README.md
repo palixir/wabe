@@ -25,7 +25,7 @@ yarn add wabe-mongodb-launcher # On yarn
 ## Basic example of wabe-mongodb-launcher usage
 
 ```ts
-import { runDatabase } from "wabe-mongodb-launcher";
+import { runDatabase } from 'wabe-mongodb-launcher'
 
-await runDatabase();
+await runDatabase()
 ```

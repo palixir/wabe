@@ -16,8 +16,7 @@ describe('Server', () => {
 		const port = await getPort()
 		const wabe = new Wabe({
 			isProduction: false,
-			rootKey:
-				'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+			rootKey: 'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
 			database: {
 				// @ts-expect-error
 				adapter: await getDatabaseAdapter(databaseId),
@@ -46,9 +45,7 @@ describe('Server', () => {
 			},
 		})
 
-		expect(wabe.start()).rejects.toThrow(
-			'Authentication session requires jwt secret',
-		)
+		expect(wabe.start()).rejects.toThrow('Authentication session requires jwt secret')
 	})
 
 	it('should throw error if no jwt secret provided but csrf protection is enabled', async () => {
@@ -57,8 +54,7 @@ describe('Server', () => {
 		const port = await getPort()
 		const wabe = new Wabe({
 			isProduction: false,
-			rootKey:
-				'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+			rootKey: 'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
 			database: {
 				// @ts-expect-error
 				adapter: await getDatabaseAdapter(databaseId),
@@ -88,9 +84,7 @@ describe('Server', () => {
 			},
 		})
 
-		expect(wabe.start()).rejects.toThrow(
-			'Authentication session requires jwt secret',
-		)
+		expect(wabe.start()).rejects.toThrow('Authentication session requires jwt secret')
 	})
 
 	it('should pass graphql options to yoga plugin', async () => {
@@ -98,19 +92,17 @@ describe('Server', () => {
 
 		const receivedOptions: any[] = []
 		const originalPlugin = WobeYoga.WobeGraphqlYogaPlugin
-		const pluginSpy = spyOn(
-			WobeYoga,
-			'WobeGraphqlYogaPlugin',
-		).mockImplementation((options: any) => {
-			receivedOptions.push(options)
-			return originalPlugin(options)
-		})
+		const pluginSpy = spyOn(WobeYoga, 'WobeGraphqlYogaPlugin').mockImplementation(
+			(options: any) => {
+				receivedOptions.push(options)
+				return originalPlugin(options)
+			},
+		)
 
 		const port = await getPort()
 		const wabe = new Wabe({
 			isProduction: true,
-			rootKey:
-				'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+			rootKey: 'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
 			database: {
 				// @ts-expect-error
 				adapter: await getDatabaseAdapter(databaseId),
@@ -157,8 +149,7 @@ describe('Server', () => {
 		const port = await getPort()
 		const wabe = new Wabe({
 			isProduction: false,
-			rootKey:
-				'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+			rootKey: 'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
 			database: {
 				// @ts-expect-error
 				adapter: await getDatabaseAdapter(databaseId),
@@ -203,8 +194,7 @@ describe('Server', () => {
 		const port = await getPort()
 		const wabe = new Wabe({
 			isProduction: false,
-			rootKey:
-				'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+			rootKey: 'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
 			database: {
 				// @ts-expect-error
 				adapter: await getDatabaseAdapter(databaseId),
@@ -299,8 +289,7 @@ describe('Server', () => {
 		const port = await getPort()
 		const wabe = new Wabe({
 			isProduction: false,
-			rootKey:
-				'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+			rootKey: 'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
 			database: {
 				// @ts-expect-error
 				adapter: await getDatabaseAdapter(databaseId),
@@ -334,8 +323,7 @@ describe('Server', () => {
 		const wabe = new Wabe({
 			isProduction: false,
 			hostname: '0.0.0.0',
-			rootKey:
-				'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+			rootKey: 'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
 			database: {
 				// @ts-expect-error
 				adapter: await getDatabaseAdapter(databaseId),
@@ -370,8 +358,7 @@ describe('Server', () => {
 			async () =>
 				new Wabe({
 					isProduction: false,
-					rootKey:
-						'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+					rootKey: 'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
 					database: {
 						// @ts-expect-error
 						adapter: await getDatabaseAdapter(databaseId),
@@ -394,8 +381,7 @@ describe('Server', () => {
 			async () =>
 				new Wabe({
 					isProduction: false,
-					rootKey:
-						'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+					rootKey: 'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
 					database: {
 						// @ts-expect-error
 						adapter: await getDatabaseAdapter(databaseId),
@@ -412,8 +398,7 @@ describe('Server', () => {
 			async () =>
 				new Wabe({
 					isProduction: false,
-					rootKey:
-						'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+					rootKey: 'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
 					database: {
 						// @ts-expect-error
 						adapter: await getDatabaseAdapter(databaseId),
@@ -439,8 +424,7 @@ describe('Server', () => {
 		const port = await getPort()
 		const wabe = new Wabe({
 			isProduction: false,
-			rootKey:
-				'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+			rootKey: 'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
 			database: {
 				// @ts-expect-error
 				adapter: await getDatabaseAdapter(databaseId),
@@ -469,8 +453,7 @@ describe('Server', () => {
 
 		const wabe = new Wabe({
 			isProduction: false,
-			rootKey:
-				'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+			rootKey: 'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
 			database: {
 				// @ts-expect-error
 				adapter: await getDatabaseAdapter(databaseId),
@@ -511,8 +494,7 @@ describe('Server', () => {
 
 		const wabe = new Wabe({
 			isProduction: false,
-			rootKey:
-				'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+			rootKey: 'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
 			database: {
 				// @ts-expect-error
 				adapter: await getDatabaseAdapter(databaseId),
@@ -536,9 +518,7 @@ describe('Server', () => {
 
 		await wabe.start()
 
-		const roleEnum = wabe.config.schema?.enums?.find(
-			(schemaEnum) => schemaEnum.name === 'RoleEnum',
-		)
+		const roleEnum = wabe.config.schema?.enums?.find((schemaEnum) => schemaEnum.name === 'RoleEnum')
 
 		expect(roleEnum).not.toBeUndefined()
 		expect(roleEnum?.values).toEqual({

@@ -39,11 +39,9 @@ export class OAuth2Client {
 		authorizationUrl.searchParams.set('response_type', 'code')
 		authorizationUrl.searchParams.set('client_id', this.clientId)
 
-		if (options?.state !== undefined)
-			authorizationUrl.searchParams.set('state', options.state)
+		if (options?.state !== undefined) authorizationUrl.searchParams.set('state', options.state)
 
-		if (scopes.length > 0)
-			authorizationUrl.searchParams.set('scope', scopes.join(' '))
+		if (scopes.length > 0) authorizationUrl.searchParams.set('scope', scopes.join(' '))
 
 		if (this.redirectURI !== null)
 			authorizationUrl.searchParams.set('redirect_uri', this.redirectURI)
@@ -73,8 +71,7 @@ export class OAuth2Client {
 
 		if (this.redirectURI !== null) body.set('redirect_uri', this.redirectURI)
 
-		if (options?.codeVerifier !== undefined)
-			body.set('code_verifier', options.codeVerifier)
+		if (options?.codeVerifier !== undefined) body.set('code_verifier', options.codeVerifier)
 
 		return this._sendTokenRequest<_TokenResponseBody>(body, options)
 	}
@@ -113,9 +110,7 @@ export class OAuth2Client {
 		if (options?.credentials !== undefined) {
 			const authenticateWith = options?.authenticateWith || 'http_basic_auth'
 			if (authenticateWith === 'http_basic_auth') {
-				const encodedCredentials = btoa(
-					`${this.clientId}:${options.credentials}`,
-				)
+				const encodedCredentials = btoa(`${this.clientId}:${options.credentials}`)
 				headers.set('Authorization', `Basic ${encodedCredentials}`)
 			} else {
 				body.set('client_secret', options.credentials)

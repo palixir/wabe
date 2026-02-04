@@ -1,11 +1,6 @@
 import { describe, expect, it } from 'bun:test'
 import { GraphqlParser } from './parser'
-import {
-	GraphQLNonNull,
-	type GraphQLNullableType,
-	GraphQLObjectType,
-	GraphQLString,
-} from 'graphql'
+import { GraphQLNonNull, type GraphQLNullableType, GraphQLObjectType, GraphQLString } from 'graphql'
 
 const deepCompareGraphQLObjects = (
 	obj1: GraphQLNullableType,
@@ -13,8 +8,7 @@ const deepCompareGraphQLObjects = (
 ): boolean => {
 	// Check if both objects are instances of GraphQLObjectType or GraphQLNonNull
 	if (
-		(!(obj1 instanceof GraphQLObjectType) &&
-			!(obj1 instanceof GraphQLNonNull)) ||
+		(!(obj1 instanceof GraphQLObjectType) && !(obj1 instanceof GraphQLNonNull)) ||
 		(!(obj2 instanceof GraphQLObjectType) && !(obj2 instanceof GraphQLNonNull))
 	)
 		return false
@@ -34,8 +28,7 @@ const deepCompareGraphQLObjects = (
 		return deepCompareGraphQLObjects(unwrappedObj1, unwrappedObj2)
 
 	// If one object is GraphQLNonNull and the other is not, they are not equal
-	if (obj1 instanceof GraphQLNonNull || obj2 instanceof GraphQLNonNull)
-		return false
+	if (obj1 instanceof GraphQLNonNull || obj2 instanceof GraphQLNonNull) return false
 
 	// Compare fields if both objects are GraphQLObjectType
 	const fields1 = (obj1 as GraphQLObjectType).getFields()
@@ -96,9 +89,7 @@ describe('WabeGraphqlParser', () => {
 			}),
 		)
 
-		expect(deepCompareGraphQLObjects(simpleObject, expectedObject)).toEqual(
-			true,
-		)
+		expect(deepCompareGraphQLObjects(simpleObject, expectedObject)).toEqual(true)
 	})
 
 	it('should parse a recursive wabe object', () => {
@@ -150,9 +141,7 @@ describe('WabeGraphqlParser', () => {
 			}),
 		)
 
-		expect(deepCompareGraphQLObjects(recursiveObject, expectedObject)).toEqual(
-			true,
-		)
+		expect(deepCompareGraphQLObjects(recursiveObject, expectedObject)).toEqual(true)
 	})
 
 	it('should create an graphql object from simple object', () => {
@@ -208,10 +197,7 @@ describe('WabeGraphqlParser', () => {
 		})
 
 		expect(
-			deepCompareGraphQLObjects(
-				recursiveObject.subObject.type,
-				expectedGraphqlObject,
-			),
+			deepCompareGraphQLObjects(recursiveObject.subObject.type, expectedGraphqlObject),
 		).toEqual(true)
 	})
 })

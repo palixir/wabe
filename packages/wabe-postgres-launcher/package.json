@@ -1,18 +1,18 @@
 {
 	"name": "wabe-postgres-launcher",
 	"version": "0.5.0",
+	"description": "Package to launch the postgres database for test",
 	"license": "Apache-2.0",
 	"main": "dist/index.js",
-	"description": "Package to launch the postgres database for test",
 	"scripts": {
 		"ci": "bun lint",
 		"build": "bun --filter wabe-build build:package $(pwd) node",
-		"lint": "biome lint . --no-errors-on-unmatched",
-		"format": "biome format --write ."
+		"lint": "oxlint .",
+		"format": "oxfmt --write ."
 	},
 	"dependencies": {
-		"p-queue": "8.1.0",
 		"dockerode": "4.0.5",
+		"p-queue": "8.1.0",
 		"tcp-port-used": "1.0.2"
 	},
 	"devDependencies": {

@@ -78,10 +78,7 @@ const generateWabeObject = ({
 
 			const objectNameWithPrefix = `${prefix}${firstLetterUpperCase(objectName)}`
 
-			if (
-				field.type === 'Object' ||
-				(field.type === 'Array' && field.typeValue === 'Object')
-			) {
+			if (field.type === 'Object' || (field.type === 'Array' && field.typeValue === 'Object')) {
 				const subObject = generateWabeObject({
 					object: field.object,
 					isInput,
@@ -93,26 +90,22 @@ const generateWabeObject = ({
 				return {
 					...acc,
 					...subObject,
-					...{
-						[objectNameWithPrefix]: {
-							...acc[objectNameWithPrefix],
-							[`${fieldName}${field.required ? '' : 'undefined'}`]: `${
-								isArray ? 'Array<' : ''
-							}${objectNameWithPrefix}${firstLetterUpperCase(field.object.name)}${
-								isArray ? '>' : ''
-							}`,
-						},
+					[objectNameWithPrefix]: {
+						...acc[objectNameWithPrefix],
+						[`${fieldName}${field.required ? '' : 'undefined'}`]: `${
+							isArray ? 'Array<' : ''
+						}${objectNameWithPrefix}${firstLetterUpperCase(field.object.name)}${
+							isArray ? '>' : ''
+						}`,
 					},
 				}
 			}
 
 			return {
 				...acc,
-				...{
-					[objectNameWithPrefix]: {
-						...acc[objectNameWithPrefix],
-						[`${fieldName}${field.required ? '' : 'undefined'}`]: `${type}`,
-					},
+				[objectNameWithPrefix]: {
+					...acc[objectNameWithPrefix],
+					[`${fieldName}${field.required ? '' : 'undefined'}`]: `${type}`,
 				},
 			}
 		},
@@ -131,10 +124,7 @@ const generateWabeTypes = (classes: ClassInterface<DevWabeTypes>[]) => {
 				(acc2, [name, field]) => {
 					const type = wabeTypesToTypescriptTypes({ field })
 
-					if (
-						field.type === 'Object' ||
-						(field.type === 'Array' && field.typeValue === 'Object')
-					) {
+					if (field.type === 'Object' || (field.type === 'Array' && field.typeValue === 'Object')) {
 						const wabeObject = generateWabeObject({ object: field.object })
 
 						objectsToLoad.push(wabeObject)
@@ -180,10 +170,7 @@ const generateWabeWhereTypes = (classes: ClassInterface<DevWabeTypes>[]) => {
 				(acc2, [name, field]) => {
 					const type = wabeTypesToTypescriptTypes({ field, isInput: true })
 
-					if (
-						field.type === 'Object' ||
-						(field.type === 'Array' && field.typeValue === 'Object')
-					) {
+					if (field.type === 'Object' || (field.type === 'Array' && field.typeValue === 'Object')) {
 						const wabeObject = generateWabeObject({
 							object: field.object,
 							isInput: true,
@@ -252,8 +239,7 @@ const generateWabeMutationOrQueryInput = (
 ) => {
 	const objectsToLoad: Array<Record<string, Record<string, string>>> = []
 
-	const mutationNameWithFirstLetterUpperCase =
-		firstLetterUpperCase(mutationOrQueryName)
+	const mutationNameWithFirstLetterUpperCase = firstLetterUpperCase(mutationOrQueryName)
 
 	const mutationObject = Object.entries(
 		(isMutation ? resolver.args?.input : resolver.args) || {},
@@ -298,17 +284,15 @@ const generateWabeMutationOrQueryInput = (
 	return {
 		...(isMutation
 			? {
-					[`${firstLetterInUpperCase(mutationOrQueryName)}Input`]:
-						mutationObject,
+					[`${firstLetterInUpperCase(mutationOrQueryName)}Input`]: mutationObject,
 				}
 			: {}),
-		[`${isMutation ? 'Mutation' : 'Query'}${firstLetterInUpperCase(
-			mutationOrQueryName,
-		)}Args`]: isMutation
-			? {
-					input: `${firstLetterInUpperCase(mutationOrQueryName)}Input`,
-				}
-			: mutationObject,
+		[`${isMutation ? 'Mutation' : 'Query'}${firstLetterInUpperCase(mutationOrQueryName)}Args`]:
+			isMutation
+				? {
+						input: `${firstLetterInUpperCase(mutationOrQueryName)}Input`,
+					}
+				: mutationObject,
 		...objects,
 	}
 }
@@ -324,15 +308,12 @@ const generateWabeMutationsAndQueriesTypes = (resolver: TypeResolver<any>) => {
 		{},
 	)
 
-	const queriesObject = Object.entries(resolver.queries || {}).reduce(
-		(acc, [queryName, query]) => {
-			return {
-				...acc,
-				...generateWabeMutationOrQueryInput(queryName, query, false),
-			}
-		},
-		{},
-	)
+	const queriesObject = Object.entries(resolver.queries || {}).reduce((acc, [queryName, query]) => {
+		return {
+			...acc,
+			...generateWabeMutationOrQueryInput(queryName, query, false),
+		}
+	}, {})
 
 	return {
 		...mutationsObject,
@@ -340,22 +321,15 @@ const generateWabeMutationsAndQueriesTypes = (resolver: TypeResolver<any>) => {
 	}
 }
 
-const wabeClassRecordToString = (
-	wabeClass: Record<string, Record<string, string>>,
-) => {
+const wabeClassRecordToString = (wabeClass: Record<string, Record<string, string>>) => {
 	return Object.entries(wabeClass).reduce((acc, [className, fields]) => {
 		return `${acc}export type ${className} = {\n${Object.entries(fields)
-			.map(
-				([fieldName, fieldType]) =>
-					`\t${fieldName.replace('undefined', '?')}: ${fieldType}`,
-			)
+			.map(([fieldName, fieldType]) => `\t${fieldName.replace('undefined', '?')}: ${fieldType}`)
 			.join(',\n')}\n}\n\n`
 	}, '')
 }
 
-const wabeEnumRecordToString = (
-	wabeEnum: Record<string, Record<string, string>>,
-) => {
+const wabeEnumRecordToString = (wabeEnum: Record<string, Record<string, string>>) => {
 	return Object.entries(wabeEnum).reduce((acc, [enumName, values]) => {
 		return `${acc}export enum ${enumName} {\n${Object.entries(values)
 			.map(([valueName, value]) => `\t${valueName} = "${value}"`)
@@ -387,14 +361,11 @@ const generateWabeDevTypes = ({
 			: 'export type WabeSchemaScalars = ""'
 
 	// Enums
-	const wabeEnumsGlobalTypes =
-		enums?.map((wabeEnum) => `${wabeEnum.name}: ${wabeEnum.name}`) || []
+	const wabeEnumsGlobalTypes = enums?.map((wabeEnum) => `${wabeEnum.name}: ${wabeEnum.name}`) || []
 
 	const wabeEnumsGlobalTypesString =
 		wabeEnumsGlobalTypes.length > 0
-			? `export type WabeSchemaEnums = {\n\t${wabeEnumsGlobalTypes.join(
-					',\n\t',
-				)}\n}`
+			? `export type WabeSchemaEnums = {\n\t${wabeEnumsGlobalTypes.join(',\n\t')}\n}`
 			: ''
 
 	// Classes
@@ -402,15 +373,11 @@ const generateWabeDevTypes = ({
 		.map((schema) => `${schema.name}: ${schema.name}`)
 		.filter((schema) => schema)
 
-	const globalWabeTypeString = `export type WabeSchemaTypes = {\n\t${allNames.join(
-		',\n\t',
-	)}\n}`
+	const globalWabeTypeString = `export type WabeSchemaTypes = {\n\t${allNames.join(',\n\t')}\n}`
 
 	// Where
 	const allWhereNames = classes
-		.map(
-			(schema) => `${schema.name}: Where${firstLetterUpperCase(schema.name)}`,
-		)
+		.map((schema) => `${schema.name}: Where${firstLetterUpperCase(schema.name)}`)
 		.filter((schema) => schema)
 
 	const globalWabeWhereTypeString = `export type WabeSchemaWhereTypes = {\n\t${allWhereNames.join(
@@ -433,13 +400,9 @@ export const generateCodegen = async ({
 
 	const wabeClasses = generateWabeTypes(schema.classes || [])
 	const wabeWhereTypes = generateWabeWhereTypes(schema.classes || [])
-	const mutationsAndQueries = generateWabeMutationsAndQueriesTypes(
-		schema.resolvers || {},
-	)
+	const mutationsAndQueries = generateWabeMutationsAndQueriesTypes(schema.resolvers || {})
 
-	const wabeEnumsInString = wabeEnumRecordToString(
-		generateWabeEnumTypes(schema.enums || []),
-	)
+	const wabeEnumsInString = wabeEnumRecordToString(generateWabeEnumTypes(schema.enums || []))
 	const wabeScalarsInString = wabeScalarRecordToString(
 		generateWabeScalarTypes(schema.scalars || []),
 	)
@@ -458,17 +421,11 @@ export const generateCodegen = async ({
 	const wabeTsContent = `${wabeEnumsInString}${wabeScalarsInString}${wabeObjectsInString}${wabeDevTypes}`
 
 	try {
-		const contentOfGraphqlSchema = (
-			await readFile(`${path}/schema.graphql`)
-		).toString()
+		const contentOfGraphqlSchema = (await readFile(`${path}/schema.graphql`)).toString()
 
 		// We will need to find a better way to avoid infinite loop of loading
 		// Better solution will be that bun implements watch ignores)
-		if (
-			!process.env.CODEGEN &&
-			contentOfGraphqlSchema === graphqlSchemaContent.toString()
-		)
-			return
+		if (!process.env.CODEGEN && contentOfGraphqlSchema === graphqlSchemaContent.toString()) return
 	} catch {}
 
 	await writeFile(`${path}/wabe.ts`, wabeTsContent)

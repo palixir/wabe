@@ -17,8 +17,7 @@ export const defaultRoutes = (devDirectory: string): WabeRoute[] => {
 			handler: (context) => {
 				const provider = context.query.provider
 
-				if (!provider)
-					throw new Error('Authentication failed, provider not found')
+				if (!provider) throw new Error('Authentication failed, provider not found')
 
 				// TODO: Maybe check if the value is in the enum
 				return authHandler(context, context.wabe, provider as ProviderEnum)

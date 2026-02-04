@@ -36,8 +36,7 @@ export const resetPasswordResolver = async (
 		const inProd = process.env.NODE_ENV === 'production'
 		const devBypass = !inProd && otp === '000000'
 
-		if (!isOtpValid && !(devBypass && !inProd))
-			throw new Error('Invalid OTP code')
+		if (!isOtpValid && !(devBypass && !inProd)) throw new Error('Invalid OTP code')
 
 		const providerKey = phone ? 'phonePassword' : 'emailPassword'
 

@@ -16,13 +16,10 @@ export const getAuthenticationMethod = <
 	const customAuthenticationConfig =
 		context.wabe.config?.authentication?.customAuthenticationMethods
 
-	if (!customAuthenticationConfig)
-		throw new Error('No custom authentication methods found')
+	if (!customAuthenticationConfig) throw new Error('No custom authentication methods found')
 
 	// We remove the secondary factor to only get all authentication methods
-	const authenticationMethods = listOfMethods.filter(
-		(method) => method !== 'secondaryFactor',
-	)
+	const authenticationMethods = listOfMethods.filter((method) => method !== 'secondaryFactor')
 
 	// We check if the client don't use multiple authentication methods at the same time
 	if (authenticationMethods.length > 1 || authenticationMethods.length === 0)
@@ -32,8 +29,7 @@ export const getAuthenticationMethod = <
 
 	// We check if the authentication method is valid
 	const validAuthenticationMethod = customAuthenticationConfig.find(
-		(method) =>
-			method.name.toLowerCase() === authenticationMethod?.toLowerCase(),
+		(method) => method.name.toLowerCase() === authenticationMethod?.toLowerCase(),
 	)
 
 	if (!validAuthenticationMethod)

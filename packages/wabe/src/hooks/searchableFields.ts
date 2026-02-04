@@ -5,8 +5,7 @@ import type { HookObject } from './HookObject'
 export const stringExtraction = (value: any): Array<string> => {
 	if (value === undefined || value === null) return []
 
-	if (typeof value === 'object')
-		return Object.values(value).flatMap((v) => stringExtraction(v))
+	if (typeof value === 'object') return Object.values(value).flatMap((v) => stringExtraction(v))
 
 	if (typeof value === 'string')
 		return tokenize(value)
@@ -27,9 +26,7 @@ export const stringExtraction = (value: any): Array<string> => {
 	return []
 }
 
-export const defaultSearchableFieldsBeforeCreate = (
-	object: HookObject<any, any>,
-) => {
+export const defaultSearchableFieldsBeforeCreate = (object: HookObject<any, any>) => {
 	const searchablesFields = object.context.wabe.config.schema?.classes?.find(
 		(currentClass) => currentClass.name === object.className,
 	)?.searchableFields
@@ -49,9 +46,7 @@ export const defaultSearchableFieldsBeforeCreate = (
 	object.upsertNewData('search', extractedSearchField)
 }
 
-export const defaultSearchableFieldsBeforeUpdate = (
-	object: HookObject<any, any>,
-) => {
+export const defaultSearchableFieldsBeforeUpdate = (object: HookObject<any, any>) => {
 	const searchablesFields = object.context.wabe.config.schema?.classes?.find(
 		(currentClass) => currentClass.name === object.className,
 	)?.searchableFields
@@ -68,16 +63,10 @@ export const defaultSearchableFieldsBeforeUpdate = (
 		})
 		.filter(notEmpty)
 
-	const oldExtractedSearcFieldForUpdateFields = Object.entries(
-		object.object || {},
-	)
+	const oldExtractedSearcFieldForUpdateFields = Object.entries(object.object || {})
 		.flatMap(([key, value]) => {
 			// If the data is not a searchable field or don't change
-			if (
-				!searchablesFields.includes(key) ||
-				!Object.keys(newData).includes(key)
-			)
-				return undefined
+			if (!searchablesFields.includes(key) || !Object.keys(newData).includes(key)) return undefined
 
 			return stringExtraction(value)
 		})
@@ -88,8 +77,7 @@ export const defaultSearchableFieldsBeforeUpdate = (
 	// Actual search fields minus old search data for same field + new extracted data for the field
 	const extractedSearchFields = [
 		...actualSearch.filter(
-			(element: string) =>
-				!oldExtractedSearcFieldForUpdateFields.includes(element),
+			(element: string) => !oldExtractedSearcFieldForUpdateFields.includes(element),
 		),
 		...newExtractedSearchField,
 	]
