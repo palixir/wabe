@@ -167,7 +167,6 @@ describe('Database', () => {
         id
         accessToken
         refreshToken
-        csrfToken
       }
     }
   `,
@@ -186,7 +185,6 @@ describe('Database', () => {
 		expect(res.signUpWith.id).toBeDefined()
 		expect(res.signUpWith.accessToken).toBeDefined()
 		expect(res.signUpWith.refreshToken).toBeDefined()
-		expect(res.signUpWith.csrfToken).toBeDefined()
 	})
 
 	it('should return id of a relation if set to true in select on getObject', async () => {

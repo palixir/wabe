@@ -98,5 +98,5 @@ export const signInWithResolver = async (
 		})
 	}
 
-	return { accessToken, refreshToken, csrfToken, user, srp }
+	return { accessToken, refreshToken, user, srp }
 }

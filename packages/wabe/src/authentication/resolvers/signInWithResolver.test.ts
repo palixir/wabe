@@ -234,7 +234,6 @@ describe('SignInWith', () => {
 		expect(res).toEqual({
 			accessToken: 'accessToken',
 			refreshToken: 'refreshToken',
-			csrfToken: 'csrfToken',
 			user: {
 				id: 'id',
 			},

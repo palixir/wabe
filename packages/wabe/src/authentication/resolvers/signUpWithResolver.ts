@@ -65,5 +65,5 @@ export const signUpWithResolver = async (
 		})
 	}
 
-	return { accessToken, refreshToken, csrfToken, id: createdUserId }
+	return { accessToken, refreshToken, id: createdUserId }
 }

@@ -1,9 +1,7 @@
-import { describe, it, expect, afterEach } from 'bun:test'
+import { describe, it, expect } from 'bun:test'
 import { decode, sign } from 'jsonwebtoken'
-import { gql, type GraphQLClient } from 'graphql-request'
-import type { Wabe } from './server'
+import { gql } from 'graphql-request'
 import {
-	type DevWabeTypes,
 	getAdminUserClient,
 	getGraphqlClient,
 	getAnonymousClient,
@@ -12,20 +10,9 @@ import {
 } from './utils/helper'
 import { setupTests, closeTests } from './utils/testHelper'
 import { RoleEnum } from 'generated/wabe'
+import { Session } from './authentication/Session'
 
 describe('Security tests', () => {
-	let wabe: Wabe<DevWabeTypes> | undefined
-	let port: number
-	let client: GraphQLClient
-	let rootClient: GraphQLClient
-
-	afterEach(async () => {
-		if (!wabe) return
-
-		await closeTests(wabe)
-		wabe = undefined
-	})
-
 	it('should not return private fields (acl) on createObject, getObject and getObjects if not root', async () => {
 		const setup = await setupTests([
 			{
@@ -53,10 +40,10 @@ describe('Security tests', () => {
 			},
 		])
 
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
 
 		const { userClient } = await createUserAndUpdateRole({
 			anonymousClient: client,
@@ -168,18 +155,17 @@ describe('Security tests', () => {
 			{ disableCSRFProtection: false },
 		)
 
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
 
-		const { userClient, accessToken, csrfToken } =
-			await createUserAndUpdateRole({
-				anonymousClient: client,
-				port,
-				roleName: 'Client',
-				rootClient,
-			})
+		const { userClient, accessToken, userId } = await createUserAndUpdateRole({
+			anonymousClient: client,
+			port,
+			roleName: 'Client',
+			rootClient,
+		})
 
 		expect(
 			userClient.request(gql`
@@ -195,7 +181,6 @@ describe('Security tests', () => {
 
 		const invalidCsrfClient = getUserClient(port, {
 			accessToken,
-			csrfToken: 'invalid-csrf-token',
 		})
 		expect(
 			invalidCsrfClient.request(gql`
@@ -209,8 +194,15 @@ describe('Security tests', () => {
 			`),
 		).rejects.toThrow('Permission denied to create class TestCSRF')
 
+		const session = new Session()
+
+		const { csrfToken, accessToken: validAccessToken } = await session.create(
+			userId,
+			{ wabe, isRoot: false },
+		)
+
 		const validCsrfClient = getUserClient(port, {
-			accessToken,
+			accessToken: validAccessToken,
 			csrfToken,
 		})
 
@@ -249,10 +241,10 @@ describe('Security tests', () => {
 			},
 		])
 
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
 
 		const { accessToken } = await createUserAndUpdateRole({
 			anonymousClient: client,
@@ -263,7 +255,6 @@ describe('Security tests', () => {
 
 		const invalidCsrfClient = getUserClient(port, {
 			accessToken,
-			csrfToken: 'invalid-csrf-token',
 		})
 
 		const res = await invalidCsrfClient.request<any>(gql`
@@ -308,10 +299,10 @@ describe('Security tests', () => {
 			},
 		])
 
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
 
 		const { userClient } = await createUserAndUpdateRole({
 			anonymousClient: client,
@@ -362,10 +353,10 @@ describe('Security tests', () => {
 			},
 		])
 
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
 
 		const { userClient } = await createUserAndUpdateRole({
 			anonymousClient: client,
@@ -399,10 +390,10 @@ describe('Security tests', () => {
 
 	it('should block GraphQL introspection queries for anonymous and authenticated users for isProduction server', async () => {
 		const setup = await setupTests([], { isProduction: true })
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
 
 		// Test pour un utilisateur anonyme
 		expect(
@@ -442,10 +433,9 @@ describe('Security tests', () => {
 
 	it('should return null if the accessToken is an invalid accessToken', async () => {
 		const setup = await setupTests()
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
+		const port = setup.port
+		const rootClient = getGraphqlClient(port)
 
 		const { accessToken } = await createUserAndUpdateRole({
 			anonymousClient: getAnonymousClient(port),
@@ -497,10 +487,9 @@ describe('Security tests', () => {
 				},
 			},
 		])
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
 
 		expect(
 			client.request(gql`
@@ -532,10 +521,9 @@ describe('Security tests', () => {
 				},
 			},
 		])
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
 
 		expect(
 			client.request(gql`
@@ -575,10 +563,9 @@ describe('Security tests', () => {
 				},
 			},
 		])
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
+		const port = setup.port
+		const rootClient = getGraphqlClient(port)
 
 		const { userClient } = await createUserAndUpdateRole({
 			anonymousClient: getAnonymousClient(port),
@@ -630,10 +617,9 @@ describe('Security tests', () => {
 
 	it('should throw an error when I try to create an user with a role without root access', async () => {
 		const setup = await setupTests()
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
 
 		const adminRole = await wabe.controllers.database.getObjects({
 			className: 'Role',
@@ -665,10 +651,9 @@ describe('Security tests', () => {
 
 	it('should not be able to update role pointer in the User class', async () => {
 		const setup = await setupTests()
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
+		const port = setup.port
+		const rootClient = getGraphqlClient(port)
 
 		const { userId } = await createUserAndUpdateRole({
 			anonymousClient: getAnonymousClient(port),
@@ -696,10 +681,9 @@ describe('Security tests', () => {
 
 	it('should not be able to create / update sessions relation in the User class', async () => {
 		const setup = await setupTests()
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
+		const port = setup.port
+		const rootClient = getGraphqlClient(port)
 
 		const { userId } = await createUserAndUpdateRole({
 			anonymousClient: getAnonymousClient(port),
@@ -763,10 +747,9 @@ describe('Security tests', () => {
 				},
 			},
 		])
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
+		const port = setup.port
+		const rootClient = getGraphqlClient(port)
 
 		const { userClient } = await createUserAndUpdateRole({
 			anonymousClient: getAnonymousClient(port),
@@ -841,10 +824,9 @@ describe('Security tests', () => {
 				},
 			},
 		])
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
+		const port = setup.port
+		const rootClient = getGraphqlClient(port)
 
 		const { userClient } = await createUserAndUpdateRole({
 			anonymousClient: getAnonymousClient(port),
@@ -941,10 +923,10 @@ describe('Security tests', () => {
 				},
 			},
 		])
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
 
 		const { userClient } = await createUserAndUpdateRole({
 			anonymousClient: client,
@@ -1018,10 +1000,10 @@ describe('Security tests', () => {
 				},
 			},
 		])
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
 
 		const { userClient } = await createUserAndUpdateRole({
 			anonymousClient: client,
@@ -1095,10 +1077,10 @@ describe('Security tests', () => {
 				},
 			},
 		])
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
 
 		await rootClient.request<any>(gql`
 			mutation createTest2 {
@@ -1189,10 +1171,10 @@ describe('Security tests', () => {
 				},
 			},
 		])
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
 
 		await rootClient.request<any>(gql`
 			mutation createTest2 {
@@ -1237,10 +1219,7 @@ describe('Security tests', () => {
 
 	it('should not be able to create / update / delete a role (except root)', async () => {
 		const setup = await setupTests()
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
 
 		const adminRole = await wabe.controllers.database.getObjects({
 			className: 'Role',
@@ -1303,10 +1282,7 @@ describe('Security tests', () => {
 
 	it('should not be able to create / update / delete a session (except root)', async () => {
 		const setup = await setupTests()
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
 
 		const adminClient = await getAdminUserClient(wabe.config.port, wabe, {
 			email: 'admin@wabe.dev',
@@ -1425,10 +1401,7 @@ describe('Security tests', () => {
 				},
 			},
 		])
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
 
 		const adminClient = await getAdminUserClient(wabe.config.port, wabe, {
 			email: 'admin@wabe.dev',
@@ -1497,10 +1470,7 @@ describe('Security tests', () => {
 				},
 			},
 		])
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
 
 		const adminClient = await getAdminUserClient(wabe.config.port, wabe, {
 			email: 'admin@wabe.dev',
@@ -1566,10 +1536,10 @@ describe('Security tests', () => {
 				},
 			},
 		])
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
 
 		const { userClient } = await createUserAndUpdateRole({
 			anonymousClient: client,
@@ -1633,10 +1603,10 @@ describe('Security tests', () => {
 				},
 			},
 		])
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
 
 		const { userClient } = await createUserAndUpdateRole({
 			anonymousClient: client,
@@ -1707,10 +1677,10 @@ describe('Security tests', () => {
 				},
 			},
 		])
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
 
 		const { userClient } = await createUserAndUpdateRole({
 			anonymousClient: client,
@@ -1788,10 +1758,10 @@ describe('Security tests', () => {
 				},
 			},
 		])
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
 
 		const { userClient } = await createUserAndUpdateRole({
 			anonymousClient: client,
@@ -1879,10 +1849,10 @@ describe('Security tests', () => {
 				},
 			},
 		])
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
 
 		const { userClient, userId } = await createUserAndUpdateRole({
 			anonymousClient: client,
@@ -1988,10 +1958,10 @@ describe('Security tests', () => {
 				},
 			},
 		])
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
 
 		const { userClient, userId } = await createUserAndUpdateRole({
 			anonymousClient: client,
@@ -2095,10 +2065,10 @@ describe('Security tests', () => {
 				},
 			},
 		])
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
 
 		const { userClient, userId } = await createUserAndUpdateRole({
 			anonymousClient: client,
@@ -2202,10 +2172,10 @@ describe('Security tests', () => {
 				},
 			},
 		])
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
 
 		const { userClient, userId } = await createUserAndUpdateRole({
 			anonymousClient: client,
@@ -2309,10 +2279,10 @@ describe('Security tests', () => {
 				},
 			},
 		])
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
 
 		const { userClient, userId } = await createUserAndUpdateRole({
 			anonymousClient: client,
@@ -2418,10 +2388,10 @@ describe('Security tests', () => {
 				},
 			},
 		])
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
 
 		const { userClient, userId } = await createUserAndUpdateRole({
 			anonymousClient: client,
@@ -2573,10 +2543,10 @@ describe('Security tests', () => {
 				},
 			},
 		])
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
 
 		const { userClient, userId } = await createUserAndUpdateRole({
 			anonymousClient: client,
@@ -2736,10 +2706,10 @@ describe('Security tests', () => {
 				},
 			},
 		])
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
 
 		const { userClient } = await createUserAndUpdateRole({
 			anonymousClient: client,
@@ -2825,10 +2795,10 @@ describe('Security tests', () => {
 				},
 			},
 		])
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
 
 		const { userClient } = await createUserAndUpdateRole({
 			anonymousClient: client,
@@ -2906,10 +2876,10 @@ describe('Security tests', () => {
 				},
 			},
 		])
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
 
 		const { userClient, refreshToken, accessToken } =
 			await createUserAndUpdateRole({
@@ -2999,10 +2969,10 @@ describe('Security tests', () => {
 				},
 			},
 		])
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
 
 		await createUserAndUpdateRole({
 			anonymousClient: client,
@@ -3082,10 +3052,10 @@ describe('Security tests', () => {
 				},
 			},
 		])
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
 
 		const { userClient } = await createUserAndUpdateRole({
 			anonymousClient: client,
@@ -3171,10 +3141,10 @@ describe('Security tests', () => {
 				},
 			},
 		])
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
 
 		const { userClient } = await createUserAndUpdateRole({
 			anonymousClient: client,
@@ -3252,10 +3222,10 @@ describe('Security tests', () => {
 				},
 			},
 		])
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
 
 		const { userClient } = await createUserAndUpdateRole({
 			anonymousClient: client,
@@ -3345,10 +3315,10 @@ describe('Security tests', () => {
 				},
 			},
 		])
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
 
 		const { userClient } = await createUserAndUpdateRole({
 			anonymousClient: client,
@@ -3424,10 +3394,10 @@ describe('Security tests', () => {
 				},
 			},
 		])
-		wabe = setup.wabe
-		port = setup.port
-		client = getAnonymousClient(port)
-		rootClient = getGraphqlClient(port)
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
 
 		const { userClient } = await createUserAndUpdateRole({
 			anonymousClient: client,

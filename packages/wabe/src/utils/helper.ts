@@ -153,7 +153,6 @@ export const createUserAndUpdateRole = async ({
         id
         accessToken
         refreshToken
-        csrfToken
       }
     }
   `,
@@ -203,6 +202,5 @@ export const createUserAndUpdateRole = async ({
 		userId: res.signUpWith.id,
 		refreshToken: res.signUpWith.refreshToken,
 		accessToken: res.signUpWith.accessToken,
-		csrfToken: res.signUpWith.csrfToken,
 	}
 }
