@@ -25,7 +25,7 @@
         "libphonenumber-js": "1.11.18",
         "otplib": "12.0.1",
         "p-retry": "7.1.0",
-        "wobe": "1.1.14",
+        "wobe": "1.1.15",
         "wobe-graphql-yoga": "1.2.9",
       },
       "devDependencies": {
@@ -1954,7 +1954,7 @@
 
     "which": ["which@2.0.2", "", { "dependencies": { "isexe": "^2.0.0" }, "bin": { "node-which": "./bin/node-which" } }, "sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA=="],
 
-    "wobe": ["wobe@1.1.14", "", {}, "sha512-D6fe5LGKRqqf/lGIeJLYlkil5r8+ZYvDKQag4FTx+z7VVz/IRdEK7vA2N6kbbZ8g0gpgej25VYKR9V+vgw5NPA=="],
+    "wobe": ["wobe@1.1.15", "", {}, "sha512-lqs8U8T2kuM1Ghz/pTleSZdJFU4GXZ1orH6Unz1DhGt6tNlG/d65CLjATHKi9c5adRdqlOd6FGJnZfDhNsdukA=="],
 
     "wobe-graphql-yoga": ["wobe-graphql-yoga@1.2.9", "", { "dependencies": { "graphql-yoga": "5.17.1" } }, "sha512-reGZ09cEAMzfOVquc7R/HL4MHNCT4bI35ZGaLzP7RV20fX+rjbsYtizXSA5KeXNG2c632lQdKfRhxRNYxbe8KA=="],
 

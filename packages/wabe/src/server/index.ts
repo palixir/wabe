@@ -327,7 +327,7 @@ export class Wabe<T extends WabeTypes> {
 
 	async close() {
 		await this.controllers.database.close()
-		this.server.stop()
+		await this.server.stop()
 	}
 }
 
