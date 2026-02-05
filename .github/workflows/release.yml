@@ -1,27 +1,26 @@
-name: "release"
+name: 'release'
 
 on:
   workflow_dispatch:
     inputs:
       package:
-        description: "Package to release"
+        description: 'Package to release'
         required: true
         type: choice
         options:
-          - "wabe"
-          - "wabe-mongodb"
-          - "wabe-postgres"
-          - "wabe-resend"
-          - "wabe-openai"
-          - "wabe-mistralai"
-          - "wabe-buns3"
-          - "wabe-cron"
-          - "wabe-mongodb-launcher"
+          - 'wabe'
+          - 'wabe-mongodb'
+          - 'wabe-postgres'
+          - 'wabe-resend'
+          - 'wabe-openai'
+          - 'wabe-buns3'
+          - 'wabe-cron'
+          - 'wabe-mongodb-launcher'
 
 jobs:
   release:
     runs-on: ubuntu-latest
-    name: "Release ${{inputs.package}}"
+    name: 'Release ${{inputs.package}}'
 
     permissions:
       contents: write
@@ -35,13 +34,13 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-          registries: "https://registry.npmjs.org"
+          registries: 'https://registry.npmjs.org'
 
       - run: bun install
       - run: bun run build
       - run: bun run ci
 
-      - name: "Get Previous tag"
+      - name: 'Get Previous tag'
         id: previousTag
         run: |
           echo "Fetching tags..."
@@ -49,7 +48,7 @@ jobs:
           echo "Found previous tag: $previous_tag"
           echo "tag=$previous_tag" >> $GITHUB_ENV
 
-      - name: "Get Next Version from package.json"
+      - name: 'Get Next Version from package.json'
         id: nextVersion
         run: |
           package_json_path="./packages/${{inputs.package}}/package.json"
