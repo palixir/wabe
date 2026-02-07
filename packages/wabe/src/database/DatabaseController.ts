@@ -1,10 +1,9 @@
 import { selectFieldsWithoutPrivateFields } from 'src/utils/helper'
 import type { WabeTypes } from '../..'
-import { OperationType, initializeHook } from '../hooks'
+import { initializeHook, OperationType } from '../hooks'
 import type { SchemaInterface } from '../schema'
 import type { WabeContext } from '../server/interface'
-import { contextWithRoot } from '../utils/export'
-import { notEmpty } from '../utils/export'
+import { contextWithRoot, notEmpty } from '../utils/export'
 import type { DevWabeTypes } from '../utils/helper'
 import type {
 	CountOptions,
@@ -745,11 +744,7 @@ export class DatabaseController<T extends WabeTypes> {
 
 		return this.getObjects({
 			className,
-			context: {
-				...context,
-				// @ts-expect-error
-				user: className === 'User' ? data[0] : context.user,
-			},
+			context: contextWithRoot(context),
 			select,
 			// @ts-expect-error
 			where: { id: { in: ids } },

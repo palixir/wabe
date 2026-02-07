@@ -108,6 +108,17 @@ export const setupTests = async (
 
 	await wabe.start()
 
+	const maxRetries = 10
+	for (let i = 0; i < maxRetries; i++) {
+		try {
+			const response = await fetch(`http://127.0.0.1:${port}/health`)
+			if (response.ok) break
+		} catch {
+			if (i === maxRetries - 1) throw new Error('Server failed to start')
+			await new Promise((resolve) => setTimeout(resolve, 100))
+		}
+	}
+
 	return { wabe, port }
 }
 
