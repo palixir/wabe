@@ -487,6 +487,95 @@ describe('Server', () => {
 		await wabe.close()
 	})
 
+	it('should block introspection in production without root key', async () => {
+		const databaseId = uuid()
+		const port = await getPort()
+		const rootKey = 'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc'
+		const wabe = new Wabe({
+			isProduction: true,
+			rootKey,
+			database: {
+				// @ts-expect-error
+				adapter: await getDatabaseAdapter(databaseId),
+			},
+			port,
+			security: {
+				disableCSRFProtection: true,
+			},
+			schema: {
+				classes: [
+					{
+						name: 'Collection1',
+						fields: { name: { type: 'String' } },
+					},
+				],
+			},
+		})
+
+		await wabe.start()
+
+		const res = await fetch(`http://127.0.0.1:${port}/graphql`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				query: '{ __schema { types { name } } }',
+			}),
+		})
+
+		const json = (await res.json()) as { errors?: { message: string }[] }
+		expect(json.errors).toBeDefined()
+		expect(json.errors?.[0]?.message).toContain('introspection')
+
+		await wabe.close()
+	})
+
+	it('should allow introspection in production with valid root key', async () => {
+		const databaseId = uuid()
+		const port = await getPort()
+		const rootKey = 'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc'
+		const wabe = new Wabe({
+			isProduction: true,
+			rootKey,
+			database: {
+				// @ts-expect-error
+				adapter: await getDatabaseAdapter(databaseId),
+			},
+			port,
+			security: {
+				disableCSRFProtection: true,
+			},
+			schema: {
+				classes: [
+					{
+						name: 'Collection1',
+						fields: { name: { type: 'String' } },
+					},
+				],
+			},
+		})
+
+		await wabe.start()
+
+		const res = await fetch(`http://127.0.0.1:${port}/graphql`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'Wabe-Root-Key': rootKey,
+			},
+			body: JSON.stringify({
+				query: '{ __schema { types { name } } }',
+			}),
+		})
+
+		const json = (await res.json()) as { data?: { __schema?: { types?: { name: string }[] } } }
+		expect(json.data?.__schema?.types).toBeDefined()
+		expect(json.data?.__schema?.types?.length).toBeGreaterThan(0)
+
+		await wabe.close()
+	})
+
 	it('should load RoleEnum correctly', async () => {
 		const databaseId = uuid()
 
