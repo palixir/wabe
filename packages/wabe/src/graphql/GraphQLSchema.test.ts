@@ -262,7 +262,15 @@ describe('GraphqlSchema', () => {
 		const createResult = await rootClient.request<any>(gql`
 			${fragments}
 			mutation createTestClass {
-				createTestClass(input: { fields: { field: "testField", field1: "value1", field2: "value2" } }) {
+				createTestClass(
+					input: {
+						fields: {
+							field: "testField"
+							field1: "value1"
+							field2: "value2"
+						}
+					}
+				) {
 					testClass {
 						...ExtendedFields
 					}
@@ -394,7 +402,16 @@ describe('GraphqlSchema', () => {
 		const createResult = await rootClient.request<any>(gql`
 			${fragments}
 			mutation createTestClass {
-				createTestClass(input: { fields: { field1: "created1", field2: "created2", field3: "created3", field4: "created4" } }) {
+				createTestClass(
+					input: {
+						fields: {
+							field1: "created1"
+							field2: "created2"
+							field3: "created3"
+							field4: "created4"
+						}
+					}
+				) {
 					testClass {
 						...CompleteFields
 					}
@@ -1363,63 +1380,53 @@ describe('GraphqlSchema', () => {
 			{},
 		)
 
-		const res = await client.request<any>(
-			gql`
-				query testClasses {
-					testClasses(where: { AND: [{ age: { equalTo: 30 } }, { search: { contains: "t" } }] }) {
-						totalCount
-					}
+		const res = await client.request<any>(gql`
+			query testClasses {
+				testClasses(where: { AND: [{ age: { equalTo: 30 } }, { search: { contains: "t" } }] }) {
+					totalCount
 				}
-			`,
-		)
+			}
+		`)
 
 		expect(res.testClasses.totalCount).toEqual(1)
 
-		const res2 = await client.request<any>(
-			gql`
-				query testClasses {
-					testClasses(where: { search: { contains: "invalid" } }) {
-						totalCount
-					}
+		const res2 = await client.request<any>(gql`
+			query testClasses {
+				testClasses(where: { search: { contains: "invalid" } }) {
+					totalCount
 				}
-			`,
-		)
+			}
+		`)
 
 		expect(res2.testClasses.totalCount).toEqual(0)
 
-		const res3 = await client.request<any>(
-			gql`
-				query testClasses {
-					testClasses(where: { search: { contains: "test" } }) {
-						totalCount
-					}
+		const res3 = await client.request<any>(gql`
+			query testClasses {
+				testClasses(where: { search: { contains: "test" } }) {
+					totalCount
 				}
-			`,
-		)
+			}
+		`)
 
 		expect(res3.testClasses.totalCount).toEqual(1)
 
-		const res4 = await client.request<any>(
-			gql`
-				query testClasses {
-					testClasses(where: { AND: [{ age: { equalTo: 1111 } }, { search: { contains: "test" } }] }) {
-						totalCount
-					}
+		const res4 = await client.request<any>(gql`
+			query testClasses {
+				testClasses(where: { AND: [{ age: { equalTo: 1111 } }, { search: { contains: "test" } }] }) {
+					totalCount
 				}
-			`,
-		)
+			}
+		`)
 
 		expect(res4.testClasses.totalCount).toEqual(0)
 
-		const res5 = await client.request<any>(
-			gql`
-				query testClasses {
-					testClasses(where: { AND: [{ age: { equalTo: 30 } }, { search: { contains: "" } }] }) {
-						totalCount
-					}
+		const res5 = await client.request<any>(gql`
+			query testClasses {
+				testClasses(where: { AND: [{ age: { equalTo: 30 } }, { search: { contains: "" } }] }) {
+					totalCount
 				}
-			`,
-		)
+			}
+		`)
 
 		expect(res5.testClasses.totalCount).toEqual(1)
 
@@ -1472,15 +1479,13 @@ describe('GraphqlSchema', () => {
 			{},
 		)
 
-		const res = await client.request<any>(
-			gql`
-				query testClasses {
-					testClasses {
-						totalCount
-					}
+		const res = await client.request<any>(gql`
+			query testClasses {
+				testClasses {
+					totalCount
 				}
-			`,
-		)
+			}
+		`)
 
 		expect(res.testClasses.totalCount).toEqual(1)
 
@@ -1891,6 +1896,117 @@ describe('GraphqlSchema', () => {
 			updatedAt: 'DateWhereInput',
 			search: 'SearchWhereInput',
 		})
+	})
+
+	it('should resolve virtual fields in GraphQL queries', async () => {
+		const { client, wabe } = await createWabe({
+			classes: [
+				{
+					name: 'VirtualPerson',
+					fields: {
+						firstName: { type: 'String' },
+						lastName: { type: 'String' },
+						age: { type: 'Int' },
+						fullName: {
+							type: 'Virtual',
+							returnType: 'String',
+							// @ts-expect-error
+							dependsOn: ['firstName', 'lastName'],
+							callback: (object: any) =>
+								`${object.firstName || ''} ${object.lastName || ''}`.trim(),
+						},
+						isAdult: {
+							type: 'Virtual',
+							returnType: 'Boolean',
+							// @ts-expect-error
+							dependsOn: ['age'],
+							callback: (object: any) => (object.age || 0) >= 18,
+						},
+					},
+					permissions: {
+						read: { requireAuthentication: false },
+						create: { requireAuthentication: false },
+						update: { requireAuthentication: false },
+						delete: { requireAuthentication: false },
+					},
+				},
+			],
+		})
+
+		const created = await client.request<{
+			createVirtualPerson: {
+				virtualPerson: {
+					id: string
+				}
+			}
+		}>(gql`
+			mutation createVirtualPerson {
+				createVirtualPerson(input: { fields: { firstName: "Ada", lastName: "Lovelace", age: 37 } }) {
+					virtualPerson {
+						id
+					}
+				}
+			}
+		`)
+
+		const read = await client.request<{
+			virtualPerson: {
+				id: string
+				firstName: string
+				lastName: string
+				age: number
+				fullName: string
+				isAdult: boolean
+			}
+		}>(
+			gql`
+				query virtualPerson($id: ID) {
+					virtualPerson(id: $id) {
+						id
+						firstName
+						lastName
+						age
+						fullName
+						isAdult
+					}
+				}
+			`,
+			{ id: created.createVirtualPerson.virtualPerson.id },
+		)
+
+		expect(read.virtualPerson.id).toBe(created.createVirtualPerson.virtualPerson.id)
+		expect(read.virtualPerson.firstName).toBe('Ada')
+		expect(read.virtualPerson.lastName).toBe('Lovelace')
+		expect(read.virtualPerson.age).toBe(37)
+		expect(read.virtualPerson.fullName).toBe('Ada Lovelace')
+		expect(read.virtualPerson.isAdult).toBe(true)
+
+		const list = await client.request<{
+			virtualPersons: {
+				edges: Array<{
+					node: {
+						fullName: string
+						isAdult: boolean
+					}
+				}>
+			}
+		}>(gql`
+			query virtualPersons {
+				virtualPersons {
+					edges {
+						node {
+							fullName
+							isAdult
+						}
+					}
+				}
+			}
+		`)
+
+		expect(list.virtualPersons.edges[0]?.node.fullName).toBe('Ada Lovelace')
+		expect(list.virtualPersons.edges[0]?.node.isAdult).toBe(true)
+
+		await wabe.close()
 	})
 
 	it('should have ConnectionObject on field of relation in ObjectType', () => {
@@ -4026,7 +4142,9 @@ describe('GraphqlSchema', () => {
 		})) as any
 
 		expect(field2BeforeUpdate2[0]?.field2).toEqual([
-			{ id: resAfterAdd.createTestClass2.testClass2.field2.edges[0].node.id },
+			{
+				id: resAfterAdd.createTestClass2.testClass2.field2.edges[0].node.id,
+			},
 		])
 
 		const resAfterUpdate = await client.request<any>(gql`

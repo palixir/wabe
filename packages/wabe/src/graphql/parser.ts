@@ -179,6 +179,23 @@ export const GraphqlParser: GraphqlParserConstructor =
 						return acc
 					}
 
+					if (currentField?.type === 'Virtual') {
+						if (isWhereType) return acc
+
+						const graphqlType = getGraphqlType({
+							type: currentField.returnType,
+						})
+
+						acc[key] = {
+							type:
+								currentField?.required && !forceRequiredToFalse
+									? new GraphQLNonNull(graphqlType)
+									: graphqlType,
+						}
+
+						return acc
+					}
+
 					const graphqlType = getGraphqlType({
 						...currentField,
 						// We never come here, complicated to good type this
@@ -443,6 +460,24 @@ export const GraphqlParser: GraphqlParserConstructor =
 
 								break
 							}
+						}
+
+						return acc
+					}
+
+					if (currentField?.type === 'Virtual') {
+						if (graphqlObjectType !== 'Object') return acc
+
+						const graphqlType = getGraphqlType({
+							type: currentField.returnType,
+							isWhereType,
+						})
+
+						acc[key] = {
+							type:
+								currentField?.required && !forceRequiredToFalse
+									? new GraphQLNonNull(graphqlType)
+									: graphqlType,
 						}
 
 						return acc

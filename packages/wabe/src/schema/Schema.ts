@@ -27,6 +27,8 @@ export type WabeRelationTypes = 'Pointer' | 'Relation'
 
 export type WabeFieldTypes = WabeCustomTypes | WabePrimaryTypes | WabeRelationTypes
 
+export type VirtualReturnType = 'String' | 'Int' | 'Float' | 'Boolean' | 'Date' | 'Email' | 'Phone'
+
 export type WabeObject<T extends WabeTypes> = {
 	name: string
 	fields: SchemaFields<T>
@@ -92,7 +94,15 @@ type TypeFieldCustomEnums<T extends WabeTypes> = {
 	defaultValue?: any
 }
 
-export type TypeField<T extends WabeTypes> = (
+type TypeFieldVirtual<T extends WabeTypes, K extends keyof T['types']> = {
+	type: 'Virtual'
+	returnType: VirtualReturnType
+	defaultValue?: never
+	dependsOn: Array<keyof T['types'][K]>
+	callback: (object: T['types'][K] & { id: string }) => string | number | boolean | Date | null
+}
+
+export type TypeField<T extends WabeTypes, K extends keyof T['types'] = keyof T['types']> = (
 	| TypeFieldBase<string, 'String'>
 	| TypeFieldBase<number, 'Int'>
 	| TypeFieldBase<number, 'Float'>
@@ -108,10 +118,14 @@ export type TypeField<T extends WabeTypes> = (
 	| TypeFieldFile
 	| TypeFieldCustomScalars<T>
 	| TypeFieldCustomEnums<T>
+	| TypeFieldVirtual<T, K>
 ) &
 	FieldBase<T>
 
-export type SchemaFields<T extends WabeTypes> = Record<string, TypeField<T>>
+export type SchemaFields<
+	T extends WabeTypes,
+	K extends keyof T['types'] = keyof T['types'],
+> = Record<string, TypeField<T, K>>
 
 export type ResolverType<T extends WabeTypes> = {
 	required?: boolean
@@ -183,7 +197,7 @@ export type ClassIndexes = Array<{
 
 export interface ClassInterface<T extends WabeTypes> {
 	name: string
-	fields: SchemaFields<T>
+	fields: SchemaFields<T, keyof T['types']>
 	description?: string
 	permissions?: ClassPermissions<T>
 	searchableFields?: SearchableFields

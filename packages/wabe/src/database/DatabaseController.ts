@@ -23,6 +23,20 @@ import type {
 export type Select = Record<string, boolean>
 type SelectWithObject = Record<string, object | boolean>
 
+type RuntimeVirtualField = {
+	type: 'Virtual'
+	dependsOn: string[]
+	callback: (object: Record<string, unknown>) => unknown
+}
+
+const isVirtualField = (field: unknown): field is RuntimeVirtualField => {
+	if (!field || typeof field !== 'object') return false
+
+	if (!('type' in field) || field.type !== 'Virtual') return false
+
+	return true
+}
+
 export class DatabaseController<T extends WabeTypes> {
 	public adapter: DatabaseAdapter<T>
 
@@ -45,6 +59,146 @@ export class DatabaseController<T extends WabeTypes> {
 	_getFieldType(originClassName: string, fieldName: string, context: WabeContext<T>) {
 		const realClass = this._getClass(originClassName, context)
 		return realClass?.fields[fieldName] as { type: string; class?: string } | undefined
+	}
+
+	_getVirtualFieldsForClass(className: keyof T['types'], context: WabeContext<T>) {
+		const currentClass = this._getClass(className, context)
+
+		if (!currentClass) return {}
+
+		const virtualFields: Record<string, RuntimeVirtualField> = {}
+
+		for (const [fieldName, fieldDefinition] of Object.entries(currentClass.fields)) {
+			if (!isVirtualField(fieldDefinition)) continue
+
+			virtualFields[fieldName] = fieldDefinition
+		}
+
+		return virtualFields
+	}
+
+	_buildReadSelects({
+		className,
+		context,
+		selectWithoutPointers,
+	}: {
+		className: keyof T['types']
+		context: WabeContext<T>
+		selectWithoutPointers: Select
+	}) {
+		const virtualFieldsByName = this._getVirtualFieldsForClass(className, context)
+		const requestedVirtualFields: string[] = []
+
+		const userSelect: Select = {}
+
+		for (const [fieldName, selected] of Object.entries(selectWithoutPointers)) {
+			if (!selected) continue
+
+			const virtualField = virtualFieldsByName[fieldName]
+
+			if (virtualField) {
+				requestedVirtualFields.push(fieldName)
+				continue
+			}
+
+			userSelect[fieldName] = true
+		}
+
+		const adapterSelect: Select = { ...userSelect }
+
+		for (const virtualFieldName of requestedVirtualFields) {
+			const virtualField = virtualFieldsByName[virtualFieldName]
+
+			if (!virtualField) continue
+
+			for (const dependencyField of virtualField.dependsOn) {
+				const dependencyName = String(dependencyField)
+
+				// Virtual dependencies are only useful for computation and must never reach adapters.
+				if (virtualFieldsByName[dependencyName]) continue
+
+				adapterSelect[dependencyName] = true
+			}
+		}
+
+		return {
+			userSelect,
+			adapterSelect,
+		}
+	}
+
+	_projectObjectForUserSelect({
+		object,
+		select,
+	}: {
+		object: Record<string, any> | null | undefined
+		select?: SelectWithObject
+	}): any {
+		if (!object) return object
+		if (!select) return object
+
+		const projectedObject: Record<string, any> = {}
+
+		for (const [fieldName, selected] of Object.entries(select)) {
+			if (!selected) continue
+			if (!(fieldName in object)) continue
+
+			projectedObject[fieldName] = object[fieldName]
+		}
+
+		return projectedObject
+	}
+
+	_stripVirtualFieldsFromPayload({
+		className,
+		context,
+		payload,
+	}: {
+		className: keyof T['types']
+		context: WabeContext<T>
+		payload: unknown
+	}): any {
+		if (!payload || typeof payload !== 'object') return {}
+
+		const virtualFields = this._getVirtualFieldsForClass(className, context)
+
+		if (Object.keys(virtualFields).length === 0) return payload
+
+		const filteredPayload: Record<string, unknown> = {}
+
+		for (const [fieldName, value] of Object.entries(payload)) {
+			if (virtualFields[fieldName]) continue
+
+			filteredPayload[fieldName] = value
+		}
+
+		return filteredPayload
+	}
+
+	_stripVirtualFieldsFromSchema(schema: SchemaInterface<T>): SchemaInterface<T> {
+		const classes = schema.classes?.map((classDefinition) => {
+			const filteredFieldEntries = Object.entries(classDefinition.fields).filter(
+				([_fieldName, fieldDefinition]) => !isVirtualField(fieldDefinition),
+			)
+			const filteredFields = Object.fromEntries(filteredFieldEntries)
+
+			const allowedFieldNames = new Set(Object.keys(filteredFields))
+
+			const filteredIndexes = classDefinition.indexes?.filter((index) =>
+				allowedFieldNames.has(index.field),
+			)
+
+			return {
+				...classDefinition,
+				fields: filteredFields,
+				indexes: filteredIndexes,
+			}
+		})
+
+		return {
+			...schema,
+			classes,
+		}
 	}
 
 	_getSelectMinusPointersAndRelations({
@@ -390,17 +544,22 @@ export class DatabaseController<T extends WabeTypes> {
 				)
 
 				if (isRelation && object[pointerField]) {
-					const selectWithoutTotalCount = Object.entries(currentSelect || {}).reduce(
-						(acc2, [key, value]) => {
-							if (key === 'totalCount') return acc2
+					const computedSelectWithoutTotalCount = currentSelect
+						? Object.entries(currentSelect).reduce((acc2, [key, value]) => {
+								if (key === 'totalCount') return acc2
 
-							return {
-								...acc2,
-								[key]: value,
-							}
-						},
-						{} as Record<string, any>,
-					)
+								return {
+									...acc2,
+									[key]: value,
+								}
+							}, {})
+						: undefined
+
+					const selectWithoutTotalCount =
+						computedSelectWithoutTotalCount &&
+						Object.keys(computedSelectWithoutTotalCount).length > 0
+							? computedSelectWithoutTotalCount
+							: { id: true }
 
 					const relationObjects = await this.getObjects({
 						className: currentClassName,
@@ -435,11 +594,11 @@ export class DatabaseController<T extends WabeTypes> {
 	}
 
 	createClassIfNotExist(className: string, schema: SchemaInterface<T>): Promise<any> {
-		return this.adapter.createClassIfNotExist(className, schema)
+		return this.adapter.createClassIfNotExist(className, this._stripVirtualFieldsFromSchema(schema))
 	}
 
 	initializeDatabase(schema: SchemaInterface<T>): Promise<void> {
-		return this.adapter.initializeDatabase(schema)
+		return this.adapter.initializeDatabase(this._stripVirtualFieldsFromSchema(schema))
 	}
 
 	async count<K extends keyof T['types']>({
@@ -489,12 +648,24 @@ export class DatabaseController<T extends WabeTypes> {
 			context,
 			select: select as SelectWithObject,
 		})
+		const { userSelect, adapterSelect } = this._buildReadSelects({
+			className,
+			context,
+			selectWithoutPointers,
+		})
 
 		const hook = !_skipHooks
 			? initializeHook({
 					className,
 					context,
-					select: selectWithoutPointers,
+					select: {
+						...userSelect,
+						...Object.fromEntries(
+							Object.keys(this._getVirtualFieldsForClass(className, context))
+								.filter((fieldName) => !!selectWithoutPointers[fieldName])
+								.map((fieldName) => [fieldName, true]),
+						),
+					},
 					objectLoader: this._loadObjectForHooks(className, context),
 					objectsLoader: this._loadObjectsForHooks(className, context),
 				})
@@ -511,7 +682,7 @@ export class DatabaseController<T extends WabeTypes> {
 			acc[fieldName] = true
 
 			return acc
-		}, selectWithoutPointers)
+		}, adapterSelect)
 
 		const objectToReturn = await this.adapter.getObject({
 			className,
@@ -541,8 +712,13 @@ export class DatabaseController<T extends WabeTypes> {
 			// @ts-expect-error
 			object: finalObject,
 		})
+		const objectAfterHooks = afterReadResult?.object || finalObject
+		const objectProjectedForUser = this._projectObjectForUserSelect({
+			object: objectAfterHooks,
+			select: select as SelectWithObject,
+		})
 
-		return afterReadResult?.object || finalObject
+		return objectProjectedForUser
 	}
 
 	async getObjects<
@@ -564,6 +740,11 @@ export class DatabaseController<T extends WabeTypes> {
 			context,
 			select: select as SelectWithObject,
 		})
+		const { userSelect, adapterSelect } = this._buildReadSelects({
+			className,
+			context,
+			selectWithoutPointers,
+		})
 
 		const whereWithPointer = await this._getWhereObjectWithPointerOrRelation(
 			className,
@@ -577,12 +758,19 @@ export class DatabaseController<T extends WabeTypes> {
 			acc[fieldName] = true
 
 			return acc
-		}, selectWithoutPointers)
+		}, adapterSelect)
 
 		const hook = !_skipHooks
 			? initializeHook({
 					className,
-					select: selectWithoutPointers,
+					select: {
+						...userSelect,
+						...Object.fromEntries(
+							Object.keys(this._getVirtualFieldsForClass(className, context))
+								.filter((fieldName) => !!selectWithoutPointers[fieldName])
+								.map((fieldName) => [fieldName, true]),
+						),
+					},
 					context,
 					objectLoader: this._loadObjectForHooks(className, context),
 					objectsLoader: this._loadObjectsForHooks(className, context),
@@ -627,10 +815,16 @@ export class DatabaseController<T extends WabeTypes> {
 			// @ts-expect-error
 			objects: objectsWithPointers,
 		})
+		const objectsAfterHooks = afterReadResults?.objects || objectsWithPointers
+		const projectedObjects = objectsAfterHooks.map((object) =>
+			this._projectObjectForUserSelect({
+				object,
+				select: select as SelectWithObject,
+			}),
+		)
 
-		return (afterReadResults?.objects || objectsWithPointers) as unknown as Promise<
-			OutputType<T, K, W>[]
-		>
+		// Projection keeps only user-requested top-level fields, including virtual fields.
+		return projectedObjects
 	}
 
 	async createObject<
@@ -653,11 +847,17 @@ export class DatabaseController<T extends WabeTypes> {
 			data,
 			select: select as Select,
 			adapterCallback: async (newData) => {
+				const payload = this._stripVirtualFieldsFromPayload({
+					className,
+					context,
+					payload: newData || data,
+				})
+
 				const res = await this.adapter.createObject({
 					className,
 					context,
 					select,
-					data: newData || data,
+					data: payload,
 				})
 
 				return { id: res.id }
@@ -668,10 +868,12 @@ export class DatabaseController<T extends WabeTypes> {
 
 		if (select && Object.keys(select).length === 0) return null
 
+		const selectWithoutPrivateFields = select ? selectFieldsWithoutPrivateFields(select) : undefined
+
 		return this.getObject({
 			className,
 			context: contextWithRoot(context),
-			select: selectFieldsWithoutPrivateFields(select),
+			select: selectWithoutPrivateFields,
 			id: res.id,
 		})
 	}
@@ -723,7 +925,13 @@ export class DatabaseController<T extends WabeTypes> {
 			className,
 			select,
 			context,
-			data: arrayOfComputedData,
+			data: arrayOfComputedData.map((payload) =>
+				this._stripVirtualFieldsFromPayload({
+					className,
+					context,
+					payload,
+				}),
+			),
 			first,
 			offset,
 			order,
@@ -768,13 +976,18 @@ export class DatabaseController<T extends WabeTypes> {
 	}: UpdateObjectOptions<T, K, U, W>): Promise<OutputType<T, K, W>> {
 		if (_skipHooks) {
 			const whereWithACLCondition = this._buildWhereWithACL({}, context, 'write')
+			const payload = this._stripVirtualFieldsFromPayload({
+				className,
+				context,
+				payload: data,
+			})
 
 			return this.adapter.updateObject({
 				className,
 				select,
 				id,
 				context,
-				data,
+				data: payload,
 				where: whereWithACLCondition,
 			}) as Promise<OutputType<T, K, W>>
 		}
@@ -789,13 +1002,18 @@ export class DatabaseController<T extends WabeTypes> {
 			select: select as Select,
 			adapterCallback: async (newData) => {
 				const whereWithACLCondition = this._buildWhereWithACL({}, context, 'write')
+				const payload = this._stripVirtualFieldsFromPayload({
+					className,
+					context,
+					payload: newData || data,
+				})
 
 				await this.adapter.updateObject({
 					className,
 					select,
 					id,
 					context,
-					data: newData || data,
+					data: payload,
 					where: whereWithACLCondition,
 				})
 
@@ -858,7 +1076,11 @@ export class DatabaseController<T extends WabeTypes> {
 			className,
 			context,
 			select,
-			data: resultsAfterBeforeUpdate?.newData[0] || data,
+			data: this._stripVirtualFieldsFromPayload({
+				className,
+				context,
+				payload: resultsAfterBeforeUpdate?.newData[0] || data || {},
+			}),
 			where: whereWithACLCondition,
 			first,
 			offset,
