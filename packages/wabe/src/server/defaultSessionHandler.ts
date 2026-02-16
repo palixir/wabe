@@ -1,7 +1,6 @@
 import type { Wabe, WobeCustomContext } from '.'
-import { timingSafeEqual } from 'node:crypto'
 import { Session } from '../authentication/Session'
-import { getCookieInRequestHeaders } from '../utils'
+import { getCookieInRequestHeaders, isValidRootKey } from '../utils'
 import type { DevWabeTypes } from '../utils/helper'
 
 export const defaultSessionHandler =
@@ -9,10 +8,7 @@ export const defaultSessionHandler =
 		const headers = ctx.request.headers
 		const isGraphQLCall = ctx.request.url.includes('/graphql')
 
-		const headerRootKey = Buffer.from(headers.get('Wabe-Root-Key') || '')
-		const rootKey = Buffer.from(wabe.config.rootKey)
-
-		if (headerRootKey.length === rootKey.length && timingSafeEqual(rootKey, headerRootKey)) {
+		if (isValidRootKey(headers, wabe.config.rootKey)) {
 			ctx.wabe = {
 				isRoot: true,
 				wabe,

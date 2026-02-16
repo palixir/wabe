@@ -402,7 +402,7 @@ describe('Security tests', () => {
 					}
 				}
 			`),
-		).rejects.toThrow('GraphQL introspection is not allowed in production')
+		).rejects.toThrow('GraphQL introspection has been disabled')
 
 		// Test pour un utilisateur authentifié (même un admin)
 		const { userClient } = await createUserAndUpdateRole({
@@ -422,7 +422,7 @@ describe('Security tests', () => {
 					}
 				}
 			`),
-		).rejects.toThrow('GraphQL introspection is not allowed in production')
+		).rejects.toThrow('GraphQL introspection has been disabled')
 
 		await closeTests(wabe)
 	})

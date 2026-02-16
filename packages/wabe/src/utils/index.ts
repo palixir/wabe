@@ -1,5 +1,12 @@
+import { timingSafeEqual } from 'node:crypto'
 import type { ClassInterface } from '../schema'
 import type { WabeTypes, WabeConfig, WabeContext } from '../server'
+
+export const isValidRootKey = (headers: Headers, rootKey: string): boolean => {
+	const headerRootKey = Buffer.from(headers.get('Wabe-Root-Key') || '')
+	const key = Buffer.from(rootKey)
+	return headerRootKey.length === key.length && timingSafeEqual(key, headerRootKey)
+}
 
 export const contextWithoutGraphQLCall = (context: WabeContext<any>): WabeContext<any> => ({
 	...context,

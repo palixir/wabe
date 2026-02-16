@@ -1,7 +1,7 @@
 import type { DatabaseConfig } from '../database'
 import { DatabaseController } from '../database/DatabaseController'
 import { type EnumInterface, Schema, type SchemaInterface } from '../schema/Schema'
-import { GraphQLError, GraphQLObjectType, GraphQLSchema } from 'graphql'
+import { GraphQLObjectType, GraphQLSchema, NoSchemaIntrospectionCustomRule } from 'graphql'
 import { GraphQLSchema as WabeGraphQLSchema } from '../graphql'
 import type { AuthenticationConfig } from '../authentication/interface'
 import { type WabeRoute, defaultRoutes } from './routes'
@@ -18,6 +18,7 @@ import { FileController } from '../file/FileController'
 import { defaultSessionHandler } from './defaultSessionHandler'
 import type { CronConfig } from '../cron'
 import type { FileConfig } from '../file'
+import { isValidRootKey } from '../utils'
 import { WobeGraphqlYogaPlugin } from 'wobe-graphql-yoga'
 
 type SecurityConfig = {
@@ -284,34 +285,27 @@ export class Wabe<T extends WabeTypes> {
 				allowMultipleOperations: true,
 				graphqlEndpoint: '/graphql',
 				plugins: [
-					{
-						// @ts-expect-error
-						onValidate: ({ addValidationRule }) => {
-							// @ts-expect-error
-							addValidationRule((context) => {
-								return {
-									// @ts-expect-error
-									Field(node) {
-										const introspectionFields = [
-											'__schema',
-											'__type',
-											'__typeKind',
-											'__field',
-											'__inputValue',
-											'__enumValue',
-											'__directive',
-										]
-
-										if (introspectionFields.includes(node.name.value)) {
-											context.reportError(
-												new GraphQLError('GraphQL introspection is not allowed in production'),
-											)
-										}
-									},
+					(() => {
+						const introspectionDisabled = new WeakSet<Request>()
+						return {
+							onRequestParse: ({ request }: { request: Request }) => {
+								if (this.config.security?.allowIntrospectionInProduction) return
+								if (isValidRootKey(request.headers, this.config.rootKey)) return
+								introspectionDisabled.add(request)
+							},
+							onValidate: ({
+								addValidationRule,
+								context,
+							}: {
+								addValidationRule: (rule: unknown) => void
+								context: { request: Request }
+							}) => {
+								if (introspectionDisabled.has(context.request)) {
+									addValidationRule(NoSchemaIntrospectionCustomRule)
 								}
-							})
-						},
-					},
+							},
+						}
+					})(),
 				],
 				context: async (ctx): Promise<WabeContext<T>> => ctx.wabe,
 			}),
