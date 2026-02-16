@@ -33,7 +33,7 @@ export const verifyChallengeResolver = async (
 
 	if (!result?.userId) throw new Error('Invalid challenge')
 
-	const session = new Session()
+	const session = new Session<DevWabeTypes>()
 
 	const { accessToken, refreshToken } = await session.create(result.userId, context)
 

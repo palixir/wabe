@@ -52,7 +52,7 @@ describe('Session', () => {
 			email: 'user@email.com',
 		})
 
-		const session = new Session()
+		const session = new Session<any>()
 
 		const jwtTokenFields = {
 			id: true,
@@ -102,7 +102,7 @@ describe('Session', () => {
 	})
 
 	it('should set all data set in the jwtTokenFields on refresh session', async () => {
-		const session = new Session()
+		const session = new Session<any>()
 
 		const { accessToken: oldAccessToken, refreshToken: oldRefreshToken } = await session.create(
 			'userId',
@@ -167,7 +167,7 @@ describe('Session', () => {
 			email: 'user@email.com',
 		})
 
-		const session = new Session()
+		const session = new Session<any>()
 
 		const { accessToken, refreshToken } = await session.create('userId', context)
 
@@ -180,7 +180,7 @@ describe('Session', () => {
 	})
 
 	it('should not set user fields if not jwtTokenFields is set on refresh session', async () => {
-		const session = new Session()
+		const session = new Session<any>()
 
 		const { accessToken: oldAccessToken, refreshToken: oldRefreshToken } = await session.create(
 			'userId',
@@ -222,7 +222,7 @@ describe('Session', () => {
 	it('should returns null if no user found', async () => {
 		mockGetObjects.mockResolvedValue([])
 
-		const session = new Session()
+		const session = new Session<any>()
 
 		const { accessToken } = await session.create('userId', context)
 
@@ -274,7 +274,7 @@ describe('Session', () => {
 			},
 		])
 
-		const session = new Session()
+		const session = new Session<any>()
 
 		const { accessToken } = await session.create('userId', context)
 
@@ -327,7 +327,7 @@ describe('Session', () => {
 	})
 
 	it('should create a new session', async () => {
-		const session = new Session()
+		const session = new Session<any>()
 
 		const fifteenMinutes = new Date(Date.now() + 1000 * 60 * 15)
 		const sevenDays = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7)
@@ -370,7 +370,7 @@ describe('Session', () => {
 	})
 
 	it('should delete a session', async () => {
-		const session = new Session()
+		const session = new Session<any>()
 
 		await session.delete({
 			sessionId: 'sessionId',
@@ -393,7 +393,7 @@ describe('Session', () => {
 	})
 
 	it('should refresh a session', async () => {
-		const session = new Session()
+		const session = new Session<any>()
 
 		const { accessToken: oldAccessToken, refreshToken: oldRefreshToken } = await session.create(
 			'userId',
@@ -474,7 +474,7 @@ describe('Session', () => {
 	})
 
 	it('should return null if access token is invalid (malformed)', async () => {
-		const session = new Session()
+		const session = new Session<any>()
 
 		const res = await session.meFromAccessToken(
 			{ accessToken: 'not-a-jwt', csrfToken: '' },
@@ -487,7 +487,7 @@ describe('Session', () => {
 	})
 
 	it('should enforce CSRF by default when cookies are used', async () => {
-		const session = new Session()
+		const session = new Session<any>()
 
 		mockGetObjects.mockResolvedValue([
 			{
@@ -522,7 +522,7 @@ describe('Session', () => {
 	})
 
 	it('should not refresh session if the access token does not already take 75% of time', () => {
-		const session = new Session()
+		const session = new Session<any>()
 
 		// 1 hour
 		const refreshTokenAgeInMs = 1000 * 60 * 60
@@ -542,7 +542,7 @@ describe('Session', () => {
 	it('should return null on refresh session if session not found', async () => {
 		mockGetObjects.mockResolvedValue([])
 
-		const session = new Session()
+		const session = new Session<any>()
 
 		const { accessToken: oldAccessToken, refreshToken: oldRefreshToken } = await session.create(
 			'userId',
@@ -596,7 +596,7 @@ describe('Session', () => {
 			},
 		])
 
-		const session = new Session()
+		const session = new Session<any>()
 
 		const { refreshToken, accessToken } = await session.create('userId', context)
 
@@ -618,7 +618,7 @@ describe('Session', () => {
 			},
 		])
 
-		const session = new Session()
+		const session = new Session<any>()
 
 		const { refreshToken, accessToken } = await session.create('userId', context)
 

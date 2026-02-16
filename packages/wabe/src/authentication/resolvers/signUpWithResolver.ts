@@ -29,7 +29,7 @@ export const signUpWithResolver = async (
 
 	const createdUserId = res?.id
 
-	const session = new Session()
+	const session = new Session<any>()
 
 	if (!createdUserId) throw new Error('User not created')
 

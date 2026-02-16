@@ -192,7 +192,7 @@ describe('Security tests', () => {
 			`),
 		).rejects.toThrow('Permission denied to create class TestCSRF')
 
-		const session = new Session()
+		const session = new Session<any>()
 
 		const { csrfToken, accessToken: validAccessToken } = await session.create(userId, {
 			wabe,

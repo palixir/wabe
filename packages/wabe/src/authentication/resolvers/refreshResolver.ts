@@ -7,7 +7,7 @@ export const refreshResolver = async (_: any, args: any, context: WabeContext<De
 		input: { refreshToken, accessToken },
 	} = args
 
-	const session = new Session()
+	const session = new Session<DevWabeTypes>()
 
 	const { accessToken: newAccessToken, refreshToken: newRefreshToken } = await session.refresh(
 		accessToken,

@@ -55,7 +55,7 @@ export const defaultSessionHandler =
 
 		const { csrfToken } = getCsrfToken()
 
-		const session = new Session()
+		const session = new Session<DevWabeTypes>()
 
 		const {
 			user,
