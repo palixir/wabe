@@ -1,13 +1,11 @@
 import jwt, { verify, type SignOptions } from 'jsonwebtoken'
 import crypto from 'node:crypto'
 import type { WabeContext } from '../server/interface'
-import type { User } from '../../generated/wabe'
-import type { WabeConfig } from '../server'
+import type { WabeConfig, WabeTypes } from '../server'
 import { contextWithRoot } from '../utils/export'
-import type { DevWabeTypes } from '../utils/helper'
 import { encryptDeterministicToken, decryptDeterministicToken } from '../utils/crypto'
 
-const getJwtSecret = (context: WabeContext<DevWabeTypes>): string => {
+const getJwtSecret = <T extends WabeTypes>(context: WabeContext<T>): string => {
 	const secret = context.wabe.config.authentication?.session?.jwtSecret
 	if (!secret) throw new Error('Authentication session requires jwtSecret')
 	return secret
@@ -25,13 +23,13 @@ const safeVerify = (
 	}
 }
 
-const getTokenSecret = (context: WabeContext<DevWabeTypes>): string =>
+const getTokenSecret = <T extends WabeTypes>(context: WabeContext<T>): string =>
 	context.wabe.config.authentication?.session?.tokenSecret ?? getJwtSecret(context)
 
-const getTokenEncryptionKey = (context: WabeContext<DevWabeTypes>) =>
+const getTokenEncryptionKey = <T extends WabeTypes>(context: WabeContext<T>) =>
 	crypto.createHash('sha256').update(getTokenSecret(context)).digest()
 
-const getJwtVerifyOptions = (context: WabeContext<DevWabeTypes>) => {
+const getJwtVerifyOptions = <T extends WabeTypes>(context: WabeContext<T>) => {
 	const opts: Pick<SignOptions, 'audience' | 'issuer'> = {}
 	const audience = context.wabe.config.authentication?.session?.jwtAudience
 	const issuer = context.wabe.config.authentication?.session?.jwtIssuer
@@ -40,11 +38,11 @@ const getJwtVerifyOptions = (context: WabeContext<DevWabeTypes>) => {
 	return opts
 }
 
-export class Session {
+export class Session<T extends WabeTypes> {
 	private accessToken: string | undefined = undefined
 	private refreshToken: string | undefined = undefined
 
-	getAccessTokenExpireAt(config: WabeConfig<DevWabeTypes>) {
+	getAccessTokenExpireAt(config: WabeConfig<T>) {
 		const customExpiresInMs = config?.authentication?.session?.accessTokenExpiresInMs
 
 		if (!customExpiresInMs) return new Date(Date.now() + 1000 * 60 * 15) // 15 minutes in ms
@@ -52,7 +50,7 @@ export class Session {
 		return new Date(Date.now() + customExpiresInMs)
 	}
 
-	_getRefreshTokenExpiresInMs(config: WabeConfig<DevWabeTypes>) {
+	_getRefreshTokenExpiresInMs(config: WabeConfig<T>) {
 		const customExpiresInMs = config?.authentication?.session?.refreshTokenExpiresInMs
 
 		if (!customExpiresInMs) return 1000 * 60 * 60 * 24 * 7 // 7 days in ms
@@ -60,7 +58,7 @@ export class Session {
 		return customExpiresInMs
 	}
 
-	getRefreshTokenExpireAt(config: WabeConfig<DevWabeTypes>) {
+	getRefreshTokenExpireAt(config: WabeConfig<T>) {
 		const expiresInMs = this._getRefreshTokenExpiresInMs(config)
 
 		return new Date(Date.now() + expiresInMs)
@@ -68,10 +66,10 @@ export class Session {
 
 	async meFromAccessToken(
 		{ accessToken, csrfToken }: { accessToken: string; csrfToken: string },
-		context: WabeContext<DevWabeTypes>,
+		context: WabeContext<T>,
 	): Promise<{
 		sessionId: string | null
-		user: User | null
+		user: T['types']['User'] | null
 		accessToken: string | null
 		refreshToken?: string | null
 	}> {
@@ -92,6 +90,7 @@ export class Session {
 
 		const sessions = await context.wabe.controllers.database.getObjects({
 			className: '_Session',
+			// @ts-expect-error
 			where: {
 				accessTokenEncrypted: { equalTo: encryptedAccessToken },
 				OR: [
@@ -108,10 +107,15 @@ export class Session {
 				],
 			},
 			select: {
+				// @ts-expect-error
 				id: true,
+				// @ts-expect-error Generic
 				user: true,
+				// @ts-expect-error Generic
 				accessTokenExpiresAt: true,
+				// @ts-expect-error Generic
 				refreshTokenExpiresAt: true,
+				// @ts-expect-error Generic
 				refreshTokenEncrypted: true,
 			},
 			first: 1,
@@ -181,6 +185,7 @@ export class Session {
 		const userWithRole = await context.wabe.controllers.database.getObject({
 			className: 'User',
 			select: {
+				// @ts-expect-error
 				role: true,
 			},
 			context,
@@ -237,7 +242,7 @@ export class Session {
 		}
 	}
 
-	async create(userId: string, context: WabeContext<DevWabeTypes>) {
+	async create(userId: string, context: WabeContext<T>) {
 		const jwtTokenFields = context.wabe.config.authentication?.session?.jwtTokenFields
 
 		const nowSeconds = Math.floor(Date.now() / 1000)
@@ -300,6 +305,7 @@ export class Session {
 				refreshTokenExpiresAt: this.getRefreshTokenExpireAt(context.wabe.config),
 				user: userId,
 			},
+			// @ts-expect-error
 			select: { id: true },
 		})
 
@@ -323,7 +329,7 @@ export class Session {
 		}
 	}
 
-	async refresh(accessToken: string, refreshToken: string, context: WabeContext<DevWabeTypes>) {
+	async refresh(accessToken: string, refreshToken: string, context: WabeContext<T>) {
 		const secretKey = getJwtSecret(context)
 
 		const verifyOptions = getJwtVerifyOptions(context)
@@ -351,12 +357,17 @@ export class Session {
 
 		const session = await context.wabe.controllers.database.getObjects({
 			className: '_Session',
+			// @ts-expect-error
 			where: {
 				accessTokenEncrypted: { equalTo: accessTokenEncrypted },
-				refreshTokenEncrypted: { equalTo: incomingRefreshTokenEncrypted },
+				refreshTokenEncrypted: {
+					equalTo: incomingRefreshTokenEncrypted,
+				},
 			},
 			select: {
+				// @ts-expect-error
 				id: true,
+				// @ts-expect-error
 				user: {
 					id: true,
 					role: {
@@ -364,7 +375,9 @@ export class Session {
 						name: true,
 					},
 				},
+				// @ts-expect-error
 				refreshTokenEncrypted: true,
+				// @ts-expect-error
 				refreshTokenExpiresAt: true,
 			},
 			context: contextWithRoot(context),
@@ -473,7 +486,7 @@ export class Session {
 		}
 	}
 
-	async delete(context: WabeContext<DevWabeTypes>) {
+	async delete(context: WabeContext<T>) {
 		if (!context.sessionId) return
 
 		await context.wabe.controllers.database.deleteObject({

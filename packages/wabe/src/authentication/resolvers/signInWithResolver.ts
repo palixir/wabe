@@ -55,7 +55,7 @@ export const signInWithResolver = async (
 		return { accessToken: null, refreshToken: null, user }
 	}
 
-	const session = new Session()
+	const session = new Session<DevWabeTypes>()
 
 	const { refreshToken, accessToken, csrfToken } = await session.create(userId, context)
 
