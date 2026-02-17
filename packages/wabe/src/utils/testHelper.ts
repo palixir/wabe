@@ -20,6 +20,7 @@ export const setupTests = async (
 	options: {
 		isProduction?: boolean
 		disableCSRFProtection?: boolean
+		rootKey?: string
 	} = {},
 ) => {
 	const databaseId = uuid()
@@ -28,7 +29,7 @@ export const setupTests = async (
 
 	const wabe = new Wabe<DevWabeTypes>({
 		isProduction: !!options.isProduction,
-		rootKey: 'dev',
+		rootKey: options.rootKey ?? 'dev',
 		database: {
 			// @ts-expect-error
 			adapter: await getDatabaseAdapter(databaseId),
