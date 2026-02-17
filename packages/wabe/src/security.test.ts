@@ -1902,6 +1902,118 @@ describe('Security tests', () => {
 		await closeTests(wabe)
 	})
 
+	it('should not authorize an user to read an object when explicitly denied in acl.users even if role has access (MongoDB notContains)', async () => {
+		const setup = await setupTests([
+			{
+				name: 'TestNotContains',
+				fields: {
+					name: { type: 'String' },
+				},
+				permissions: {
+					read: {
+						authorizedRoles: ['Client'],
+						requireAuthentication: true,
+					},
+					create: {
+						authorizedRoles: ['Client'],
+						requireAuthentication: true,
+					},
+				},
+			},
+		])
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
+
+		const { userClient, userId } = await createUserAndUpdateRole({
+			anonymousClient: client,
+			port,
+			roleName: 'Client',
+			rootClient,
+		})
+
+		const clientRole = await rootClient.request<any>(gql`
+			query getClientRole {
+				roles(where: { name: { equalTo: "Client" } }) {
+					edges {
+						node {
+							id
+						}
+					}
+				}
+			}
+		`)
+
+		const clientRoleId = clientRole.roles.edges[0].node.id
+
+		const objectCreated = await rootClient.request<any>(gql`
+			mutation createTestNotContains {
+				createTestNotContains(input: { fields: { name: "secret" } }) {
+					testNotContains {
+						id
+					}
+				}
+			}
+		`)
+
+		const objectId = objectCreated.createTestNotContains.testNotContains.id
+
+		await rootClient.request<any>(gql`
+			mutation updateACL {
+				updateTestNotContains(input: {
+					id: "${objectId}",
+					fields: {
+						acl: {
+							users: [{
+								userId: "${userId}",
+								read: false,
+								write: false
+							}],
+							roles: [{
+								roleId: "${clientRoleId}",
+								read: true,
+								write: true
+							}]
+						}
+					}
+				}) {
+					testNotContains {
+						id
+					}
+				}
+			}
+		`)
+
+		await expect(
+			userClient.request<any>(gql`
+				query testNotContains {
+					testNotContains(id: "${objectId}") {
+						id
+						name
+					}
+				}
+			`),
+		).rejects.toThrow('Object not found')
+
+		const resList = await userClient.request<any>(gql`
+			query testNotContainses {
+				testNotContainses {
+					edges {
+						node {
+							id
+							name
+						}
+					}
+				}
+			}
+		`)
+
+		expect(resList.testNotContainses.edges.length).toEqual(0)
+
+		await closeTests(wabe)
+	})
+
 	it('should not authorize an user to write (delete) an object when the user has not access on write to the object (ACL)', async () => {
 		const setup = await setupTests([
 			{
