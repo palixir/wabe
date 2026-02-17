@@ -11,13 +11,18 @@ const getJwtSecret = <T extends WabeTypes>(context: WabeContext<T>): string => {
 	return secret
 }
 
+const JWT_ALGORITHM = 'HS256'
+
 const safeVerify = (
 	token: string,
 	secret: string,
 	options: Pick<SignOptions, 'audience' | 'issuer'> = {},
 ) => {
 	try {
-		return !!verify(token, secret, options)
+		return !!verify(token, secret, {
+			...options,
+			algorithms: [JWT_ALGORITHM],
+		})
 	} catch {
 		return false
 	}
@@ -258,7 +263,10 @@ export class Session<T extends WabeTypes> {
 
 		const secretKey = getJwtSecret(context)
 
-		const signOptions: SignOptions = { jwtid: crypto.randomUUID() }
+		const signOptions: SignOptions = {
+			jwtid: crypto.randomUUID(),
+			algorithm: JWT_ALGORITHM,
+		}
 		const audience = context.wabe.config.authentication?.session?.jwtAudience
 		const issuer = context.wabe.config.authentication?.session?.jwtIssuer
 		if (audience) signOptions.audience = audience
@@ -272,7 +280,7 @@ export class Session<T extends WabeTypes> {
 				exp: Math.floor(this.getAccessTokenExpireAt(context.wabe.config).getTime() / 1000),
 			},
 			secretKey,
-			signOptions,
+			{ ...signOptions, algorithm: JWT_ALGORITHM },
 		)
 
 		this.refreshToken = jwt.sign(
@@ -283,7 +291,7 @@ export class Session<T extends WabeTypes> {
 				exp: Math.floor(this.getRefreshTokenExpireAt(context.wabe.config).getTime() / 1000),
 			},
 			secretKey,
-			signOptions,
+			{ ...signOptions, algorithm: JWT_ALGORITHM },
 		)
 
 		const accessTokenEncrypted = encryptDeterministicToken(
@@ -430,7 +438,10 @@ export class Session<T extends WabeTypes> {
 
 		const nowSeconds = Math.floor(Date.now() / 1000)
 
-		const signOptions: SignOptions = { jwtid: crypto.randomUUID() }
+		const signOptions: SignOptions = {
+			jwtid: crypto.randomUUID(),
+			algorithm: JWT_ALGORITHM,
+		}
 		const audience = context.wabe.config.authentication?.session?.jwtAudience
 		const issuer = context.wabe.config.authentication?.session?.jwtIssuer
 		if (audience) signOptions.audience = audience
@@ -444,7 +455,7 @@ export class Session<T extends WabeTypes> {
 				exp: Math.floor(this.getAccessTokenExpireAt(context.wabe.config).getTime() / 1000),
 			},
 			secretKey,
-			signOptions,
+			{ ...signOptions, algorithm: JWT_ALGORITHM },
 		)
 
 		const newRefreshToken = jwt.sign(
@@ -455,7 +466,7 @@ export class Session<T extends WabeTypes> {
 				exp: Math.floor(this.getRefreshTokenExpireAt(context.wabe.config).getTime() / 1000),
 			},
 			secretKey,
-			signOptions,
+			{ ...signOptions, algorithm: JWT_ALGORITHM },
 		)
 
 		const newAccessTokenEncrypted = encryptDeterministicToken(
