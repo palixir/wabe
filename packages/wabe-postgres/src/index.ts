@@ -52,6 +52,19 @@ const getSQLColumnCreateTableFromType = <T extends WabeTypes>(type: TypeField<T>
 	}
 }
 
+/** Resolve where operators (e.g. { string: { equalTo: 'user1' } }) to plain values for JSON. */
+const resolveWhereToPlain = (obj: unknown): unknown => {
+	if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return obj
+	return Object.fromEntries(
+		Object.entries(obj).map(([key, value]) => [
+			key,
+			value && typeof value === 'object' && !Array.isArray(value) && 'equalTo' in value
+				? (value as { equalTo: unknown }).equalTo
+				: resolveWhereToPlain(value),
+		]),
+	)
+}
+
 export const buildPostgresOrderQuery = <
 	T extends WabeTypes,
 	K extends keyof T['types'],
@@ -207,10 +220,11 @@ export const buildPostgresWhereQueryAndValues = <T extends WabeTypes, K extends 
 			if (value?.notContains) {
 				// Simple access on json field because contains is use for array or object column
 				acc.conditions.push(`NOT (${simpleFullKey}  @> $${acc.paramIndex})`)
+				const toJson = (v: unknown) => (Array.isArray(v) ? JSON.stringify(v) : JSON.stringify([v]))
 				acc.values.push(
-					Array.isArray(value.notContains)
-						? JSON.stringify(value.notContains)
-						: JSON.stringify([value.notContains]),
+					typeof value.notContains === 'object' && !Array.isArray(value.notContains)
+						? toJson(resolveWhereToPlain(value.notContains))
+						: toJson(value.notContains),
 				)
 				acc.paramIndex++
 				return acc

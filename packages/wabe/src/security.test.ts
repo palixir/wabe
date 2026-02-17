@@ -2014,6 +2014,80 @@ describe('Security tests', () => {
 		await closeTests(wabe)
 	})
 
+	it('should correctly filter with nested notContains without recursion overwrite (MongoDB buildMongoWhereQuery)', async () => {
+		const setup = await setupTests([
+			{
+				name: 'TestRecursion',
+				fields: {
+					data: {
+						type: 'Object',
+						object: {
+							name: 'TestRecursionData',
+							fields: {
+								array: {
+									type: 'Array',
+									typeValue: 'Object',
+									object: {
+										name: 'TestRecursionArrayItem',
+										fields: {
+											string: { type: 'String' },
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+				permissions: {
+					read: { requireAuthentication: false },
+					create: { requireAuthentication: false },
+				},
+			},
+		])
+
+		const wabe = setup.wabe
+		const port = setup.port
+		const rootClient = getGraphqlClient(port)
+
+		await rootClient.request<any>(gql`
+			mutation create1 {
+				createTestRecursion(input: { fields: { data: { array: [{ string: "user1" }] } } }) {
+					testRecursion {
+						id
+					}
+				}
+			}
+		`)
+
+		await rootClient.request<any>(gql`
+			mutation create2 {
+				createTestRecursion(input: { fields: { data: { array: [{ string: "user2" }] } } }) {
+					testRecursion {
+						id
+					}
+				}
+			}
+		`)
+
+		const res = await wabe.controllers.database.getObjects({
+			className: 'TestRecursion' as any,
+			context: { isRoot: true, wabe } as any,
+			where: {
+				data: {
+					array: {
+						notContains: { string: { equalTo: 'user1' } },
+					},
+				},
+			} as any,
+			select: { data: true } as any,
+		})
+
+		expect(res.length).toBe(1)
+		expect((res[0] as any)?.data?.array).toEqual([{ string: 'user2' }])
+
+		await closeTests(wabe)
+	})
+
 	it('should not authorize an user to write (delete) an object when the user has not access on write to the object (ACL)', async () => {
 		const setup = await setupTests([
 			{
