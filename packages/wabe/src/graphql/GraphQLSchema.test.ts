@@ -2120,7 +2120,9 @@ describe('GraphqlSchema', () => {
 			}
 		}>(gql`
 			mutation createVirtualPersonWithObjectArray {
-				createVirtualPersonWithObjectArray(input: { fields: { firstName: "Grace", lastName: "Hopper" } }) {
+				createVirtualPersonWithObjectArray(
+					input: { fields: { firstName: "Grace", lastName: "Hopper" } }
+				) {
 					virtualPersonWithObjectArray {
 						id
 					}

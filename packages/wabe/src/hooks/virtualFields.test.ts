@@ -1,12 +1,4 @@
-import {
-	afterAll,
-	beforeAll,
-	beforeEach,
-	describe,
-	expect,
-	it,
-	spyOn,
-} from 'bun:test'
+import { afterAll, beforeAll, beforeEach, describe, expect, it, spyOn } from 'bun:test'
 import type { Wabe } from '../server'
 import { type DevWabeTypes } from '../utils/helper'
 import { closeTests, setupTests } from '../utils/testHelper'
@@ -26,8 +18,7 @@ describe('Virtual fields integration', () => {
 						type: 'Virtual',
 						returnType: 'String',
 						dependsOn: ['firstName', 'lastName'],
-						callback: (object: any) =>
-							`${object.firstName} ${object.lastName}`.trim(),
+						callback: (object: any) => `${object.firstName} ${object.lastName}`.trim(),
 					},
 					isAdult: {
 						type: 'Virtual',
@@ -49,9 +40,7 @@ describe('Virtual fields integration', () => {
 						callback: (object: any) => ({
 							full: `${object.firstName} ${object.lastName}`.trim(),
 							initials:
-								[object.firstName?.[0], object.lastName?.[0]]
-									.filter(Boolean)
-									.join('.') || '',
+								[object.firstName?.[0], object.lastName?.[0]].filter(Boolean).join('.') || '',
 						}),
 					},
 				},
@@ -107,10 +96,7 @@ describe('Virtual fields integration', () => {
 	})
 
 	it('loads dependencies in adapter select and never requests virtual keys directly on database', async () => {
-		const adapterGetObjectSpy = spyOn(
-			wabe.controllers.database.adapter,
-			'getObject'
-		)
+		const adapterGetObjectSpy = spyOn(wabe.controllers.database.adapter, 'getObject')
 
 		const created = await wabe.controllers.database.createObject({
 			// @ts-expect-error
@@ -140,19 +126,18 @@ describe('Virtual fields integration', () => {
 		})
 
 		expect(adapterGetObjectSpy.mock.calls.length).toBeGreaterThanOrEqual(1)
-		const adapterCallWithVirtualDependencies =
-			adapterGetObjectSpy.mock.calls.find((call: any) => {
-				const options = call[0]
-				return (
-					options?.className === 'VirtualPerson' &&
-					options?.id === (created?.id || '') &&
-					options?.select?.firstName === true &&
-					options?.select?.lastName === true &&
-					options?.select?.age === true &&
-					options?.select?.fullName === undefined &&
-					options?.select?.isAdult === undefined
-				)
-			})
+		const adapterCallWithVirtualDependencies = adapterGetObjectSpy.mock.calls.find((call: any) => {
+			const options = call[0]
+			return (
+				options?.className === 'VirtualPerson' &&
+				options?.id === (created?.id || '') &&
+				options?.select?.firstName === true &&
+				options?.select?.lastName === true &&
+				options?.select?.age === true &&
+				options?.select?.fullName === undefined &&
+				options?.select?.isAdult === undefined
+			)
+		})
 
 		expect(adapterCallWithVirtualDependencies).toBeDefined()
 	})

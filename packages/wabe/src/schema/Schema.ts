@@ -126,10 +126,7 @@ type TypeFieldVirtualArray<T extends WabeTypes, K extends keyof T['types']> = {
 	defaultValue?: never
 	dependsOn: Array<keyof T['types'][K]>
 	callback: (object: T['types'][K] & { id: string }) => unknown[] | null
-} & (
-	| { typeValue: WabePrimaryTypes }
-	| { typeValue: 'Object'; object: WabeObject<T> }
-)
+} & ({ typeValue: WabePrimaryTypes } | { typeValue: 'Object'; object: WabeObject<T> })
 
 type TypeFieldVirtual<T extends WabeTypes, K extends keyof T['types']> =
 	| TypeFieldVirtualScalar<T, K>
