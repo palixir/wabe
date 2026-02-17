@@ -182,6 +182,53 @@ export const GraphqlParser: GraphqlParserConstructor =
 					if (currentField?.type === 'Virtual') {
 						if (isWhereType) return acc
 
+						if (currentField.returnType === 'Object' && 'object' in currentField) {
+							acc[key] = {
+								type: callBackForObjectType({
+									required: currentField.object?.required,
+									description: currentField.description,
+									objectToParse: currentField.object,
+									nameOfTheObject: `${nameOfTheObject}${keyWithFirstLetterUppercase}`,
+								}),
+							}
+							return acc
+						}
+
+						if (currentField.returnType === 'Array' && 'typeValue' in currentField) {
+							if (currentField.typeValue === 'Object' && 'object' in currentField) {
+								const objectList = new GraphQLList(
+									callBackForObjectType({
+										required: currentField.object?.required,
+										description: currentField.description,
+										objectToParse: currentField.object,
+										nameOfTheObject: `${nameOfTheObject}${currentField.object.name}`,
+									}),
+								)
+								acc[key] = {
+									type:
+										currentField.required && !forceRequiredToFalse
+											? new GraphQLNonNull(objectList)
+											: objectList,
+								}
+							} else if (
+								currentField.typeValue &&
+								templateScalarType[currentField.typeValue as WabePrimaryTypes]
+							) {
+								const graphqlType = getGraphqlType({
+									type: 'Array',
+									typeValue: currentField.typeValue as WabePrimaryTypes,
+									requiredValue: (currentField as any).requiredValue,
+								})
+								acc[key] = {
+									type:
+										currentField.required && !forceRequiredToFalse
+											? new GraphQLNonNull(graphqlType)
+											: graphqlType,
+								}
+							}
+							return acc
+						}
+
 						const graphqlType = getGraphqlType({
 							type: currentField.returnType,
 						})
@@ -426,6 +473,7 @@ export const GraphqlParser: GraphqlParserConstructor =
 
 			const rawFields = keysOfObject.reduce(
 				(acc, key) => {
+					const keyWithFirstLetterUppercase = `${key.charAt(0).toUpperCase()}${key.slice(1)}`
 					const currentField = schemaFields[key]
 
 					const isRelation = currentField?.type === 'Relation'
@@ -467,6 +515,54 @@ export const GraphqlParser: GraphqlParserConstructor =
 
 					if (currentField?.type === 'Virtual') {
 						if (graphqlObjectType !== 'Object') return acc
+
+						if (currentField.returnType === 'Object' && 'object' in currentField) {
+							acc[key] = {
+								type: callback({
+									required: currentField.object?.required,
+									description: currentField.description,
+									objectToParse: currentField.object,
+									nameOfTheObject: `${nameOfTheObject}${keyWithFirstLetterUppercase}`,
+								}),
+							}
+							return acc
+						}
+
+						if (currentField.returnType === 'Array' && 'typeValue' in currentField) {
+							if (currentField.typeValue === 'Object' && 'object' in currentField) {
+								const objectList = new GraphQLList(
+									callback({
+										required: currentField.object?.required,
+										description: currentField.description,
+										objectToParse: currentField.object,
+										nameOfTheObject: `${nameOfTheObject}${currentField.object.name}`,
+									}),
+								)
+								acc[key] = {
+									type:
+										currentField.required && !forceRequiredToFalse
+											? new GraphQLNonNull(objectList)
+											: objectList,
+								}
+							} else if (
+								currentField.typeValue &&
+								templateScalarType[currentField.typeValue as WabePrimaryTypes]
+							) {
+								const graphqlType = getGraphqlType({
+									type: 'Array',
+									typeValue: currentField.typeValue as WabePrimaryTypes,
+									requiredValue: (currentField as any).requiredValue,
+									isWhereType,
+								})
+								acc[key] = {
+									type:
+										currentField.required && !forceRequiredToFalse
+											? new GraphQLNonNull(graphqlType)
+											: graphqlType,
+								}
+							}
+							return acc
+						}
 
 						const graphqlType = getGraphqlType({
 							type: currentField.returnType,

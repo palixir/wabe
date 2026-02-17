@@ -2009,6 +2009,153 @@ describe('GraphqlSchema', () => {
 		await wabe.close()
 	})
 
+	it('should resolve virtual field returning array in GraphQL queries', async () => {
+		const { client, wabe } = await createWabe({
+			classes: [
+				{
+					name: 'VirtualPersonWithArray',
+					fields: {
+						firstName: { type: 'String' },
+						lastName: { type: 'String' },
+						nameParts: {
+							type: 'Virtual',
+							returnType: 'Array',
+							typeValue: 'String',
+							// @ts-expect-error
+							dependsOn: ['firstName', 'lastName'],
+							callback: (object: any) =>
+								[object.firstName || '', object.lastName || ''].filter(Boolean),
+						},
+					},
+					permissions: {
+						read: { requireAuthentication: false },
+						create: { requireAuthentication: false },
+						update: { requireAuthentication: false },
+						delete: { requireAuthentication: false },
+					},
+				},
+			],
+		})
+
+		const created = await client.request<{
+			createVirtualPersonWithArray: {
+				virtualPersonWithArray: { id: string }
+			}
+		}>(gql`
+			mutation createVirtualPersonWithArray {
+				createVirtualPersonWithArray(input: { fields: { firstName: "Ada", lastName: "Lovelace" } }) {
+					virtualPersonWithArray {
+						id
+					}
+				}
+			}
+		`)
+
+		const read = await client.request<{
+			virtualPersonWithArray: {
+				id: string
+				firstName: string
+				lastName: string
+				nameParts: string[]
+			}
+		}>(
+			gql`
+				query virtualPersonWithArray($id: ID) {
+					virtualPersonWithArray(id: $id) {
+						id
+						firstName
+						lastName
+						nameParts
+					}
+				}
+			`,
+			{ id: created.createVirtualPersonWithArray.virtualPersonWithArray.id },
+		)
+
+		expect(read.virtualPersonWithArray.nameParts).toEqual(['Ada', 'Lovelace'])
+
+		await wabe.close()
+	})
+
+	it('should resolve virtual field returning array of objects in GraphQL queries', async () => {
+		const { client, wabe } = await createWabe({
+			classes: [
+				{
+					name: 'VirtualPersonWithObjectArray',
+					fields: {
+						firstName: { type: 'String' },
+						lastName: { type: 'String' },
+						nameInfos: {
+							type: 'Virtual',
+							returnType: 'Array',
+							typeValue: 'Object',
+							object: {
+								name: 'NameInfo',
+								fields: {
+									label: { type: 'String' },
+									value: { type: 'String' },
+								},
+							},
+							// @ts-expect-error
+							dependsOn: ['firstName', 'lastName'],
+							callback: (object: any) => [
+								{ label: 'First', value: object.firstName || '' },
+								{ label: 'Last', value: object.lastName || '' },
+							],
+						},
+					},
+					permissions: {
+						read: { requireAuthentication: false },
+						create: { requireAuthentication: false },
+						update: { requireAuthentication: false },
+						delete: { requireAuthentication: false },
+					},
+				},
+			],
+		})
+
+		const created = await client.request<{
+			createVirtualPersonWithObjectArray: {
+				virtualPersonWithObjectArray: { id: string }
+			}
+		}>(gql`
+			mutation createVirtualPersonWithObjectArray {
+				createVirtualPersonWithObjectArray(input: { fields: { firstName: "Grace", lastName: "Hopper" } }) {
+					virtualPersonWithObjectArray {
+						id
+					}
+				}
+			}
+		`)
+
+		const read = await client.request<{
+			virtualPersonWithObjectArray: {
+				id: string
+				nameInfos: Array<{ label: string; value: string }>
+			}
+		}>(
+			gql`
+				query virtualPersonWithObjectArray($id: ID) {
+					virtualPersonWithObjectArray(id: $id) {
+						id
+						nameInfos {
+							label
+							value
+						}
+					}
+				}
+			`,
+			{ id: created.createVirtualPersonWithObjectArray.virtualPersonWithObjectArray.id },
+		)
+
+		expect(read.virtualPersonWithObjectArray.nameInfos).toEqual([
+			{ label: 'First', value: 'Grace' },
+			{ label: 'Last', value: 'Hopper' },
+		])
+
+		await wabe.close()
+	})
+
 	it('should have ConnectionObject on field of relation in ObjectType', () => {
 		expect(
 			getTypeFromGraphQLSchema({

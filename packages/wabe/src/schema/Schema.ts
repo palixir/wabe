@@ -27,7 +27,16 @@ export type WabeRelationTypes = 'Pointer' | 'Relation'
 
 export type WabeFieldTypes = WabeCustomTypes | WabePrimaryTypes | WabeRelationTypes
 
-export type VirtualReturnType = 'String' | 'Int' | 'Float' | 'Boolean' | 'Date' | 'Email' | 'Phone'
+export type VirtualReturnType =
+	| 'String'
+	| 'Int'
+	| 'Float'
+	| 'Boolean'
+	| 'Date'
+	| 'Email'
+	| 'Phone'
+	| 'Object'
+	| 'Array'
 
 export type WabeObject<T extends WabeTypes> = {
 	name: string
@@ -94,13 +103,38 @@ type TypeFieldCustomEnums<T extends WabeTypes> = {
 	defaultValue?: any
 }
 
-type TypeFieldVirtual<T extends WabeTypes, K extends keyof T['types']> = {
+type TypeFieldVirtualScalar<T extends WabeTypes, K extends keyof T['types']> = {
 	type: 'Virtual'
-	returnType: VirtualReturnType
+	returnType: 'String' | 'Int' | 'Float' | 'Boolean' | 'Date' | 'Email' | 'Phone'
 	defaultValue?: never
 	dependsOn: Array<keyof T['types'][K]>
 	callback: (object: T['types'][K] & { id: string }) => string | number | boolean | Date | null
 }
+
+type TypeFieldVirtualObject<T extends WabeTypes, K extends keyof T['types']> = {
+	type: 'Virtual'
+	returnType: 'Object'
+	object: WabeObject<T>
+	defaultValue?: never
+	dependsOn: Array<keyof T['types'][K]>
+	callback: (object: T['types'][K] & { id: string }) => Record<string, unknown> | null
+}
+
+type TypeFieldVirtualArray<T extends WabeTypes, K extends keyof T['types']> = {
+	type: 'Virtual'
+	returnType: 'Array'
+	defaultValue?: never
+	dependsOn: Array<keyof T['types'][K]>
+	callback: (object: T['types'][K] & { id: string }) => unknown[] | null
+} & (
+	| { typeValue: WabePrimaryTypes }
+	| { typeValue: 'Object'; object: WabeObject<T> }
+)
+
+type TypeFieldVirtual<T extends WabeTypes, K extends keyof T['types']> =
+	| TypeFieldVirtualScalar<T, K>
+	| TypeFieldVirtualObject<T, K>
+	| TypeFieldVirtualArray<T, K>
 
 export type TypeField<T extends WabeTypes, K extends keyof T['types'] = keyof T['types']> = (
 	| TypeFieldBase<string, 'String'>
