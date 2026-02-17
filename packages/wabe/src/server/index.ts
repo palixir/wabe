@@ -209,6 +209,9 @@ export class Wabe<T extends WabeTypes> {
 	}
 
 	async start() {
+		if (!this.config.rootKey || this.config.rootKey.length === 0)
+			throw new Error('rootKey cannot be empty')
+
 		if (this.config.authentication?.session && !this.config.authentication.session.jwtSecret)
 			throw new Error('Authentication session requires jwt secret')
 

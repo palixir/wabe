@@ -1,4 +1,6 @@
 import { describe, it, expect } from 'bun:test'
+import { v4 as uuid } from 'uuid'
+import getPort from 'get-port'
 import { decode, sign } from 'jsonwebtoken'
 import { gql } from 'graphql-request'
 import {
@@ -8,11 +10,38 @@ import {
 	createUserAndUpdateRole,
 	getUserClient,
 } from './utils/helper'
-import { setupTests, closeTests } from './utils/testHelper'
+import { setupTests, closeTests, getDatabaseAdapter } from './utils/testHelper'
 import { RoleEnum } from 'generated/wabe'
 import { Session } from './authentication/Session'
+import { Wabe } from './server'
+import type { DevWabeTypes } from './utils/helper'
 
 describe('Security tests', () => {
+	it('should throw at server startup when rootKey is empty', async () => {
+		const databaseId = uuid()
+		const port = await getPort()
+
+		const wabe = new Wabe<DevWabeTypes>({
+			isProduction: false,
+			rootKey: '',
+			database: {
+				// @ts-expect-error
+				adapter: await getDatabaseAdapter(databaseId),
+			},
+			port,
+			schema: {
+				classes: [
+					{
+						name: 'Collection1',
+						fields: { name: { type: 'String' } },
+					},
+				],
+			},
+		})
+
+		await expect(wabe.start()).rejects.toThrow('rootKey cannot be empty')
+	})
+
 	it('should not return private fields (acl) on createObject, getObject and getObjects if not root', async () => {
 		const setup = await setupTests([
 			{
