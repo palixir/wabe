@@ -1,6 +1,6 @@
 pre-commit:
-  parallel: true
-  commands:
-    check:
-      glob: '*.{js,ts,jsx,tsx}'
-      run: bun format && bun oxfmt check {staged_files}
+    parallel: true
+    commands:
+        check:
+            glob: '*.{js,ts,jsx,tsx}'
+            run: oxlint {staged_files} && bun format && git add {staged_files}
