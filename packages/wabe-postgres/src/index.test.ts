@@ -427,6 +427,40 @@ describe('Postgres adapter', () => {
 		expect(res[0]?.object?.array).toEqual([{ string: 'user2' }])
 	})
 
+	it('should correctly filter with nested notContains and equalTo without recursion overwrite', async () => {
+		await postgresAdapter.createObject({
+			className: 'Test',
+			data: {
+				object: { array: [{ string: 'user1' }] },
+			},
+			context,
+		})
+
+		await postgresAdapter.createObject({
+			className: 'Test',
+			data: {
+				object: { array: [{ string: 'user2' }] },
+			},
+			context,
+		})
+
+		const res = await postgresAdapter.getObjects({
+			className: 'Test',
+			context,
+			where: {
+				object: {
+					// @ts-expect-error
+					array: {
+						notContains: { string: { equalTo: 'user1' } },
+					},
+				},
+			},
+		})
+
+		expect(res.length).toBe(1)
+		expect(res[0]?.object?.array).toEqual([{ string: 'user2' }])
+	})
+
 	it('should create class', async () => {
 		const client = await postgresAdapter.pool.connect()
 

@@ -19,6 +19,10 @@ import type {
 	SchemaInterface,
 } from 'wabe'
 
+/** Use built MongoDB query if non-empty, otherwise fallback to original (e.g. direct value { string: 'user1' }). */
+const builtOrOriginal = (built: Record<string, unknown>, original: unknown) =>
+	Object.keys(built).length ? built : original
+
 export const buildMongoOrderQuery = <
 	T extends WabeTypes,
 	K extends keyof T['types'],
@@ -63,11 +67,20 @@ export const buildMongoWhereQuery = <T extends WabeTypes, K extends keyof T['typ
 						: {
 								$all: Array.isArray(value.contains) ? value.contains : [value.contains],
 							}
-			if (value?.notContains || value?.notContains === null)
+			if (value?.notContains || value?.notContains === null) {
 				acc[keyToWrite] =
 					typeof value.notContains === 'object' && !Array.isArray(value.notContains)
-						? { $not: { $elemMatch: value.notContains } }
+						? {
+								$not: {
+									$elemMatch: builtOrOriginal(
+										buildMongoWhereQuery(value.notContains as WhereType<T, K>),
+										value.notContains,
+									),
+								},
+							}
 						: { $nin: Array.isArray(value.notContains) ? value.notContains : [value.notContains] }
+				return acc
+			}
 			if (value?.exists === true) acc[keyToWrite] = { $exists: true, $ne: null }
 			if (value?.exists === false) acc[keyToWrite] = { $eq: null }
 
@@ -153,6 +166,8 @@ export const buildMongoWhereQuery = <T extends WabeTypes, K extends keyof T['typ
 				acc.$and = where.AND?.map((and) => buildMongoWhereQuery(and))
 				return acc
 			}
+
+			if (acc[keyToWrite] !== undefined) return acc
 
 			if (typeof value === 'object') {
 				const where = buildMongoWhereQuery(value as WhereType<T, K>)
