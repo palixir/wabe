@@ -64,7 +64,10 @@ export const buildMongoWhereQuery = <T extends WabeTypes, K extends keyof T['typ
 								$all: Array.isArray(value.contains) ? value.contains : [value.contains],
 							}
 			if (value?.notContains || value?.notContains === null)
-				acc[keyToWrite] = { $ne: value.notContains }
+				acc[keyToWrite] =
+					typeof value.notContains === 'object' && !Array.isArray(value.notContains)
+						? { $not: { $elemMatch: value.notContains } }
+						: { $nin: Array.isArray(value.notContains) ? value.notContains : [value.notContains] }
 			if (value?.exists === true) acc[keyToWrite] = { $exists: true, $ne: null }
 			if (value?.exists === false) acc[keyToWrite] = { $eq: null }
 

@@ -384,6 +384,40 @@ describe('Mongo adapter', () => {
 		expect(res2.length).toBe(1)
 	})
 
+	it('should correctly exclude documents with notContains on array of objects (ACL notContains fix)', async () => {
+		await mongoAdapter.createObject({
+			className: 'Test',
+			data: {
+				object: { array: [{ string: 'user1' }] },
+			},
+			context,
+		})
+
+		await mongoAdapter.createObject({
+			className: 'Test',
+			data: {
+				object: { array: [{ string: 'user2' }] },
+			},
+			context,
+		})
+
+		const res = await mongoAdapter.getObjects({
+			className: 'Test',
+			context,
+			where: {
+				object: {
+					// @ts-expect-error
+					array: {
+						notContains: { string: 'user1' },
+					},
+				},
+			},
+		})
+
+		expect(res.length).toBe(1)
+		expect(res[0]?.object?.array).toEqual([{ string: 'user2' }])
+	})
+
 	it('should retry on connection error', async () => {
 		const spyMongoClientConnect = spyOn(mongoAdapter.client, 'connect').mockImplementationOnce(
 			() => {
