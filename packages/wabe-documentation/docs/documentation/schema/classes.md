@@ -17,6 +17,7 @@ Wabe supports the following native field types (with the ability to extend throu
 - **Array**: Arrays of values (can specify element type)
 - **Pointer**: Single reference to another class object
 - **Relation**: Multiple references to objects of another class
+- **Virtual**: Computed fields derived from other fields at read time
 - **Hash**: Secure password hashing
 
 The `classes` array allow you to create new classe in your project with some fields. In the example below, a company class had a required name and a logo.
@@ -184,6 +185,57 @@ const run = async () => {
             users: {
               type: "Relation",
               class: "User",
+            },
+          },
+        },
+      ],
+    },
+  });
+
+  await wabe.start();
+};
+
+await run();
+```
+
+#### Virtual
+
+Virtual fields are computed at read time from other fields. They are not stored in the database and cannot be used in create or update operations. Use them to derive values like full names, computed booleans, or formatted strings without duplicating data.
+
+Each virtual field requires:
+
+- **returnType**: The GraphQL type of the computed value (`String`, `Int`, `Float`, `Boolean`, `Date`, `Email`, or `Phone`)
+- **dependsOn**: An array of field names that the callback needs to compute the value
+- **callback**: A function that receives the object (including `id` and all `dependsOn` fields) and returns the computed value
+
+When you select a virtual field in a query, only the computed value is returned—the dependency fields are not exposed unless you explicitly select them.
+
+```ts
+import { Wabe } from "wabe";
+
+const run = async () => {
+  const wabe = new Wabe({
+    // ... others config fields
+    schema: {
+      classes: [
+        {
+          name: "Person",
+          fields: {
+            firstName: { type: "String" },
+            lastName: { type: "String" },
+            age: { type: "Int" },
+            fullName: {
+              type: "Virtual",
+              returnType: "String",
+              dependsOn: ["firstName", "lastName"],
+              callback: (object) =>
+                `${object.firstName} ${object.lastName}`.trim(),
+            },
+            isAdult: {
+              type: "Virtual",
+              returnType: "Boolean",
+              dependsOn: ["age"],
+              callback: (object) => (object.age ?? 0) >= 18,
             },
           },
         },

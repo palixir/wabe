@@ -42,6 +42,7 @@ import {
 	defaultCallAuthenticationProviderOnBeforeCreateUser,
 	defaultCallAuthenticationProviderOnBeforeUpdateUser,
 } from './authentication'
+import { defaultVirtualFieldsAfterRead } from './virtualFields'
 
 export enum OperationType {
 	AfterCreate = 'afterCreate',
@@ -313,6 +314,11 @@ export const getDefaultHooks = (): Hook<any, any>[] => [
 		operationType: OperationType.AfterRead,
 		priority: 1,
 		callback: defaultAfterReadFile,
+	},
+	{
+		operationType: OperationType.AfterRead,
+		priority: 2,
+		callback: defaultVirtualFieldsAfterRead,
 	},
 	{
 		operationType: OperationType.AfterDelete,
