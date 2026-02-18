@@ -1,5 +1,6 @@
 import type { Hook } from '.'
 import type { DevWabeTypes } from '../utils/helper'
+import { canUserReadField } from './protected'
 
 type VirtualFieldDefinition = {
 	type: 'Virtual'
@@ -32,6 +33,15 @@ export const defaultVirtualFieldsAfterRead: Hook<DevWabeTypes, any>['callback'] 
 		const fieldDefinition = classDefinition.fields[fieldName]
 
 		if (!isVirtualFieldDefinition(fieldDefinition)) continue
+
+		const hasAccessToAllDependencies = fieldDefinition.dependsOn.every((dep) =>
+			canUserReadField(classDefinition, String(dep), hookObject.context),
+		)
+
+		if (!hasAccessToAllDependencies) {
+			object[fieldName] = undefined
+			continue
+		}
 
 		object[fieldName] = fieldDefinition.callback(object)
 	}

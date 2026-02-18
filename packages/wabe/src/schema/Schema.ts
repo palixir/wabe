@@ -45,13 +45,19 @@ export type WabeObject<T extends WabeTypes> = {
 	required?: boolean
 }
 
+export type ProtectedFieldConfig<TRole = string> = {
+	authorizedRoles: Array<TRole>
+	protectedOperations: Array<'create' | 'read' | 'update'>
+}
+
+export type SchemaClassWithProtectedFields = {
+	fields: Record<string, { protected?: ProtectedFieldConfig }>
+}
+
 type FieldBase<T extends WabeTypes> = {
 	required?: boolean
 	description?: string
-	protected?: {
-		authorizedRoles: Array<T['enums']['RoleEnum'] | 'rootOnly'>
-		protectedOperations: Array<'create' | 'read' | 'update'>
-	}
+	protected?: ProtectedFieldConfig<T['enums']['RoleEnum'] | 'rootOnly'>
 }
 
 type TypeFieldBase<U, K extends WabeFieldTypes> = {
