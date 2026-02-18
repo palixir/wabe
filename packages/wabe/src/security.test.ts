@@ -580,6 +580,119 @@ describe('Security tests', () => {
 		await closeTests(wabe)
 	})
 
+	it('should reject token reuse after logout', async () => {
+		const setup = await setupTests()
+		const wabe = setup.wabe
+		const port = setup.port
+		const rootClient = getGraphqlClient(port)
+
+		const { userClient } = await createUserAndUpdateRole({
+			anonymousClient: getAnonymousClient(port),
+			port,
+			roleName: 'Client',
+			rootClient,
+		})
+
+		const meBeforeLogout = await userClient.request<any>(gql`
+			query me {
+				me {
+					user {
+						id
+					}
+				}
+			}
+		`)
+
+		expect(meBeforeLogout.me.user).not.toBeNull()
+
+		await userClient.request<any>(graphql.signOut)
+
+		const meAfterLogout = await userClient.request<any>(gql`
+			query me {
+				me {
+					user {
+						id
+					}
+				}
+			}
+		`)
+
+		expect(meAfterLogout.me.user).toBeNull()
+
+		await closeTests(wabe)
+	})
+
+	it('should prevent session fixation by issuing new tokens on sign-in', async () => {
+		const setup = await setupTests()
+		const wabe = setup.wabe
+		const port = setup.port
+		const anonymousClient = getAnonymousClient(port)
+
+		const userARes = await anonymousClient.request<any>(graphql.signUpWith, {
+			input: {
+				authentication: {
+					emailPassword: {
+						email: 'attacker@test.fr',
+						password: 'password',
+					},
+				},
+			},
+		})
+
+		const userBRes = await anonymousClient.request<any>(graphql.signUpWith, {
+			input: {
+				authentication: {
+					emailPassword: {
+						email: 'victim@test.fr',
+						password: 'password',
+					},
+				},
+			},
+		})
+
+		const tokenA = userARes.signUpWith.accessToken
+		const userIdA = userARes.signUpWith.id
+		const userIdB = userBRes.signUpWith.id
+
+		const clientWithTokenA = getUserClient(port, { accessToken: tokenA })
+
+		await clientWithTokenA.request<any>(
+			gql`
+				mutation signInWith($input: SignInWithInput!) {
+					signInWith(input: $input) {
+						accessToken
+						refreshToken
+					}
+				}
+			`,
+			{
+				input: {
+					authentication: {
+						emailPassword: {
+							email: 'victim@test.fr',
+							password: 'password',
+						},
+					},
+				},
+			},
+		)
+
+		const meWithTokenA = await clientWithTokenA.request<any>(gql`
+			query me {
+				me {
+					user {
+						id
+					}
+				}
+			}
+		`)
+
+		expect(meWithTokenA.me.user?.id).toBe(userIdA)
+		expect(meWithTokenA.me.user?.id).not.toBe(userIdB)
+
+		await closeTests(wabe)
+	})
+
 	it('should throw an error if try to access to a class with empty authorizedRoles but not requireAuthentication', async () => {
 		const setup = await setupTests([
 			{
