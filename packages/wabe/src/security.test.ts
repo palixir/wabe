@@ -17,6 +17,90 @@ import { Wabe } from './server'
 import type { DevWabeTypes } from './utils/helper'
 
 describe('Security tests', () => {
+	it('should apply rate limit on GraphQL endpoints when rateLimit is configured', async () => {
+		const setup = await setupTests(
+			[
+				{
+					name: 'RateLimitTest',
+					fields: { name: { type: 'String' } },
+					permissions: {
+						read: { requireAuthentication: false },
+						create: { requireAuthentication: false },
+					},
+				},
+			],
+			{
+				rateLimit: {
+					interval: 60 * 1000,
+					numberOfRequests: 2,
+				},
+			},
+		)
+
+		const wabe = setup.wabe
+		const port = setup.port
+		const graphqlUrl = `http://127.0.0.1:${port}/graphql`
+
+		const graphqlRequest = async () =>
+			fetch(graphqlUrl, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'Wabe-Root-Key': 'dev',
+				},
+				body: JSON.stringify({
+					query: 'query { rateLimitTests { edges { node { id } } } }',
+				}),
+			})
+
+		const res1 = await graphqlRequest()
+		const res2 = await graphqlRequest()
+		const res3 = await graphqlRequest()
+
+		expect(res1.status).toBe(200)
+		expect(res2.status).toBe(200)
+		expect(res3.status).toBe(429)
+
+		await closeTests(wabe)
+	})
+
+	it('should not apply rate limit on GraphQL endpoints when rateLimit is not configured', async () => {
+		const setup = await setupTests([
+			{
+				name: 'NoRateLimitTest',
+				fields: { name: { type: 'String' } },
+				permissions: {
+					read: { requireAuthentication: false },
+					create: { requireAuthentication: false },
+				},
+			},
+		])
+
+		const wabe = setup.wabe
+		const port = setup.port
+		const rootClient = getGraphqlClient(port)
+
+		const requests = Array.from({ length: 5 }, () =>
+			rootClient.request<any>(gql`
+				query {
+					noRateLimitTests {
+						edges {
+							node {
+								id
+							}
+						}
+					}
+				}
+			`),
+		)
+
+		const results = await Promise.all(requests)
+		expect(results).toHaveLength(5)
+		results.forEach((res) => expect(res.noRateLimitTests).toBeDefined())
+
+		await closeTests(wabe)
+	})
+
 	it('should throw at server startup when rootKey is empty', async () => {
 		const databaseId = uuid()
 		const port = await getPort()
