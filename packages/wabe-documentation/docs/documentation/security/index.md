@@ -275,7 +275,11 @@ await run();
 
 ## Rate limiting
 
-Rate limiting is a security feature that allows you to limit the number of requests that can be made to your API within a certain time period. You can enable rate limiting by setting the `rateLimit` property in the `security` configuration object.
+Rate limiting is a security feature that protects your API from abuse by limiting the number of requests a client can make within a given time window. When enabled, it applies to all endpoints including the GraphQL endpoint (`/graphql`), helping prevent denial-of-service attacks and ensuring fair resource usage.
+
+### Configuration
+
+Enable rate limiting by setting the `rateLimit` property in the `security` configuration object:
 
 ```ts
 import { Wabe } from "wabe";
@@ -285,8 +289,8 @@ const run = async () => {
     // ... other configuration fields
     security: {
       rateLimit: {
-        interval: 60 * 1000, // 1 minute
-        numberOfRequests: 100, // 100 requests per minute
+        interval: 60 * 1000, // Time window in milliseconds (e.g. 1 minute)
+        numberOfRequests: 100, // Max requests allowed per interval per client
       },
     },
   });
@@ -296,6 +300,38 @@ const run = async () => {
 
 await run();
 ```
+
+### Options
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `interval` | `number` | The time window in milliseconds during which requests are counted |
+| `numberOfRequests` | `number` | The maximum number of requests allowed per client within the interval |
+
+### Behavior
+
+- The limit is applied **per client** (typically identified by IP address)
+- When a client exceeds the limit, subsequent requests receive an **HTTP 429 (Too Many Requests)** response
+- The counter resets at the end of each interval
+
+### Example: Strict rate limit for sensitive endpoints
+
+For APIs that need stricter protection, use a lower limit:
+
+```ts
+security: {
+  rateLimit: {
+    interval: 60 * 1000, // 1 minute
+    numberOfRequests: 10, // 10 requests per minute
+  },
+},
+```
+
+### Best practices
+
+- **Production**: Use reasonable limits (e.g. 100–200 requests per minute) to balance protection and usability
+- **Public APIs**: Consider stricter limits to prevent abuse
+- **Authentication endpoints**: Rate limiting helps mitigate brute-force attacks on login flows
 
 ## Hide sensitive error message
 

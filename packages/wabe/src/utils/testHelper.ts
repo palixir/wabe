@@ -1,4 +1,5 @@
 import { v4 as uuid } from 'uuid'
+import type { RateLimitOptions } from 'wobe'
 import { type ClassInterface, EmailDevAdapter, FileDevAdapter } from '..'
 import { Wabe } from '../server'
 import type { DevWabeTypes } from './helper'
@@ -21,6 +22,7 @@ export const setupTests = async (
 		isProduction?: boolean
 		disableCSRFProtection?: boolean
 		rootKey?: string
+		rateLimit?: RateLimitOptions
 	} = {},
 ) => {
 	const databaseId = uuid()
@@ -37,6 +39,7 @@ export const setupTests = async (
 		security: {
 			// To make test easier keep default value to true
 			disableCSRFProtection: options.disableCSRFProtection ?? true,
+			...(options.rateLimit && { rateLimit: options.rateLimit }),
 		},
 		authentication: {
 			roles: ['Client', 'Client2', 'Client3', 'Admin'],
