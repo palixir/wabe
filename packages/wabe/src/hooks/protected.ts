@@ -1,6 +1,8 @@
 import { OperationType } from '.'
 import type { DevWabeTypes } from '../utils/helper'
 import type { HookObject } from './HookObject'
+import type { SchemaClassWithProtectedFields } from '../schema/Schema'
+import type { WabeContext } from '../server/interface'
 
 const _checkProtected = (
 	hookObject: HookObject<DevWabeTypes, any>,
@@ -48,6 +50,18 @@ const _checkProtected = (
 				throw new Error(`You are not authorized to ${operation} this field`)
 		}
 	})
+}
+
+export const canUserReadField = (
+	schemaClass: SchemaClassWithProtectedFields,
+	fieldName: string,
+	context: Pick<WabeContext<any>, 'isRoot' | 'user'>,
+): boolean => {
+	const protectedForField = schemaClass.fields[fieldName]?.protected
+	if (!protectedForField || !protectedForField.protectedOperations.includes('read')) return true
+	if (context.isRoot && protectedForField.authorizedRoles.includes('rootOnly')) return true
+	const userRole = context.user?.role?.name || ''
+	return protectedForField.authorizedRoles.includes(userRole)
 }
 
 export const defaultCheckProtectedOnBeforeRead = (object: HookObject<DevWabeTypes, any>) =>

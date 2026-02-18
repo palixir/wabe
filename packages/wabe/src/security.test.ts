@@ -1986,6 +1986,219 @@ describe('Security tests', () => {
 		await closeTests(wabe)
 	})
 
+	it('should return undefined for virtual field (object type) when user has read:false and write:true in ACL', async () => {
+		const setup = await setupTests([
+			{
+				name: 'VirtualFieldAclTest',
+				fields: {
+					name: { type: 'String' },
+					secret: {
+						type: 'String',
+					},
+					secretInfo: {
+						type: 'Virtual',
+						returnType: 'Object',
+						object: {
+							name: 'SecretInfo',
+							fields: {
+								summary: { type: 'String' },
+							},
+						},
+						dependsOn: ['secret'],
+						callback: (object: any) =>
+							object.secret != null ? { summary: `${object.secret.slice(0, 3)}...` } : null,
+					},
+				},
+				permissions: {
+					read: {
+						authorizedRoles: ['Client'],
+						requireAuthentication: true,
+					},
+					create: {
+						authorizedRoles: ['Client'],
+						requireAuthentication: true,
+					},
+					acl: async (hookObject) => {
+						await hookObject.addACL('roles', {
+							role: RoleEnum.Client,
+							read: true,
+							write: true,
+						})
+					},
+				},
+			},
+		])
+
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
+
+		const { userClient, userId } = await createUserAndUpdateRole({
+			anonymousClient: client,
+			port,
+			roleName: 'Client',
+			rootClient,
+		})
+
+		const objectCreated = await rootClient.request<any>(gql`
+			mutation createVirtualFieldAclTest {
+				createVirtualFieldAclTest(input: { fields: { name: "test", secret: "sensitive" } }) {
+					virtualFieldAclTest {
+						id
+					}
+				}
+			}
+		`)
+
+		const objectId = objectCreated.createVirtualFieldAclTest.virtualFieldAclTest.id
+
+		await rootClient.request<any>(gql`
+			mutation updateACL {
+				updateVirtualFieldAclTest(input: {
+					id: "${objectId}",
+					fields: {
+						acl: {
+							users: [{
+								userId: "${userId}",
+								read: false,
+								write: true
+							}]
+						}
+					}
+				}) {
+					virtualFieldAclTest {
+						id
+					}
+				}
+			}
+		`)
+
+		const resList = await userClient.request<any>(gql`
+			query virtualFieldAclTests {
+				virtualFieldAclTests {
+					edges {
+						node {
+							id
+							name
+							secretInfo {
+								summary
+							}
+						}
+					}
+				}
+			}
+		`)
+
+		expect(resList.virtualFieldAclTests.edges.length).toEqual(0)
+
+		await expect(
+			userClient.request<any>(gql`
+			query virtualFieldAclTest {
+				virtualFieldAclTest(id: "${objectId}") {
+					id
+					name
+					secretInfo {
+						summary
+					}
+				}
+			}
+		`),
+		).rejects.toThrow('Object not found')
+
+		await closeTests(wabe)
+	})
+
+	it('should return undefined for virtual field (object type) when user cannot read a protected dependency field', async () => {
+		const setup = await setupTests([
+			{
+				name: 'VirtualFieldProtectedTest',
+				fields: {
+					name: { type: 'String' },
+					secret: {
+						type: 'String',
+						protected: {
+							authorizedRoles: ['rootOnly'],
+							protectedOperations: ['read'],
+						},
+					},
+					secretInfo: {
+						type: 'Virtual',
+						returnType: 'Object',
+						object: {
+							name: 'SecretInfo',
+							fields: {
+								summary: { type: 'String' },
+							},
+						},
+						dependsOn: ['secret'],
+						callback: (object: any) =>
+							object.secret != null ? { summary: `${object.secret.slice(0, 3)}...` } : null,
+					},
+				},
+				permissions: {
+					read: {
+						authorizedRoles: ['Client'],
+						requireAuthentication: true,
+					},
+					create: {
+						authorizedRoles: ['Client'],
+						requireAuthentication: true,
+					},
+					acl: async (hookObject) => {
+						await hookObject.addACL('roles', {
+							role: RoleEnum.Client,
+							read: true,
+							write: true,
+						})
+					},
+				},
+			},
+		])
+
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
+
+		const { userClient } = await createUserAndUpdateRole({
+			anonymousClient: client,
+			port,
+			roleName: 'Client',
+			rootClient,
+		})
+
+		const objectCreated = await rootClient.request<any>(gql`
+			mutation createVirtualFieldProtectedTest {
+				createVirtualFieldProtectedTest(input: { fields: { name: "test", secret: "sensitive" } }) {
+					virtualFieldProtectedTest {
+						id
+					}
+				}
+			}
+		`)
+
+		const objectId = objectCreated.createVirtualFieldProtectedTest.virtualFieldProtectedTest.id
+
+		const res = await userClient.request<any>(gql`
+			query virtualFieldProtectedTest {
+				virtualFieldProtectedTest(id: "${objectId}") {
+					id
+					name
+					secretInfo {
+						summary
+					}
+				}
+			}
+		`)
+
+		expect(res.virtualFieldProtectedTest).toBeDefined()
+		expect(res.virtualFieldProtectedTest.name).toBe('test')
+		expect(res.virtualFieldProtectedTest.secretInfo).toBeNull()
+
+		await closeTests(wabe)
+	})
+
 	it('should not authorize an user to read an object when explicitly denied in acl.users even if role has access (MongoDB notContains)', async () => {
 		const setup = await setupTests([
 			{
