@@ -835,6 +835,80 @@ describe('Security tests', () => {
 		await closeTests(wabe)
 	})
 
+	it('should not allow user with ACL write access to modify ACL on existing object (ACL updates restricted to root)', async () => {
+		const setup = await setupTests([
+			{
+				name: 'AclRestrictedTest',
+				fields: { name: { type: 'String' } },
+				permissions: {
+					create: { authorizedRoles: ['Client'], requireAuthentication: true },
+					read: { authorizedRoles: ['Client'], requireAuthentication: true },
+					update: { authorizedRoles: ['Client'], requireAuthentication: true },
+				},
+			},
+		])
+		const wabe = setup.wabe
+		const port = setup.port
+		const rootClient = getGraphqlClient(port)
+
+		const { userClient, userId } = await createUserAndUpdateRole({
+			anonymousClient: getAnonymousClient(port),
+			port,
+			roleName: 'Client',
+			rootClient,
+		})
+
+		const created = await rootClient.request<any>(gql`
+			mutation createAclRestrictedTest {
+				createAclRestrictedTest(input: { fields: { name: "original" } }) {
+					aclRestrictedTest {
+						id
+					}
+				}
+			}
+		`)
+
+		const objectId = created.createAclRestrictedTest.aclRestrictedTest.id
+
+		await rootClient.request<any>(gql`
+			mutation updateACL {
+				updateAclRestrictedTest(input: {
+					id: "${objectId}",
+					fields: { acl: { users: [{ userId: "${userId}", read: true, write: true }] } }
+				}) {
+					aclRestrictedTest { id }
+				}
+			}
+		`)
+
+		await expect(
+			userClient.request<any>(gql`
+				mutation updateName {
+					updateAclRestrictedTest(input: { id: "${objectId}", fields: { name: "updated" } }) {
+						aclRestrictedTest { id name }
+					}
+				}
+			`),
+		).resolves.toMatchObject({
+			updateAclRestrictedTest: { aclRestrictedTest: { name: 'updated' } },
+		})
+
+		await expect(
+			userClient.request(gql`
+				mutation updateACL {
+					updateAclRestrictedTest(input: {
+						id: "${objectId}",
+						fields: { acl: { users: [{ userId: "other-user-id", read: true, write: true }] } }
+					}) {
+						aclRestrictedTest { id }
+					}
+				}
+			`),
+		).rejects.toThrow('You are not authorized to update this field')
+
+		await closeTests(wabe)
+	})
+
 	it('should throw an error when I try to create an user with a role without root access', async () => {
 		const setup = await setupTests()
 		const wabe = setup.wabe
