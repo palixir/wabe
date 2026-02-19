@@ -408,6 +408,185 @@ describe('Database', () => {
 		expect(res[0].userTest).toEqual([{ name: 'test', id: expect.any(String) }])
 	})
 
+	it('should filter relation with have through databaseController where', async () => {
+		const matchingUser = await wabe.controllers.database.createObject({
+			className: 'User',
+			context,
+			data: { name: 'match-user' },
+			select: { id: true },
+		})
+		const otherUser = await wabe.controllers.database.createObject({
+			className: 'User',
+			context,
+			data: { name: 'other-user' },
+			select: { id: true },
+		})
+
+		await wabe.controllers.database.createObjects({
+			// @ts-expect-error
+			className: 'Test2',
+			context,
+			data: [
+				// @ts-expect-error
+				{ name: 'match-parent', userTest: [matchingUser?.id] },
+				// @ts-expect-error
+				{ name: 'other-parent', userTest: [otherUser?.id] },
+			],
+			select: { id: true },
+		})
+
+		const filtered = await wabe.controllers.database.getObjects({
+			// @ts-expect-error
+			className: 'Test2',
+			context,
+			// @ts-expect-error relation where type is not fully expressed in DevWabeTypes
+			where: { userTest: { have: { name: { equalTo: 'match-user' } } } },
+			// @ts-expect-error Test2 fields are runtime-defined in setup schema
+			select: { id: true, name: true },
+		})
+
+		expect(filtered.length).toBe(1)
+		expect((filtered[0] as any)?.name).toBe('match-parent')
+	})
+
+	it('should filter relation with isEmpty true and false through databaseController where', async () => {
+		const linkedUser = await wabe.controllers.database.createObject({
+			className: 'User',
+			context,
+			data: { name: 'linked-user' },
+			select: { id: true },
+		})
+
+		await wabe.controllers.database.createObjects({
+			// @ts-expect-error
+			className: 'Test2',
+			context,
+			data: [
+				// @ts-expect-error
+				{ name: 'empty-parent' },
+				// @ts-expect-error
+				{ name: 'non-empty-parent', userTest: [linkedUser?.id] },
+			],
+			select: { id: true },
+		})
+
+		const emptyRelation = await wabe.controllers.database.getObjects({
+			// @ts-expect-error
+			className: 'Test2',
+			context,
+			// @ts-expect-error relation where type is not fully expressed in DevWabeTypes
+			where: { userTest: { isEmpty: true } },
+			// @ts-expect-error Test2 fields are runtime-defined in setup schema
+			select: { name: true },
+		})
+
+		const nonEmptyRelation = await wabe.controllers.database.getObjects({
+			// @ts-expect-error
+			className: 'Test2',
+			context,
+			// @ts-expect-error relation where type is not fully expressed in DevWabeTypes
+			where: { userTest: { isEmpty: false } },
+			// @ts-expect-error Test2 fields are runtime-defined in setup schema
+			select: { name: true },
+		})
+
+		expect(emptyRelation.length).toBe(1)
+		expect((emptyRelation[0] as any)?.name).toBe('empty-parent')
+		expect(nonEmptyRelation.length).toBe(1)
+		expect((nonEmptyRelation[0] as any)?.name).toBe('non-empty-parent')
+	})
+
+	it('should support relation where with nested AND/OR composition', async () => {
+		const targetUser = await wabe.controllers.database.createObject({
+			className: 'User',
+			context,
+			data: { name: 'target-user' },
+			select: { id: true },
+		})
+		const nonTargetUser = await wabe.controllers.database.createObject({
+			className: 'User',
+			context,
+			data: { name: 'non-target-user' },
+			select: { id: true },
+		})
+
+		await wabe.controllers.database.createObjects({
+			// @ts-expect-error
+			className: 'Test2',
+			context,
+			data: [
+				// @ts-expect-error
+				{ name: 'candidate', userTest: [targetUser?.id] },
+				// @ts-expect-error
+				{ name: 'candidate', userTest: [nonTargetUser?.id] },
+				// @ts-expect-error
+				{ name: 'outside-or' },
+			],
+			select: { id: true },
+		})
+
+		const filtered = await wabe.controllers.database.getObjects({
+			// @ts-expect-error
+			className: 'Test2',
+			context,
+			where: {
+				AND: [
+					{
+						// @ts-expect-error Test2 fields are runtime-defined in setup schema
+						OR: [{ name: { equalTo: 'candidate' } }, { name: { equalTo: 'other' } }],
+					},
+					{
+						// @ts-expect-error relation where type is not fully expressed in DevWabeTypes
+						userTest: { have: { name: { equalTo: 'target-user' } } },
+					},
+				],
+			},
+			// @ts-expect-error Test2 fields are runtime-defined in setup schema
+			select: { id: true, name: true },
+		})
+
+		expect(filtered.length).toBe(1)
+		expect((filtered[0] as any)?.name).toBe('candidate')
+	})
+
+	it('should support count with relation have where filter', async () => {
+		const includedUser = await wabe.controllers.database.createObject({
+			className: 'User',
+			context,
+			data: { name: 'included-user' },
+			select: { id: true },
+		})
+		const excludedUser = await wabe.controllers.database.createObject({
+			className: 'User',
+			context,
+			data: { name: 'excluded-user' },
+			select: { id: true },
+		})
+
+		await wabe.controllers.database.createObjects({
+			// @ts-expect-error
+			className: 'Test2',
+			context,
+			data: [
+				// @ts-expect-error
+				{ name: 'included-parent', userTest: [includedUser?.id] },
+				// @ts-expect-error
+				{ name: 'excluded-parent', userTest: [excludedUser?.id] },
+			],
+			select: { id: true },
+		})
+
+		const totalCount = await wabe.controllers.database.count({
+			// @ts-expect-error
+			className: 'Test2',
+			context,
+			// @ts-expect-error relation where type is not fully expressed in DevWabeTypes
+			where: { userTest: { have: { name: { equalTo: 'included-user' } } } },
+		})
+
+		expect(totalCount).toBe(1)
+	})
+
 	it("should return null on a pointer if the pointer doesn't exist", async () => {
 		await getGraphqlClient(wabe.config.port).request<any>(graphql.signUpWith, {
 			input: {
