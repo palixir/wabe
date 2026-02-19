@@ -147,6 +147,76 @@ export class DatabaseController<T extends WabeTypes> {
 		}
 	}
 
+	_buildHookReadSelect({
+		className,
+		context,
+		userSelect,
+		selectWithoutPointers,
+	}: {
+		className: keyof T['types']
+		context: WabeContext<T>
+		userSelect: Select
+		selectWithoutPointers: Select
+	}): Select {
+		const selectedVirtualFields = Object.keys(this._getVirtualFieldsForClass(className, context))
+			.filter((fieldName) => !!selectWithoutPointers[fieldName])
+			.map((fieldName) => [fieldName, true])
+
+		return {
+			...userSelect,
+			...Object.fromEntries(selectedVirtualFields),
+		}
+	}
+
+	_initializeReadHook<K extends keyof T['types']>({
+		className,
+		context,
+		userSelect,
+		selectWithoutPointers,
+		_skipHooks,
+	}: {
+		className: K
+		context: WabeContext<T>
+		userSelect: Select
+		selectWithoutPointers: Select
+		_skipHooks?: boolean
+	}) {
+		if (_skipHooks) return undefined
+
+		return initializeHook({
+			className,
+			context,
+			select: this._buildHookReadSelect({
+				className,
+				context,
+				userSelect,
+				selectWithoutPointers,
+			}),
+			objectLoader: this._loadObjectForHooks(className, context),
+			objectsLoader: this._loadObjectsForHooks(className, context),
+		})
+	}
+
+	_buildSelectWithPointers({
+		adapterSelect,
+		pointers,
+	}: {
+		adapterSelect: Select
+		pointers: Record<string, { className: string; select: Select }>
+	}) {
+		return Object.keys(pointers).reduce(
+			(acc, fieldName) => {
+				acc[fieldName] = true
+				return acc
+			},
+			{ ...adapterSelect },
+		)
+	}
+
+	_isEmptySelect(select?: Record<string, unknown>): boolean {
+		return !!select && Object.keys(select).length === 0
+	}
+
 	_projectObjectForUserSelect({
 		object,
 		select,
@@ -388,69 +458,58 @@ export class DatabaseController<T extends WabeTypes> {
 		const roleId = context.user?.role?.id
 		const userId = context.user?.id
 
-		// If we have an user we good right we return
-		// If we don't have user we check role
-		// If the role is good we return
-
-		// @ts-expect-error
-		return {
-			AND: [
-				{ ...where },
-				// If the user is not connected we need to have a null acl
-				!userId
-					? {
-							acl: { equalTo: null },
-						}
-					: undefined,
-				// If we have user or role we need to check the acl
-				userId || roleId
-					? {
-							OR: [
-								{
-									acl: { equalTo: null },
-								},
-								userId
-									? {
-											acl: {
-												users: {
-													contains: {
-														userId,
-														[operation]: true,
-													},
-												},
-											},
-										}
-									: undefined,
-								roleId
-									? {
-											AND: [
-												{
-													acl: {
-														users: {
-															notContains: {
-																userId,
-															},
-														},
-													},
-												},
-												{
-													acl: {
-														roles: {
-															contains: {
-																roleId,
-																[operation]: true,
-															},
-														},
-													},
-												},
-											],
-										}
-									: undefined,
-							].filter(notEmpty),
-						}
-					: undefined,
-			].filter(notEmpty),
+		const aclNullCondition = {
+			acl: { equalTo: null },
 		}
+		const aclUserCondition = userId
+			? {
+					acl: {
+						users: {
+							contains: {
+								userId,
+								[operation]: true,
+							},
+						},
+					},
+				}
+			: undefined
+		const aclRoleCondition = roleId
+			? {
+					AND: [
+						{
+							acl: {
+								users: {
+									notContains: {
+										userId,
+									},
+								},
+							},
+						},
+						{
+							acl: {
+								roles: {
+									contains: {
+										roleId,
+										[operation]: true,
+									},
+								},
+							},
+						},
+					],
+				}
+			: undefined
+
+		const aclForUnauthenticated = !userId ? aclNullCondition : undefined
+		const aclForUserOrRole =
+			userId || roleId
+				? {
+						OR: [aclNullCondition, aclUserCondition, aclRoleCondition].filter(notEmpty),
+					}
+				: undefined
+
+		return {
+			AND: [{ ...where }, aclForUnauthenticated, aclForUserOrRole].filter(notEmpty),
+		} as WhereType<T, K>
 	}
 
 	/**
@@ -542,6 +601,87 @@ export class DatabaseController<T extends WabeTypes> {
 		return res
 	}
 
+	_getRelationSelectWithoutTotalCount(currentSelect?: Select): Select {
+		const selectWithoutTotalCount = currentSelect
+			? Object.entries(currentSelect).reduce((acc, [key, value]) => {
+					if (key === 'totalCount') return acc
+					return {
+						...acc,
+						[key]: value,
+					}
+				}, {})
+			: undefined
+
+		return selectWithoutTotalCount && Object.keys(selectWithoutTotalCount).length > 0
+			? (selectWithoutTotalCount as Select)
+			: { id: true }
+	}
+
+	async _resolvePointerField({
+		currentClassName,
+		object,
+		pointerField,
+		currentSelect,
+		context,
+		_skipHooks,
+	}: {
+		currentClassName: string
+		object: Record<string, any>
+		pointerField: string
+		currentSelect?: Select
+		context: WabeContext<any>
+		_skipHooks?: boolean
+	}) {
+		if (!object[pointerField]) return null
+
+		return this.getObject({
+			className: currentClassName,
+			id: object[pointerField],
+			context,
+			// @ts-expect-error
+			select: currentSelect,
+			_skipHooks,
+		})
+	}
+
+	async _resolveRelationField({
+		currentClassName,
+		object,
+		pointerField,
+		currentSelect,
+		context,
+		_skipHooks,
+	}: {
+		currentClassName: string
+		object: Record<string, any>
+		pointerField: string
+		currentSelect?: Select
+		context: WabeContext<any>
+		_skipHooks?: boolean
+	}) {
+		const relationIds = object[pointerField]
+		if (!relationIds) return undefined
+
+		const selectWithoutTotalCount = this._getRelationSelectWithoutTotalCount(currentSelect)
+		const relationObjects = await this.getObjects({
+			className: currentClassName,
+			select: selectWithoutTotalCount as any,
+			// @ts-expect-error
+			where: { id: { in: relationIds } },
+			context,
+			_skipHooks,
+		})
+
+		if (!context.isGraphQLCall) return relationObjects
+
+		return {
+			totalCount: relationObjects.length,
+			edges: relationObjects.map((object: any) => ({
+				node: object,
+			})),
+		}
+	}
+
 	_getFinalObjectWithPointerAndRelation({
 		pointers,
 		context,
@@ -549,18 +689,20 @@ export class DatabaseController<T extends WabeTypes> {
 		object,
 		_skipHooks,
 	}: {
-		originClassName: string
+		originClassName: keyof T['types']
 		pointers: Record<string, { className: string; select: Select }>
 		context: WabeContext<any>
-		object: Record<string, any>
+		object: Record<string, any> | null | undefined
 		_skipHooks?: boolean
 	}) {
+		if (!object) return Promise.resolve({})
+
 		return Object.entries(pointers).reduce(
 			async (acc, [pointerField, { className: currentClassName, select: currentSelect }]) => {
 				const accObject = await acc
 
 				const isPointer = this._isFieldOfType(
-					originClassName,
+					String(originClassName),
 					pointerField,
 					'Pointer',
 					context,
@@ -568,76 +710,44 @@ export class DatabaseController<T extends WabeTypes> {
 				)
 
 				if (isPointer) {
-					if (!object[pointerField])
-						return {
-							...accObject,
-							[pointerField]: null,
-						}
-
-					const objectOfPointerClass = await this.getObject({
-						className: currentClassName,
-						id: object[pointerField],
-						context,
-						// @ts-expect-error
-						select: currentSelect,
-						_skipHooks,
-					})
-
 					return {
 						...accObject,
-						[pointerField]: objectOfPointerClass,
+						[pointerField]: await this._resolvePointerField({
+							currentClassName,
+							object,
+							pointerField,
+							currentSelect,
+							context,
+							_skipHooks,
+						}),
 					}
 				}
 
 				const isRelation = this._isFieldOfType(
-					originClassName,
+					String(originClassName),
 					pointerField,
 					'Relation',
 					context,
 					currentClassName,
 				)
 
-				if (isRelation && object[pointerField]) {
-					const computedSelectWithoutTotalCount = currentSelect
-						? Object.entries(currentSelect).reduce((acc2, [key, value]) => {
-								if (key === 'totalCount') return acc2
+				if (!isRelation) return accObject
 
-								return {
-									...acc2,
-									[key]: value,
-								}
-							}, {})
-						: undefined
+				const relationValue = await this._resolveRelationField({
+					currentClassName,
+					object,
+					pointerField,
+					currentSelect,
+					context,
+					_skipHooks,
+				})
 
-					const selectWithoutTotalCount =
-						computedSelectWithoutTotalCount &&
-						Object.keys(computedSelectWithoutTotalCount).length > 0
-							? computedSelectWithoutTotalCount
-							: { id: true }
+				if (relationValue === undefined) return accObject
 
-					const relationObjects = await this.getObjects({
-						className: currentClassName,
-						select: selectWithoutTotalCount,
-						// @ts-expect-error
-						where: { id: { in: object[pointerField] } },
-						context,
-						_skipHooks,
-					})
-
-					return {
-						...accObject,
-						[pointerField]: context.isGraphQLCall
-							? {
-									totalCount: relationObjects.length,
-									edges: relationObjects.map((object: any) => ({
-										node: object,
-									})),
-								}
-							: relationObjects,
-					}
+				return {
+					...accObject,
+					[pointerField]: relationValue,
 				}
-
-				return accObject
 			},
 			Promise.resolve({} as Record<string, any>),
 		)
@@ -714,22 +824,13 @@ export class DatabaseController<T extends WabeTypes> {
 			selectWithoutPointers,
 		})
 
-		const hook = !_skipHooks
-			? initializeHook({
-					className,
-					context,
-					select: {
-						...userSelect,
-						...Object.fromEntries(
-							Object.keys(this._getVirtualFieldsForClass(className, context))
-								.filter((fieldName) => !!selectWithoutPointers[fieldName])
-								.map((fieldName) => [fieldName, true]),
-						),
-					},
-					objectLoader: this._loadObjectForHooks(className, context),
-					objectsLoader: this._loadObjectsForHooks(className, context),
-				})
-			: undefined
+		const hook = this._initializeReadHook({
+			className,
+			context,
+			userSelect,
+			selectWithoutPointers,
+			_skipHooks,
+		})
 
 		await hook?.runOnSingleObject({
 			operationType: OperationType.BeforeRead,
@@ -738,11 +839,10 @@ export class DatabaseController<T extends WabeTypes> {
 
 		const whereWithACLCondition = this._buildWhereWithACL(where || {}, context, 'read')
 
-		const selectWithPointersAndRelationsToGetId = Object.keys(pointers).reduce((acc, fieldName) => {
-			acc[fieldName] = true
-
-			return acc
-		}, adapterSelect)
+		const selectWithPointersAndRelationsToGetId = this._buildSelectWithPointers({
+			adapterSelect,
+			pointers,
+		})
 
 		const objectToReturn = await this.adapter.getObject({
 			className,
@@ -757,10 +857,8 @@ export class DatabaseController<T extends WabeTypes> {
 			...objectToReturn,
 			...(await this._getFinalObjectWithPointerAndRelation({
 				context,
-				// @ts-expect-error
 				originClassName: className,
 				pointers,
-				// @ts-expect-error
 				object: objectToReturn,
 				_skipHooks,
 			})),
@@ -814,28 +912,18 @@ export class DatabaseController<T extends WabeTypes> {
 
 		const whereWithACLCondition = this._buildWhereWithACL(whereWithPointer || {}, context, 'read')
 
-		const selectWithPointersAndRelationsToGetId = Object.keys(pointers).reduce((acc, fieldName) => {
-			acc[fieldName] = true
+		const selectWithPointersAndRelationsToGetId = this._buildSelectWithPointers({
+			adapterSelect,
+			pointers,
+		})
 
-			return acc
-		}, adapterSelect)
-
-		const hook = !_skipHooks
-			? initializeHook({
-					className,
-					select: {
-						...userSelect,
-						...Object.fromEntries(
-							Object.keys(this._getVirtualFieldsForClass(className, context))
-								.filter((fieldName) => !!selectWithoutPointers[fieldName])
-								.map((fieldName) => [fieldName, true]),
-						),
-					},
-					context,
-					objectLoader: this._loadObjectForHooks(className, context),
-					objectsLoader: this._loadObjectsForHooks(className, context),
-				})
-			: undefined
+		const hook = this._initializeReadHook({
+			className,
+			context,
+			userSelect,
+			selectWithoutPointers,
+			_skipHooks,
+		})
 
 		await hook?.runOnMultipleObjects({
 			operationType: OperationType.BeforeRead,
@@ -858,10 +946,8 @@ export class DatabaseController<T extends WabeTypes> {
 				return {
 					...object,
 					...(await this._getFinalObjectWithPointerAndRelation({
-						// @ts-expect-error
 						object,
 						context,
-						// @ts-expect-error
 						originClassName: className,
 						pointers,
 						_skipHooks,
@@ -926,7 +1012,7 @@ export class DatabaseController<T extends WabeTypes> {
 
 		const res = result as { id: string }
 
-		if (select && Object.keys(select).length === 0) return null
+		if (this._isEmptySelect(select as Record<string, unknown>)) return null
 
 		const selectWithoutPrivateFields = select ? selectFieldsWithoutPrivateFields(select) : undefined
 
@@ -1008,7 +1094,7 @@ export class DatabaseController<T extends WabeTypes> {
 			),
 		)
 
-		if (select && Object.keys(select).length === 0) return []
+		if (this._isEmptySelect(select as Record<string, unknown>)) return []
 
 		return this.getObjects({
 			className,
@@ -1081,7 +1167,7 @@ export class DatabaseController<T extends WabeTypes> {
 			},
 		})
 
-		if (select && Object.keys(select).length === 0) return null
+		if (this._isEmptySelect(select as Record<string, unknown>)) return null
 
 		return this.getObject({
 			className,
@@ -1155,7 +1241,7 @@ export class DatabaseController<T extends WabeTypes> {
 			originalObjects: resultsAfterBeforeUpdate?.objects || [],
 		})
 
-		if (select && Object.keys(select).length === 0) return []
+		if (this._isEmptySelect(select as Record<string, unknown>)) return []
 
 		return this.getObjects({
 			className,
@@ -1216,7 +1302,7 @@ export class DatabaseController<T extends WabeTypes> {
 			},
 		})) as unknown as OutputType<T, K, U>
 
-		if (select && Object.keys(select).length === 0) return null as any
+		if (this._isEmptySelect(select as Record<string, unknown>)) return null as any
 
 		return result
 	}
