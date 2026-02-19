@@ -20,12 +20,20 @@ describe('SignInWith', () => {
 	)
 
 	const mockCreateObject = mock(() => Promise.resolve({}))
+	const mockGetObject = mock(() => Promise.resolve({ pendingChallenges: [] }))
+	const mockUpdateObject = mock(() => Promise.resolve({}))
 
 	const mockOnSendChallenge = mock(() => Promise.resolve())
 	const mockOnVerifyChallenge = mock(() => Promise.resolve(true))
 
 	const context = {
 		wabe: {
+			controllers: {
+				database: {
+					getObject: mockGetObject,
+					updateObject: mockUpdateObject,
+				},
+			},
 			config: {
 				authentication: {
 					session: {
@@ -68,6 +76,8 @@ describe('SignInWith', () => {
 
 	afterEach(() => {
 		mockCreateObject.mockClear()
+		mockGetObject.mockClear()
+		mockUpdateObject.mockClear()
 		mockOnLogin.mockClear()
 		mockOnSignUp.mockClear()
 	})
@@ -121,6 +131,7 @@ describe('SignInWith', () => {
 		expect(res).toEqual({
 			accessToken: null,
 			refreshToken: null,
+			challengeToken: expect.any(String),
 			user: {
 				id: 'id',
 				email: 'email@test.fr',
@@ -231,6 +242,7 @@ describe('SignInWith', () => {
 		expect(res).toEqual({
 			accessToken: 'accessToken',
 			refreshToken: 'refreshToken',
+			challengeToken: null,
 			user: {
 				id: 'id',
 			},

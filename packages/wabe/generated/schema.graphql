@@ -50,6 +50,7 @@ type User {
 	role: Role
 	sessions: _SessionConnection
 	secondFA: UserSecondFA
+	pendingChallenges: [UserPendingAuthenticationChallenge]
 }
 
 """
@@ -130,6 +131,12 @@ type UserSecondFA {
 	provider: SecondaryFactor!
 }
 
+type UserPendingAuthenticationChallenge {
+	token: String!
+	provider: String!
+	expiresAt: Date!
+}
+
 """
 User class
 """
@@ -148,6 +155,7 @@ input UserInput {
 	role: RolePointerInput
 	sessions: _SessionRelationInput
 	secondFA: UserSecondFAInput
+	pendingChallenges: [UserPendingAuthenticationChallengeInput]
 }
 
 input UserACLObjectInput {
@@ -208,6 +216,12 @@ input UserSecondFAInput {
 	provider: SecondaryFactor!
 }
 
+input UserPendingAuthenticationChallengeInput {
+	token: String!
+	provider: String!
+	expiresAt: Date!
+}
+
 """
 Input to link an object to a pointer User
 """
@@ -235,6 +249,7 @@ input UserCreateFieldsInput {
 	role: RolePointerInput
 	sessions: _SessionRelationInput
 	secondFA: UserSecondFACreateFieldsInput
+	pendingChallenges: [UserPendingAuthenticationChallengeCreateFieldsInput]
 }
 
 input UserACLObjectCreateFieldsInput {
@@ -293,6 +308,12 @@ input UserAuthenticationGithubCreateFieldsInput {
 input UserSecondFACreateFieldsInput {
 	enabled: Boolean
 	provider: SecondaryFactor
+}
+
+input UserPendingAuthenticationChallengeCreateFieldsInput {
+	token: String
+	provider: String
+	expiresAt: Date
 }
 
 """
@@ -802,6 +823,7 @@ input UserWhereInput {
 	role: RoleWhereInput
 	sessions: _SessionRelationWhereInput
 	secondFA: UserSecondFAWhereInput
+	pendingChallenges: [UserPendingAuthenticationChallengeWhereInput]
 	OR: [UserWhereInput]
 	AND: [UserWhereInput]
 }
@@ -1056,6 +1078,14 @@ input UserSecondFAWhereInput {
 	AND: [UserSecondFAWhereInput]
 }
 
+input UserPendingAuthenticationChallengeWhereInput {
+	token: StringWhereInput
+	provider: StringWhereInput
+	expiresAt: DateWhereInput
+	OR: [UserPendingAuthenticationChallengeWhereInput]
+	AND: [UserPendingAuthenticationChallengeWhereInput]
+}
+
 enum UserOrder {
 	name_ASC
 	name_DESC
@@ -1085,6 +1115,8 @@ enum UserOrder {
 	sessions_DESC
 	secondFA_ASC
 	secondFA_DESC
+	pendingChallenges_ASC
+	pendingChallenges_DESC
 }
 
 type PostConnection {
@@ -1410,6 +1442,7 @@ input UserUpdateFieldsInput {
 	role: RolePointerInput
 	sessions: _SessionRelationInput
 	secondFA: UserSecondFAUpdateFieldsInput
+	pendingChallenges: [UserPendingAuthenticationChallengeUpdateFieldsInput]
 }
 
 input UserACLObjectUpdateFieldsInput {
@@ -1468,6 +1501,12 @@ input UserAuthenticationGithubUpdateFieldsInput {
 input UserSecondFAUpdateFieldsInput {
 	enabled: Boolean
 	provider: SecondaryFactor
+}
+
+input UserPendingAuthenticationChallengeUpdateFieldsInput {
+	token: String
+	provider: String
+	expiresAt: Date
 }
 
 input UpdateUsersInput {
@@ -1842,6 +1881,7 @@ input SendEmailInput {
 
 type SignInWithOutput {
 	user: User
+	challengeToken: String
 	accessToken: String
 	refreshToken: String
 	srp: SignInWithOutputSRPOutputSignInWith
@@ -1956,6 +1996,7 @@ type VerifyChallengeOutputSRPOutputVerifyChallenge {
 }
 
 input VerifyChallengeInput {
+	challengeToken: String
 	secondFA: VerifyChallengeSecondaryFactorAuthenticationInput
 }
 

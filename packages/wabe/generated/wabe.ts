@@ -74,6 +74,12 @@ export type SecondFA = {
 	provider: SecondaryFactor
 }
 
+export type PendingAuthenticationChallenge = {
+	token: string
+	provider: string
+	expiresAt: Date
+}
+
 export type User = {
 	id: string
 	name?: string
@@ -90,6 +96,7 @@ export type User = {
 	role?: Role
 	sessions?: Array<_Session>
 	secondFA?: SecondFA
+	pendingChallenges?: Array<PendingAuthenticationChallenge>
 }
 
 export type Experience = {
@@ -163,6 +170,7 @@ export type WhereUser = {
 	role?: Role
 	sessions?: Array<_Session>
 	secondFA?: SecondFA
+	pendingChallenges?: Array<PendingAuthenticationChallenge>
 }
 
 export type WherePost = {
@@ -375,6 +383,7 @@ export type MutationRefreshArgs = {
 }
 
 export type VerifyChallengeInput = {
+	challengeToken?: string
 	secondFA?: VerifyChallengeSecondFA
 }
 

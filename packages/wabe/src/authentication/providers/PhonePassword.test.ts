@@ -23,6 +23,7 @@ describe('Phone password', () => {
 
 	afterEach(() => {
 		mockGetObjects.mockClear()
+		mockCount.mockClear()
 		mockCreateObject.mockClear()
 		spyArgonPasswordVerify.mockClear()
 		spyBunPasswordHash.mockClear()
@@ -134,6 +135,49 @@ describe('Phone password', () => {
 		).rejects.toThrow('Invalid authentication credentials')
 
 		expect(spyArgonPasswordVerify).toHaveBeenCalledTimes(1)
+	})
+
+	it('should rate limit signUp attempts in production', async () => {
+		mockCount.mockResolvedValue(1)
+
+		const context = {
+			wabe: {
+				...controllers,
+				config: {
+					isProduction: true,
+					authentication: {
+						security: {
+							signUpRateLimit: {
+								enabled: true,
+								maxAttempts: 2,
+								windowMs: 60_000,
+								blockDurationMs: 60_000,
+							},
+						},
+					},
+				},
+			},
+		} as any
+
+		const input = {
+			phone: 'ratelimit-signup-phone-password',
+			password: 'password',
+		}
+
+		await expect(phonePassword.onSignUp({ context, input })).rejects.toThrow(
+			'Not authorized to create user',
+		)
+		await expect(phonePassword.onSignUp({ context, input })).rejects.toThrow(
+			'Not authorized to create user',
+		)
+
+		const callsBeforeBlockedAttempt = mockCount.mock.calls.length
+
+		await expect(phonePassword.onSignUp({ context, input })).rejects.toThrow(
+			'Not authorized to create user',
+		)
+
+		expect(mockCount.mock.calls.length).toBe(callsBeforeBlockedAttempt)
 	})
 
 	it('should not update authentication data if there is no user found', () => {

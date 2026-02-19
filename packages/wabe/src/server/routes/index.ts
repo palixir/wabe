@@ -9,7 +9,13 @@ export interface WabeRoute {
 	handler: WobeHandler<WobeCustomContext<any>>
 }
 
-export const defaultRoutes = (devDirectory: string): WabeRoute[] => {
+export const defaultRoutes = ({
+	devDirectory,
+	enableBucketRoute,
+}: {
+	devDirectory: string
+	enableBucketRoute: boolean
+}): WabeRoute[] => {
 	const routes: WabeRoute[] = [
 		{
 			method: 'GET',
@@ -28,12 +34,15 @@ export const defaultRoutes = (devDirectory: string): WabeRoute[] => {
 			path: '/auth/oauth/callback',
 			handler: (context) => oauthHandlerCallback(context, context.wabe),
 		},
-		{
+	]
+
+	if (enableBucketRoute) {
+		routes.push({
 			method: 'GET',
 			path: '/bucket/:filename',
 			handler: uploadDirectory({ directory: devDirectory }),
-		},
-	]
+		})
+	}
 
 	return routes
 }

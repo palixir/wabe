@@ -7,6 +7,7 @@ import type {
 	SecondaryProviderInterface,
 } from '../interface'
 import { OTP } from '../OTP'
+import { clearRateLimit, isRateLimited } from '../security'
 
 const DUMMY_USER_ID = '00000000-0000-0000-0000-000000000000'
 
@@ -45,6 +46,11 @@ export class EmailOTP implements SecondaryProviderInterface<DevWabeTypes, EmailO
 		context,
 		input,
 	}: OnVerifyChallengeOptions<DevWabeTypes, EmailOTPInterface>) {
+		const normalizedEmail = input.email.trim().toLowerCase()
+		const rateLimitKey = `emailOtp:${normalizedEmail}`
+
+		if (isRateLimited(context, 'verifyChallenge', rateLimitKey)) return null
+
 		const users = await context.wabe.controllers.database.getObjects({
 			className: 'User',
 			where: {
@@ -77,7 +83,10 @@ export class EmailOTP implements SecondaryProviderInterface<DevWabeTypes, EmailO
 
 		const isOtpValid = otpClass.verify(input.otp, userId)
 
-		if (realUser && (isOtpValid || isDevBypass)) return { userId: realUser.id }
+		if (realUser && (isOtpValid || isDevBypass)) {
+			clearRateLimit(context, 'verifyChallenge', rateLimitKey)
+			return { userId: realUser.id }
+		}
 
 		return null
 	}

@@ -116,6 +116,27 @@ export interface SessionConfig<T extends WabeTypes> {
 	jwtTokenFields?: SelectType<T, 'User', keyof T['types']['User']>
 }
 
+export interface AuthenticationRateLimitConfig {
+	/**
+	 * Enable this rate limiter. Enabled by default in production.
+	 */
+	enabled?: boolean
+	maxAttempts?: number
+	windowMs?: number
+	blockDurationMs?: number
+}
+
+export interface AuthenticationSecurityConfig {
+	signInRateLimit?: AuthenticationRateLimitConfig
+	signUpRateLimit?: AuthenticationRateLimitConfig
+	verifyChallengeRateLimit?: AuthenticationRateLimitConfig
+	mfaChallengeTtlMs?: number
+	/**
+	 * Require a valid challenge token during verifyChallenge in production.
+	 */
+	requireMfaChallengeInProduction?: boolean
+}
+
 export interface AuthenticationConfig<T extends WabeTypes> {
 	session?: SessionConfig<T>
 	roles?: RoleConfig
@@ -127,6 +148,7 @@ export interface AuthenticationConfig<T extends WabeTypes> {
 	customAuthenticationMethods?: CustomAuthenticationMethods<T>[]
 	sessionHandler?: (context: WobeCustomContext<T>) => void | Promise<void>
 	disableSignUp?: boolean
+	security?: AuthenticationSecurityConfig
 }
 
 export interface CreateTokenFromAuthorizationCodeOptions {

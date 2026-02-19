@@ -4,6 +4,7 @@ import { ProviderEnum } from '../../authentication/interface'
 import { getGraphqlClient } from '../../utils/helper'
 import { gql } from 'graphql-request'
 import { Google } from '../../authentication/oauth'
+import { getSessionCookieSameSite } from '../../authentication/cookies'
 import { generateRandomValues } from '../../authentication/oauth/utils'
 import { GitHub } from '../../authentication/oauth/GitHub'
 
@@ -61,6 +62,7 @@ export const oauthHandlerCallback = async (context: Context, wabeContext: WabeCo
 		const { accessToken, refreshToken } = signInWith
 
 		const isCookieSession = !!wabeContext.wabe.config.authentication?.session?.cookieSession
+		const sameSite = getSessionCookieSameSite(wabeContext.wabe.config)
 
 		context.res.setCookie('accessToken', accessToken, {
 			// If cookie session we put httpOnly to true, otherwise the front will need to get it
@@ -70,7 +72,7 @@ export const oauthHandlerCallback = async (context: Context, wabeContext: WabeCo
 			maxAge:
 				(wabeContext.wabe.config.authentication?.session?.accessTokenExpiresInMs ||
 					60 * 15 * 1000) / 1000, // 15 minutes in seconds
-			sameSite: 'None',
+			sameSite,
 			secure: true,
 		})
 
@@ -82,7 +84,7 @@ export const oauthHandlerCallback = async (context: Context, wabeContext: WabeCo
 			maxAge:
 				(wabeContext.wabe.config.authentication?.session?.accessTokenExpiresInMs ||
 					60 * 15 * 1000) / 1000, // 15 minutes in seconds
-			sameSite: 'None',
+			sameSite,
 			secure: true,
 		})
 

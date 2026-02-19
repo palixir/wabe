@@ -930,3 +930,102 @@ describe('File upload', () => {
 		expect(await res.text()).toEqual('this is the content')
 	})
 })
+
+describe('File upload security in production', () => {
+	let wabe: Wabe<DevWabeTypes>
+
+	beforeAll(async () => {
+		const setup = await setupTests(
+			[
+				{
+					name: 'TestSecurityFile',
+					fields: {
+						file: { type: 'File' },
+					},
+					permissions: {
+						read: { requireAuthentication: false },
+						create: { requireAuthentication: false },
+						update: { requireAuthentication: false },
+						delete: { requireAuthentication: false },
+					},
+				},
+			],
+			{ isProduction: true },
+		)
+
+		wabe = setup.wabe
+	})
+
+	afterAll(async () => {
+		await closeTests(wabe)
+	})
+
+	afterEach(async () => {
+		await wabe.controllers.database.deleteObjects({
+			// @ts-expect-error
+			className: 'TestSecurityFile',
+			context: {
+				isRoot: true,
+				wabe,
+			},
+			where: {},
+			select: {},
+		})
+	})
+
+	it('should randomize uploaded file name in production', async () => {
+		await wabe.controllers.database.createObject({
+			// @ts-expect-error
+			className: 'TestSecurityFile',
+			context: {
+				isRoot: true,
+				wabe,
+			},
+			data: {
+				// @ts-expect-error
+				file: {
+					file: new File(['hello'], 'report.txt', { type: 'text/plain' }),
+				},
+			},
+			select: {},
+		})
+
+		const result = await wabe.controllers.database.getObjects({
+			// @ts-expect-error
+			className: 'TestSecurityFile',
+			context: {
+				isRoot: true,
+				wabe,
+			},
+			where: {},
+			// @ts-expect-error
+			select: { file: true, id: true },
+		})
+
+		const storedName = (result[0] as any)?.file?.name as string
+
+		expect(storedName).toBeString()
+		expect(storedName).not.toEqual('report.txt')
+		expect(storedName.endsWith('.txt')).toBe(true)
+	})
+
+	it('should reject file type not allowed in production', async () => {
+		expect(
+			wabe.controllers.database.createObject({
+				// @ts-expect-error
+				className: 'TestSecurityFile',
+				context: {
+					isRoot: true,
+					wabe,
+				},
+				data: {
+					// @ts-expect-error
+					file: {
+						file: new File(['alert(1)'], 'script.js', { type: 'application/javascript' }),
+					},
+				},
+				select: {},
+			}),
+		).rejects.toThrow('File extension is not allowed')
+	})
+})

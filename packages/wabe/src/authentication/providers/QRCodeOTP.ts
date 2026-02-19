@@ -2,6 +2,7 @@ import { contextWithRoot } from '../..'
 import type { DevWabeTypes } from '../../utils/helper'
 import type { OnVerifyChallengeOptions, SecondaryProviderInterface } from '../interface'
 import { OTP } from '../OTP'
+import { clearRateLimit, isRateLimited, registerRateLimitFailure } from '../security'
 
 const DUMMY_USER_ID = '00000000-0000-0000-0000-000000000000'
 
@@ -19,6 +20,11 @@ export class QRCodeOTP implements SecondaryProviderInterface<DevWabeTypes, QRCod
 		context,
 		input,
 	}: OnVerifyChallengeOptions<DevWabeTypes, QRCodeOTPInterface>) {
+		const normalizedEmail = input.email.trim().toLowerCase()
+		const rateLimitKey = `qrCodeOtp:${normalizedEmail}`
+
+		if (isRateLimited(context, 'verifyChallenge', rateLimitKey)) return null
+
 		const users = await context.wabe.controllers.database.getObjects({
 			className: 'User',
 			where: {
@@ -51,7 +57,12 @@ export class QRCodeOTP implements SecondaryProviderInterface<DevWabeTypes, QRCod
 
 		const isOtpValid = otpClass.authenticatorVerify(input.otp, userId)
 
-		if (realUser && (isOtpValid || isDevBypass)) return { userId: realUser.id }
+		if (realUser && (isOtpValid || isDevBypass)) {
+			clearRateLimit(context, 'verifyChallenge', rateLimitKey)
+			return { userId: realUser.id }
+		}
+
+		registerRateLimitFailure(context, 'verifyChallenge', rateLimitKey)
 
 		return null
 	}

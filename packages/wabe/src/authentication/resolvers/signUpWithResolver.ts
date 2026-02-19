@@ -1,5 +1,6 @@
 import type { SignUpWithInput } from '../../../generated/wabe'
 import type { WabeContext } from '../../server/interface'
+import { getSessionCookieSameSite } from '../cookies'
 import { Session } from '../Session'
 
 // 0 - Get the authentication method
@@ -36,10 +37,12 @@ export const signUpWithResolver = async (
 	const { accessToken, refreshToken, csrfToken } = await session.create(createdUserId, context)
 
 	if (context.wabe.config.authentication?.session?.cookieSession) {
+		const sameSite = getSessionCookieSameSite(context.wabe.config)
+
 		context.response?.setCookie('refreshToken', refreshToken, {
 			httpOnly: true,
 			path: '/',
-			sameSite: 'Strict',
+			sameSite,
 			secure: true,
 			expires: session.getRefreshTokenExpireAt(context.wabe.config),
 		})
@@ -47,7 +50,7 @@ export const signUpWithResolver = async (
 		context.response?.setCookie('accessToken', accessToken, {
 			httpOnly: true,
 			path: '/',
-			sameSite: 'Strict',
+			sameSite,
 			secure: true,
 			expires: session.getAccessTokenExpireAt(context.wabe.config),
 		})
@@ -55,7 +58,7 @@ export const signUpWithResolver = async (
 		context.response?.setCookie('csrfToken', csrfToken, {
 			httpOnly: true,
 			path: '/',
-			sameSite: 'Strict',
+			sameSite,
 			secure: true,
 			expires: session.getAccessTokenExpireAt(context.wabe.config),
 		})
