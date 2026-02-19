@@ -5,23 +5,43 @@ import type { SchemaInterface } from '../schema'
 import type { WabeContext } from '../server/interface'
 import { contextWithRoot, notEmpty } from '../utils/export'
 import type { DevWabeTypes } from '../utils/helper'
-import type {
-	CountOptions,
-	CreateObjectOptions,
-	CreateObjectsOptions,
-	DatabaseAdapter,
-	DeleteObjectOptions,
-	DeleteObjectsOptions,
-	GetObjectOptions,
-	GetObjectsOptions,
-	OutputType,
-	UpdateObjectOptions,
-	UpdateObjectsOptions,
-	WhereType,
+import {
+	type CountOptions,
+	type CreateObjectOptions,
+	type CreateObjectsOptions,
+	type DatabaseAdapter,
+	type DeleteObjectOptions,
+	type DeleteObjectsOptions,
+	type GetObjectOptions,
+	type GetObjectsOptions,
+	type OutputType,
+	type UpdateObjectOptions,
+	type UpdateObjectsOptions,
+	type WhereType,
 } from './interface'
 
 export type Select = Record<string, boolean>
 type SelectWithObject = Record<string, object | boolean>
+
+const scalarWhereOperators = new Set([
+	'equalTo',
+	'notEqualTo',
+	'greaterThan',
+	'lessThan',
+	'greaterThanOrEqualTo',
+	'lessThanOrEqualTo',
+	'in',
+	'notIn',
+	'contains',
+	'notContains',
+	'exists',
+])
+
+const isScalarWhereFilter = (value: unknown): boolean =>
+	value !== null &&
+	typeof value === 'object' &&
+	!Array.isArray(value) &&
+	Object.keys(value).some((key) => scalarWhereOperators.has(key))
 
 type RuntimeVirtualField = {
 	type: 'Virtual'
@@ -292,7 +312,44 @@ export class DatabaseController<T extends WabeTypes> {
 			// @ts-expect-error
 			const fieldTargetClass = field.class
 
-			const defaultWhere = where[typedWhereKey]
+			const relationValue = where[typedWhereKey]
+
+			// Relation where can already be transformed (e.g. { in: [...] })
+			// when reused across count/getObjects; keep scalar filters unchanged.
+			if (field?.type === 'Relation' && isScalarWhereFilter(relationValue)) {
+				return {
+					...currentAcc,
+					[typedWhereKey]: relationValue,
+				}
+			}
+
+			// For Relation: unwrap have/isEmpty structure
+			let defaultWhere = relationValue
+			if (field?.type === 'Relation' && relationValue) {
+				// @ts-expect-error
+				if (relationValue.isEmpty !== undefined) {
+					// In storage, an empty relation can be either [] or an absent field.
+					// Model both cases explicitly so the filter behaves consistently.
+					// @ts-expect-error
+					return relationValue.isEmpty === true
+						? {
+								...currentAcc,
+								OR: [{ [typedWhereKey]: { equalTo: [] } }, { [typedWhereKey]: { exists: false } }],
+							}
+						: {
+								...currentAcc,
+								AND: [
+									{ [typedWhereKey]: { exists: true } },
+									{ [typedWhereKey]: { notEqualTo: [] } },
+								],
+							}
+				}
+
+				// @ts-expect-error
+				if (relationValue.have)
+					// @ts-expect-error
+					defaultWhere = relationValue.have as typeof defaultWhere
+			}
 
 			const objects = await this.getObjects({
 				className: fieldTargetClass,
@@ -302,19 +359,16 @@ export class DatabaseController<T extends WabeTypes> {
 				where: defaultWhere,
 				context,
 			})
-
-			return {
-				...acc,
-				// If we don't found any object we just execute the query with the default where
-				// Without any transformation for pointer or relation
-				// Ensure the 'in' condition is not empty to avoid unauthorized access
-				...(objects.length > 0
+			// When no objects match, use impossible condition to return no results
+			const relationWhere =
+				objects.length > 0
 					? {
-							[typedWhereKey]: {
-								in: objects.map((object) => object?.id).filter(notEmpty),
-							},
+							in: objects.map((object) => object?.id).filter(notEmpty),
 						}
-					: {}),
+					: { equalTo: '__no_match__' }
+			return {
+				...currentAcc,
+				[typedWhereKey]: relationWhere,
 			}
 		}, Promise.resolve({}))
 
@@ -606,7 +660,13 @@ export class DatabaseController<T extends WabeTypes> {
 		context,
 		where,
 	}: CountOptions<T, K>): Promise<number> {
-		const whereWithACLCondition = this._buildWhereWithACL(where || {}, context, 'read')
+		const whereWithPointer = await this._getWhereObjectWithPointerOrRelation(
+			className,
+			where || {},
+			context,
+		)
+
+		const whereWithACLCondition = this._buildWhereWithACL(whereWithPointer, context, 'read')
 
 		const hook = initializeHook({
 			className,

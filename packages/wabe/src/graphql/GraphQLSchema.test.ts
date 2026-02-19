@@ -2069,7 +2069,9 @@ describe('GraphqlSchema', () => {
 					}
 				}
 			`,
-			{ id: created.createVirtualPersonWithArray.virtualPersonWithArray.id },
+			{
+				id: created.createVirtualPersonWithArray.virtualPersonWithArray.id,
+			},
 		)
 
 		expect(read.virtualPersonWithArray.nameParts).toEqual(['Ada', 'Lovelace'])
@@ -2099,7 +2101,10 @@ describe('GraphqlSchema', () => {
 							// @ts-expect-error
 							dependsOn: ['firstName', 'lastName'],
 							callback: (object: any) => [
-								{ label: 'First', value: object.firstName || '' },
+								{
+									label: 'First',
+									value: object.firstName || '',
+								},
 								{ label: 'Last', value: object.lastName || '' },
 							],
 						},
@@ -2147,7 +2152,9 @@ describe('GraphqlSchema', () => {
 					}
 				}
 			`,
-			{ id: created.createVirtualPersonWithObjectArray.virtualPersonWithObjectArray.id },
+			{
+				id: created.createVirtualPersonWithObjectArray.virtualPersonWithObjectArray.id,
+			},
 		)
 
 		expect(read.virtualPersonWithObjectArray.nameInfos).toEqual([
@@ -2186,6 +2193,189 @@ describe('GraphqlSchema', () => {
 				name: 'FifthClassInput',
 			}).input.relation,
 		).toEqual('SixthClassRelationInput')
+	})
+
+	it('should have RelationWhereInput with have and isEmpty for relation fields', () => {
+		expect(
+			getTypeFromGraphQLSchema({
+				schema,
+				type: 'Type',
+				name: 'FifthClassWhereInput',
+			}).input.relation,
+		).toEqual('SixthClassRelationWhereInput')
+
+		expect(
+			getTypeFromGraphQLSchema({
+				schema,
+				type: 'Type',
+				name: 'SixthClassRelationWhereInput',
+			}).input,
+		).toEqual({
+			have: 'SixthClassWhereInput',
+			isEmpty: 'Boolean',
+		})
+	})
+
+	it('should filter by relation with have', async () => {
+		const { client, wabe } = await createWabe({
+			classes: [
+				{
+					name: 'TestClass',
+					fields: {
+						field1: { type: 'String' },
+					},
+				},
+				{
+					name: 'TestClass2',
+					fields: {
+						name: { type: 'String' },
+						field2: {
+							type: 'Relation',
+							// @ts-expect-error
+							class: 'TestClass',
+						},
+					},
+				},
+			],
+		})
+
+		await client.request<any>(gql`
+			mutation createTestClass2 {
+				createTestClass2(
+					input: { fields: { name: "matchParent", field2: { createAndAdd: [{ field1: "match" }] } } }
+				) {
+					testClass2 {
+						id
+					}
+				}
+			}
+		`)
+
+		await client.request<any>(gql`
+			mutation createTestClass2 {
+				createTestClass2(
+					input: { fields: { name: "otherParent", field2: { createAndAdd: [{ field1: "other" }] } } }
+				) {
+					testClass2 {
+						id
+					}
+				}
+			}
+		`)
+
+		const res = await client.request<any>(gql`
+			query testClass2s {
+				testClass2s(where: { field2: { have: { field1: { equalTo: "match" } } } }) {
+					totalCount
+					edges {
+						node {
+							name
+						}
+					}
+				}
+			}
+		`)
+
+		expect(res.testClass2s.totalCount).toBe(1)
+		expect(res.testClass2s.edges[0]?.node.name).toBe('matchParent')
+
+		const res2 = await client.request<any>(gql`
+			query testClass2s {
+				testClass2s(where: { field2: { have: { field1: { notEqualTo: "match" } } } }) {
+					totalCount
+					edges {
+						node {
+							name
+						}
+					}
+				}
+			}
+		`)
+
+		expect(res2.testClass2s.totalCount).toBe(1)
+		expect(res2.testClass2s.edges[0]?.node.name).toBe('otherParent')
+
+		await wabe.close()
+	})
+
+	it('should filter by relation with isEmpty', async () => {
+		const { client, wabe } = await createWabe({
+			classes: [
+				{
+					name: 'TestClass',
+					fields: {
+						field1: { type: 'String' },
+					},
+				},
+				{
+					name: 'TestClass2',
+					fields: {
+						name: { type: 'String' },
+						field2: {
+							type: 'Relation',
+							// @ts-expect-error
+							class: 'TestClass',
+						},
+					},
+				},
+			],
+		})
+
+		await client.request<any>(gql`
+			mutation createTestClass2 {
+				createTestClass2(input: { fields: { name: "empty" } }) {
+					testClass2 {
+						id
+					}
+				}
+			}
+		`)
+
+		await client.request<any>(gql`
+			mutation createTestClass2 {
+				createTestClass2(
+					input: { fields: { name: "withItems", field2: { createAndAdd: [{ field1: "x" }] } } }
+				) {
+					testClass2 {
+						id
+					}
+				}
+			}
+		`)
+
+		const resEmpty = await client.request<any>(gql`
+			query testClass2s {
+				testClass2s(where: { field2: { isEmpty: true } }) {
+					totalCount
+					edges {
+						node {
+							name
+						}
+					}
+				}
+			}
+		`)
+
+		expect(resEmpty.testClass2s.totalCount).toBe(1)
+		expect(resEmpty.testClass2s.edges[0]?.node.name).toBe('empty')
+
+		const resNonEmpty = await client.request<any>(gql`
+			query testClass2s {
+				testClass2s(where: { field2: { isEmpty: false } }) {
+					totalCount
+					edges {
+						node {
+							name
+						}
+					}
+				}
+			}
+		`)
+
+		expect(resNonEmpty.testClass2s.totalCount).toBe(1)
+		expect(resNonEmpty.testClass2s.edges[0]?.node.name).toBe('withItems')
+
+		await wabe.close()
 	})
 
 	it('should have the pointer in the object when there is a circular dependency in pointer', () => {

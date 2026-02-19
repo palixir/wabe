@@ -43,6 +43,7 @@ type AllPossibleObject =
 	| 'connectionObject'
 	| 'pointerInputObject'
 	| 'relationInputObject'
+	| 'relationWhereInputObject'
 	| 'updateInputObject'
 	| 'createInputObject'
 	| 'orderEnumType'
@@ -132,6 +133,11 @@ export class GraphQLSchema {
 				acc.objects.push(inputObject)
 				acc.objects.push(pointerInputObject)
 				acc.objects.push(relationInputObject)
+
+				const relationWhereInputObject = currentObject.relationWhereInputObject
+				if (relationWhereInputObject) {
+					acc.objects.push(relationWhereInputObject)
+				}
 
 				return acc
 			},
