@@ -56,6 +56,12 @@ type WhereConditional<T extends WabeTypes, K = keyof T['where']> = {
 export type WhereType<T extends WabeTypes, K = keyof T['where']> = Partial<WhereAggregation<T, K>> &
 	WhereConditional<T, K>
 
+/** Structure for relation where input (have / isEmpty) */
+export type RelationWhereInput<THave = unknown> = {
+	have?: THave
+	isEmpty?: boolean
+}
+
 type SelectObject<T, K extends WabeTypes, Depth extends number = 3> = {
 	[P in keyof T]: IsScalar<T[P]> extends true
 		? boolean

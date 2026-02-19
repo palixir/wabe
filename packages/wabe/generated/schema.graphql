@@ -800,7 +800,7 @@ input UserWhereInput {
 	isOauth: BooleanWhereInput
 	verifiedEmail: BooleanWhereInput
 	role: RoleWhereInput
-	sessions: _SessionWhereInput
+	sessions: _SessionRelationWhereInput
 	secondFA: UserSecondFAWhereInput
 	OR: [UserWhereInput]
 	AND: [UserWhereInput]
@@ -963,13 +963,21 @@ scalar Any
 input RoleWhereInput {
 	id: IdWhereInput
 	name: StringWhereInput
-	users: UserWhereInput
+	users: UserRelationWhereInput
 	acl: RoleACLObjectWhereInput
 	createdAt: DateWhereInput
 	updatedAt: DateWhereInput
 	search: SearchWhereInput
 	OR: [RoleWhereInput]
 	AND: [RoleWhereInput]
+}
+
+"""
+Filter on relation to User
+"""
+input UserRelationWhereInput {
+	have: UserWhereInput
+	isEmpty: Boolean
 }
 
 input RoleACLObjectWhereInput {
@@ -993,6 +1001,14 @@ input RoleACLObjectRolesACLWhereInput {
 	write: BooleanWhereInput
 	OR: [RoleACLObjectRolesACLWhereInput]
 	AND: [RoleACLObjectRolesACLWhereInput]
+}
+
+"""
+Filter on relation to _Session
+"""
+input _SessionRelationWhereInput {
+	have: _SessionWhereInput
+	isEmpty: Boolean
 }
 
 input _SessionWhereInput {
@@ -1085,7 +1101,7 @@ input PostWhereInput {
 	id: IdWhereInput
 	name: StringWhereInput
 	test2: AnyWhereInput
-	test3: UserWhereInput
+	test3: UserRelationWhereInput
 	test4: UserWhereInput
 	experiences: [PostExperienceWhereInput!]
 	acl: PostACLObjectWhereInput

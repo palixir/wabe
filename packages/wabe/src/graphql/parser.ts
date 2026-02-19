@@ -502,8 +502,32 @@ export const GraphqlParser: GraphqlParserConstructor =
 								break
 							}
 							case 'WhereInputObject': {
-								acc[key] = {
-									type: allObjects[currentField.class]?.whereInputObject,
+								if (isRelation) {
+									const relatedClass = currentField.class as string
+									const relatedWhereInput = allObjects[relatedClass]?.whereInputObject
+
+									let relationWhereInput = allObjects[relatedClass]?.relationWhereInputObject
+
+									if (!relationWhereInput && relatedWhereInput) {
+										relationWhereInput = new GraphQLInputObjectType({
+											name: `${relatedClass}RelationWhereInput`,
+											description: `Filter on relation to ${relatedClass}`,
+											fields: {
+												have: { type: relatedWhereInput },
+												isEmpty: { type: GraphQLBoolean },
+											},
+										})
+										if (!allObjects[relatedClass]) allObjects[relatedClass] = {}
+										allObjects[relatedClass].relationWhereInputObject = relationWhereInput
+									}
+
+									acc[key] = {
+										type: relationWhereInput || relatedWhereInput,
+									}
+								} else {
+									acc[key] = {
+										type: allObjects[currentField.class]?.whereInputObject,
+									}
 								}
 
 								break
