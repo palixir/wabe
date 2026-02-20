@@ -131,6 +131,7 @@ describe('SignInWith', () => {
 		expect(res).toEqual({
 			accessToken: null,
 			refreshToken: null,
+			srp: null,
 			challengeToken: expect.any(String),
 			user: {
 				id: 'id',
