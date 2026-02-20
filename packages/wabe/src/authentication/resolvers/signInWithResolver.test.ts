@@ -276,7 +276,7 @@ describe('SignInWith', () => {
 		})
 
 		expect(mockSetCookie).toHaveBeenNthCalledWith(3, 'csrfToken', 'csrfToken', {
-			httpOnly: true,
+			httpOnly: false,
 			path: '/',
 			secure: true,
 			sameSite: 'Strict',

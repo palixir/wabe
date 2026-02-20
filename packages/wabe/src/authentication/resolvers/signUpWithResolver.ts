@@ -56,7 +56,7 @@ export const signUpWithResolver = async (
 		})
 
 		context.response?.setCookie('csrfToken', csrfToken, {
-			httpOnly: true,
+			httpOnly: false,
 			path: '/',
 			sameSite,
 			secure: true,
