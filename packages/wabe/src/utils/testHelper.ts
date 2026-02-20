@@ -21,6 +21,7 @@ export const setupTests = async (
 	options: {
 		isProduction?: boolean
 		disableCSRFProtection?: boolean
+		disableIntrospection?: boolean
 		rootKey?: string
 		rateLimit?: RateLimitOptions
 	} = {},
@@ -39,6 +40,9 @@ export const setupTests = async (
 		security: {
 			// To make test easier keep default value to true
 			disableCSRFProtection: options.disableCSRFProtection ?? true,
+			...(options.disableIntrospection !== undefined && {
+				disableIntrospection: options.disableIntrospection,
+			}),
 			...(options.rateLimit && { rateLimit: options.rateLimit }),
 		},
 		authentication: {

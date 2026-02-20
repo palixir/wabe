@@ -18,7 +18,6 @@ import { FileController } from '../file/FileController'
 import { defaultSessionHandler } from './defaultSessionHandler'
 import type { CronConfig } from '../cron'
 import type { FileConfig } from '../file'
-import { isValidRootKey } from '../utils'
 import { WobeGraphqlYogaPlugin } from 'wobe-graphql-yoga'
 
 type SecurityConfig = {
@@ -26,7 +25,8 @@ type SecurityConfig = {
 	rateLimit?: RateLimitOptions
 	hideSensitiveErrorMessage?: boolean
 	disableCSRFProtection?: boolean
-	allowIntrospectionInProduction?: boolean
+	disableGraphQLDashboard?: boolean
+	disableIntrospection?: boolean
 	maxGraphqlDepth?: number
 }
 
@@ -287,8 +287,9 @@ export class Wabe<T extends WabeTypes> {
 		await this.server.usePlugin(
 			WobeGraphqlYogaPlugin({
 				schema: this.config.graphqlSchema,
+				allowGetRequests: !(this.config.security?.disableGraphQLDashboard ?? false),
 				maskedErrors: this.config.security?.hideSensitiveErrorMessage || this.config.isProduction,
-				allowIntrospection: !!this.config.security?.allowIntrospectionInProduction,
+				allowIntrospection: !(this.config.security?.disableIntrospection ?? false),
 				maxDepth,
 				allowMultipleOperations: true,
 				graphqlEndpoint: '/graphql',
@@ -297,8 +298,7 @@ export class Wabe<T extends WabeTypes> {
 						const introspectionDisabled = new WeakSet<Request>()
 						return {
 							onRequestParse: ({ request }: { request: Request }) => {
-								if (this.config.security?.allowIntrospectionInProduction) return
-								if (isValidRootKey(request.headers, this.config.rootKey)) return
+								if (!(this.config.security?.disableIntrospection ?? false)) return
 								introspectionDisabled.add(request)
 							},
 							onValidate: ({
