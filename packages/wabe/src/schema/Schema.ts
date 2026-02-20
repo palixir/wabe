@@ -375,6 +375,9 @@ export class Schema<T extends WabeTypes> {
 											type: 'Pointer',
 											class: 'User',
 										},
+										challengeToken: {
+											type: 'String',
+										},
 										accessToken: {
 											type: 'String',
 										},
@@ -485,6 +488,9 @@ export class Schema<T extends WabeTypes> {
 								},
 								args: {
 									input: {
+										challengeToken: {
+											type: 'String',
+										},
 										secondFA: secondaryFactorAuthenticationInputObject,
 									},
 								},
@@ -670,6 +676,31 @@ export class Schema<T extends WabeTypes> {
 							required: true,
 						},
 					},
+				},
+			},
+			pendingChallenges: {
+				type: 'Array',
+				typeValue: 'Object',
+				object: {
+					name: 'PendingAuthenticationChallenge',
+					fields: {
+						token: {
+							type: 'String',
+							required: true,
+						},
+						provider: {
+							type: 'String',
+							required: true,
+						},
+						expiresAt: {
+							type: 'Date',
+							required: true,
+						},
+					},
+				},
+				protected: {
+					authorizedRoles: ['rootOnly'],
+					protectedOperations: ['create', 'read', 'update'],
 				},
 			},
 		}

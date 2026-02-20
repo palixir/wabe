@@ -7,6 +7,7 @@ import type {
 import { contextWithRoot } from '../../utils/export'
 import type { DevWabeTypes } from '../../utils/helper'
 import { createSRPServer, type Ephemeral, type Session } from 'js-srp6a'
+import { clearRateLimit, isRateLimited, registerRateLimitFailure } from '../security'
 
 // 🛡 Valeurs factices pour mitigation des timing attacks
 const DUMMY_SALT = 'deadbeefdeadbeefdeadbeefdeadbeef'
@@ -90,6 +91,12 @@ export class EmailPasswordSRP implements ProviderInterface<
 		input,
 		context,
 	}: AuthenticationEventsOptions<DevWabeTypes, EmailPasswordSRPInterface>) {
+		const normalizedEmail = input.email.trim().toLowerCase()
+		const rateLimitKey = `emailPasswordSrp:${normalizedEmail}`
+
+		if (isRateLimited(context, 'signUp', rateLimitKey))
+			throw new Error('Not authorized to create user')
+
 		const users = await context.wabe.controllers.database.count({
 			className: 'User',
 			where: {
@@ -98,7 +105,12 @@ export class EmailPasswordSRP implements ProviderInterface<
 			context: contextWithRoot(context),
 		})
 
-		if (users > 0) throw new Error('Not authorized to create user')
+		if (users > 0) {
+			registerRateLimitFailure(context, 'signUp', rateLimitKey)
+			throw new Error('Not authorized to create user')
+		}
+
+		clearRateLimit(context, 'signUp', rateLimitKey)
 
 		return {
 			authenticationDataToSave: {

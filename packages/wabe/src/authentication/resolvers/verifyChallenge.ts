@@ -1,6 +1,8 @@
 import type { VerifyChallengeInput } from '../../../generated/wabe'
 import type { WabeContext } from '../../server/interface'
 import type { DevWabeTypes } from '../../utils/helper'
+import { getSessionCookieSameSite } from '../cookies'
+import { consumeMfaChallenge, shouldRequireMfaChallenge } from '../security'
 import { Session } from '../Session'
 import type { SecondaryProviderInterface } from '../interface'
 import { getAuthenticationMethod } from '../utils'
@@ -33,6 +35,19 @@ export const verifyChallengeResolver = async (
 
 	if (!result?.userId) throw new Error('Invalid challenge')
 
+	if (shouldRequireMfaChallenge(context)) {
+		const challengeToken = input.challengeToken
+		if (!challengeToken) throw new Error('Invalid challenge')
+
+		const isValidChallenge = await consumeMfaChallenge(context, {
+			challengeToken,
+			userId: result.userId,
+			provider: name,
+		})
+
+		if (!isValidChallenge) throw new Error('Invalid challenge')
+	}
+
 	const session = new Session<DevWabeTypes>()
 
 	const { accessToken, refreshToken } = await session.create(result.userId, context)
@@ -40,11 +55,12 @@ export const verifyChallengeResolver = async (
 	if (context.wabe.config.authentication?.session?.cookieSession) {
 		const accessTokenExpiresAt = session.getAccessTokenExpireAt(context.wabe.config)
 		const refreshTokenExpiresAt = session.getRefreshTokenExpireAt(context.wabe.config)
+		const sameSite = getSessionCookieSameSite(context.wabe.config)
 
 		context.response?.setCookie('refreshToken', refreshToken, {
 			httpOnly: true,
 			path: '/',
-			sameSite: 'None',
+			sameSite,
 			secure: true,
 			expires: refreshTokenExpiresAt,
 		})
@@ -52,7 +68,7 @@ export const verifyChallengeResolver = async (
 		context.response?.setCookie('accessToken', accessToken, {
 			httpOnly: true,
 			path: '/',
-			sameSite: 'None',
+			sameSite,
 			secure: true,
 			expires: accessTokenExpiresAt,
 		})

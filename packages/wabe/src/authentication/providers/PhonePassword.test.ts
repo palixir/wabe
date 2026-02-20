@@ -4,6 +4,7 @@ import * as crypto from '../../utils/crypto'
 import { PhonePassword } from './PhonePassword'
 
 describe('Phone password', () => {
+	const mockGetObject = mock(() => Promise.resolve(null)) as any
 	const mockGetObjects = mock(() => Promise.resolve([]))
 	const mockCount = mock(() => Promise.resolve(0)) as any
 	const mockCreateObject = mock(() => Promise.resolve({ id: 'userId' })) as any
@@ -14,6 +15,7 @@ describe('Phone password', () => {
 	const controllers = {
 		controllers: {
 			database: {
+				getObject: mockGetObject,
 				getObjects: mockGetObjects,
 				createObject: mockCreateObject,
 				count: mockCount,
@@ -22,7 +24,9 @@ describe('Phone password', () => {
 	} as any
 
 	afterEach(() => {
+		mockGetObject.mockClear()
 		mockGetObjects.mockClear()
+		mockCount.mockClear()
 		mockCreateObject.mockClear()
 		spyArgonPasswordVerify.mockClear()
 		spyBunPasswordHash.mockClear()
@@ -136,6 +140,49 @@ describe('Phone password', () => {
 		expect(spyArgonPasswordVerify).toHaveBeenCalledTimes(1)
 	})
 
+	it('should rate limit signUp attempts in production', async () => {
+		mockCount.mockResolvedValue(1)
+
+		const context = {
+			wabe: {
+				...controllers,
+				config: {
+					isProduction: true,
+					authentication: {
+						security: {
+							signUpRateLimit: {
+								enabled: true,
+								maxAttempts: 2,
+								windowMs: 60_000,
+								blockDurationMs: 60_000,
+							},
+						},
+					},
+				},
+			},
+		} as any
+
+		const input = {
+			phone: 'ratelimit-signup-phone-password',
+			password: 'password',
+		}
+
+		await expect(phonePassword.onSignUp({ context, input })).rejects.toThrow(
+			'Not authorized to create user',
+		)
+		await expect(phonePassword.onSignUp({ context, input })).rejects.toThrow(
+			'Not authorized to create user',
+		)
+
+		const callsBeforeBlockedAttempt = mockCount.mock.calls.length
+
+		await expect(phonePassword.onSignUp({ context, input })).rejects.toThrow(
+			'Not authorized to create user',
+		)
+
+		expect(mockCount.mock.calls.length).toBe(callsBeforeBlockedAttempt)
+	})
+
 	it('should not update authentication data if there is no user found', () => {
 		mockGetObjects.mockResolvedValue([])
 
@@ -154,11 +201,9 @@ describe('Phone password', () => {
 	})
 
 	it('should update authentication data if the userId match with an user', async () => {
-		mockGetObjects.mockResolvedValue([
-			{
-				id: 'id',
-			},
-		] as any)
+		mockGetObject.mockResolvedValue({
+			id: 'id',
+		})
 
 		spyBunPasswordHash.mockResolvedValueOnce('$argon2id$hashedPassword')
 

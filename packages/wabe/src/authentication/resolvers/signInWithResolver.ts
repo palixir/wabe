@@ -1,6 +1,8 @@
 import type { SignInWithInput } from '../../../generated/wabe'
 import type { WabeContext } from '../../server/interface'
 import type { DevWabeTypes } from '../../utils/helper'
+import { getSessionCookieSameSite } from '../cookies'
+import { createMfaChallenge } from '../security'
 import { Session } from '../Session'
 import type { ProviderInterface, SecondaryProviderInterface } from '../interface'
 import { getAuthenticationMethod } from '../utils'
@@ -52,7 +54,18 @@ export const signInWithResolver = async (
 			user,
 		})
 
-		return { accessToken: null, refreshToken: null, user }
+		const challengeToken = await createMfaChallenge(context, {
+			userId,
+			provider: secondFAObject.provider,
+		})
+
+		return {
+			accessToken: null,
+			refreshToken: null,
+			user,
+			challengeToken,
+			srp: null,
+		}
 	}
 
 	const session = new Session<DevWabeTypes>()
@@ -62,11 +75,12 @@ export const signInWithResolver = async (
 	if (context.wabe.config.authentication?.session?.cookieSession) {
 		const accessTokenExpiresAt = session.getAccessTokenExpireAt(context.wabe.config)
 		const refreshTokenExpiresAt = session.getRefreshTokenExpireAt(context.wabe.config)
+		const sameSite = getSessionCookieSameSite(context.wabe.config)
 
 		context.response?.setCookie('refreshToken', refreshToken, {
 			httpOnly: true,
 			path: '/',
-			sameSite: 'Strict',
+			sameSite,
 			secure: true,
 			expires: refreshTokenExpiresAt,
 		})
@@ -74,7 +88,7 @@ export const signInWithResolver = async (
 		context.response?.setCookie('accessToken', accessToken, {
 			httpOnly: true,
 			path: '/',
-			sameSite: 'Strict',
+			sameSite,
 			secure: true,
 			expires: accessTokenExpiresAt,
 		})
@@ -82,11 +96,11 @@ export const signInWithResolver = async (
 		context.response?.setCookie('csrfToken', csrfToken, {
 			httpOnly: true,
 			path: '/',
-			sameSite: 'Strict',
+			sameSite,
 			secure: true,
 			expires: accessTokenExpiresAt,
 		})
 	}
 
-	return { accessToken, refreshToken, user, srp }
+	return { accessToken, refreshToken, user, srp, challengeToken: null }
 }

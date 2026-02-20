@@ -5,6 +5,7 @@ import type {
 } from '../interface'
 import { contextWithRoot, verifyArgon2 } from '../../utils/export'
 import type { DevWabeTypes } from '../../utils/helper'
+import { clearRateLimit, isRateLimited, registerRateLimitFailure } from '../security'
 
 const DUMMY_PASSWORD_HASH =
 	'$argon2id$v=19$m=65536,t=2,p=1$wHZB9xRS/Mbo7L3SL9e935Ag5K+T2EuT/XgB8akwZgo$SPf8EZ4T1HYkuIll4v2hSzNCH7woX3VrZJo3yWg5u8U'
@@ -20,12 +21,18 @@ export class PhonePassword implements ProviderInterface<DevWabeTypes, PhonePassw
 		input,
 		context,
 	}: AuthenticationEventsOptions<DevWabeTypes, PhonePasswordInterface>) {
+		const normalizedPhone = input.phone.trim().toLowerCase()
+		const rateLimitKey = `phonePassword:${normalizedPhone}`
+
+		if (isRateLimited(context, 'signIn', rateLimitKey))
+			throw new Error('Invalid authentication credentials')
+
 		const users = await context.wabe.controllers.database.getObjects({
 			className: 'User',
 			where: {
 				authentication: {
 					phonePassword: {
-						phone: { equalTo: input.phone },
+						phone: { equalTo: normalizedPhone },
 					},
 				},
 			},
@@ -51,8 +58,16 @@ export class PhonePassword implements ProviderInterface<DevWabeTypes, PhonePassw
 
 		const isPasswordEquals = await verifyArgon2(input.password, passwordHashToCheck)
 
-		if (!user || !isPasswordEquals || input.phone !== user.authentication?.phonePassword?.phone)
+		if (
+			!user ||
+			!isPasswordEquals ||
+			normalizedPhone !== user.authentication?.phonePassword?.phone
+		) {
+			registerRateLimitFailure(context, 'signIn', rateLimitKey)
 			throw new Error('Invalid authentication credentials')
+		}
+
+		clearRateLimit(context, 'signIn', rateLimitKey)
 
 		return {
 			user,
@@ -63,23 +78,34 @@ export class PhonePassword implements ProviderInterface<DevWabeTypes, PhonePassw
 		input,
 		context,
 	}: AuthenticationEventsOptions<DevWabeTypes, PhonePasswordInterface>) {
+		const normalizedPhone = input.phone.trim().toLowerCase()
+		const rateLimitKey = `phonePassword:${normalizedPhone}`
+
+		if (isRateLimited(context, 'signUp', rateLimitKey))
+			throw new Error('Not authorized to create user')
+
 		const users = await context.wabe.controllers.database.count({
 			className: 'User',
 			where: {
 				authentication: {
 					phonePassword: {
-						phone: { equalTo: input.phone },
+						phone: { equalTo: normalizedPhone },
 					},
 				},
 			},
 			context: contextWithRoot(context),
 		})
 
-		if (users > 0) throw new Error('Not authorized to create user')
+		if (users > 0) {
+			registerRateLimitFailure(context, 'signUp', rateLimitKey)
+			throw new Error('Not authorized to create user')
+		}
+
+		clearRateLimit(context, 'signUp', rateLimitKey)
 
 		return {
 			authenticationDataToSave: {
-				phone: input.phone,
+				phone: normalizedPhone,
 				password: input.password,
 			},
 		}
@@ -90,24 +116,19 @@ export class PhonePassword implements ProviderInterface<DevWabeTypes, PhonePassw
 		input,
 		context,
 	}: AuthenticationEventsOptionsWithUserId<DevWabeTypes, PhonePasswordInterface>) {
-		const users = await context.wabe.controllers.database.getObjects({
+		const normalizedPhone = input.phone.trim().toLowerCase()
+		const user = await context.wabe.controllers.database.getObject({
 			className: 'User',
-			where: {
-				id: {
-					equalTo: userId,
-				},
-			},
-			context,
+			id: userId,
+			context: contextWithRoot(context),
 			select: { authentication: true },
 		})
 
-		if (users.length === 0) throw new Error('User not found')
-
-		const user = users[0]
+		if (!user) throw new Error('User not found')
 
 		return {
 			authenticationDataToSave: {
-				phone: input.phone ?? user?.authentication?.phonePassword?.phone,
+				phone: normalizedPhone ?? user?.authentication?.phonePassword?.phone,
 				password: input.password ? input.password : user?.authentication?.phonePassword?.password,
 			},
 		}

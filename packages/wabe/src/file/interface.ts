@@ -1,5 +1,28 @@
 import type { WabeContext, WabeTypes } from 'src/server'
 
+export type FileUploadSecurityConfig = {
+	/**
+	 * Enable upload validation rules. Enabled by default in production.
+	 */
+	enabled?: boolean
+	/**
+	 * Maximum allowed file size in bytes.
+	 */
+	maxFileSizeBytes?: number
+	/**
+	 * Allowlist of MIME types accepted by uploads.
+	 */
+	allowedMimeTypes?: string[]
+	/**
+	 * Allowlist of file extensions accepted by uploads (without dot).
+	 */
+	allowedExtensions?: string[]
+	/**
+	 * Randomize uploaded file names (enabled by default in production).
+	 */
+	randomizeFileName?: boolean
+}
+
 /**
  * The file config contains the adapter to use to upload file
  * @param adapter: FileAdapter
@@ -11,6 +34,7 @@ export type FileConfig<T extends WabeTypes> = {
 	urlCacheInSeconds?: number
 	devDirectory?: string
 	beforeUpload?: (file: File, context: WabeContext<T>) => Promise<File> | File
+	security?: FileUploadSecurityConfig
 }
 
 export interface ReadFileOptions {

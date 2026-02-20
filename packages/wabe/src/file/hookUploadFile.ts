@@ -1,4 +1,5 @@
 import type { HookObject } from '../hooks/HookObject'
+import { secureUploadedFile } from './security'
 
 const handleFile = async (hookObject: HookObject<any, any>) => {
 	const newData = hookObject.getNewData()
@@ -30,13 +31,14 @@ const handleFile = async (hookObject: HookObject<any, any>) => {
 
 			if (!hookObject.context.wabe.controllers.file) throw new Error('No file adapter found')
 
-			const fileToUpload = (await beforeUpload?.(file, hookObject.context)) || file
+			const fileFromBeforeUpload = (await beforeUpload?.(file, hookObject.context)) || file
+			const fileToUpload = await secureUploadedFile(fileFromBeforeUpload, hookObject.context)
 
 			// We upload the file and set the name of the file in the newData
 			await hookObject.context.wabe.controllers.file?.uploadFile(fileToUpload)
 
 			hookObject.upsertNewData(keyName, {
-				name: file.name,
+				name: fileToUpload.name,
 				isPresignedUrl: true,
 			})
 		}),

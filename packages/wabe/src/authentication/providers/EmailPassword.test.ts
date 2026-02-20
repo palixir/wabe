@@ -23,6 +23,7 @@ describe('Email password', () => {
 
 	afterEach(() => {
 		mockGetObjects.mockClear()
+		mockCount.mockClear()
 		mockCreateObject.mockClear()
 		spyArgonPasswordVerify.mockClear()
 		spyBunPasswordHash.mockClear()
@@ -134,6 +135,92 @@ describe('Email password', () => {
 		).rejects.toThrow('Invalid authentication credentials')
 
 		expect(spyArgonPasswordVerify).toHaveBeenCalledTimes(1)
+	})
+
+	it('should rate limit signIn attempts in production', async () => {
+		mockGetObjects.mockResolvedValue([])
+
+		const context = {
+			wabe: {
+				...controllers,
+				config: {
+					isProduction: true,
+					authentication: {
+						security: {
+							signInRateLimit: {
+								enabled: true,
+								maxAttempts: 2,
+								windowMs: 60_000,
+								blockDurationMs: 60_000,
+							},
+						},
+					},
+				},
+			},
+		} as any
+
+		const input = {
+			email: 'ratelimit-email-password@test.fr',
+			password: 'password',
+		}
+
+		await expect(emailPassword.onSignIn({ context, input })).rejects.toThrow(
+			'Invalid authentication credentials',
+		)
+		await expect(emailPassword.onSignIn({ context, input })).rejects.toThrow(
+			'Invalid authentication credentials',
+		)
+
+		const callsBeforeBlockedAttempt = mockGetObjects.mock.calls.length
+
+		await expect(emailPassword.onSignIn({ context, input })).rejects.toThrow(
+			'Invalid authentication credentials',
+		)
+
+		expect(mockGetObjects.mock.calls.length).toBe(callsBeforeBlockedAttempt)
+	})
+
+	it('should rate limit signUp attempts in production', async () => {
+		mockCount.mockResolvedValue(1)
+
+		const context = {
+			wabe: {
+				...controllers,
+				config: {
+					isProduction: true,
+					authentication: {
+						security: {
+							signUpRateLimit: {
+								enabled: true,
+								maxAttempts: 2,
+								windowMs: 60_000,
+								blockDurationMs: 60_000,
+							},
+						},
+					},
+				},
+			},
+		} as any
+
+		const input = {
+			email: 'ratelimit-signup-email-password@test.fr',
+			password: 'password',
+		}
+
+		await expect(emailPassword.onSignUp({ context, input })).rejects.toThrow(
+			'Not authorized to create user',
+		)
+		await expect(emailPassword.onSignUp({ context, input })).rejects.toThrow(
+			'Not authorized to create user',
+		)
+
+		const callsBeforeBlockedAttempt = mockCount.mock.calls.length
+
+		await expect(emailPassword.onSignUp({ context, input })).rejects.toThrow(
+			'Not authorized to create user',
+		)
+
+		expect(mockCount.mock.calls.length).toBe(callsBeforeBlockedAttempt)
 	})
 
 	it('should not update authentication data if there is no user found', () => {

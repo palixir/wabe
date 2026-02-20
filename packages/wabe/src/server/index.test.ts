@@ -228,6 +228,38 @@ describe('Server', () => {
 		await wabe.close()
 	})
 
+	it('should disable /bucket route in production by default', async () => {
+		const databaseId = uuid()
+		const port = await getPort()
+		const wabe = new Wabe({
+			isProduction: true,
+			rootKey: 'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+			database: {
+				// @ts-expect-error
+				adapter: await getDatabaseAdapter(databaseId),
+			},
+			port,
+			security: {
+				disableCSRFProtection: true,
+			},
+			schema: {
+				classes: [
+					{
+						name: 'Collection1',
+						fields: { name: { type: 'String' } },
+					},
+				],
+			},
+		})
+
+		await wabe.start()
+
+		const res = await fetch(`http://127.0.0.1:${port}/bucket/test.txt`)
+		expect(res.status).toBe(404)
+
+		await wabe.close()
+	})
+
 	it('should setup the root key in context if the root key is correct', async () => {
 		const databaseId = uuid()
 

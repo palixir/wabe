@@ -1,4 +1,5 @@
 import type { Wabe, WobeCustomContext } from '.'
+import { getSessionCookieSameSite } from '../authentication/cookies'
 import { Session } from '../authentication/Session'
 import { getCookieInRequestHeaders, isValidRootKey } from '../utils'
 import type { DevWabeTypes } from '../utils/helper'
@@ -82,11 +83,13 @@ export const defaultSessionHandler =
 			newRefreshToken &&
 			newAccessToken !== accessToken
 		) {
+			const sameSite = getSessionCookieSameSite(wabe.config)
+
 			ctx.res.setCookie('accessToken', newAccessToken, {
 				httpOnly: true,
 				path: '/',
 				expires: session.getAccessTokenExpireAt(wabe.config),
-				sameSite: 'None',
+				sameSite,
 				secure: true,
 			})
 
@@ -94,7 +97,7 @@ export const defaultSessionHandler =
 				httpOnly: true,
 				path: '/',
 				expires: session.getRefreshTokenExpireAt(wabe.config),
-				sameSite: 'None',
+				sameSite,
 				secure: true,
 			})
 		}
