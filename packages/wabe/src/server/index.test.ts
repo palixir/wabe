@@ -87,6 +87,120 @@ describe('Server', () => {
 		expect(wabe.start()).rejects.toThrow('Authentication session requires jwt secret')
 	})
 
+	it('should return GraphiQL for GET /graphql in development', async () => {
+		const databaseId = uuid()
+		const port = await getPort()
+		const wabe = new Wabe({
+			isProduction: false,
+			rootKey: 'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+			database: {
+				// @ts-expect-error
+				adapter: await getDatabaseAdapter(databaseId),
+			},
+			port,
+			security: {
+				disableCSRFProtection: true,
+			},
+			schema: {
+				classes: [
+					{
+						name: 'Collection1',
+						fields: { name: { type: 'String' } },
+					},
+				],
+			},
+		})
+
+		await wabe.start()
+
+		const res = await fetch(`http://127.0.0.1:${port}/graphql`, {
+			method: 'GET',
+			headers: { Accept: 'text/html' },
+		})
+
+		const text = await res.text()
+		expect(res.status).toBe(200)
+		expect(text).toContain('GraphiQL')
+
+		await wabe.close()
+	})
+
+	it('should return GraphiQL in production by default', async () => {
+		const databaseId = uuid()
+		const port = await getPort()
+		const wabe = new Wabe({
+			isProduction: true,
+			rootKey: 'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+			database: {
+				// @ts-expect-error
+				adapter: await getDatabaseAdapter(databaseId),
+			},
+			port,
+			security: {
+				disableCSRFProtection: true,
+			},
+			schema: {
+				classes: [
+					{
+						name: 'Collection1',
+						fields: { name: { type: 'String' } },
+					},
+				],
+			},
+		})
+
+		await wabe.start()
+
+		const res = await fetch(`http://127.0.0.1:${port}/graphql`, {
+			method: 'GET',
+			headers: { Accept: 'text/html' },
+		})
+
+		const text = await res.text()
+		expect(res.status).toBe(200)
+		expect(text).toContain('GraphiQL')
+
+		await wabe.close()
+	})
+
+	it('should not return GraphiQL when disableGraphQLDashboard is true', async () => {
+		const databaseId = uuid()
+		const port = await getPort()
+		const wabe = new Wabe({
+			isProduction: false,
+			rootKey: 'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+			database: {
+				// @ts-expect-error
+				adapter: await getDatabaseAdapter(databaseId),
+			},
+			port,
+			security: {
+				disableCSRFProtection: true,
+				disableGraphQLDashboard: true,
+			},
+			schema: {
+				classes: [
+					{
+						name: 'Collection1',
+						fields: { name: { type: 'String' } },
+					},
+				],
+			},
+		})
+
+		await wabe.start()
+
+		const res = await fetch(`http://127.0.0.1:${port}/graphql`, {
+			method: 'GET',
+			headers: { Accept: 'text/html' },
+		})
+
+		const text = await res.text()
+		expect(text).not.toContain('GraphiQL')
+
+		await wabe.close()
+	})
+
 	it('should pass graphql options to yoga plugin', async () => {
 		const databaseId = uuid()
 
@@ -115,7 +229,6 @@ describe('Server', () => {
 			},
 			security: {
 				disableCSRFProtection: true,
-				allowIntrospectionInProduction: true,
 				maxGraphqlDepth: 60,
 			},
 			schema: {
@@ -519,13 +632,12 @@ describe('Server', () => {
 		await wabe.close()
 	})
 
-	it('should block introspection in production without root key', async () => {
+	it('should allow introspection in development by default', async () => {
 		const databaseId = uuid()
 		const port = await getPort()
-		const rootKey = 'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc'
 		const wabe = new Wabe({
-			isProduction: true,
-			rootKey,
+			isProduction: false,
+			rootKey: 'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
 			database: {
 				// @ts-expect-error
 				adapter: await getDatabaseAdapter(databaseId),
@@ -548,9 +660,49 @@ describe('Server', () => {
 
 		const res = await fetch(`http://127.0.0.1:${port}/graphql`, {
 			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				query: '{ __schema { types { name } } }',
+			}),
+		})
+
+		const json = (await res.json()) as { data?: { __schema?: { types?: { name: string }[] } } }
+		expect(json.data?.__schema?.types).toBeDefined()
+		expect(json.data?.__schema?.types?.length).toBeGreaterThan(0)
+
+		await wabe.close()
+	})
+
+	it('should block introspection when disableIntrospection is true', async () => {
+		const databaseId = uuid()
+		const port = await getPort()
+		const wabe = new Wabe({
+			isProduction: false,
+			rootKey: 'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+			database: {
+				// @ts-expect-error
+				adapter: await getDatabaseAdapter(databaseId),
 			},
+			port,
+			security: {
+				disableCSRFProtection: true,
+				disableIntrospection: true,
+			},
+			schema: {
+				classes: [
+					{
+						name: 'Collection1',
+						fields: { name: { type: 'String' } },
+					},
+				],
+			},
+		})
+
+		await wabe.start()
+
+		const res = await fetch(`http://127.0.0.1:${port}/graphql`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
 				query: '{ __schema { types { name } } }',
 			}),
@@ -563,13 +715,54 @@ describe('Server', () => {
 		await wabe.close()
 	})
 
-	it('should allow introspection in production with valid root key', async () => {
+	it('should block introspection in production when disableIntrospection is true', async () => {
 		const databaseId = uuid()
 		const port = await getPort()
-		const rootKey = 'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc'
 		const wabe = new Wabe({
 			isProduction: true,
-			rootKey,
+			rootKey: 'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+			database: {
+				// @ts-expect-error
+				adapter: await getDatabaseAdapter(databaseId),
+			},
+			port,
+			security: {
+				disableCSRFProtection: true,
+				disableIntrospection: true,
+			},
+			schema: {
+				classes: [
+					{
+						name: 'Collection1',
+						fields: { name: { type: 'String' } },
+					},
+				],
+			},
+		})
+
+		await wabe.start()
+
+		const res = await fetch(`http://127.0.0.1:${port}/graphql`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				query: '{ __schema { types { name } } }',
+			}),
+		})
+
+		const json = (await res.json()) as { errors?: { message: string }[] }
+		expect(json.errors).toBeDefined()
+		expect(json.errors?.[0]?.message).toContain('introspection')
+
+		await wabe.close()
+	})
+
+	it('should allow introspection in production by default', async () => {
+		const databaseId = uuid()
+		const port = await getPort()
+		const wabe = new Wabe({
+			isProduction: true,
+			rootKey: 'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
 			database: {
 				// @ts-expect-error
 				adapter: await getDatabaseAdapter(databaseId),
@@ -592,10 +785,7 @@ describe('Server', () => {
 
 		const res = await fetch(`http://127.0.0.1:${port}/graphql`, {
 			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				'Wabe-Root-Key': rootKey,
-			},
+			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
 				query: '{ __schema { types { name } } }',
 			}),

@@ -497,8 +497,11 @@ describe('Security tests', () => {
 		await closeTests(wabe)
 	})
 
-	it('should block GraphQL introspection queries for anonymous and authenticated users for isProduction server', async () => {
-		const setup = await setupTests([], { isProduction: true })
+	it('should block GraphQL introspection queries for anonymous and authenticated users when disableIntrospection is true', async () => {
+		const setup = await setupTests([], {
+			isProduction: true,
+			disableIntrospection: true,
+		})
 		const wabe = setup.wabe
 		const port = setup.port
 		const client = getAnonymousClient(port)
