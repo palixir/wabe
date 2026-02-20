@@ -4,6 +4,7 @@ import * as crypto from '../../utils/crypto'
 import { PhonePassword } from './PhonePassword'
 
 describe('Phone password', () => {
+	const mockGetObject = mock(() => Promise.resolve(null)) as any
 	const mockGetObjects = mock(() => Promise.resolve([]))
 	const mockCount = mock(() => Promise.resolve(0)) as any
 	const mockCreateObject = mock(() => Promise.resolve({ id: 'userId' })) as any
@@ -14,6 +15,7 @@ describe('Phone password', () => {
 	const controllers = {
 		controllers: {
 			database: {
+				getObject: mockGetObject,
 				getObjects: mockGetObjects,
 				createObject: mockCreateObject,
 				count: mockCount,
@@ -22,6 +24,7 @@ describe('Phone password', () => {
 	} as any
 
 	afterEach(() => {
+		mockGetObject.mockClear()
 		mockGetObjects.mockClear()
 		mockCount.mockClear()
 		mockCreateObject.mockClear()
@@ -198,11 +201,9 @@ describe('Phone password', () => {
 	})
 
 	it('should update authentication data if the userId match with an user', async () => {
-		mockGetObjects.mockResolvedValue([
-			{
-				id: 'id',
-			},
-		] as any)
+		mockGetObject.mockResolvedValue({
+			id: 'id',
+		})
 
 		spyBunPasswordHash.mockResolvedValueOnce('$argon2id$hashedPassword')
 

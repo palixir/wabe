@@ -59,7 +59,13 @@ export const signInWithResolver = async (
 			provider: secondFAObject.provider,
 		})
 
-		return { accessToken: null, refreshToken: null, user, challengeToken }
+		return {
+			accessToken: null,
+			refreshToken: null,
+			user,
+			challengeToken,
+			srp: null,
+		}
 	}
 
 	const session = new Session<DevWabeTypes>()

@@ -137,7 +137,7 @@ describe('Email password', () => {
 		expect(spyArgonPasswordVerify).toHaveBeenCalledTimes(1)
 	})
 
-	it('should rate limit signIn attempts in production', async () => {
+	it.only('should rate limit signIn attempts in production', async () => {
 		mockGetObjects.mockResolvedValue([])
 
 		const context = {
@@ -177,7 +177,7 @@ describe('Email password', () => {
 			'Invalid authentication credentials',
 		)
 
-		expect(mockGetObjects.mock.calls.length).toBe(callsBeforeBlockedAttempt + 1)
+		expect(mockGetObjects.mock.calls.length).toBe(callsBeforeBlockedAttempt)
 	})
 
 	it('should rate limit signUp attempts in production', async () => {

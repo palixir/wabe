@@ -7,7 +7,7 @@ import type {
 	SecondaryProviderInterface,
 } from '../interface'
 import { OTP } from '../OTP'
-import { clearRateLimit, isRateLimited } from '../security'
+import { clearRateLimit, isRateLimited, registerRateLimitFailure } from '../security'
 
 const DUMMY_USER_ID = '00000000-0000-0000-0000-000000000000'
 
@@ -87,6 +87,8 @@ export class EmailOTP implements SecondaryProviderInterface<DevWabeTypes, EmailO
 			clearRateLimit(context, 'verifyChallenge', rateLimitKey)
 			return { userId: realUser.id }
 		}
+
+		registerRateLimitFailure(context, 'verifyChallenge', rateLimitKey)
 
 		return null
 	}

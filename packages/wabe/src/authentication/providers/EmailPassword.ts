@@ -59,6 +59,7 @@ export class EmailPassword implements ProviderInterface<DevWabeTypes, EmailPassw
 		const isPasswordEquals = await verifyArgon2(input.password, passwordHashToCheck)
 
 		if (!user || !isPasswordEquals || input.email !== user.authentication?.emailPassword?.email) {
+			registerRateLimitFailure(context, 'signIn', rateLimitKey)
 			throw new Error('Invalid authentication credentials')
 		}
 

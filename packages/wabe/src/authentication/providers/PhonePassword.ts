@@ -32,7 +32,7 @@ export class PhonePassword implements ProviderInterface<DevWabeTypes, PhonePassw
 			where: {
 				authentication: {
 					phonePassword: {
-						phone: { equalTo: input.phone },
+						phone: { equalTo: normalizedPhone },
 					},
 				},
 			},
@@ -58,7 +58,11 @@ export class PhonePassword implements ProviderInterface<DevWabeTypes, PhonePassw
 
 		const isPasswordEquals = await verifyArgon2(input.password, passwordHashToCheck)
 
-		if (!user || !isPasswordEquals || input.phone !== user.authentication?.phonePassword?.phone) {
+		if (
+			!user ||
+			!isPasswordEquals ||
+			normalizedPhone !== user.authentication?.phonePassword?.phone
+		) {
 			registerRateLimitFailure(context, 'signIn', rateLimitKey)
 			throw new Error('Invalid authentication credentials')
 		}
@@ -85,7 +89,7 @@ export class PhonePassword implements ProviderInterface<DevWabeTypes, PhonePassw
 			where: {
 				authentication: {
 					phonePassword: {
-						phone: { equalTo: input.phone },
+						phone: { equalTo: normalizedPhone },
 					},
 				},
 			},
@@ -101,7 +105,7 @@ export class PhonePassword implements ProviderInterface<DevWabeTypes, PhonePassw
 
 		return {
 			authenticationDataToSave: {
-				phone: input.phone,
+				phone: normalizedPhone,
 				password: input.password,
 			},
 		}
@@ -112,24 +116,19 @@ export class PhonePassword implements ProviderInterface<DevWabeTypes, PhonePassw
 		input,
 		context,
 	}: AuthenticationEventsOptionsWithUserId<DevWabeTypes, PhonePasswordInterface>) {
-		const users = await context.wabe.controllers.database.getObjects({
+		const normalizedPhone = input.phone.trim().toLowerCase()
+		const user = await context.wabe.controllers.database.getObject({
 			className: 'User',
-			where: {
-				id: {
-					equalTo: userId,
-				},
-			},
-			context,
+			id: userId,
+			context: contextWithRoot(context),
 			select: { authentication: true },
 		})
 
-		if (users.length === 0) throw new Error('User not found')
-
-		const user = users[0]
+		if (!user) throw new Error('User not found')
 
 		return {
 			authenticationDataToSave: {
-				phone: input.phone ?? user?.authentication?.phonePassword?.phone,
+				phone: normalizedPhone ?? user?.authentication?.phonePassword?.phone,
 				password: input.password ? input.password : user?.authentication?.phonePassword?.password,
 			},
 		}
