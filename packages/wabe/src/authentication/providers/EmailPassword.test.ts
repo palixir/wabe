@@ -137,7 +137,7 @@ describe('Email password', () => {
 		expect(spyArgonPasswordVerify).toHaveBeenCalledTimes(1)
 	})
 
-	it.only('should rate limit signIn attempts in production', async () => {
+	it('should rate limit signIn attempts in production', async () => {
 		mockGetObjects.mockResolvedValue([])
 
 		const context = {
