@@ -138,12 +138,7 @@ const generateWabeTypes = (classes: ClassInterface<DevWabeTypes>[]) => {
 				{} as Record<string, string>,
 			)
 
-			const objects = objectsToLoad.reduce((acc2, object) => {
-				return {
-					...acc2,
-					...object,
-				}
-			}, {})
+			const objects = mergeNestedStringRecords(objectsToLoad)
 
 			return {
 				...acc,
@@ -187,12 +182,7 @@ const generateWabeWhereTypes = (classes: ClassInterface<DevWabeTypes>[]) => {
 				{} as Record<string, string>,
 			)
 
-			const objects = objectsToLoad.reduce((acc2, object) => {
-				return {
-					...acc2,
-					...object,
-				}
-			}, {})
+			const objects = mergeNestedStringRecords(objectsToLoad)
 
 			return {
 				...acc,
@@ -274,12 +264,7 @@ const generateWabeMutationOrQueryInput = (
 		{} as Record<string, string>,
 	)
 
-	const objects = objectsToLoad.reduce((acc2, object) => {
-		return {
-			...acc2,
-			...object,
-		}
-	}, {})
+	const objects = mergeNestedStringRecords(objectsToLoad)
 
 	return {
 		...(isMutation
@@ -327,9 +312,9 @@ export type CodegenFormatOptions = {
 	semi?: boolean
 	quote?: 'single' | 'double'
 	formatCommand?: string
-	graphqlPrintWidth?: number
-	graphqlFinalNewline?: boolean
-	graphqlSemanticCompare?: boolean
+	printWidth?: number
+	finalNewline?: boolean
+	semanticCompare?: boolean
 }
 
 const normalizeGraphqlSchemaForComparison = (schemaContent: string) => {
@@ -338,6 +323,16 @@ const normalizeGraphqlSchemaForComparison = (schemaContent: string) => {
 	} catch {
 		return schemaContent
 	}
+}
+
+const mergeNestedStringRecords = (records: Array<Record<string, Record<string, string>>>) => {
+	return records.reduce(
+		(acc, currentRecord) => ({
+			...acc,
+			...currentRecord,
+		}),
+		{} as Record<string, Record<string, string>>,
+	)
 }
 
 const wrapLongGraphqlFieldArguments = ({
@@ -380,13 +375,6 @@ const wabeClassRecordToString = (
 ) => {
 	const indent = options?.indent ?? '\t'
 	const endChar = options?.semi ? ';' : options?.comma ? ',' : ''
-	const lastEndChar = options?.semi
-		? ';'
-		: options?.comma === true
-			? ','
-			: options?.comma === false
-				? ''
-				: ''
 
 	return Object.entries(wabeClass).reduce((acc, [className, fields]) => {
 		const fieldsLength = Object.keys(fields).length
@@ -396,7 +384,7 @@ const wabeClassRecordToString = (
 			.map(
 				([fieldName, fieldType]) => `${indent}${fieldName.replace('undefined', '?')}: ${fieldType}`,
 			)
-			.join(`${endChar}\n`)}${fieldsLength > 0 ? lastEndChar : ''}\n}\n\n`
+			.join(`${endChar}\n`)}${endChar}\n}\n\n`
 	}, '')
 }
 
@@ -492,9 +480,9 @@ export const generateCodegen = async ({
 	let graphqlSchemaContent = printSchema(graphqlSchema)
 
 	const indentStr = options?.indent ?? '\t'
-	const graphqlPrintWidth = options?.graphqlPrintWidth ?? 100
-	const shouldEnsureFinalNewline = options?.graphqlFinalNewline ?? true
-	const shouldUseSemanticComparison = options?.graphqlSemanticCompare ?? true
+	const printWidth = options?.printWidth ?? 100
+	const shouldEnsureFinalNewline = options?.finalNewline ?? true
+	const shouldUseSemanticComparison = options?.semanticCompare ?? true
 
 	if (indentStr !== '  ') {
 		graphqlSchemaContent = graphqlSchemaContent.replaceAll('  ', indentStr)
@@ -505,24 +493,24 @@ export const generateCodegen = async ({
 	graphqlSchemaContent = wrapLongGraphqlFieldArguments({
 		content: graphqlSchemaContent,
 		indent: indentStr,
-		printWidth: graphqlPrintWidth,
+		printWidth,
 	})
 
 	if (shouldEnsureFinalNewline && !graphqlSchemaContent.endsWith('\n')) {
 		graphqlSchemaContent += '\n'
 	}
 
-	const wabeClasses = generateWabeTypes(schema.classes || [])
-	const wabeWhereTypes = generateWabeWhereTypes(schema.classes || [])
-	const mutationsAndQueries = generateWabeMutationsAndQueriesTypes(schema.resolvers || {})
+	const classes = schema.classes ?? []
+	const resolvers = schema.resolvers ?? {}
+	const enums = schema.enums ?? []
+	const scalars = schema.scalars ?? []
 
-	const wabeEnumsInString = wabeEnumRecordToString(
-		generateWabeEnumTypes(schema.enums || []),
-		options,
-	)
-	const wabeScalarsInString = wabeScalarRecordToString(
-		generateWabeScalarTypes(schema.scalars || []),
-	)
+	const wabeClasses = generateWabeTypes(classes)
+	const wabeWhereTypes = generateWabeWhereTypes(classes)
+	const mutationsAndQueries = generateWabeMutationsAndQueriesTypes(resolvers)
+
+	const wabeEnumsInString = wabeEnumRecordToString(generateWabeEnumTypes(enums), options)
+	const wabeScalarsInString = wabeScalarRecordToString(generateWabeScalarTypes(scalars))
 	const wabeObjectsInString = wabeClassRecordToString(
 		{
 			...wabeClasses,
@@ -533,9 +521,9 @@ export const generateCodegen = async ({
 	)
 
 	const wabeDevTypes = generateWabeDevTypes({
-		scalars: schema.scalars,
-		enums: schema.enums,
-		classes: schema.classes || [],
+		scalars,
+		enums,
+		classes,
 		options,
 	})
 
@@ -544,14 +532,14 @@ export const generateCodegen = async ({
 	let shouldWriteGraphqlSchema = true
 	try {
 		const contentOfGraphqlSchema = (await readFile(`${path}/schema.graphql`)).toString()
-		const strictComparisonIsEqual = contentOfGraphqlSchema === graphqlSchemaContent
-		const semanticComparisonIsEqual =
-			shouldUseSemanticComparison &&
-			normalizeGraphqlSchemaForComparison(contentOfGraphqlSchema) ===
-				normalizeGraphqlSchemaForComparison(graphqlSchemaContent)
+		const schemasAreEqual =
+			contentOfGraphqlSchema === graphqlSchemaContent ||
+			(shouldUseSemanticComparison &&
+				normalizeGraphqlSchemaForComparison(contentOfGraphqlSchema) ===
+					normalizeGraphqlSchemaForComparison(graphqlSchemaContent))
 
 		// Avoid formatting-only writes and file-watch loops.
-		shouldWriteGraphqlSchema = !(strictComparisonIsEqual || semanticComparisonIsEqual)
+		shouldWriteGraphqlSchema = !schemasAreEqual
 	} catch {}
 
 	await writeFile(`${path}/wabe.ts`, wabeTsContent)
