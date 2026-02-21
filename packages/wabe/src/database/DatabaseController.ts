@@ -604,7 +604,7 @@ export class DatabaseController<T extends WabeTypes> {
 	_getRelationSelectWithoutTotalCount(currentSelect?: Select): Select {
 		const selectWithoutTotalCount = currentSelect
 			? Object.entries(currentSelect).reduce((acc, [key, value]) => {
-					if (key === 'totalCount') return acc
+					if (key === 'totalCount' || key === '_args') return acc
 					return {
 						...acc,
 						[key]: value,
@@ -663,19 +663,58 @@ export class DatabaseController<T extends WabeTypes> {
 		if (!relationIds) return undefined
 
 		const selectWithoutTotalCount = this._getRelationSelectWithoutTotalCount(currentSelect)
+		const args = (currentSelect as any)?._args || {}
+
+		const where: any = args.where
+			? { AND: [{ id: { in: relationIds } }, args.where] }
+			: { id: { in: relationIds } }
+
+		const order: any = args.order?.reduce(
+			(acc: any, currentOrder: any) => {
+				// In some AST parsing, enums may come as strings like "age_DESC"
+				// or as objects depending on how valueFromASTUntyped processed it.
+				if (typeof currentOrder === 'string') {
+					const lastUnderscore = currentOrder.lastIndexOf('_')
+					if (lastUnderscore !== -1) {
+						const field = currentOrder.slice(0, lastUnderscore)
+						const direction = currentOrder.slice(lastUnderscore + 1)
+						return { ...acc, [field]: direction }
+					}
+				} else {
+					const result = Object.entries(currentOrder)[0]
+					if (result && result[0] && result[1]) {
+						return { ...acc, [result[0]]: result[1] }
+					}
+				}
+				return acc
+			},
+			{} as Record<string, 'ASC' | 'DESC'>,
+		)
+
 		const relationObjects = await this.getObjects({
 			className: currentClassName,
 			select: selectWithoutTotalCount as any,
-			// @ts-expect-error
-			where: { id: { in: relationIds } },
+			where,
+			offset: args.offset,
+			first: args.first,
+			order,
 			context,
 			_skipHooks,
 		})
 
 		if (!context.isGraphQLCall) return relationObjects
 
+		const totalCount =
+			args.offset || args.first || args.where
+				? await this.count({
+						className: currentClassName,
+						where,
+						context,
+					})
+				: relationObjects.length
+
 		return {
-			totalCount: relationObjects.length,
+			totalCount,
 			edges: relationObjects.map((object: any) => ({
 				node: object,
 			})),

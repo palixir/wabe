@@ -16,10 +16,13 @@ import {
 	remove,
 } from './pointerAndRelationFunction'
 
+import { valueFromASTUntyped } from 'graphql'
+
 const expandFragmentSpread = (
 	fragmentSpread: FragmentSpreadNode,
 	fragments: Record<string, FragmentDefinitionNode>,
 	className: string,
+	variables?: Record<string, any>,
 ): Record<string, any> => {
 	const fragmentName = fragmentSpread.name.value
 	const fragmentDef = fragments[fragmentName]
@@ -28,14 +31,16 @@ const expandFragmentSpread = (
 		throw new Error(`Fragment "${fragmentName}" not found`)
 	}
 
-	return extractFieldsFromSetNode(fragmentDef.selectionSet, className, fragments)
+	return extractFieldsFromSetNode(fragmentDef.selectionSet, className, fragments, {
+		variables,
+	})
 }
 
 export const extractFieldsFromSetNode = (
 	selectionSet: SelectionSetNode,
 	className: string,
 	fragments?: Record<string, FragmentDefinitionNode>,
-	options?: { ignoreClassField?: boolean },
+	options?: { ignoreClassField?: boolean; variables?: Record<string, any> },
 ): Record<string, any> => {
 	const ignoredFields = ['edges', 'node', 'clientMutationId', 'ok']
 	const shouldIgnoreClassField = options?.ignoreClassField ?? true
@@ -53,6 +58,7 @@ export const extractFieldsFromSetNode = (
 					selection as FragmentSpreadNode,
 					fragments,
 					className,
+					options?.variables,
 				)
 				return { ...acc, ...fragmentFields }
 			}
@@ -60,15 +66,27 @@ export const extractFieldsFromSetNode = (
 			//@ts-expect-error
 			const currentValue = selection.name.value
 
+			const _args =
+				selection.kind === 'Field' && selection.arguments && selection.arguments.length > 0
+					? selection.arguments.reduce(
+							(argAcc, arg) => ({
+								...argAcc,
+								[arg.name.value]: valueFromASTUntyped(arg.value, options?.variables),
+							}),
+							{} as Record<string, any>,
+						)
+					: undefined
+
 			if (selection.selectionSet?.selections && selection.selectionSet?.selections?.length > 0) {
 				const res = extractFieldsFromSetNode(selection.selectionSet, className, fragments, {
 					ignoreClassField: false,
+					variables: options?.variables,
 				})
 
 				if (ignoredFields.indexOf(currentValue) === -1)
 					return {
 						...acc,
-						[currentValue]: res,
+						[currentValue]: _args ? { ...res, _args } : res,
 					}
 
 				return {
@@ -77,7 +95,9 @@ export const extractFieldsFromSetNode = (
 				}
 			}
 
-			if (ignoredFields.indexOf(currentValue) === -1) acc[currentValue] = true
+			if (ignoredFields.indexOf(currentValue) === -1) {
+				acc[currentValue] = _args ? { _args } : true
+			}
 
 			return acc
 		},
@@ -90,7 +110,9 @@ const getFieldsFromInfo = (info: GraphQLResolveInfo, className: string) => {
 
 	if (!selectionSet) throw new Error('No output fields provided')
 
-	const fields = extractFieldsFromSetNode(selectionSet, className, info.fragments)
+	const fields = extractFieldsFromSetNode(selectionSet, className, info.fragments, {
+		variables: info.variableValues,
+	})
 
 	if (!fields) throw new Error('No fields provided')
 

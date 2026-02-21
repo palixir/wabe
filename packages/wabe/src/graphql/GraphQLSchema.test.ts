@@ -822,6 +822,240 @@ describe('GraphqlSchema', () => {
 		await wabe.close()
 	})
 
+	it('should respect connection arguments on relation object query', async () => {
+		const { wabe } = await createWabe({
+			classes: [
+				{
+					name: 'TestClass1',
+					fields: {
+						field1: {
+							type: 'Relation',
+							// @ts-expect-error
+							class: 'TestClass2',
+						},
+					},
+				},
+				{
+					name: 'TestClass2',
+					fields: {
+						field2: {
+							type: 'String',
+						},
+						age: {
+							type: 'Int',
+						},
+					},
+				},
+			],
+		})
+
+		const rootClient = getGraphqlClient(wabe.config.port)
+
+		const result1 = await rootClient.request<any>(gql`
+			mutation createTestClass1 {
+				createTestClass1(
+					input: {
+						fields: {
+							field1: {
+								createAndAdd: [
+									{ field2: "field2a", age: 10 }
+									{ field2: "field2b", age: 20 }
+									{ field2: "field2c", age: 30 }
+								]
+							}
+						}
+					}
+				) {
+					testClass1 {
+						id
+					}
+				}
+			}
+		`)
+
+		// limit with first
+		const resultFirst = await rootClient.request<any>(gql`
+      query testClass1 {
+          testClass1(id: "${result1.createTestClass1.testClass1.id}") {
+            field1(first: 2) {
+              totalCount
+              edges {
+                node {
+                  field2
+                }
+              }
+            }
+          }
+      }
+    `)
+
+		expect(resultFirst.testClass1.field1.edges).toHaveLength(2)
+		expect(resultFirst.testClass1.field1.totalCount).toEqual(3) // 3 in DB
+
+		// skip with offset
+		const resultOffset = await rootClient.request<any>(gql`
+      query testClass1 {
+          testClass1(id: "${result1.createTestClass1.testClass1.id}") {
+            field1(offset: 2) {
+              edges {
+                node {
+                  field2
+                }
+              }
+            }
+          }
+      }
+    `)
+
+		expect(resultOffset.testClass1.field1.edges).toHaveLength(1)
+
+		// order
+		const resultOrder = await rootClient.request<any>(gql`
+      query testClass1 {
+          testClass1(id: "${result1.createTestClass1.testClass1.id}") {
+            field1(order: [age_DESC]) {
+              edges {
+                node {
+                  age
+                }
+              }
+            }
+          }
+      }
+    `)
+
+		expect(resultOrder.testClass1.field1.edges[0].node.age).toEqual(30)
+		expect(resultOrder.testClass1.field1.edges[1].node.age).toEqual(20)
+		expect(resultOrder.testClass1.field1.edges[2].node.age).toEqual(10)
+
+		// filter with where
+		const resultWhere = await rootClient.request<any>(gql`
+      query testClass1 {
+          testClass1(id: "${result1.createTestClass1.testClass1.id}") {
+            field1(where: { age: { greaterThan: 15 } }) {
+              totalCount
+              edges {
+                node {
+                  age
+                }
+              }
+            }
+          }
+      }
+    `)
+
+		expect(resultWhere.testClass1.field1.edges).toHaveLength(2)
+		expect(resultWhere.testClass1.field1.totalCount).toEqual(2)
+
+		await wabe.close()
+	})
+
+	it('should respect connection arguments on relation object query (multiple objects)', async () => {
+		const { wabe } = await createWabe({
+			classes: [
+				{
+					name: 'TestClass1',
+					fields: {
+						name: {
+							type: 'String',
+						},
+						field1: {
+							type: 'Relation',
+							// @ts-expect-error
+							class: 'TestClass2',
+						},
+					},
+				},
+				{
+					name: 'TestClass2',
+					fields: {
+						field2: {
+							type: 'String',
+						},
+						age: {
+							type: 'Int',
+						},
+					},
+				},
+			],
+		})
+
+		const rootClient = getGraphqlClient(wabe.config.port)
+
+		await rootClient.request<any>(gql`
+			mutation createTestClass1 {
+				createTestClass1(
+					input: {
+						fields: {
+							name: "Object1"
+							field1: {
+								createAndAdd: [
+									{ field2: "field2a", age: 10 }
+									{ field2: "field2b", age: 20 }
+									{ field2: "field2c", age: 30 }
+								]
+							}
+						}
+					}
+				) {
+					testClass1 {
+						id
+					}
+				}
+			}
+		`)
+
+		await rootClient.request<any>(gql`
+			mutation createTestClass1 {
+				createTestClass1(
+					input: {
+						fields: {
+							name: "Object2"
+							field1: { createAndAdd: [{ field2: "field2x", age: 40 }, { field2: "field2y", age: 50 }] }
+						}
+					}
+				) {
+					testClass1 {
+						id
+					}
+				}
+			}
+		`)
+
+		// limit with first, offset, where, and order nested in multiple Query
+		const resultMultipleFirst = await rootClient.request<any>(gql`
+			query testClasses1 {
+				testClass1s(order: [name_ASC]) {
+					edges {
+						node {
+							name
+							field1(first: 2, offset: 1, order: [age_ASC], where: { age: { greaterThan: 15 } }) {
+								totalCount
+								edges {
+									node {
+										age
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		`)
+
+		expect(resultMultipleFirst.testClass1s.edges[0].node.name).toBe('Object1')
+		expect(resultMultipleFirst.testClass1s.edges[0].node.field1.totalCount).toEqual(2) // Total matching over 15: 20 and 30
+		expect(resultMultipleFirst.testClass1s.edges[0].node.field1.edges).toHaveLength(1) // Due to first: 2 and offset: 1 we get 1 element (the age 30)
+		expect(resultMultipleFirst.testClass1s.edges[0].node.field1.edges[0].node.age).toEqual(30) // Resulting set after offset is age 30
+
+		expect(resultMultipleFirst.testClass1s.edges[1].node.name).toBe('Object2')
+		expect(resultMultipleFirst.testClass1s.edges[1].node.field1.totalCount).toEqual(2) // Total matching over 15: 40 and 50
+		expect(resultMultipleFirst.testClass1s.edges[1].node.field1.edges).toHaveLength(1) // Due to first: 2 and offset: 1 we get 1 element (age 50)
+		expect(resultMultipleFirst.testClass1s.edges[1].node.field1.edges[0].node.age).toEqual(50) // Resulting set after offset is age 50
+
+		await wabe.close()
+	})
+
 	it('should request relation object on single object query', async () => {
 		const { wabe } = await createWabe({
 			classes: [

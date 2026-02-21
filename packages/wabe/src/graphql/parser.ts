@@ -486,6 +486,16 @@ export const GraphqlParser: GraphqlParserConstructor =
 							case 'Object': {
 								acc[key] = {
 									type: isRelation ? graphqlObject?.connectionObject : graphqlObject?.object,
+									args: isRelation
+										? {
+												where: { type: graphqlObject?.whereInputObject },
+												offset: { type: GraphQLInt },
+												first: { type: GraphQLInt },
+												order: {
+													type: new GraphQLList(new GraphQLNonNull(graphqlObject?.orderEnumType)),
+												},
+											}
+										: undefined,
 								}
 
 								break
