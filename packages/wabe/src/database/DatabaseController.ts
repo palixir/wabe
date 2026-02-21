@@ -704,14 +704,16 @@ export class DatabaseController<T extends WabeTypes> {
 
 		if (!context.isGraphQLCall) return relationObjects
 
-		const totalCount =
-			args.offset || args.first || args.where
-				? await this.count({
-						className: currentClassName,
-						where,
-						context,
-					})
-				: relationObjects.length
+		const shouldCount =
+			args.offset !== undefined || args.first !== undefined || args.where !== undefined
+
+		const totalCount = shouldCount
+			? await this.count({
+					className: currentClassName,
+					where,
+					context,
+				})
+			: relationObjects.length
 
 		return {
 			totalCount,
