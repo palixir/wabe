@@ -1,4 +1,4 @@
-import { type GraphQLSchema, printSchema } from 'graphql'
+import { type GraphQLSchema, parse, print, printSchema } from 'graphql'
 import { writeFile, readFile } from 'node:fs/promises'
 import type {
 	ClassInterface,
@@ -327,6 +327,51 @@ export type CodegenFormatOptions = {
 	semi?: boolean
 	quote?: 'single' | 'double'
 	formatCommand?: string
+	graphqlPrintWidth?: number
+	graphqlFinalNewline?: boolean
+	graphqlSemanticCompare?: boolean
+}
+
+const normalizeGraphqlSchemaForComparison = (schemaContent: string) => {
+	try {
+		return print(parse(schemaContent))
+	} catch {
+		return schemaContent
+	}
+}
+
+const wrapLongGraphqlFieldArguments = ({
+	content,
+	indent,
+	printWidth,
+}: {
+	content: string
+	indent: string
+	printWidth: number
+}) => {
+	return content
+		.split('\n')
+		.map((line) => {
+			if (line.length <= printWidth) return line
+
+			const fieldWithArgsMatch = line.match(/^(\s*)([_A-Za-z][_0-9A-Za-z]*)\((.+)\):\s*(.+)$/)
+			if (!fieldWithArgsMatch) return line
+
+			const [, fieldIndent = '', fieldName = '', argsString = '', returnType = ''] =
+				fieldWithArgsMatch
+			if (!fieldName || !argsString || !returnType) return line
+			const args = argsString
+				.split(',')
+				.map((arg) => arg.trim())
+				.filter((arg) => arg.length > 0)
+
+			if (args.length <= 1) return line
+
+			return `${fieldIndent}${fieldName}(\n${args
+				.map((arg) => `${fieldIndent}${indent}${arg}`)
+				.join('\n')}\n${fieldIndent}): ${returnType}`
+		})
+		.join('\n')
 }
 
 const wabeClassRecordToString = (
@@ -447,11 +492,25 @@ export const generateCodegen = async ({
 	let graphqlSchemaContent = printSchema(graphqlSchema)
 
 	const indentStr = options?.indent ?? '\t'
+	const graphqlPrintWidth = options?.graphqlPrintWidth ?? 100
+	const shouldEnsureFinalNewline = options?.graphqlFinalNewline ?? true
+	const shouldUseSemanticComparison = options?.graphqlSemanticCompare ?? true
+
 	if (indentStr !== '  ') {
 		graphqlSchemaContent = graphqlSchemaContent.replaceAll('  ', indentStr)
 	}
 
 	graphqlSchemaContent = graphqlSchemaContent.replace(/"""([^\n"]+)"""/g, '"""\n$1\n"""')
+
+	graphqlSchemaContent = wrapLongGraphqlFieldArguments({
+		content: graphqlSchemaContent,
+		indent: indentStr,
+		printWidth: graphqlPrintWidth,
+	})
+
+	if (shouldEnsureFinalNewline && !graphqlSchemaContent.endsWith('\n')) {
+		graphqlSchemaContent += '\n'
+	}
 
 	const wabeClasses = generateWabeTypes(schema.classes || [])
 	const wabeWhereTypes = generateWabeWhereTypes(schema.classes || [])
@@ -482,16 +541,23 @@ export const generateCodegen = async ({
 
 	const wabeTsContent = `${wabeEnumsInString}${wabeScalarsInString}${wabeObjectsInString}${wabeDevTypes}\n`
 
+	let shouldWriteGraphqlSchema = true
 	try {
 		const contentOfGraphqlSchema = (await readFile(`${path}/schema.graphql`)).toString()
+		const strictComparisonIsEqual = contentOfGraphqlSchema === graphqlSchemaContent
+		const semanticComparisonIsEqual =
+			shouldUseSemanticComparison &&
+			normalizeGraphqlSchemaForComparison(contentOfGraphqlSchema) ===
+				normalizeGraphqlSchemaForComparison(graphqlSchemaContent)
 
-		// We will need to find a better way to avoid infinite loop of loading
-		// Better solution will be that bun implements watch ignores)
-		if (!process.env.CODEGEN && contentOfGraphqlSchema === graphqlSchemaContent.toString()) return
+		// Avoid formatting-only writes and file-watch loops.
+		shouldWriteGraphqlSchema = !(strictComparisonIsEqual || semanticComparisonIsEqual)
 	} catch {}
 
 	await writeFile(`${path}/wabe.ts`, wabeTsContent)
-	await writeFile(`${path}/schema.graphql`, graphqlSchemaContent)
+	if (shouldWriteGraphqlSchema) {
+		await writeFile(`${path}/schema.graphql`, graphqlSchemaContent)
+	}
 
 	if (options?.formatCommand) {
 		const { exec } = await import('node:child_process')
