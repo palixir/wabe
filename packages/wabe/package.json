@@ -1,6 +1,6 @@
 {
 	"name": "wabe",
-	"version": "0.6.12",
+	"version": "0.6.13",
 	"description": "Your backend without vendor lock-in in Typescript",
 	"keywords": [
 		"baas",
@@ -18,7 +18,9 @@
 		"type": "git",
 		"url": "git+https://github.com/palixir/wabe.git"
 	},
-	"files": ["dist"],
+	"files": [
+		"dist"
+	],
 	"main": "dist/index.js",
 	"scripts": {
 		"build": "bun --filter wabe-build build:package $(pwd)",
