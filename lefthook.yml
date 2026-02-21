@@ -3,4 +3,4 @@ pre-commit:
     commands:
         check:
             glob: '*.{js,ts,jsx,tsx,graphql}'
-            run: bun oxlint {staged_files} && bun format && git add {staged_files}
+            run: bun oxlint {staged_files} && bun oxfmt --write {staged_files} && git add {staged_files}
