@@ -3,6 +3,7 @@
 	"version": "0.5.2",
 	"description": "Package to launch the mongodb for test",
 	"license": "Apache-2.0",
+	"files": ["dist"],
 	"main": "dist/index.js",
 	"scripts": {
 		"ci": "bun lint",
