@@ -321,19 +321,53 @@ const generateWabeMutationsAndQueriesTypes = (resolver: TypeResolver<any>) => {
 	}
 }
 
-const wabeClassRecordToString = (wabeClass: Record<string, Record<string, string>>) => {
+export type CodegenFormatOptions = {
+	indent?: string
+	comma?: boolean
+	semi?: boolean
+	quote?: 'single' | 'double'
+	formatCommand?: string
+}
+
+const wabeClassRecordToString = (
+	wabeClass: Record<string, Record<string, string>>,
+	options?: CodegenFormatOptions,
+) => {
+	const indent = options?.indent ?? '\t'
+	const endChar = options?.semi ? ';' : options?.comma ? ',' : ''
+	const lastEndChar = options?.semi
+		? ';'
+		: options?.comma === true
+			? ','
+			: options?.comma === false
+				? ''
+				: ''
+
 	return Object.entries(wabeClass).reduce((acc, [className, fields]) => {
+		const fieldsLength = Object.keys(fields).length
+		if (fieldsLength === 0) return `${acc}export type ${className} = {}\n\n`
+
 		return `${acc}export type ${className} = {\n${Object.entries(fields)
-			.map(([fieldName, fieldType]) => `\t${fieldName.replace('undefined', '?')}: ${fieldType}`)
-			.join(',\n')}\n}\n\n`
+			.map(
+				([fieldName, fieldType]) => `${indent}${fieldName.replace('undefined', '?')}: ${fieldType}`,
+			)
+			.join(`${endChar}\n`)}${fieldsLength > 0 ? lastEndChar : ''}\n}\n\n`
 	}, '')
 }
 
-const wabeEnumRecordToString = (wabeEnum: Record<string, Record<string, string>>) => {
+const wabeEnumRecordToString = (
+	wabeEnum: Record<string, Record<string, string>>,
+	options?: CodegenFormatOptions,
+) => {
+	const indent = options?.indent ?? '\t'
+	const endChar = options?.semi ? ';' : (options?.comma ?? true) ? ',' : ''
+	const quoteString = options?.quote === 'double' ? '"' : "'"
+
 	return Object.entries(wabeEnum).reduce((acc, [enumName, values]) => {
+		const valuesLength = Object.keys(values).length
 		return `${acc}export enum ${enumName} {\n${Object.entries(values)
-			.map(([valueName, value]) => `\t${valueName} = "${value}"`)
-			.join(',\n')}\n}\n\n`
+			.map(([valueName, value]) => `${indent}${valueName} = ${quoteString}${value}${quoteString}`)
+			.join(`${endChar}\n`)}${valuesLength > 0 ? endChar : ''}\n}\n\n`
 	}, '')
 }
 
@@ -347,25 +381,31 @@ const generateWabeDevTypes = ({
 	scalars,
 	enums,
 	classes,
+	options,
 }: {
 	enums?: EnumInterface[]
 	scalars?: ScalarInterface[]
 	classes: ClassInterface<DevWabeTypes>[]
+	options?: CodegenFormatOptions
 }) => {
+	const indent = options?.indent ?? '\t'
+	const endChar = options?.semi ? ';' : options?.comma ? ',' : ''
+	const quoteString = options?.quote === 'double' ? '"' : "'"
+
 	// Scalars
-	const listOfScalars = scalars?.map((scalar) => `"${scalar.name}"`) || []
+	const listOfScalars = scalars?.map((scalar) => `${quoteString}${scalar.name}${quoteString}`) || []
 
 	const wabeScalarType =
 		listOfScalars.length > 0
 			? `export type WabeSchemaScalars = ${listOfScalars.join(' | ')}`
-			: 'export type WabeSchemaScalars = ""'
+			: `export type WabeSchemaScalars = ${quoteString}${quoteString}`
 
 	// Enums
 	const wabeEnumsGlobalTypes = enums?.map((wabeEnum) => `${wabeEnum.name}: ${wabeEnum.name}`) || []
 
 	const wabeEnumsGlobalTypesString =
 		wabeEnumsGlobalTypes.length > 0
-			? `export type WabeSchemaEnums = {\n\t${wabeEnumsGlobalTypes.join(',\n\t')}\n}`
+			? `export type WabeSchemaEnums = {\n${indent}${wabeEnumsGlobalTypes.join(`${endChar}\n${indent}`)}${endChar}\n}`
 			: ''
 
 	// Classes
@@ -373,16 +413,22 @@ const generateWabeDevTypes = ({
 		.map((schema) => `${schema.name}: ${schema.name}`)
 		.filter((schema) => schema)
 
-	const globalWabeTypeString = `export type WabeSchemaTypes = {\n\t${allNames.join(',\n\t')}\n}`
+	const globalWabeTypeString =
+		allNames.length > 0
+			? `export type WabeSchemaTypes = {\n${indent}${allNames.join(`${endChar}\n${indent}`)}${endChar}\n}`
+			: ''
 
 	// Where
 	const allWhereNames = classes
 		.map((schema) => `${schema.name}: Where${firstLetterUpperCase(schema.name)}`)
 		.filter((schema) => schema)
 
-	const globalWabeWhereTypeString = `export type WabeSchemaWhereTypes = {\n\t${allWhereNames.join(
-		',\n\t',
-	)}\n}`
+	const globalWabeWhereTypeString =
+		allWhereNames.length > 0
+			? `export type WabeSchemaWhereTypes = {\n${indent}${allWhereNames.join(
+					`${endChar}\n${indent}`,
+				)}${endChar}\n}`
+			: ''
 
 	return `${wabeScalarType}\n\n${wabeEnumsGlobalTypesString}\n\n${globalWabeTypeString}\n\n${globalWabeWhereTypeString}`
 }
@@ -391,34 +437,50 @@ export const generateCodegen = async ({
 	schema,
 	path,
 	graphqlSchema,
+	options,
 }: {
 	schema: SchemaInterface<any>
 	path: string
 	graphqlSchema: GraphQLSchema
+	options?: CodegenFormatOptions
 }) => {
-	const graphqlSchemaContent = printSchema(graphqlSchema)
+	let graphqlSchemaContent = printSchema(graphqlSchema)
+
+	const indentStr = options?.indent ?? '\t'
+	if (indentStr !== '  ') {
+		graphqlSchemaContent = graphqlSchemaContent.replaceAll('  ', indentStr)
+	}
+
+	graphqlSchemaContent = graphqlSchemaContent.replace(/"""([^\n"]+)"""/g, '"""\n$1\n"""')
 
 	const wabeClasses = generateWabeTypes(schema.classes || [])
 	const wabeWhereTypes = generateWabeWhereTypes(schema.classes || [])
 	const mutationsAndQueries = generateWabeMutationsAndQueriesTypes(schema.resolvers || {})
 
-	const wabeEnumsInString = wabeEnumRecordToString(generateWabeEnumTypes(schema.enums || []))
+	const wabeEnumsInString = wabeEnumRecordToString(
+		generateWabeEnumTypes(schema.enums || []),
+		options,
+	)
 	const wabeScalarsInString = wabeScalarRecordToString(
 		generateWabeScalarTypes(schema.scalars || []),
 	)
-	const wabeObjectsInString = wabeClassRecordToString({
-		...wabeClasses,
-		...wabeWhereTypes,
-		...mutationsAndQueries,
-	})
+	const wabeObjectsInString = wabeClassRecordToString(
+		{
+			...wabeClasses,
+			...wabeWhereTypes,
+			...mutationsAndQueries,
+		},
+		options,
+	)
 
 	const wabeDevTypes = generateWabeDevTypes({
 		scalars: schema.scalars,
 		enums: schema.enums,
 		classes: schema.classes || [],
+		options,
 	})
 
-	const wabeTsContent = `${wabeEnumsInString}${wabeScalarsInString}${wabeObjectsInString}${wabeDevTypes}`
+	const wabeTsContent = `${wabeEnumsInString}${wabeScalarsInString}${wabeObjectsInString}${wabeDevTypes}\n`
 
 	try {
 		const contentOfGraphqlSchema = (await readFile(`${path}/schema.graphql`)).toString()
@@ -430,4 +492,14 @@ export const generateCodegen = async ({
 
 	await writeFile(`${path}/wabe.ts`, wabeTsContent)
 	await writeFile(`${path}/schema.graphql`, graphqlSchemaContent)
+
+	if (options?.formatCommand) {
+		const { exec } = await import('node:child_process')
+		const { promisify } = await import('node:util')
+		try {
+			await promisify(exec)(options.formatCommand)
+		} catch (e) {
+			console.error('Error running formatCommand on codegen files:', e)
+		}
+	}
 }

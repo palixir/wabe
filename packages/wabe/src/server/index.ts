@@ -6,7 +6,7 @@ import { GraphQLSchema as WabeGraphQLSchema } from '../graphql'
 import type { AuthenticationConfig } from '../authentication/interface'
 import { type WabeRoute, defaultRoutes } from './routes'
 import { type Hook, getDefaultHooks } from '../hooks'
-import { generateCodegen } from './generateCodegen'
+import { CodegenFormatOptions, generateCodegen } from './generateCodegen'
 import { defaultAuthenticationMethods } from '../authentication/defaultAuthentication'
 import { Wobe, cors, rateLimit } from 'wobe'
 import type { Context, CorsOptions, RateLimitOptions } from 'wobe'
@@ -47,6 +47,7 @@ export interface WabeConfig<T extends WabeTypes> {
 		| {
 				enabled: true
 				path: string
+				formatOptions?: CodegenFormatOptions
 		  }
 		| { enabled?: false }
 	authentication?: AuthenticationConfig<T>
@@ -253,6 +254,7 @@ export class Wabe<T extends WabeTypes> {
 				path: this.config.codegen.path,
 				schema: wabeSchema.schema,
 				graphqlSchema: this.config.graphqlSchema,
+				options: this.config.codegen.formatOptions,
 			})
 
 			// If we just want codegen we exit before server created.
