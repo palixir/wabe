@@ -18,7 +18,9 @@
 		"type": "git",
 		"url": "git+https://github.com/palixir/wabe.git"
 	},
-	"files": ["dist"],
+	"files": [
+		"dist"
+	],
 	"main": "dist/index.js",
 	"scripts": {
 		"build": "bun --filter wabe-build build:package $(pwd) bun",
