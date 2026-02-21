@@ -3,6 +3,7 @@ dist
 /.next/
 /out/
 /build
+doc_build/
 .DS_Store
 *.pem
 npm-debug.log*
@@ -22,6 +23,24 @@ package-lock.json
 **/*.bun
 .zed
 
+# Caches & build artifacts
+.cache
+.parcel-cache
+*.tsbuildinfo
+.eslintcache
+
+# Coverage
+coverage
+*.lcov
+.nyc_output
+
+# IDE
+.idea
+.vscode-test
+
+# Docusaurus / docs
+.temp
+.docusaurus
 
 cache
 bucket

@@ -1,6 +1,6 @@
 {
 	"name": "wabe-mongodb",
-	"version": "0.5.4",
+	"version": "0.5.5",
 	"description": "MongoDB adapter for Wabe (official)",
 	"keywords": [
 		"baas",
@@ -19,6 +19,9 @@
 		"type": "git",
 		"url": "git+https://github.com/palixir/wabe.git"
 	},
+	"files": [
+		"dist"
+	],
 	"main": "dist/index.js",
 	"scripts": {
 		"build": "bun --filter wabe-build build:package $(pwd)",
