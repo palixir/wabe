@@ -56,7 +56,7 @@ export const signUpWithResolver = async (
 		})
 
 		context.response?.setCookie('csrfToken', csrfToken, {
-			httpOnly: false,
+			httpOnly: false, // OWASP specification specify that the csrfToken should not be httpOnly
 			path: '/',
 			sameSite,
 			secure: true,
