@@ -1,6 +1,6 @@
 {
 	"name": "wabe-mongodb-launcher",
-	"version": "0.5.2",
+	"version": "0.5.3",
 	"description": "Package to launch the mongodb for test",
 	"license": "Apache-2.0",
 	"files": [
@@ -14,8 +14,7 @@
 		"format": "oxfmt --write ."
 	},
 	"dependencies": {
-		"mongodb-memory-server": "10.1.4",
-		"p-queue": "8.1.0",
+		"mongodb-memory-server": "11.0.1",
 		"tcp-port-used": "1.0.2"
 	},
 	"devDependencies": {
