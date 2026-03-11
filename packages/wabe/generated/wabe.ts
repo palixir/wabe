@@ -269,18 +269,6 @@ export type MutationSendOtpCodeArgs = {
 	input: SendOtpCodeInput
 }
 
-export type SendEmailInput = {
-	from: string
-	to: Array<string>
-	subject: string
-	text?: string
-	html?: string
-}
-
-export type MutationSendEmailArgs = {
-	input: SendEmailInput
-}
-
 export type SignInWithInput = {
 	authentication: SignInWithAuthentication
 }

@@ -488,7 +488,11 @@ export const generateCodegen = async ({
 		graphqlSchemaContent = graphqlSchemaContent.replaceAll('  ', indentStr)
 	}
 
-	graphqlSchemaContent = graphqlSchemaContent.replace(/"""([^\n"]+)"""/g, '"""\n$1\n"""')
+	graphqlSchemaContent = graphqlSchemaContent.replace(
+		/(^[ \t]*)"""([^\n"]+)"""(?=\n)/gm,
+		(_, indentation: string, description: string) =>
+			`${indentation}"""\n${indentation}${description}\n${indentation}"""`,
+	)
 
 	graphqlSchemaContent = wrapLongGraphqlFieldArguments({
 		content: graphqlSchemaContent,
