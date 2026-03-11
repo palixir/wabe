@@ -7,6 +7,7 @@ import type {
 import type { WabeTypes } from '..'
 import type { WabeContext } from '../server/interface'
 import { contextWithoutGraphQLCall, firstLetterInLowerCase } from '../utils'
+import { isUnsafeObjectKey } from '../utils/objectKeys'
 import {
 	type InputFields,
 	type TypeOfExecution,
@@ -188,6 +189,8 @@ export const executeRelationOnFields = ({
 	return entries.reduce(
 		async (acc, [fieldName, value]) => {
 			const newAcc = await acc
+
+			if (isUnsafeObjectKey(fieldName)) return newAcc
 
 			if (value instanceof File) {
 				newAcc[fieldName] = value

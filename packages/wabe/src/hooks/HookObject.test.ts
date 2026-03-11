@@ -119,4 +119,23 @@ describe('HookObject', () => {
 			age: 30,
 		})
 	})
+
+	it('should reject unsafe field keys when upserting data', () => {
+		const userData = { name: 'John Doe', age: 30 }
+
+		const hookObject = new HookObject({
+			className: 'User',
+			newData: userData as any,
+			operationType: OperationType.BeforeCreate,
+			context: {} as any,
+			object: {
+				id: '1',
+			},
+			select: {},
+		})
+
+		expect(() => hookObject.upsertNewData('__proto__' as any, 'tata')).toThrow(
+			'Cannot set unsafe field key "__proto__"',
+		)
+	})
 })

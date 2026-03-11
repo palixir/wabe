@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'bun:test'
-import { firstLetterInLowerCase, getCookieInRequestHeaders } from '.'
+import {
+	firstLetterInLowerCase,
+	getCookieInRequestHeaders,
+	getNewObjectAfterUpdateNestedProperty,
+} from '.'
+import { isUnsafeObjectKey } from './objectKeys'
 
 describe('utils', () => {
 	it('should put the first letter in lowercase', () => {
@@ -23,5 +28,22 @@ describe('utils', () => {
 		})
 
 		expect(getCookieInRequestHeaders('accessToken', headers)).toBeUndefined()
+	})
+
+	it('should identify unsafe object keys', () => {
+		expect(isUnsafeObjectKey('__proto__')).toBeTrue()
+		expect(isUnsafeObjectKey('prototype')).toBeTrue()
+		expect(isUnsafeObjectKey('constructor')).toBeTrue()
+		expect(isUnsafeObjectKey('safeField')).toBeFalse()
+	})
+
+	it('should prevent prototype pollution via path-based updates', () => {
+		const object = {}
+
+		getNewObjectAfterUpdateNestedProperty(object, '__proto__.polluted', 'yes')
+		getNewObjectAfterUpdateNestedProperty(object, 'constructor.prototype.polluted', 'yes')
+
+		expect(({} as any).polluted).toBeUndefined()
+		expect((object as any).polluted).toBeUndefined()
 	})
 })
