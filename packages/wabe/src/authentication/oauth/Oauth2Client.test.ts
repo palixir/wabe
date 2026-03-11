@@ -1,16 +1,12 @@
-import { describe, expect, it, spyOn, mock, afterAll } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it, spyOn, mock } from 'bun:test'
 import { fail } from 'node:assert'
 import { OAuth2Client } from './Oauth2Client'
 import { base64URLencode } from './utils'
 
-const mockFetch = mock(() => {})
-
 const originalFetch = global.fetch
 
-// @ts-expect-error
-global.fetch = mockFetch
-
 describe('Oauth2Client', () => {
+	let mockFetch: ReturnType<typeof mock>
 	const oauthClient = new OAuth2Client(
 		'clientId',
 		'https://authorizationEndpoint',
@@ -18,7 +14,14 @@ describe('Oauth2Client', () => {
 		'https://redirectURI',
 	)
 
-	afterAll(() => {
+	beforeEach(() => {
+		mockFetch = mock(() => {})
+		// @ts-expect-error
+		global.fetch = mockFetch
+	})
+
+	afterEach(() => {
+		mock.restore()
 		global.fetch = originalFetch
 	})
 
@@ -101,8 +104,6 @@ describe('Oauth2Client', () => {
 			authenticateWith: 'http_basic_auth',
 			credentials: 'credentials',
 		} as any)
-
-		spySendTokenRequest.mockRestore()
 	})
 
 	it('should refresh access token', async () => {
@@ -142,8 +143,6 @@ describe('Oauth2Client', () => {
 			authenticateWith: 'http_basic_auth',
 			credentials: 'credentials',
 		})
-
-		spySendTokenRequest.mockRestore()
 	})
 
 	it('should send token request', async () => {
@@ -171,17 +170,15 @@ describe('Oauth2Client', () => {
 		expect(receivedRequest.headers.get('accept')).toEqual('application/json')
 		expect(receivedRequest.headers.get('user-agent')).toEqual('wabe')
 		expect(receivedRequest.headers.get('authorization')).toEqual(`Basic ${encodeCredentials}`)
-
-		mockFetch.mockRestore()
 	})
 
-	it('should throw an error if the result of the request is not valid', () => {
+	it('should throw an error if the result of the request is not valid', async () => {
 		mockFetch.mockResolvedValue({
 			json: () => Promise.resolve({}),
 			ok: false,
 		} as never)
 
-		expect(
+		await expect(
 			oauthClient._sendTokenRequest(new URLSearchParams(), {
 				authenticateWith: 'http_basic_auth',
 				credentials: 'credentials',
@@ -194,7 +191,7 @@ describe('Oauth2Client', () => {
 			status: 400,
 		} as never)
 
-		expect(
+		await expect(
 			oauthClient._sendTokenRequest(new URLSearchParams(), {
 				authenticateWith: 'http_basic_auth',
 				credentials: 'credentials',
@@ -207,13 +204,11 @@ describe('Oauth2Client', () => {
 			status: 200,
 		} as never)
 
-		expect(
+		await expect(
 			oauthClient._sendTokenRequest(new URLSearchParams(), {
 				authenticateWith: 'http_basic_auth',
 				credentials: 'credentials',
 			}),
 		).rejects.toThrow('Error in token request')
-
-		mockFetch.mockRestore()
 	})
 })

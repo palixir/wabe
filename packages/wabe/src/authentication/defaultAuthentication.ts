@@ -40,6 +40,7 @@ export const defaultAuthenticationMethods = <T extends WabeTypes>(): CustomAuthe
 			},
 			clientPublic: {
 				type: 'String',
+				required: true,
 			},
 			salt: {
 				type: 'String',
@@ -63,6 +64,9 @@ export const defaultAuthenticationMethods = <T extends WabeTypes>(): CustomAuthe
 			},
 			serverSecret: {
 				type: 'String',
+			},
+			serverSecretExpiresAt: {
+				type: 'Date',
 			},
 		},
 		// @ts-expect-error

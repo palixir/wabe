@@ -3,6 +3,7 @@ import { v4 as uuid } from 'uuid'
 import getPort from 'get-port'
 import { decode, sign } from 'jsonwebtoken'
 import { gql } from 'graphql-request'
+import { createSRPClient } from 'js-srp6a'
 import {
 	getAdminUserClient,
 	getGraphqlClient,
@@ -692,6 +693,284 @@ describe('Security tests', () => {
 
 		expect(meWithTokenA.me.user?.id).toBe(userIdA)
 		expect(meWithTokenA.me.user?.id).not.toBe(userIdB)
+
+		await closeTests(wabe)
+	})
+
+	it('should not issue tokens during SRP sign-in initialization', async () => {
+		const setup = await setupTests()
+		const wabe = setup.wabe
+		const port = setup.port
+		const anonymousClient = getAnonymousClient(port)
+		const email = 'srp-init@test.fr'
+		const password = 'password'
+
+		const srpClient = createSRPClient('SHA-256', 3072)
+		const salt = srpClient.generateSalt()
+		const privateKey = await srpClient.deriveSafePrivateKey(salt, password)
+		const verifier = srpClient.deriveVerifier(privateKey)
+
+		await anonymousClient.request<any>(
+			gql`
+				mutation signUpWith($input: SignUpWithInput!) {
+					signUpWith(input: $input) {
+						id
+					}
+				}
+			`,
+			{
+				input: {
+					authentication: {
+						emailPasswordSRP: {
+							email,
+							clientPublic: 'sign-up-public',
+							salt,
+							verifier,
+						},
+					},
+				},
+			},
+		)
+
+		const sessionsBefore = await wabe.controllers.database.getObjects({
+			className: '_Session',
+			context: {
+				wabe,
+				isRoot: true,
+			},
+			where: {},
+			select: {
+				id: true,
+			},
+		})
+
+		const clientEphemeral = srpClient.generateEphemeral()
+		const { signInWith } = await anonymousClient.request<any>(
+			gql`
+				mutation signInWith($input: SignInWithInput!) {
+					signInWith(input: $input) {
+						accessToken
+						refreshToken
+						challengeToken
+						srp {
+							salt
+							serverPublic
+						}
+					}
+				}
+			`,
+			{
+				input: {
+					authentication: {
+						emailPasswordSRP: {
+							email,
+							clientPublic: clientEphemeral.public,
+						},
+					},
+				},
+			},
+		)
+
+		const sessionsAfter = await wabe.controllers.database.getObjects({
+			className: '_Session',
+			context: {
+				wabe,
+				isRoot: true,
+			},
+			where: {},
+			select: {
+				id: true,
+			},
+		})
+
+		expect(signInWith.accessToken).toBeNull()
+		expect(signInWith.refreshToken).toBeNull()
+		expect(signInWith.challengeToken).toBeNull()
+		expect(signInWith.srp?.serverPublic).toEqual(expect.any(String))
+		expect(sessionsAfter).toHaveLength(sessionsBefore.length)
+
+		await closeTests(wabe)
+	})
+
+	it('should create SRP session only after challenge and reject replay', async () => {
+		const setup = await setupTests()
+		const wabe = setup.wabe
+		const port = setup.port
+		const anonymousClient = getAnonymousClient(port)
+		const email = 'srp-challenge@test.fr'
+		const password = 'password'
+
+		const srpClient = createSRPClient('SHA-256', 3072)
+		const salt = srpClient.generateSalt()
+		const privateKey = await srpClient.deriveSafePrivateKey(salt, password)
+		const verifier = srpClient.deriveVerifier(privateKey)
+
+		const { signUpWith } = await anonymousClient.request<any>(
+			gql`
+				mutation signUpWith($input: SignUpWithInput!) {
+					signUpWith(input: $input) {
+						id
+					}
+				}
+			`,
+			{
+				input: {
+					authentication: {
+						emailPasswordSRP: {
+							email,
+							clientPublic: 'sign-up-public',
+							salt,
+							verifier,
+						},
+					},
+				},
+			},
+		)
+
+		const sessionsBefore = await wabe.controllers.database.getObjects({
+			className: '_Session',
+			context: {
+				wabe,
+				isRoot: true,
+			},
+			where: {},
+			select: {
+				id: true,
+			},
+		})
+
+		const clientEphemeral = srpClient.generateEphemeral()
+		const { signInWith } = await anonymousClient.request<any>(
+			gql`
+				mutation signInWith($input: SignInWithInput!) {
+					signInWith(input: $input) {
+						accessToken
+						refreshToken
+						srp {
+							salt
+							serverPublic
+						}
+					}
+				}
+			`,
+			{
+				input: {
+					authentication: {
+						emailPasswordSRP: {
+							email,
+							clientPublic: clientEphemeral.public,
+						},
+					},
+				},
+			},
+		)
+
+		const sessionsAfterInit = await wabe.controllers.database.getObjects({
+			className: '_Session',
+			context: {
+				wabe,
+				isRoot: true,
+			},
+			where: {},
+			select: {
+				id: true,
+			},
+		})
+
+		const clientSession = await srpClient.deriveSession(
+			clientEphemeral.secret,
+			signInWith.srp.serverPublic,
+			signInWith.srp.salt,
+			'',
+			privateKey,
+		)
+
+		const { verifyChallenge } = await anonymousClient.request<any>(
+			gql`
+				mutation verifyChallenge($input: VerifyChallengeInput!) {
+					verifyChallenge(input: $input) {
+						accessToken
+						srp {
+							serverSessionProof
+						}
+					}
+				}
+			`,
+			{
+				input: {
+					secondFA: {
+						emailPasswordSRPChallenge: {
+							email,
+							clientPublic: clientEphemeral.public,
+							clientSessionProof: clientSession.proof,
+						},
+					},
+				},
+			},
+		)
+
+		const sessionsAfterVerify = await wabe.controllers.database.getObjects({
+			className: '_Session',
+			context: {
+				wabe,
+				isRoot: true,
+			},
+			where: {},
+			select: {
+				id: true,
+			},
+		})
+
+		expect(signInWith.accessToken).toBeNull()
+		expect(signInWith.refreshToken).toBeNull()
+		expect(sessionsAfterInit).toHaveLength(sessionsBefore.length)
+		expect(verifyChallenge.accessToken).toEqual(expect.any(String))
+		expect(sessionsAfterVerify).toHaveLength(sessionsBefore.length + 1)
+		expect(
+			srpClient.verifySession(
+				clientEphemeral.public,
+				clientSession,
+				verifyChallenge.srp.serverSessionProof,
+			),
+		).resolves.toBeUndefined()
+
+		const userClient = getUserClient(port, {
+			accessToken: verifyChallenge.accessToken,
+		})
+		const me = await userClient.request<any>(gql`
+			query me {
+				me {
+					user {
+						id
+					}
+				}
+			}
+		`)
+
+		expect(me.me.user?.id).toBe(signUpWith.id)
+
+		expect(
+			anonymousClient.request<any>(
+				gql`
+					mutation verifyChallenge($input: VerifyChallengeInput!) {
+						verifyChallenge(input: $input) {
+							accessToken
+						}
+					}
+				`,
+				{
+					input: {
+						secondFA: {
+							emailPasswordSRPChallenge: {
+								email,
+								clientPublic: clientEphemeral.public,
+								clientSessionProof: clientSession.proof,
+							},
+						},
+					},
+				},
+			),
+		).rejects.toThrow('Invalid authentication credentials')
 
 		await closeTests(wabe)
 	})
