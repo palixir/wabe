@@ -33,10 +33,7 @@ export const resetPasswordResolver = async (
 	const isOtpValid = otpClass.verify(otp, userId)
 
 	if (realUser) {
-		const inProd = process.env.NODE_ENV === 'production'
-		const devBypass = !inProd && otp === '000000'
-
-		if (!isOtpValid && !(devBypass && !inProd)) throw new Error('Invalid OTP code')
+		if (!isOtpValid) throw new Error('Invalid OTP code')
 
 		const providerKey = phone ? 'phonePassword' : 'emailPassword'
 
@@ -53,6 +50,15 @@ export const resetPasswordResolver = async (
 						password,
 					},
 				},
+			},
+			select: {},
+			context: contextWithRoot(context),
+		})
+
+		await context.wabe.controllers.database.deleteObjects({
+			className: '_Session',
+			where: {
+				user: { id: { equalTo: realUser.id } },
 			},
 			select: {},
 			context: contextWithRoot(context),

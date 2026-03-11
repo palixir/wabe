@@ -5,6 +5,5 @@ export const defaultBeforeCreateUser = (object: HookObject<any, any>) => {
 
 	if (context.isRoot) return
 
-	if (context.wabe.config.authentication?.disableSignUp && !context.user)
-		throw new Error('Sign up is disabled')
+	if (context.wabe.config.authentication?.disableSignUp) throw new Error('Sign up is disabled')
 }

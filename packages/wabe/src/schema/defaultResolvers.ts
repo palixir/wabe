@@ -1,6 +1,5 @@
 import type { MutationResolver, QueryResolver } from './Schema'
 import { meResolver } from './resolvers/meResolver'
-import { sendEmailResolver } from './resolvers/sendEmail'
 import { resetPasswordResolver } from './resolvers/resetPassword'
 import { sendOtpCodeResolver } from './resolvers/sendOtpCode'
 
@@ -60,34 +59,5 @@ export const defaultMutations: {
 			},
 		},
 		resolve: sendOtpCodeResolver,
-	},
-	sendEmail: {
-		type: 'String',
-		description: 'Send basic email with text and html, returns the id of the email',
-		args: {
-			input: {
-				from: {
-					type: 'String',
-					required: true,
-				},
-				to: {
-					type: 'Array',
-					typeValue: 'String',
-					required: true,
-					requiredValue: true,
-				},
-				subject: {
-					type: 'String',
-					required: true,
-				},
-				text: {
-					type: 'String',
-				},
-				html: {
-					type: 'String',
-				},
-			},
-		},
-		resolve: sendEmailResolver,
 	},
 }

@@ -168,9 +168,18 @@ export class Session<T extends WabeTypes> {
 				context.wabe.config.authentication?.session?.csrfSecret || getJwtSecret(context)
 
 			const expectedHmac = crypto.createHmac('sha256', csrfSecret).update(message).digest('hex')
+			const isHex = /^[0-9a-f]+$/i
+
+			if (!isHex.test(receivedHmacHex) || receivedHmacHex.length !== expectedHmac.length)
+				return {
+					sessionId: null,
+					user: null,
+					accessToken: null,
+					refreshToken: null,
+				}
 
 			const isValid = crypto.timingSafeEqual(
-				Buffer.from(receivedHmacHex || '', 'hex'),
+				Buffer.from(receivedHmacHex, 'hex'),
 				Buffer.from(expectedHmac, 'hex'),
 			)
 

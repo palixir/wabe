@@ -4766,6 +4766,7 @@ describe('GraphqlSchema', () => {
 				testClasses {
 					edges {
 						node {
+							id
 							field1
 						}
 					}
@@ -4773,7 +4774,8 @@ describe('GraphqlSchema', () => {
 			}
 		`)
 
-		expect(resAfterRemove.testClasses.edges.length).toBe(0)
+		expect(resAfterRemove.testClasses.edges.length).toBe(1)
+		expect(resAfterRemove.testClasses.edges[0].node.field1).toBe('field1')
 
 		await wabe.close()
 	})
@@ -4870,6 +4872,7 @@ describe('GraphqlSchema', () => {
 				testClasses {
 					edges {
 						node {
+							id
 							field1
 						}
 					}
@@ -4877,7 +4880,8 @@ describe('GraphqlSchema', () => {
 			}
 		`)
 
-		expect(resAfterRemove.testClasses.edges.length).toBe(0)
+		expect(resAfterRemove.testClasses.edges.length).toBe(1)
+		expect(resAfterRemove.testClasses.edges[0].node.field1).toBe('field1')
 
 		await wabe.close()
 	})
