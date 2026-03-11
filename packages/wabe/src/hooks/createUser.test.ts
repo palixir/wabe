@@ -47,6 +47,38 @@ describe('createUser hook', () => {
 		}
 	})
 
+	it('should throw an error if disableSignUp is true and user is authenticated but not root', () => {
+		if (wabe.config) {
+			wabe.config.authentication = {
+				disableSignUp: true,
+			}
+		}
+
+		expect(
+			wabe.controllers.database.createObject({
+				className: 'User',
+				context: {
+					wabe,
+					isRoot: false,
+					sessionId: 'session-id',
+					user: {
+						id: 'user-id',
+					},
+				},
+				data: {
+					email: 'email2@test.fr',
+				},
+				select: {},
+			}),
+		).rejects.toThrow('Sign up is disabled')
+
+		if (wabe.config) {
+			wabe.config.authentication = {
+				disableSignUp: false,
+			}
+		}
+	})
+
 	it('should not throw an error if disableSignUp is true and user is root', async () => {
 		if (wabe.config) {
 			wabe.config.authentication = {

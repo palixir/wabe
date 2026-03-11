@@ -330,6 +330,49 @@ describe('Session', () => {
 		expect(user?.email).toEqual('userEmail')
 	})
 
+	it('should return null session when csrf token format is invalid', async () => {
+		mockGetObjects.mockResolvedValue([
+			{
+				id: 'sessionId',
+				refreshTokenEncrypted: encryptToken('refreshToken', 'dev'),
+				user: {
+					id: 'userId',
+					email: 'userEmail',
+				},
+				accessTokenExpiresAt: new Date(Date.now() + 1000 * 60 * 60),
+				refreshTokenExpiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
+			},
+		])
+
+		const session = new Session<any>()
+		const { accessToken } = await session.create('userId', context)
+
+		const res = await session.meFromAccessToken(
+			{
+				accessToken,
+				csrfToken: 'zz.invalid',
+			},
+			{
+				...context,
+				wabe: {
+					...context.wabe,
+					config: {
+						...context.wabe.config,
+						authentication: {
+							session: {
+								jwtSecret: 'dev',
+								cookieSession: true,
+							},
+						},
+					},
+				},
+			},
+		)
+
+		expect(res.sessionId).toBeNull()
+		expect(res.user).toBeNull()
+	})
+
 	it('should create a new session', async () => {
 		const session = new Session<any>()
 

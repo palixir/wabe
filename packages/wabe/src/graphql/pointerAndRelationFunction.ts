@@ -245,13 +245,6 @@ export const remove = async ({
 		const olderValuesIds =
 			currentValue?.[fieldName]?.map((object: any) => getPointerId(object)).filter(notEmpty) || []
 
-		await context.wabe.controllers.database.deleteObjects({
-			className: targetClass,
-			where: { id: { in: idsToRemove } },
-			context,
-			select: {},
-		})
-
 		return olderValuesIds
 			.filter((olderValue: any) => !idsToRemove.includes(olderValue))
 			.map((pointerId: string) =>
@@ -273,13 +266,6 @@ export const remove = async ({
 		const olderValuesIds = allObjectsMatchedWithWhere.flatMap((object: any) =>
 			object[fieldName]?.map((object: any) => getPointerId(object)).filter(notEmpty),
 		)
-
-		await context.wabe.controllers.database.deleteObjects({
-			className: targetClass,
-			where: { id: { in: idsToRemove } },
-			context,
-			select: {},
-		})
 
 		return olderValuesIds
 			.filter(notEmpty)

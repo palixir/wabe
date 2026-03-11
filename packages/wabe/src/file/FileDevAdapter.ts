@@ -5,9 +5,20 @@ import type { FileAdapter, ReadFileOptions } from '.'
 export class FileDevAdapter implements FileAdapter {
 	private basePath = 'bucket'
 	private rootPath = process.cwd()
+	private getSafeFilePath(fileName: string) {
+		const bucketPath = path.resolve(this.rootPath, this.basePath)
+		const resolvedFilePath = path.resolve(bucketPath, fileName)
+		const isInsideBucket =
+			resolvedFilePath === bucketPath || resolvedFilePath.startsWith(`${bucketPath}${path.sep}`)
+
+		if (!isInsideBucket) throw new Error('Invalid file path')
+
+		return resolvedFilePath
+	}
 
 	async uploadFile(file: File): Promise<void> {
 		const fullPath = path.join(this.rootPath, this.basePath)
+		const safePath = this.getSafeFilePath(file.name)
 
 		await mkdir(fullPath, { recursive: true })
 
@@ -23,11 +34,11 @@ export class FileDevAdapter implements FileAdapter {
 			fileContent = Buffer.from(arrayBuffer)
 		}
 
-		await writeFile(path.join(fullPath, file.name), fileContent)
+		await writeFile(safePath, fileContent)
 	}
 
 	async readFile(fileName: string, options?: ReadFileOptions): Promise<string | null> {
-		const filePath = path.join(this.rootPath, this.basePath, fileName)
+		const filePath = this.getSafeFilePath(fileName)
 
 		try {
 			await access(filePath, constants.F_OK)
@@ -38,7 +49,7 @@ export class FileDevAdapter implements FileAdapter {
 	}
 
 	async deleteFile(fileName: string): Promise<void> {
-		const filePath = path.join(this.rootPath, this.basePath, fileName)
+		const filePath = this.getSafeFilePath(fileName)
 
 		try {
 			await access(filePath, constants.F_OK)

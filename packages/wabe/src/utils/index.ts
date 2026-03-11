@@ -163,11 +163,25 @@ export const getCookieInRequestHeaders = (cookieName: string, headers: Headers) 
 
 	if (!cookies) return
 
-	const cookie = cookies.split(';').find((c) => c.includes(cookieName))
+	const parsedCookies = cookies
+		.split(';')
+		.map((cookiePart) => cookiePart.trim())
+		.map((cookiePart) => {
+			const firstEqualIndex = cookiePart.indexOf('=')
+			if (firstEqualIndex < 0) return [cookiePart, ''] as const
+			return [
+				cookiePart.slice(0, firstEqualIndex).trim(),
+				cookiePart.slice(firstEqualIndex + 1),
+			] as const
+		})
+		.filter(([name]) => name === cookieName)
 
-	if (!cookie) return
+	if (parsedCookies.length !== 1) return
 
-	return cookie.split('=')[1]
+	const cookieEntry = parsedCookies[0]
+	if (!cookieEntry) return
+
+	return cookieEntry[1]
 }
 
 /**
