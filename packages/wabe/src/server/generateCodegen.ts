@@ -20,6 +20,7 @@ const wabePrimaryTypesToTypescriptTypes: Record<WabePrimaryTypes, string> = {
 	Int: 'number',
 	Float: 'number',
 	String: 'string',
+	Any: 'any',
 	Email: 'string',
 	Phone: 'string',
 	Date: 'Date',
@@ -42,6 +43,7 @@ const wabeTypesToTypescriptTypes = ({
 		case 'Int':
 		case 'Float':
 		case 'String':
+		case 'Any':
 		case 'Email':
 		case 'Phone':
 		case 'File':

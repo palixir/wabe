@@ -1171,6 +1171,113 @@ describe('GraphqlSchema', () => {
 		await wabe.close()
 	})
 
+	it('should have Any and AnyWhereInput types when we use an Any field', async () => {
+		const { wabe } = await createWabe({
+			classes: [
+				{
+					name: 'TestClassAny',
+					fields: {
+						metadata: {
+							type: 'Any',
+						},
+					},
+				},
+			],
+		})
+
+		expect(
+			getTypeFromGraphQLSchema({
+				schema: wabe.config.graphqlSchema || ({} as any),
+				type: 'Type',
+				name: 'TestClassAnyCreateFieldsInput',
+			}).input.metadata,
+		).toEqual('Any')
+
+		expect(
+			getTypeFromGraphQLSchema({
+				schema: wabe.config.graphqlSchema || ({} as any),
+				type: 'Type',
+				name: 'TestClassAnyUpdateFieldsInput',
+			}).input.metadata,
+		).toEqual('Any')
+
+		expect(
+			getTypeFromGraphQLSchema({
+				schema: wabe.config.graphqlSchema || ({} as any),
+				type: 'Type',
+				name: 'TestClassAnyWhereInput',
+			}).input.metadata,
+		).toEqual('AnyWhereInput')
+
+		await wabe.close()
+	})
+
+	it('should create and read values without validation when using an Any field', async () => {
+		const { client, wabe } = await createWabe({
+			classes: [
+				{
+					name: 'TestClassAny',
+					fields: {
+						metadata: {
+							type: 'Any',
+						},
+					},
+				},
+			],
+		})
+
+		const metadata = {
+			count: 1,
+			nested: {
+				enabled: true,
+				tags: ['a', 2, null],
+				deep: {
+					level: 3,
+				},
+			},
+			nullValue: null,
+		}
+
+		const createRes = await client.request<any>(
+			gql`
+				mutation createTestClassAny($input: CreateTestClassAnyInput!) {
+					createTestClassAny(input: $input) {
+						testClassAny {
+							id
+							metadata
+						}
+					}
+				}
+			`,
+			{
+				input: {
+					fields: {
+						metadata,
+					},
+				},
+			},
+		)
+
+		expect(createRes.createTestClassAny.testClassAny.metadata).toEqual(metadata)
+
+		const readRes = await client.request<any>(
+			gql`
+				query testClassAny($id: ID) {
+					testClassAny(id: $id) {
+						metadata
+					}
+				}
+			`,
+			{
+				id: createRes.createTestClassAny.testClassAny.id,
+			},
+		)
+
+		expect(readRes.testClassAny.metadata).toEqual(metadata)
+
+		await wabe.close()
+	})
+
 	it('should be able to create a phone field that check correctly if the phone is valid across the world', async () => {
 		const { client, wabe } = await createWabe({
 			classes: [

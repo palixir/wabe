@@ -13,6 +13,7 @@ import {
 } from 'graphql'
 import {
 	type AllObjects,
+	AnyScalarType,
 	AnyWhereInput,
 	ArrayWhereInput,
 	BooleanWhereInput,
@@ -53,6 +54,7 @@ export const templateScalarType: Record<WabePrimaryTypes, GraphQLScalarType> = {
 	Int: GraphQLInt,
 	Float: GraphQLFloat,
 	Boolean: GraphQLBoolean,
+	Any: AnyScalarType,
 	Date: DateScalarType,
 	Email: EmailScalarType,
 	File: FileScalarType,
@@ -65,6 +67,7 @@ export const templateWhereInput: Record<WabePrimaryTypes | 'Array', GraphQLInput
 	Int: IntWhereInput,
 	Float: FloatWhereInput,
 	Boolean: BooleanWhereInput,
+	Any: AnyWhereInput,
 	Date: DateWhereInput,
 	Email: EmailWhereInput,
 	Phone: PhoneWhereInput,
