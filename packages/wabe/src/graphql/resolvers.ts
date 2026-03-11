@@ -13,6 +13,8 @@ import {
 	add,
 	createAndAdd,
 	createAndLink,
+	getPointerId,
+	type PointerObject,
 	remove,
 } from './pointerAndRelationFunction'
 
@@ -170,6 +172,18 @@ export const executeRelationOnFields = ({
 	typeOfExecution?: TypeOfExecution
 }) => {
 	const entries = Object.entries(fields)
+	const getTargetClassFromField = (fieldName: string) => {
+		const currentClass = context.wabe.config.schema?.classes?.find(
+			(schemaClass) => schemaClass.name === className,
+		)
+		// @ts-expect-error runtime schema
+		const targetClass = currentClass?.fields?.[fieldName]?.class
+
+		if (!targetClass || typeof targetClass !== 'string')
+			throw new Error(`Target class not found for ${className}.${fieldName}`)
+
+		return targetClass
+	}
 
 	return entries.reduce(
 		async (acc, [fieldName, value]) => {
@@ -185,7 +199,16 @@ export const executeRelationOnFields = ({
 					className,
 				})
 			} else if (typeof value === 'object' && value?.link) {
-				newAcc[fieldName] = value.link
+				const linkedId = getPointerId(value.link)
+				const targetClass = getTargetClassFromField(fieldName)
+
+				if (!linkedId) throw new Error(`Invalid link value for ${className}.${fieldName}`)
+
+				newAcc[fieldName] = {
+					class: targetClass,
+					id: linkedId,
+					type: 'Pointer',
+				} as PointerObject
 			} else if (typeof value === 'object' && value.unlink) {
 				newAcc[fieldName] = null
 			} else if (typeof value === 'object' && value?.createAndAdd) {

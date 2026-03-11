@@ -9,6 +9,45 @@ type Add = Array<string>
 type Remove = Array<string>
 type CreateAndAdd = Array<any>
 
+export type PointerObject = {
+	class: string
+	id: string
+	type: 'Pointer'
+}
+
+const toPointerObject = ({ className, id }: { className: string; id: string }): PointerObject => ({
+	class: className,
+	id,
+	type: 'Pointer',
+})
+
+export const getPointerId = (value: unknown): string | undefined => {
+	if (typeof value === 'string') return value
+	if (!value || typeof value !== 'object') return undefined
+
+	const id = (value as { id?: string }).id
+	return typeof id === 'string' ? id : undefined
+}
+
+const getTargetClassFromField = ({
+	className,
+	fieldName,
+	context,
+}: {
+	className: string
+	fieldName: string
+	context: WabeContext<any>
+}) => {
+	const classInSchema = getClassFromClassName(className, context.wabe.config)
+	// @ts-expect-error schema runtime
+	const targetClass = classInSchema.fields[fieldName]?.class
+
+	if (!targetClass || typeof targetClass !== 'string')
+		throw new Error(`Target class not found for ${className}.${fieldName}`)
+
+	return targetClass
+}
+
 export type TypeOfExecution = 'create' | 'update' | 'updateMany'
 
 export type InputFields = Record<
@@ -35,17 +74,25 @@ export const createAndLink = async ({
 	context: WabeContext<any>
 	className: string
 }) => {
-	const classInSchema = getClassFromClassName(className, context.wabe.config)
+	const targetClass = getTargetClassFromField({
+		className,
+		fieldName,
+		context,
+	})
 
 	const res = await context.wabe.controllers.database.createObject({
-		// @ts-expect-error
-		className: classInSchema.fields[fieldName].class,
+		className: targetClass,
 		data: createAndLink,
 		select: { id: true },
 		context,
 	})
 
-	return res?.id
+	if (!res?.id) throw new Error('Linked object not created')
+
+	return toPointerObject({
+		className: targetClass,
+		id: res.id,
+	})
 }
 
 export const createAndAdd = async ({
@@ -59,17 +106,29 @@ export const createAndAdd = async ({
 	context: WabeContext<any>
 	className: string
 }) => {
-	const classInSchema = getClassFromClassName(className, context.wabe.config)
+	const targetClass = getTargetClassFromField({
+		className,
+		fieldName,
+		context,
+	})
 
 	const result = await context.wabe.controllers.database.createObjects({
-		// @ts-expect-error
-		className: classInSchema.fields[fieldName].class,
+		className: targetClass,
 		data: createAndAdd,
 		select: { id: true },
 		context,
 	})
 
-	return result.map((object: any) => object.id)
+	return result
+		.map((object: any) =>
+			object?.id
+				? toPointerObject({
+						className: targetClass,
+						id: object.id,
+					})
+				: undefined,
+		)
+		.filter(notEmpty)
 }
 
 export const add = async ({
@@ -89,7 +148,20 @@ export const add = async ({
 	className: string
 	where: any
 }) => {
-	if (typeOfExecution === 'create') return add
+	const targetClass = getTargetClassFromField({
+		className,
+		fieldName,
+		context,
+	})
+	const idsToAdd = add.map(getPointerId).filter(notEmpty)
+
+	if (typeOfExecution === 'create')
+		return idsToAdd.map((id) =>
+			toPointerObject({
+				className: targetClass,
+				id,
+			}),
+		)
 
 	if (typeOfExecution === 'update' && id) {
 		const currentValue = await context.wabe.controllers.database.getObject({
@@ -99,9 +171,15 @@ export const add = async ({
 			context,
 		})
 
-		const currentValueIds = currentValue?.[fieldName]?.map((object: any) => object.id) || []
+		const currentValueIds =
+			currentValue?.[fieldName]?.map((object: any) => getPointerId(object)).filter(notEmpty) || []
 
-		return [...currentValueIds, ...add].filter(notEmpty)
+		return [...currentValueIds, ...idsToAdd].filter(notEmpty).map((id) =>
+			toPointerObject({
+				className: targetClass,
+				id,
+			}),
+		)
 	}
 
 	// For update many we need to get all objects that match the where and add the new value
@@ -116,9 +194,15 @@ export const add = async ({
 
 		return Promise.all(
 			allObjectsMatchedWithWhere.flatMap((object: any) => {
-				const currentValueIds = object[fieldName]?.map((object: any) => object.id) || []
+				const currentValueIds =
+					object[fieldName]?.map((object: any) => getPointerId(object)).filter(notEmpty) || []
 
-				return [...currentValueIds, ...add]
+				return [...currentValueIds, ...idsToAdd].map((id) =>
+					toPointerObject({
+						className: targetClass,
+						id,
+					}),
+				)
 			}),
 		)
 	}
@@ -143,7 +227,12 @@ export const remove = async ({
 }) => {
 	if (typeOfExecution === 'create') return []
 
-	const classInSchema = getClassFromClassName(className, context.wabe.config)
+	const targetClass = getTargetClassFromField({
+		className,
+		fieldName,
+		context,
+	})
+	const idsToRemove = remove.map(getPointerId).filter(notEmpty)
 
 	if (typeOfExecution === 'update' && id) {
 		const currentValue = await context.wabe.controllers.database.getObject({
@@ -153,17 +242,24 @@ export const remove = async ({
 			context,
 		})
 
-		const olderValuesIds = currentValue?.[fieldName]?.map((object: any) => object.id) || []
+		const olderValuesIds =
+			currentValue?.[fieldName]?.map((object: any) => getPointerId(object)).filter(notEmpty) || []
 
 		await context.wabe.controllers.database.deleteObjects({
-			// @ts-expect-error
-			className: classInSchema.fields[fieldName].class,
-			where: { id: { in: remove } },
+			className: targetClass,
+			where: { id: { in: idsToRemove } },
 			context,
 			select: {},
 		})
 
-		return olderValuesIds.filter((olderValue: any) => !remove.includes(olderValue))
+		return olderValuesIds
+			.filter((olderValue: any) => !idsToRemove.includes(olderValue))
+			.map((pointerId: string) =>
+				toPointerObject({
+					className: targetClass,
+					id: pointerId,
+				}),
+			)
 	}
 
 	if (typeOfExecution === 'updateMany' && where) {
@@ -174,18 +270,25 @@ export const remove = async ({
 			context,
 		})
 
-		const olderValuesIds = allObjectsMatchedWithWhere.flatMap(
-			(object: any) => object[fieldName]?.map((object: any) => object.id) || [],
+		const olderValuesIds = allObjectsMatchedWithWhere.flatMap((object: any) =>
+			object[fieldName]?.map((object: any) => getPointerId(object)).filter(notEmpty),
 		)
 
 		await context.wabe.controllers.database.deleteObjects({
-			// @ts-expect-error
-			className: classInSchema.fields[fieldName].class,
-			where: { id: { in: remove } },
+			className: targetClass,
+			where: { id: { in: idsToRemove } },
 			context,
 			select: {},
 		})
 
-		return olderValuesIds.filter((olderValue: any) => !remove.includes(olderValue))
+		return olderValuesIds
+			.filter(notEmpty)
+			.filter((olderValue: any) => !idsToRemove.includes(olderValue))
+			.map((pointerId: string) =>
+				toPointerObject({
+					className: targetClass,
+					id: pointerId,
+				}),
+			)
 	}
 }

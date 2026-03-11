@@ -386,7 +386,13 @@ describe('Database', () => {
 			context,
 			data: {
 				// @ts-expect-error
-				userTest: [createdUserObject?.id],
+				userTest: [
+					{
+						class: 'User',
+						id: createdUserObject?.id,
+						type: 'Pointer',
+					},
+				],
 			},
 		})
 
@@ -427,11 +433,15 @@ describe('Database', () => {
 			className: 'Test2',
 			context,
 			data: [
-				// @ts-expect-error
-				{ name: 'match-parent', userTest: [matchingUser?.id] },
-				// @ts-expect-error
-				{ name: 'other-parent', userTest: [otherUser?.id] },
-			],
+				{
+					name: 'match-parent',
+					userTest: [{ class: 'User', id: matchingUser?.id, type: 'Pointer' }],
+				},
+				{
+					name: 'other-parent',
+					userTest: [{ class: 'User', id: otherUser?.id, type: 'Pointer' }],
+				},
+			] as any,
 			select: { id: true },
 		})
 
@@ -462,11 +472,12 @@ describe('Database', () => {
 			className: 'Test2',
 			context,
 			data: [
-				// @ts-expect-error
 				{ name: 'empty-parent' },
-				// @ts-expect-error
-				{ name: 'non-empty-parent', userTest: [linkedUser?.id] },
-			],
+				{
+					name: 'non-empty-parent',
+					userTest: [{ class: 'User', id: linkedUser?.id, type: 'Pointer' }],
+				},
+			] as any,
 			select: { id: true },
 		})
 
@@ -515,13 +526,16 @@ describe('Database', () => {
 			className: 'Test2',
 			context,
 			data: [
-				// @ts-expect-error
-				{ name: 'candidate', userTest: [targetUser?.id] },
-				// @ts-expect-error
-				{ name: 'candidate', userTest: [nonTargetUser?.id] },
-				// @ts-expect-error
+				{
+					name: 'candidate',
+					userTest: [{ class: 'User', id: targetUser?.id, type: 'Pointer' }],
+				},
+				{
+					name: 'candidate',
+					userTest: [{ class: 'User', id: nonTargetUser?.id, type: 'Pointer' }],
+				},
 				{ name: 'outside-or' },
-			],
+			] as any,
 			select: { id: true },
 		})
 
@@ -568,11 +582,15 @@ describe('Database', () => {
 			className: 'Test2',
 			context,
 			data: [
-				// @ts-expect-error
-				{ name: 'included-parent', userTest: [includedUser?.id] },
-				// @ts-expect-error
-				{ name: 'excluded-parent', userTest: [excludedUser?.id] },
-			],
+				{
+					name: 'included-parent',
+					userTest: [{ class: 'User', id: includedUser?.id, type: 'Pointer' }],
+				},
+				{
+					name: 'excluded-parent',
+					userTest: [{ class: 'User', id: excludedUser?.id, type: 'Pointer' }],
+				},
+			] as any,
 			select: { id: true },
 		})
 

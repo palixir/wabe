@@ -186,7 +186,7 @@ export class Wabe<T extends WabeTypes> {
 
 		const wabeRoutes = [
 			...defaultRoutes({
-				devDirectory: this.config.file?.devDirectory || `${__dirname}/../../bucket`,
+				devDirectory: this.config.file?.devDirectory || `${process.cwd()}/bucket`,
 				enableBucketRoute,
 			}),
 			...(this.config.routes || []),

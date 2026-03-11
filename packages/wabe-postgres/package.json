@@ -1,6 +1,6 @@
 {
 	"name": "wabe-postgres",
-	"version": "0.5.4",
+	"version": "0.5.5",
 	"description": "PostgreSQL adapter for Wabe (official)",
 	"keywords": [
 		"adapter",
