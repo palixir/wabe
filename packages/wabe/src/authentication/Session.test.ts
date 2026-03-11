@@ -95,7 +95,11 @@ describe('Session', () => {
 				accessTokenExpiresAt: expect.any(Date),
 				refreshTokenEncrypted: expect.any(String),
 				refreshTokenExpiresAt: expect.any(Date),
-				user: 'userId',
+				user: {
+					class: 'User',
+					id: 'userId',
+					type: 'Pointer',
+				},
 			},
 			select: { id: true },
 		})
@@ -363,7 +367,11 @@ describe('Session', () => {
 				accessTokenExpiresAt: expect.any(Date),
 				refreshTokenEncrypted: expect.any(String),
 				refreshTokenExpiresAt: expect.any(Date),
-				user: 'userId',
+				user: {
+					class: 'User',
+					id: 'userId',
+					type: 'Pointer',
+				},
 			},
 			select: { id: true },
 		})

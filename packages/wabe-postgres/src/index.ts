@@ -43,7 +43,7 @@ const getSQLColumnCreateTableFromType = <T extends WabeTypes>(type: TypeField<T>
 		case 'Array':
 			return `JSONB${type.required ? ' NOT NULL' : ' DEFAULT NULL'}`
 		case 'Pointer':
-			return `VARCHAR(255)${type.required ? ' NOT NULL' : ' DEFAULT NULL'}`
+			return `JSONB${type.required ? ' NOT NULL' : ' DEFAULT NULL'}`
 		case 'Relation':
 			return `JSONB${type.required ? ' NOT NULL' : ' DEFAULT NULL'}`
 		default:
@@ -99,7 +99,7 @@ export const buildPostgresWhereQueryAndValues = <T extends WabeTypes, K extends 
 	const acc = objectKeys.reduce(
 		(acc, key) => {
 			const value = where[key]
-			const keyToWrite = key === 'id' ? '_id' : String(key)
+			const keyToWrite = key === 'id' && !parentKey ? '_id' : String(key)
 
 			const fullKey = parentKey ? `${parentKey}->>'${keyToWrite}'` : `"${keyToWrite}"`
 
@@ -311,6 +311,7 @@ export const buildPostgresWhereQueryAndValues = <T extends WabeTypes, K extends 
 const computeValuesFromData = (data: Record<string, any>) => {
 	return Object.values(data).map((value) => {
 		if (Array.isArray(value)) return JSON.stringify(value)
+		if (value && typeof value === 'object' && !(value instanceof Date)) return JSON.stringify(value)
 
 		return value
 	})

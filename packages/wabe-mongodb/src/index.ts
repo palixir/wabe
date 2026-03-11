@@ -49,6 +49,7 @@ export const buildMongoOrderQuery = <
 
 export const buildMongoWhereQuery = <T extends WabeTypes, K extends keyof T['types']>(
 	where?: WhereType<T, K>,
+	isNested = false,
 ): Record<string, any> => {
 	if (!where) return {}
 
@@ -58,7 +59,7 @@ export const buildMongoWhereQuery = <T extends WabeTypes, K extends keyof T['typ
 		(acc, key) => {
 			const value = where[key]
 
-			const keyToWrite = key === 'id' ? '_id' : key
+			const keyToWrite = key === 'id' && !isNested ? '_id' : key
 
 			if (value?.contains || value?.contains === null)
 				acc[keyToWrite] =
@@ -73,7 +74,7 @@ export const buildMongoWhereQuery = <T extends WabeTypes, K extends keyof T['typ
 						? {
 								$not: {
 									$elemMatch: builtOrOriginal(
-										buildMongoWhereQuery(value.notContains as WhereType<T, K>),
+										buildMongoWhereQuery(value.notContains as WhereType<T, K>, true),
 										value.notContains,
 									),
 								},
@@ -111,7 +112,9 @@ export const buildMongoWhereQuery = <T extends WabeTypes, K extends keyof T['typ
 			if (hasEqualTo) {
 				acc[keyToWrite] =
 					keyToWrite === '_id' && typeof value?.equalTo === 'string'
-						? ObjectId.createFromHexString(value?.equalTo)
+						? ObjectId.isValid(value.equalTo)
+							? ObjectId.createFromHexString(value.equalTo)
+							: value.equalTo
 						: value?.equalTo
 			}
 
@@ -120,7 +123,9 @@ export const buildMongoWhereQuery = <T extends WabeTypes, K extends keyof T['typ
 				acc[keyToWrite] = {
 					$ne:
 						keyToWrite === '_id' && typeof value?.notEqualTo === 'string'
-							? ObjectId.createFromHexString(value?.notEqualTo)
+							? ObjectId.isValid(value.notEqualTo)
+								? ObjectId.createFromHexString(value.notEqualTo)
+								: value.notEqualTo
 							: value?.notEqualTo,
 				}
 			}
@@ -142,6 +147,8 @@ export const buildMongoWhereQuery = <T extends WabeTypes, K extends keyof T['typ
 									// @ts-expect-error
 									.filter((inValue: any) => typeof inValue === 'string')
 									// @ts-expect-error
+									.filter((inValue) => ObjectId.isValid(inValue))
+									// @ts-expect-error
 									.map((inValue) => ObjectId.createFromHexString(inValue))
 							: value.in,
 				}
@@ -153,24 +160,26 @@ export const buildMongoWhereQuery = <T extends WabeTypes, K extends keyof T['typ
 									// @ts-expect-error
 									.filter((notInValue: any) => typeof notInValue === 'string')
 									// @ts-expect-error
+									.filter((notInValue) => ObjectId.isValid(notInValue))
+									// @ts-expect-error
 									.map((notInValue) => ObjectId.createFromHexString(notInValue))
 							: value.notIn,
 				}
 
 			if (value && keyToWrite === 'OR') {
-				acc.$or = where.OR?.map((or) => buildMongoWhereQuery(or))
+				acc.$or = where.OR?.map((or) => buildMongoWhereQuery(or, isNested))
 				return acc
 			}
 
 			if (value && keyToWrite === 'AND') {
-				acc.$and = where.AND?.map((and) => buildMongoWhereQuery(and))
+				acc.$and = where.AND?.map((and) => buildMongoWhereQuery(and, isNested))
 				return acc
 			}
 
 			if (acc[keyToWrite] !== undefined) return acc
 
 			if (typeof value === 'object') {
-				const where = buildMongoWhereQuery(value as WhereType<T, K>)
+				const where = buildMongoWhereQuery(value as WhereType<T, K>, true)
 				const entries = Object.entries(where)
 
 				if (entries.length > 0)

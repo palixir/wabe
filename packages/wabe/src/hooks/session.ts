@@ -2,12 +2,26 @@ import type { DevWabeTypes } from '../utils/helper'
 import { notEmpty } from '../utils/export'
 import type { HookObject } from './HookObject'
 
+const toPointerObject = ({ className, id }: { className: string; id: string }) => ({
+	class: className,
+	id,
+	type: 'Pointer' as const,
+})
+
+const getUserIdFromSessionObject = (sessionObject: any): string | undefined => {
+	const user = sessionObject?.user
+	if (!user) return undefined
+	if (typeof user === 'string') return user
+	if (typeof user === 'object' && typeof user.id === 'string') return user.id
+
+	return undefined
+}
+
 export const defaultAfterCreateSession = async (
 	hookObject: HookObject<DevWabeTypes, '_Session'>,
 ) => {
 	const object = hookObject.object
-	// @ts-expect-error
-	const userId = object?.user as string
+	const userId = getUserIdFromSessionObject(object)
 
 	if (!userId) return
 
@@ -23,13 +37,19 @@ export const defaultAfterCreateSession = async (
 	})
 
 	const sessionsId = user?.sessions?.map((session) => session.id) || []
+	const sessionsPointers = [...sessionsId, object?.id].filter(notEmpty).map((sessionId) =>
+		toPointerObject({
+			className: '_Session',
+			id: sessionId,
+		}),
+	)
 
 	await databaseController.updateObject({
 		className: 'User',
 		id: userId,
 		context: hookObject.context,
 		data: {
-			sessions: [...sessionsId, object?.id].filter(notEmpty),
+			sessions: sessionsPointers,
 		},
 	})
 }
@@ -37,9 +57,8 @@ export const defaultAfterCreateSession = async (
 export const defaultAfterDeleteSession = async (
 	hookObject: HookObject<DevWabeTypes, '_Session'>,
 ) => {
-	const object = hookObject.object
-	// @ts-expect-error
-	const userId = object?.user as string
+	const object = hookObject.originalObject || hookObject.object
+	const userId = getUserIdFromSessionObject(object)
 
 	if (!userId) return
 
@@ -57,13 +76,20 @@ export const defaultAfterDeleteSession = async (
 	const newSessionsId = user?.sessions
 		?.filter((session) => session.id !== object?.id)
 		.map((session) => session.id)
+	const newSessionsPointers =
+		newSessionsId?.map((sessionId) =>
+			toPointerObject({
+				className: '_Session',
+				id: sessionId,
+			}),
+		) || []
 
 	await databaseController.updateObject({
 		className: 'User',
 		id: userId,
 		context: hookObject.context,
 		data: {
-			sessions: newSessionsId,
+			sessions: newSessionsPointers,
 		},
 	})
 }

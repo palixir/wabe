@@ -6,7 +6,7 @@ import type { DevWabeTypes } from './helper'
 import getPort from 'get-port'
 
 export const getDatabaseAdapter = async (databaseName: string) => {
-	const mongodbAdapter = await import('wabe-mongodb')
+	const mongodbAdapter = await import('../../../wabe-mongodb/src')
 
 	return new mongodbAdapter.MongoAdapter<DevWabeTypes>({
 		// For postgres

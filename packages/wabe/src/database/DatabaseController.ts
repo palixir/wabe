@@ -348,6 +348,22 @@ export class DatabaseController<T extends WabeTypes> {
 		)
 	}
 
+	_extractPointerId(pointerValue: unknown): string | undefined {
+		if (typeof pointerValue === 'string') return pointerValue
+		if (!pointerValue || typeof pointerValue !== 'object') return undefined
+
+		const id = (pointerValue as { id?: unknown }).id
+		return typeof id === 'string' ? id : undefined
+	}
+
+	_extractRelationIds(relationValue: unknown): string[] {
+		if (!Array.isArray(relationValue)) return []
+
+		return relationValue
+			.map((value) => this._extractPointerId(value))
+			.filter((id): id is string => typeof id === 'string')
+	}
+
 	async _getWhereObjectWithPointerOrRelation<U extends keyof T['types']>(
 		className: U,
 		where: WhereType<T, U>,
@@ -431,14 +447,45 @@ export class DatabaseController<T extends WabeTypes> {
 			})
 			// When no objects match, use impossible condition to return no results
 			const relationWhere =
-				objects.length > 0
-					? {
-							in: objects.map((object) => object?.id).filter(notEmpty),
-						}
-					: { equalTo: '__no_match__' }
+				objects.length > 0 ? objects.map((object) => object?.id).filter(notEmpty) : []
+
+			if (field?.type === 'Pointer') {
+				return {
+					...currentAcc,
+					[typedWhereKey]:
+						relationWhere.length > 0
+							? { id: { in: relationWhere } }
+							: { id: { equalTo: '__no_match__' } },
+				}
+			}
+
+			const relationPointerFilters =
+				relationWhere.length > 0
+					? relationWhere.map((id) => ({
+							[typedWhereKey]: {
+								contains: {
+									class: fieldTargetClass,
+									id,
+									type: 'Pointer',
+								},
+							},
+						}))
+					: [
+							{
+								[typedWhereKey]: {
+									contains: {
+										class: fieldTargetClass,
+										id: '__no_match__',
+										type: 'Pointer',
+									},
+								},
+							},
+						]
+
 			return {
 				...currentAcc,
-				[typedWhereKey]: relationWhere,
+				[typedWhereKey]: undefined,
+				AND: [...((currentAcc as any).AND || []), { OR: relationPointerFilters }],
 			}
 		}, Promise.resolve({}))
 
@@ -632,11 +679,12 @@ export class DatabaseController<T extends WabeTypes> {
 		context: WabeContext<any>
 		_skipHooks?: boolean
 	}) {
-		if (!object[pointerField]) return null
+		const pointerId = this._extractPointerId(object[pointerField])
+		if (!pointerId) return null
 
 		return this.getObject({
 			className: currentClassName,
-			id: object[pointerField],
+			id: pointerId,
 			context,
 			// @ts-expect-error
 			select: currentSelect,
@@ -659,8 +707,16 @@ export class DatabaseController<T extends WabeTypes> {
 		context: WabeContext<any>
 		_skipHooks?: boolean
 	}) {
-		const relationIds = object[pointerField]
-		if (!relationIds) return undefined
+		const relationIds = this._extractRelationIds(object[pointerField])
+		if (relationIds.length === 0 && !Array.isArray(object[pointerField])) return undefined
+		if (relationIds.length === 0) {
+			if (!context.isGraphQLCall) return []
+
+			return {
+				totalCount: 0,
+				edges: [],
+			}
+		}
 
 		const selectWithoutTotalCount = this._getRelationSelectWithoutTotalCount(currentSelect)
 		const args = (currentSelect as any)?._args || {}

@@ -311,7 +311,11 @@ export class Session<T extends WabeTypes> {
 				accessTokenExpiresAt: this.getAccessTokenExpireAt(context.wabe.config),
 				refreshTokenEncrypted,
 				refreshTokenExpiresAt: this.getRefreshTokenExpireAt(context.wabe.config),
-				user: userId,
+				user: {
+					class: 'User',
+					id: userId,
+					type: 'Pointer',
+				},
 			},
 			// @ts-expect-error
 			select: { id: true },
