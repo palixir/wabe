@@ -445,17 +445,25 @@ export class DatabaseController<T extends WabeTypes> {
 				where: defaultWhere,
 				context,
 			})
-			// When no objects match, use impossible condition to return no results
+			// When no objects match, inject a contradiction that can never match.
 			const relationWhere =
 				objects.length > 0 ? objects.map((object) => object?.id).filter(notEmpty) : []
+			const neverMatchWhere = {
+				AND: [{ id: { exists: true } }, { id: { exists: false } }],
+			}
 
 			if (field?.type === 'Pointer') {
+				if (relationWhere.length === 0) {
+					return {
+						...currentAcc,
+						[typedWhereKey]: undefined,
+						AND: [...((currentAcc as any).AND || []), neverMatchWhere],
+					}
+				}
+
 				return {
 					...currentAcc,
-					[typedWhereKey]:
-						relationWhere.length > 0
-							? { id: { in: relationWhere } }
-							: { id: { equalTo: '__no_match__' } },
+					[typedWhereKey]: { id: { in: relationWhere } },
 				}
 			}
 
@@ -470,17 +478,7 @@ export class DatabaseController<T extends WabeTypes> {
 								},
 							},
 						}))
-					: [
-							{
-								[typedWhereKey]: {
-									contains: {
-										class: fieldTargetClass,
-										id: '__no_match__',
-										type: 'Pointer',
-									},
-								},
-							},
-						]
+					: [neverMatchWhere]
 
 			return {
 				...currentAcc,
