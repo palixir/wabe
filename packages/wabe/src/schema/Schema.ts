@@ -15,6 +15,7 @@ export type WabePrimaryTypes =
 	| 'Int'
 	| 'Float'
 	| 'Boolean'
+	| 'Any'
 	| 'Email'
 	| 'Phone'
 	| 'Date'
@@ -144,6 +145,7 @@ export type TypeField<T extends WabeTypes, K extends keyof T['types'] = keyof T[
 	| TypeFieldBase<number, 'Int'>
 	| TypeFieldBase<number, 'Float'>
 	| TypeFieldBase<boolean, 'Boolean'>
+	| TypeFieldBase<any, 'Any'>
 	| TypeFieldBase<Date, 'Date'>
 	| TypeFieldBase<string, 'Email'>
 	| TypeFieldBase<string, 'Phone'>
