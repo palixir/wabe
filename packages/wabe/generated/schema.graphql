@@ -1395,11 +1395,6 @@ type Mutation {
 	Send an OTP code by email to the user
 	"""
 	sendOtpCode(input: SendOtpCodeInput!): Boolean
-
-	"""
-	Send basic email with text and html, returns the id of the email
-	"""
-	sendEmail(input: SendEmailInput!): String
 	signInWith(input: SignInWithInput!): SignInWithOutput
 	signUpWith(input: SignUpWithInput!): SignUpWithOutput
 	signOut: Boolean
@@ -1879,14 +1874,6 @@ input ResetPasswordInput {
 
 input SendOtpCodeInput {
 	email: Email!
-}
-
-input SendEmailInput {
-	from: String!
-	to: [String!]!
-	subject: String!
-	text: String
-	html: String
 }
 
 type SignInWithOutput {
