@@ -38,6 +38,7 @@ export type AuthenticationEmailPasswordSRP = {
 	salt: string
 	verifier: string
 	serverSecret?: string
+	serverSecretExpiresAt?: Date
 }
 
 export type Authentication = {
@@ -269,18 +270,6 @@ export type MutationSendOtpCodeArgs = {
 	input: SendOtpCodeInput
 }
 
-export type SendEmailInput = {
-	from: string
-	to: Array<string>
-	subject: string
-	text?: string
-	html?: string
-}
-
-export type MutationSendEmailArgs = {
-	input: SendEmailInput
-}
-
 export type SignInWithInput = {
 	authentication: SignInWithAuthentication
 }
@@ -291,7 +280,7 @@ export type MutationSignInWithArgs = {
 
 export type SignInWithAuthenticationEmailPasswordSRP = {
 	email: string
-	clientPublic?: string
+	clientPublic: string
 	salt?: string
 	verifier?: string
 }
@@ -334,7 +323,7 @@ export type MutationSignUpWithArgs = {
 
 export type SignUpWithAuthenticationEmailPasswordSRP = {
 	email: string
-	clientPublic?: string
+	clientPublic: string
 	salt?: string
 	verifier?: string
 }

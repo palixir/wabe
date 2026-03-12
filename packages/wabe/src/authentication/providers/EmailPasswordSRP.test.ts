@@ -42,6 +42,7 @@ describe('EmailPasswordSRP', () => {
 					authentication: {
 						emailPasswordSRP: {
 							email,
+							clientPublic: 'sign-up-public',
 							salt,
 							verifier,
 						},
@@ -139,7 +140,7 @@ describe('EmailPasswordSRP', () => {
 			{
 				input: {
 					authentication: {
-						emailPasswordSRP: { email, salt, verifier },
+						emailPasswordSRP: { email, clientPublic: 'sign-up-public', salt, verifier },
 					},
 				},
 			},

@@ -68,6 +68,18 @@ export const signInWithResolver = async (
 		}
 	}
 
+	// SRP authentication is a two-step flow: the first call must only return challenge data.
+	// Tokens are created only after emailPasswordSRPChallenge is successfully verified.
+	if (name === 'emailPasswordSRP') {
+		return {
+			accessToken: null,
+			refreshToken: null,
+			user,
+			srp: srp || null,
+			challengeToken: null,
+		}
+	}
+
 	const session = new Session<DevWabeTypes>()
 
 	const { refreshToken, accessToken, csrfToken } = await session.create(userId, context)

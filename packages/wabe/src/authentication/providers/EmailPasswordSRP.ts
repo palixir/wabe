@@ -13,6 +13,10 @@ import { clearRateLimit, isRateLimited, registerRateLimitFailure } from '../secu
 const DUMMY_SALT = 'deadbeefdeadbeefdeadbeefdeadbeef'
 const DUMMY_VERIFIER =
 	'94c8f9b69f44fa0453a8a65129a7865ea2d70b21e645cf185d6fd42a679e524c394d4f02bba2032b10517be8c80f0f58e94302cb57cce7ce1e0a21906b6d22020b84a473d8ef58ea1f53e5204f8b83f05dc334b781fda309ad7cb8fa5c91dc81f64c114b671688b22e0f693a9c97ad2f43e6f1954c83d73e81e3dc8a963b7cbce'
+const SRP_SERVER_SECRET_TTL_MS = 5 * 60 * 1000
+
+const isFilledString = (value: string | undefined) =>
+	typeof value === 'string' && value.trim().length > 0
 
 type EmailPasswordSRPInterface = {
 	clientPublic: string
@@ -29,6 +33,8 @@ export class EmailPasswordSRP implements ProviderInterface<
 		input,
 		context,
 	}: AuthenticationEventsOptions<DevWabeTypes, EmailPasswordSRPInterface>) {
+		if (!isFilledString(input.clientPublic)) throw new Error('Invalid authentication credentials')
+
 		const server = createSRPServer('SHA-256', 3072)
 
 		const users = await context.wabe.controllers.database.getObjects({
@@ -78,6 +84,7 @@ export class EmailPasswordSRP implements ProviderInterface<
 					emailPasswordSRP: {
 						...user.authentication?.emailPasswordSRP,
 						serverSecret: ephemeral.secret,
+						serverSecretExpiresAt: new Date(Date.now() + SRP_SERVER_SECRET_TTL_MS),
 					},
 				},
 			},
@@ -118,6 +125,7 @@ export class EmailPasswordSRP implements ProviderInterface<
 				verifier: input.verifier,
 				email: input.email,
 				serverSecret: null,
+				serverSecretExpiresAt: null,
 			},
 		}
 	}
@@ -137,6 +145,9 @@ export class EmailPasswordSRPChallenge implements SecondaryProviderInterface<
 		context,
 		input,
 	}: OnVerifyChallengeOptions<DevWabeTypes, EmailPasswordSRPChallengeInterface>) {
+		if (!isFilledString(input.clientPublic) || !isFilledString(input.clientSessionProof))
+			throw new Error('Invalid authentication credentials')
+
 		const server = createSRPServer('SHA-256', 3072)
 
 		const users = await context.wabe.controllers.database.getObjects({
@@ -159,7 +170,15 @@ export class EmailPasswordSRPChallenge implements SecondaryProviderInterface<
 
 		const salt = user?.authentication?.emailPasswordSRP?.salt ?? DUMMY_SALT
 		const verifier = user?.authentication?.emailPasswordSRP?.verifier ?? DUMMY_VERIFIER
-		const serverSecret = user?.authentication?.emailPasswordSRP?.serverSecret ?? 'deadbeef'
+		const configuredServerSecret = user?.authentication?.emailPasswordSRP?.serverSecret
+		const serverSecretExpiresAt = user?.authentication?.emailPasswordSRP?.serverSecretExpiresAt
+		const hasValidServerSecret =
+			isFilledString(configuredServerSecret) &&
+			!!serverSecretExpiresAt &&
+			new Date(serverSecretExpiresAt) >= new Date()
+
+		const serverSecret =
+			hasValidServerSecret && configuredServerSecret ? configuredServerSecret : 'deadbeef'
 
 		let serverSession: Session
 		try {
@@ -180,6 +199,24 @@ export class EmailPasswordSRPChallenge implements SecondaryProviderInterface<
 			await new Promise((resolve) => setTimeout(resolve, 10))
 			throw new Error('Invalid authentication credentials')
 		}
+
+		if (!hasValidServerSecret) throw new Error('Invalid authentication credentials')
+
+		await context.wabe.controllers.database.updateObject({
+			className: 'User',
+			context: contextWithRoot(context),
+			id: user.id,
+			data: {
+				authentication: {
+					emailPasswordSRP: {
+						...user.authentication?.emailPasswordSRP,
+						serverSecret: null,
+						serverSecretExpiresAt: null,
+					},
+				},
+			},
+			select: {},
+		})
 
 		return {
 			userId: user.id,

@@ -1,4 +1,4 @@
-import { describe, expect, it, spyOn } from 'bun:test'
+import { afterEach, describe, expect, it, mock, spyOn } from 'bun:test'
 import { Google } from './Google'
 import { OAuth2Client } from './Oauth2Client'
 
@@ -17,6 +17,10 @@ describe('Google oauth', () => {
 	} as any
 
 	const googleOauth = new Google(config)
+
+	afterEach(() => {
+		mock.restore()
+	})
 
 	it('should create authorization url', () => {
 		const spyOauth2ClientCreateAuthorizationUrl = spyOn(
@@ -40,6 +44,7 @@ describe('Google oauth', () => {
 	})
 
 	it('should validate authorization code', async () => {
+		const startTime = Date.now()
 		const spyOauth2ClientValidateAuthorizationCode = spyOn(
 			OAuth2Client.prototype,
 			'validateAuthorizationCode',
@@ -58,15 +63,11 @@ describe('Google oauth', () => {
 			codeVerifier: 'codeVerifier',
 		})
 
-		// +100 to avoid flaky
-		expect((res.accessTokenExpiresAt?.getTime() || 0) + 100).toBeGreaterThanOrEqual(
-			Date.now() + 3600 * 1000,
-		)
-
-		spyOauth2ClientValidateAuthorizationCode.mockRestore()
+		expect(res.accessTokenExpiresAt?.getTime() || 0).toBeGreaterThanOrEqual(startTime + 3600 * 1000)
 	})
 
 	it('should refresh access token', async () => {
+		const startTime = Date.now()
 		const spyOauth2ClientRefreshAccessToken = spyOn(
 			OAuth2Client.prototype,
 			'refreshAccessToken',
@@ -84,8 +85,6 @@ describe('Google oauth', () => {
 		})
 
 		expect(res.accessToken).toBe('access_token')
-		expect(res.accessTokenExpiresAt?.getTime()).toBeGreaterThanOrEqual(Date.now() + 3600 * 1000)
-
-		spyOauth2ClientRefreshAccessToken.mockRestore()
+		expect(res.accessTokenExpiresAt?.getTime() || 0).toBeGreaterThanOrEqual(startTime + 3600 * 1000)
 	})
 })

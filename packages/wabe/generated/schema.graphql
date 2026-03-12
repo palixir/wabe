@@ -93,6 +93,7 @@ type UserAuthenticationEmailPasswordSRP {
 	salt: String!
 	verifier: String!
 	serverSecret: String
+	serverSecretExpiresAt: Date
 }
 
 type UserAuthenticationPhonePassword {
@@ -272,6 +273,7 @@ input UserAuthenticationEmailPasswordSRPWhereInput {
 	salt: StringWhereInput
 	verifier: StringWhereInput
 	serverSecret: StringWhereInput
+	serverSecretExpiresAt: DateWhereInput
 	OR: [UserAuthenticationEmailPasswordSRPWhereInput]
 	AND: [UserAuthenticationEmailPasswordSRPWhereInput]
 }
@@ -496,6 +498,7 @@ input UserAuthenticationEmailPasswordSRPInput {
 	salt: String!
 	verifier: String!
 	serverSecret: String
+	serverSecretExpiresAt: Date
 }
 
 input UserAuthenticationPhonePasswordInput {
@@ -590,6 +593,7 @@ input UserAuthenticationEmailPasswordSRPCreateFieldsInput {
 	salt: String
 	verifier: String
 	serverSecret: String
+	serverSecretExpiresAt: Date
 }
 
 input UserAuthenticationPhonePasswordCreateFieldsInput {
@@ -1480,6 +1484,7 @@ input UserAuthenticationEmailPasswordSRPUpdateFieldsInput {
 	salt: String
 	verifier: String
 	serverSecret: String
+	serverSecretExpiresAt: Date
 }
 
 input UserAuthenticationPhonePasswordUpdateFieldsInput {
@@ -1911,7 +1916,7 @@ input SignInWithAuthenticationInput {
 
 input SignInWithAuthenticationEmailPasswordSRPInput {
 	email: Email!
-	clientPublic: String
+	clientPublic: String!
 	salt: String
 	verifier: String
 }
@@ -1956,7 +1961,7 @@ input SignUpWithAuthenticationInput {
 
 input SignUpWithAuthenticationEmailPasswordSRPInput {
 	email: Email!
-	clientPublic: String
+	clientPublic: String!
 	salt: String
 	verifier: String
 }
