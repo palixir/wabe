@@ -1,6 +1,7 @@
 import { timingSafeEqual } from 'node:crypto'
 import type { ClassInterface } from '../schema'
 import type { WabeTypes, WabeConfig, WabeContext } from '../server'
+import { isUnsafeObjectKey } from './objectKeys'
 
 export const isValidRootKey = (headers: Headers, rootKey: string): boolean => {
 	const headerRootKey = Buffer.from(headers.get('Wabe-Root-Key') || '')
@@ -102,6 +103,12 @@ export const base32Encode = (
 
 export const getNewObjectAfterUpdateNestedProperty = (obj: any, path: string, value: any) => {
 	const keys = path.split('.')
+
+	if (keys.some((key) => key && isUnsafeObjectKey(key))) return obj
+
+	const lastKey = keys[keys.length - 1]
+	if (!lastKey) return obj
+
 	let current = { ...obj }
 
 	for (let i = 0; i < keys.length - 1; i++) {
@@ -115,8 +122,7 @@ export const getNewObjectAfterUpdateNestedProperty = (obj: any, path: string, va
 		current = current[key]
 	}
 
-	// @ts-expect-error
-	current[keys[keys.length - 1]] = value
+	current[lastKey] = value
 	return obj
 }
 

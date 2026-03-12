@@ -3,6 +3,7 @@ import type { WabeTypes } from '../..'
 import { initializeHook, OperationType } from '../hooks'
 import type { SchemaInterface } from '../schema'
 import type { WabeContext } from '../server/interface'
+import { isUnsafeObjectKey } from '../utils/objectKeys'
 import { contextWithRoot, notEmpty } from '../utils/export'
 import type { DevWabeTypes } from '../utils/helper'
 import {
@@ -258,6 +259,7 @@ export class DatabaseController<T extends WabeTypes> {
 
 		for (const [fieldName, value] of Object.entries(payload)) {
 			if (virtualFields[fieldName]) continue
+			if (isUnsafeObjectKey(fieldName)) continue
 
 			filteredPayload[fieldName] = value
 		}

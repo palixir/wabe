@@ -3,6 +3,7 @@ import type { RoleEnum, ACLObject } from '../../generated/wabe'
 import type { MutationData, OutputType, Select } from '../database'
 import type { WabeTypes } from '../server'
 import type { WabeContext } from '../server/interface'
+import { isUnsafeObjectKey } from '../utils/objectKeys'
 import { contextWithRoot } from '../utils/export'
 
 type AddACLOpptions = {
@@ -61,6 +62,9 @@ export class HookObject<T extends WabeTypes, K extends keyof WabeTypes['types']>
 
 		if (!['beforeCreate', 'beforeUpdate'].includes(this.operationType))
 			throw new Error('Cannot set data in a hook that is not a before hook')
+
+		if (isUnsafeObjectKey(String(field)))
+			throw new Error(`Cannot set unsafe field key "${String(field)}"`)
 
 		this.newData[field] = value
 	}
