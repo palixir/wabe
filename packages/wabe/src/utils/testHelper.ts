@@ -24,8 +24,12 @@ export const setupTests = async (
 		disableIntrospection?: boolean
 		rootKey?: string
 		rateLimit?: RateLimitOptions
+		maxWhereRecursionDepth?: number
+		security?: { maxWhereRecursionDepth?: number }
 	} = {},
 ) => {
+	const maxWhereRecursionDepth =
+		options.security?.maxWhereRecursionDepth ?? options.maxWhereRecursionDepth
 	const databaseId = uuid()
 
 	const port = await getPort()
@@ -44,6 +48,9 @@ export const setupTests = async (
 				disableIntrospection: options.disableIntrospection,
 			}),
 			...(options.rateLimit && { rateLimit: options.rateLimit }),
+			...(maxWhereRecursionDepth !== undefined && {
+				maxWhereRecursionDepth,
+			}),
 		},
 		authentication: {
 			roles: ['Client', 'Client2', 'Client3', 'Admin'],

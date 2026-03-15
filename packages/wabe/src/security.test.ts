@@ -65,6 +65,37 @@ describe('Security tests', () => {
 		await closeTests(wabe)
 	})
 
+	it('should reject deeply nested where queries to prevent DoS', async () => {
+		const setup = await setupTests([
+			{
+				name: 'DepthTest',
+				fields: { name: { type: 'String' } },
+				permissions: {
+					read: { requireAuthentication: false },
+					create: { requireAuthentication: false },
+				},
+			},
+		])
+
+		const wabe = setup.wabe
+		const rootContext = { wabe, isRoot: true } as any
+
+		// Build AND nesting deeper than MAX_WHERE_RECURSION_DEPTH (10)
+		const buildDeepAnd = (depth: number): any =>
+			depth <= 0 ? { name: { equalTo: 'test' } } : { AND: [buildDeepAnd(depth - 1)] }
+
+		await expect(
+			wabe.controllers.database.getObjects({
+				className: 'DepthTest' as any,
+				context: rootContext,
+				where: buildDeepAnd(12) as any,
+				select: { id: true },
+			}),
+		).rejects.toThrow('Query recursion depth exceeded maximum')
+
+		await closeTests(wabe)
+	})
+
 	it('should not apply rate limit on GraphQL endpoints when rateLimit is not configured', async () => {
 		const setup = await setupTests([
 			{
@@ -98,6 +129,140 @@ describe('Security tests', () => {
 		const results = await Promise.all(requests)
 		expect(results).toHaveLength(5)
 		results.forEach((res) => expect(res.noRateLimitTests).toBeDefined())
+
+		await closeTests(wabe)
+	})
+
+	it('should reject queries with deeply nested where conditions (DoS prevention)', async () => {
+		const setup = await setupTests([
+			{
+				name: 'DepthTest',
+				fields: { name: { type: 'String' } },
+				permissions: {
+					read: { requireAuthentication: false },
+					create: { requireAuthentication: false },
+				},
+			},
+		])
+		const wabe = setup.wabe
+
+		const buildDeepAnd = (levels: number): any =>
+			levels <= 0 ? { name: { equalTo: 'x' } } : { AND: [buildDeepAnd(levels - 1)] }
+
+		await expect(
+			wabe.controllers.database.getObjects({
+				// @ts-expect-error DepthTest is runtime-defined
+				className: 'DepthTest',
+				where: buildDeepAnd(12),
+				context: { wabe, isRoot: true },
+				select: { id: true },
+			}),
+		).rejects.toThrow(/Query recursion depth exceeded maximum/)
+
+		await closeTests(wabe)
+	})
+
+	it('should respect custom maxWhereRecursionDepth when configured', async () => {
+		const setup = await setupTests(
+			[
+				{
+					name: 'DepthTest',
+					fields: { name: { type: 'String' } },
+					permissions: {
+						read: { requireAuthentication: false },
+						create: { requireAuthentication: false },
+					},
+				},
+			],
+			{ maxWhereRecursionDepth: 15 },
+		)
+		const wabe = setup.wabe
+		const rootContext = { wabe, isRoot: true } as any
+
+		const buildDeepAnd = (depth: number): any =>
+			depth <= 0 ? { name: { equalTo: 'x' } } : { AND: [buildDeepAnd(depth - 1)] }
+
+		// Depth 12 should succeed with limit 15
+		const result = await wabe.controllers.database.getObjects({
+			className: 'DepthTest' as any,
+			context: rootContext,
+			where: buildDeepAnd(12) as any,
+			select: { id: true },
+		})
+		expect(result).toEqual([])
+
+		// Depth 16 should fail
+		await expect(
+			wabe.controllers.database.getObjects({
+				className: 'DepthTest' as any,
+				context: rootContext,
+				where: buildDeepAnd(16) as any,
+				select: { id: true },
+			}),
+		).rejects.toThrow(/Query recursion depth exceeded maximum \(15\)/)
+
+		await closeTests(wabe)
+	})
+
+	it('should reject deeply nested where queries to prevent DoS', async () => {
+		const setup = await setupTests([
+			{
+				name: 'DepthLimitTest',
+				fields: { name: { type: 'String' } },
+				permissions: {
+					read: { requireAuthentication: false },
+					create: { requireAuthentication: false },
+				},
+			},
+		])
+
+		const wabe = setup.wabe
+
+		const buildDeepAnd = (depth: number): any =>
+			depth <= 0 ? { name: { equalTo: 'x' } } : { AND: [buildDeepAnd(depth - 1)] }
+
+		const deepWhere = buildDeepAnd(12)
+
+		await expect(
+			wabe.controllers.database.getObjects({
+				className: 'DepthLimitTest' as any,
+				context: { isRoot: true, wabe } as any,
+				where: deepWhere,
+				select: { id: true },
+			}),
+		).rejects.toThrow('Query recursion depth exceeded maximum (10)')
+
+		await closeTests(wabe)
+	})
+
+	it('should reject deeply nested where clauses to prevent DoS', async () => {
+		const setup = await setupTests([
+			{
+				name: 'DepthLimitTest',
+				fields: { name: { type: 'String' } },
+				permissions: {
+					read: { requireAuthentication: false },
+					create: { requireAuthentication: false },
+				},
+			},
+		])
+
+		const wabe = setup.wabe
+
+		// Build AND([AND([AND([...])])]) exceeding max depth (10)
+		const buildDeepAnd = (depth: number): any =>
+			depth <= 0 ? { name: { equalTo: 'x' } } : { AND: [buildDeepAnd(depth - 1)] }
+
+		const deeplyNestedWhere = buildDeepAnd(12)
+
+		await expect(
+			wabe.controllers.database.getObjects({
+				className: 'DepthLimitTest' as any,
+				where: deeplyNestedWhere,
+				context: { isRoot: true, wabe } as any,
+				select: { id: true },
+			}),
+		).rejects.toThrow('Query recursion depth exceeded maximum')
 
 		await closeTests(wabe)
 	})
@@ -1123,9 +1288,18 @@ describe('Security tests', () => {
 				name: 'AclRestrictedTest',
 				fields: { name: { type: 'String' } },
 				permissions: {
-					create: { authorizedRoles: ['Client'], requireAuthentication: true },
-					read: { authorizedRoles: ['Client'], requireAuthentication: true },
-					update: { authorizedRoles: ['Client'], requireAuthentication: true },
+					create: {
+						authorizedRoles: ['Client'],
+						requireAuthentication: true,
+					},
+					read: {
+						authorizedRoles: ['Client'],
+						requireAuthentication: true,
+					},
+					update: {
+						authorizedRoles: ['Client'],
+						requireAuthentication: true,
+					},
 				},
 			},
 		])
