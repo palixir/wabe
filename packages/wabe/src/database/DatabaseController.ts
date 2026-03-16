@@ -24,6 +24,8 @@ import {
 export type Select = Record<string, boolean>
 type SelectWithObject = Record<string, object | boolean>
 
+const DEFAULT_MAX_WHERE_RECURSION_DEPTH = 10
+
 const scalarWhereOperators = new Set([
 	'equalTo',
 	'notEqualTo',
@@ -370,7 +372,15 @@ export class DatabaseController<T extends WabeTypes> {
 		className: U,
 		where: WhereType<T, U>,
 		context: WabeContext<T>,
+		depth = 0,
 	) {
+		const maxDepth =
+			context.wabe.config.security?.maxWhereRecursionDepth ?? DEFAULT_MAX_WHERE_RECURSION_DEPTH
+		if (depth > maxDepth)
+			throw new Error(
+				`Query recursion depth exceeded maximum (${maxDepth}). Reduce nested where conditions.`,
+			)
+
 		const whereKeys = Object.keys(where) as Array<keyof WhereType<T, U>>
 
 		const realClass = this._getClass(className, context)
@@ -385,7 +395,7 @@ export class DatabaseController<T extends WabeTypes> {
 			if (typedWhereKey === 'AND' || typedWhereKey === 'OR') {
 				const newWhere = await Promise.all(
 					(where[typedWhereKey] as any).map((whereObject: any) =>
-						this._getWhereObjectWithPointerOrRelation(className, whereObject, context),
+						this._getWhereObjectWithPointerOrRelation(className, whereObject, context, depth + 1),
 					),
 				)
 
@@ -446,6 +456,7 @@ export class DatabaseController<T extends WabeTypes> {
 				// @ts-expect-error
 				where: defaultWhere,
 				context,
+				_whereRecursionDepth: depth + 1,
 			})
 			// When no objects match, inject a contradiction that can never match.
 			const relationWhere =
@@ -988,6 +999,7 @@ export class DatabaseController<T extends WabeTypes> {
 		first,
 		offset,
 		order,
+		_whereRecursionDepth,
 	}: GetObjectsOptions<T, K, U, W>): Promise<OutputType<T, K, W>[]> {
 		const { pointers, selectWithoutPointers } = this._getSelectMinusPointersAndRelations({
 			className,
@@ -1004,6 +1016,7 @@ export class DatabaseController<T extends WabeTypes> {
 			className,
 			where || {},
 			context,
+			_whereRecursionDepth ?? 0,
 		)
 
 		const whereWithACLCondition = this._buildWhereWithACL(whereWithPointer || {}, context, 'read')

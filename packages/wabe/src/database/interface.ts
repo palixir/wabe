@@ -153,6 +153,8 @@ export interface GetObjectsOptions<
 	context: WabeContext<T>
 	_skipHooks?: boolean
 	select?: SelectType<T, K, W>
+	/** @internal For security: limits recursion depth of where with Pointer/Relation */
+	_whereRecursionDepth?: number
 }
 
 export interface CreateObjectOptions<

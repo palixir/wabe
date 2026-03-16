@@ -333,6 +333,42 @@ security: {
 - **Public APIs**: Consider stricter limits to prevent abuse
 - **Authentication endpoints**: Rate limiting helps mitigate brute-force attacks on login flows
 
+## Where recursion depth limit
+
+Wabe limits the recursion depth of `where` conditions (AND/OR, Pointer, Relation) to prevent denial-of-service attacks via deeply nested queries. Queries exceeding the limit are rejected with an error.
+
+### Configuration
+
+Set `maxWhereRecursionDepth` in the `security` configuration to override the default (10):
+
+```ts
+import { Wabe } from "wabe";
+
+const run = async () => {
+  const wabe = new Wabe({
+    // ... other configuration fields
+    security: {
+      maxWhereRecursionDepth: 15, // Default: 10
+    },
+  });
+
+  await wabe.start();
+};
+
+await run();
+```
+
+### Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `maxWhereRecursionDepth` | `number` | `10` | Maximum recursion depth for nested where conditions (AND/OR, Pointer, Relation subqueries). |
+
+### When to adjust
+
+- **Increase** (e.g. 15–20): If your domain requires deeply nested relations in `where` filters and legitimate queries hit the limit.
+- **Decrease** (e.g. 5): For stricter DoS protection on public or high-risk APIs.
+
 ## Hide sensitive error message
 
 You can hide sensitive error messages, for example, to avoid leaking any information to an attacker during the authentication process.

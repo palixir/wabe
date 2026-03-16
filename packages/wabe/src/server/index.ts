@@ -28,6 +28,11 @@ type SecurityConfig = {
 	disableGraphQLDashboard?: boolean
 	disableIntrospection?: boolean
 	maxGraphqlDepth?: number
+	/**
+	 * Maximum recursion depth for where clauses with AND/OR and Pointer/Relation subqueries.
+	 * Prevents DoS via deeply nested queries. Default: 10.
+	 */
+	maxWhereRecursionDepth?: number
 }
 
 export * from './interface'
