@@ -15,7 +15,7 @@ import type {
 import { firstLetterUpperCase, type DevWabeTypes } from '../utils/helper'
 import { firstLetterInUpperCase } from '../utils'
 
-const wabePrimaryTypesToTypescriptTypes: Record<WabePrimaryTypes, string> = {
+const wabePrimaryTypesToTypescriptTypes: Record<Exclude<WabePrimaryTypes, 'File'>, string> = {
 	Boolean: 'boolean',
 	Int: 'number',
 	Float: 'number',
@@ -24,21 +24,29 @@ const wabePrimaryTypesToTypescriptTypes: Record<WabePrimaryTypes, string> = {
 	Email: 'string',
 	Phone: 'string',
 	Date: 'Date',
-	File: '{url: string, name: string}',
 	Hash: 'string',
+}
+
+const getFileTypeString = (options?: CodegenFormatOptions) => {
+	const sep = options?.semi ? '; ' : ', '
+	return `{ url: string${sep}name: string }`
 }
 
 const wabeTypesToTypescriptTypes = ({
 	field,
 	isInput = false,
+	formatOptions,
 }: {
 	field: TypeField<DevWabeTypes>
 	isInput?: boolean
+	formatOptions?: CodegenFormatOptions
 }) => {
 	switch (field.type) {
 		case 'Date':
 			if (isInput) return 'Date'
 			return 'string'
+		case 'File':
+			return getFileTypeString(formatOptions)
 		case 'Boolean':
 		case 'Int':
 		case 'Float':
@@ -46,11 +54,11 @@ const wabeTypesToTypescriptTypes = ({
 		case 'Any':
 		case 'Email':
 		case 'Phone':
-		case 'File':
 		case 'Hash':
 			return wabePrimaryTypesToTypescriptTypes[field.type]
 		case 'Array':
 			if (field.typeValue === 'Object') return `Array<${field.object.name}>`
+			if (field.typeValue === 'File') return `Array<${getFileTypeString(formatOptions)}>`
 			return `Array<${wabePrimaryTypesToTypescriptTypes[field.typeValue]}>`
 		case 'Pointer':
 			return field.class
@@ -67,16 +75,18 @@ const generateWabeObject = ({
 	object,
 	isInput = false,
 	prefix = '',
+	formatOptions,
 }: {
 	object: WabeObject<DevWabeTypes>
 	prefix?: string
 	isInput?: boolean
+	formatOptions?: CodegenFormatOptions
 }): Record<string, Record<string, string>> => {
 	const objectName = object.name
 
 	return Object.entries(object.fields).reduce(
 		(acc, [fieldName, field]) => {
-			const type = wabeTypesToTypescriptTypes({ field, isInput })
+			const type = wabeTypesToTypescriptTypes({ field, isInput, formatOptions })
 
 			const objectNameWithPrefix = `${prefix}${firstLetterUpperCase(objectName)}`
 
@@ -85,6 +95,7 @@ const generateWabeObject = ({
 					object: field.object,
 					isInput,
 					prefix: objectNameWithPrefix,
+					formatOptions,
 				})
 
 				const isArray = field.type === 'Array'
@@ -115,7 +126,10 @@ const generateWabeObject = ({
 	)
 }
 
-const generateWabeTypes = (classes: ClassInterface<DevWabeTypes>[]) => {
+const generateWabeTypes = (
+	classes: ClassInterface<DevWabeTypes>[],
+	formatOptions?: CodegenFormatOptions,
+) => {
 	const wabeTypes = classes.reduce(
 		(acc, classType) => {
 			const { name, fields } = classType
@@ -124,10 +138,13 @@ const generateWabeTypes = (classes: ClassInterface<DevWabeTypes>[]) => {
 
 			const currentClass = Object.entries(fields).reduce(
 				(acc2, [name, field]) => {
-					const type = wabeTypesToTypescriptTypes({ field })
+					const type = wabeTypesToTypescriptTypes({ field, formatOptions })
 
 					if (field.type === 'Object' || (field.type === 'Array' && field.typeValue === 'Object')) {
-						const wabeObject = generateWabeObject({ object: field.object })
+						const wabeObject = generateWabeObject({
+							object: field.object,
+							formatOptions,
+						})
 
 						objectsToLoad.push(wabeObject)
 					}
@@ -154,7 +171,10 @@ const generateWabeTypes = (classes: ClassInterface<DevWabeTypes>[]) => {
 	return wabeTypes
 }
 
-const generateWabeWhereTypes = (classes: ClassInterface<DevWabeTypes>[]) => {
+const generateWabeWhereTypes = (
+	classes: ClassInterface<DevWabeTypes>[],
+	formatOptions?: CodegenFormatOptions,
+) => {
 	const wabeTypes = classes.reduce(
 		(acc, classType) => {
 			const { name, fields } = classType
@@ -165,12 +185,17 @@ const generateWabeWhereTypes = (classes: ClassInterface<DevWabeTypes>[]) => {
 
 			const currentClass = Object.entries(fields).reduce(
 				(acc2, [name, field]) => {
-					const type = wabeTypesToTypescriptTypes({ field, isInput: true })
+					const type = wabeTypesToTypescriptTypes({
+						field,
+						isInput: true,
+						formatOptions,
+					})
 
 					if (field.type === 'Object' || (field.type === 'Array' && field.typeValue === 'Object')) {
 						const wabeObject = generateWabeObject({
 							object: field.object,
 							isInput: true,
+							formatOptions,
 						})
 
 						objectsToLoad.push(wabeObject)
@@ -228,6 +253,7 @@ const generateWabeMutationOrQueryInput = (
 	mutationOrQueryName: string,
 	resolver: MutationResolver<any> | QueryResolver<any>,
 	isMutation: boolean,
+	formatOptions?: CodegenFormatOptions,
 ) => {
 	const objectsToLoad: Array<Record<string, Record<string, string>>> = []
 
@@ -237,7 +263,11 @@ const generateWabeMutationOrQueryInput = (
 		(isMutation ? resolver.args?.input : resolver.args) || {},
 	).reduce(
 		(acc, [name, field]) => {
-			let type = wabeTypesToTypescriptTypes({ field, isInput: true })
+			let type = wabeTypesToTypescriptTypes({
+				field,
+				isInput: true,
+				formatOptions,
+			})
 
 			if (field.type === 'Object') {
 				type = firstLetterInUpperCase(name)
@@ -248,6 +278,7 @@ const generateWabeMutationOrQueryInput = (
 						name: type,
 					},
 					prefix: mutationNameWithFirstLetterUpperCase,
+					formatOptions,
 				})
 
 				objectsToLoad.push(wabeObject)
@@ -284,12 +315,15 @@ const generateWabeMutationOrQueryInput = (
 	}
 }
 
-const generateWabeMutationsAndQueriesTypes = (resolver: TypeResolver<any>) => {
+const generateWabeMutationsAndQueriesTypes = (
+	resolver: TypeResolver<any>,
+	formatOptions?: CodegenFormatOptions,
+) => {
 	const mutationsObject = Object.entries(resolver.mutations || {}).reduce(
 		(acc, [mutationName, mutation]) => {
 			return {
 				...acc,
-				...generateWabeMutationOrQueryInput(mutationName, mutation, true),
+				...generateWabeMutationOrQueryInput(mutationName, mutation, true, formatOptions),
 			}
 		},
 		{},
@@ -298,7 +332,7 @@ const generateWabeMutationsAndQueriesTypes = (resolver: TypeResolver<any>) => {
 	const queriesObject = Object.entries(resolver.queries || {}).reduce((acc, [queryName, query]) => {
 		return {
 			...acc,
-			...generateWabeMutationOrQueryInput(queryName, query, false),
+			...generateWabeMutationOrQueryInput(queryName, query, false, formatOptions),
 		}
 	}, {})
 
@@ -511,9 +545,9 @@ export const generateCodegen = async ({
 	const enums = schema.enums ?? []
 	const scalars = schema.scalars ?? []
 
-	const wabeClasses = generateWabeTypes(classes)
-	const wabeWhereTypes = generateWabeWhereTypes(classes)
-	const mutationsAndQueries = generateWabeMutationsAndQueriesTypes(resolvers)
+	const wabeClasses = generateWabeTypes(classes, options)
+	const wabeWhereTypes = generateWabeWhereTypes(classes, options)
+	const mutationsAndQueries = generateWabeMutationsAndQueriesTypes(resolvers, options)
 
 	const wabeEnumsInString = wabeEnumRecordToString(generateWabeEnumTypes(enums), options)
 	const wabeScalarsInString = wabeScalarRecordToString(generateWabeScalarTypes(scalars))
