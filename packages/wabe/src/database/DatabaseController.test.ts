@@ -610,4 +610,85 @@ describe('DatabaseController', () => {
 
 		mockRunOnMultipleObject.mockClear()
 	})
+
+	it('should transform pointer where filters on getObject', async () => {
+		mockGetObjects.mockResolvedValue([{ id: 'related-id' }] as never)
+		mockGetObject.mockResolvedValue({ id: 'id' } as never)
+
+		const databaseController = new DatabaseController(mockAdapter() as any)
+
+		await databaseController.getObject({
+			className: 'TestClass',
+			context,
+			id: 'id',
+			where: {
+				pointerToAnotherClass: {
+					field1: {
+						equalTo: 'value',
+					},
+				},
+			} as any,
+			select: {
+				id: true,
+			},
+		})
+
+		expect(mockGetObjects).toHaveBeenCalledWith(
+			expect.objectContaining({
+				className: 'AnotherClass',
+				where: {
+					field1: {
+						equalTo: 'value',
+					},
+				},
+			}),
+		)
+
+		expect(mockGetObject).toHaveBeenCalledWith(
+			expect.objectContaining({
+				className: 'TestClass',
+				id: 'id',
+				where: {
+					pointerToAnotherClass: {
+						id: {
+							in: ['related-id'],
+						},
+					},
+				},
+			}),
+		)
+	})
+
+	it('should enforce max where recursion depth on getObject', async () => {
+		mockGetObject.mockResolvedValue({ id: 'id' } as never)
+		const databaseController = new DatabaseController(mockAdapter() as any)
+		const contextWithRecursionLimit = {
+			...context,
+			wabe: {
+				config: {
+					...config,
+					security: {
+						maxWhereRecursionDepth: 1,
+					},
+				},
+			},
+		} as any
+
+		await expect(
+			databaseController.getObject({
+				className: 'TestClass',
+				context: contextWithRecursionLimit,
+				id: 'id',
+				where: {
+					AND: [
+						{
+							AND: [{ id: { equalTo: 'id' } }],
+						},
+					],
+				} as any,
+				select: { id: true },
+			}),
+		).rejects.toThrow('Query recursion depth exceeded maximum (1)')
+		expect(mockGetObject).toHaveBeenCalledTimes(0)
+	})
 })

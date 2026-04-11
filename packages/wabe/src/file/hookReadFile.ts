@@ -7,7 +7,7 @@ const getFile = async (hookObject: HookObject<any, any>) => {
 
 	if (!schema) return
 
-	const urlCacheInSeconds = hookObject.context.wabe.config.file?.urlCacheInSeconds || 3600 * 24
+	const urlCacheInSeconds = hookObject.context.wabe.config.file?.urlCacheInSeconds ?? 3600 * 24
 
 	// After read we get the file URL and we update the field url with an URL.
 	// For security purpose we recommend to use a presigned URL
@@ -34,8 +34,9 @@ const getFile = async (hookObject: HookObject<any, any>) => {
 				if (!hookObject.context.wabe.controllers.file) throw new Error('No file adapter found')
 
 				const fileUrlFromBucket = await hookObject.context.wabe.controllers.file?.readFile(fileName)
+				if (!fileUrlFromBucket) return
 
-				const newUrl = fileUrlFromBucket || fileInfo.url
+				const newUrl = fileUrlFromBucket
 				const newUrlGeneratedAt = new Date()
 
 				// Mutate the object returned to the caller so AfterRead effects are visible immediately
@@ -46,10 +47,12 @@ const getFile = async (hookObject: HookObject<any, any>) => {
 					url: newUrl,
 				}
 
+				if (!hookObject.object?.id) return
+
 				return hookObject.context.wabe.controllers.database.updateObject({
 					className: hookObject.className,
 					context: hookObject.context,
-					id: hookObject.object?.id || '',
+					id: hookObject.object.id,
 					data: {
 						[fieldName]: {
 							...fileInfo,

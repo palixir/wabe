@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'bun:test'
 import {
+	firstLetterInUpperCase,
 	firstLetterInLowerCase,
 	getCookieInRequestHeaders,
 	getNewObjectAfterUpdateNestedProperty,
@@ -12,6 +13,15 @@ describe('utils', () => {
 		expect(firstLetterInLowerCase('User')).toEqual('user')
 		expect(firstLetterInLowerCase('USer')).toEqual('uSer')
 		expect(firstLetterInLowerCase('99 User')).toEqual('99 user')
+		expect(firstLetterInLowerCase('12345')).toEqual('12345')
+		expect(firstLetterInLowerCase('')).toEqual('')
+	})
+
+	it('should put the first letter in uppercase', () => {
+		expect(firstLetterInUpperCase('hello')).toEqual('Hello')
+		expect(firstLetterInUpperCase('99 user')).toEqual('99 User')
+		expect(firstLetterInUpperCase('12345')).toEqual('12345')
+		expect(firstLetterInUpperCase('')).toEqual('')
 	})
 
 	it('should read a cookie by exact name match', () => {

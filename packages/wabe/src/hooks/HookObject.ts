@@ -54,7 +54,8 @@ export class HookObject<T extends WabeTypes, K extends keyof WabeTypes['types']>
 	}
 
 	isFieldUpdated(field: keyof T['types'][K]) {
-		return !!(this.newData && !!this.newData[field])
+		if (!this.newData) return false
+		return Object.prototype.hasOwnProperty.call(this.newData, field)
 	}
 
 	upsertNewData(field: keyof T['types'][K], value: any) {

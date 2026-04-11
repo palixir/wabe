@@ -346,6 +346,10 @@ export class Wabe<T extends WabeTypes> {
 	}
 
 	async close() {
+		this.config.crons?.forEach(({ job }) => {
+			// Croner jobs expose stop() when active.
+			job?.stop?.()
+		})
 		await this.controllers.database.close()
 		await this.server.stop()
 	}

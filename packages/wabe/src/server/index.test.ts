@@ -1,4 +1,4 @@
-import { describe, expect, it, spyOn } from 'bun:test'
+import { describe, expect, it, spyOn, mock } from 'bun:test'
 import { v4 as uuid } from 'uuid'
 import getPort from 'get-port'
 import { Wabe } from '.'
@@ -839,5 +839,38 @@ describe('Server', () => {
 		})
 
 		await wabe.close()
+	})
+
+	it('should stop cron jobs when closing the server', async () => {
+		const stopCron = mock()
+		const closeDatabase = mock(async () => {})
+		const stopServer = mock(async () => {})
+		const wabe = new Wabe({
+			isProduction: false,
+			rootKey: 'test-root-key',
+			port: 1234,
+			database: {
+				adapter: {
+					close: closeDatabase,
+				} as any,
+			},
+			crons: [
+				{
+					name: 'cleanup',
+					cron: () =>
+						({
+							stop: stopCron,
+						}) as any,
+				},
+			],
+		})
+
+		wabe.server.stop = stopServer
+
+		await wabe.close()
+
+		expect(stopCron).toHaveBeenCalledTimes(1)
+		expect(closeDatabase).toHaveBeenCalledTimes(1)
+		expect(stopServer).toHaveBeenCalledTimes(1)
 	})
 })

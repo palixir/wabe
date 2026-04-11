@@ -133,6 +133,12 @@ export const secureUploadedFile = async <T extends WabeTypes>(
 		throw new Error('File MIME type is not allowed')
 
 	const detectedMimeType = await detectMimeTypeFromContent(file)
+	const mimeTypeHasKnownSignature = MIME_SIGNATURES.some(
+		(signature) => signature.mimeType === mimeType,
+	)
+
+	if (mimeTypeHasKnownSignature && detectedMimeType !== mimeType)
+		throw new Error('File content does not match MIME type')
 
 	if (detectedMimeType && detectedMimeType !== mimeType)
 		throw new Error('File content does not match MIME type')
