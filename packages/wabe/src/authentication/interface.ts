@@ -130,11 +130,9 @@ export interface AuthenticationSecurityConfig {
 	signInRateLimit?: AuthenticationRateLimitConfig
 	signUpRateLimit?: AuthenticationRateLimitConfig
 	verifyChallengeRateLimit?: AuthenticationRateLimitConfig
+	sendOtpCodeRateLimit?: AuthenticationRateLimitConfig
+	resetPasswordRateLimit?: AuthenticationRateLimitConfig
 	mfaChallengeTtlMs?: number
-	/**
-	 * Require a valid challenge token during verifyChallenge in production.
-	 */
-	requireMfaChallengeInProduction?: boolean
 }
 
 export interface AuthenticationConfig<T extends WabeTypes> {

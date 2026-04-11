@@ -1,4 +1,5 @@
 import type { MutationSendOtpCodeArgs } from '../../../generated/wabe'
+import { isRateLimited, registerRateLimitFailure } from '../../authentication/security'
 import type { WabeContext } from '../../server/interface'
 import type { DevWabeTypes } from '../../utils/helper'
 import { sendOtpCodeTemplate } from '../../email/templates/sendOtpCode'
@@ -13,6 +14,9 @@ export const sendOtpCodeResolver = async (
 	const emailController = context.wabe.controllers.email
 
 	if (!emailController) throw new Error('Email adapter not defined')
+	const normalizedEmail = input.email.trim().toLowerCase()
+	const rateLimitKey = `sendOtpCode:${normalizedEmail}`
+	if (isRateLimited(context, 'sendOtpCode', rateLimitKey)) return true
 
 	const user = await context.wabe.controllers.database.getObjects({
 		className: 'User',
@@ -47,6 +51,7 @@ export const sendOtpCodeResolver = async (
 		subject: template?.subject || 'Your OTP code',
 		html: template?.fn ? await template.fn({ otp }) : sendOtpCodeTemplate(otp),
 	})
+	registerRateLimitFailure(context, 'sendOtpCode', rateLimitKey)
 
 	return true
 }

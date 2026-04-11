@@ -155,13 +155,26 @@ export const add = async ({
 	})
 	const idsToAdd = add.map(getPointerId).filter(notEmpty)
 
-	if (typeOfExecution === 'create')
+	if (typeOfExecution === 'create') {
+		const linkedObjects = await Promise.all(
+			idsToAdd.map((id) =>
+				context.wabe.controllers.database.getObject({
+					className: targetClass,
+					id,
+					select: { id: true },
+					context,
+				}),
+			),
+		)
+		if (linkedObjects.some((object) => !object)) throw new Error('Object not found')
+
 		return idsToAdd.map((id) =>
 			toPointerObject({
 				className: targetClass,
 				id,
 			}),
 		)
+	}
 
 	if (typeOfExecution === 'update' && id) {
 		const currentValue = await context.wabe.controllers.database.getObject({

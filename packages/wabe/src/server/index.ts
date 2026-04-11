@@ -275,7 +275,14 @@ export class Wabe<T extends WabeTypes> {
 			cors(this.config.security?.corsOptions),
 		)
 
-		const rateLimitOptions = this.config.security?.rateLimit
+		const rateLimitOptions =
+			this.config.security?.rateLimit ||
+			(this.config.isProduction
+				? {
+						numberOfRequests: 200,
+						interval: 60_000,
+					}
+				: undefined)
 
 		if (rateLimitOptions) this.server.beforeHandler(rateLimit(rateLimitOptions))
 
@@ -289,24 +296,28 @@ export class Wabe<T extends WabeTypes> {
 				defaultSessionHandler(this),
 		)
 
-		const maxDepth = this.config.security?.maxGraphqlDepth ?? 50
+		const maxDepth = this.config.security?.maxGraphqlDepth ?? (this.config.isProduction ? 15 : 50)
+		const introspectionDisabled =
+			this.config.security?.disableIntrospection ?? this.config.isProduction
+		const disableGraphQLDashboard =
+			this.config.security?.disableGraphQLDashboard ?? this.config.isProduction
 
 		await this.server.usePlugin(
 			WobeGraphqlYogaPlugin({
 				schema: this.config.graphqlSchema,
-				allowGetRequests: !(this.config.security?.disableGraphQLDashboard ?? false),
+				allowGetRequests: !disableGraphQLDashboard,
 				maskedErrors: this.config.security?.hideSensitiveErrorMessage || this.config.isProduction,
-				allowIntrospection: !(this.config.security?.disableIntrospection ?? false),
+				allowIntrospection: !introspectionDisabled,
 				maxDepth,
 				allowMultipleOperations: true,
 				graphqlEndpoint: '/graphql',
 				plugins: [
 					(() => {
-						const introspectionDisabled = new WeakSet<Request>()
+						const introspectionDisabledRequests = new WeakSet<Request>()
 						return {
 							onRequestParse: ({ request }: { request: Request }) => {
-								if (!(this.config.security?.disableIntrospection ?? false)) return
-								introspectionDisabled.add(request)
+								if (!introspectionDisabled) return
+								introspectionDisabledRequests.add(request)
 							},
 							onValidate: ({
 								addValidationRule,
@@ -315,7 +326,7 @@ export class Wabe<T extends WabeTypes> {
 								addValidationRule: (rule: unknown) => void
 								context: { request: Request }
 							}) => {
-								if (introspectionDisabled.has(context.request)) {
+								if (introspectionDisabledRequests.has(context.request)) {
 									addValidationRule(NoSchemaIntrospectionCustomRule)
 								}
 							},

@@ -71,12 +71,17 @@ export const signInWithResolver = async (
 	// SRP authentication is a two-step flow: the first call must only return challenge data.
 	// Tokens are created only after emailPasswordSRPChallenge is successfully verified.
 	if (name === 'emailPasswordSRP') {
+		const challengeToken = await createMfaChallenge(context, {
+			userId,
+			provider: 'emailPasswordSRPChallenge',
+		})
+
 		return {
 			accessToken: null,
 			refreshToken: null,
 			user,
 			srp: srp || null,
-			challengeToken: null,
+			challengeToken,
 		}
 	}
 
