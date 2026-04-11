@@ -132,6 +132,7 @@ export const getNestedProperty = (obj: any, path: string) => {
 
 export const firstLetterInUpperCase = (str: string) => {
 	const indexOfFirstLetter = str.search(/[a-z]/i)
+	if (indexOfFirstLetter < 0) return str
 
 	return (
 		str.slice(0, indexOfFirstLetter) +
@@ -142,6 +143,7 @@ export const firstLetterInUpperCase = (str: string) => {
 
 export const firstLetterInLowerCase = (str: string) => {
 	const indexOfFirstLetter = str.search(/[a-z]/i)
+	if (indexOfFirstLetter < 0) return str
 
 	return (
 		str.slice(0, indexOfFirstLetter) +

@@ -15,6 +15,7 @@ export const sendOtpCodeResolver = async (
 
 	if (!emailController) throw new Error('Email adapter not defined')
 	const normalizedEmail = input.email.trim().toLowerCase()
+	if (!normalizedEmail) return true
 	const rateLimitKey = `sendOtpCode:${normalizedEmail}`
 	if (isRateLimited(context, 'sendOtpCode', rateLimitKey)) return true
 
@@ -22,7 +23,7 @@ export const sendOtpCodeResolver = async (
 		className: 'User',
 		where: {
 			email: {
-				equalTo: input.email,
+				equalTo: normalizedEmail,
 			},
 		},
 		select: { id: true },
@@ -47,7 +48,7 @@ export const sendOtpCodeResolver = async (
 
 	await emailController.send({
 		from: mainEmail,
-		to: [input.email],
+		to: [normalizedEmail],
 		subject: template?.subject || 'Your OTP code',
 		html: template?.fn ? await template.fn({ otp }) : sendOtpCodeTemplate(otp),
 	})

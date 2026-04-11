@@ -72,6 +72,27 @@ describe('HookObject', () => {
 		expect(hookObject.isFieldUpdated('age')).toBeFalse()
 	})
 
+	it('should mark fields as updated even when new value is falsy', () => {
+		const hookObject = new HookObject<DevWabeTypes, 'User'>({
+			className: 'User',
+			newData: {
+				age: 0,
+				verified: false,
+				name: '',
+			} as any,
+			context: {} as any,
+			operationType: OperationType.BeforeUpdate,
+			object: {
+				id: '1',
+			},
+			select: {},
+		})
+
+		expect(hookObject.isFieldUpdated('age')).toBeTrue()
+		expect(hookObject.isFieldUpdated('verified' as any)).toBeTrue()
+		expect(hookObject.isFieldUpdated('name')).toBeTrue()
+	})
+
 	it('should create a clone of the data', () => {
 		const userData = { name: 'John Doe', age: 30 }
 
