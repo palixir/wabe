@@ -125,7 +125,7 @@ describe('Server', () => {
 		await wabe.close()
 	})
 
-	it('should return GraphiQL in production by default', async () => {
+	it('should not return GraphiQL in production by default', async () => {
 		const databaseId = uuid()
 		const port = await getPort()
 		const wabe = new Wabe({
@@ -157,8 +157,8 @@ describe('Server', () => {
 		})
 
 		const text = await res.text()
-		expect(res.status).toBe(200)
-		expect(text).toContain('GraphiQL')
+		expect(res.status).toBe(404)
+		expect(text).not.toContain('GraphiQL')
 
 		await wabe.close()
 	})
@@ -250,7 +250,7 @@ describe('Server', () => {
 
 		expect(receivedOptions.length).toBeGreaterThan(0)
 		const args = receivedOptions[0]
-		expect(args?.allowIntrospection).toBe(true)
+		expect(args?.allowIntrospection).toBe(false)
 		expect(args?.maxDepth).toBe(60)
 		expect(args?.allowMultipleOperations).toBe(true)
 	})
@@ -757,7 +757,7 @@ describe('Server', () => {
 		await wabe.close()
 	})
 
-	it('should allow introspection in production by default', async () => {
+	it('should block introspection in production by default', async () => {
 		const databaseId = uuid()
 		const port = await getPort()
 		const wabe = new Wabe({
@@ -791,9 +791,9 @@ describe('Server', () => {
 			}),
 		})
 
-		const json = (await res.json()) as { data?: { __schema?: { types?: { name: string }[] } } }
-		expect(json.data?.__schema?.types).toBeDefined()
-		expect(json.data?.__schema?.types?.length).toBeGreaterThan(0)
+		const json = (await res.json()) as { errors?: { message: string }[] }
+		expect(json.errors).toBeDefined()
+		expect(json.errors?.[0]?.message).toContain('introspection')
 
 		await wabe.close()
 	})

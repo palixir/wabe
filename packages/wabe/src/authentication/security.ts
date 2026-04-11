@@ -4,7 +4,7 @@ import type { WabeTypes } from '../server'
 import { contextWithRoot, getDatabaseController } from '../utils/export'
 import { DevWabeTypes } from 'src/utils/helper'
 
-type RateLimitScope = 'signIn' | 'signUp' | 'verifyChallenge'
+type RateLimitScope = 'signIn' | 'signUp' | 'verifyChallenge' | 'sendOtpCode' | 'resetPassword'
 
 type RateLimitOptions = {
 	enabled: boolean
@@ -43,6 +43,18 @@ const DEFAULT_VERIFY_CHALLENGE_RATE_LIMIT = {
 	blockDurationMs: 15 * 60 * 1000,
 }
 
+const DEFAULT_SEND_OTP_CODE_RATE_LIMIT = {
+	maxAttempts: 5,
+	windowMs: 10 * 60 * 1000,
+	blockDurationMs: 30 * 60 * 1000,
+}
+
+const DEFAULT_RESET_PASSWORD_RATE_LIMIT = {
+	maxAttempts: 10,
+	windowMs: 10 * 60 * 1000,
+	blockDurationMs: 15 * 60 * 1000,
+}
+
 const DEFAULT_MFA_CHALLENGE_TTL_MS = 5 * 60 * 1000
 
 const rateLimitStorage = new Map<string, RateLimitState>()
@@ -57,11 +69,15 @@ const getRateLimitOptions = <T extends WabeTypes>(
 		signIn: securityConfig?.signInRateLimit,
 		signUp: securityConfig?.signUpRateLimit,
 		verifyChallenge: securityConfig?.verifyChallengeRateLimit,
+		sendOtpCode: securityConfig?.sendOtpCodeRateLimit,
+		resetPassword: securityConfig?.resetPasswordRateLimit,
 	}
 	const defaultsMap = {
 		signIn: DEFAULT_SIGN_IN_RATE_LIMIT,
 		signUp: DEFAULT_SIGN_UP_RATE_LIMIT,
 		verifyChallenge: DEFAULT_VERIFY_CHALLENGE_RATE_LIMIT,
+		sendOtpCode: DEFAULT_SEND_OTP_CODE_RATE_LIMIT,
+		resetPassword: DEFAULT_RESET_PASSWORD_RATE_LIMIT,
 	}
 	const scopeConfig = scopeConfigMap[scope]
 	const defaults = defaultsMap[scope]
@@ -272,7 +288,3 @@ export const consumeMfaChallenge = async (
 
 	return isValid
 }
-
-export const shouldRequireMfaChallenge = <T extends WabeTypes>(context: WabeContext<T>) =>
-	context.wabe.config?.authentication?.security?.requireMfaChallengeInProduction ??
-	!!context.wabe.config?.isProduction

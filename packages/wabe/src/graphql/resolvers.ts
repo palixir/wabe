@@ -206,6 +206,13 @@ export const executeRelationOnFields = ({
 				const targetClass = getTargetClassFromField(fieldName)
 
 				if (!linkedId) throw new Error(`Invalid link value for ${className}.${fieldName}`)
+				const linkedObject = await context.wabe.controllers.database.getObject({
+					className: targetClass,
+					id: linkedId,
+					select: { id: true },
+					context: contextWithoutGraphQLCall(context),
+				})
+				if (!linkedObject) throw new Error(`Object not found`)
 
 				newAcc[fieldName] = {
 					class: targetClass,

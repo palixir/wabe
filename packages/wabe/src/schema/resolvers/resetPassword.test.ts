@@ -395,6 +395,63 @@ describe('resetPasswordResolver', () => {
 
 		process.env.NODE_ENV = 'test'
 	})
+
+	it('should rate limit reset password attempts after repeated invalid OTPs', async () => {
+		const previousSecurity = wabe.config.authentication?.security
+		wabe.config.authentication = {
+			...wabe.config.authentication,
+			security: {
+				...previousSecurity,
+				resetPasswordRateLimit: {
+					enabled: true,
+					maxAttempts: 1,
+					windowMs: 60_000,
+					blockDurationMs: 60_000,
+				},
+			},
+		}
+
+		const email = 'ratelimit-reset@toto.fr'
+		try {
+			await client.request<any>(graphql.createUserWithRoot, {
+				input: {
+					fields: {
+						authentication: {
+							emailPassword: {
+								email,
+								password: 'totototo',
+							},
+						},
+					},
+				},
+			})
+
+			await expect(
+				client.request<any>(graphql.resetPassword, {
+					input: {
+						email,
+						password: 'newPassword',
+						otp: 'invalidOtp',
+					},
+				}),
+			).rejects.toThrow('Invalid OTP code')
+
+			await expect(
+				client.request<any>(graphql.resetPassword, {
+					input: {
+						email,
+						password: 'newPassword',
+						otp: 'invalidOtp',
+					},
+				}),
+			).rejects.toThrow('Too many attempts. Please try again later.')
+		} finally {
+			wabe.config.authentication = {
+				...wabe.config.authentication,
+				security: previousSecurity,
+			}
+		}
+	})
 })
 
 const graphql = {

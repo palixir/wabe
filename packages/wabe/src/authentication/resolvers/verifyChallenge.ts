@@ -2,7 +2,7 @@ import type { VerifyChallengeInput } from '../../../generated/wabe'
 import type { WabeContext } from '../../server/interface'
 import type { DevWabeTypes } from '../../utils/helper'
 import { getSessionCookieSameSite } from '../cookies'
-import { consumeMfaChallenge, shouldRequireMfaChallenge } from '../security'
+import { consumeMfaChallenge } from '../security'
 import { Session } from '../Session'
 import type { SecondaryProviderInterface } from '../interface'
 import { getAuthenticationMethod } from '../utils'
@@ -35,18 +35,16 @@ export const verifyChallengeResolver = async (
 
 	if (!result?.userId) throw new Error('Invalid challenge')
 
-	if (shouldRequireMfaChallenge(context)) {
-		const challengeToken = input.challengeToken
-		if (!challengeToken) throw new Error('Invalid challenge')
+	const challengeToken = input.challengeToken
+	if (!challengeToken) throw new Error('Invalid challenge')
 
-		const isValidChallenge = await consumeMfaChallenge(context, {
-			challengeToken,
-			userId: result.userId,
-			provider: name,
-		})
+	const isValidChallenge = await consumeMfaChallenge(context, {
+		challengeToken,
+		userId: result.userId,
+		provider: name,
+	})
 
-		if (!isValidChallenge) throw new Error('Invalid challenge')
-	}
+	if (!isValidChallenge) throw new Error('Invalid challenge')
 
 	const session = new Session<DevWabeTypes>()
 

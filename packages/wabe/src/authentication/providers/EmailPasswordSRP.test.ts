@@ -58,6 +58,7 @@ describe('EmailPasswordSRP', () => {
 			gql`
 				mutation signInWith($input: SignInWithInput!) {
 					signInWith(input: $input) {
+						challengeToken
 						srp {
 							salt
 							serverPublic
@@ -97,6 +98,7 @@ describe('EmailPasswordSRP', () => {
 			`,
 			{
 				input: {
+					challengeToken: signInWith.challengeToken,
 					secondFA: {
 						emailPasswordSRPChallenge: {
 							email,
@@ -152,6 +154,7 @@ describe('EmailPasswordSRP', () => {
 			gql`
 				mutation signInWith($input: SignInWithInput!) {
 					signInWith(input: $input) {
+						challengeToken
 						srp {
 							salt
 							serverPublic
@@ -194,6 +197,7 @@ describe('EmailPasswordSRP', () => {
 				`,
 				{
 					input: {
+						challengeToken: signInWith.challengeToken,
 						secondFA: {
 							emailPasswordSRPChallenge: {
 								email,

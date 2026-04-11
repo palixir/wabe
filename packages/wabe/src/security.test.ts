@@ -409,6 +409,71 @@ describe('Security tests', () => {
 		await closeTests(wabe)
 	})
 
+	it('should not return private fields (acl) on createObjects if not root', async () => {
+		const setup = await setupTests([
+			{
+				name: 'Secret',
+				fields: {
+					name: { type: 'String' },
+				},
+				permissions: {
+					create: {
+						requireAuthentication: true,
+						authorizedRoles: ['Client'],
+					},
+					read: {
+						requireAuthentication: true,
+						authorizedRoles: ['Client'],
+					},
+					acl: async (hookObject) => {
+						await hookObject.addACL('roles', {
+							read: true,
+							write: true,
+							role: RoleEnum.Client,
+						})
+					},
+				},
+			},
+		])
+
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
+
+		const { userClient } = await createUserAndUpdateRole({
+			anonymousClient: client,
+			port,
+			roleName: 'Client',
+			rootClient,
+		})
+
+		const res = await userClient.request<any>(gql`
+			mutation createSecrets {
+				createSecrets(input: { fields: [{ name: "n1" }, { name: "n2" }] }) {
+					edges {
+						node {
+							id
+							acl {
+								roles {
+									roleId
+									read
+									write
+								}
+							}
+						}
+					}
+				}
+			}
+		`)
+
+		expect(res.createSecrets.edges).toHaveLength(2)
+		expect(res.createSecrets.edges[0].node.acl).toBeNull()
+		expect(res.createSecrets.edges[1].node.acl).toBeNull()
+
+		await closeTests(wabe)
+	})
+
 	it('should block requests without a valid CSRF token', async () => {
 		const setup = await setupTests(
 			[
@@ -950,7 +1015,7 @@ describe('Security tests', () => {
 
 		expect(signInWith.accessToken).toBeNull()
 		expect(signInWith.refreshToken).toBeNull()
-		expect(signInWith.challengeToken).toBeNull()
+		expect(signInWith.challengeToken).toEqual(expect.any(String))
 		expect(signInWith.srp?.serverPublic).toEqual(expect.any(String))
 		expect(sessionsAfter).toHaveLength(sessionsBefore.length)
 
@@ -1011,6 +1076,7 @@ describe('Security tests', () => {
 					signInWith(input: $input) {
 						accessToken
 						refreshToken
+						challengeToken
 						srp {
 							salt
 							serverPublic
@@ -1063,6 +1129,7 @@ describe('Security tests', () => {
 			`,
 			{
 				input: {
+					challengeToken: signInWith.challengeToken,
 					secondFA: {
 						emailPasswordSRPChallenge: {
 							email,
@@ -1125,6 +1192,7 @@ describe('Security tests', () => {
 				`,
 				{
 					input: {
+						challengeToken: signInWith.challengeToken,
 						secondFA: {
 							emailPasswordSRPChallenge: {
 								email,
@@ -1394,7 +1462,7 @@ describe('Security tests', () => {
          }
      }
      `),
-		).rejects.toThrow('You are not authorized to create this field')
+		).rejects.toThrow('Permission denied to read class Role')
 
 		await closeTests(wabe)
 	})
@@ -3840,6 +3908,99 @@ describe('Security tests', () => {
 				}
 			`),
 		).rejects.toThrow('Permission denied to create class Test2')
+
+		await closeTests(wabe)
+	})
+
+	it('should not allow linking unreadable pointer or relation targets during create', async () => {
+		const setup = await setupTests([
+			{
+				name: 'Test',
+				fields: {
+					name: { type: 'String' },
+					pointer: {
+						type: 'Pointer',
+						class: 'Test2',
+					},
+					relation: {
+						type: 'Relation',
+						class: 'Test2',
+					},
+				},
+				permissions: {
+					read: {
+						authorizedRoles: ['Client2'],
+						requireAuthentication: true,
+					},
+					create: {
+						authorizedRoles: ['Client2'],
+						requireAuthentication: true,
+					},
+				},
+			},
+			{
+				name: 'Test2',
+				fields: {
+					name: { type: 'String' },
+				},
+				permissions: {
+					read: {
+						authorizedRoles: ['Client'],
+						requireAuthentication: true,
+					},
+					create: {
+						authorizedRoles: [],
+						requireAuthentication: true,
+					},
+				},
+			},
+		])
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
+
+		const { userClient } = await createUserAndUpdateRole({
+			anonymousClient: client,
+			port,
+			roleName: 'Client2',
+			rootClient,
+		})
+
+		const hiddenTarget = await rootClient.request<any>(gql`
+			mutation createTest2 {
+				createTest2(input: { fields: { name: "hidden" } }) {
+					test2 {
+						id
+					}
+				}
+			}
+		`)
+		const hiddenTargetId = hiddenTarget.createTest2.test2.id
+
+		await expect(
+			userClient.request<any>(gql`
+				mutation createTest {
+					createTest(input: { fields: { name: "test", pointer: { link: "${hiddenTargetId}" } } }) {
+						test {
+							id
+						}
+					}
+				}
+			`),
+		).rejects.toThrow('Permission denied to read class Test2')
+
+		await expect(
+			userClient.request<any>(gql`
+				mutation createTest {
+					createTest(input: { fields: { name: "test", relation: { add: ["${hiddenTargetId}"] } } }) {
+						test {
+							id
+						}
+					}
+				}
+			`),
+		).rejects.toThrow('Permission denied to read class Test2')
 
 		await closeTests(wabe)
 	})

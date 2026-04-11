@@ -1205,10 +1205,12 @@ export class DatabaseController<T extends WabeTypes> {
 
 		if (this._isEmptySelect(select as Record<string, unknown>)) return []
 
+		const selectWithoutPrivateFields = select ? selectFieldsWithoutPrivateFields(select) : undefined
+
 		return this.getObjects({
 			className,
 			context: contextWithRoot(context),
-			select,
+			select: selectWithoutPrivateFields,
 			// @ts-expect-error
 			where: { id: { in: ids } },
 			first,

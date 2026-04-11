@@ -114,12 +114,17 @@ describe('verifyChallenge', () => {
 		})
 
 		mockOnVerifyChallenge.mockResolvedValue({ userId: 'userId' } as never)
+		const challengeToken = await createMfaChallenge(context, {
+			userId: 'userId',
+			provider: 'fakeOtp',
+		})
 
 		expect(
 			await verifyChallengeResolver(
 				undefined,
 				{
 					input: {
+						challengeToken,
 						secondFA: {
 							// @ts-expect-error
 							fakeOtp: {
@@ -147,19 +152,8 @@ describe('verifyChallenge', () => {
 		spyCreateSession.mockRestore()
 	})
 
-	it('should require challenge token in production', () => {
+	it('should require challenge token', () => {
 		mockOnVerifyChallenge.mockResolvedValue({ userId: 'userId' } as never)
-
-		const productionContext = {
-			...context,
-			wabe: {
-				...context.wabe,
-				config: {
-					...context.wabe.config,
-					isProduction: true,
-				},
-			},
-		} as WabeContext<any>
 
 		expect(
 			verifyChallengeResolver(
@@ -174,12 +168,12 @@ describe('verifyChallenge', () => {
 						},
 					},
 				},
-				productionContext,
+				context,
 			),
 		).rejects.toThrow('Invalid challenge')
 	})
 
-	it('should validate challenge token in production', async () => {
+	it('should validate challenge token', async () => {
 		const spyCreateSession = spyOn(Session.prototype, 'create').mockResolvedValue({
 			accessToken: 'accessToken',
 			refreshToken: 'refreshToken',
@@ -187,19 +181,7 @@ describe('verifyChallenge', () => {
 			csrfToken: 'csrfToken',
 		})
 		mockOnVerifyChallenge.mockResolvedValue({ userId: 'userId' } as never)
-
-		const productionContext = {
-			...context,
-			wabe: {
-				...context.wabe,
-				config: {
-					...context.wabe.config,
-					isProduction: true,
-				},
-			},
-		} as WabeContext<any>
-
-		const challengeToken = await createMfaChallenge(productionContext, {
+		const challengeToken = await createMfaChallenge(context, {
 			userId: 'userId',
 			provider: 'fakeOtp',
 		})
@@ -218,7 +200,7 @@ describe('verifyChallenge', () => {
 						},
 					},
 				},
-				productionContext,
+				context,
 			),
 		).toEqual({
 			accessToken: 'accessToken',

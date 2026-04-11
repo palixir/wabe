@@ -50,14 +50,11 @@ export class QRCodeOTP implements SecondaryProviderInterface<DevWabeTypes, QRCod
 		const realUser = users.length > 0 ? users[0] : null
 		const userId = realUser?.id ?? DUMMY_USER_ID
 
-		const isDevBypass =
-			!context.wabe.config.isProduction && input.otp === '000000' && realUser !== null
-
 		const otpClass = new OTP(context.wabe.config.rootKey)
 
 		const isOtpValid = otpClass.authenticatorVerify(input.otp, userId)
 
-		if (realUser && (isOtpValid || isDevBypass)) {
+		if (realUser && isOtpValid) {
 			clearRateLimit(context, 'verifyChallenge', rateLimitKey)
 			return { userId: realUser.id }
 		}

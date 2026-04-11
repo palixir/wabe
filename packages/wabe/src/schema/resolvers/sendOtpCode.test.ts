@@ -114,6 +114,57 @@ describe('sendOtpCodeResolver', () => {
 
 		expect(spySend).toHaveBeenCalledTimes(0)
 	})
+
+	it('should rate limit OTP send requests per email', async () => {
+		const previousSecurity = wabe.config.authentication?.security
+		wabe.config.authentication = {
+			...wabe.config.authentication,
+			security: {
+				...previousSecurity,
+				sendOtpCodeRateLimit: {
+					enabled: true,
+					maxAttempts: 1,
+					windowMs: 60_000,
+					blockDurationMs: 60_000,
+				},
+			},
+		}
+
+		const email = 'ratelimit-send-otp@toto.fr'
+		try {
+			await client.request<any>(graphql.createUser, {
+				input: {
+					fields: {
+						authentication: {
+							emailPassword: {
+								email,
+								password: 'totototo',
+							},
+						},
+					},
+				},
+			})
+
+			await client.request<any>(graphql.sendOtpCode, {
+				input: {
+					email,
+				},
+			})
+
+			await client.request<any>(graphql.sendOtpCode, {
+				input: {
+					email,
+				},
+			})
+
+			expect(spySend).toHaveBeenCalledTimes(1)
+		} finally {
+			wabe.config.authentication = {
+				...wabe.config.authentication,
+				security: previousSecurity,
+			}
+		}
+	})
 })
 
 const graphql = {
