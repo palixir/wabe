@@ -12,6 +12,7 @@ export const signOutResolver = async (_: any, __: any, context: WabeContext<DevW
 	if (context.wabe.config.authentication?.session?.cookieSession) {
 		context.response?.deleteCookie('accessToken')
 		context.response?.deleteCookie('refreshToken')
+		context.response?.deleteCookie('csrfToken')
 	}
 
 	return true

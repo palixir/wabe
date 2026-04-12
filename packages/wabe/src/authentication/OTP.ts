@@ -1,9 +1,39 @@
 import { totp, authenticator } from 'otplib'
 import type { TOTP } from 'otplib/core'
-import { createHash } from 'node:crypto'
+import { createHash, randomBytes } from 'node:crypto'
 import { base32Encode } from 'src/utils'
+import type { WabeContext } from '../server/interface'
+import { contextWithRoot } from '../utils/export'
 
 const ONE_WINDOW = 1
+
+export const generateOtpSalt = (): string => randomBytes(32).toString('hex')
+
+export const getOrCreateOtpSalt = async (
+	context: WabeContext<any>,
+	userId: string,
+): Promise<string> => {
+	const rootContext = contextWithRoot(context)
+	const user = await context.wabe.controllers.database.getObject({
+		className: 'User',
+		id: userId,
+		context: rootContext,
+		select: { otpSalt: true },
+	})
+
+	if (user?.otpSalt) return user.otpSalt as string
+
+	const salt = generateOtpSalt()
+	await context.wabe.controllers.database.updateObject({
+		className: 'User',
+		id: userId,
+		context: rootContext,
+		data: { otpSalt: salt },
+		select: {},
+	})
+
+	return salt
+}
 
 export class OTP {
 	private secret: string
@@ -16,31 +46,32 @@ export class OTP {
 		})
 	}
 
-	deriveSecret(userId: string): string {
-		const hash = createHash('sha256').update(`${this.secret}:${userId}`).digest()
+	deriveSecret(userId: string, salt?: string): string {
+		const material = salt ? `${this.secret}:${userId}:${salt}` : `${this.secret}:${userId}`
+		const hash = createHash('sha256').update(material).digest()
 
 		return base32Encode(hash, 'RFC4648', { padding: false })
 	}
 
-	generate(userId: string): string {
-		const secret = this.deriveSecret(userId)
+	generate(userId: string, salt?: string): string {
+		const secret = this.deriveSecret(userId, salt)
 
 		return this.internalTotp.generate(secret)
 	}
 
-	verify(otp: string, userId: string): boolean {
-		const secret = this.deriveSecret(userId)
+	verify(otp: string, userId: string, salt?: string): boolean {
+		const secret = this.deriveSecret(userId, salt)
 
 		return this.internalTotp.verify({ secret, token: otp })
 	}
 
-	authenticatorGenerate(userId: string): string {
-		const secret = this.deriveSecret(userId)
+	authenticatorGenerate(userId: string, salt?: string): string {
+		const secret = this.deriveSecret(userId, salt)
 		return authenticator.generate(secret)
 	}
 
-	authenticatorVerify(otp: string, userId: string): boolean {
-		const secret = this.deriveSecret(userId)
+	authenticatorVerify(otp: string, userId: string, salt?: string): boolean {
+		const secret = this.deriveSecret(userId, salt)
 
 		return authenticator.verify({
 			secret,
@@ -52,12 +83,14 @@ export class OTP {
 		userId,
 		emailOrUsername,
 		applicationName,
+		salt,
 	}: {
 		userId: string
 		emailOrUsername: string
 		applicationName: string
+		salt?: string
 	}): string {
-		const secret = this.deriveSecret(userId)
+		const secret = this.deriveSecret(userId, salt)
 
 		return authenticator.keyuri(emailOrUsername, applicationName, secret)
 	}

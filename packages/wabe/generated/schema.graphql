@@ -55,6 +55,7 @@ type User {
 		order: [_SessionOrder!]
 	): _SessionConnection
 	secondFA: UserSecondFA
+	otpSalt: String
 	pendingChallenges: [UserPendingAuthenticationChallenge]
 }
 
@@ -173,6 +174,7 @@ input UserWhereInput {
 	role: RoleWhereInput
 	sessions: _SessionRelationWhereInput
 	secondFA: UserSecondFAWhereInput
+	otpSalt: StringWhereInput
 	pendingChallenges: [UserPendingAuthenticationChallengeWhereInput]
 	OR: [UserWhereInput]
 	AND: [UserWhereInput]
@@ -465,6 +467,7 @@ input UserInput {
 	role: RolePointerInput
 	sessions: _SessionRelationInput
 	secondFA: UserSecondFAInput
+	otpSalt: String
 	pendingChallenges: [UserPendingAuthenticationChallengeInput]
 }
 
@@ -560,6 +563,7 @@ input UserCreateFieldsInput {
 	role: RolePointerInput
 	sessions: _SessionRelationInput
 	secondFA: UserSecondFACreateFieldsInput
+	otpSalt: String
 	pendingChallenges: [UserPendingAuthenticationChallengeCreateFieldsInput]
 }
 
@@ -689,6 +693,8 @@ enum UserOrder {
 	sessions_DESC
 	secondFA_ASC
 	secondFA_DESC
+	otpSalt_ASC
+	otpSalt_DESC
 	pendingChallenges_ASC
 	pendingChallenges_DESC
 }
@@ -1446,6 +1452,7 @@ input UserUpdateFieldsInput {
 	role: RolePointerInput
 	sessions: _SessionRelationInput
 	secondFA: UserSecondFAUpdateFieldsInput
+	otpSalt: String
 	pendingChallenges: [UserPendingAuthenticationChallengeUpdateFieldsInput]
 }
 

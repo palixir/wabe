@@ -68,6 +68,9 @@ export const setupTests = async (
 			adapter: new FileDevAdapter(),
 			// 12 hours of cache
 			urlCacheInSeconds: 3600 * 12,
+			...(!options.isProduction && {
+				security: { enabled: false },
+			}),
 		},
 		schema: {
 			classes: [

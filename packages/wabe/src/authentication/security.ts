@@ -83,7 +83,7 @@ const getRateLimitOptions = <T extends WabeTypes>(
 	const defaults = defaultsMap[scope]
 
 	return {
-		enabled: scopeConfig?.enabled ?? !!wabeConfig?.isProduction,
+		enabled: scopeConfig?.enabled ?? true,
 		maxAttempts: scopeConfig?.maxAttempts ?? defaults.maxAttempts,
 		windowMs: scopeConfig?.windowMs ?? defaults.windowMs,
 		blockDurationMs: scopeConfig?.blockDurationMs ?? defaults.blockDurationMs,
@@ -253,6 +253,8 @@ export const createMfaChallenge = async (
 	return token
 }
 
+const mfaLocks = new Map<string, Promise<boolean>>()
+
 export const consumeMfaChallenge = async (
 	context: WabeContext<DevWabeTypes>,
 	{
@@ -265,21 +267,37 @@ export const consumeMfaChallenge = async (
 		provider: string
 	},
 ): Promise<boolean> => {
-	const currentChallenges = await getUserPendingChallenges(context, userId)
+	const lockKey = `mfa:${userId}`
 
-	const activeChallenges = pruneExpiredChallenges(currentChallenges)
-	const normalizedProvider = provider.toLowerCase()
-	const isValid = activeChallenges.some(
-		(challenge) => challenge.token === challengeToken && challenge.provider === normalizedProvider,
-	)
-	const remainingChallenges = activeChallenges.filter(
-		(challenge) =>
-			!(challenge.token === challengeToken && challenge.provider === normalizedProvider),
-	)
+	const previous = mfaLocks.get(lockKey) ?? Promise.resolve(false)
+	const current = previous
+		.catch(() => false)
+		.then(async () => {
+			const currentChallenges = await getUserPendingChallenges(context, userId)
+			if (!currentChallenges) return false
 
-	if (remainingChallenges.length !== currentChallenges.length || isValid) {
-		await saveUserPendingChallenges(context, userId, remainingChallenges)
+			const activeChallenges = pruneExpiredChallenges(currentChallenges)
+			const normalizedProvider = provider.toLowerCase()
+			const isValid = activeChallenges.some(
+				(challenge) =>
+					challenge.token === challengeToken && challenge.provider === normalizedProvider,
+			)
+			const remainingChallenges = activeChallenges.filter(
+				(challenge) =>
+					!(challenge.token === challengeToken && challenge.provider === normalizedProvider),
+			)
+
+			if (remainingChallenges.length !== currentChallenges.length || isValid) {
+				await saveUserPendingChallenges(context, userId, remainingChallenges)
+			}
+
+			return isValid
+		})
+
+	mfaLocks.set(lockKey, current)
+	try {
+		return await current
+	} finally {
+		if (mfaLocks.get(lockKey) === current) mfaLocks.delete(lockKey)
 	}
-
-	return isValid
 }

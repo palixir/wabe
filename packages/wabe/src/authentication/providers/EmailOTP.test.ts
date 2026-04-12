@@ -4,7 +4,7 @@ import type { DevWabeTypes } from '../../utils/helper'
 import { setupTests, closeTests } from '../../utils/testHelper'
 import { EmailDevAdapter, type Wabe } from '../..'
 import * as sendOtpCodeTemplate from '../../email/templates/sendOtpCode'
-import { OTP } from '../OTP'
+import { OTP, getOrCreateOtpSalt } from '../OTP'
 
 describe('EmailOTPProvider', () => {
 	const spyEmailSend = spyOn(EmailDevAdapter.prototype, 'send')
@@ -88,7 +88,8 @@ describe('EmailOTPProvider', () => {
 
 		if (!createdUser) throw new Error('User not created')
 
-		const otp = new OTP(wabe.config.rootKey).generate(createdUser.id)
+		const salt = await getOrCreateOtpSalt({ isRoot: true, wabe } as any, createdUser.id)
+		const otp = new OTP(wabe.config.rootKey).generate(createdUser.id, salt)
 
 		const emailOTP = new EmailOTP()
 

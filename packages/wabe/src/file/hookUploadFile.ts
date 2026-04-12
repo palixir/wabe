@@ -1,6 +1,26 @@
 import type { HookObject } from '../hooks/HookObject'
 import { secureUploadedFile } from './security'
 
+const ALLOWED_URL_PROTOCOLS = ['https:']
+
+const validateFileUrl = (url: string): void => {
+	let parsed: URL
+	try {
+		parsed = new URL(url)
+	} catch {
+		throw new Error('Invalid file URL')
+	}
+
+	if (!ALLOWED_URL_PROTOCOLS.includes(parsed.protocol)) throw new Error('File URL must use HTTPS')
+
+	if (
+		parsed.hostname === 'localhost' ||
+		parsed.hostname === '127.0.0.1' ||
+		parsed.hostname === '[::1]'
+	)
+		throw new Error('File URL must not point to localhost')
+}
+
 const handleFile = async (hookObject: HookObject<any, any>) => {
 	const newData = hookObject.getNewData()
 
@@ -20,6 +40,8 @@ const handleFile = async (hookObject: HookObject<any, any>) => {
 			if (!file && !url) return
 
 			if (url) {
+				validateFileUrl(url)
+
 				hookObject.upsertNewData(keyName, {
 					url,
 					isPresignedUrl: false,

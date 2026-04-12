@@ -8,6 +8,8 @@ import { getSessionCookieSameSite } from '../../authentication/cookies'
 import { generateRandomValues } from '../../authentication/oauth/utils'
 import { GitHub } from '../../authentication/oauth/GitHub'
 
+const validProviders = new Set<string>(Object.values(ProviderEnum))
+
 /*
 - Generate code verifier (back)
 - Sent post request to a route on back with code verifier in url (back)
@@ -31,6 +33,9 @@ export const oauthHandlerCallback = async (context: Context, wabeContext: WabeCo
 
 		const codeVerifier = context.getCookie('code_verifier')
 		const provider = context.getCookie('provider')
+
+		if (!provider || !validProviders.has(provider))
+			throw new Error('Authentication failed, invalid provider')
 
 		const { signInWith } = await getGraphqlClient(wabeContext.wabe.config.port).request<any>(
 			gql`
@@ -82,8 +87,8 @@ export const oauthHandlerCallback = async (context: Context, wabeContext: WabeCo
 			httpOnly: isCookieSession,
 			path: '/',
 			maxAge:
-				(wabeContext.wabe.config.authentication?.session?.accessTokenExpiresInMs ||
-					60 * 15 * 1000) / 1000, // 15 minutes in seconds
+				(wabeContext.wabe.config.authentication?.session?.refreshTokenExpiresInMs ||
+					1000 * 60 * 60 * 24 * 7) / 1000, // 7 days in seconds (matches Session default)
 			sameSite,
 			secure: true,
 		})

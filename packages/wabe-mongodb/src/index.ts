@@ -23,6 +23,20 @@ import type {
 const builtOrOriginal = (built: Record<string, unknown>, original: unknown) =>
 	Object.keys(built).length ? built : original
 
+const containsMongoOperators = (value: unknown): boolean => {
+	if (value === null || value === undefined || typeof value !== 'object') return false
+	if (Array.isArray(value)) return value.some(containsMongoOperators)
+	return Object.keys(value as Record<string, unknown>).some(
+		(key) => key.startsWith('$') || containsMongoOperators((value as Record<string, unknown>)[key]),
+	)
+}
+
+const sanitizeValue = <V>(value: V): V => {
+	if (containsMongoOperators(value))
+		throw new Error('Invalid query: operator-like keys are not allowed in filter values')
+	return value
+}
+
 export const buildMongoOrderQuery = <
 	T extends WabeTypes,
 	K extends keyof T['types'],
@@ -64,9 +78,11 @@ export const buildMongoWhereQuery = <T extends WabeTypes, K extends keyof T['typ
 			if (value?.contains || value?.contains === null)
 				acc[keyToWrite] =
 					typeof value.contains === 'object' && !Array.isArray(value.contains)
-						? { $elemMatch: value.contains }
+						? { $elemMatch: sanitizeValue(value.contains) }
 						: {
-								$all: Array.isArray(value.contains) ? value.contains : [value.contains],
+								$all: Array.isArray(value.contains)
+									? sanitizeValue(value.contains)
+									: [sanitizeValue(value.contains)],
 							}
 			if (value?.notContains || value?.notContains === null) {
 				acc[keyToWrite] =
@@ -75,11 +91,15 @@ export const buildMongoWhereQuery = <T extends WabeTypes, K extends keyof T['typ
 								$not: {
 									$elemMatch: builtOrOriginal(
 										buildMongoWhereQuery(value.notContains as WhereType<T, K>, true),
-										value.notContains,
+										sanitizeValue(value.notContains),
 									),
 								},
 							}
-						: { $nin: Array.isArray(value.notContains) ? value.notContains : [value.notContains] }
+						: {
+								$nin: Array.isArray(value.notContains)
+									? sanitizeValue(value.notContains)
+									: [sanitizeValue(value.notContains)],
+							}
 				return acc
 			}
 			if (value?.exists === true) acc[keyToWrite] = { $exists: true, $ne: null }
@@ -115,7 +135,7 @@ export const buildMongoWhereQuery = <T extends WabeTypes, K extends keyof T['typ
 						? ObjectId.isValid(value.equalTo)
 							? ObjectId.createFromHexString(value.equalTo)
 							: value.equalTo
-						: value?.equalTo
+						: sanitizeValue(value?.equalTo)
 			}
 
 			// notEqualTo: value
@@ -126,7 +146,7 @@ export const buildMongoWhereQuery = <T extends WabeTypes, K extends keyof T['typ
 							? ObjectId.isValid(value.notEqualTo)
 								? ObjectId.createFromHexString(value.notEqualTo)
 								: value.notEqualTo
-							: value?.notEqualTo,
+							: sanitizeValue(value?.notEqualTo),
 				}
 			}
 
