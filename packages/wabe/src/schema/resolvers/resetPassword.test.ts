@@ -273,6 +273,63 @@ describe('resetPasswordResolver', () => {
 		expect(res.signInWith.user.id).toEqual(userId)
 	})
 
+	it('should normalize email casing for lookup and password update', async () => {
+		process.env.NODE_ENV = 'production'
+
+		const {
+			createUser: { user },
+		} = await client.request<any>(graphql.createUserWithRoot, {
+			input: {
+				fields: {
+					authentication: {
+						emailPassword: {
+							email: 'normalize-reset@toto.fr',
+							password: 'totototo',
+						},
+					},
+				},
+			},
+		})
+
+		const otp = new OTP(wabe.config.rootKey)
+		const salt = await getOrCreateOtpSalt(makeRootContext(), user.id)
+
+		await client.request<any>(graphql.resetPassword, {
+			input: {
+				email: 'NORMALIZE-RESET@TOTO.FR',
+				password: 'new-password',
+				otp: otp.generate(user.id, salt),
+			},
+		})
+
+		const res = await client.request<any>(graphql.signInWith, {
+			input: {
+				authentication: {
+					emailPassword: {
+						email: 'normalize-reset@toto.fr',
+						password: 'new-password',
+					},
+				},
+			},
+		})
+
+		expect(res.signInWith.user.id).toEqual(user.id)
+		process.env.NODE_ENV = 'test'
+	})
+
+	it('should reject requests when both email and phone are provided', async () => {
+		await expect(
+			client.request<any>(graphql.resetPassword, {
+				input: {
+					email: 'toto@toto.fr',
+					phone: '+33600000000',
+					password: 'newPassword',
+					otp: '000000',
+				},
+			}),
+		).rejects.toThrow('Email or phone is required')
+	})
+
 	it('should reject reset password with code 000000', async () => {
 		process.env.NODE_ENV = 'test'
 

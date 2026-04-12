@@ -3,6 +3,9 @@ import { gql } from 'graphql-request'
 import type { Wabe } from '../server'
 import { type DevWabeTypes, getAnonymousClient, getUserClient } from '../utils/helper'
 import { setupTests, closeTests } from '../utils/testHelper'
+import { defaultBeforeUpdateSessionOnUser } from './session'
+import { HookObject } from './HookObject'
+import { OperationType } from '.'
 
 describe('hooks/session', () => {
 	let wabe: Wabe<DevWabeTypes>
@@ -113,6 +116,48 @@ describe('hooks/session', () => {
 		})
 
 		expect(res3[0]?.sessions?.length).toEqual(1)
+	})
+
+	it('should block non-root updates to User.sessions field', () => {
+		const hookObject = new HookObject<DevWabeTypes, 'User'>({
+			className: 'User',
+			newData: {
+				sessions: [],
+			} as any,
+			context: {
+				wabe,
+				isRoot: false,
+			} as any,
+			operationType: OperationType.BeforeUpdate,
+			object: {
+				id: 'user-id',
+			},
+			select: {},
+		})
+
+		expect(() => defaultBeforeUpdateSessionOnUser(hookObject)).toThrow(
+			'Not authorized to update user sessions',
+		)
+	})
+
+	it('should allow root updates to User.sessions field', () => {
+		const hookObject = new HookObject<DevWabeTypes, 'User'>({
+			className: 'User',
+			newData: {
+				sessions: [],
+			} as any,
+			context: {
+				wabe,
+				isRoot: true,
+			} as any,
+			operationType: OperationType.BeforeUpdate,
+			object: {
+				id: 'user-id',
+			},
+			select: {},
+		})
+
+		expect(() => defaultBeforeUpdateSessionOnUser(hookObject)).not.toThrow()
 	})
 })
 

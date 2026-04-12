@@ -72,6 +72,26 @@ describe('Permissions', () => {
 						},
 						permissions: {},
 					},
+					{
+						name: 'TestClassCrud',
+						fields: {
+							field2: { type: 'String' },
+						},
+						permissions: {
+							create: {
+								requireAuthentication: true,
+								authorizedRoles: [RoleEnum.Admin],
+							},
+							update: {
+								requireAuthentication: true,
+								authorizedRoles: [RoleEnum.Admin],
+							},
+							delete: {
+								requireAuthentication: true,
+								authorizedRoles: [RoleEnum.Admin],
+							},
+						},
+					},
 				],
 			},
 		} as any
@@ -345,6 +365,77 @@ describe('Permissions', () => {
 			})
 
 			_checkCLP(obj, OperationType.BeforeRead)
+		})
+
+		it('should enforce create permission when session is missing', () => {
+			const context: WabeContext<any> = {
+				sessionId: undefined,
+				user: undefined,
+				isRoot: false,
+				wabe: { controllers, config } as any,
+			}
+
+			const obj = new HookObject({
+				className: 'TestClassCrud',
+				context,
+				object: { id: 'id' },
+				operationType: OperationType.BeforeCreate,
+				select: {},
+			})
+
+			expect(() => _checkCLP(obj, OperationType.BeforeCreate)).toThrow(
+				'Permission denied to create class TestClassCrud',
+			)
+		})
+
+		it('should validate update permission for authenticated admin user', () => {
+			const context: WabeContext<any> = {
+				sessionId: 'sessionId',
+				user: {
+					id: 'userId',
+					role: {
+						name: RoleEnum.Admin,
+					},
+				} as any,
+				isRoot: false,
+				wabe: { controllers, config } as any,
+			}
+
+			const obj = new HookObject({
+				className: 'TestClassCrud',
+				context,
+				object: { id: 'id' },
+				operationType: OperationType.BeforeUpdate,
+				select: {},
+			})
+
+			_checkCLP(obj, OperationType.BeforeUpdate)
+		})
+
+		it('should reject delete permission when role is not authorized', () => {
+			const context: WabeContext<any> = {
+				sessionId: 'sessionId',
+				user: {
+					id: 'userId',
+					role: {
+						name: RoleEnum.Client,
+					},
+				} as any,
+				isRoot: false,
+				wabe: { controllers, config } as any,
+			}
+
+			const obj = new HookObject({
+				className: 'TestClassCrud',
+				context,
+				object: { id: 'id' },
+				operationType: OperationType.BeforeDelete,
+				select: {},
+			})
+
+			expect(() => _checkCLP(obj, OperationType.BeforeDelete)).toThrow(
+				'Permission denied to delete class TestClassCrud',
+			)
 		})
 
 		it('should call _checkPermission on beforeRead', () => {

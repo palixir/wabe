@@ -558,6 +558,72 @@ describe('File upload', () => {
 		expect(spyFileDevAdapterReadFile).toHaveBeenCalledTimes(1)
 	})
 
+	it('should read the file again when urlCacheInSeconds is set to 0', async () => {
+		const previousUrlCacheInSeconds = wabe.config.file?.urlCacheInSeconds
+		if (wabe.config.file) wabe.config.file.urlCacheInSeconds = 0
+
+		try {
+			const formData = new FormData()
+
+			formData.append(
+				'operations',
+				JSON.stringify({
+					query:
+						'mutation ($file: File!) {createTest3(input: {fields: {file: {file:$file}}}){test3{id, file { name}}}}',
+					variables: { file: null },
+				}),
+			)
+
+			formData.append('map', JSON.stringify({ 0: ['variables.file'] }))
+			formData.append('0', new File(['a'], 'cache-zero.text', { type: 'text/plain' }))
+
+			await fetch(`http://127.0.0.1:${port}/graphql`, {
+				method: 'POST',
+				body: formData,
+			})
+
+			const anonymousClient = getAnonymousClient(port)
+
+			await anonymousClient.request<any>(gql`
+				query {
+					test3s {
+						edges {
+							node {
+								id
+								file {
+									name
+									url
+								}
+							}
+						}
+					}
+				}
+			`)
+			const readCallsAfterFirstQuery = spyFileDevAdapterReadFile.mock.calls.length
+
+			await anonymousClient.request<any>(gql`
+				query {
+					test3s {
+						edges {
+							node {
+								id
+								file {
+									name
+									url
+								}
+							}
+						}
+					}
+				}
+			`)
+			const readCallsAfterSecondQuery = spyFileDevAdapterReadFile.mock.calls.length
+
+			expect(readCallsAfterSecondQuery).toBe(readCallsAfterFirstQuery + 1)
+		} finally {
+			if (wabe.config.file) wabe.config.file.urlCacheInSeconds = previousUrlCacheInSeconds
+		}
+	})
+
 	it('should reset the cache if the file is updated', async () => {
 		const formData = new FormData()
 
@@ -1027,5 +1093,25 @@ describe('File upload security in production', () => {
 				select: {},
 			}),
 		).rejects.toThrow('File extension is not allowed')
+	})
+
+	it('should reject files when MIME and content signature do not match in production', async () => {
+		expect(
+			wabe.controllers.database.createObject({
+				// @ts-expect-error
+				className: 'TestSecurityFile',
+				context: {
+					isRoot: true,
+					wabe,
+				},
+				data: {
+					// @ts-expect-error
+					file: {
+						file: new File(['not-a-real-jpeg'], 'fake.jpg', { type: 'image/jpeg' }),
+					},
+				},
+				select: {},
+			}),
+		).rejects.toThrow('File content does not match MIME type')
 	})
 })

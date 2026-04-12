@@ -27,6 +27,10 @@ describe('sendOtpCodeResolver', () => {
 		spySend.mockClear()
 	})
 
+	beforeEach(async () => {
+		await wabe.controllers.database.clearDatabase()
+	})
+
 	it('should use the provided email template if provided', async () => {
 		const previous = wabe.config.email
 		// @ts-expect-error
@@ -70,6 +74,51 @@ describe('sendOtpCodeResolver', () => {
 		wabe.config.email = previous
 	})
 
+	it('should await an async email template function', async () => {
+		const previous = wabe.config.email
+		// @ts-expect-error
+		wabe.config.email = {
+			...wabe.config.email,
+			htmlTemplates: {
+				sendOTPCode: {
+					fn: async () => Promise.resolve('async-template'),
+					subject: 'Async confirmation code',
+				},
+			},
+		}
+
+		try {
+			await client.request<any>(graphql.createUser, {
+				input: {
+					fields: {
+						authentication: {
+							emailPassword: {
+								email: 'async-template@toto.fr',
+								password: 'totototo',
+							},
+						},
+					},
+				},
+			})
+
+			await client.request<any>(graphql.sendOtpCode, {
+				input: {
+					email: 'async-template@toto.fr',
+				},
+			})
+
+			expect(spySend).toHaveBeenCalledTimes(1)
+			expect(spySend).toHaveBeenCalledWith({
+				from: 'main.email@wabe.com',
+				to: ['async-template@toto.fr'],
+				subject: 'Async confirmation code',
+				html: 'async-template',
+			})
+		} finally {
+			wabe.config.email = previous
+		}
+	})
+
 	it("should send an OTP code to the user's email as anonymous client", async () => {
 		const anonymousClient = getAnonymousClient(port)
 
@@ -99,6 +148,10 @@ describe('sendOtpCodeResolver', () => {
 			subject: 'Your OTP code',
 			html: expect.any(String),
 		})
+
+		const sendCall = (spySend.mock.calls as any[])[0]?.[0] as { html?: string } | undefined
+		expect(sendCall?.html).toContain('Confirmation code')
+		expect(sendCall?.html).toContain('otp-code')
 	})
 
 	it("should return true if the user doesn't exist (hide sensitive data)", async () => {
@@ -158,6 +211,62 @@ describe('sendOtpCodeResolver', () => {
 			})
 
 			expect(spySend).toHaveBeenCalledTimes(1)
+		} finally {
+			wabe.config.authentication = {
+				...wabe.config.authentication,
+				security: previousSecurity,
+			}
+		}
+	})
+
+	it('should normalize email casing before lookup and rate limiting', async () => {
+		const previousSecurity = wabe.config.authentication?.security
+		wabe.config.authentication = {
+			...wabe.config.authentication,
+			security: {
+				...previousSecurity,
+				sendOtpCodeRateLimit: {
+					enabled: true,
+					maxAttempts: 1,
+					windowMs: 60_000,
+					blockDurationMs: 60_000,
+				},
+			},
+		}
+
+		try {
+			await client.request<any>(graphql.createUser, {
+				input: {
+					fields: {
+						authentication: {
+							emailPassword: {
+								email: 'normalize-send-otp@toto.fr',
+								password: 'totototo',
+							},
+						},
+					},
+				},
+			})
+
+			await client.request<any>(graphql.sendOtpCode, {
+				input: {
+					email: 'NORMALIZE-SEND-OTP@TOTO.FR',
+				},
+			})
+
+			await client.request<any>(graphql.sendOtpCode, {
+				input: {
+					email: 'normalize-send-otp@toto.fr',
+				},
+			})
+
+			expect(spySend).toHaveBeenCalledTimes(1)
+			expect(spySend).toHaveBeenCalledWith({
+				from: 'main.email@wabe.com',
+				to: ['normalize-send-otp@toto.fr'],
+				subject: 'Your OTP code',
+				html: expect.any(String),
+			})
 		} finally {
 			wabe.config.authentication = {
 				...wabe.config.authentication,

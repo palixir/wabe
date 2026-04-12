@@ -199,21 +199,17 @@ const pruneExpiredChallenges = (challenges: PendingChallenge[]) => {
 const getUserPendingChallenges = async (
 	context: WabeContext<DevWabeTypes>,
 	userId: string,
-): Promise<PendingChallenge[] | null> => {
-	try {
-		const user = await getDatabaseController(context).getObject({
-			className: 'User',
-			id: userId,
-			context: contextWithRoot(context),
-			select: {
-				pendingChallenges: true,
-			},
-		})
+): Promise<PendingChallenge[]> => {
+	const user = await getDatabaseController(context).getObject({
+		className: 'User',
+		id: userId,
+		context: contextWithRoot(context),
+		select: {
+			pendingChallenges: true,
+		},
+	})
 
-		return parsePendingChallenges(user?.pendingChallenges)
-	} catch {
-		return null
-	}
+	return parsePendingChallenges(user?.pendingChallenges)
 }
 
 const saveUserPendingChallenges = async (
@@ -242,7 +238,7 @@ export const createMfaChallenge = async (
 	const token = crypto.randomUUID()
 	const expiresAt = Date.now() + getMfaChallengeTTL(context)
 
-	const currentChallenges = (await getUserPendingChallenges(context, userId)) || []
+	const currentChallenges = await getUserPendingChallenges(context, userId)
 	const nextChallenges = [
 		...pruneExpiredChallenges(currentChallenges),
 		{

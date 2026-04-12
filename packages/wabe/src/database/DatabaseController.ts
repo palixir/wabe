@@ -953,7 +953,12 @@ export class DatabaseController<T extends WabeTypes> {
 			id,
 		})
 
-		const whereWithACLCondition = this._buildWhereWithACL(where || {}, context, 'read')
+		const whereWithPointer = await this._getWhereObjectWithPointerOrRelation(
+			className,
+			where || {},
+			context,
+		)
+		const whereWithACLCondition = this._buildWhereWithACL(whereWithPointer || {}, context, 'read')
 
 		const selectWithPointersAndRelationsToGetId = this._buildSelectWithPointers({
 			adapterSelect,

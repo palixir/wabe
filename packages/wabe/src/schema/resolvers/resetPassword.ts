@@ -16,9 +16,12 @@ export const resetPasswordResolver = async (
 	{ input: { email, phone, password, otp } }: MutationResetPasswordArgs,
 	context: WabeContext<DevWabeTypes>,
 ) => {
-	if (!email && !phone) throw new Error('Email or phone is required')
+	const normalizedEmail = email?.trim().toLowerCase()
+	const normalizedPhone = phone?.trim()
+	if (!normalizedEmail && !normalizedPhone) throw new Error('Email or phone is required')
+	if (normalizedEmail && normalizedPhone) throw new Error('Email or phone is required')
 
-	const identifier = email?.trim().toLowerCase() || phone?.trim()
+	const identifier = normalizedEmail || normalizedPhone
 	if (!identifier) throw new Error('Email or phone is required')
 
 	const rateLimitKey = `resetPassword:${identifier}`
@@ -28,10 +31,10 @@ export const resetPasswordResolver = async (
 	const users = await context.wabe.controllers.database.getObjects({
 		className: 'User',
 		where: {
-			...(email && { email: { equalTo: email } }),
-			...(phone && {
+			...(normalizedEmail && { email: { equalTo: normalizedEmail } }),
+			...(normalizedPhone && {
 				authentication: {
-					phonePassword: { phone: { equalTo: phone } },
+					phonePassword: { phone: { equalTo: normalizedPhone } },
 				},
 			}),
 		},
@@ -53,7 +56,7 @@ export const resetPasswordResolver = async (
 			throw new Error('Invalid OTP code')
 		}
 
-		const providerKey = phone ? 'phonePassword' : 'emailPassword'
+		const providerKey = normalizedPhone ? 'phonePassword' : 'emailPassword'
 
 		await context.wabe.controllers.database.updateObject({
 			className: 'User',
@@ -61,10 +64,10 @@ export const resetPasswordResolver = async (
 			data: {
 				authentication: {
 					[providerKey]: {
-						...(phone && {
+						...(normalizedPhone && {
 							phone: realUser.authentication?.phonePassword?.phone,
 						}),
-						...(email && { email }),
+						...(normalizedEmail && { email: normalizedEmail }),
 						password,
 					},
 				},

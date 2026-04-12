@@ -44,6 +44,11 @@ describe('crypto deterministic token helpers', () => {
 	it('should return null on malformed ciphertext', () => {
 		expect(decryptDeterministicToken('bad:format', key)).toBeNull()
 	})
+
+	it('should identify argon2 hashes using the PHC prefix', () => {
+		expect(isArgon2Hash('$argon2id$v=19$m=65536,t=2,p=1$nonce$hash')).toBe(true)
+		expect(isArgon2Hash('not-an-argon-hash')).toBe(false)
+	})
 })
 
 describe('Argon2 hash and verify', () => {

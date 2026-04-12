@@ -5,6 +5,7 @@ import {
 	createHmac,
 	timingSafeEqual,
 } from 'node:crypto'
+import * as nodeCrypto from 'node:crypto'
 import { promisify } from 'node:util'
 
 const params = {
@@ -12,6 +13,26 @@ const params = {
 	tagLength: 64,
 	memory: 65536,
 	passes: 2,
+}
+
+type NodeArgon2 = (
+	algorithm: string,
+	params: {
+		nonce: Buffer
+		parallelism: number
+		tagLength: number
+		memory: number
+		passes: number
+		message: string
+	},
+	callback: (error: unknown, derived: Buffer) => void,
+) => void
+
+const getNodeArgon2 = (): NodeArgon2 => {
+	// @ts-expect-error
+	const argon2 = nodeCrypto.argon2
+	if (!argon2) throw new Error('Argon2 is not supported in this runtime')
+	return argon2
 }
 
 /*
@@ -22,7 +43,7 @@ export const hashArgon2 = async (text: string) => {
 	if (process.versions.bun) return Bun.password.hash(text, { algorithm: 'argon2id' })
 
 	// Node support
-	const argon2 = promisify(require('node:crypto').argon2)
+	const argon2 = promisify(getNodeArgon2())
 
 	const nonce = randomBytes(16)
 
@@ -44,6 +65,7 @@ export const verifyArgon2 = async (password: string, hash: string) => {
 
 	// Node support
 	const [, algorithm, , paramString, nonceHex, storedHashHex] = hash.split('$')
+	if (!algorithm || !paramString || !nonceHex || !storedHashHex) return false
 
 	const kvPairs = paramString?.split(',')
 	const parsedParams = Object.fromEntries(
@@ -56,20 +78,19 @@ export const verifyArgon2 = async (password: string, hash: string) => {
 	const memory = parsedParams.m
 	const passes = parsedParams.t
 	const parallelism = parsedParams.p
+	if ([memory, passes, parallelism].some((value) => Number.isNaN(value))) return false
 
-	const newDerived = await promisify(require('node:crypto'))(algorithm, {
-		nonce: Buffer.from(nonceHex || '', 'base64'),
+	const argon2Async = promisify(getNodeArgon2())
+	const newDerived = await argon2Async(algorithm, {
+		nonce: Buffer.from(nonceHex, 'base64'),
 		parallelism,
-		tagLength: 64,
+		tagLength: params.tagLength,
 		memory,
 		passes,
 		message: password,
 	})
 
-	const isMatch = timingSafeEqual(
-		Buffer.from(newDerived),
-		Buffer.from(storedHashHex || '', 'base64'),
-	)
+	const isMatch = timingSafeEqual(Buffer.from(newDerived), Buffer.from(storedHashHex, 'base64'))
 
 	return isMatch
 }
