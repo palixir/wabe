@@ -506,6 +506,15 @@ export class DatabaseController<T extends WabeTypes> {
 		}
 	}
 
+	/**
+	 * Adds ACL-based conditions to the where clause.
+	 *
+	 * IMPORTANT: Objects with `acl == null` are accessible to ANY authenticated
+	 * user. If you only use class-level permissions (CLP) without setting
+	 * per-object ACLs, any user with the required role can read/update/delete
+	 * any row. To restrict access to the owner, set `acl` on each object at
+	 * creation time via hooks or custom logic.
+	 */
 	_buildWhereWithACL<K extends keyof T['types']>(
 		where: WhereType<T, K>,
 		context: WabeContext<T>,

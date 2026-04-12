@@ -84,7 +84,7 @@ const detectMimeTypeFromContent = async (file: File) => {
 
 const getUploadSecurityConfig = <T extends WabeTypes>(context: WabeContext<T>) => {
 	const security = context.wabe.config.file?.security
-	const enabled = security?.enabled ?? context.wabe.config.isProduction
+	const enabled = security?.enabled ?? true
 	const maxFileSizeBytes = security?.maxFileSizeBytes ?? DEFAULT_MAX_FILE_SIZE_BYTES
 	const allowedMimeTypes = (security?.allowedMimeTypes || DEFAULT_ALLOWED_MIME_TYPES).map(
 		normalizeMimeType,

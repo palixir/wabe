@@ -97,6 +97,7 @@ export type User = {
 	role?: Role
 	sessions?: Array<_Session>
 	secondFA?: SecondFA
+	otpSalt?: string
 	pendingChallenges?: Array<PendingAuthenticationChallenge>
 }
 
@@ -171,6 +172,7 @@ export type WhereUser = {
 	role?: Role
 	sessions?: Array<_Session>
 	secondFA?: SecondFA
+	otpSalt?: string
 	pendingChallenges?: Array<PendingAuthenticationChallenge>
 }
 

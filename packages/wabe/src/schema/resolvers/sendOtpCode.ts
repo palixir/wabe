@@ -3,7 +3,7 @@ import { isRateLimited, registerRateLimitFailure } from '../../authentication/se
 import type { WabeContext } from '../../server/interface'
 import type { DevWabeTypes } from '../../utils/helper'
 import { sendOtpCodeTemplate } from '../../email/templates/sendOtpCode'
-import { OTP } from '../../authentication/OTP'
+import { OTP, getOrCreateOtpSalt } from '../../authentication/OTP'
 import { contextWithRoot } from '../../utils/export'
 
 export const sendOtpCodeResolver = async (
@@ -38,8 +38,9 @@ export const sendOtpCodeResolver = async (
 	if (!userId) return false
 
 	const otpClass = new OTP(context.wabe.config.rootKey)
+	const salt = await getOrCreateOtpSalt(context, userId)
 
-	const otp = otpClass.generate(userId)
+	const otp = otpClass.generate(userId, salt)
 
 	const mainEmail = context.wabe.config.email?.mainEmail || 'noreply@wabe.com'
 

@@ -1,7 +1,9 @@
 import { type WobeHandler, uploadDirectory } from 'wobe'
-import type { ProviderEnum } from '../../authentication/interface'
+import { ProviderEnum } from '../../authentication/interface'
 import { authHandler, oauthHandlerCallback } from './authHandler'
 import type { WobeCustomContext } from '..'
+
+const validProviders = new Set<string>(Object.values(ProviderEnum))
 
 export interface WabeRoute {
 	method: 'GET' | 'POST' | 'PUT' | 'DELETE'
@@ -23,9 +25,9 @@ export const defaultRoutes = ({
 			handler: (context) => {
 				const provider = context.query.provider
 
-				if (!provider) throw new Error('Authentication failed, provider not found')
+				if (!provider || !validProviders.has(provider))
+					throw new Error('Authentication failed, invalid provider')
 
-				// TODO: Maybe check if the value is in the enum
 				return authHandler(context, context.wabe, provider as ProviderEnum)
 			},
 		},

@@ -680,6 +680,13 @@ export class Schema<T extends WabeTypes> {
 					},
 				},
 			},
+			otpSalt: {
+				type: 'String',
+				protected: {
+					authorizedRoles: ['rootOnly'],
+					protectedOperations: ['create', 'read', 'update'],
+				},
+			},
 			pendingChallenges: {
 				type: 'Array',
 				typeValue: 'Object',

@@ -6,7 +6,7 @@ import type {
 	OnVerifyChallengeOptions,
 	SecondaryProviderInterface,
 } from '../interface'
-import { OTP } from '../OTP'
+import { OTP, getOrCreateOtpSalt } from '../OTP'
 import { clearRateLimit, isRateLimited, registerRateLimitFailure } from '../security'
 
 const DUMMY_USER_ID = '00000000-0000-0000-0000-000000000000'
@@ -29,8 +29,9 @@ export class EmailOTP implements SecondaryProviderInterface<DevWabeTypes, EmailO
 		if (!user.email) throw new Error('No user email found')
 
 		const otpClass = new OTP(context.wabe.config.rootKey)
+		const salt = await getOrCreateOtpSalt(context, user.id)
 
-		const otp = otpClass.generate(user.id)
+		const otp = otpClass.generate(user.id, salt)
 
 		const template = context.wabe.config.email?.htmlTemplates?.sendOTPCode
 
@@ -77,8 +78,9 @@ export class EmailOTP implements SecondaryProviderInterface<DevWabeTypes, EmailO
 		const userId = realUser?.id ?? DUMMY_USER_ID
 
 		const otpClass = new OTP(context.wabe.config.rootKey)
+		const salt = realUser ? await getOrCreateOtpSalt(context, userId) : undefined
 
-		const isOtpValid = otpClass.verify(input.otp, userId)
+		const isOtpValid = otpClass.verify(input.otp, userId, salt)
 
 		if (realUser && isOtpValid) {
 			clearRateLimit(context, 'verifyChallenge', rateLimitKey)

@@ -1896,6 +1896,65 @@ describe('Mongo adapter', () => {
 		expect(resAfterDelete.length).toEqual(0)
 	})
 
+	it('should reject MongoDB operators in equalTo values (NoSQL injection)', () => {
+		expect(() => buildMongoWhereQuery({ name: { equalTo: { $regex: '.*' } } })).toThrow(
+			'operator-like keys are not allowed',
+		)
+
+		expect(() => buildMongoWhereQuery({ age: { equalTo: { $gt: 0 } } })).toThrow(
+			'operator-like keys are not allowed',
+		)
+
+		expect(() =>
+			buildMongoWhereQuery({ data: { equalTo: { nested: { $where: 'true' } } } }),
+		).toThrow('operator-like keys are not allowed')
+	})
+
+	it('should reject MongoDB operators in notEqualTo values (NoSQL injection)', () => {
+		expect(() => buildMongoWhereQuery({ name: { notEqualTo: { $regex: '.*' } } })).toThrow(
+			'operator-like keys are not allowed',
+		)
+	})
+
+	it('should reject MongoDB operators in contains values (NoSQL injection)', () => {
+		expect(() => buildMongoWhereQuery({ tags: { contains: { $gt: '' } } })).toThrow(
+			'operator-like keys are not allowed',
+		)
+	})
+
+	it('should reject MongoDB operators in notContains values (NoSQL injection)', () => {
+		expect(() => buildMongoWhereQuery({ tags: { notContains: { $exists: true } } })).toThrow(
+			'operator-like keys are not allowed',
+		)
+	})
+
+	it('should reject deeply nested MongoDB operators (NoSQL injection)', () => {
+		expect(() => buildMongoWhereQuery({ data: { equalTo: { a: { b: { $ne: null } } } } })).toThrow(
+			'operator-like keys are not allowed',
+		)
+	})
+
+	it('should reject MongoDB operators in array values (NoSQL injection)', () => {
+		expect(() => buildMongoWhereQuery({ tags: { contains: [{ $gt: '' }] } })).toThrow(
+			'operator-like keys are not allowed',
+		)
+	})
+
+	it('should allow legitimate object values without $ keys', () => {
+		const where = buildMongoWhereQuery({
+			name: { equalTo: 'John' },
+		})
+		expect(where).toEqual({ name: 'John' })
+	})
+
+	it('should allow legitimate object contains without $ keys (ACL pattern)', () => {
+		const where = buildMongoWhereQuery({
+			// @ts-expect-error
+			acl: { users: { contains: { userId: 'user1', read: true } } },
+		})
+		expect(where).toEqual({ 'acl.users': { $elemMatch: { userId: 'user1', read: true } } })
+	})
+
 	it('should build where query with equalTo null', () => {
 		const where = buildMongoWhereQuery({
 			acl: { equalTo: null },

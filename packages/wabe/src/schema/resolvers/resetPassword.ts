@@ -1,5 +1,5 @@
 import type { MutationResetPasswordArgs } from '../../../generated/wabe'
-import { OTP } from '../../authentication/OTP'
+import { OTP, getOrCreateOtpSalt } from '../../authentication/OTP'
 import {
 	clearRateLimit,
 	isRateLimited,
@@ -44,7 +44,8 @@ export const resetPasswordResolver = async (
 	const userId = realUser?.id ?? DUMMY_USER_ID
 
 	const otpClass = new OTP(context.wabe.config.rootKey)
-	const isOtpValid = otpClass.verify(otp, userId)
+	const salt = realUser ? await getOrCreateOtpSalt(context, userId) : undefined
+	const isOtpValid = otpClass.verify(otp, userId, salt)
 
 	if (realUser) {
 		if (!isOtpValid) {

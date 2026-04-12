@@ -8,7 +8,7 @@ import {
 } from '../../utils/helper'
 import { setupTests, closeTests } from '../../utils/testHelper'
 import type { Wabe } from '../../server'
-import { OTP } from 'src'
+import { OTP, getOrCreateOtpSalt } from 'src'
 
 describe('resetPasswordResolver', () => {
 	let wabe: Wabe<DevWabeTypes>
@@ -29,6 +29,12 @@ describe('resetPasswordResolver', () => {
 	beforeEach(async () => {
 		await wabe.controllers.database.clearDatabase()
 	})
+
+	const makeRootContext = () =>
+		({
+			isRoot: true,
+			wabe: { controllers: wabe.controllers, config: wabe.config },
+		}) as any
 
 	it('should let an anonymous reset the password of an user', async () => {
 		process.env.NODE_ENV = 'production'
@@ -65,12 +71,13 @@ describe('resetPasswordResolver', () => {
 		const userId = edges[0].node.id
 
 		const otp = new OTP(wabe.config.rootKey)
+		const salt = await getOrCreateOtpSalt(makeRootContext(), userId)
 
 		await anonymousClient.request<any>(graphql.resetPassword, {
 			input: {
 				email: 'toto@toto.fr',
 				password: 'tata',
-				otp: otp.generate(userId),
+				otp: otp.generate(userId, salt),
 			},
 		})
 
@@ -111,12 +118,13 @@ describe('resetPasswordResolver', () => {
 		const userId = user.id
 
 		const otp = new OTP(wabe.config.rootKey)
+		const salt = await getOrCreateOtpSalt(makeRootContext(), userId)
 
 		await client.request<any>(graphql.resetPassword, {
 			input: {
 				email: 'toto@toto.fr',
 				password: 'tata',
-				otp: otp.generate(userId),
+				otp: otp.generate(userId, salt),
 			},
 		})
 
@@ -156,6 +164,7 @@ describe('resetPasswordResolver', () => {
 
 		const userId = user.id
 		const otp = new OTP(wabe.config.rootKey)
+		const salt = await getOrCreateOtpSalt(makeRootContext(), userId)
 
 		const signInRes = await client.request<any>(graphql.signInWith, {
 			input: {
@@ -175,7 +184,7 @@ describe('resetPasswordResolver', () => {
 			input: {
 				email: 'session-reset@toto.fr',
 				password: 'tata',
-				otp: otp.generate(userId),
+				otp: otp.generate(userId, salt),
 			},
 		})
 
@@ -240,12 +249,13 @@ describe('resetPasswordResolver', () => {
 		const userId = user.id
 
 		const otp = new OTP(wabe.config.rootKey)
+		const salt = await getOrCreateOtpSalt(makeRootContext(), userId)
 
 		await client.request<any>(graphql.resetPassword, {
 			input: {
 				email: 'toto@toto.fr',
 				password: 'tata',
-				otp: otp.generate(userId),
+				otp: otp.generate(userId, salt),
 			},
 		})
 
@@ -371,12 +381,13 @@ describe('resetPasswordResolver', () => {
 		const userId = user.id
 
 		const otp = new OTP(wabe.config.rootKey)
+		const salt = await getOrCreateOtpSalt(makeRootContext(), userId)
 
 		await client.request<any>(graphql.resetPassword, {
 			input: {
 				phone: '+33600000000',
 				password: 'tata',
-				otp: otp.generate(userId),
+				otp: otp.generate(userId, salt),
 			},
 		})
 

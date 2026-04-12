@@ -1,4 +1,4 @@
-import { describe, expect, it, mock, spyOn } from 'bun:test'
+import { describe, expect, it, mock, spyOn, beforeEach } from 'bun:test'
 import { signOutResolver } from './signOutResolver'
 import { Session } from '../Session'
 
@@ -21,6 +21,10 @@ describe('signOut', () => {
 		},
 	} as any
 
+	beforeEach(() => {
+		mockDeleteCookie.mockClear()
+	})
+
 	it('should sign out the current user', async () => {
 		const spyDeleteSession = spyOn(Session.prototype, 'delete').mockResolvedValue(undefined)
 
@@ -31,8 +35,32 @@ describe('signOut', () => {
 		expect(spyDeleteSession).toHaveBeenCalledTimes(1)
 		expect(spyDeleteSession).toHaveBeenCalledWith(context)
 
-		expect(mockDeleteCookie).toHaveBeenCalledTimes(2)
+		expect(mockDeleteCookie).toHaveBeenCalledTimes(3)
 		expect(mockDeleteCookie).toHaveBeenNthCalledWith(1, 'accessToken')
 		expect(mockDeleteCookie).toHaveBeenNthCalledWith(2, 'refreshToken')
+		expect(mockDeleteCookie).toHaveBeenNthCalledWith(3, 'csrfToken')
+	})
+
+	it('should not delete cookies when cookieSession is disabled', async () => {
+		const noCookieContext = {
+			...context,
+			wabe: {
+				config: {
+					authentication: {
+						session: {
+							cookieSession: false,
+						},
+					},
+				},
+			},
+		} as any
+
+		const spyDeleteSession = spyOn(Session.prototype, 'delete').mockResolvedValue(undefined)
+
+		await signOutResolver(undefined, {}, noCookieContext)
+
+		expect(mockDeleteCookie).toHaveBeenCalledTimes(0)
+
+		spyDeleteSession.mockRestore()
 	})
 })

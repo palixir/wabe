@@ -1,4 +1,10 @@
-import { randomBytes, createCipheriv, createDecipheriv, createHmac } from 'node:crypto'
+import {
+	randomBytes,
+	createCipheriv,
+	createDecipheriv,
+	createHmac,
+	timingSafeEqual,
+} from 'node:crypto'
 import { promisify } from 'node:util'
 
 const params = {
@@ -60,7 +66,7 @@ export const verifyArgon2 = async (password: string, hash: string) => {
 		message: password,
 	})
 
-	const isMatch = crypto.timingSafeEqual(
+	const isMatch = timingSafeEqual(
 		Buffer.from(newDerived),
 		Buffer.from(storedHashHex || '', 'base64'),
 	)

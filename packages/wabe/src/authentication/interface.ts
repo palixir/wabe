@@ -118,7 +118,7 @@ export interface SessionConfig<T extends WabeTypes> {
 
 export interface AuthenticationRateLimitConfig {
 	/**
-	 * Enable this rate limiter. Enabled by default in production.
+	 * Enable this rate limiter. Enabled by default.
 	 */
 	enabled?: boolean
 	maxAttempts?: number

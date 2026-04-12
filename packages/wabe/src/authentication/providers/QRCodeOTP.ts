@@ -1,7 +1,7 @@
 import { contextWithRoot } from '../..'
 import type { DevWabeTypes } from '../../utils/helper'
 import type { OnVerifyChallengeOptions, SecondaryProviderInterface } from '../interface'
-import { OTP } from '../OTP'
+import { OTP, getOrCreateOtpSalt } from '../OTP'
 import { clearRateLimit, isRateLimited, registerRateLimitFailure } from '../security'
 
 const DUMMY_USER_ID = '00000000-0000-0000-0000-000000000000'
@@ -51,8 +51,9 @@ export class QRCodeOTP implements SecondaryProviderInterface<DevWabeTypes, QRCod
 		const userId = realUser?.id ?? DUMMY_USER_ID
 
 		const otpClass = new OTP(context.wabe.config.rootKey)
+		const salt = realUser ? await getOrCreateOtpSalt(context, userId) : undefined
 
-		const isOtpValid = otpClass.authenticatorVerify(input.otp, userId)
+		const isOtpValid = otpClass.authenticatorVerify(input.otp, userId, salt)
 
 		if (realUser && isOtpValid) {
 			clearRateLimit(context, 'verifyChallenge', rateLimitKey)

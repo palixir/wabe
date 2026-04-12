@@ -2,7 +2,7 @@ import { describe, expect, it, beforeAll, afterAll, afterEach } from 'bun:test'
 import type { DevWabeTypes } from '../../utils/helper'
 import { setupTests, closeTests } from '../../utils/testHelper'
 import type { Wabe } from '../..'
-import { OTP } from '../OTP'
+import { OTP, getOrCreateOtpSalt } from '../OTP'
 import { QRCodeOTP } from './QRCodeOTP'
 
 describe('QRCodeOTPProvider', () => {
@@ -38,7 +38,8 @@ describe('QRCodeOTPProvider', () => {
 
 		if (!createdUser) throw new Error('User not created')
 
-		const otp = new OTP(wabe.config.rootKey).authenticatorGenerate(createdUser.id)
+		const salt = await getOrCreateOtpSalt({ isRoot: true, wabe } as any, createdUser.id)
+		const otp = new OTP(wabe.config.rootKey).authenticatorGenerate(createdUser.id, salt)
 
 		const qrCodeOTP = new QRCodeOTP()
 

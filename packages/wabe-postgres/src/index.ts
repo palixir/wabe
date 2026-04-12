@@ -442,7 +442,7 @@ export class PostgresAdapter<T extends WabeTypes> implements DatabaseAdapter<T> 
 					return client.query(`
             CREATE ${indexType} INDEX IF NOT EXISTS
             idx_${String(className)}_${String(index.field)}
-            ON "${String(className)}" (${String(index.field)}' ${indexDirection})
+            ON "${String(className)}" ("${String(index.field)}" ${indexDirection})
           `)
 				}),
 			)

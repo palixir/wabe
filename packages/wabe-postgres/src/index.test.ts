@@ -2189,3 +2189,47 @@ describe('Postgres adapter', () => {
 		expect(results3.some((row) => row?.field1 === 'John')).toBe(true)
 	})
 })
+
+describe('PostgreSQL DDL index syntax', () => {
+	it('should generate valid index DDL without stray quotes', () => {
+		const className = 'TestTable'
+		const index = { field: 'myField', unique: false, order: 'ASC' as const }
+
+		const indexType = index.unique ? 'UNIQUE' : ''
+		const indexDirection = index.order === 'ASC' ? 'ASC' : 'DESC'
+
+		const ddl = `CREATE ${indexType} INDEX IF NOT EXISTS idx_${String(className)}_${String(index.field)} ON "${String(className)}" ("${String(index.field)}" ${indexDirection})`
+
+		expect(ddl).not.toContain("'")
+		expect(ddl).toContain('"myField"')
+		expect(ddl).toContain('"TestTable"')
+		expect(ddl).toContain('ASC')
+	})
+
+	it('should generate valid UNIQUE index DDL', () => {
+		const className = 'Users'
+		const index = { field: 'email', unique: true, order: 'ASC' as const }
+
+		const indexType = index.unique ? 'UNIQUE' : ''
+		const indexDirection = index.order === 'ASC' ? 'ASC' : 'DESC'
+
+		const ddl = `CREATE ${indexType} INDEX IF NOT EXISTS idx_${String(className)}_${String(index.field)} ON "${String(className)}" ("${String(index.field)}" ${indexDirection})`
+
+		expect(ddl).toContain('UNIQUE')
+		expect(ddl).toContain('"email"')
+		expect(ddl).not.toMatch(/"[^"]*'/)
+	})
+
+	it('should generate DESC index DDL', () => {
+		const className = 'Orders'
+		const index = { field: 'createdAt', unique: false, order: 'DESC' as string }
+
+		const indexType = index.unique ? 'UNIQUE' : ''
+		const indexDirection = index.order === 'ASC' ? 'ASC' : 'DESC'
+
+		const ddl = `CREATE ${indexType} INDEX IF NOT EXISTS idx_${String(className)}_${String(index.field)} ON "${String(className)}" ("${String(index.field)}" ${indexDirection})`
+
+		expect(ddl).toContain('DESC')
+		expect(ddl).toContain('"createdAt"')
+	})
+})
