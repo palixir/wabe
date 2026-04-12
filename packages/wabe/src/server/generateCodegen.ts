@@ -15,6 +15,17 @@ import type {
 import { firstLetterUpperCase, type DevWabeTypes } from '../utils/helper'
 import { firstLetterInUpperCase } from '../utils'
 
+export type CodegenFormatOptions = {
+	indent?: string
+	comma?: boolean
+	semi?: boolean
+	quote?: 'single' | 'double'
+	formatCommand?: string
+	printWidth?: number
+	finalNewline?: boolean
+	semanticCompare?: boolean
+}
+
 const wabePrimaryTypesToTypescriptTypes: Record<Exclude<WabePrimaryTypes, 'File'>, string> = {
 	Boolean: 'boolean',
 	Int: 'number',
@@ -27,12 +38,20 @@ const wabePrimaryTypesToTypescriptTypes: Record<Exclude<WabePrimaryTypes, 'File'
 	Hash: 'string',
 }
 
-const getFileTypeString = (options?: CodegenFormatOptions) => {
+export const getIndent = (options?: CodegenFormatOptions): string => options?.indent ?? '\t'
+
+export const getEndChar = (options?: CodegenFormatOptions): string =>
+	options?.semi ? ';' : options?.comma ? ',' : ''
+
+export const getQuoteChar = (options?: CodegenFormatOptions): string =>
+	options?.quote === 'double' ? '"' : "'"
+
+export const getFileTypeString = (options?: CodegenFormatOptions) => {
 	const sep = options?.semi ? '; ' : ', '
 	return `{ url: string${sep}name: string }`
 }
 
-const wabeTypesToTypescriptTypes = ({
+export const wabeTypesToTypescriptTypes = ({
 	field,
 	isInput = false,
 	formatOptions,
@@ -43,8 +62,7 @@ const wabeTypesToTypescriptTypes = ({
 }) => {
 	switch (field.type) {
 		case 'Date':
-			if (isInput) return 'Date'
-			return 'string'
+			return isInput ? 'Date' : 'string'
 		case 'File':
 			return getFileTypeString(formatOptions)
 		case 'Boolean':
@@ -71,6 +89,8 @@ const wabeTypesToTypescriptTypes = ({
 	}
 }
 
+const fieldKey = (name: string, required?: boolean) => `${name}${required ? '' : 'undefined'}`
+
 const generateWabeObject = ({
 	object,
 	isInput = false,
@@ -82,13 +102,11 @@ const generateWabeObject = ({
 	isInput?: boolean
 	formatOptions?: CodegenFormatOptions
 }): Record<string, Record<string, string>> => {
-	const objectName = object.name
+	const objectNameWithPrefix = `${prefix}${firstLetterUpperCase(object.name)}`
 
 	return Object.entries(object.fields).reduce(
 		(acc, [fieldName, field]) => {
 			const type = wabeTypesToTypescriptTypes({ field, isInput, formatOptions })
-
-			const objectNameWithPrefix = `${prefix}${firstLetterUpperCase(objectName)}`
 
 			if (field.type === 'Object' || (field.type === 'Array' && field.typeValue === 'Object')) {
 				const subObject = generateWabeObject({
@@ -99,17 +117,14 @@ const generateWabeObject = ({
 				})
 
 				const isArray = field.type === 'Array'
+				const subTypeName = `${objectNameWithPrefix}${firstLetterUpperCase(field.object.name)}`
 
 				return {
 					...acc,
 					...subObject,
 					[objectNameWithPrefix]: {
 						...acc[objectNameWithPrefix],
-						[`${fieldName}${field.required ? '' : 'undefined'}`]: `${
-							isArray ? 'Array<' : ''
-						}${objectNameWithPrefix}${firstLetterUpperCase(field.object.name)}${
-							isArray ? '>' : ''
-						}`,
+						[fieldKey(fieldName, field.required)]: isArray ? `Array<${subTypeName}>` : subTypeName,
 					},
 				}
 			}
@@ -118,7 +133,7 @@ const generateWabeObject = ({
 				...acc,
 				[objectNameWithPrefix]: {
 					...acc[objectNameWithPrefix],
-					[`${fieldName}${field.required ? '' : 'undefined'}`]: `${type}`,
+					[fieldKey(fieldName, field.required)]: `${type}`,
 				},
 			}
 		},
@@ -126,128 +141,54 @@ const generateWabeObject = ({
 	)
 }
 
-const generateWabeTypes = (
+const mergeNestedStringRecords = (records: Array<Record<string, Record<string, string>>>) =>
+	Object.assign({} as Record<string, Record<string, string>>, ...records)
+
+const generateClassTypes = (
 	classes: ClassInterface<DevWabeTypes>[],
 	formatOptions?: CodegenFormatOptions,
-) => {
-	const wabeTypes = classes.reduce(
-		(acc, classType) => {
-			const { name, fields } = classType
-
+	namePrefix = '',
+	isInput = false,
+) =>
+	classes.reduce(
+		(acc, { name, fields }) => {
 			const objectsToLoad: Array<Record<string, Record<string, string>>> = []
 
 			const currentClass = Object.entries(fields).reduce(
-				(acc2, [name, field]) => {
-					const type = wabeTypesToTypescriptTypes({ field, formatOptions })
+				(acc2, [fieldName, field]) => {
+					const type = wabeTypesToTypescriptTypes({ field, isInput, formatOptions })
 
 					if (field.type === 'Object' || (field.type === 'Array' && field.typeValue === 'Object')) {
-						const wabeObject = generateWabeObject({
-							object: field.object,
-							formatOptions,
-						})
-
-						objectsToLoad.push(wabeObject)
+						objectsToLoad.push(generateWabeObject({ object: field.object, isInput, formatOptions }))
 					}
 
 					return {
 						...acc2,
-						[`${name}${field.required ? '' : 'undefined'}`]: type,
+						[fieldKey(fieldName, field.required)]: type,
 					}
 				},
 				{} as Record<string, string>,
 			)
 
-			const objects = mergeNestedStringRecords(objectsToLoad)
+			const completeName = namePrefix ? `${namePrefix}${firstLetterUpperCase(name)}` : name
 
 			return {
 				...acc,
-				...objects,
-				[name]: { id: 'string', ...currentClass },
-			}
-		},
-		{} as Record<string, Record<string, string>>,
-	)
-
-	return wabeTypes
-}
-
-const generateWabeWhereTypes = (
-	classes: ClassInterface<DevWabeTypes>[],
-	formatOptions?: CodegenFormatOptions,
-) => {
-	const wabeTypes = classes.reduce(
-		(acc, classType) => {
-			const { name, fields } = classType
-
-			const completeName = `Where${firstLetterUpperCase(name)}`
-
-			const objectsToLoad: Array<Record<string, Record<string, string>>> = []
-
-			const currentClass = Object.entries(fields).reduce(
-				(acc2, [name, field]) => {
-					const type = wabeTypesToTypescriptTypes({
-						field,
-						isInput: true,
-						formatOptions,
-					})
-
-					if (field.type === 'Object' || (field.type === 'Array' && field.typeValue === 'Object')) {
-						const wabeObject = generateWabeObject({
-							object: field.object,
-							isInput: true,
-							formatOptions,
-						})
-
-						objectsToLoad.push(wabeObject)
-					}
-
-					return {
-						...acc2,
-						[`${name}${field.required ? '' : 'undefined'}`]: type,
-					}
-				},
-				{} as Record<string, string>,
-			)
-
-			const objects = mergeNestedStringRecords(objectsToLoad)
-
-			return {
-				...acc,
-				...objects,
+				...mergeNestedStringRecords(objectsToLoad),
 				[completeName]: { id: 'string', ...currentClass },
 			}
 		},
 		{} as Record<string, Record<string, string>>,
 	)
 
-	return wabeTypes
-}
-
-const generateWabeEnumTypes = (enums: EnumInterface[]) => {
-	return Object.values(enums).reduce(
-		(acc, { name, values }) => {
-			return {
-				...acc,
-				[name]: values,
-			}
-		},
+const generateWabeEnumTypes = (enums: EnumInterface[]) =>
+	enums.reduce(
+		(acc, { name, values }) => ({ ...acc, [name]: values }),
 		{} as Record<string, Record<string, string>>,
 	)
-}
 
-const generateWabeScalarTypes = (scalars: ScalarInterface[]) => {
-	return Object.values(scalars).reduce(
-		(acc, { name }) => {
-			return {
-				...acc,
-				// For the moment we will just use string as the type
-				// Suppose all scalars are string
-				[name]: 'string',
-			}
-		},
-		{} as Record<string, string>,
-	)
-}
+const generateWabeScalarTypes = (scalars: ScalarInterface[]) =>
+	scalars.reduce((acc, { name }) => ({ ...acc, [name]: 'string' }), {} as Record<string, string>)
 
 const generateWabeMutationOrQueryInput = (
 	mutationOrQueryName: string,
@@ -256,122 +197,113 @@ const generateWabeMutationOrQueryInput = (
 	formatOptions?: CodegenFormatOptions,
 ) => {
 	const objectsToLoad: Array<Record<string, Record<string, string>>> = []
+	const upperName = firstLetterUpperCase(mutationOrQueryName)
 
-	const mutationNameWithFirstLetterUpperCase = firstLetterUpperCase(mutationOrQueryName)
-
-	const mutationObject = Object.entries(
+	const resolvedArgs = Object.entries(
 		(isMutation ? resolver.args?.input : resolver.args) || {},
 	).reduce(
 		(acc, [name, field]) => {
-			let type = wabeTypesToTypescriptTypes({
-				field,
-				isInput: true,
-				formatOptions,
-			})
-
 			if (field.type === 'Object') {
-				type = firstLetterInUpperCase(name)
-
-				const wabeObject = generateWabeObject({
-					object: {
-						...field.object,
-						name: type,
-					},
-					prefix: mutationNameWithFirstLetterUpperCase,
-					formatOptions,
-				})
-
-				objectsToLoad.push(wabeObject)
-
+				const typeName = firstLetterInUpperCase(name)
+				objectsToLoad.push(
+					generateWabeObject({
+						object: { ...field.object, name: typeName },
+						prefix: upperName,
+						formatOptions,
+					}),
+				)
 				return {
 					...acc,
-					[`${name}${field.required ? '' : 'undefined'}`]: `${mutationNameWithFirstLetterUpperCase}${type}`,
+					[fieldKey(name, field.required)]: `${upperName}${typeName}`,
 				}
 			}
 
 			return {
 				...acc,
-				[`${name}${field.required ? '' : 'undefined'}`]: type,
+				[fieldKey(name, field.required)]: wabeTypesToTypescriptTypes({
+					field,
+					isInput: true,
+					formatOptions,
+				}),
 			}
 		},
 		{} as Record<string, string>,
 	)
 
-	const objects = mergeNestedStringRecords(objectsToLoad)
+	const prettyName = firstLetterInUpperCase(mutationOrQueryName)
 
 	return {
-		...(isMutation
-			? {
-					[`${firstLetterInUpperCase(mutationOrQueryName)}Input`]: mutationObject,
-				}
-			: {}),
-		[`${isMutation ? 'Mutation' : 'Query'}${firstLetterInUpperCase(mutationOrQueryName)}Args`]:
-			isMutation
-				? {
-						input: `${firstLetterInUpperCase(mutationOrQueryName)}Input`,
-					}
-				: mutationObject,
-		...objects,
+		...(isMutation ? { [`${prettyName}Input`]: resolvedArgs } : {}),
+		[`${isMutation ? 'Mutation' : 'Query'}${prettyName}Args`]: isMutation
+			? { input: `${prettyName}Input` }
+			: resolvedArgs,
+		...mergeNestedStringRecords(objectsToLoad),
 	}
 }
 
 const generateWabeMutationsAndQueriesTypes = (
 	resolver: TypeResolver<any>,
 	formatOptions?: CodegenFormatOptions,
-) => {
-	const mutationsObject = Object.entries(resolver.mutations || {}).reduce(
-		(acc, [mutationName, mutation]) => {
-			return {
-				...acc,
-				...generateWabeMutationOrQueryInput(mutationName, mutation, true, formatOptions),
-			}
-		},
-		{},
-	)
-
-	const queriesObject = Object.entries(resolver.queries || {}).reduce((acc, [queryName, query]) => {
-		return {
+) => ({
+	...Object.entries(resolver.mutations || {}).reduce(
+		(acc, [name, mutation]) => ({
 			...acc,
-			...generateWabeMutationOrQueryInput(queryName, query, false, formatOptions),
-		}
-	}, {})
-
-	return {
-		...mutationsObject,
-		...queriesObject,
-	}
-}
-
-export type CodegenFormatOptions = {
-	indent?: string
-	comma?: boolean
-	semi?: boolean
-	quote?: 'single' | 'double'
-	formatCommand?: string
-	printWidth?: number
-	finalNewline?: boolean
-	semanticCompare?: boolean
-}
-
-const normalizeGraphqlSchemaForComparison = (schemaContent: string) => {
-	try {
-		return print(parse(schemaContent))
-	} catch {
-		return schemaContent
-	}
-}
-
-const mergeNestedStringRecords = (records: Array<Record<string, Record<string, string>>>) => {
-	return records.reduce(
-		(acc, currentRecord) => ({
-			...acc,
-			...currentRecord,
+			...generateWabeMutationOrQueryInput(name, mutation, true, formatOptions),
 		}),
-		{} as Record<string, Record<string, string>>,
-	)
+		{},
+	),
+	...Object.entries(resolver.queries || {}).reduce(
+		(acc, [name, query]) => ({
+			...acc,
+			...generateWabeMutationOrQueryInput(name, query, false, formatOptions),
+		}),
+		{},
+	),
+})
+
+export const wabeClassRecordToString = (
+	wabeClass: Record<string, Record<string, string>>,
+	options?: CodegenFormatOptions,
+) => {
+	const indent = getIndent(options)
+	const endChar = getEndChar(options)
+
+	return Object.entries(wabeClass).reduce((acc, [className, fields]) => {
+		if (Object.keys(fields).length === 0) return `${acc}export type ${className} = {}\n\n`
+
+		const body = Object.entries(fields)
+			.map(([name, type]) => `${indent}${name.replace('undefined', '?')}: ${type}`)
+			.join(`${endChar}\n`)
+
+		return `${acc}export type ${className} = {\n${body}${endChar}\n}\n\n`
+	}, '')
 }
 
-const wrapLongGraphqlFieldArguments = ({
+export const wabeEnumRecordToString = (
+	wabeEnum: Record<string, Record<string, string>>,
+	options?: CodegenFormatOptions,
+) => {
+	const indent = getIndent(options)
+	const endChar = options?.semi ? ';' : (options?.comma ?? true) ? ',' : ''
+	const quote = getQuoteChar(options)
+
+	return Object.entries(wabeEnum).reduce((acc, [enumName, values]) => {
+		const hasValues = Object.keys(values).length > 0
+		const body = Object.entries(values)
+			.map(([k, v]) => `${indent}${k} = ${quote}${v}${quote}`)
+			.join(`${endChar}\n`)
+
+		return `${acc}export enum ${enumName} {\n${body}${hasValues ? endChar : ''}\n}\n\n`
+	}, '')
+}
+
+export const wabeScalarRecordToString = (wabeScalar: Record<string, string>) =>
+	Object.entries(wabeScalar).reduce(
+		(acc, [name, type]) => `${acc}export type ${name} = ${type}\n\n`,
+		'',
+	)
+
+export const wrapLongGraphqlFieldArguments = ({
 	content,
 	indent,
 	printWidth,
@@ -379,18 +311,18 @@ const wrapLongGraphqlFieldArguments = ({
 	content: string
 	indent: string
 	printWidth: number
-}) => {
-	return content
+}) =>
+	content
 		.split('\n')
 		.map((line) => {
 			if (line.length <= printWidth) return line
 
-			const fieldWithArgsMatch = line.match(/^(\s*)([_A-Za-z][_0-9A-Za-z]*)\((.+)\):\s*(.+)$/)
-			if (!fieldWithArgsMatch) return line
+			const match = line.match(/^(\s*)([_A-Za-z][_0-9A-Za-z]*)\((.+)\):\s*(.+)$/)
+			if (!match) return line
 
-			const [, fieldIndent = '', fieldName = '', argsString = '', returnType = ''] =
-				fieldWithArgsMatch
+			const [, fieldIndent = '', fieldName = '', argsString = '', returnType = ''] = match
 			if (!fieldName || !argsString || !returnType) return line
+
 			const args = argsString
 				.split(',')
 				.map((arg) => arg.trim())
@@ -398,55 +330,12 @@ const wrapLongGraphqlFieldArguments = ({
 
 			if (args.length <= 1) return line
 
-			return `${fieldIndent}${fieldName}(\n${args
-				.map((arg) => `${fieldIndent}${indent}${arg}`)
-				.join('\n')}\n${fieldIndent}): ${returnType}`
+			const wrappedArgs = args.map((arg) => `${fieldIndent}${indent}${arg}`).join('\n')
+			return `${fieldIndent}${fieldName}(\n${wrappedArgs}\n${fieldIndent}): ${returnType}`
 		})
 		.join('\n')
-}
 
-const wabeClassRecordToString = (
-	wabeClass: Record<string, Record<string, string>>,
-	options?: CodegenFormatOptions,
-) => {
-	const indent = options?.indent ?? '\t'
-	const endChar = options?.semi ? ';' : options?.comma ? ',' : ''
-
-	return Object.entries(wabeClass).reduce((acc, [className, fields]) => {
-		const fieldsLength = Object.keys(fields).length
-		if (fieldsLength === 0) return `${acc}export type ${className} = {}\n\n`
-
-		return `${acc}export type ${className} = {\n${Object.entries(fields)
-			.map(
-				([fieldName, fieldType]) => `${indent}${fieldName.replace('undefined', '?')}: ${fieldType}`,
-			)
-			.join(`${endChar}\n`)}${endChar}\n}\n\n`
-	}, '')
-}
-
-const wabeEnumRecordToString = (
-	wabeEnum: Record<string, Record<string, string>>,
-	options?: CodegenFormatOptions,
-) => {
-	const indent = options?.indent ?? '\t'
-	const endChar = options?.semi ? ';' : (options?.comma ?? true) ? ',' : ''
-	const quoteString = options?.quote === 'double' ? '"' : "'"
-
-	return Object.entries(wabeEnum).reduce((acc, [enumName, values]) => {
-		const valuesLength = Object.keys(values).length
-		return `${acc}export enum ${enumName} {\n${Object.entries(values)
-			.map(([valueName, value]) => `${indent}${valueName} = ${quoteString}${value}${quoteString}`)
-			.join(`${endChar}\n`)}${valuesLength > 0 ? endChar : ''}\n}\n\n`
-	}, '')
-}
-
-const wabeScalarRecordToString = (wabeScalar: Record<string, string>) => {
-	return Object.entries(wabeScalar).reduce((acc, [scalarName, scalarType]) => {
-		return `${acc}export type ${scalarName} = ${scalarType}\n\n`
-	}, '')
-}
-
-const generateWabeDevTypes = ({
+export const generateWabeDevTypes = ({
 	scalars,
 	enums,
 	classes,
@@ -457,49 +346,44 @@ const generateWabeDevTypes = ({
 	classes: ClassInterface<DevWabeTypes>[]
 	options?: CodegenFormatOptions
 }) => {
-	const indent = options?.indent ?? '\t'
-	const endChar = options?.semi ? ';' : options?.comma ? ',' : ''
-	const quoteString = options?.quote === 'double' ? '"' : "'"
-
-	// Scalars
-	const listOfScalars = scalars?.map((scalar) => `${quoteString}${scalar.name}${quoteString}`) || []
+	const indent = getIndent(options)
+	const endChar = getEndChar(options)
+	const quote = getQuoteChar(options)
 
 	const wabeScalarType =
-		listOfScalars.length > 0
-			? `export type WabeSchemaScalars = ${listOfScalars.join(' | ')}`
-			: `export type WabeSchemaScalars = ${quoteString}${quoteString}`
+		scalars && scalars.length > 0
+			? `export type WabeSchemaScalars = ${scalars.map((s) => `${quote}${s.name}${quote}`).join(' | ')}`
+			: `export type WabeSchemaScalars = ${quote}${quote}`
 
-	// Enums
-	const wabeEnumsGlobalTypes = enums?.map((wabeEnum) => `${wabeEnum.name}: ${wabeEnum.name}`) || []
-
-	const wabeEnumsGlobalTypesString =
-		wabeEnumsGlobalTypes.length > 0
-			? `export type WabeSchemaEnums = {\n${indent}${wabeEnumsGlobalTypes.join(`${endChar}\n${indent}`)}${endChar}\n}`
+	const buildTypeMap = (typeName: string, entries: string[]) =>
+		entries.length > 0
+			? `export type ${typeName} = {\n${indent}${entries.join(`${endChar}\n${indent}`)}${endChar}\n}`
 			: ''
 
-	// Classes
-	const allNames = classes
-		.map((schema) => `${schema.name}: ${schema.name}`)
-		.filter((schema) => schema)
+	const wabeEnumsString = buildTypeMap(
+		'WabeSchemaEnums',
+		enums?.map((e) => `${e.name}: ${e.name}`) ?? [],
+	)
 
-	const globalWabeTypeString =
-		allNames.length > 0
-			? `export type WabeSchemaTypes = {\n${indent}${allNames.join(`${endChar}\n${indent}`)}${endChar}\n}`
-			: ''
+	const wabeTypesString = buildTypeMap(
+		'WabeSchemaTypes',
+		classes.map((c) => `${c.name}: ${c.name}`),
+	)
 
-	// Where
-	const allWhereNames = classes
-		.map((schema) => `${schema.name}: Where${firstLetterUpperCase(schema.name)}`)
-		.filter((schema) => schema)
+	const wabeWhereString = buildTypeMap(
+		'WabeSchemaWhereTypes',
+		classes.map((c) => `${c.name}: Where${firstLetterUpperCase(c.name)}`),
+	)
 
-	const globalWabeWhereTypeString =
-		allWhereNames.length > 0
-			? `export type WabeSchemaWhereTypes = {\n${indent}${allWhereNames.join(
-					`${endChar}\n${indent}`,
-				)}${endChar}\n}`
-			: ''
+	return `${wabeScalarType}\n\n${wabeEnumsString}\n\n${wabeTypesString}\n\n${wabeWhereString}`
+}
 
-	return `${wabeScalarType}\n\n${wabeEnumsGlobalTypesString}\n\n${globalWabeTypeString}\n\n${globalWabeWhereTypeString}`
+const normalizeGraphqlSchemaForComparison = (schemaContent: string) => {
+	try {
+		return print(parse(schemaContent))
+	} catch {
+		return schemaContent
+	}
 }
 
 export const generateCodegen = async ({
@@ -515,7 +399,7 @@ export const generateCodegen = async ({
 }) => {
 	let graphqlSchemaContent = printSchema(graphqlSchema)
 
-	const indentStr = options?.indent ?? '\t'
+	const indentStr = getIndent(options)
 	const printWidth = options?.printWidth ?? 100
 	const shouldEnsureFinalNewline = options?.finalNewline ?? true
 	const shouldUseSemanticComparison = options?.semanticCompare ?? true
@@ -545,27 +429,18 @@ export const generateCodegen = async ({
 	const enums = schema.enums ?? []
 	const scalars = schema.scalars ?? []
 
-	const wabeClasses = generateWabeTypes(classes, options)
-	const wabeWhereTypes = generateWabeWhereTypes(classes, options)
+	const wabeClasses = generateClassTypes(classes, options)
+	const wabeWhereTypes = generateClassTypes(classes, options, 'Where', true)
 	const mutationsAndQueries = generateWabeMutationsAndQueriesTypes(resolvers, options)
 
 	const wabeEnumsInString = wabeEnumRecordToString(generateWabeEnumTypes(enums), options)
 	const wabeScalarsInString = wabeScalarRecordToString(generateWabeScalarTypes(scalars))
 	const wabeObjectsInString = wabeClassRecordToString(
-		{
-			...wabeClasses,
-			...wabeWhereTypes,
-			...mutationsAndQueries,
-		},
+		{ ...wabeClasses, ...wabeWhereTypes, ...mutationsAndQueries },
 		options,
 	)
 
-	const wabeDevTypes = generateWabeDevTypes({
-		scalars,
-		enums,
-		classes,
-		options,
-	})
+	const wabeDevTypes = generateWabeDevTypes({ scalars, enums, classes, options })
 
 	const wabeTsContent = `${wabeEnumsInString}${wabeScalarsInString}${wabeObjectsInString}${wabeDevTypes}\n`
 
@@ -578,7 +453,6 @@ export const generateCodegen = async ({
 				normalizeGraphqlSchemaForComparison(contentOfGraphqlSchema) ===
 					normalizeGraphqlSchemaForComparison(graphqlSchemaContent))
 
-		// Avoid formatting-only writes and file-watch loops.
 		shouldWriteGraphqlSchema = !schemasAreEqual
 	} catch {}
 
