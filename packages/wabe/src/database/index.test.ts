@@ -21,6 +21,8 @@ import type { WabeContext } from '../server/interface'
 import { OperationType, getDefaultHooks } from '../hooks'
 import { gql } from 'graphql-request'
 import { contextWithRoot } from '../utils/export'
+import type { CreateObjectOptions, UpdateObjectOptions } from './interface'
+import { AuthenticationProvider } from '../../generated/wabe'
 
 describe('Database', () => {
 	let wabe: Wabe<DevWabeTypes>
@@ -263,6 +265,103 @@ describe('Database', () => {
 		`)
 
 		expect(res2.createTest2.test2.userTest2.name).toEqual('test')
+	})
+
+	it('should expose normalized pointer objects in beforeCreate hook when IDs are provided', async () => {
+		const observedNewData = mock((_newData: unknown) => {})
+		wabe.config.hooks = [
+			...getDefaultHooks(),
+			{
+				operationType: OperationType.BeforeCreate,
+				priority: 2,
+				className: 'Test2',
+				callback: (hookObject) => {
+					observedNewData(hookObject.getNewData())
+				},
+			},
+		]
+
+		const createdUser = await wabe.controllers.database.createObject({
+			className: 'User',
+			context,
+			data: { name: 'hook-user' },
+			select: { id: true },
+		})
+
+		await wabe.controllers.database.createObject({
+			className: 'Test2',
+			context,
+			data: {
+				name: 'hook-parent',
+				userTest2: createdUser?.id || '',
+				userTest: [createdUser?.id || ''],
+			},
+			select: { id: true },
+		} as any)
+
+		expect(observedNewData).toHaveBeenCalledTimes(1)
+		expect(observedNewData.mock.calls[0]?.[0]).toEqual(
+			expect.objectContaining({
+				userTest2: {
+					class: 'User',
+					id: createdUser?.id,
+					type: 'Pointer',
+				},
+				userTest: {
+					class: 'User',
+					ids: [createdUser?.id],
+					type: 'Relation',
+				},
+			}),
+		)
+	})
+
+	it('should type pointer and relation mutation inputs as IDs', () => {
+		const validPointerInput: CreateObjectOptions<DevWabeTypes, 'User', 'role', 'id'> = {
+			className: 'User',
+			context: context as any,
+			data: {
+				role: 'role-id',
+			},
+			select: { id: true },
+		}
+		void validPointerInput
+
+		const validRelationInput: UpdateObjectOptions<DevWabeTypes, 'User', 'sessions', 'id'> = {
+			className: 'User',
+			id: 'user-id',
+			context: context as any,
+			data: {
+				sessions: ['session-id-1', 'session-id-2'],
+			},
+			select: { id: true },
+		}
+		void validRelationInput
+
+		const invalidPointerInput: CreateObjectOptions<DevWabeTypes, 'User', 'role', 'id'> = {
+			className: 'User',
+			context: context as any,
+			data: {
+				// @ts-expect-error Pointer inputs must be IDs in DatabaseController mutations
+				role: { class: 'Role', id: 'role-id', type: 'Pointer' },
+			},
+			select: { id: true },
+		}
+		void invalidPointerInput
+
+		const invalidRelationInput: UpdateObjectOptions<DevWabeTypes, 'User', 'sessions', 'id'> = {
+			className: 'User',
+			id: 'user-id',
+			context: context as any,
+			data: {
+				// @ts-expect-error Relation inputs must be ID arrays in DatabaseController mutations
+				sessions: [{ class: '_Session', id: 'session-id', type: 'Pointer' }],
+			},
+			select: { id: true },
+		}
+		void invalidRelationInput
+
+		expect(true).toBeTrue()
 	})
 
 	it('should not return point data whe no pointer is present on the object', async () => {
@@ -1202,7 +1301,7 @@ describe('Database', () => {
 			context,
 			select: { authentication: true },
 			data: {
-				provider: 'Google',
+				provider: AuthenticationProvider.google,
 				isOauth: true,
 				authentication: {
 					google: {
@@ -1541,7 +1640,6 @@ describe('Database', () => {
 			data: [
 				{ name: 'Object with name', otherField: 'other' },
 				{ name: 'Another object with name', otherField: 'other' },
-				// @ts-expect-error
 				{ otherField: 'No name field' },
 			],
 			context,
@@ -1569,9 +1667,7 @@ describe('Database', () => {
 					otherField: 'other',
 					anotherField: 'another',
 				},
-				// @ts-expect-error
 				{ otherField: 'No name field' },
-				// @ts-expect-error
 				{ anotherField: 'Also no name' },
 			],
 			context,
@@ -1593,14 +1689,7 @@ describe('Database', () => {
 	it('should work with exists on AND/OR conditions', async () => {
 		await context.wabe.controllers.database.createObjects({
 			className: 'Test',
-			data: [
-				{ name: 'John', age: 25 },
-				{ name: 'Jane', age: 30 },
-				// @ts-expect-error
-				{ age: 35 },
-				// @ts-expect-error
-				{ name: 'Bob' },
-			],
+			data: [{ name: 'John', age: 25 }, { name: 'Jane', age: 30 }, { age: 35 }, { name: 'Bob' }],
 			context,
 			select: {},
 		})

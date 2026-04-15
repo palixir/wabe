@@ -59,6 +59,32 @@ const numberOfUser = await context.wabe.controllers.database.count({
 
 You also have the ability to create / update / delete one or multiple object as you can do with `GraphQL API`.
 
+### Pointer and relation inputs
+
+For `DatabaseController` mutations (`createObject`, `createObjects`, `updateObject`, `updateObjects`):
+
+- Pointer fields must be passed as an object ID string (`document: "docId"`).
+- Relation fields must be passed as an array of ID strings (`documents: ["docId1", "docId2"]`).
+
+```ts
+await context.wabe.controllers.database.createObject({
+  className: "Version",
+  context,
+  data: {
+    document: "existing-document-id",
+    documents: ["existing-document-id", "other-document-id"],
+  },
+  select: { id: true },
+});
+```
+
+When these values are consumed in hooks (`hookObject.getNewData()`), Wabe exposes normalized pointer objects:
+
+- Pointer: `{ class: "Document", type: "Pointer", id: "..." }`
+- Relation: `{ class: "Document", type: "Relation", ids: ["..."] }`
+
+**Breaking change:** passing pointer objects directly in `DatabaseController` mutation inputs (for example `{ class, type, id }`) is no longer the typed mutation contract.
+
 ### Create one object
 
 ```ts

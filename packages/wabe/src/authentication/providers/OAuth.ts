@@ -2,6 +2,7 @@ import type { WabeContext } from '../../server/interface'
 import { contextWithRoot } from '../../utils/export'
 import type { DevWabeTypes } from '../../utils/helper'
 import { type AuthenticationEventsOptions, AuthenticationProvider } from '../interface'
+import { AuthenticationProvider as AuthenticationProviderEnum } from '../../../generated/wabe'
 import { Google } from '../oauth'
 import { GitHub } from '../oauth/GitHub'
 
@@ -68,10 +69,15 @@ export const oAuthAuthentication =
 		})
 
 		if (user.length === 0) {
+			const providerToSave =
+				oAuthProvider === AuthenticationProvider.Google
+					? AuthenticationProviderEnum.google
+					: AuthenticationProviderEnum.github
+
 			const createdUser = await context.wabe.controllers.database.createObject({
 				className: 'User',
 				data: {
-					provider: oAuthProvider,
+					provider: providerToSave,
 					isOauth: true,
 					authentication: {
 						[oAuthProvider]: userInfoToSave,

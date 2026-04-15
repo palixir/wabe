@@ -9,7 +9,33 @@ describe('HookObject', () => {
 	let wabe: Wabe<DevWabeTypes>
 
 	beforeAll(async () => {
-		const setup = await setupTests()
+		const setup = await setupTests([
+			{
+				name: 'TestDocument',
+				fields: {
+					name: { type: 'String' },
+				},
+				permissions: {
+					read: { requireAuthentication: false },
+					create: { requireAuthentication: false },
+					update: { requireAuthentication: false },
+					delete: { requireAuthentication: false },
+				},
+			},
+			{
+				name: 'TestPointerContainer',
+				fields: {
+					document: { type: 'Pointer', class: 'TestDocument' },
+					documents: { type: 'Relation', class: 'TestDocument' },
+				},
+				permissions: {
+					read: { requireAuthentication: false },
+					create: { requireAuthentication: false },
+					update: { requireAuthentication: false },
+					delete: { requireAuthentication: false },
+				},
+			},
+		])
 		wabe = setup.wabe
 	})
 
@@ -157,6 +183,68 @@ describe('HookObject', () => {
 
 		expect(() => hookObject.upsertNewData('__proto__' as any, 'tata')).toThrow(
 			'Cannot set unsafe field key "__proto__"',
+		)
+	})
+
+	it('should normalize pointer and relation IDs in getNewData', () => {
+		const hookObject = new HookObject<DevWabeTypes, any>({
+			className: 'TestPointerContainer',
+			newData: {
+				document: 'document-id',
+				documents: ['document-id', 'document-id-2'],
+			} as any,
+			context: { wabe } as any,
+			operationType: OperationType.BeforeCreate,
+			object: {
+				id: 'container-id',
+			} as any,
+			select: {},
+		})
+
+		expect(hookObject.getNewData()).toEqual(
+			expect.objectContaining({
+				document: {
+					class: 'TestDocument',
+					id: 'document-id',
+					type: 'Pointer',
+				},
+				documents: {
+					class: 'TestDocument',
+					ids: ['document-id', 'document-id-2'],
+					type: 'Relation',
+				},
+			}),
+		)
+	})
+
+	it('should normalize pointer values set through upsertNewData', () => {
+		const hookObject = new HookObject<DevWabeTypes, any>({
+			className: 'TestPointerContainer',
+			newData: {} as any,
+			context: { wabe } as any,
+			operationType: OperationType.BeforeUpdate,
+			object: {
+				id: 'container-id',
+			} as any,
+			select: {},
+		})
+
+		hookObject.upsertNewData('document', 'document-id')
+		hookObject.upsertNewData('documents', ['document-id', 'document-id-2'])
+
+		expect(hookObject.getNewData()).toEqual(
+			expect.objectContaining({
+				document: {
+					class: 'TestDocument',
+					id: 'document-id',
+					type: 'Pointer',
+				},
+				documents: {
+					class: 'TestDocument',
+					ids: ['document-id', 'document-id-2'],
+					type: 'Relation',
+				},
+			}),
 		)
 	})
 })

@@ -109,6 +109,43 @@ export type OutputType<
 	U extends keyof T['types'][K],
 > = (Pick<T['types'][K], U> & { id: string }) | null
 
+export type PointerPayloadObject = {
+	class: string
+	id: string
+	type: 'Pointer'
+}
+
+export type RelationPayloadObject = {
+	class: string
+	ids: string[]
+	type: 'Relation'
+}
+
+type MutationInputField<TField, TWhereField = unknown> =
+	TField extends Array<infer Item>
+		? Item extends { id: string }
+			? string[]
+			: TField
+		: TField extends { id: string }
+			? string
+			: TWhereField extends Date
+				? Date
+				: TField
+
+type MutationWhereField<
+	T extends WabeTypes,
+	K extends keyof T['types'],
+	P extends keyof T['types'][K],
+> = K extends keyof T['where'] ? (P extends keyof T['where'][K] ? T['where'][K][P] : never) : never
+
+export type MutationInputData<
+	T extends WabeTypes,
+	K extends keyof T['types'],
+	U extends keyof T['types'][K],
+> = Partial<{
+	[P in U]: MutationInputField<T['types'][K][P], MutationWhereField<T, K, P>>
+}>
+
 export interface AdapterOptions {
 	databaseUrl: string
 	databaseName: string
@@ -164,7 +201,7 @@ export interface CreateObjectOptions<
 	W extends keyof T['types'][K],
 > {
 	className: K
-	data: MutationData<T, K, U>
+	data: MutationInputData<T, K, U>
 	context: WabeContext<T>
 	select?: SelectType<T, K, W>
 }
@@ -176,7 +213,7 @@ export interface CreateObjectsOptions<
 	X extends keyof T['types'][K],
 > {
 	className: K
-	data: Array<MutationData<T, K, U>>
+	data: Array<MutationInputData<T, K, U>>
 	offset?: number
 	first?: number
 	order?: OrderType<T, U, X>
@@ -193,7 +230,7 @@ export interface UpdateObjectOptions<
 	className: K
 	id: string
 	where?: WhereType<T, K>
-	data: MutationData<T, K, U>
+	data: MutationInputData<T, K, U>
 	context: WabeContext<T>
 	_skipHooks?: boolean
 	select?: SelectType<T, K, W>
@@ -209,7 +246,7 @@ export interface UpdateObjectsOptions<
 	className: K
 	where: WhereType<T, K>
 	order?: OrderType<T, K, X>
-	data: MutationData<T, K, U>
+	data: MutationInputData<T, K, U>
 	offset?: number
 	first?: number
 	context: WabeContext<T>

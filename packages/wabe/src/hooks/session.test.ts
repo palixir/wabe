@@ -115,7 +115,7 @@ describe('hooks/session', () => {
 			},
 		})
 
-		expect(res3[0]?.sessions?.length).toEqual(1)
+		expect((res3[0] as any)?.sessions?.ids?.length).toEqual(1)
 	})
 
 	it('should block non-root updates to User.sessions field', () => {

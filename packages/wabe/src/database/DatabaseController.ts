@@ -20,6 +20,13 @@ import {
 	type UpdateObjectsOptions,
 	type WhereType,
 } from './interface'
+import {
+	extractPointerId,
+	extractRelationIds,
+	isRelationPayloadObject,
+	normalizePointerValue,
+	normalizeRelationValue,
+} from './pointerRelationPayload'
 
 export type Select = Record<string, boolean>
 type SelectWithObject = Record<string, object | boolean>
@@ -82,6 +89,51 @@ export class DatabaseController<T extends WabeTypes> {
 	_getFieldType(originClassName: string, fieldName: string, context: WabeContext<T>) {
 		const realClass = this._getClass(originClassName, context)
 		return realClass?.fields[fieldName] as { type: string; class?: string } | undefined
+	}
+
+	_normalizeMutationPayload({
+		className,
+		context,
+		payload,
+	}: {
+		className: keyof T['types']
+		context: WabeContext<T>
+		payload: unknown
+	}) {
+		if (!payload || typeof payload !== 'object') return {}
+
+		const currentClass = this._getClass(className, context)
+		if (!currentClass) return payload
+
+		return Object.entries(payload).reduce(
+			(acc, [fieldName, value]) => {
+				if (isUnsafeObjectKey(fieldName)) return acc
+
+				const fieldDefinition = currentClass.fields[fieldName]
+
+				if (
+					fieldDefinition?.type === 'Pointer' &&
+					'class' in fieldDefinition &&
+					fieldDefinition.class
+				) {
+					acc[fieldName] = normalizePointerValue(value, String(fieldDefinition.class))
+					return acc
+				}
+
+				if (
+					fieldDefinition?.type === 'Relation' &&
+					'class' in fieldDefinition &&
+					fieldDefinition.class
+				) {
+					acc[fieldName] = normalizeRelationValue(value, String(fieldDefinition.class))
+					return acc
+				}
+
+				acc[fieldName] = value
+				return acc
+			},
+			{} as Record<string, unknown>,
+		)
 	}
 
 	_getVirtualFieldsForClass(className: keyof T['types'], context: WabeContext<T>) {
@@ -352,22 +404,6 @@ export class DatabaseController<T extends WabeTypes> {
 		)
 	}
 
-	_extractPointerId(pointerValue: unknown): string | undefined {
-		if (typeof pointerValue === 'string') return pointerValue
-		if (!pointerValue || typeof pointerValue !== 'object') return undefined
-
-		const id = (pointerValue as { id?: unknown }).id
-		return typeof id === 'string' ? id : undefined
-	}
-
-	_extractRelationIds(relationValue: unknown): string[] {
-		if (!Array.isArray(relationValue)) return []
-
-		return relationValue
-			.map((value) => this._extractPointerId(value))
-			.filter((id): id is string => typeof id === 'string')
-	}
-
 	async _getWhereObjectWithPointerOrRelation<U extends keyof T['types']>(
 		className: U,
 		where: WhereType<T, U>,
@@ -426,19 +462,34 @@ export class DatabaseController<T extends WabeTypes> {
 			if (field?.type === 'Relation' && relationValue) {
 				// @ts-expect-error
 				if (relationValue.isEmpty !== undefined) {
-					// In storage, an empty relation can be either [] or an absent field.
-					// Model both cases explicitly so the filter behaves consistently.
+					// In storage, an empty relation can be either [] (legacy),
+					// { type: 'Relation', class, ids: [] } (current), or absent.
 					// @ts-expect-error
 					return relationValue.isEmpty === true
 						? {
 								...currentAcc,
-								OR: [{ [typedWhereKey]: { equalTo: [] } }, { [typedWhereKey]: { exists: false } }],
+								OR: [
+									{ [typedWhereKey]: { equalTo: [] } },
+									{ [typedWhereKey]: { ids: { equalTo: [] } } },
+									{ [typedWhereKey]: { exists: false } },
+								],
 							}
 						: {
 								...currentAcc,
-								AND: [
-									{ [typedWhereKey]: { exists: true } },
-									{ [typedWhereKey]: { notEqualTo: [] } },
+								OR: [
+									{
+										AND: [
+											{ [typedWhereKey]: { ids: { exists: true } } },
+											{ [typedWhereKey]: { ids: { notEqualTo: [] } } },
+										],
+									},
+									{
+										AND: [
+											{ [typedWhereKey]: { exists: true } },
+											{ [typedWhereKey]: { ids: { exists: false } } },
+											{ [typedWhereKey]: { notEqualTo: [] } },
+										],
+									},
 								],
 							}
 				}
@@ -484,11 +535,7 @@ export class DatabaseController<T extends WabeTypes> {
 				relationWhere.length > 0
 					? relationWhere.map((id) => ({
 							[typedWhereKey]: {
-								contains: {
-									class: fieldTargetClass,
-									id,
-									type: 'Pointer',
-								},
+								ids: { contains: id },
 							},
 						}))
 					: [neverMatchWhere]
@@ -634,10 +681,19 @@ export class DatabaseController<T extends WabeTypes> {
 		inputObject?: OutputType<T, K, U>
 		adapterCallback: (newData: any) => Promise<OutputType<T, K, U> | { id: string } | null>
 	}) {
+		const normalizedData =
+			data === undefined
+				? undefined
+				: this._normalizeMutationPayload({
+						className,
+						context,
+						payload: data,
+					})
+
 		const hook = initializeHook({
 			className,
 			context,
-			newData: data,
+			newData: normalizedData,
 			// @ts-expect-error
 			select,
 			objectLoader: this._loadObjectForHooks(className, context),
@@ -651,7 +707,7 @@ export class DatabaseController<T extends WabeTypes> {
 			object: inputObject,
 		})
 
-		const res = await adapterCallback(newData || data)
+		const res = await adapterCallback(newData || normalizedData)
 
 		if (!res) return null
 
@@ -699,7 +755,7 @@ export class DatabaseController<T extends WabeTypes> {
 		context: WabeContext<any>
 		_skipHooks?: boolean
 	}) {
-		const pointerId = this._extractPointerId(object[pointerField])
+		const pointerId = extractPointerId(object[pointerField])
 		if (!pointerId) return null
 
 		return this.getObject({
@@ -727,8 +783,10 @@ export class DatabaseController<T extends WabeTypes> {
 		context: WabeContext<any>
 		_skipHooks?: boolean
 	}) {
-		const relationIds = this._extractRelationIds(object[pointerField])
-		if (relationIds.length === 0 && !Array.isArray(object[pointerField])) return undefined
+		const relationIds = extractRelationIds(object[pointerField])
+		const hasRelationContainer =
+			Array.isArray(object[pointerField]) || isRelationPayloadObject(object[pointerField])
+		if (relationIds.length === 0 && !hasRelationContainer) return undefined
 		if (relationIds.length === 0) {
 			if (!context.isGraphQLCall) return []
 
@@ -1163,8 +1221,16 @@ export class DatabaseController<T extends WabeTypes> {
 	}: CreateObjectsOptions<T, K, U, W, X>): Promise<OutputType<T, K, W>[]> {
 		if (data.length === 0) return []
 
+		const normalizedInputData = data.map((newData) =>
+			this._normalizeMutationPayload({
+				className,
+				context,
+				payload: newData,
+			}),
+		)
+
 		const hooks = await Promise.all(
-			data.map((newData) =>
+			normalizedInputData.map((newData) =>
 				initializeHook({
 					className,
 					context,
@@ -1247,10 +1313,15 @@ export class DatabaseController<T extends WabeTypes> {
 	}: UpdateObjectOptions<T, K, U, W>): Promise<OutputType<T, K, W>> {
 		if (_skipHooks) {
 			const whereWithACLCondition = this._buildWhereWithACL({}, context, 'write')
-			const payload = this._stripVirtualFieldsFromPayload({
+			const normalizedData = this._normalizeMutationPayload({
 				className,
 				context,
 				payload: data,
+			})
+			const payload = this._stripVirtualFieldsFromPayload({
+				className,
+				context,
+				payload: normalizedData,
 			})
 
 			return this.adapter.updateObject({
@@ -1323,12 +1394,17 @@ export class DatabaseController<T extends WabeTypes> {
 			where || {},
 			context,
 		)
+		const normalizedData = this._normalizeMutationPayload({
+			className,
+			context,
+			payload: data,
+		})
 
 		const hook = !_skipHooks
 			? initializeHook({
 					className,
 					context,
-					newData: data,
+					newData: normalizedData,
 					// @ts-expect-error
 					select,
 					objectLoader: this._loadObjectForHooks(className, context),
@@ -1350,7 +1426,7 @@ export class DatabaseController<T extends WabeTypes> {
 			data: this._stripVirtualFieldsFromPayload({
 				className,
 				context,
-				payload: resultsAfterBeforeUpdate?.newData[0] || data || {},
+				payload: resultsAfterBeforeUpdate?.newData[0] || normalizedData || {},
 			}),
 			where: whereWithACLCondition,
 			first,
