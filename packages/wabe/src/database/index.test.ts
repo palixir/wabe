@@ -435,7 +435,13 @@ describe('Database', () => {
 			data: [
 				{
 					name: 'match-parent',
-					userTest: [{ class: 'User', id: matchingUser?.id, type: 'Pointer' }],
+					userTest: [
+						{
+							class: 'User',
+							id: matchingUser?.id,
+							type: 'Pointer',
+						},
+					],
 				},
 				{
 					name: 'other-parent',
@@ -532,7 +538,13 @@ describe('Database', () => {
 				},
 				{
 					name: 'candidate',
-					userTest: [{ class: 'User', id: nonTargetUser?.id, type: 'Pointer' }],
+					userTest: [
+						{
+							class: 'User',
+							id: nonTargetUser?.id,
+							type: 'Pointer',
+						},
+					],
 				},
 				{ name: 'outside-or' },
 			] as any,
@@ -551,7 +563,9 @@ describe('Database', () => {
 					},
 					{
 						// @ts-expect-error relation where type is not fully expressed in DevWabeTypes
-						userTest: { have: { name: { equalTo: 'target-user' } } },
+						userTest: {
+							have: { name: { equalTo: 'target-user' } },
+						},
 					},
 				],
 			},
@@ -584,11 +598,23 @@ describe('Database', () => {
 			data: [
 				{
 					name: 'included-parent',
-					userTest: [{ class: 'User', id: includedUser?.id, type: 'Pointer' }],
+					userTest: [
+						{
+							class: 'User',
+							id: includedUser?.id,
+							type: 'Pointer',
+						},
+					],
 				},
 				{
 					name: 'excluded-parent',
-					userTest: [{ class: 'User', id: excludedUser?.id, type: 'Pointer' }],
+					userTest: [
+						{
+							class: 'User',
+							id: excludedUser?.id,
+							type: 'Pointer',
+						},
+					],
 				},
 			] as any,
 			select: { id: true },
@@ -598,11 +624,66 @@ describe('Database', () => {
 			// @ts-expect-error
 			className: 'Test2',
 			context,
-			// @ts-expect-error relation where type is not fully expressed in DevWabeTypes
-			where: { userTest: { have: { name: { equalTo: 'included-user' } } } },
+			where: {
+				// @ts-expect-error relation where type is not fully expressed in DevWabeTypes
+				userTest: { have: { name: { equalTo: 'included-user' } } },
+			},
 		})
 
 		expect(totalCount).toBe(1)
+	})
+
+	it('should filter pointer with nested id equalTo through databaseController where', async () => {
+		const matchingUser = await wabe.controllers.database.createObject({
+			className: 'User',
+			context,
+			data: { name: 'pointer-target-user' },
+			select: { id: true },
+		})
+		const otherUser = await wabe.controllers.database.createObject({
+			className: 'User',
+			context,
+			data: { name: 'pointer-other-user' },
+			select: { id: true },
+		})
+
+		await wabe.controllers.database.createObjects({
+			// @ts-expect-error
+			className: 'Test2',
+			context,
+			data: [
+				{
+					name: 'pointer-match-parent',
+					userTest2: {
+						class: 'User',
+						id: matchingUser?.id,
+						type: 'Pointer',
+					},
+				},
+				{
+					name: 'pointer-other-parent',
+					userTest2: {
+						class: 'User',
+						id: otherUser?.id,
+						type: 'Pointer',
+					},
+				},
+			] as any,
+			select: { id: true },
+		})
+
+		const filtered = await wabe.controllers.database.getObjects({
+			// @ts-expect-error
+			className: 'Test2',
+			context,
+			// @ts-expect-error pointer where type is not fully expressed in DevWabeTypes
+			where: { userTest2: { id: { equalTo: matchingUser?.id } } },
+			// @ts-expect-error Test2 fields are runtime-defined in setup schema
+			select: { id: true, name: true },
+		})
+
+		expect(filtered.length).toBe(1)
+		expect((filtered[0] as any)?.name).toBe('pointer-match-parent')
 	})
 
 	it("should return null on a pointer if the pointer doesn't exist", async () => {
