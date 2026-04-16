@@ -1,6 +1,7 @@
 import type { OperationType } from '.'
 import type { RoleEnum, ACLObject } from '../../generated/wabe'
 import type { MutationData, OutputType, Select } from '../database'
+import { normalizePointerValue, normalizeRelationValue } from '../database/pointerRelationPayload'
 import type { WabeTypes } from '../server'
 import type { WabeContext } from '../server/interface'
 import { isUnsafeObjectKey } from '../utils/objectKeys'
@@ -40,13 +41,49 @@ export class HookObject<T extends WabeTypes, K extends keyof WabeTypes['types']>
 		originalObject?: OutputType<T, K, keyof T['types'][K]>
 		select: Select
 	}) {
-		this.newData = newData
 		this.className = className
 		this.operationType = operationType
 		this.context = context
+		this.newData = this._normalizeMutationData(newData)
 		this.object = object
 		this.originalObject = originalObject
 		this.select = select || {}
+	}
+
+	private _normalizeFieldValue(fieldName: string, value: unknown) {
+		const schema = this.context?.wabe?.config?.schema
+		if (!schema) return value
+
+		const currentClass = schema.classes?.find(
+			(schemaClass) => schemaClass.name.toLowerCase() === String(this.className).toLowerCase(),
+		)
+		const field = currentClass?.fields?.[fieldName]
+
+		if (!field || !('type' in field)) return value
+
+		if (field.type === 'Pointer' && 'class' in field && field.class) {
+			return normalizePointerValue(value, String(field.class))
+		}
+
+		if (field.type === 'Relation' && 'class' in field && field.class) {
+			return normalizeRelationValue(value, String(field.class))
+		}
+
+		return value
+	}
+
+	private _normalizeMutationData(data?: MutationData<T, K, keyof T['types'][K]>) {
+		if (!data || typeof data !== 'object') return data
+
+		return Object.entries(data).reduce(
+			(acc, [fieldName, value]) => {
+				if (isUnsafeObjectKey(fieldName)) return acc
+
+				acc[fieldName as keyof T['types'][K]] = this._normalizeFieldValue(fieldName, value) as any
+				return acc
+			},
+			{} as MutationData<T, K, keyof T['types'][K]>,
+		)
 	}
 
 	getUser() {
@@ -67,7 +104,7 @@ export class HookObject<T extends WabeTypes, K extends keyof WabeTypes['types']>
 		if (isUnsafeObjectKey(String(field)))
 			throw new Error(`Cannot set unsafe field key "${String(field)}"`)
 
-		this.newData[field] = value
+		this.newData[field] = this._normalizeFieldValue(String(field), value) as any
 	}
 
 	getNewData(): MutationData<T, K, keyof T['types'][K]> {

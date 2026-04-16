@@ -4061,7 +4061,7 @@ describe('GraphqlSchema', () => {
 			},
 		})) as any
 
-		expect(field2AfterUpdate1[0]?.field2.length).toBe(2)
+		expect(field2AfterUpdate1[0]?.field2?.ids?.length).toBe(2)
 
 		expect(res.createTestClass2.testClass2.name).toBe('name')
 		expect(res.createTestClass2.testClass2.field2.edges[0].node.field1).toBe('field1')
@@ -4422,7 +4422,7 @@ describe('GraphqlSchema', () => {
 			},
 		})) as any
 
-		expect(field2AfterUpdate1[0]?.field2.length).toBe(1)
+		expect(field2AfterUpdate1[0]?.field2?.ids?.length).toBe(1)
 
 		const resAfterUpdate2 = await client.request<any>(gql`
     	mutation updateTestClass2 {
@@ -4863,7 +4863,11 @@ describe('GraphqlSchema', () => {
 			},
 		})) as any
 
-		expect(field2AfterUpdate2[0]?.field2).toEqual([])
+		expect(field2AfterUpdate2[0]?.field2).toEqual({
+			class: 'TestClass',
+			ids: [],
+			type: 'Relation',
+		})
 
 		expect(resAfterUpdate.updateTestClass2s.edges[0].node.name).toBe('name')
 		expect(resAfterUpdate.updateTestClass2s.edges[0].node.field2.edges.length).toBe(0)
@@ -4969,7 +4973,7 @@ describe('GraphqlSchema', () => {
 			},
 		})) as any
 
-		expect(field2AfterUpdate2[0]?.field2.length).toBe(0)
+		expect(field2AfterUpdate2[0]?.field2?.ids?.length).toBe(0)
 
 		expect(resAfterUpdate.updateTestClass2.testClass2.name).toBe('name')
 		expect(resAfterUpdate.updateTestClass2.testClass2.field2.edges.length).toBe(0)

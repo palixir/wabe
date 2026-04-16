@@ -4,6 +4,7 @@ import type {
 	ProviderInterface,
 	SecondaryProviderInterface,
 } from '../interface'
+import type { AuthenticationEmailPasswordSRP } from '../../../generated/wabe'
 import { contextWithRoot } from '../../utils/export'
 import type { DevWabeTypes } from '../../utils/helper'
 import { createSRPServer, type Ephemeral, type Session } from 'js-srp6a'
@@ -17,6 +18,28 @@ const SRP_SERVER_SECRET_TTL_MS = 5 * 60 * 1000
 
 const isFilledString = (value: string | undefined) =>
 	typeof value === 'string' && value.trim().length > 0
+
+const buildSrpData = ({
+	base,
+	email,
+	salt,
+	verifier,
+	serverSecret,
+	serverSecretExpiresAt,
+}: {
+	base?: AuthenticationEmailPasswordSRP
+	email: string
+	salt: string
+	verifier: string
+	serverSecret?: string
+	serverSecretExpiresAt?: Date
+}): AuthenticationEmailPasswordSRP => ({
+	email: base?.email || email,
+	salt: base?.salt || salt,
+	verifier: base?.verifier || verifier,
+	serverSecret,
+	serverSecretExpiresAt,
+})
 
 type EmailPasswordSRPInterface = {
 	clientPublic: string
@@ -81,11 +104,14 @@ export class EmailPasswordSRP implements ProviderInterface<
 			id: user.id,
 			data: {
 				authentication: {
-					emailPasswordSRP: {
-						...user.authentication?.emailPasswordSRP,
+					emailPasswordSRP: buildSrpData({
+						base: user.authentication?.emailPasswordSRP,
+						email: input.email,
+						salt,
+						verifier,
 						serverSecret: ephemeral.secret,
 						serverSecretExpiresAt: new Date(Date.now() + SRP_SERVER_SECRET_TTL_MS),
-					},
+					}),
 				},
 			},
 			select: {},
@@ -208,11 +234,14 @@ export class EmailPasswordSRPChallenge implements SecondaryProviderInterface<
 			id: user.id,
 			data: {
 				authentication: {
-					emailPasswordSRP: {
-						...user.authentication?.emailPasswordSRP,
-						serverSecret: null,
-						serverSecretExpiresAt: null,
-					},
+					emailPasswordSRP: buildSrpData({
+						base: user.authentication?.emailPasswordSRP,
+						email: input.email,
+						salt,
+						verifier,
+						serverSecret: undefined,
+						serverSecretExpiresAt: undefined,
+					}),
 				},
 			},
 			select: {},

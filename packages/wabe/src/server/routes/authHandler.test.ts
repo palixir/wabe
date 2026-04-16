@@ -1,4 +1,4 @@
-import { describe, expect, it, mock } from 'bun:test'
+import { describe, expect, it } from 'bun:test'
 import { ProviderEnum } from '../../authentication/interface'
 
 const validProviders = new Set<string>(Object.values(ProviderEnum))

@@ -2,12 +2,6 @@ import type { DevWabeTypes } from '../utils/helper'
 import { notEmpty } from '../utils/export'
 import type { HookObject } from './HookObject'
 
-const toPointerObject = ({ className, id }: { className: string; id: string }) => ({
-	class: className,
-	id,
-	type: 'Pointer' as const,
-})
-
 const getUserIdFromSessionObject = (sessionObject: any): string | undefined => {
 	const user = sessionObject?.user
 	if (!user) return undefined
@@ -37,19 +31,14 @@ export const defaultAfterCreateSession = async (
 	})
 
 	const sessionsId = user?.sessions?.map((session) => session.id) || []
-	const sessionsPointers = [...sessionsId, object?.id].filter(notEmpty).map((sessionId) =>
-		toPointerObject({
-			className: '_Session',
-			id: sessionId,
-		}),
-	)
+	const nextSessionIds = [...sessionsId, object?.id].filter(notEmpty)
 
 	await databaseController.updateObject({
 		className: 'User',
 		id: userId,
 		context: hookObject.context,
 		data: {
-			sessions: sessionsPointers,
+			sessions: nextSessionIds,
 		},
 	})
 }
@@ -76,20 +65,14 @@ export const defaultAfterDeleteSession = async (
 	const newSessionsId = user?.sessions
 		?.filter((session) => session.id !== object?.id)
 		.map((session) => session.id)
-	const newSessionsPointers =
-		newSessionsId?.map((sessionId) =>
-			toPointerObject({
-				className: '_Session',
-				id: sessionId,
-			}),
-		) || []
+	const nextSessionIds = newSessionsId || []
 
 	await databaseController.updateObject({
 		className: 'User',
 		id: userId,
 		context: hookObject.context,
 		data: {
-			sessions: newSessionsPointers,
+			sessions: nextSessionIds,
 		},
 	})
 }

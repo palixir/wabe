@@ -2,7 +2,6 @@ import { describe, expect, it } from 'bun:test'
 import type { TypeField } from '../schema'
 import type { DevWabeTypes } from '../utils/helper'
 import {
-	type CodegenFormatOptions,
 	getEndChar,
 	getFileTypeString,
 	getIndent,
@@ -92,9 +91,12 @@ describe('wabeTypesToTypescriptTypes', () => {
 	})
 
 	it('should return Date for Date when isInput', () => {
-		expect(wabeTypesToTypescriptTypes({ field: mkField({ type: 'Date' }), isInput: true })).toBe(
-			'Date',
-		)
+		expect(
+			wabeTypesToTypescriptTypes({
+				field: mkField({ type: 'Date' }),
+				isInput: true,
+			}),
+		).toBe('Date')
 	})
 
 	it('should return File type object', () => {
@@ -129,7 +131,11 @@ describe('wabeTypesToTypescriptTypes', () => {
 	it('should handle Array of Object', () => {
 		expect(
 			wabeTypesToTypescriptTypes({
-				field: mkField({ type: 'Array', typeValue: 'Object', object: { name: 'Addr' } }),
+				field: mkField({
+					type: 'Array',
+					typeValue: 'Object',
+					object: { name: 'Addr' },
+				}),
 			}),
 		).toBe('Array<Addr>')
 	})
@@ -210,7 +216,9 @@ describe('wabeClassRecordToString', () => {
 	})
 
 	it('should replace "undefined" with "?" in field names', () => {
-		const result = wabeClassRecordToString({ User: { nameundefined: 'string' } })
+		const result = wabeClassRecordToString({
+			User: { nameundefined: 'string' },
+		})
 		expect(result).toBe('export type User = {\n\tname?: string\n}\n\n')
 	})
 
@@ -226,7 +234,9 @@ describe('wabeClassRecordToString', () => {
 
 describe('wabeEnumRecordToString', () => {
 	it('should output enum with single-quoted values by default', () => {
-		const result = wabeEnumRecordToString({ Status: { ACTIVE: 'active', INACTIVE: 'inactive' } })
+		const result = wabeEnumRecordToString({
+			Status: { ACTIVE: 'active', INACTIVE: 'inactive' },
+		})
 		expect(result).toContain("ACTIVE = 'active'")
 		expect(result).toContain("INACTIVE = 'inactive'")
 	})
@@ -264,7 +274,10 @@ describe('wabeEnumRecordToString', () => {
 
 describe('wabeScalarRecordToString', () => {
 	it('should output type aliases for scalars', () => {
-		const result = wabeScalarRecordToString({ JSON: 'string', URL: 'string' })
+		const result = wabeScalarRecordToString({
+			JSON: 'string',
+			URL: 'string',
+		})
 		expect(result).toBe('export type JSON = string\n\nexport type URL = string\n\n')
 	})
 
@@ -276,13 +289,21 @@ describe('wabeScalarRecordToString', () => {
 describe('wrapLongGraphqlFieldArguments', () => {
 	it('should not wrap lines shorter than printWidth', () => {
 		const content = '  myField(arg1: String): Boolean'
-		const result = wrapLongGraphqlFieldArguments({ content, indent: '  ', printWidth: 100 })
+		const result = wrapLongGraphqlFieldArguments({
+			content,
+			indent: '  ',
+			printWidth: 100,
+		})
 		expect(result).toBe(content)
 	})
 
 	it('should wrap long lines with multiple arguments', () => {
 		const content = '  createUser(name: String!, email: String!, age: Int): User'
-		const result = wrapLongGraphqlFieldArguments({ content, indent: '  ', printWidth: 30 })
+		const result = wrapLongGraphqlFieldArguments({
+			content,
+			indent: '  ',
+			printWidth: 30,
+		})
 		expect(result).toContain('createUser(\n')
 		expect(result).toContain('    name: String!\n')
 		expect(result).toContain('    email: String!\n')
@@ -292,19 +313,31 @@ describe('wrapLongGraphqlFieldArguments', () => {
 
 	it('should not wrap single-arg lines even if long', () => {
 		const content = '  myField(veryLongArgumentName: String!): Boolean'
-		const result = wrapLongGraphqlFieldArguments({ content, indent: '  ', printWidth: 10 })
+		const result = wrapLongGraphqlFieldArguments({
+			content,
+			indent: '  ',
+			printWidth: 10,
+		})
 		expect(result).toBe(content)
 	})
 
 	it('should leave non-field lines unchanged', () => {
 		const content = 'type Query { }'
-		const result = wrapLongGraphqlFieldArguments({ content, indent: '  ', printWidth: 5 })
+		const result = wrapLongGraphqlFieldArguments({
+			content,
+			indent: '  ',
+			printWidth: 5,
+		})
 		expect(result).toBe(content)
 	})
 
 	it('should handle multiple lines independently', () => {
 		const content = 'short\n  longField(a: A!, b: B!, c: C!): D'
-		const result = wrapLongGraphqlFieldArguments({ content, indent: '\t', printWidth: 20 })
+		const result = wrapLongGraphqlFieldArguments({
+			content,
+			indent: '\t',
+			printWidth: 20,
+		})
 		const lines = result.split('\n')
 		expect(lines[0]).toBe('short')
 		expect(lines.length).toBeGreaterThan(2)
