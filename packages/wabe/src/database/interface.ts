@@ -1,6 +1,7 @@
 import type { WabeContext } from '../server/interface'
 import type { WabeTypes } from '../server'
 import type { SchemaInterface } from '../schema'
+import type { WabeFile, WabeFileInput } from '../file/interface'
 
 type IsScalar<T> = T extends string | number | boolean | Date ? true : false
 
@@ -121,11 +122,14 @@ export type RelationPayloadObject = {
 	type: 'Relation'
 }
 
-type MutationInputField<TField, TWhereField = unknown> =
-	TField extends Array<infer Item>
-		? Item extends { id: string }
-			? string[]
-			: TField
+type MutationInputField<TField, TWhereField = unknown> = TField extends WabeFile
+	? WabeFileInput
+	: TField extends Array<infer Item>
+		? Item extends WabeFile
+			? Array<WabeFileInput>
+			: Item extends { id: string }
+				? string[]
+				: TField
 		: TField extends { id: string }
 			? string
 			: TWhereField extends Date

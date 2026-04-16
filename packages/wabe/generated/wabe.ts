@@ -85,6 +85,12 @@ export type User = {
 	id: string
 	name?: string
 	age?: number
+	avatar?: {
+		name: string
+		url?: string
+		urlGeneratedAt?: string
+		isPresignedUrl: boolean
+	}
 	email?: string
 	acl?: ACLObject
 	createdAt?: string

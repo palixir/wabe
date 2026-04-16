@@ -61,6 +61,9 @@ const run = async () => {
 							type: 'Email',
 							required: true,
 						},
+						avatar: {
+							type: 'File',
+						},
 					},
 				},
 				{
@@ -68,8 +71,16 @@ const run = async () => {
 					fields: {
 						name: { type: 'String', required: true },
 						test2: { type: 'RoleEnum' },
-						test3: { type: 'Relation', class: 'User', required: true },
-						test4: { type: 'Pointer', class: 'User', required: true },
+						test3: {
+							type: 'Relation',
+							class: 'User',
+							required: true,
+						},
+						test4: {
+							type: 'Pointer',
+							class: 'User',
+							required: true,
+						},
 						experiences: {
 							type: 'Array',
 							typeValue: 'Object',
@@ -180,6 +191,17 @@ const run = async () => {
 				},
 			},
 		},
+	})
+
+	await wabe.controllers.database.createObject({
+		className: 'User',
+		context: { isRoot: true, wabe },
+		data: {
+			avatar: {
+				file: new File(['test'], 'test.txt', { type: 'text/plain' }),
+			},
+		},
+		select: {},
 	})
 
 	// For select test

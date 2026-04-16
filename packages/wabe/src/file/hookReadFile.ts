@@ -1,4 +1,8 @@
 import type { HookObject } from '../hooks/HookObject'
+import type { WabeFile } from './interface'
+
+const isWabeFile = (value: unknown): value is WabeFile =>
+	typeof value === 'object' && value !== null && 'name' in (value as Record<string, unknown>)
 
 const getFile = async (hookObject: HookObject<any, any>) => {
 	const schema = hookObject.context.wabe.config.schema?.classes?.find(
@@ -15,15 +19,18 @@ const getFile = async (hookObject: HookObject<any, any>) => {
 		Object.entries(schema.fields)
 			.filter(([_, value]) => value.type === 'File')
 			.map(async ([fieldName]) => {
-				const fileInfo = hookObject.object?.[fieldName]
+				const rawFileInfo = hookObject.object?.[fieldName as keyof typeof hookObject.object]
 
-				if (!fileInfo) return
+				if (!isWabeFile(rawFileInfo)) return
 
-				const fileName = fileInfo.name as string
+				const fileInfo: WabeFile = rawFileInfo
+				const fileName = fileInfo.name
 
 				if (!fileName && fileInfo.url) return fileInfo.url
 
-				const fileUrlGeneratedAt = new Date(fileInfo.urlGeneratedAt)
+				const fileUrlGeneratedAt = fileInfo.urlGeneratedAt
+					? new Date(fileInfo.urlGeneratedAt)
+					: undefined
 
 				if (
 					fileUrlGeneratedAt &&
@@ -39,13 +46,14 @@ const getFile = async (hookObject: HookObject<any, any>) => {
 				const newUrl = fileUrlFromBucket
 				const newUrlGeneratedAt = new Date()
 
-				// Mutate the object returned to the caller so AfterRead effects are visible immediately
-				// @ts-expect-error
-				hookObject.object[fieldName] = {
+				const updatedFile: WabeFile = {
 					...fileInfo,
 					urlGeneratedAt: newUrlGeneratedAt,
 					url: newUrl,
 				}
+
+				// Mutate the object returned to the caller so AfterRead effects are visible immediately
+				;(hookObject.object as Record<string, unknown>)[fieldName] = updatedFile
 
 				if (!hookObject.object?.id) return
 
@@ -54,11 +62,7 @@ const getFile = async (hookObject: HookObject<any, any>) => {
 					context: hookObject.context,
 					id: hookObject.object.id,
 					data: {
-						[fieldName]: {
-							...fileInfo,
-							urlGeneratedAt: newUrlGeneratedAt,
-							url: newUrl,
-						},
+						[fieldName]: updatedFile,
 					},
 					_skipHooks: true,
 				})
