@@ -55,6 +55,8 @@ export enum OperationType {
 	BeforeRead = 'beforeRead',
 }
 
+export { HookObject } from './HookObject'
+
 export type Hook<T extends WabeTypes, K extends keyof WabeTypes['types']> = {
 	operationType: OperationType
 	// If the className is undefined the hook is called on each class
