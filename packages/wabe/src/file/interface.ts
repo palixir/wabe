@@ -1,5 +1,31 @@
 import type { WabeContext, WabeTypes } from 'src/server'
 
+/**
+ * Input shape accepted by Wabe when writing a File field via the
+ * DatabaseController or GraphQL.
+ *
+ * Two forms are accepted (XOR):
+ * - An object with an explicit `file` property to upload a new file.
+ * - An object with an external `url` and its `name` for already-hosted files.
+ */
+export type WabeFileInput =
+	| { file: File; url?: never; name?: never }
+	| { file?: never; url: string; name: string }
+
+/**
+ * Stored and returned representation of a File field. This is what the
+ * DatabaseController and GraphQL expose after the upload hooks have run.
+ *
+ * `urlGeneratedAt` can be returned as a `Date` (DatabaseController) or as a
+ * string (serialized over GraphQL), so the type accepts both forms.
+ */
+export type WabeFile = {
+	name: string
+	url?: string
+	urlGeneratedAt?: Date | string
+	isPresignedUrl: boolean
+}
+
 export type FileUploadSecurityConfig = {
 	/**
 	 * Enable upload validation rules. Enabled by default in production.

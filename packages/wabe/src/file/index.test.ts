@@ -912,6 +912,136 @@ describe('File upload', () => {
 		).resolves.toEqual(expect.anything())
 	})
 
+	it('should upload a file when passing avatar: { file: new File(...) } on a fully typed class', async () => {
+		const created = await wabe.controllers.database.createObject({
+			className: 'User',
+			context: {
+				isRoot: true,
+				wabe,
+			},
+			data: {
+				name: 'John',
+				// @ts-expect-error
+				avatar: {
+					file: new File(['avatar-content'], 'avatar.txt', {
+						type: 'text/plain',
+					}),
+				},
+			},
+			select: { id: true },
+		})
+
+		if (!created) throw new Error('User not created')
+
+		expect(spyFileDevAdapterUploadFile).toHaveBeenCalledTimes(1)
+		const uploadedFile = spyFileDevAdapterUploadFile.mock.calls[0]?.[0]
+		expect(uploadedFile?.name).toEqual('avatar.txt')
+		expect(await uploadedFile?.text()).toEqual('avatar-content')
+
+		const user = await wabe.controllers.database.getObject({
+			className: 'User',
+			context: { isRoot: true, wabe },
+			id: created.id,
+			// @ts-expect-error
+			select: { avatar: true, id: true },
+		})
+
+		// @ts-expect-error
+		expect(user?.avatar?.name).toEqual('avatar.txt')
+		// @ts-expect-error
+		expect(user?.avatar?.url).toEqual(`http://127.0.0.1:${port}/bucket/avatar.txt`)
+		// @ts-expect-error
+		expect(user?.avatar?.isPresignedUrl).toEqual(true)
+	})
+
+	it('should reject passing a bare File instance (shorthand not supported)', async () => {
+		expect(
+			wabe.controllers.database.createObject({
+				// @ts-expect-error
+				className: 'Test3',
+				context: {
+					isRoot: true,
+					wabe,
+				},
+				data: {
+					// @ts-expect-error bare File is not a valid WabeFileInput
+					file: new File(['shorthand'], 'shorthand.txt', {
+						type: 'text/plain',
+					}),
+				},
+				select: {},
+			}),
+		).rejects.toThrow(
+			'File field "file" must be provided as { file } or { url, name }, not a bare File instance',
+		)
+
+		expect(spyFileDevAdapterUploadFile).toHaveBeenCalledTimes(0)
+	})
+
+	it('should reject when both file and url are provided at the same time', async () => {
+		expect(
+			wabe.controllers.database.createObject({
+				// @ts-expect-error
+				className: 'Test3',
+				context: {
+					isRoot: true,
+					wabe,
+				},
+				data: {
+					// @ts-expect-error file and url are mutually exclusive
+					file: {
+						file: new File(['a'], 'a.txt', { type: 'text/plain' }),
+						url: 'https://palixir.github.io/wabe//assets/logo.png',
+						name: 'logo.png',
+					},
+				},
+				select: {},
+			}),
+		).rejects.toThrow('File field "file" cannot have both "file" and "url" set at the same time')
+
+		expect(spyFileDevAdapterUploadFile).toHaveBeenCalledTimes(0)
+	})
+
+	it('should insert a file directly with an url and a name via database controller and mark it as not presigned', async () => {
+		const externalUrl = 'https://palixir.github.io/wabe//assets/logo.png'
+
+		await wabe.controllers.database.createObject({
+			// @ts-expect-error
+			className: 'Test3',
+			context: {
+				isRoot: true,
+				wabe,
+			},
+			data: {
+				// @ts-expect-error
+				file: { url: externalUrl, name: 'logo.png' },
+			},
+			select: {},
+		})
+
+		// No bucket upload should happen when inserting an external url
+		expect(spyFileDevAdapterUploadFile).toHaveBeenCalledTimes(0)
+
+		const result = await wabe.controllers.database.getObjects({
+			// @ts-expect-error
+			className: 'Test3',
+			context: {
+				isRoot: true,
+				wabe,
+			},
+			where: {},
+			// @ts-expect-error
+			select: { file: true, id: true },
+		})
+
+		// @ts-expect-error
+		const storedFile = result[0].file
+
+		expect(storedFile.url).toEqual(externalUrl)
+		expect(storedFile.isPresignedUrl).toEqual(false)
+		expect(storedFile.name).toEqual('logo.png')
+	})
+
 	it('should upload a file providing an url without File scalar', async () => {
 		const anonymousClient = getAnonymousClient(port)
 
@@ -1050,7 +1180,9 @@ describe('File upload security in production', () => {
 			data: {
 				// @ts-expect-error
 				file: {
-					file: new File(['hello'], 'report.txt', { type: 'text/plain' }),
+					file: new File(['hello'], 'report.txt', {
+						type: 'text/plain',
+					}),
 				},
 			},
 			select: {},
@@ -1087,7 +1219,9 @@ describe('File upload security in production', () => {
 				data: {
 					// @ts-expect-error
 					file: {
-						file: new File(['alert(1)'], 'script.js', { type: 'application/javascript' }),
+						file: new File(['alert(1)'], 'script.js', {
+							type: 'application/javascript',
+						}),
 					},
 				},
 				select: {},
@@ -1107,7 +1241,9 @@ describe('File upload security in production', () => {
 				data: {
 					// @ts-expect-error
 					file: {
-						file: new File(['not-a-real-jpeg'], 'fake.jpg', { type: 'image/jpeg' }),
+						file: new File(['not-a-real-jpeg'], 'fake.jpg', {
+							type: 'image/jpeg',
+						}),
 					},
 				},
 				select: {},

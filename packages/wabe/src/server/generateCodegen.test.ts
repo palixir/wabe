@@ -3,6 +3,8 @@ import type { TypeField } from '../schema'
 import type { DevWabeTypes } from '../utils/helper'
 import {
 	getEndChar,
+	getFileInputTypeString,
+	getFileOutputTypeString,
 	getFileTypeString,
 	getIndent,
 	getQuoteChar,
@@ -63,13 +65,41 @@ describe('Format helpers', () => {
 		})
 	})
 
-	describe('getFileTypeString', () => {
+	describe('getFileOutputTypeString', () => {
 		it('should use comma separator by default', () => {
-			expect(getFileTypeString()).toBe('{ url: string, name: string }')
+			expect(getFileOutputTypeString()).toBe(
+				'{ name: string, url?: string, urlGeneratedAt?: string, isPresignedUrl: boolean }',
+			)
 		})
 
 		it('should use semicolon separator when semi is true', () => {
-			expect(getFileTypeString({ semi: true })).toBe('{ url: string; name: string }')
+			expect(getFileOutputTypeString({ semi: true })).toBe(
+				'{ name: string; url?: string; urlGeneratedAt?: string; isPresignedUrl: boolean }',
+			)
+		})
+	})
+
+	describe('getFileInputTypeString', () => {
+		it('should return an XOR union (file | url+name) with comma separator by default', () => {
+			expect(getFileInputTypeString()).toBe(
+				'{ file: File, url?: never, name?: never } | { file?: never, url: string, name: string }',
+			)
+		})
+
+		it('should return an XOR union (file | url+name) with semicolon separator when semi is true', () => {
+			expect(getFileInputTypeString({ semi: true })).toBe(
+				'{ file: File; url?: never; name?: never } | { file?: never; url: string; name: string }',
+			)
+		})
+	})
+
+	describe('getFileTypeString', () => {
+		it('should default to output type', () => {
+			expect(getFileTypeString()).toBe(getFileOutputTypeString())
+		})
+
+		it('should return the input type when isInput is true', () => {
+			expect(getFileTypeString(undefined, true)).toBe(getFileInputTypeString())
 		})
 	})
 })
@@ -99,19 +129,42 @@ describe('wabeTypesToTypescriptTypes', () => {
 		).toBe('Date')
 	})
 
-	it('should return File type object', () => {
+	it('should return File output type object by default', () => {
 		expect(wabeTypesToTypescriptTypes({ field: mkField({ type: 'File' }) })).toBe(
-			'{ url: string, name: string }',
+			'{ name: string, url?: string, urlGeneratedAt?: string, isPresignedUrl: boolean }',
 		)
 	})
 
-	it('should return File type with semi format', () => {
+	it('should return File output type with semi format', () => {
 		expect(
 			wabeTypesToTypescriptTypes({
 				field: mkField({ type: 'File' }),
 				formatOptions: { semi: true },
 			}),
-		).toBe('{ url: string; name: string }')
+		).toBe('{ name: string; url?: string; urlGeneratedAt?: string; isPresignedUrl: boolean }')
+	})
+
+	it('should return File input type object when isInput', () => {
+		expect(
+			wabeTypesToTypescriptTypes({
+				field: mkField({ type: 'File' }),
+				isInput: true,
+			}),
+		).toBe(
+			'{ file: File, url?: never, name?: never } | { file?: never, url: string, name: string }',
+		)
+	})
+
+	it('should return File input type with semi format when isInput', () => {
+		expect(
+			wabeTypesToTypescriptTypes({
+				field: mkField({ type: 'File' }),
+				isInput: true,
+				formatOptions: { semi: true },
+			}),
+		).toBe(
+			'{ file: File; url?: never; name?: never } | { file?: never; url: string; name: string }',
+		)
 	})
 
 	it('should handle Array of primitives', () => {
@@ -140,12 +193,25 @@ describe('wabeTypesToTypescriptTypes', () => {
 		).toBe('Array<Addr>')
 	})
 
-	it('should handle Array of File', () => {
+	it('should handle Array of File with output format by default', () => {
 		expect(
 			wabeTypesToTypescriptTypes({
 				field: mkField({ type: 'Array', typeValue: 'File' }),
 			}),
-		).toBe('Array<{ url: string, name: string }>')
+		).toBe(
+			'Array<{ name: string, url?: string, urlGeneratedAt?: string, isPresignedUrl: boolean }>',
+		)
+	})
+
+	it('should handle Array of File with input format when isInput', () => {
+		expect(
+			wabeTypesToTypescriptTypes({
+				field: mkField({ type: 'Array', typeValue: 'File' }),
+				isInput: true,
+			}),
+		).toBe(
+			'Array<{ file: File, url?: never, name?: never } | { file?: never, url: string, name: string }>',
+		)
 	})
 
 	it('should handle Pointer', () => {

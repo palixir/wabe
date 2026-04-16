@@ -68,8 +68,16 @@ const run = async () => {
 					fields: {
 						name: { type: 'String', required: true },
 						test2: { type: 'RoleEnum' },
-						test3: { type: 'Relation', class: 'User', required: true },
-						test4: { type: 'Pointer', class: 'User', required: true },
+						test3: {
+							type: 'Relation',
+							class: 'User',
+							required: true,
+						},
+						test4: {
+							type: 'Pointer',
+							class: 'User',
+							required: true,
+						},
 						experiences: {
 							type: 'Array',
 							typeValue: 'Object',

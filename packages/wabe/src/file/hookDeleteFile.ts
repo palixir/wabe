@@ -1,4 +1,8 @@
 import type { HookObject } from '../hooks/HookObject'
+import type { WabeFile } from './interface'
+
+const isWabeFile = (value: unknown): value is WabeFile =>
+	typeof value === 'object' && value !== null && 'name' in (value as Record<string, unknown>)
 
 const deleteFile = async (hookObject: HookObject<any, any>) => {
 	const schema = hookObject.context.wabe.config.schema?.classes?.find(
@@ -11,7 +15,12 @@ const deleteFile = async (hookObject: HookObject<any, any>) => {
 		Object.entries(schema.fields)
 			.filter(([_, value]) => value.type === 'File')
 			.map(([fieldName]) => {
-				const fileName = hookObject.originalObject?.[fieldName]?.name as string
+				const rawFileInfo =
+					hookObject.originalObject?.[fieldName as keyof typeof hookObject.originalObject]
+
+				if (!isWabeFile(rawFileInfo)) return Promise.resolve()
+
+				const fileName = rawFileInfo.name
 
 				if (!fileName) return Promise.resolve()
 

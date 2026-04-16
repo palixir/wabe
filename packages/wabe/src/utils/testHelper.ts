@@ -80,6 +80,7 @@ export const setupTests = async (
 					fields: {
 						name: { type: 'String' },
 						age: { type: 'Int' },
+						avatar: { type: 'File' },
 						isAdmin: { type: 'Boolean', defaultValue: false },
 						floatValue: { type: 'Float' },
 						birthDate: { type: 'Date' },

@@ -46,10 +46,18 @@ export const getEndChar = (options?: CodegenFormatOptions): string =>
 export const getQuoteChar = (options?: CodegenFormatOptions): string =>
 	options?.quote === 'double' ? '"' : "'"
 
-export const getFileTypeString = (options?: CodegenFormatOptions) => {
+export const getFileOutputTypeString = (options?: CodegenFormatOptions) => {
 	const sep = options?.semi ? '; ' : ', '
-	return `{ url: string${sep}name: string }`
+	return `{ name: string${sep}url?: string${sep}urlGeneratedAt?: string${sep}isPresignedUrl: boolean }`
 }
+
+export const getFileInputTypeString = (options?: CodegenFormatOptions) => {
+	const sep = options?.semi ? '; ' : ', '
+	return `{ file: File${sep}url?: never${sep}name?: never } | { file?: never${sep}url: string${sep}name: string }`
+}
+
+export const getFileTypeString = (options?: CodegenFormatOptions, isInput = false) =>
+	isInput ? getFileInputTypeString(options) : getFileOutputTypeString(options)
 
 export const wabeTypesToTypescriptTypes = ({
 	field,
@@ -64,7 +72,7 @@ export const wabeTypesToTypescriptTypes = ({
 		case 'Date':
 			return isInput ? 'Date' : 'string'
 		case 'File':
-			return getFileTypeString(formatOptions)
+			return getFileTypeString(formatOptions, isInput)
 		case 'Boolean':
 		case 'Int':
 		case 'Float':
@@ -76,7 +84,7 @@ export const wabeTypesToTypescriptTypes = ({
 			return wabePrimaryTypesToTypescriptTypes[field.type]
 		case 'Array':
 			if (field.typeValue === 'Object') return `Array<${field.object.name}>`
-			if (field.typeValue === 'File') return `Array<${getFileTypeString(formatOptions)}>`
+			if (field.typeValue === 'File') return `Array<${getFileTypeString(formatOptions, isInput)}>`
 			return `Array<${wabePrimaryTypesToTypescriptTypes[field.typeValue]}>`
 		case 'Pointer':
 			return field.class

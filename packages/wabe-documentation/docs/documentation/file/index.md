@@ -124,11 +124,13 @@ const res = await fetch("http://127.0.0.1:3001/graphql", {
 });
 ```
 
-Using a URL to create a file
+Using a URL to create a file (both `url` and `name` must be provided)
 
 ```graphql
-mutation createUser($avatarUrl: String!) {
-  createUser(input: { fields: { avatar: { url: $avatarUrl } } }) {
+mutation createUser($avatarUrl: String!, $avatarName: String!) {
+  createUser(
+    input: { fields: { avatar: { url: $avatarUrl, name: $avatarName } } }
+  ) {
     user {
       id
       avatar {
@@ -137,4 +139,64 @@ mutation createUser($avatarUrl: String!) {
     }
   }
 }
+```
+
+## 🧩 TypeScript types
+
+Wabe exposes two public types to describe a `File` field on both sides of the wire:
+
+```ts
+import type { WabeFile, WabeFileInput } from "wabe";
+
+// Input: strict XOR union accepted by the DatabaseController and GraphQL.
+// Either upload a binary File, or reference an external HTTPS URL (with a name) — never both.
+type Input = WabeFileInput;
+// = { file: File; url?: never; name?: never }
+// | { file?: never; url: string; name: string }
+
+// Output: shape stored in the database and returned by the DatabaseController
+// or GraphQL after the upload hooks have resolved.
+type Output = WabeFile;
+// = {
+//   name: string;           // canonical file name stored in the bucket
+//   url?: string;           // presigned or external URL, refreshed by AfterRead
+//   urlGeneratedAt?: Date;  // last time the URL was generated (cache window)
+//   isPresignedUrl: boolean // true when the URL is a presigned bucket URL
+// }
+```
+
+### Uploading via the DatabaseController
+
+```ts
+import type { WabeFileInput } from "wabe";
+
+const payload: WabeFileInput = {
+  file: new File(["hello"], "hello.txt", { type: "text/plain" }),
+};
+
+await wabe.controllers.database.createObject({
+  className: "User",
+  context: { isRoot: true, wabe },
+  data: { avatar: payload },
+  select: {},
+});
+```
+
+Or with an external URL (must be HTTPS and not point to localhost). Both `url` and `name` are required:
+
+```ts
+import type { WabeFileInput } from "wabe";
+
+const payload: WabeFileInput = {
+  url: "https://cdn.example.com/logo.png",
+  name: "logo.png",
+};
+
+await wabe.controllers.database.updateObject({
+  className: "User",
+  context: { isRoot: true, wabe },
+  id: "userId",
+  data: { avatar: payload },
+  select: {},
+});
 ```
