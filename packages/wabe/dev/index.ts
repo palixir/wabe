@@ -61,9 +61,6 @@ const run = async () => {
 							type: 'Email',
 							required: true,
 						},
-						avatar: {
-							type: 'File',
-						},
 					},
 				},
 				{
@@ -191,17 +188,6 @@ const run = async () => {
 				},
 			},
 		},
-	})
-
-	await wabe.controllers.database.createObject({
-		className: 'User',
-		context: { isRoot: true, wabe },
-		data: {
-			avatar: {
-				file: new File(['test'], 'test.txt', { type: 'text/plain' }),
-			},
-		},
-		select: {},
 	})
 
 	// For select test

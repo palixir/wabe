@@ -921,6 +921,7 @@ describe('File upload', () => {
 			},
 			data: {
 				name: 'John',
+				// @ts-expect-error
 				avatar: {
 					file: new File(['avatar-content'], 'avatar.txt', {
 						type: 'text/plain',
@@ -941,11 +942,15 @@ describe('File upload', () => {
 			className: 'User',
 			context: { isRoot: true, wabe },
 			id: created.id,
+			// @ts-expect-error
 			select: { avatar: true, id: true },
 		})
 
+		// @ts-expect-error
 		expect(user?.avatar?.name).toEqual('avatar.txt')
+		// @ts-expect-error
 		expect(user?.avatar?.url).toEqual(`http://127.0.0.1:${port}/bucket/avatar.txt`)
+		// @ts-expect-error
 		expect(user?.avatar?.isPresignedUrl).toEqual(true)
 	})
 
