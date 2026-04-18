@@ -5,6 +5,35 @@ import type { WobeCustomContext } from '..'
 
 const validProviders = new Set<string>(Object.values(ProviderEnum))
 
+const BUCKET_PREFIX = '/bucket/'
+
+const bucketHandler = ({
+	devDirectory,
+}: {
+	devDirectory: string
+}): WobeHandler<WobeCustomContext<any>> => {
+	const baseHandler = uploadDirectory({ directory: devDirectory })
+
+	return (ctx) => {
+		// `uploadDirectory` reads `ctx.params.filename` to resolve the file on
+		// disk. The default route `/bucket/:filename` only matches a single path
+		// segment, so nested file names (e.g. `userId/docId/file.json`) get a 404.
+		// We register the route as a wildcard and reconstruct the full nested
+		// file name from the request pathname here.
+		if (ctx.pathname.startsWith(BUCKET_PREFIX)) {
+			const rawFileName = ctx.pathname.slice(BUCKET_PREFIX.length)
+
+			try {
+				ctx.params.filename = decodeURIComponent(rawFileName)
+			} catch {
+				ctx.params.filename = rawFileName
+			}
+		}
+
+		return baseHandler(ctx)
+	}
+}
+
 export interface WabeRoute {
 	method: 'GET' | 'POST' | 'PUT' | 'DELETE'
 	path: string
@@ -41,8 +70,8 @@ export const defaultRoutes = ({
 	if (enableBucketRoute) {
 		routes.push({
 			method: 'GET',
-			path: '/bucket/:filename',
-			handler: uploadDirectory({ directory: devDirectory }),
+			path: '/bucket/*',
+			handler: bucketHandler({ devDirectory }),
 		})
 	}
 
