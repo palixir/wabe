@@ -43,39 +43,183 @@ describe('HookObject', () => {
 		await closeTests(wabe)
 	})
 
-	it('should fetch all the fields of an object', async () => {
-		const res = await wabe.controllers.database.createObject({
-			className: 'User',
-			data: { age: 30, name: 'John Doe' },
-			context: {
-				wabe,
-				isRoot: true,
-			},
+	it('should fetch a pointer field and mutate the object with the resolved value', async () => {
+		const database = wabe.controllers.database as any
+
+		const document = await database.createObject({
+			className: 'TestDocument',
+			data: { name: 'My Document' },
+			context: { wabe, isRoot: true },
 			select: { id: true },
 		})
 
-		const hookObject = new HookObject<DevWabeTypes, 'User'>({
-			className: 'User',
-			// @ts-expect-error
-			newData: { age: 30, name: 'John Doe' },
-			context: {
-				wabe,
-			} as any,
-			operationType: OperationType.BeforeCreate,
+		const container = await database.createObject({
+			className: 'TestPointerContainer',
+			data: { document: document?.id },
+			context: { wabe, isRoot: true },
+			select: { id: true, document: true },
+		})
+
+		const hookObject = new HookObject<DevWabeTypes, any>({
+			className: 'TestPointerContainer',
+			newData: {} as any,
+			context: { wabe } as any,
+			operationType: OperationType.AfterCreate,
 			object: {
-				id: res?.id || 'id',
-			},
+				id: container?.id,
+				document: container?.document,
+			} as any,
 			select: {},
 		})
 
-		const fetchResult = await hookObject.fetch()
+		const result = await hookObject.fetchPointerOrRelation('document')
 
-		expect(fetchResult).toEqual(
+		expect(result).toEqual(
 			expect.objectContaining({
-				id: res?.id || 'id',
-				age: 30,
-				name: 'John Doe',
+				id: document?.id,
+				name: 'My Document',
 			}),
+		)
+
+		expect((hookObject.object as any)?.document).toEqual(
+			expect.objectContaining({
+				id: document?.id,
+				name: 'My Document',
+			}),
+		)
+	})
+
+	it('should fetch a relation field and mutate the object with the resolved values', async () => {
+		const database = wabe.controllers.database as any
+
+		const doc1 = await database.createObject({
+			className: 'TestDocument',
+			data: { name: 'Doc 1' },
+			context: { wabe, isRoot: true },
+			select: { id: true },
+		})
+
+		const doc2 = await database.createObject({
+			className: 'TestDocument',
+			data: { name: 'Doc 2' },
+			context: { wabe, isRoot: true },
+			select: { id: true },
+		})
+
+		const container = await database.createObject({
+			className: 'TestPointerContainer',
+			data: { documents: [doc1?.id, doc2?.id] },
+			context: { wabe, isRoot: true },
+			select: { id: true, documents: true },
+		})
+
+		const hookObject = new HookObject<DevWabeTypes, any>({
+			className: 'TestPointerContainer',
+			newData: {} as any,
+			context: { wabe } as any,
+			operationType: OperationType.AfterCreate,
+			object: {
+				id: container?.id,
+				documents: container?.documents,
+			} as any,
+			select: {},
+		})
+
+		const result = await hookObject.fetchPointerOrRelation('documents')
+
+		expect(Array.isArray(result)).toBeTrue()
+		expect(result).toHaveLength(2)
+		expect(result).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({ id: doc1?.id, name: 'Doc 1' }),
+				expect.objectContaining({ id: doc2?.id, name: 'Doc 2' }),
+			]),
+		)
+
+		expect((hookObject.object as any)?.documents).toEqual(result)
+	})
+
+	it('should respect the select option when fetching a pointer field', async () => {
+		const database = wabe.controllers.database as any
+
+		const document = await database.createObject({
+			className: 'TestDocument',
+			data: { name: 'Selective' },
+			context: { wabe, isRoot: true },
+			select: { id: true },
+		})
+
+		const container = await database.createObject({
+			className: 'TestPointerContainer',
+			data: { document: document?.id },
+			context: { wabe, isRoot: true },
+			select: { id: true, document: true },
+		})
+
+		const hookObject = new HookObject<DevWabeTypes, any>({
+			className: 'TestPointerContainer',
+			newData: {} as any,
+			context: { wabe } as any,
+			operationType: OperationType.AfterCreate,
+			object: {
+				id: container?.id,
+				document: container?.document,
+			} as any,
+			select: {},
+		})
+
+		const result = await hookObject.fetchPointerOrRelation('document', {
+			select: { name: true },
+		})
+
+		expect(result).toEqual({ name: 'Selective' } as any)
+
+		const hookObjectWithId = new HookObject<DevWabeTypes, any>({
+			className: 'TestPointerContainer',
+			newData: {} as any,
+			context: { wabe } as any,
+			operationType: OperationType.AfterCreate,
+			object: {
+				id: container?.id,
+				document: container?.document,
+			} as any,
+			select: {},
+		})
+
+		const resultWithId = await hookObjectWithId.fetchPointerOrRelation('document', {
+			select: { id: true, name: true },
+		})
+
+		expect(resultWithId).toEqual({ id: document?.id, name: 'Selective' } as any)
+	})
+
+	it('should throw when trying to fetch a non Pointer/Relation field at runtime', async () => {
+		const hookObject = new HookObject<DevWabeTypes, any>({
+			className: 'TestPointerContainer',
+			newData: {} as any,
+			context: { wabe } as any,
+			operationType: OperationType.AfterCreate,
+			object: { id: 'container-id' } as any,
+			select: {},
+		})
+
+		await expect(hookObject.fetchPointerOrRelation('name' as any)).rejects.toThrow(
+			'Field "name" is not a Pointer or Relation',
+		)
+	})
+
+	it('should throw when trying to fetch an unsafe field key', async () => {
+		const hookObject = new HookObject<DevWabeTypes, any>({
+			className: 'TestPointerContainer',
+			newData: {} as any,
+			context: { wabe } as any,
+			operationType: OperationType.AfterCreate,
+			object: { id: 'container-id' } as any,
+			select: {},
+		})
+
+		await expect(hookObject.fetchPointerOrRelation('__proto__' as any)).rejects.toThrow(
+			'Cannot fetch unsafe field key "__proto__"',
 		)
 	})
 
