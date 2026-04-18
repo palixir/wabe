@@ -69,7 +69,16 @@ The hook object also contains the following methods:
 - `getUser(): User`: this method returns the user who initiated the request.
 - `isFieldUpdatedd(fieldName: string): boolean`: this method returns true if the field has been updated during the request.
 - `getNewData(): Record<string, any>`: this method returns the new data that has been added during the request.
-- `fetch(): Promise<OutputType<T, K, any>>`: this methods allow you to force the fetch of the current object from the database. By default, the `object` property is already up to date, but if you need to force a fetch, you can use this method.
+- `fetchPointerOrRelation(field, options?): Promise<...>`: this method resolves a Pointer or Relation field on the current object from the database. The `field` argument is type-checked: only fields whose value is a Pointer (object with `id`) or a Relation (array of objects with `id`) are accepted. After the call, `hookObject.object[field]` is mutated to contain the fully resolved value, so subsequent reads (e.g. `hookObject.object.role.id`, `hookObject.object.role.name`) are available. An optional `select` lets you restrict which fields of the target class are loaded (e.g. `{ select: { name: true } }`); when omitted, all fields are returned. Calling it on a field that isn't a Pointer or Relation throws at runtime.
+
+```ts
+// On a User hook, resolve the `role` Pointer
+await hookObject.fetchPointerOrRelation("role");
+console.log(hookObject.object.role.id, hookObject.object.role.name);
+
+// Restrict the loaded fields
+await hookObject.fetchPointerOrRelation("role", { select: { name: true } });
+```
 
 ```ts
 import { Wabe } from "wabe";

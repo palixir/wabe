@@ -1,7 +1,12 @@
 import type { OperationType } from '.'
 import type { RoleEnum, ACLObject } from '../../generated/wabe'
 import type { MutationData, OutputType, Select } from '../database'
-import { normalizePointerValue, normalizeRelationValue } from '../database/pointerRelationPayload'
+import {
+	extractPointerId,
+	extractRelationIds,
+	normalizePointerValue,
+	normalizeRelationValue,
+} from '../database/pointerRelationPayload'
 import type { WabeTypes } from '../server'
 import type { WabeContext } from '../server/interface'
 import { isUnsafeObjectKey } from '../utils/objectKeys'
@@ -13,6 +18,29 @@ type AddACLOpptions = {
 	read: boolean
 	write: boolean
 } | null
+
+/**
+ * Restricts to fields whose value is a Pointer (object with `id`)
+ * or a Relation (array of objects with `id`).
+ */
+type PointerOrRelationFields<T extends WabeTypes, K extends keyof T['types']> = {
+	[P in keyof T['types'][K]]: NonNullable<T['types'][K][P]> extends
+		| { id: string }
+		| Array<{ id: string }>
+		? P
+		: never
+}[keyof T['types'][K]]
+
+type TargetShape<T extends WabeTypes, K extends keyof T['types'], P extends keyof T['types'][K]> =
+	NonNullable<T['types'][K][P]> extends Array<infer Item> ? Item : NonNullable<T['types'][K][P]>
+
+export type FetchPointerOrRelationOptions<
+	T extends WabeTypes,
+	K extends keyof T['types'],
+	P extends keyof T['types'][K],
+> = {
+	select?: Partial<Record<keyof TargetShape<T, K, P>, boolean>>
+}
 
 export class HookObject<T extends WabeTypes, K extends keyof WabeTypes['types']> {
 	public className: K
@@ -111,16 +139,71 @@ export class HookObject<T extends WabeTypes, K extends keyof WabeTypes['types']>
 		return this.newData || ({} as any)
 	}
 
-	fetch(): Promise<OutputType<T, K, keyof T['types'][K]>> {
+	async fetchPointerOrRelation<P extends PointerOrRelationFields<T, K>>(
+		field: P,
+		options?: FetchPointerOrRelationOptions<T, K, P>,
+	): Promise<T['types'][K][P] | null> {
+		const fieldName = String(field)
+
+		if (isUnsafeObjectKey(fieldName))
+			throw new Error(`Cannot fetch unsafe field key "${fieldName}"`)
+
+		const schema = this.context?.wabe?.config?.schema
+		const currentClass = schema?.classes?.find(
+			(schemaClass) => schemaClass.name.toLowerCase() === String(this.className).toLowerCase(),
+		)
+		const schemaField = currentClass?.fields?.[fieldName]
+
+		if (
+			!schemaField ||
+			!('type' in schemaField) ||
+			(schemaField.type !== 'Pointer' && schemaField.type !== 'Relation') ||
+			!('class' in schemaField) ||
+			!schemaField.class
+		)
+			throw new Error(`Field "${fieldName}" is not a Pointer or Relation`)
+
+		if (!this.object) return null
+
 		const databaseController = this.context.wabe.controllers.database
+		const targetClassName = schemaField.class as keyof T['types']
+		const rootContext = contextWithRoot(this.context)
+		const select = options?.select as Select | undefined
+		const rawValue = (this.object as Record<string, any>)[fieldName]
 
-		if (!this.object?.id) return Promise.resolve(null)
+		let resolved: unknown
 
-		return databaseController.getObject({
-			className: this.className,
-			id: this.object.id,
-			context: contextWithRoot(this.context),
-		})
+		if (schemaField.type === 'Pointer') {
+			const pointerId = extractPointerId(rawValue)
+
+			resolved = pointerId
+				? await databaseController.getObject({
+						className: targetClassName,
+						id: pointerId,
+						context: rootContext,
+						select: select as any,
+					})
+				: null
+		} else {
+			const relationIds = extractRelationIds(rawValue)
+
+			resolved =
+				relationIds.length === 0
+					? []
+					: await databaseController.getObjects({
+							className: targetClassName,
+							where: { id: { in: relationIds } } as any,
+							context: rootContext,
+							select: select as any,
+						})
+		}
+
+		const value = (resolved ?? null) as T['types'][K][P] | null
+
+		// @ts-expect-error
+		this.object[fieldName] = value
+
+		return value
 	}
 
 	async addACL(type: 'users' | 'roles', options: AddACLOpptions) {
