@@ -1082,6 +1082,24 @@ describe('File upload', () => {
 		expect(test3s.edges[0].node.file.url).toEqual('https://palixir.github.io/wabe//assets/logo.png')
 	})
 
+	it('should serve a nested file path from the bucket route', async () => {
+		const adapter = wabe.config.file?.adapter as FileDevAdapter
+
+		const fileName = 'nested-bucket/sub-dir/version-1.ir.json'
+		const fileContent = JSON.stringify({ ok: true, version: 1 })
+
+		await adapter.uploadFile(new File([fileContent], fileName, { type: 'application/json' }))
+
+		const url = await adapter.readFile(fileName, { port })
+		expect(url).toEqual(`http://127.0.0.1:${port}/bucket/${fileName}`)
+
+		const res = await fetch(url as string)
+		expect(res.status).toBe(200)
+		expect(await res.text()).toEqual(fileContent)
+
+		await adapter.deleteFile(fileName)
+	})
+
 	it('should upload a file and access to it with the local url provided by upload directory', async () => {
 		await wabe.controllers.database.createObject({
 			// @ts-expect-error
