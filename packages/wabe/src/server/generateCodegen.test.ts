@@ -66,30 +66,20 @@ describe('Format helpers', () => {
 	})
 
 	describe('getFileOutputTypeString', () => {
-		it('should use comma separator by default', () => {
+		it('should use semicolon separators for inline object members', () => {
 			expect(getFileOutputTypeString()).toBe(
-				'{ name: string, url?: string, urlGeneratedAt?: string, isPresignedUrl: boolean }',
-			)
-		})
-
-		it('should use semicolon separator when semi is true', () => {
-			expect(getFileOutputTypeString({ semi: true })).toBe(
 				'{ name: string; url?: string; urlGeneratedAt?: string; isPresignedUrl: boolean }',
 			)
+			expect(getFileOutputTypeString({ semi: true })).toBe(getFileOutputTypeString())
 		})
 	})
 
 	describe('getFileInputTypeString', () => {
-		it('should return an XOR union (file | url+name) with comma separator by default', () => {
+		it('should return an XOR union (file | url+name) with semicolon separators', () => {
 			expect(getFileInputTypeString()).toBe(
-				'{ file: File, url?: never, name?: never } | { file?: never, url: string, name: string }',
-			)
-		})
-
-		it('should return an XOR union (file | url+name) with semicolon separator when semi is true', () => {
-			expect(getFileInputTypeString({ semi: true })).toBe(
 				'{ file: File; url?: never; name?: never } | { file?: never; url: string; name: string }',
 			)
+			expect(getFileInputTypeString({ semi: true })).toBe(getFileInputTypeString())
 		})
 	})
 
@@ -131,11 +121,11 @@ describe('wabeTypesToTypescriptTypes', () => {
 
 	it('should return File output type object by default', () => {
 		expect(wabeTypesToTypescriptTypes({ field: mkField({ type: 'File' }) })).toBe(
-			'{ name: string, url?: string, urlGeneratedAt?: string, isPresignedUrl: boolean }',
+			'{ name: string; url?: string; urlGeneratedAt?: string; isPresignedUrl: boolean }',
 		)
 	})
 
-	it('should return File output type with semi format', () => {
+	it('should return File output type with same inline separators when semi is set on formatOptions', () => {
 		expect(
 			wabeTypesToTypescriptTypes({
 				field: mkField({ type: 'File' }),
@@ -151,11 +141,11 @@ describe('wabeTypesToTypescriptTypes', () => {
 				isInput: true,
 			}),
 		).toBe(
-			'{ file: File, url?: never, name?: never } | { file?: never, url: string, name: string }',
+			'{ file: File; url?: never; name?: never } | { file?: never; url: string; name: string }',
 		)
 	})
 
-	it('should return File input type with semi format when isInput', () => {
+	it('should return File input type with same inline separators when isInput and semi formatOptions', () => {
 		expect(
 			wabeTypesToTypescriptTypes({
 				field: mkField({ type: 'File' }),
@@ -199,7 +189,7 @@ describe('wabeTypesToTypescriptTypes', () => {
 				field: mkField({ type: 'Array', typeValue: 'File' }),
 			}),
 		).toBe(
-			'Array<{ name: string, url?: string, urlGeneratedAt?: string, isPresignedUrl: boolean }>',
+			'Array<{ name: string; url?: string; urlGeneratedAt?: string; isPresignedUrl: boolean }>',
 		)
 	})
 
@@ -210,7 +200,7 @@ describe('wabeTypesToTypescriptTypes', () => {
 				isInput: true,
 			}),
 		).toBe(
-			'Array<{ file: File, url?: never, name?: never } | { file?: never, url: string, name: string }>',
+			'Array<{ file: File; url?: never; name?: never } | { file?: never; url: string; name: string }>',
 		)
 	})
 
