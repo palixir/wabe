@@ -46,15 +46,13 @@ export const getEndChar = (options?: CodegenFormatOptions): string =>
 export const getQuoteChar = (options?: CodegenFormatOptions): string =>
 	options?.quote === 'double' ? '"' : "'"
 
-export const getFileOutputTypeString = (options?: CodegenFormatOptions) => {
-	const sep = options?.semi ? '; ' : ', '
-	return `{ name: string${sep}url?: string${sep}urlGeneratedAt?: string${sep}isPresignedUrl: boolean }`
-}
+const inlineObjectTypeMemberSep = '; '
 
-export const getFileInputTypeString = (options?: CodegenFormatOptions) => {
-	const sep = options?.semi ? '; ' : ', '
-	return `{ file: File${sep}url?: never${sep}name?: never } | { file?: never${sep}url: string${sep}name: string }`
-}
+export const getFileOutputTypeString = (_options?: CodegenFormatOptions) =>
+	`{ name: string${inlineObjectTypeMemberSep}url?: string${inlineObjectTypeMemberSep}urlGeneratedAt?: string${inlineObjectTypeMemberSep}isPresignedUrl: boolean }`
+
+export const getFileInputTypeString = (_options?: CodegenFormatOptions) =>
+	`{ file: File${inlineObjectTypeMemberSep}url?: never${inlineObjectTypeMemberSep}name?: never } | { file?: never${inlineObjectTypeMemberSep}url: string${inlineObjectTypeMemberSep}name: string }`
 
 export const getFileTypeString = (options?: CodegenFormatOptions, isInput = false) =>
 	isInput ? getFileInputTypeString(options) : getFileOutputTypeString(options)
