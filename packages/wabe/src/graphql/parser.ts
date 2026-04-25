@@ -626,7 +626,8 @@ export const GraphqlParser: GraphqlParserConstructor =
 
 						if (
 							graphqlObjectType === 'CreateFieldsInput' ||
-							graphqlObjectType === 'UpdateFieldsInput'
+							graphqlObjectType === 'UpdateFieldsInput' ||
+							graphqlObjectType === 'InputObject'
 						) {
 							acc[key] = {
 								type: currentField.required

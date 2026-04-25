@@ -1,6 +1,7 @@
 import { v4 as uuid } from 'uuid'
 import type { RateLimitOptions } from 'wobe'
 import { type ClassInterface, EmailDevAdapter, FileDevAdapter } from '..'
+import type { TypeResolver } from '../schema/Schema'
 import { Wabe } from '../server'
 import type { DevWabeTypes } from './helper'
 import getPort from 'get-port'
@@ -26,6 +27,7 @@ export const setupTests = async (
 		rateLimit?: RateLimitOptions
 		maxWhereRecursionDepth?: number
 		security?: { maxWhereRecursionDepth?: number }
+		resolvers?: TypeResolver<DevWabeTypes>
 	} = {},
 ) => {
 	const maxWhereRecursionDepth =
@@ -122,6 +124,7 @@ export const setupTests = async (
 					description: 'Test scalar',
 				},
 			],
+			...(options.resolvers && { resolvers: options.resolvers }),
 		},
 	})
 

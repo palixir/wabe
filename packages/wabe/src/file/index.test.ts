@@ -14,28 +14,52 @@ describe('File upload', () => {
 	const mockBeforeUpload = mock()
 
 	beforeAll(async () => {
-		const setup = await setupTests([
-			{
-				name: 'Test3',
-				fields: {
-					file: { type: 'File' },
+		const setup = await setupTests(
+			[
+				{
+					name: 'Test3',
+					fields: {
+						file: { type: 'File' },
+					},
+					permissions: {
+						read: {
+							requireAuthentication: false,
+						},
+						create: {
+							requireAuthentication: false,
+						},
+						update: {
+							requireAuthentication: false,
+						},
+						delete: {
+							requireAuthentication: false,
+						},
+					},
 				},
-				permissions: {
-					read: {
-						requireAuthentication: false,
-					},
-					create: {
-						requireAuthentication: false,
-					},
-					update: {
-						requireAuthentication: false,
-					},
-					delete: {
-						requireAuthentication: false,
+			],
+			{
+				resolvers: {
+					mutations: {
+						uploadFileCustom: {
+							required: true,
+							type: 'String',
+							args: {
+								input: {
+									attachment: { type: 'File', required: true },
+								},
+							},
+							resolve: async (
+								_parent: unknown,
+								args: { input: { attachment: { file: File } } },
+							) => {
+								const file = args.input.attachment.file
+								return `${file.name}|${await file.text()}`
+							},
+						},
 					},
 				},
 			},
-		])
+		)
 		wabe = setup.wabe
 		port = setup.port
 
@@ -299,6 +323,37 @@ describe('File upload', () => {
 		const fileArg2 = spyFileDevAdapterUploadFile.mock.calls[1]?.[0]
 		expect(fileArg2?.name).toEqual('b.text')
 		expect(await fileArg2?.text()).toEqual('b')
+	})
+
+	it('should accept multipart file upload on a custom mutation File input field', async () => {
+		const formData = new FormData()
+
+		formData.append(
+			'operations',
+			JSON.stringify({
+				query:
+					'mutation ($file: File!) { uploadFileCustom(input: { attachment: { file: $file } }) }',
+				variables: { file: null },
+			}),
+		)
+
+		formData.append('map', JSON.stringify({ 0: ['variables.file'] }))
+		formData.append(
+			'0',
+			new File(['custom-mutation-payload'], 'custom-doc.txt', { type: 'text/plain' }),
+		)
+
+		const res = await fetch(`http://127.0.0.1:${port}/graphql`, {
+			method: 'POST',
+			body: formData,
+		})
+
+		const jsonRes = await res.json()
+
+		expect(jsonRes.errors).toBeUndefined()
+		expect(jsonRes.data.uploadFileCustom).toEqual('custom-doc.txt|custom-mutation-payload')
+
+		expect(spyFileDevAdapterUploadFile).not.toHaveBeenCalled()
 	})
 
 	it('should upload a file on request on type File on create request', async () => {
