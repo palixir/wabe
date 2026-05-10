@@ -961,6 +961,74 @@ describe('Security tests', () => {
 		await closeTests(wabe)
 	})
 
+	it('should enforce CLP on updateObject when _skipHooks is true', async () => {
+		const setup = await setupTests([
+			{
+				name: 'SkipHooksClpTest',
+				fields: {
+					name: { type: 'String' },
+				},
+				permissions: {
+					create: {
+						authorizedRoles: ['Client'],
+						requireAuthentication: true,
+					},
+					read: {
+						authorizedRoles: ['Client'],
+						requireAuthentication: true,
+					},
+					update: {
+						authorizedRoles: ['Admin'],
+						requireAuthentication: true,
+					},
+				},
+			},
+		])
+
+		const wabe = setup.wabe
+		const port = setup.port
+		const rootContext = { wabe, isRoot: true } as any
+		const anonymousClient = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
+
+		const { userId } = await createUserAndUpdateRole({
+			anonymousClient,
+			port,
+			roleName: 'Client',
+			rootClient,
+		})
+
+		const created = await wabe.controllers.database.createObject({
+			className: 'SkipHooksClpTest' as any,
+			context: rootContext,
+			data: { name: 'private-object' },
+			select: { id: true },
+		})
+
+		const userContext = {
+			wabe,
+			isRoot: false,
+			sessionId: 'session-id',
+			user: {
+				id: userId,
+				role: { name: 'Client' },
+			},
+		} as any
+
+		await expect(
+			wabe.controllers.database.updateObject({
+				className: 'SkipHooksClpTest' as any,
+				context: userContext,
+				id: created?.id || '',
+				data: { name: 'updated-name' },
+				select: { id: true },
+				_skipHooks: true,
+			}),
+		).rejects.toThrow('Permission denied to update class SkipHooksClpTest')
+
+		await closeTests(wabe)
+	})
+
 	it('should block GraphQL introspection queries for anonymous and authenticated users when disableIntrospection is true', async () => {
 		const setup = await setupTests([], {
 			isProduction: true,
@@ -2675,6 +2743,79 @@ describe('Security tests', () => {
 		await closeTests(wabe)
 	})
 
+	it('should allow cross-user updates when ACL is null and CLP update allows the role', async () => {
+		const setup = await setupTests([
+			{
+				name: 'TestAclNull',
+				fields: {
+					name: { type: 'String' },
+				},
+				permissions: {
+					create: {
+						requireAuthentication: true,
+						authorizedRoles: ['Client'],
+					},
+					read: {
+						requireAuthentication: true,
+						authorizedRoles: ['Client', 'Client2'],
+					},
+					update: {
+						requireAuthentication: true,
+						authorizedRoles: ['Client', 'Client2'],
+					},
+				},
+			},
+		])
+
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
+
+		const { userClient } = await createUserAndUpdateRole({
+			anonymousClient: client,
+			port,
+			roleName: 'Client',
+			rootClient,
+		})
+
+		const { userClient: userClient2 } = await createUserAndUpdateRole({
+			anonymousClient: client,
+			port,
+			roleName: 'Client2',
+			rootClient,
+			email: 'acl-null-updater@test.fr',
+		})
+
+		const created = await userClient.request<any>(gql`
+			mutation createTestAclNull {
+				createTestAclNull(input: { fields: { name: "owner-value" } }) {
+					testAclNull {
+						id
+					}
+				}
+			}
+		`)
+
+		const createdId = created.createTestAclNull.testAclNull.id
+
+		const updated = await userClient2.request<any>(gql`
+			mutation updateTestAclNull {
+				updateTestAclNull(input: { id: "${createdId}", fields: { name: "updated-by-other-user" } }) {
+					testAclNull {
+						id
+						name
+					}
+				}
+			}
+		`)
+
+		expect(updated.updateTestAclNull.testAclNull.id).toEqual(createdId)
+		expect(updated.updateTestAclNull.testAclNull.name).toEqual('updated-by-other-user')
+
+		await closeTests(wabe)
+	})
+
 	it('should authorize user to access to created object with self acl but not an other user', async () => {
 		const setup = await setupTests([
 			{
@@ -3759,6 +3900,257 @@ describe('Security tests', () => {
 		await closeTests(wabe)
 	})
 
+	it('should only update writable objects in bulk update when ACL is mixed', async () => {
+		const setup = await setupTests([
+			{
+				name: 'MixedAclBulkUpdate',
+				fields: {
+					name: { type: 'String' },
+				},
+				permissions: {
+					create: {
+						requireAuthentication: true,
+						authorizedRoles: ['Client'],
+					},
+					read: {
+						requireAuthentication: true,
+						authorizedRoles: ['Client'],
+					},
+					update: {
+						requireAuthentication: true,
+						authorizedRoles: ['Client'],
+					},
+					delete: {
+						requireAuthentication: true,
+						authorizedRoles: ['Client'],
+					},
+				},
+			},
+		])
+
+		const wabe = setup.wabe
+		const port = setup.port
+		const rootContext = { wabe, isRoot: true } as any
+		const anonymousClient = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
+
+		const { userId } = await createUserAndUpdateRole({
+			anonymousClient,
+			port,
+			roleName: 'Client',
+			rootClient,
+			email: 'mixed-acl-update@test.fr',
+		})
+
+		const writable = await wabe.controllers.database.createObject({
+			className: 'MixedAclBulkUpdate' as any,
+			context: rootContext,
+			data: { name: 'writable' },
+			select: { id: true, name: true },
+		})
+
+		const readOnly = await wabe.controllers.database.createObject({
+			className: 'MixedAclBulkUpdate' as any,
+			context: rootContext,
+			data: { name: 'readonly' },
+			select: { id: true, name: true },
+		})
+
+		await wabe.controllers.database.updateObject({
+			className: 'MixedAclBulkUpdate' as any,
+			context: rootContext,
+			id: writable?.id || '',
+			data: {
+				acl: {
+					users: [{ userId, read: true, write: true }],
+					roles: [],
+				},
+			},
+			select: {},
+		})
+
+		await wabe.controllers.database.updateObject({
+			className: 'MixedAclBulkUpdate' as any,
+			context: rootContext,
+			id: readOnly?.id || '',
+			data: {
+				acl: {
+					users: [{ userId, read: true, write: false }],
+					roles: [],
+				},
+			},
+			select: {},
+		})
+
+		const userContext = {
+			wabe,
+			isRoot: false,
+			sessionId: 'session-id',
+			user: {
+				id: userId,
+				role: { id: 'role-id', name: 'Client' },
+			},
+		} as any
+
+		const updatedObjects = await wabe.controllers.database.updateObjects({
+			className: 'MixedAclBulkUpdate' as any,
+			context: userContext,
+			where: {
+				id: {
+					in: [writable?.id, readOnly?.id].filter(Boolean),
+				},
+			} as any,
+			data: { name: 'updated' },
+			select: { id: true, name: true },
+		})
+
+		expect(updatedObjects).toHaveLength(1)
+		expect(updatedObjects[0]?.id).toEqual(writable?.id)
+		expect(updatedObjects[0]?.name).toEqual('updated')
+
+		const allObjects = await wabe.controllers.database.getObjects({
+			className: 'MixedAclBulkUpdate' as any,
+			context: rootContext,
+			where: {
+				id: {
+					in: [writable?.id, readOnly?.id].filter(Boolean),
+				},
+			} as any,
+			select: { id: true, name: true },
+		})
+
+		const writableAfterUpdate = allObjects.find((object) => object?.id === writable?.id)
+		const readOnlyAfterUpdate = allObjects.find((object) => object?.id === readOnly?.id)
+
+		expect(writableAfterUpdate?.name).toEqual('updated')
+		expect(readOnlyAfterUpdate?.name).toEqual('readonly')
+
+		await closeTests(wabe)
+	})
+
+	it('should only return writable objects in bulk delete response when ACL is mixed', async () => {
+		const setup = await setupTests([
+			{
+				name: 'MixedAclBulkDelete',
+				fields: {
+					name: { type: 'String' },
+				},
+				permissions: {
+					create: {
+						requireAuthentication: true,
+						authorizedRoles: ['Client'],
+					},
+					read: {
+						requireAuthentication: true,
+						authorizedRoles: ['Client'],
+					},
+					update: {
+						requireAuthentication: true,
+						authorizedRoles: ['Client'],
+					},
+					delete: {
+						requireAuthentication: true,
+						authorizedRoles: ['Client'],
+					},
+				},
+			},
+		])
+
+		const wabe = setup.wabe
+		const port = setup.port
+		const rootContext = { wabe, isRoot: true } as any
+		const anonymousClient = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
+
+		const { userId } = await createUserAndUpdateRole({
+			anonymousClient,
+			port,
+			roleName: 'Client',
+			rootClient,
+			email: 'mixed-acl-delete@test.fr',
+		})
+
+		const deletable = await wabe.controllers.database.createObject({
+			className: 'MixedAclBulkDelete' as any,
+			context: rootContext,
+			data: { name: 'deletable' },
+			select: { id: true, name: true },
+		})
+
+		const notDeletable = await wabe.controllers.database.createObject({
+			className: 'MixedAclBulkDelete' as any,
+			context: rootContext,
+			data: { name: 'not-deletable' },
+			select: { id: true, name: true },
+		})
+
+		await wabe.controllers.database.updateObject({
+			className: 'MixedAclBulkDelete' as any,
+			context: rootContext,
+			id: deletable?.id || '',
+			data: {
+				acl: {
+					users: [{ userId, read: true, write: true }],
+					roles: [],
+				},
+			},
+			select: {},
+		})
+
+		await wabe.controllers.database.updateObject({
+			className: 'MixedAclBulkDelete' as any,
+			context: rootContext,
+			id: notDeletable?.id || '',
+			data: {
+				acl: {
+					users: [{ userId, read: true, write: false }],
+					roles: [],
+				},
+			},
+			select: {},
+		})
+
+		const userContext = {
+			wabe,
+			isRoot: false,
+			sessionId: 'session-id',
+			user: {
+				id: userId,
+				role: { id: 'role-id', name: 'Client' },
+			},
+		} as any
+
+		const deletedObjects = await wabe.controllers.database.deleteObjects({
+			className: 'MixedAclBulkDelete' as any,
+			context: userContext,
+			where: {
+				id: {
+					in: [deletable?.id, notDeletable?.id].filter(Boolean),
+				},
+			} as any,
+			select: { id: true, name: true },
+		})
+
+		expect(deletedObjects).toHaveLength(1)
+		expect(deletedObjects[0]?.id).toEqual(deletable?.id)
+
+		const remainingObjects = await wabe.controllers.database.getObjects({
+			className: 'MixedAclBulkDelete' as any,
+			context: rootContext,
+			where: {
+				id: {
+					in: [deletable?.id, notDeletable?.id].filter(Boolean),
+				},
+			} as any,
+			select: { id: true, name: true },
+		})
+
+		expect(remainingObjects).toHaveLength(1)
+		expect(remainingObjects[0]?.id).toEqual(notDeletable?.id)
+
+		await closeTests(wabe)
+	})
+
 	it('should not authorized an user to read an object on another class with pointer when the user do not have ACL to read the other class', async () => {
 		const setup = await setupTests([
 			{
@@ -4227,6 +4619,115 @@ describe('Security tests', () => {
 			userClient.request<any>(gql`
 				mutation createTest {
 					createTest(input: { fields: { name: "test", relation: { add: ["${hiddenTargetId}"] } } }) {
+						test {
+							id
+						}
+					}
+				}
+			`),
+		).rejects.toThrow('Permission denied to read class Test2')
+
+		await closeTests(wabe)
+	})
+
+	it('should not allow linking unreadable pointer or relation targets during update', async () => {
+		const setup = await setupTests([
+			{
+				name: 'Test',
+				fields: {
+					name: { type: 'String' },
+					pointer: {
+						type: 'Pointer',
+						class: 'Test2',
+					},
+					relation: {
+						type: 'Relation',
+						class: 'Test2',
+					},
+				},
+				permissions: {
+					read: {
+						authorizedRoles: ['Client2'],
+						requireAuthentication: true,
+					},
+					create: {
+						authorizedRoles: ['Client2'],
+						requireAuthentication: true,
+					},
+					update: {
+						authorizedRoles: ['Client2'],
+						requireAuthentication: true,
+					},
+				},
+			},
+			{
+				name: 'Test2',
+				fields: {
+					name: { type: 'String' },
+				},
+				permissions: {
+					read: {
+						authorizedRoles: ['Client'],
+						requireAuthentication: true,
+					},
+					create: {
+						authorizedRoles: [],
+						requireAuthentication: true,
+					},
+				},
+			},
+		])
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
+
+		const { userClient } = await createUserAndUpdateRole({
+			anonymousClient: client,
+			port,
+			roleName: 'Client2',
+			rootClient,
+			email: 'update-link-user@test.fr',
+		})
+
+		const objectToUpdate = await userClient.request<any>(gql`
+			mutation createTest {
+				createTest(input: { fields: { name: "owner" } }) {
+					test {
+						id
+					}
+				}
+			}
+		`)
+		const testId = objectToUpdate.createTest.test.id
+
+		const hiddenTarget = await rootClient.request<any>(gql`
+			mutation createTest2 {
+				createTest2(input: { fields: { name: "hidden" } }) {
+					test2 {
+						id
+					}
+				}
+			}
+		`)
+		const hiddenTargetId = hiddenTarget.createTest2.test2.id
+
+		await expect(
+			userClient.request<any>(gql`
+				mutation updateTest {
+					updateTest(input: { id: "${testId}", fields: { pointer: { link: "${hiddenTargetId}" } } }) {
+						test {
+							id
+						}
+					}
+				}
+			`),
+		).rejects.toThrow('Permission denied to read class Test2')
+
+		await expect(
+			userClient.request<any>(gql`
+				mutation updateTest {
+					updateTest(input: { id: "${testId}", fields: { relation: { add: ["${hiddenTargetId}"] } } }) {
 						test {
 							id
 						}

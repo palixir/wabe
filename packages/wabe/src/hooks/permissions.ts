@@ -3,6 +3,8 @@ import type { WabeContext } from '../server/interface'
 import type { HookObject } from './HookObject'
 import { OperationType } from './index'
 
+type PermissionSubject = Pick<HookObject<any, any>, 'className' | 'context' | 'getUser'>
+
 const convertOperationTypeToPermission = (operationType: OperationType) => {
 	const template: Record<OperationType, PermissionsOperations> = {
 		[OperationType.BeforeCreate]: 'create',
@@ -36,7 +38,7 @@ export const _getPermissionPropertiesOfAClass = ({
 	return permission
 }
 
-export const _checkCLP = (object: HookObject<any, any>, operationType: OperationType) => {
+export const _checkCLP = (object: PermissionSubject, operationType: OperationType) => {
 	if (object.context.isRoot) return
 
 	const permissionOperation = convertOperationTypeToPermission(operationType)

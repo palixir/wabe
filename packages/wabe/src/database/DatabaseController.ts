@@ -1,6 +1,7 @@
 import { selectFieldsWithoutPrivateFields } from 'src/utils/helper'
 import type { WabeTypes } from '../..'
 import { initializeHook, OperationType } from '../hooks'
+import { _checkCLP } from '../hooks/permissions'
 import type { SchemaInterface } from '../schema'
 import type { WabeContext } from '../server/interface'
 import { isUnsafeObjectKey } from '../utils/objectKeys'
@@ -89,6 +90,27 @@ export class DatabaseController<T extends WabeTypes> {
 	_getFieldType(originClassName: string, fieldName: string, context: WabeContext<T>) {
 		const realClass = this._getClass(originClassName, context)
 		return realClass?.fields[fieldName] as { type: string; class?: string } | undefined
+	}
+
+	/**
+	 * _skipHooks is used by internal flows to avoid recursive hooks.
+	 * We still enforce CLP for update operations to avoid bypassing class permissions.
+	 */
+	_assertCLPOnSkipHooksUpdate({
+		className,
+		context,
+	}: {
+		className: keyof T['types']
+		context: WabeContext<T>
+	}) {
+		_checkCLP(
+			{
+				className: String(className),
+				context,
+				getUser: () => context.user,
+			},
+			OperationType.BeforeUpdate,
+		)
 	}
 
 	_normalizeMutationPayload({
@@ -1316,6 +1338,7 @@ export class DatabaseController<T extends WabeTypes> {
 		_skipHooks,
 	}: UpdateObjectOptions<T, K, U, W>): Promise<OutputType<T, K, W>> {
 		if (_skipHooks) {
+			this._assertCLPOnSkipHooksUpdate({ className, context })
 			const whereWithACLCondition = this._buildWhereWithACL({}, context, 'write')
 			const normalizedData = this._normalizeMutationPayload({
 				className,
@@ -1403,6 +1426,8 @@ export class DatabaseController<T extends WabeTypes> {
 			context,
 			payload: data,
 		})
+
+		if (_skipHooks) this._assertCLPOnSkipHooksUpdate({ className, context })
 
 		const hook = !_skipHooks
 			? initializeHook({
@@ -1547,7 +1572,7 @@ export class DatabaseController<T extends WabeTypes> {
 		if (select && Object.keys(select).length > 0)
 			objectsBeforeDelete = await this.getObjects({
 				className,
-				where,
+				where: whereWithACLCondition,
 				select,
 				context,
 				first,
