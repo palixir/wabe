@@ -9,9 +9,11 @@ import { getDatabaseAdapter } from '../src/utils/testHelper'
 import { Wabe } from '../src/server'
 import { FileDevAdapter } from '../src'
 import { runDatabase } from 'wabe-mongodb-launcher'
+import { resolve } from 'node:path'
 
 const run = async () => {
 	await runDatabase()
+	const codegenPath = `${import.meta.dirname}/../generated/`
 
 	const wabe = new Wabe<{
 		types: WabeSchemaTypes
@@ -22,7 +24,16 @@ const run = async () => {
 		isProduction: false,
 		codegen: {
 			enabled: true,
-			path: `${import.meta.dirname}/../generated/`,
+			path: codegenPath,
+		},
+		onGenerateCodegen: async ({ path }) => {
+			const process = Bun.spawn(['bunx', 'oxfmt', '--write', resolve(path)], {
+				stdout: 'inherit',
+				stderr: 'inherit',
+			})
+
+			const exitCode = await process.exited
+			if (exitCode !== 0) throw new Error(`oxfmt failed with exit code ${exitCode}`)
 		},
 		rootKey: 'dev',
 		authentication: {

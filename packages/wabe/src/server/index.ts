@@ -6,7 +6,6 @@ import { GraphQLSchema as WabeGraphQLSchema } from '../graphql'
 import type { AuthenticationConfig } from '../authentication/interface'
 import { type WabeRoute, defaultRoutes } from './routes'
 import { type Hook, getDefaultHooks } from '../hooks'
-import { CodegenFormatOptions, generateCodegen } from './generateCodegen'
 import { defaultAuthenticationMethods } from '../authentication/defaultAuthentication'
 import { Wobe, cors, rateLimit } from 'wobe'
 import type { Context, CorsOptions, RateLimitOptions } from 'wobe'
@@ -40,6 +39,14 @@ export * from './routes'
 
 export const defaultRoles = ['DashboardAdmin']
 
+export type GenerateCodegenContext<T extends WabeTypes> = {
+	path: string
+	schema: SchemaInterface<T>
+	graphqlSchema: GraphQLSchema
+	isProduction: boolean
+	nodeEnv: string | undefined
+}
+
 export interface WabeConfig<T extends WabeTypes> {
 	port: number
 	isProduction: boolean
@@ -52,9 +59,9 @@ export interface WabeConfig<T extends WabeTypes> {
 		| {
 				enabled: true
 				path: string
-				formatOptions?: CodegenFormatOptions
 		  }
 		| { enabled?: false }
+	onGenerateCodegen?: (context: GenerateCodegenContext<T>) => Promise<void> | void
 	authentication?: AuthenticationConfig<T>
 	routes?: WabeRoute[]
 	rootKey: string
@@ -97,6 +104,7 @@ export class Wabe<T extends WabeTypes> {
 		authentication,
 		rootKey,
 		codegen,
+		onGenerateCodegen,
 		hooks,
 		file,
 		email,
@@ -111,6 +119,7 @@ export class Wabe<T extends WabeTypes> {
 			schema,
 			database,
 			codegen,
+			onGenerateCodegen,
 			authentication,
 			rootKey,
 			hooks,
@@ -255,11 +264,12 @@ export class Wabe<T extends WabeTypes> {
 			this.config.codegen.enabled &&
 			this.config.codegen.path.length > 0
 		) {
-			await generateCodegen({
+			await this.config.onGenerateCodegen?.({
 				path: this.config.codegen.path,
 				schema: wabeSchema.schema,
 				graphqlSchema: this.config.graphqlSchema,
-				options: this.config.codegen.formatOptions,
+				isProduction: this.config.isProduction,
+				nodeEnv: process.env.NODE_ENV,
 			})
 
 			// If we just want codegen we exit before server created.
@@ -354,5 +364,3 @@ export class Wabe<T extends WabeTypes> {
 		await this.server.stop()
 	}
 }
-
-export { generateCodegen }
