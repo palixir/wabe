@@ -1,5 +1,6 @@
 import { OAuth2Client } from '.'
 import type { WabeConfig } from '../../server'
+import type { OAuthUserInfo } from './Oauth2Client'
 import type { OAuth2ProviderWithPKCE, Tokens } from './utils'
 
 const authorizeEndpoint = 'https://github.com/login/oauth/authorize'
@@ -15,6 +16,18 @@ interface AuthorizationCodeResponseBody {
 interface RefreshTokenResponseBody {
 	access_token: string
 	expires_in: number
+}
+
+interface GitHubUser {
+	id?: number
+	login?: string
+	avatar_url?: string
+}
+
+interface GitHubUserEmail {
+	email?: string
+	primary?: boolean
+	verified?: boolean
 }
 
 export class GitHub implements OAuth2ProviderWithPKCE {
@@ -89,7 +102,7 @@ export class GitHub implements OAuth2ProviderWithPKCE {
 		}
 	}
 
-	async getUserInfo(accessToken: string) {
+	async getUserInfo(accessToken: string): Promise<OAuthUserInfo> {
 		const userInfoResponse = await fetch('https://api.github.com/user', {
 			headers: {
 				Authorization: `Bearer ${accessToken}`,
@@ -107,15 +120,29 @@ export class GitHub implements OAuth2ProviderWithPKCE {
 		if (!userInfoResponse.ok || !userEmailResponse.ok)
 			throw new Error('Failed to fetch user information from GitHub')
 
-		const userInfo = await userInfoResponse.json()
-		const userEmails = await userEmailResponse.json()
+		const userInfo = (await userInfoResponse.json()) as GitHubUser
+		const userEmails = (await userEmailResponse.json()) as GitHubUserEmail[]
 
-		const primaryEmail = userEmails.find((email: any) => email.primary)?.email
+		const preferredEmail =
+			userEmails.find((email) => email.primary && email.verified)?.email ||
+			userEmails.find((email) => email.verified)?.email ||
+			userEmails.find((email) => email.primary)?.email ||
+			null
+
+		const preferredLower = preferredEmail?.toLowerCase() ?? null
+		const verifiedEmail = Boolean(
+			preferredLower &&
+			userEmails.some(
+				(entry) => entry.email?.toLowerCase() === preferredLower && entry.verified === true,
+			),
+		)
 
 		return {
-			email: primaryEmail || null,
-			username: userInfo.login,
-			avatarUrl: userInfo.avatar_url,
+			providerUserId: userInfo.id ? String(userInfo.id) : null,
+			email: preferredLower,
+			username: userInfo.login || null,
+			avatarUrl: userInfo.avatar_url || null,
+			verifiedEmail,
 		}
 	}
 }

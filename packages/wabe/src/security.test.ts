@@ -4912,6 +4912,91 @@ describe('Security tests', () => {
 		await closeTests(wabe)
 	})
 
+	it('should not allow refresh token replay after token rotation', async () => {
+		const setup = await setupTests()
+		const wabe = setup.wabe
+		const port = setup.port
+		const anonymousClient = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
+
+		const { userClient, accessToken, refreshToken } = await createUserAndUpdateRole({
+			anonymousClient,
+			port,
+			roleName: 'Client',
+			rootClient,
+		})
+
+		const refreshedTokens = await userClient.request<any>(graphql.refresh, {
+			input: {
+				accessToken,
+				refreshToken,
+			},
+		})
+
+		expect(refreshedTokens.refresh.accessToken).toEqual(expect.any(String))
+		expect(refreshedTokens.refresh.refreshToken).toEqual(expect.any(String))
+
+		await expect(
+			userClient.request<any>(graphql.refresh, {
+				input: {
+					accessToken,
+					refreshToken,
+				},
+			}),
+		).rejects.toThrow('Invalid refresh token')
+
+		await closeTests(wabe)
+	})
+
+	it('should invalidate one of two concurrent refresh attempts using the same token pair', async () => {
+		const setup = await setupTests()
+		const wabe = setup.wabe
+		const port = setup.port
+		const anonymousClient = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
+
+		const { userClient, accessToken, refreshToken } = await createUserAndUpdateRole({
+			anonymousClient,
+			port,
+			roleName: 'Client',
+			rootClient,
+		})
+
+		const settledResults = await Promise.allSettled([
+			userClient.request<any>(graphql.refresh, {
+				input: {
+					accessToken,
+					refreshToken,
+				},
+			}),
+			userClient.request<any>(graphql.refresh, {
+				input: {
+					accessToken,
+					refreshToken,
+				},
+			}),
+		])
+
+		const successfulRefreshes = settledResults.filter(
+			(result): result is PromiseFulfilledResult<any> =>
+				result.status === 'fulfilled' &&
+				!!result.value?.refresh?.accessToken &&
+				!!result.value?.refresh?.refreshToken,
+		)
+		const deniedRefreshes = settledResults.filter(
+			(result) =>
+				result.status === 'rejected' ||
+				(result.status === 'fulfilled' &&
+					result.value?.refresh?.accessToken === null &&
+					result.value?.refresh?.refreshToken === null),
+		)
+
+		expect(successfulRefreshes).toHaveLength(1)
+		expect(deniedRefreshes).toHaveLength(1)
+
+		await closeTests(wabe)
+	})
+
 	it('should not authorize to access to protected resource if the user is not connected', async () => {
 		const setup = await setupTests([
 			{

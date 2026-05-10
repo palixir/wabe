@@ -46,6 +46,25 @@ const getJwtVerifyOptions = <T extends WabeTypes>(context: WabeContext<T>) => {
 export class Session<T extends WabeTypes> {
 	private accessToken: string | undefined = undefined
 	private refreshToken: string | undefined = undefined
+	private static refreshLocks = new Map<string, Promise<void>>()
+
+	private async acquireRefreshLock(lockKey: string) {
+		while (Session.refreshLocks.has(lockKey)) {
+			const existingLock = Session.refreshLocks.get(lockKey)
+			if (existingLock) await existingLock
+		}
+
+		let release = () => {}
+		const lockPromise = new Promise<void>((resolve) => {
+			release = resolve
+		})
+		Session.refreshLocks.set(lockKey, lockPromise)
+
+		return () => {
+			release()
+			if (Session.refreshLocks.get(lockKey) === lockPromise) Session.refreshLocks.delete(lockKey)
+		}
+	}
 
 	getAccessTokenExpireAt(config: WabeConfig<T>) {
 		const customExpiresInMs = config?.authentication?.session?.accessTokenExpiresInMs
@@ -371,138 +390,165 @@ export class Session<T extends WabeTypes> {
 			refreshToken,
 			getTokenEncryptionKey(context),
 		)
+		const releaseRefreshLock = await this.acquireRefreshLock(
+			`${accessTokenEncrypted}:${incomingRefreshTokenEncrypted}`,
+		)
 
-		const session = await context.wabe.controllers.database.getObjects({
-			className: '_Session',
-			// @ts-expect-error
-			where: {
-				accessTokenEncrypted: { equalTo: accessTokenEncrypted },
-				refreshTokenEncrypted: {
-					equalTo: incomingRefreshTokenEncrypted,
-				},
-			},
-			select: {
+		try {
+			const session = await context.wabe.controllers.database.getObjects({
+				className: '_Session',
 				// @ts-expect-error
-				id: true,
-				// @ts-expect-error
-				user: {
-					id: true,
-					role: {
-						id: true,
-						name: true,
+				where: {
+					accessTokenEncrypted: { equalTo: accessTokenEncrypted },
+					refreshTokenEncrypted: {
+						equalTo: incomingRefreshTokenEncrypted,
 					},
 				},
-				// @ts-expect-error
-				refreshTokenEncrypted: true,
-				// @ts-expect-error
-				refreshTokenExpiresAt: true,
-			},
-			context: contextWithRoot(context),
-		})
+				select: {
+					// @ts-expect-error
+					id: true,
+					// @ts-expect-error
+					user: {
+						id: true,
+						role: {
+							id: true,
+							name: true,
+						},
+					},
+					// @ts-expect-error
+					refreshTokenEncrypted: true,
+					// @ts-expect-error
+					refreshTokenExpiresAt: true,
+				},
+				context: contextWithRoot(context),
+			})
 
-		if (!session.length)
-			return {
-				accessToken: null,
-				refreshToken: null,
+			if (!session.length)
+				return {
+					accessToken: null,
+					refreshToken: null,
+				}
+
+			if (!session[0]) throw new Error('Session not found')
+
+			const {
+				refreshTokenExpiresAt,
+				user,
+				refreshTokenEncrypted: storedRefreshTokenEncrypted,
+				id,
+			} = session[0]
+
+			if (new Date(refreshTokenExpiresAt) < new Date(Date.now()))
+				throw new Error('Refresh token expired')
+
+			const decryptedRefreshToken =
+				decryptDeterministicToken(storedRefreshTokenEncrypted, getTokenEncryptionKey(context)) ||
+				refreshToken
+
+			if (!decryptedRefreshToken || decryptedRefreshToken !== refreshToken)
+				throw new Error('Invalid refresh token')
+
+			// Always rotate tokens on refresh
+			const userId = user?.id
+
+			if (!userId)
+				return {
+					accessToken: null,
+					refreshToken: null,
+				}
+
+			const jwtTokenFields = context.wabe.config.authentication?.session?.jwtTokenFields
+
+			const result = jwtTokenFields
+				? await context.wabe.controllers.database.getObject({
+						className: 'User',
+						select: jwtTokenFields,
+						context,
+						id: userId,
+					})
+				: undefined
+
+			const nowSeconds = Math.floor(Date.now() / 1000)
+
+			const signOptions: SignOptions = {
+				jwtid: crypto.randomUUID(),
+				algorithm: JWT_ALGORITHM,
 			}
+			const audience = context.wabe.config.authentication?.session?.jwtAudience
+			const issuer = context.wabe.config.authentication?.session?.jwtIssuer
+			if (audience) signOptions.audience = audience
+			if (issuer) signOptions.issuer = issuer
 
-		if (!session[0]) throw new Error('Session not found')
+			const newAccessToken = jwt.sign(
+				{
+					userId,
+					user: result,
+					iat: nowSeconds,
+					exp: Math.floor(this.getAccessTokenExpireAt(context.wabe.config).getTime() / 1000),
+				},
+				secretKey,
+				{ ...signOptions, algorithm: JWT_ALGORITHM },
+			)
 
-		const {
-			refreshTokenExpiresAt,
-			user,
-			refreshTokenEncrypted: storedRefreshTokenEncrypted,
-			id,
-		} = session[0]
+			const newRefreshToken = jwt.sign(
+				{
+					userId,
+					user: result,
+					iat: nowSeconds,
+					exp: Math.floor(this.getRefreshTokenExpireAt(context.wabe.config).getTime() / 1000),
+				},
+				secretKey,
+				{ ...signOptions, algorithm: JWT_ALGORITHM },
+			)
 
-		if (new Date(refreshTokenExpiresAt) < new Date(Date.now()))
-			throw new Error('Refresh token expired')
+			const newAccessTokenEncrypted = encryptDeterministicToken(
+				newAccessToken,
+				getTokenEncryptionKey(context),
+			)
+			const newRefreshTokenEncrypted = encryptDeterministicToken(
+				newRefreshToken,
+				getTokenEncryptionKey(context),
+			)
 
-		const decryptedRefreshToken =
-			decryptDeterministicToken(storedRefreshTokenEncrypted, getTokenEncryptionKey(context)) ||
-			refreshToken
+			const updatedSessions = await context.wabe.controllers.database.updateObjects({
+				className: '_Session',
+				context: contextWithRoot(context),
+				// @ts-expect-error _Session where input is valid at runtime; WhereType is narrower than GraphQL filters.
+				where: {
+					id: {
+						equalTo: id,
+					},
+					accessTokenEncrypted: {
+						equalTo: accessTokenEncrypted,
+					},
+					refreshTokenEncrypted: {
+						equalTo: incomingRefreshTokenEncrypted,
+					},
+					refreshTokenExpiresAt: {
+						greaterThanOrEqualTo: new Date(),
+					},
+				},
+				data: {
+					accessTokenEncrypted: newAccessTokenEncrypted,
+					accessTokenExpiresAt: this.getAccessTokenExpireAt(context.wabe.config),
+					refreshTokenEncrypted: newRefreshTokenEncrypted,
+					refreshTokenExpiresAt: this.getRefreshTokenExpireAt(context.wabe.config),
+				} as any,
+				select: {
+					// @ts-expect-error
+					id: true,
+				},
+				first: 1,
+			})
 
-		if (!decryptedRefreshToken || decryptedRefreshToken !== refreshToken)
-			throw new Error('Invalid refresh token')
+			if (!updatedSessions.length) throw new Error('Invalid refresh token')
 
-		// Always rotate tokens on refresh
-		const userId = user?.id
-
-		if (!userId)
 			return {
-				accessToken: null,
-				refreshToken: null,
+				accessToken: newAccessToken,
+				refreshToken: newRefreshToken,
 			}
-
-		const jwtTokenFields = context.wabe.config.authentication?.session?.jwtTokenFields
-
-		const result = jwtTokenFields
-			? await context.wabe.controllers.database.getObject({
-					className: 'User',
-					select: jwtTokenFields,
-					context,
-					id: userId,
-				})
-			: undefined
-
-		const nowSeconds = Math.floor(Date.now() / 1000)
-
-		const signOptions: SignOptions = {
-			jwtid: crypto.randomUUID(),
-			algorithm: JWT_ALGORITHM,
-		}
-		const audience = context.wabe.config.authentication?.session?.jwtAudience
-		const issuer = context.wabe.config.authentication?.session?.jwtIssuer
-		if (audience) signOptions.audience = audience
-		if (issuer) signOptions.issuer = issuer
-
-		const newAccessToken = jwt.sign(
-			{
-				userId,
-				user: result,
-				iat: nowSeconds,
-				exp: Math.floor(this.getAccessTokenExpireAt(context.wabe.config).getTime() / 1000),
-			},
-			secretKey,
-			{ ...signOptions, algorithm: JWT_ALGORITHM },
-		)
-
-		const newRefreshToken = jwt.sign(
-			{
-				userId,
-				user: result,
-				iat: nowSeconds,
-				exp: Math.floor(this.getRefreshTokenExpireAt(context.wabe.config).getTime() / 1000),
-			},
-			secretKey,
-			{ ...signOptions, algorithm: JWT_ALGORITHM },
-		)
-
-		const newAccessTokenEncrypted = encryptDeterministicToken(
-			newAccessToken,
-			getTokenEncryptionKey(context),
-		)
-		const newRefreshTokenEncrypted = encryptDeterministicToken(
-			newRefreshToken,
-			getTokenEncryptionKey(context),
-		)
-
-		await context.wabe.controllers.database.updateObject({
-			className: '_Session',
-			context: contextWithRoot(context),
-			id,
-			data: {
-				accessTokenEncrypted: newAccessTokenEncrypted,
-				accessTokenExpiresAt: this.getAccessTokenExpireAt(context.wabe.config),
-				refreshTokenEncrypted: newRefreshTokenEncrypted,
-				refreshTokenExpiresAt: this.getRefreshTokenExpireAt(context.wabe.config),
-			} as any,
-			select: {},
-		})
-
-		return {
-			accessToken: newAccessToken,
-			refreshToken: newRefreshToken,
+		} finally {
+			releaseRefreshLock()
 		}
 	}
 

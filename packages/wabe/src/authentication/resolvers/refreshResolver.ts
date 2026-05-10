@@ -15,5 +15,7 @@ export const refreshResolver = async (_: any, args: any, context: WabeContext<De
 		context,
 	)
 
+	if (!newAccessToken || !newRefreshToken) throw new Error('Invalid refresh token')
+
 	return { accessToken: newAccessToken, refreshToken: newRefreshToken }
 }

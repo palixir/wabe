@@ -10,6 +10,14 @@ export interface TokenResponseBody {
 	scope?: string
 }
 
+export type OAuthUserInfo = {
+	providerUserId: string | null
+	email: string | null
+	verifiedEmail: boolean
+	username?: string | null
+	avatarUrl?: string | null
+}
+
 export class OAuth2Client {
 	public clientId: string
 
