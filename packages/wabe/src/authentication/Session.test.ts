@@ -20,6 +20,9 @@ describe('Session', () => {
 	const mockDeleteObject = mock(() => Promise.resolve()) as any
 	const mockUpdateObject = mock(() => Promise.resolve()) as any
 	const mockUpdateObjects = mock(() => Promise.resolve([{ id: 'sessionId' }])) as any
+	const mockLockMutex = mock(() => Promise.resolve(true)) as any
+	const mockUnlockMutex = mock(() => Promise.resolve(true)) as any
+	const mockGetMutexStatus = mock(() => Promise.resolve(false)) as any
 
 	const controllers = {
 		database: {
@@ -30,6 +33,11 @@ describe('Session', () => {
 			updateObject: mockUpdateObject,
 			updateObjects: mockUpdateObjects,
 		},
+		mutex: {
+			lockMutex: mockLockMutex,
+			unlockMutex: mockUnlockMutex,
+			getMutexStatus: mockGetMutexStatus,
+		},
 	}
 
 	beforeEach(() => {
@@ -39,6 +47,9 @@ describe('Session', () => {
 		mockDeleteObject.mockClear()
 		mockUpdateObject.mockClear()
 		mockUpdateObjects.mockClear()
+		mockLockMutex.mockClear()
+		mockUnlockMutex.mockClear()
+		mockGetMutexStatus.mockClear()
 	})
 
 	const context = {
@@ -519,6 +530,9 @@ describe('Session', () => {
 			first: 1,
 		})
 
+		expect(mockLockMutex).toHaveBeenCalledTimes(1)
+		expect(mockUnlockMutex).toHaveBeenCalledTimes(1)
+
 		const accessTokenExpiresAt = mockUpdateObjects.mock.calls[0][0].data
 			.accessTokenExpiresAt as Date
 
@@ -708,5 +722,8 @@ describe('Session', () => {
 		await expect(session.refresh(accessToken, refreshToken, context)).rejects.toThrow(
 			'Invalid refresh token',
 		)
+
+		expect(mockLockMutex).toHaveBeenCalledTimes(1)
+		expect(mockUnlockMutex).toHaveBeenCalledTimes(1)
 	})
 })

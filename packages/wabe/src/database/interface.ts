@@ -285,6 +285,13 @@ export interface DeleteObjectsOptions<
 	select?: SelectType<T, K, W>
 }
 
+export interface CompareAndSetMutexOptions<T extends WabeTypes> {
+	name: string
+	requiredLockedState: boolean
+	newLocked: boolean
+	context: WabeContext<T>
+}
+
 export interface DatabaseAdapter<T extends WabeTypes> {
 	close(): Promise<void>
 
@@ -348,4 +355,6 @@ export interface DatabaseAdapter<T extends WabeTypes> {
 	>(
 		params: DeleteObjectsOptions<T, K, U, W>,
 	): Promise<void>
+
+	compareAndSetMutex(params: CompareAndSetMutexOptions<T>): Promise<boolean>
 }

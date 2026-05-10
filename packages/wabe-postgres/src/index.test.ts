@@ -50,6 +50,40 @@ describe('Postgres adapter', () => {
 		}
 	})
 
+	it('should compare-and-set mutex lock atomically', async () => {
+		const acquired = await postgresAdapter.compareAndSetMutex({
+			name: 'refresh:user-1',
+			requiredLockedState: false,
+			newLocked: true,
+			context,
+		})
+		expect(acquired).toBe(true)
+
+		const secondAcquire = await postgresAdapter.compareAndSetMutex({
+			name: 'refresh:user-1',
+			requiredLockedState: false,
+			newLocked: true,
+			context,
+		})
+		expect(secondAcquire).toBe(false)
+
+		const released = await postgresAdapter.compareAndSetMutex({
+			name: 'refresh:user-1',
+			requiredLockedState: true,
+			newLocked: false,
+			context,
+		})
+		expect(released).toBe(true)
+
+		const secondRelease = await postgresAdapter.compareAndSetMutex({
+			name: 'refresh:user-1',
+			requiredLockedState: true,
+			newLocked: false,
+			context,
+		})
+		expect(secondRelease).toBe(false)
+	})
+
 	it('should create a row with no values', async () => {
 		const res = await postgresAdapter.createObject({
 			className: 'Test',
@@ -2156,7 +2190,6 @@ describe('Postgres adapter', () => {
 		// Create test documents with JSON data using the adapter
 		await postgresAdapter.createObjects({
 			className: 'Test',
-			// @ts-expect-error
 			data: [{ object: null, field1: 'John', float: 2.5 }, { int: 35 }],
 			context,
 		})

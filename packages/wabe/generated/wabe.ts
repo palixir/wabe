@@ -60,11 +60,13 @@ export type AuthenticationEmailPassword = {
 }
 
 export type AuthenticationGoogle = {
+	providerUserId?: string
 	email: string
 	verifiedEmail: boolean
 }
 
 export type AuthenticationGithub = {
+	providerUserId?: string
 	email: string
 	avatarUrl: string
 	username: string
@@ -156,6 +158,16 @@ export type _InternalConfig = {
 	search?: Array<string>
 }
 
+export type _Mutex = {
+	id: string
+	name: string
+	locked: boolean
+	acl?: ACLObject
+	createdAt?: string
+	updatedAt?: string
+	search?: Array<string>
+}
+
 export type WhereUser = {
 	id: string
 	name?: string
@@ -217,6 +229,16 @@ export type Where_InternalConfig = {
 	configKey: string
 	configValue: string
 	description?: string
+	acl?: ACLObject
+	createdAt?: Date
+	updatedAt?: Date
+	search?: Array<string>
+}
+
+export type Where_Mutex = {
+	id: string
+	name: string
+	locked: boolean
 	acl?: ACLObject
 	createdAt?: Date
 	updatedAt?: Date
@@ -424,6 +446,7 @@ export type WabeSchemaTypes = {
 	_Session: _Session
 	Role: Role
 	_InternalConfig: _InternalConfig
+	_Mutex: _Mutex
 }
 
 export type WabeSchemaWhereTypes = {
@@ -432,4 +455,5 @@ export type WabeSchemaWhereTypes = {
 	_Session: Where_Session
 	Role: WhereRole
 	_InternalConfig: Where_InternalConfig
+	_Mutex: Where_Mutex
 }

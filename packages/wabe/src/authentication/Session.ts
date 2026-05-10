@@ -46,25 +46,6 @@ const getJwtVerifyOptions = <T extends WabeTypes>(context: WabeContext<T>) => {
 export class Session<T extends WabeTypes> {
 	private accessToken: string | undefined = undefined
 	private refreshToken: string | undefined = undefined
-	private static refreshLocks = new Map<string, Promise<void>>()
-
-	private async acquireRefreshLock(lockKey: string) {
-		while (Session.refreshLocks.has(lockKey)) {
-			const existingLock = Session.refreshLocks.get(lockKey)
-			if (existingLock) await existingLock
-		}
-
-		let release = () => {}
-		const lockPromise = new Promise<void>((resolve) => {
-			release = resolve
-		})
-		Session.refreshLocks.set(lockKey, lockPromise)
-
-		return () => {
-			release()
-			if (Session.refreshLocks.get(lockKey) === lockPromise) Session.refreshLocks.delete(lockKey)
-		}
-	}
 
 	getAccessTokenExpireAt(config: WabeConfig<T>) {
 		const customExpiresInMs = config?.authentication?.session?.accessTokenExpiresInMs
@@ -390,9 +371,9 @@ export class Session<T extends WabeTypes> {
 			refreshToken,
 			getTokenEncryptionKey(context),
 		)
-		const releaseRefreshLock = await this.acquireRefreshLock(
-			`${accessTokenEncrypted}:${incomingRefreshTokenEncrypted}`,
-		)
+		const lockKey = `${accessTokenEncrypted}:${incomingRefreshTokenEncrypted}`
+		const didAcquireLock = await context.wabe.controllers.mutex.lockMutex(lockKey)
+		if (!didAcquireLock) throw new Error('Unable to acquire refresh lock')
 
 		try {
 			const session = await context.wabe.controllers.database.getObjects({
@@ -548,7 +529,7 @@ export class Session<T extends WabeTypes> {
 				refreshToken: newRefreshToken,
 			}
 		} finally {
-			releaseRefreshLock()
+			await context.wabe.controllers.mutex.unlockMutex(lockKey)
 		}
 	}
 

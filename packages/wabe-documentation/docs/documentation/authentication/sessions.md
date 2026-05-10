@@ -6,6 +6,16 @@ Wabe gives you the ability to configure your `session` parameters. You can choos
 
 The `refreshToken` and the `accessToken` are stored in the `Session` table in the database. The `refreshToken` and the `accessToken` are automatically rotated after each request when `cookieSession` is used to limit the possibilities in case of theft.
 
+## Concurrent refresh protection
+
+Wabe protects refresh-token rotation with a database-backed mutex (`_Mutex` internal class).
+
+During `refresh`, Wabe tries to lock a mutex key derived from the current access/refresh token pair:
+- if the lock is acquired, refresh rotation continues
+- if the lock is not acquired, the refresh request fails immediately
+
+This prevents concurrent refresh requests from rotating the same session at the same time across multiple instances.
+
 ```ts
 import { Wabe } from "wabe";
 

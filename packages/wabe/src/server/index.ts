@@ -14,10 +14,12 @@ import { initializeRoles } from '../authentication/roles'
 import type { EmailConfig } from '../email'
 import { EmailController } from '../email/EmailController'
 import { FileController } from '../file/FileController'
+import { MutexController } from '../mutex/MutexController'
 import { defaultSessionHandler } from './defaultSessionHandler'
 import type { CronConfig } from '../cron'
 import type { FileConfig } from '../file'
 import { WobeGraphqlYogaPlugin } from 'wobe-graphql-yoga'
+import { generateCodegen } from './generateCodegen'
 
 type SecurityConfig = {
 	corsOptions?: CorsOptions
@@ -84,6 +86,7 @@ export type WobeCustomContext<T extends WabeTypes> = Context & {
 
 type WabeControllers<T extends WabeTypes> = {
 	database: DatabaseController<T>
+	mutex: MutexController<T>
 	email?: EmailController
 	file?: FileController
 }
@@ -134,8 +137,11 @@ export class Wabe<T extends WabeTypes> {
 			context.res.send('OK')
 		})
 
+		const databaseController = new DatabaseController<T>(database.adapter)
+
 		this.controllers = {
-			database: new DatabaseController<T>(database.adapter),
+			database: databaseController,
+			mutex: new MutexController<T>(databaseController, this),
 			email: email?.adapter ? new EmailController(email.adapter) : undefined,
 			file: file?.adapter ? new FileController(file.adapter, this) : undefined,
 		}
@@ -264,6 +270,12 @@ export class Wabe<T extends WabeTypes> {
 			this.config.codegen.enabled &&
 			this.config.codegen.path.length > 0
 		) {
+			await generateCodegen({
+				path: this.config.codegen.path,
+				schema: wabeSchema.schema,
+				graphqlSchema: this.config.graphqlSchema,
+			})
+
 			await this.config.onGenerateCodegen?.({
 				path: this.config.codegen.path,
 				schema: wabeSchema.schema,
