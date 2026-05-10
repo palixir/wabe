@@ -138,6 +138,21 @@ await run();
 
 If your use is more specific, you can create your own `hook` to set the acl on the class.
 
+### Important ACL default behavior
+
+By default, objects with `acl: null` are considered shared:
+
+- authenticated users can access them when CLP allows the operation;
+- anonymous users can access them only when CLP allows anonymous access and ACL remains `null`.
+
+If your expected model is owner-only access, you should always set ACL at creation time (for example with `permissions.acl` and `hookObject.addACL("users", ...)`), and clear role ACLs when needed.
+
+To migrate an existing class safely:
+
+1. Add a create hook (`permissions.acl`) that sets per-user ACL on every new object.
+2. Backfill existing rows where `acl` is `null`.
+3. Keep CLP as a class gate, and rely on ACL for per-object isolation.
+
 Here is an example of a `hook` that can be created to set acl on the class `Company` before creation.
 
 ```ts

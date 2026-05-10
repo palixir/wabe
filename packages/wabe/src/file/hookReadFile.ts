@@ -1,4 +1,5 @@
 import type { HookObject } from '../hooks/HookObject'
+import { contextWithRoot } from '../utils/export'
 import type { WabeFile } from './interface'
 
 const isWabeFile = (value: unknown): value is WabeFile =>
@@ -59,7 +60,9 @@ const getFile = async (hookObject: HookObject<any, any>) => {
 
 				return hookObject.context.wabe.controllers.database.updateObject({
 					className: hookObject.className,
-					context: hookObject.context,
+					// Refreshing signed URLs is a technical side effect of reads.
+					// Use an internal context so we don't depend on end-user mutation rights.
+					context: contextWithRoot(hookObject.context),
 					id: hookObject.object.id,
 					data: {
 						[fieldName]: updatedFile,
