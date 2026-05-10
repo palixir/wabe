@@ -728,6 +728,239 @@ describe('Security tests', () => {
 		await closeTests(wabe)
 	})
 
+	it('should not return created object when ACL denies read on create response', async () => {
+		const setup = await setupTests([
+			{
+				name: 'CreateReadbackAclTest',
+				fields: {
+					name: { type: 'String' },
+				},
+				permissions: {
+					create: {
+						requireAuthentication: true,
+						authorizedRoles: ['Client'],
+					},
+					read: {
+						requireAuthentication: true,
+						authorizedRoles: ['Client'],
+					},
+					acl: async (hookObject) => {
+						await hookObject.addACL('users', {
+							userId: hookObject.context.user?.id || '',
+							read: false,
+							write: true,
+						})
+						await hookObject.addACL('roles', null)
+					},
+				},
+			},
+		])
+
+		const wabe = setup.wabe
+		const port = setup.port
+		const rootClient = getGraphqlClient(port)
+		const anonymousClient = getAnonymousClient(port)
+
+		const { userClient } = await createUserAndUpdateRole({
+			anonymousClient,
+			port,
+			roleName: 'Client',
+			rootClient,
+		})
+
+		await expect(
+			userClient.request<any>(gql`
+				mutation createCreateReadbackAclTest {
+					createCreateReadbackAclTest(input: { fields: { name: "private-on-read" } }) {
+						createReadbackAclTest {
+							id
+						}
+					}
+				}
+			`),
+		).rejects.toThrow('Object not found')
+
+		await closeTests(wabe)
+	})
+
+	it('should not return created objects when ACL denies read on createObjects response', async () => {
+		const setup = await setupTests([
+			{
+				name: 'CreateReadbackAclManyTest',
+				fields: {
+					name: { type: 'String' },
+				},
+				permissions: {
+					create: {
+						requireAuthentication: true,
+						authorizedRoles: ['Client'],
+					},
+					read: {
+						requireAuthentication: true,
+						authorizedRoles: ['Client'],
+					},
+					acl: async (hookObject) => {
+						await hookObject.addACL('users', {
+							userId: hookObject.context.user?.id || '',
+							read: false,
+							write: true,
+						})
+						await hookObject.addACL('roles', null)
+					},
+				},
+			},
+		])
+
+		const wabe = setup.wabe
+		const port = setup.port
+		const rootClient = getGraphqlClient(port)
+		const anonymousClient = getAnonymousClient(port)
+
+		const { userClient } = await createUserAndUpdateRole({
+			anonymousClient,
+			port,
+			roleName: 'Client',
+			rootClient,
+		})
+
+		const res = await userClient.request<any>(gql`
+			mutation createCreateReadbackAclManyTests {
+				createCreateReadbackAclManyTests(
+					input: { fields: [{ name: "private-1" }, { name: "private-2" }] }
+				) {
+					edges {
+						node {
+							id
+						}
+					}
+				}
+			}
+		`)
+
+		expect(res.createCreateReadbackAclManyTests.edges).toEqual([])
+
+		await closeTests(wabe)
+	})
+
+	it('should not bypass ACL when loading objects for hooks', async () => {
+		const setup = await setupTests([
+			{
+				name: 'HookLoaderAclTest',
+				fields: {
+					name: { type: 'String' },
+				},
+				permissions: {
+					create: { requireAuthentication: false },
+					read: { requireAuthentication: false },
+				},
+			},
+		])
+
+		const wabe = setup.wabe
+		const rootContext = { wabe, isRoot: true } as any
+
+		const created = await wabe.controllers.database.createObject({
+			className: 'HookLoaderAclTest' as any,
+			context: rootContext,
+			data: { name: 'hook-target' },
+			select: { id: true },
+		})
+
+		await wabe.controllers.database.updateObject({
+			className: 'HookLoaderAclTest' as any,
+			context: rootContext,
+			id: created?.id || '',
+			data: {
+				acl: {
+					users: [{ userId: 'allowed-user', read: true, write: true }],
+					roles: [],
+				},
+			},
+			select: {},
+		})
+
+		const deniedContext = {
+			wabe,
+			isRoot: false,
+			user: { id: 'denied-user' },
+		} as any
+
+		const loadObjectForHooks = (wabe.controllers.database as any)._loadObjectForHooks(
+			'HookLoaderAclTest',
+			deniedContext,
+		)
+
+		await expect(loadObjectForHooks(created?.id)).rejects.toThrow('Object not found')
+
+		await closeTests(wabe)
+	})
+
+	it('should not bypass ACL when loading multiple objects for hooks', async () => {
+		const setup = await setupTests([
+			{
+				name: 'HookLoaderAclManyTest',
+				fields: {
+					name: { type: 'String' },
+				},
+				permissions: {
+					create: { requireAuthentication: false },
+					read: { requireAuthentication: false },
+				},
+			},
+		])
+
+		const wabe = setup.wabe
+		const rootContext = { wabe, isRoot: true } as any
+
+		const createdA = await wabe.controllers.database.createObject({
+			className: 'HookLoaderAclManyTest' as any,
+			context: rootContext,
+			data: { name: 'hook-target-a' },
+			select: { id: true },
+		})
+
+		const createdB = await wabe.controllers.database.createObject({
+			className: 'HookLoaderAclManyTest' as any,
+			context: rootContext,
+			data: { name: 'hook-target-b' },
+			select: { id: true },
+		})
+
+		for (const id of [createdA?.id, createdB?.id]) {
+			await wabe.controllers.database.updateObject({
+				className: 'HookLoaderAclManyTest' as any,
+				context: rootContext,
+				id: id || '',
+				data: {
+					acl: {
+						users: [{ userId: 'allowed-user', read: true, write: true }],
+						roles: [],
+					},
+				},
+				select: {},
+			})
+		}
+
+		const deniedContext = {
+			wabe,
+			isRoot: false,
+			user: { id: 'denied-user' },
+		} as any
+
+		const loadObjectsForHooks = (wabe.controllers.database as any)._loadObjectsForHooks(
+			'HookLoaderAclManyTest',
+			deniedContext,
+		)
+
+		const result = await loadObjectsForHooks({
+			ids: [createdA?.id, createdB?.id].filter(Boolean),
+		})
+
+		expect(result).toEqual([])
+
+		await closeTests(wabe)
+	})
+
 	it('should block GraphQL introspection queries for anonymous and authenticated users when disableIntrospection is true', async () => {
 		const setup = await setupTests([], {
 			isProduction: true,
@@ -1492,7 +1725,7 @@ describe('Security tests', () => {
 					role: 'newid',
 				},
 			}),
-		).rejects.toThrow('You are not authorized to update this field')
+		).rejects.toThrow('Object not found')
 
 		await closeTests(wabe)
 	})
@@ -1522,7 +1755,7 @@ describe('Security tests', () => {
 					sessions: ['newid'],
 				},
 			}),
-		).rejects.toThrow('You are not authorized to update this field')
+		).rejects.toThrow('Object not found')
 
 		expect(
 			wabe.controllers.database.createObject({

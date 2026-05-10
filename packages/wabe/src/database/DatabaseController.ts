@@ -633,7 +633,7 @@ export class DatabaseController<T extends WabeTypes> {
 		return (id: string) =>
 			this.getObject({
 				className,
-				context: contextWithRoot(context),
+				context,
 				id,
 				_skipHooks: true,
 			})
@@ -646,7 +646,7 @@ export class DatabaseController<T extends WabeTypes> {
 		return ({ where, ids }: { where?: WhereType<DevWabeTypes, any>; ids: string[] }) =>
 			this.getObjects({
 				className,
-				context: contextWithRoot(context),
+				context,
 				// @ts-expect-error
 				where: where ? where : { id: { in: ids } },
 				_skipHooks: true,
@@ -1196,10 +1196,12 @@ export class DatabaseController<T extends WabeTypes> {
 		if (this._isEmptySelect(select as Record<string, unknown>)) return null
 
 		const selectWithoutPrivateFields = select ? selectFieldsWithoutPrivateFields(select) : undefined
+		const readbackContext =
+			String(className) === 'User' ? contextWithRoot(context as WabeContext<T>) : context
 
 		return this.getObject({
 			className,
-			context: contextWithRoot(context),
+			context: readbackContext,
 			select: selectWithoutPrivateFields,
 			id: res.id,
 		})
@@ -1286,10 +1288,12 @@ export class DatabaseController<T extends WabeTypes> {
 		if (this._isEmptySelect(select as Record<string, unknown>)) return []
 
 		const selectWithoutPrivateFields = select ? selectFieldsWithoutPrivateFields(select) : undefined
+		const readbackContext =
+			String(className) === 'User' ? contextWithRoot(context as WabeContext<T>) : context
 
 		return this.getObjects({
 			className,
-			context: contextWithRoot(context),
+			context: readbackContext,
 			select: selectWithoutPrivateFields,
 			// @ts-expect-error
 			where: { id: { in: ids } },

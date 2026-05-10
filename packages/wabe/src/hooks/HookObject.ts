@@ -167,7 +167,6 @@ export class HookObject<T extends WabeTypes, K extends keyof WabeTypes['types']>
 
 		const databaseController = this.context.wabe.controllers.database
 		const targetClassName = schemaField.class as keyof T['types']
-		const rootContext = contextWithRoot(this.context)
 		const select = options?.select as Select | undefined
 		const rawValue = (this.object as Record<string, any>)[fieldName]
 
@@ -180,7 +179,7 @@ export class HookObject<T extends WabeTypes, K extends keyof WabeTypes['types']>
 				? await databaseController.getObject({
 						className: targetClassName,
 						id: pointerId,
-						context: rootContext,
+						context: this.context,
 						select: select as any,
 					})
 				: null
@@ -193,7 +192,7 @@ export class HookObject<T extends WabeTypes, K extends keyof WabeTypes['types']>
 					: await databaseController.getObjects({
 							className: targetClassName,
 							where: { id: { in: relationIds } } as any,
-							context: rootContext,
+							context: this.context,
 							select: select as any,
 						})
 		}
