@@ -19,6 +19,7 @@ describe('Session', () => {
 	const mockCreateObject = mock(() => Promise.resolve({ id: 'userId' })) as any
 	const mockDeleteObject = mock(() => Promise.resolve()) as any
 	const mockUpdateObject = mock(() => Promise.resolve()) as any
+	const mockUpdateObjects = mock(() => Promise.resolve([{ id: 'sessionId' }])) as any
 
 	const controllers = {
 		database: {
@@ -27,6 +28,7 @@ describe('Session', () => {
 			createObject: mockCreateObject,
 			deleteObject: mockDeleteObject,
 			updateObject: mockUpdateObject,
+			updateObjects: mockUpdateObjects,
 		},
 	}
 
@@ -36,6 +38,7 @@ describe('Session', () => {
 		mockCreateObject.mockClear()
 		mockDeleteObject.mockClear()
 		mockUpdateObject.mockClear()
+		mockUpdateObjects.mockClear()
 	})
 
 	const context = {
@@ -488,23 +491,38 @@ describe('Session', () => {
 			context: expect.any(Object),
 		})
 
-		expect(mockUpdateObject).toHaveBeenCalledTimes(1)
-		expect(mockUpdateObject).toHaveBeenCalledWith({
+		expect(mockUpdateObjects).toHaveBeenCalledTimes(1)
+		expect(mockUpdateObjects).toHaveBeenCalledWith({
 			className: '_Session',
 			context: expect.any(Object),
-			id: 'sessionId',
+			where: {
+				id: {
+					equalTo: 'sessionId',
+				},
+				accessTokenEncrypted: {
+					equalTo: encryptToken(oldAccessToken, 'dev'),
+				},
+				refreshTokenEncrypted: {
+					equalTo: encryptToken(oldRefreshToken, 'dev'),
+				},
+				refreshTokenExpiresAt: {
+					greaterThanOrEqualTo: expect.any(Date),
+				},
+			},
 			data: {
 				accessTokenEncrypted: expect.any(String),
 				accessTokenExpiresAt: expect.any(Date),
 				refreshTokenEncrypted: expect.any(String),
 				refreshTokenExpiresAt: expect.any(Date),
 			},
-			select: {},
+			select: { id: true },
+			first: 1,
 		})
 
-		const accessTokenExpiresAt = mockUpdateObject.mock.calls[0][0].data.accessTokenExpiresAt as Date
+		const accessTokenExpiresAt = mockUpdateObjects.mock.calls[0][0].data
+			.accessTokenExpiresAt as Date
 
-		const refreshTokenExpiresAt = mockUpdateObject.mock.calls[0][0].data
+		const refreshTokenExpiresAt = mockUpdateObjects.mock.calls[0][0].data
 			.refreshTokenExpiresAt as Date
 
 		// -1000 to avoid flaky
@@ -666,6 +684,28 @@ describe('Session', () => {
 		const { refreshToken, accessToken } = await session.create('userId', context)
 
 		expect(session.refresh(accessToken, refreshToken, context)).rejects.toThrow(
+			'Invalid refresh token',
+		)
+	})
+
+	it('should throw an error when refresh rotation update is stale', async () => {
+		const session = new Session<any>()
+		const { refreshToken, accessToken } = await session.create('userId', context)
+
+		mockGetObjects.mockResolvedValue([
+			{
+				id: 'sessionId',
+				refreshTokenEncrypted: encryptToken(refreshToken, 'dev'),
+				refreshTokenExpiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
+				user: {
+					id: 'userId',
+					email: 'userEmail',
+				},
+			},
+		])
+		mockUpdateObjects.mockResolvedValue([])
+
+		await expect(session.refresh(accessToken, refreshToken, context)).rejects.toThrow(
 			'Invalid refresh token',
 		)
 	})

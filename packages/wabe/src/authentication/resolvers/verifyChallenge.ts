@@ -48,7 +48,7 @@ export const verifyChallengeResolver = async (
 
 	const session = new Session<DevWabeTypes>()
 
-	const { accessToken, refreshToken } = await session.create(result.userId, context)
+	const { accessToken, refreshToken, csrfToken } = await session.create(result.userId, context)
 
 	if (context.wabe.config.authentication?.session?.cookieSession) {
 		const accessTokenExpiresAt = session.getAccessTokenExpireAt(context.wabe.config)
@@ -65,6 +65,14 @@ export const verifyChallengeResolver = async (
 
 		context.response?.setCookie('accessToken', accessToken, {
 			httpOnly: true,
+			path: '/',
+			sameSite,
+			secure: true,
+			expires: accessTokenExpiresAt,
+		})
+
+		context.response?.setCookie('csrfToken', csrfToken, {
+			httpOnly: false, // OWASP specification specify that the csrfToken should not be httpOnly
 			path: '/',
 			sameSite,
 			secure: true,

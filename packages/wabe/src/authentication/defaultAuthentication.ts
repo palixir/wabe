@@ -167,6 +167,9 @@ export const defaultAuthenticationMethods = <T extends WabeTypes>(): CustomAuthe
 			},
 		},
 		dataToStore: {
+			providerUserId: {
+				type: 'String',
+			},
 			email: {
 				type: 'Email',
 				required: true,
@@ -193,6 +196,9 @@ export const defaultAuthenticationMethods = <T extends WabeTypes>(): CustomAuthe
 			},
 		},
 		dataToStore: {
+			providerUserId: {
+				type: 'String',
+			},
 			email: {
 				type: 'Email',
 				required: true,

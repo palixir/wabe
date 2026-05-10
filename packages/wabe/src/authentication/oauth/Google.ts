@@ -1,5 +1,6 @@
 import { OAuth2Client } from '.'
 import type { WabeConfig } from '../../server'
+import type { OAuthUserInfo } from './Oauth2Client'
 import type { OAuth2ProviderWithPKCE, Tokens } from './utils'
 
 const authorizeEndpoint = 'https://accounts.google.com/o/oauth2/v2/auth'
@@ -15,6 +16,12 @@ interface AuthorizationCodeResponseBody {
 interface RefreshTokenResponseBody {
 	access_token: string
 	expires_in: number
+}
+
+interface GoogleUserInfoResponse {
+	id?: string
+	email?: string
+	verified_email?: boolean
 }
 
 export class Google implements OAuth2ProviderWithPKCE {
@@ -89,13 +96,19 @@ export class Google implements OAuth2ProviderWithPKCE {
 		}
 	}
 
-	async getUserInfo(accessToken: string) {
+	async getUserInfo(accessToken: string): Promise<OAuthUserInfo> {
 		const userInfo = await fetch(
 			`https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${accessToken}`,
 		)
 
-		const { email, verified_email } = await userInfo.json()
+		if (!userInfo.ok) throw new Error('Failed to fetch user information from Google')
 
-		return { email, verifiedEmail: verified_email }
+		const { id, email, verified_email } = (await userInfo.json()) as GoogleUserInfoResponse
+
+		return {
+			providerUserId: id || null,
+			email: email?.toLowerCase() || null,
+			verifiedEmail: verified_email === true,
+		}
 	}
 }

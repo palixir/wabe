@@ -7,8 +7,38 @@ import { Google } from '../../authentication/oauth'
 import { getSessionCookieSameSite } from '../../authentication/cookies'
 import { generateRandomValues } from '../../authentication/oauth/utils'
 import { GitHub } from '../../authentication/oauth/GitHub'
+import crypto from 'node:crypto'
+import { encryptDeterministicToken } from '../../utils/crypto'
 
 const validProviders = new Set<string>(Object.values(ProviderEnum))
+
+const getJwtSecret = (wabeContext: WabeContext<any>) => {
+	const secret = wabeContext.wabe.config.authentication?.session?.jwtSecret
+	if (!secret) throw new Error('Authentication session requires jwtSecret')
+	return secret
+}
+
+const getTokenEncryptionKey = (wabeContext: WabeContext<any>) => {
+	const tokenSecret =
+		wabeContext.wabe.config.authentication?.session?.tokenSecret || getJwtSecret(wabeContext)
+	return crypto.createHash('sha256').update(tokenSecret).digest()
+}
+
+const buildCsrfTokenForSession = ({
+	sessionId,
+	wabeContext,
+}: {
+	sessionId: string
+	wabeContext: WabeContext<any>
+}) => {
+	const randomValue = crypto.randomBytes(16).toString('hex')
+	const message = `${sessionId.length}!${sessionId}!${randomValue.length}!${randomValue}`
+	const csrfSecret =
+		wabeContext.wabe.config.authentication?.session?.csrfSecret || getJwtSecret(wabeContext)
+	const hmac = crypto.createHmac('sha256', csrfSecret).update(message).digest('hex')
+
+	return `${hmac}.${randomValue}`
+}
 
 /*
 - Generate code verifier (back)
@@ -65,6 +95,7 @@ export const oauthHandlerCallback = async (context: Context, wabeContext: WabeCo
 		)
 
 		const { accessToken, refreshToken } = signInWith
+		if (!accessToken || !refreshToken) throw new Error('Authentication failed')
 
 		const isCookieSession = !!wabeContext.wabe.config.authentication?.session?.cookieSession
 		const sameSite = getSessionCookieSameSite(wabeContext.wabe.config)
@@ -92,6 +123,43 @@ export const oauthHandlerCallback = async (context: Context, wabeContext: WabeCo
 			sameSite,
 			secure: true,
 		})
+
+		if (isCookieSession) {
+			const accessTokenEncrypted = encryptDeterministicToken(
+				accessToken,
+				getTokenEncryptionKey(wabeContext),
+			)
+			const session = await wabeContext.wabe.controllers.database.getObjects({
+				className: '_Session',
+				where: {
+					accessTokenEncrypted: { equalTo: accessTokenEncrypted },
+				},
+				select: { id: true },
+				first: 1,
+				context: {
+					wabe: wabeContext.wabe,
+					isRoot: true,
+				},
+			})
+
+			const sessionId = session[0]?.id
+			if (!sessionId) throw new Error('Authentication failed')
+
+			const csrfToken = buildCsrfTokenForSession({
+				sessionId,
+				wabeContext,
+			})
+
+			context.res.setCookie('csrfToken', csrfToken, {
+				httpOnly: false,
+				path: '/',
+				maxAge:
+					(wabeContext.wabe.config.authentication?.session?.accessTokenExpiresInMs ||
+						60 * 15 * 1000) / 1000,
+				sameSite,
+				secure: true,
+			})
+		}
 
 		context.redirect(wabeContext.wabe.config.authentication?.successRedirectPath || '/')
 	} catch {

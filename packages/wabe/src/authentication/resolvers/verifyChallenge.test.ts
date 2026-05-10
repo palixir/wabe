@@ -209,4 +209,75 @@ describe('verifyChallenge', () => {
 
 		spyCreateSession.mockRestore()
 	})
+
+	it('should set csrf cookie when cookieSession is enabled', async () => {
+		const spyCreateSession = spyOn(Session.prototype, 'create').mockResolvedValue({
+			accessToken: 'accessToken',
+			refreshToken: 'refreshToken',
+			sessionId: 'sessionId',
+			csrfToken: 'csrfToken',
+		})
+		const setCookie = mock(() => {})
+		mockOnVerifyChallenge.mockResolvedValue({ userId: 'userId' } as never)
+		const challengeToken = await createMfaChallenge(context, {
+			userId: 'userId',
+			provider: 'fakeOtp',
+		})
+
+		await verifyChallengeResolver(
+			undefined,
+			{
+				input: {
+					challengeToken,
+					secondFA: {
+						// @ts-expect-error
+						fakeOtp: {
+							code: '123456',
+						},
+					},
+				},
+			},
+			{
+				...context,
+				response: { setCookie },
+				wabe: {
+					...context.wabe,
+					config: {
+						...context.wabe.config,
+						authentication: {
+							...context.wabe.config.authentication,
+							session: {
+								cookieSession: true,
+							},
+						},
+					},
+				},
+			} as any,
+		)
+
+		expect(setCookie).toHaveBeenCalledTimes(3)
+		expect(setCookie).toHaveBeenNthCalledWith(1, 'refreshToken', 'refreshToken', {
+			httpOnly: true,
+			path: '/',
+			sameSite: 'Strict',
+			secure: true,
+			expires: expect.any(Date),
+		})
+		expect(setCookie).toHaveBeenNthCalledWith(2, 'accessToken', 'accessToken', {
+			httpOnly: true,
+			path: '/',
+			sameSite: 'Strict',
+			secure: true,
+			expires: expect.any(Date),
+		})
+		expect(setCookie).toHaveBeenNthCalledWith(3, 'csrfToken', 'csrfToken', {
+			httpOnly: false,
+			path: '/',
+			sameSite: 'Strict',
+			secure: true,
+			expires: expect.any(Date),
+		})
+
+		spyCreateSession.mockRestore()
+	})
 })
