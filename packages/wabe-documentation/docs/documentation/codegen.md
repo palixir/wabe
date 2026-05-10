@@ -1,11 +1,21 @@
 # Codegen
 
-With Wabe, you can configure when code generation is triggered with `codegen`, and provide your own generation pipeline with `onGenerateCodegen`. This inversion of control lets you run any tool you want (for example `oxfmt`, `prettier`, or a custom generator), without Wabe enforcing a formatter strategy.
+Wabe can generate code artifacts from your schema when `codegen` is enabled.
 
-Your callback is fully custom. In this example, we only format generated files with `oxfmt`.
+By default, Wabe generates:
+- `wabe.ts` (TypeScript schema types)
+- `schema.graphql` (printed GraphQL schema)
+
+`onGenerateCodegen` is optional and is called **after** default generation. Use it for post-processing (for example formatting or custom checks).
+
+Codegen runs only when:
+- `isProduction` is `false`
+- `NODE_ENV !== "test"`
+- `codegen.enabled` is `true`
 
 ```ts
 import { Wabe } from "wabe";
+
 import { resolve } from "node:path";
 
 const run = async () => {
@@ -15,6 +25,7 @@ const run = async () => {
       enabled: true,
       path: `${import.meta.dirname}/../generated/`,
     },
+    // Optional: called after wabe.ts/schema.graphql are generated
     onGenerateCodegen: async ({ path }) => {
       const process = Bun.spawn(["bunx", "oxfmt", "--write", resolve(path)]);
       const exitCode = await process.exited;

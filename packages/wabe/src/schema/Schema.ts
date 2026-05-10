@@ -605,6 +605,48 @@ export class Schema<T extends WabeTypes> {
 		}
 	}
 
+	mutexClass(): ClassInterface<T> {
+		return {
+			name: '_Mutex',
+			fields: {
+				name: {
+					type: 'String',
+					required: true,
+				},
+				locked: {
+					type: 'Boolean',
+					required: true,
+				},
+			},
+			indexes: [
+				{
+					field: 'name',
+					order: 'ASC',
+					unique: true,
+				},
+			],
+			// Only root key
+			permissions: {
+				create: {
+					authorizedRoles: [],
+					requireAuthentication: true,
+				},
+				read: {
+					authorizedRoles: [],
+					requireAuthentication: true,
+				},
+				update: {
+					authorizedRoles: [],
+					requireAuthentication: true,
+				},
+				delete: {
+					authorizedRoles: [],
+					requireAuthentication: true,
+				},
+			},
+		}
+	}
+
 	userClass(): ClassInterface<T> {
 		const customAuthenticationConfig = this.config.authentication?.customAuthenticationMethods || []
 
@@ -843,6 +885,7 @@ export class Schema<T extends WabeTypes> {
 			this.sessionClass(),
 			this.roleClass(),
 			this.internalConfigClass(),
+			this.mutexClass(),
 		])
 	}
 }

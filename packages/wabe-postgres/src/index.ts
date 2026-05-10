@@ -764,4 +764,50 @@ export class PostgresAdapter<T extends WabeTypes> implements DatabaseAdapter<T> 
 			client.release()
 		}
 	}
+
+	async compareAndSetMutex({
+		name,
+		requiredLockedState,
+		newLocked,
+		context: _context,
+	}: {
+		name: string
+		requiredLockedState: boolean
+		newLocked: boolean
+		context: unknown
+	}): Promise<boolean> {
+		const normalizedName = name.trim()
+		if (!normalizedName) throw new Error('Mutex name cannot be empty')
+
+		const client = await this.pool.connect()
+
+		try {
+			if (!requiredLockedState) {
+				const result = await client.query(
+					`INSERT INTO "_Mutex" ("name", "locked")
+           VALUES ($1, $2)
+           ON CONFLICT ("name")
+           DO UPDATE
+             SET "locked" = EXCLUDED."locked"
+           WHERE "_Mutex"."locked" = $3
+           RETURNING _id`,
+					[normalizedName, newLocked, requiredLockedState],
+				)
+
+				return (result.rowCount || 0) > 0
+			}
+
+			const result = await client.query(
+				`UPDATE "_Mutex"
+         SET "locked" = $2
+         WHERE "name" = $1 AND "locked" = $3
+         RETURNING _id`,
+				[normalizedName, newLocked, requiredLockedState],
+			)
+
+			return (result.rowCount || 0) > 0
+		} finally {
+			client.release()
+		}
+	}
 }

@@ -228,7 +228,7 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
 		await this.client.close()
 	}
 
-	createClassIfNotExist(className: keyof T['types'], schema: SchemaInterface<T>) {
+	async createClassIfNotExist(className: keyof T['types'], schema: SchemaInterface<T>) {
 		if (!this.database) throw new Error('Connection to database is not established')
 
 		const schemaClass = schema?.classes?.find((currentClass) => currentClass.name === className)
@@ -240,12 +240,14 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
 
 		const indexes = schemaClass.indexes || []
 
-		indexes.map((index) =>
-			collection.createIndex(
-				{
-					[index.field]: index.order === 'ASC' ? 1 : -1,
-				},
-				{ unique: !!index.unique },
+		await Promise.all(
+			indexes.map((index) =>
+				collection.createIndex(
+					{
+						[index.field]: index.order === 'ASC' ? 1 : -1,
+					},
+					{ unique: !!index.unique },
+				),
 			),
 		)
 	}
@@ -499,5 +501,84 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
 		const collection = this.database.collection(className)
 
 		await collection.deleteMany(whereBuilded)
+	}
+
+	async compareAndSetMutex({
+		name,
+		requiredLockedState,
+		newLocked,
+		context: _context,
+	}: {
+		name: string
+		requiredLockedState: boolean
+		newLocked: boolean
+		context: unknown
+	}): Promise<boolean> {
+		if (!this.database) throw new Error('Connection to database is not established')
+
+		const normalizedName = name.trim()
+		if (!normalizedName) throw new Error('Mutex name cannot be empty')
+
+		const collection = this.database.collection('_Mutex')
+
+		if (requiredLockedState === false) {
+			const updatedDocument = await collection.findOneAndUpdate(
+				{
+					name: normalizedName,
+					locked: false,
+				},
+				{
+					$set: {
+						locked: newLocked,
+					},
+				},
+				{
+					returnDocument: 'after',
+				},
+			)
+
+			if (updatedDocument) return true
+
+			const existingMutex = await collection.findOne(
+				{ name: normalizedName },
+				{ projection: { _id: 1 } },
+			)
+			if (existingMutex) return false
+
+			try {
+				await collection.insertOne({
+					name: normalizedName,
+					locked: newLocked,
+				})
+				return true
+			} catch (error) {
+				if (
+					typeof error === 'object' &&
+					error !== null &&
+					'code' in error &&
+					(error as { code?: number }).code === 11000
+				)
+					return false
+
+				throw error
+			}
+		}
+
+		const updatedDocument = await collection.findOneAndUpdate(
+			{
+				name: normalizedName,
+				locked: requiredLockedState,
+			},
+			{
+				$set: {
+					locked: newLocked,
+				},
+			},
+			{
+				returnDocument: 'after',
+			},
+		)
+
+		return !!updatedDocument
 	}
 }

@@ -8,6 +8,7 @@ import { isUnsafeObjectKey } from '../utils/objectKeys'
 import { contextWithRoot, notEmpty } from '../utils/export'
 import type { DevWabeTypes } from '../utils/helper'
 import {
+	type CompareAndSetMutexOptions,
 	type CountOptions,
 	type CreateObjectOptions,
 	type CreateObjectsOptions,
@@ -999,6 +1000,23 @@ export class DatabaseController<T extends WabeTypes> {
 
 	async clearDatabase(): Promise<void> {
 		await this.adapter.clearDatabase()
+	}
+
+	async compareAndSetMutex({
+		name,
+		requiredLockedState,
+		newLocked,
+		context,
+	}: CompareAndSetMutexOptions<T>): Promise<boolean> {
+		const normalizedName = name.trim()
+		if (!normalizedName) throw new Error('Mutex name cannot be empty')
+
+		return this.adapter.compareAndSetMutex({
+			name: normalizedName,
+			requiredLockedState,
+			newLocked,
+			context: contextWithRoot(context),
+		})
 	}
 
 	async getObject<K extends keyof T['types'], U extends keyof T['types'][K]>({

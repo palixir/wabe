@@ -479,4 +479,55 @@ describe('Schema', () => {
 			},
 		})
 	})
+
+	it('should add _Mutex as a root-only internal class', () => {
+		const schema = new Schema<DevWabeTypes>({
+			schema: {
+				classes: [],
+			},
+		} as any)
+
+		const mutexClass = schema.schema?.classes?.find((schemaClass) => schemaClass.name === '_Mutex')
+
+		expect(mutexClass).toEqual(
+			expect.objectContaining({
+				name: '_Mutex',
+				fields: expect.objectContaining({
+					name: expect.objectContaining({
+						type: 'String',
+						required: true,
+					}),
+					locked: expect.objectContaining({
+						type: 'Boolean',
+						required: true,
+					}),
+				}),
+				indexes: [
+					{
+						field: 'name',
+						order: 'ASC',
+						unique: true,
+					},
+				],
+				permissions: {
+					create: {
+						authorizedRoles: [],
+						requireAuthentication: true,
+					},
+					read: {
+						authorizedRoles: [],
+						requireAuthentication: true,
+					},
+					update: {
+						authorizedRoles: [],
+						requireAuthentication: true,
+					},
+					delete: {
+						authorizedRoles: [],
+						requireAuthentication: true,
+					},
+				},
+			}),
+		)
+	})
 })

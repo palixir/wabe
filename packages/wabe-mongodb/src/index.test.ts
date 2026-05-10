@@ -41,6 +41,40 @@ describe('Mongo adapter', () => {
 			)
 	})
 
+	it('should compare-and-set mutex lock atomically', async () => {
+		const acquired = await mongoAdapter.compareAndSetMutex({
+			name: 'refresh:user-1',
+			requiredLockedState: false,
+			newLocked: true,
+			context,
+		})
+		expect(acquired).toBe(true)
+
+		const secondAcquire = await mongoAdapter.compareAndSetMutex({
+			name: 'refresh:user-1',
+			requiredLockedState: false,
+			newLocked: true,
+			context,
+		})
+		expect(secondAcquire).toBe(false)
+
+		const released = await mongoAdapter.compareAndSetMutex({
+			name: 'refresh:user-1',
+			requiredLockedState: true,
+			newLocked: false,
+			context,
+		})
+		expect(released).toBe(true)
+
+		const secondRelease = await mongoAdapter.compareAndSetMutex({
+			name: 'refresh:user-1',
+			requiredLockedState: true,
+			newLocked: false,
+			context,
+		})
+		expect(secondRelease).toBe(false)
+	})
+
 	it('should create a row with no values', async () => {
 		const res = await mongoAdapter.createObject({
 			className: 'Test',
@@ -2122,7 +2156,6 @@ describe('Mongo adapter', () => {
 			data: [
 				{ name: 'Document with name', age: 25 },
 				{ name: 'Another document with name', age: 30 },
-				// @ts-expect-error
 				{ age: 35 }, // No name field
 			],
 			context,
@@ -2145,9 +2178,7 @@ describe('Mongo adapter', () => {
 			className: 'Test',
 			data: [
 				{ name: 'Document with name', age: 25 },
-				// @ts-expect-error
 				{ age: 30 }, // No name field
-				// @ts-expect-error
 				{ age: 35 }, // No name field
 			],
 			context,
@@ -2167,12 +2198,7 @@ describe('Mongo adapter', () => {
 	it('should handle exists with null values correctly', async () => {
 		await mongoAdapter.createObjects({
 			className: 'Test',
-			data: [
-				{ name: 'Document with name', age: 25 },
-				{ name: null, age: 30 },
-				// @ts-expect-error
-				{ age: 35 },
-			],
+			data: [{ name: 'Document with name', age: 25 }, { name: null, age: 30 }, { age: 35 }],
 			context,
 		})
 
@@ -2225,7 +2251,6 @@ describe('Mongo adapter', () => {
 		// Create test documents with JSON data using the adapter
 		await mongoAdapter.createObjects({
 			className: 'Test',
-			// @ts-expect-error
 			data: [{ object: null, field1: 'John', float: 2.5 }, { int: 35 }],
 			context,
 		})
