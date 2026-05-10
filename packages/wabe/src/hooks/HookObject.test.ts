@@ -223,6 +223,110 @@ describe('HookObject', () => {
 		)
 	})
 
+	it('should not bypass ACL when fetching pointer/relation in hooks', async () => {
+		const database = wabe.controllers.database as any
+
+		const document = await database.createObject({
+			className: 'TestDocument',
+			data: { name: 'ACL protected' },
+			context: { wabe, isRoot: true },
+			select: { id: true },
+		})
+
+		await database.updateObject({
+			className: 'TestDocument',
+			id: document?.id,
+			context: { wabe, isRoot: true },
+			data: {
+				acl: {
+					users: [{ userId: 'allowed-user', read: true, write: true }],
+					roles: [],
+				},
+			},
+			select: {},
+		})
+
+		const container = await database.createObject({
+			className: 'TestPointerContainer',
+			data: { document: document?.id },
+			context: { wabe, isRoot: true },
+			select: { id: true, document: true },
+		})
+
+		const hookObject = new HookObject<DevWabeTypes, any>({
+			className: 'TestPointerContainer',
+			newData: {} as any,
+			context: {
+				wabe,
+				isRoot: false,
+				user: {
+					id: 'denied-user',
+				},
+			} as any,
+			operationType: OperationType.AfterCreate,
+			object: {
+				id: container?.id,
+				document: container?.document,
+			} as any,
+			select: {},
+		})
+
+		await expect(hookObject.fetchPointerOrRelation('document')).rejects.toThrow('Object not found')
+	})
+
+	it('should return empty relation in hooks when ACL denies linked objects', async () => {
+		const database = wabe.controllers.database as any
+
+		const document = await database.createObject({
+			className: 'TestDocument',
+			data: { name: 'ACL protected relation' },
+			context: { wabe, isRoot: true },
+			select: { id: true },
+		})
+
+		await database.updateObject({
+			className: 'TestDocument',
+			id: document?.id,
+			context: { wabe, isRoot: true },
+			data: {
+				acl: {
+					users: [{ userId: 'allowed-user', read: true, write: true }],
+					roles: [],
+				},
+			},
+			select: {},
+		})
+
+		const container = await database.createObject({
+			className: 'TestPointerContainer',
+			data: { documents: [document?.id] },
+			context: { wabe, isRoot: true },
+			select: { id: true, documents: true },
+		})
+
+		const hookObject = new HookObject<DevWabeTypes, any>({
+			className: 'TestPointerContainer',
+			newData: {} as any,
+			context: {
+				wabe,
+				isRoot: false,
+				user: {
+					id: 'denied-user',
+				},
+			} as any,
+			operationType: OperationType.AfterCreate,
+			object: {
+				id: container?.id,
+				documents: container?.documents,
+			} as any,
+			select: {},
+		})
+
+		const relation = await hookObject.fetchPointerOrRelation('documents')
+
+		expect(relation).toEqual([])
+	})
+
 	it('should return correctly value depends on the update state of the field', () => {
 		const userData = { name: 'John Doe' }
 
