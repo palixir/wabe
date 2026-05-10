@@ -461,6 +461,143 @@ describe('Server', () => {
 		await wabe.close()
 	})
 
+	it('should call onGenerateCodegen when codegen is enabled in development', async () => {
+		const databaseId = uuid()
+		const port = await getPort()
+		const onGenerateCodegen = mock(async () => {})
+		const codegenPath = `${process.cwd()}/generated`
+		const wabe = new Wabe({
+			isProduction: false,
+			rootKey: 'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+			database: {
+				// @ts-expect-error
+				adapter: await getDatabaseAdapter(databaseId),
+			},
+			port,
+			security: {
+				disableCSRFProtection: true,
+			},
+			codegen: {
+				enabled: true,
+				path: codegenPath,
+			},
+			onGenerateCodegen,
+			schema: {
+				classes: [
+					{
+						name: 'Collection1',
+						fields: { name: { type: 'String' } },
+					},
+				],
+			},
+		})
+
+		const previousNodeEnv = process.env.NODE_ENV
+		process.env.NODE_ENV = 'development'
+		try {
+			await wabe.start()
+		} finally {
+			process.env.NODE_ENV = previousNodeEnv
+			await wabe.close()
+		}
+
+		expect(onGenerateCodegen).toHaveBeenCalledTimes(1)
+		const calls = onGenerateCodegen.mock.calls as unknown as Array<
+			[
+				{
+					path: string
+					schema: any
+					graphqlSchema: any
+					isProduction: boolean
+				},
+			]
+		>
+		const context = calls[0]?.[0]
+		expect(context).toBeDefined()
+		if (!context) throw new Error('onGenerateCodegen should have received a context')
+		const typedContext = context as {
+			path: string
+			schema: any
+			graphqlSchema: any
+			isProduction: boolean
+		}
+		expect(typedContext.path).toBe(codegenPath)
+		expect(typedContext.schema).toBeDefined()
+		expect(typedContext.graphqlSchema).toBeDefined()
+		expect(typedContext.isProduction).toBe(false)
+	})
+
+	it('should not call onGenerateCodegen in production', async () => {
+		const databaseId = uuid()
+		const port = await getPort()
+		const onGenerateCodegen = mock(async () => {})
+		const wabe = new Wabe({
+			isProduction: true,
+			rootKey: 'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+			database: {
+				// @ts-expect-error
+				adapter: await getDatabaseAdapter(databaseId),
+			},
+			port,
+			security: {
+				disableCSRFProtection: true,
+			},
+			codegen: {
+				enabled: true,
+				path: `${process.cwd()}/generated`,
+			},
+			onGenerateCodegen,
+			schema: {
+				classes: [
+					{
+						name: 'Collection1',
+						fields: { name: { type: 'String' } },
+					},
+				],
+			},
+		})
+
+		await wabe.start()
+		await wabe.close()
+
+		expect(onGenerateCodegen).toHaveBeenCalledTimes(0)
+	})
+
+	it('should not call onGenerateCodegen when codegen is disabled', async () => {
+		const databaseId = uuid()
+		const port = await getPort()
+		const onGenerateCodegen = mock(async () => {})
+		const wabe = new Wabe({
+			isProduction: false,
+			rootKey: 'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+			database: {
+				// @ts-expect-error
+				adapter: await getDatabaseAdapter(databaseId),
+			},
+			port,
+			security: {
+				disableCSRFProtection: true,
+			},
+			codegen: {
+				enabled: false,
+			},
+			onGenerateCodegen,
+			schema: {
+				classes: [
+					{
+						name: 'Collection1',
+						fields: { name: { type: 'String' } },
+					},
+				],
+			},
+		})
+
+		await wabe.start()
+		await wabe.close()
+
+		expect(onGenerateCodegen).toHaveBeenCalledTimes(0)
+	})
+
 	it('should run server on different hostname', async () => {
 		const databaseId = uuid()
 
@@ -666,7 +803,9 @@ describe('Server', () => {
 			}),
 		})
 
-		const json = (await res.json()) as { data?: { __schema?: { types?: { name: string }[] } } }
+		const json = (await res.json()) as {
+			data?: { __schema?: { types?: { name: string }[] } }
+		}
 		expect(json.data?.__schema?.types).toBeDefined()
 		expect(json.data?.__schema?.types?.length).toBeGreaterThan(0)
 
