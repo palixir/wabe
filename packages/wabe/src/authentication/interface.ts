@@ -34,11 +34,13 @@ export type OnSendChallengeOptions<T extends WabeTypes> = {
 export type OnVerifyChallengeOptions<T extends WabeTypes, K> = {
 	context: WabeContext<T>
 	input: K
+	challengeToken: string
 }
 
 export type ProviderInterface<T extends WabeTypes, K = any> = {
 	onSignIn: (options: AuthenticationEventsOptions<T, K>) => Promise<{
 		user: Partial<User>
+		challengeToken?: string | null
 		srp?: {
 			salt: string
 			serverPublic: string
@@ -46,7 +48,7 @@ export type ProviderInterface<T extends WabeTypes, K = any> = {
 	}>
 	onSignUp: (
 		options: AuthenticationEventsOptions<T, K>,
-	) => Promise<{ authenticationDataToSave: any }>
+	) => Promise<{ authenticationDataToSave: any; challengeToken?: string | null }>
 	onUpdateAuthenticationData?: (
 		options: AuthenticationEventsOptionsWithUserId<T, K>,
 	) => Promise<{ authenticationDataToSave: any }>
@@ -73,6 +75,7 @@ export type CustomAuthenticationMethods<
 	dataToStore?: W
 	provider: U
 	isSecondaryFactor?: boolean
+	challengeStorage?: 'userPending' | 'providerManaged'
 }
 
 export type RoleConfig = Array<string>
@@ -133,6 +136,8 @@ export interface AuthenticationSecurityConfig {
 	sendOtpCodeRateLimit?: AuthenticationRateLimitConfig
 	resetPasswordRateLimit?: AuthenticationRateLimitConfig
 	mfaChallengeTtlMs?: number
+	magicLinkOtpTtlMs?: number
+	magicLinkMaxAttempts?: number
 }
 
 export interface AuthenticationConfig<T extends WabeTypes> {
@@ -167,6 +172,12 @@ export enum AuthenticationProvider {
 	Google = 'google',
 	EmailPassword = 'emailPassword',
 	PhonePassword = 'phonePassword',
+	MagicLink = 'magicLink',
+}
+
+export enum MagicLinkIntent {
+	signIn = 'signIn',
+	signUp = 'signUp',
 }
 
 export enum SecondaryFactor {

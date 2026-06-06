@@ -1,4 +1,4 @@
-import { describe, expect, it, spyOn, beforeAll, afterAll, afterEach } from 'bun:test'
+import { describe, expect, it, spyOn, beforeAll, afterAll, afterEach, beforeEach } from 'bun:test'
 import { EmailOTP } from './EmailOTP'
 import type { DevWabeTypes } from '../../utils/helper'
 import { setupTests, closeTests } from '../../utils/testHelper'
@@ -15,6 +15,11 @@ describe('EmailOTPProvider', () => {
 	beforeAll(async () => {
 		const setup = await setupTests()
 		wabe = setup.wabe
+	})
+
+	beforeEach(() => {
+		spyEmailSend.mockClear()
+		spySendOtpCodeTemplate.mockClear()
 	})
 
 	afterAll(async () => {
@@ -95,6 +100,7 @@ describe('EmailOTPProvider', () => {
 
 		expect(
 			await emailOTP.onVerifyChallenge({
+				challengeToken: 'challenge-token',
 				context: {
 					wabe,
 					isRoot: false,
@@ -114,6 +120,7 @@ describe('EmailOTPProvider', () => {
 
 		expect(
 			await emailOTP.onVerifyChallenge({
+				challengeToken: 'challenge-token',
 				context: {
 					wabe,
 					isRoot: false,

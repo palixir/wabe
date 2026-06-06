@@ -30,7 +30,7 @@ Host it anywhere.
 
 | Feature                   | Description                                                                              |
 | ------------------------- | ---------------------------------------------------------------------------------------- |
-| 🔐 Authentication         | Email/password, OTP, OAuth (Google, GitHub), password reset, email verification          |
+| 🔐 Authentication         | Email/password, magic link (email OTP), 2FA OTP, OAuth (Google, GitHub), password reset   |
 | 🔑 Permissions            | Fine-grained access control at collection, object, and field levels with secure defaults |
 | ⚡ Auto-generated GraphQL | Fully typed CRUD GraphQL API generated from your schema, ready for production            |
 | 🔄 Hooks                  | Custom logic before/after create, update, delete, and read operations                    |

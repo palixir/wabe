@@ -693,6 +693,7 @@ export class DatabaseController<T extends WabeTypes> {
 		id,
 		adapterCallback,
 		inputObject,
+		_skipAuthenticationSignUpHook,
 	}: {
 		operationTypeBefore: OperationType
 		operationTypeAfter: OperationType
@@ -703,6 +704,7 @@ export class DatabaseController<T extends WabeTypes> {
 		id?: string
 		inputObject?: OutputType<T, K, U>
 		adapterCallback: (newData: any) => Promise<OutputType<T, K, U> | { id: string } | null>
+		_skipAuthenticationSignUpHook?: boolean
 	}) {
 		const normalizedData =
 			data === undefined
@@ -721,6 +723,7 @@ export class DatabaseController<T extends WabeTypes> {
 			select,
 			objectLoader: this._loadObjectForHooks(className, context),
 			objectsLoader: this._loadObjectsForHooks(className, context),
+			_skipAuthenticationSignUpHook,
 		})
 
 		const { newData, object: objectFromHook } = await hook.runOnSingleObject({
@@ -1203,6 +1206,7 @@ export class DatabaseController<T extends WabeTypes> {
 		context,
 		data,
 		select,
+		_skipAuthenticationSignUpHook,
 	}: CreateObjectOptions<T, K, U, W>): Promise<OutputType<T, K, W>> {
 		// Here data.file is null but should not be
 
@@ -1213,6 +1217,7 @@ export class DatabaseController<T extends WabeTypes> {
 			context,
 			data,
 			select: select as Select,
+			_skipAuthenticationSignUpHook,
 			adapterCallback: async (newData) => {
 				const payload = this._stripVirtualFieldsFromPayload({
 					className,

@@ -8,6 +8,8 @@ export const defaultCallAuthenticationProviderOnBeforeCreateUser = async (
 ) => {
 	if (!hookObject.isFieldUpdated('authentication') || hookObject.getNewData().isOauth) return
 
+	if (hookObject.skipAuthenticationSignUpHook) return
+
 	const context = hookObject.context
 
 	const authentication = hookObject.getNewData().authentication

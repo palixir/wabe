@@ -45,6 +45,7 @@ describe('QRCodeOTPProvider', () => {
 
 		expect(
 			await qrCodeOTP.onVerifyChallenge({
+				challengeToken: 'challenge-token',
 				context: {
 					wabe,
 					isRoot: false,
@@ -64,6 +65,7 @@ describe('QRCodeOTPProvider', () => {
 
 		expect(
 			await qrCodeOTP.onVerifyChallenge({
+				challengeToken: 'challenge-token',
 				context: {
 					wabe,
 					isRoot: false,

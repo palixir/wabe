@@ -30,10 +30,20 @@ export const signInWithResolver = async (
 		input.authentication[name]
 
 	// 1 - We call the onSignIn method of the provider
-	const { user, srp } = await provider.onSignIn({
+	const { user, srp, challengeToken } = await provider.onSignIn({
 		input: inputOfTheGoodAuthenticationMethod,
 		context,
 	})
+
+	if (challengeToken) {
+		return {
+			accessToken: null,
+			refreshToken: null,
+			user: null,
+			challengeToken,
+			srp: null,
+		}
+	}
 
 	const userId = user.id
 

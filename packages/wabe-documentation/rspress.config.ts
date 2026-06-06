@@ -106,6 +106,10 @@ export default defineConfig({
 							link: '/documentation/authentication/twoFactor',
 						},
 						{
+							text: 'Magic link (email OTP)',
+							link: '/documentation/authentication/magicLink',
+						},
+						{
 							text: 'Social login (OAuth)',
 							link: '/documentation/authentication/oauth',
 						},

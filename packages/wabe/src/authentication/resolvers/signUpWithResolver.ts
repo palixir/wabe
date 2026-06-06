@@ -2,9 +2,12 @@ import type { SignUpWithInput } from '../../../generated/wabe'
 import type { WabeContext } from '../../server/interface'
 import { getSessionCookieSameSite } from '../cookies'
 import { Session } from '../Session'
+import type { ProviderInterface } from '../interface'
+import { getAuthenticationMethod } from '../utils'
+import type { DevWabeTypes } from '../../utils/helper'
 
 // 0 - Get the authentication method
-// 1 - We check if the signUp is possible (call onSign)
+// 1 - We check if the signUp is possible (call onSignUp)
 // 2 - We create the user
 // 3 - We create session
 export const signUpWithResolver = async (
@@ -14,23 +17,48 @@ export const signUpWithResolver = async (
 	}: {
 		input: SignUpWithInput
 	},
-	context: WabeContext<any>,
+	context: WabeContext<DevWabeTypes>,
 ) => {
 	if (context.wabe.config.authentication?.disableSignUp) throw new Error('SignUp is disabled')
 
-	// Create object call the provider signUp
+	const { provider, name } = getAuthenticationMethod<DevWabeTypes, ProviderInterface<DevWabeTypes>>(
+		Object.keys(input.authentication || {}),
+		context,
+	)
+
+	const inputOfTheGoodAuthenticationMethod =
+		// @ts-expect-error
+		input.authentication[name]
+
+	const { authenticationDataToSave, challengeToken } = await provider.onSignUp({
+		input: inputOfTheGoodAuthenticationMethod,
+		context,
+	})
+
+	if (challengeToken) {
+		return {
+			id: null,
+			accessToken: null,
+			refreshToken: null,
+			challengeToken,
+		}
+	}
+
 	const res = await context.wabe.controllers.database.createObject({
 		className: 'User',
 		data: {
-			authentication: input.authentication,
+			authentication: {
+				[name]: authenticationDataToSave,
+			},
 		},
 		context,
 		select: { id: true },
+		_skipAuthenticationSignUpHook: true,
 	})
 
 	const createdUserId = res?.id
 
-	const session = new Session<any>()
+	const session = new Session<DevWabeTypes>()
 
 	if (!createdUserId) throw new Error('User not created')
 
@@ -64,5 +92,5 @@ export const signUpWithResolver = async (
 		})
 	}
 
-	return { accessToken, refreshToken, id: createdUserId }
+	return { accessToken, refreshToken, id: createdUserId, challengeToken: null }
 }

@@ -3,6 +3,10 @@ export type HtmlTemplates = {
 		fn: (options: { otp: string }) => string | Promise<string>
 		subject: string
 	}
+	magicLink?: {
+		fn: (options: { otp: string }) => string | Promise<string>
+		subject: string
+	}
 }
 
 export interface EmailSendOptions {

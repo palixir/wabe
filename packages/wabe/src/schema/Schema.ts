@@ -1,4 +1,4 @@
-import { AuthenticationProvider, SecondaryFactor } from '../authentication'
+import { AuthenticationProvider, MagicLinkIntent, SecondaryFactor } from '../authentication'
 import { refreshResolver } from '../authentication/resolvers/refreshResolver'
 import { signOutResolver } from '../authentication/resolvers/signOutResolver'
 import { verifyChallengeResolver } from '../authentication/resolvers/verifyChallenge'
@@ -289,6 +289,10 @@ export class Schema<T extends WabeTypes> {
 				name: 'SecondaryFactor',
 				values: Object.fromEntries(Object.values(SecondaryFactor).map((key) => [key, key])),
 			},
+			{
+				name: 'MagicLinkIntent',
+				values: Object.fromEntries(Object.values(MagicLinkIntent).map((key) => [key, key])),
+			},
 		]
 	}
 
@@ -416,13 +420,14 @@ export class Schema<T extends WabeTypes> {
 									name: 'SignUpWithOutput',
 									fields: {
 										id: { type: 'String' },
+										challengeToken: {
+											type: 'String',
+										},
 										accessToken: {
 											type: 'String',
-											required: true,
 										},
 										refreshToken: {
 											type: 'String',
-											required: true,
 										},
 									},
 								},
@@ -492,6 +497,7 @@ export class Schema<T extends WabeTypes> {
 									input: {
 										challengeToken: {
 											type: 'String',
+											required: true,
 										},
 										secondFA: secondaryFactorAuthenticationInputObject,
 									},
@@ -584,6 +590,63 @@ export class Schema<T extends WabeTypes> {
 				},
 			},
 			// Only root key
+			permissions: {
+				create: {
+					authorizedRoles: [],
+					requireAuthentication: true,
+				},
+				read: {
+					authorizedRoles: [],
+					requireAuthentication: true,
+				},
+				update: {
+					authorizedRoles: [],
+					requireAuthentication: true,
+				},
+				delete: {
+					authorizedRoles: [],
+					requireAuthentication: true,
+				},
+			},
+		}
+	}
+
+	magicLinkChallengeClass(): ClassInterface<T> {
+		return {
+			name: '_MagicLinkChallenge',
+			fields: {
+				email: {
+					type: 'Email',
+					required: true,
+				},
+				token: {
+					type: 'String',
+					required: true,
+				},
+				otpHash: {
+					type: 'String',
+					required: true,
+				},
+				expiresAt: {
+					type: 'Date',
+					required: true,
+				},
+				intent: {
+					type: 'MagicLinkIntent',
+					required: true,
+				},
+				attempts: {
+					type: 'Int',
+					required: true,
+				},
+			},
+			indexes: [
+				{
+					field: 'token',
+					order: 'ASC',
+					unique: true,
+				},
+			],
 			permissions: {
 				create: {
 					authorizedRoles: [],
@@ -885,6 +948,7 @@ export class Schema<T extends WabeTypes> {
 			this.sessionClass(),
 			this.roleClass(),
 			this.internalConfigClass(),
+			this.magicLinkChallengeClass(),
 			this.mutexClass(),
 		])
 	}
