@@ -7,11 +7,17 @@ enum AuthenticationProvider {
 	google
 	emailPassword
 	phonePassword
+	magicLink
 }
 
 enum SecondaryFactor {
 	emailOTP
 	qrcodeOTP
+}
+
+enum MagicLinkIntent {
+	signIn
+	signUp
 }
 
 """
@@ -147,12 +153,22 @@ type User {
 }
 
 type UserAuthentication {
+	magicLink: UserAuthenticationMagicLink
 	emailPasswordSRP: UserAuthenticationEmailPasswordSRP
 	phonePassword: UserAuthenticationPhonePassword
 	emailPassword: UserAuthenticationEmailPassword
 	google: UserAuthenticationGoogle
 	github: UserAuthenticationGithub
 }
+
+type UserAuthenticationMagicLink {
+	email: Email!
+}
+
+"""
+Email scalar type
+"""
+scalar Email
 
 type UserAuthenticationEmailPasswordSRP {
 	email: Email!
@@ -161,11 +177,6 @@ type UserAuthenticationEmailPasswordSRP {
 	serverSecret: String
 	serverSecretExpiresAt: Date
 }
-
-"""
-Email scalar type
-"""
-scalar Email
 
 type UserAuthenticationPhonePassword {
 	phone: Phone!
@@ -248,6 +259,7 @@ input UserWhereInput {
 }
 
 input UserAuthenticationWhereInput {
+	magicLink: UserAuthenticationMagicLinkWhereInput
 	emailPasswordSRP: UserAuthenticationEmailPasswordSRPWhereInput
 	phonePassword: UserAuthenticationPhonePasswordWhereInput
 	emailPassword: UserAuthenticationEmailPasswordWhereInput
@@ -255,6 +267,20 @@ input UserAuthenticationWhereInput {
 	github: UserAuthenticationGithubWhereInput
 	OR: [UserAuthenticationWhereInput]
 	AND: [UserAuthenticationWhereInput]
+}
+
+input UserAuthenticationMagicLinkWhereInput {
+	email: EmailWhereInput
+	OR: [UserAuthenticationMagicLinkWhereInput]
+	AND: [UserAuthenticationMagicLinkWhereInput]
+}
+
+input EmailWhereInput {
+	equalTo: Email
+	notEqualTo: Email
+	in: [Email]
+	notIn: [Email]
+	exists: Boolean
 }
 
 input UserAuthenticationEmailPasswordSRPWhereInput {
@@ -265,14 +291,6 @@ input UserAuthenticationEmailPasswordSRPWhereInput {
 	serverSecretExpiresAt: DateWhereInput
 	OR: [UserAuthenticationEmailPasswordSRPWhereInput]
 	AND: [UserAuthenticationEmailPasswordSRPWhereInput]
-}
-
-input EmailWhereInput {
-	equalTo: Email
-	notEqualTo: Email
-	in: [Email]
-	notIn: [Email]
-	exists: Boolean
 }
 
 input StringWhereInput {
@@ -541,11 +559,16 @@ input UserInput {
 }
 
 input UserAuthenticationInput {
+	magicLink: UserAuthenticationMagicLinkInput
 	emailPasswordSRP: UserAuthenticationEmailPasswordSRPInput
 	phonePassword: UserAuthenticationPhonePasswordInput
 	emailPassword: UserAuthenticationEmailPasswordInput
 	google: UserAuthenticationGoogleInput
 	github: UserAuthenticationGithubInput
+}
+
+input UserAuthenticationMagicLinkInput {
+	email: Email!
 }
 
 input UserAuthenticationEmailPasswordSRPInput {
@@ -634,11 +657,16 @@ input UserCreateFieldsInput {
 }
 
 input UserAuthenticationCreateFieldsInput {
+	magicLink: UserAuthenticationMagicLinkCreateFieldsInput
 	emailPasswordSRP: UserAuthenticationEmailPasswordSRPCreateFieldsInput
 	phonePassword: UserAuthenticationPhonePasswordCreateFieldsInput
 	emailPassword: UserAuthenticationEmailPasswordCreateFieldsInput
 	google: UserAuthenticationGoogleCreateFieldsInput
 	github: UserAuthenticationGithubCreateFieldsInput
+}
+
+input UserAuthenticationMagicLinkCreateFieldsInput {
+	email: Email
 }
 
 input UserAuthenticationEmailPasswordSRPCreateFieldsInput {
@@ -1053,6 +1081,115 @@ input _InternalConfigRelationInput {
 	createAndAdd: [_InternalConfigCreateFieldsInput!]
 }
 
+type _MagicLinkChallenge {
+	id: ID!
+	email: Email!
+	token: String!
+	otpHash: String!
+	expiresAt: Date!
+	intent: MagicLinkIntent!
+	attempts: Int!
+	acl: _MagicLinkChallengeACLObject
+	createdAt: Date
+	updatedAt: Date
+	search: [String]
+}
+
+type _MagicLinkChallengeACLObject {
+	users: [_MagicLinkChallengeACLObjectUsersACL]
+	roles: [_MagicLinkChallengeACLObjectRolesACL]
+}
+
+type _MagicLinkChallengeACLObjectUsersACL {
+	userId: String!
+	read: Boolean!
+	write: Boolean!
+}
+
+type _MagicLinkChallengeACLObjectRolesACL {
+	roleId: String!
+	read: Boolean!
+	write: Boolean!
+}
+
+input _MagicLinkChallengeInput {
+	email: Email!
+	token: String!
+	otpHash: String!
+	expiresAt: Date!
+	intent: MagicLinkIntent!
+	attempts: Int!
+	acl: _MagicLinkChallengeACLObjectInput
+	createdAt: Date
+	updatedAt: Date
+	search: [String]
+}
+
+input _MagicLinkChallengeACLObjectInput {
+	users: [_MagicLinkChallengeACLObjectUsersACLInput]
+	roles: [_MagicLinkChallengeACLObjectRolesACLInput]
+}
+
+input _MagicLinkChallengeACLObjectUsersACLInput {
+	userId: String!
+	read: Boolean!
+	write: Boolean!
+}
+
+input _MagicLinkChallengeACLObjectRolesACLInput {
+	roleId: String!
+	read: Boolean!
+	write: Boolean!
+}
+
+"""
+Input to link an object to a pointer _MagicLinkChallenge
+"""
+input _MagicLinkChallengePointerInput {
+	unlink: Boolean
+	link: ID
+	createAndLink: _MagicLinkChallengeCreateFieldsInput
+}
+
+input _MagicLinkChallengeCreateFieldsInput {
+	email: Email
+	token: String
+	otpHash: String
+	expiresAt: Date
+	intent: MagicLinkIntent
+	attempts: Int
+	acl: _MagicLinkChallengeACLObjectCreateFieldsInput
+	createdAt: Date
+	updatedAt: Date
+	search: [String]
+}
+
+input _MagicLinkChallengeACLObjectCreateFieldsInput {
+	users: [_MagicLinkChallengeACLObjectUsersACLCreateFieldsInput]
+	roles: [_MagicLinkChallengeACLObjectRolesACLCreateFieldsInput]
+}
+
+input _MagicLinkChallengeACLObjectUsersACLCreateFieldsInput {
+	userId: String
+	read: Boolean
+	write: Boolean
+}
+
+input _MagicLinkChallengeACLObjectRolesACLCreateFieldsInput {
+	roleId: String
+	read: Boolean
+	write: Boolean
+}
+
+"""
+Input to add a relation to the class _MagicLinkChallenge
+"""
+input _MagicLinkChallengeRelationInput {
+	add: [ID!]
+	remove: [ID!]
+	createAndAdd: [_MagicLinkChallengeCreateFieldsInput!]
+}
+
 type _Mutex {
 	id: ID!
 	name: String!
@@ -1176,6 +1313,13 @@ type Query {
 		first: Int
 		order: [_InternalConfigOrder!]
 	): _InternalConfigConnection!
+	_magicLinkChallenge(id: ID): _MagicLinkChallenge
+	_magicLinkChallenges(
+		where: _MagicLinkChallengeWhereInput
+		offset: Int
+		first: Int
+		order: [_MagicLinkChallengeOrder!]
+	): _MagicLinkChallengeConnection!
 	_mutex(id: ID): _Mutex
 	_mutexes(
 		where: _MutexWhereInput
@@ -1331,6 +1475,90 @@ enum _InternalConfigOrder {
 	search_DESC
 }
 
+type _MagicLinkChallengeConnection {
+	ok: Boolean
+	totalCount: Int
+	edges: [_MagicLinkChallengeEdge]
+}
+
+type _MagicLinkChallengeEdge {
+	node: _MagicLinkChallenge!
+}
+
+input _MagicLinkChallengeWhereInput {
+	id: IdWhereInput
+	email: EmailWhereInput
+	token: StringWhereInput
+	otpHash: StringWhereInput
+	expiresAt: DateWhereInput
+	intent: AnyWhereInput
+	attempts: IntWhereInput
+	acl: _MagicLinkChallengeACLObjectWhereInput
+	createdAt: DateWhereInput
+	updatedAt: DateWhereInput
+	search: SearchWhereInput
+	OR: [_MagicLinkChallengeWhereInput]
+	AND: [_MagicLinkChallengeWhereInput]
+}
+
+input IntWhereInput {
+	equalTo: Int
+	notEqualTo: Int
+	lessThan: Int
+	lessThanOrEqualTo: Int
+	greaterThan: Int
+	greaterThanOrEqualTo: Int
+	in: [Int]
+	notIn: [Int]
+	exists: Boolean
+}
+
+input _MagicLinkChallengeACLObjectWhereInput {
+	users: [_MagicLinkChallengeACLObjectUsersACLWhereInput]
+	roles: [_MagicLinkChallengeACLObjectRolesACLWhereInput]
+	OR: [_MagicLinkChallengeACLObjectWhereInput]
+	AND: [_MagicLinkChallengeACLObjectWhereInput]
+}
+
+input _MagicLinkChallengeACLObjectUsersACLWhereInput {
+	userId: StringWhereInput
+	read: BooleanWhereInput
+	write: BooleanWhereInput
+	OR: [_MagicLinkChallengeACLObjectUsersACLWhereInput]
+	AND: [_MagicLinkChallengeACLObjectUsersACLWhereInput]
+}
+
+input _MagicLinkChallengeACLObjectRolesACLWhereInput {
+	roleId: StringWhereInput
+	read: BooleanWhereInput
+	write: BooleanWhereInput
+	OR: [_MagicLinkChallengeACLObjectRolesACLWhereInput]
+	AND: [_MagicLinkChallengeACLObjectRolesACLWhereInput]
+}
+
+enum _MagicLinkChallengeOrder {
+	email_ASC
+	email_DESC
+	token_ASC
+	token_DESC
+	otpHash_ASC
+	otpHash_DESC
+	expiresAt_ASC
+	expiresAt_DESC
+	intent_ASC
+	intent_DESC
+	attempts_ASC
+	attempts_DESC
+	acl_ASC
+	acl_DESC
+	createdAt_ASC
+	createdAt_DESC
+	updatedAt_ASC
+	updatedAt_DESC
+	search_ASC
+	search_DESC
+}
+
 type _MutexConnection {
 	ok: Boolean
 	totalCount: Int
@@ -1426,6 +1654,24 @@ type Mutation {
 	update_InternalConfigs(input: Update_InternalConfigsInput!): _InternalConfigConnection!
 	delete_InternalConfig(input: Delete_InternalConfigInput!): Delete_InternalConfigPayload
 	delete_InternalConfigs(input: Delete_InternalConfigsInput!): _InternalConfigConnection!
+	create_MagicLinkChallenge(
+		input: Create_MagicLinkChallengeInput!
+	): Create_MagicLinkChallengePayload
+	create_MagicLinkChallenges(
+		input: Create_MagicLinkChallengesInput!
+	): _MagicLinkChallengeConnection!
+	update_MagicLinkChallenge(
+		input: Update_MagicLinkChallengeInput!
+	): Update_MagicLinkChallengePayload
+	update_MagicLinkChallenges(
+		input: Update_MagicLinkChallengesInput!
+	): _MagicLinkChallengeConnection!
+	delete_MagicLinkChallenge(
+		input: Delete_MagicLinkChallengeInput!
+	): Delete_MagicLinkChallengePayload
+	delete_MagicLinkChallenges(
+		input: Delete_MagicLinkChallengesInput!
+	): _MagicLinkChallengeConnection!
 	create_Mutex(input: Create_MutexInput!): Create_MutexPayload
 	create_Mutexes(input: Create_MutexesInput!): _MutexConnection!
 	update_Mutex(input: Update_MutexInput!): Update_MutexPayload
@@ -1566,11 +1812,16 @@ input UserUpdateFieldsInput {
 }
 
 input UserAuthenticationUpdateFieldsInput {
+	magicLink: UserAuthenticationMagicLinkUpdateFieldsInput
 	emailPasswordSRP: UserAuthenticationEmailPasswordSRPUpdateFieldsInput
 	phonePassword: UserAuthenticationPhonePasswordUpdateFieldsInput
 	emailPassword: UserAuthenticationEmailPasswordUpdateFieldsInput
 	google: UserAuthenticationGoogleUpdateFieldsInput
 	github: UserAuthenticationGithubUpdateFieldsInput
+}
+
+input UserAuthenticationMagicLinkUpdateFieldsInput {
+	email: Email
 }
 
 input UserAuthenticationEmailPasswordSRPUpdateFieldsInput {
@@ -1880,6 +2131,84 @@ input Delete_InternalConfigsInput {
 	order: [_InternalConfigOrder]
 }
 
+type Create_MagicLinkChallengePayload {
+	_magicLinkChallenge: _MagicLinkChallenge
+	ok: Boolean
+}
+
+input Create_MagicLinkChallengeInput {
+	fields: _MagicLinkChallengeCreateFieldsInput
+}
+
+input Create_MagicLinkChallengesInput {
+	fields: [_MagicLinkChallengeCreateFieldsInput]!
+	offset: Int
+	first: Int
+	order: [_MagicLinkChallengeOrder]
+}
+
+type Update_MagicLinkChallengePayload {
+	_magicLinkChallenge: _MagicLinkChallenge
+	ok: Boolean
+}
+
+input Update_MagicLinkChallengeInput {
+	id: ID
+	fields: _MagicLinkChallengeUpdateFieldsInput
+}
+
+input _MagicLinkChallengeUpdateFieldsInput {
+	email: Email
+	token: String
+	otpHash: String
+	expiresAt: Date
+	intent: MagicLinkIntent
+	attempts: Int
+	acl: _MagicLinkChallengeACLObjectUpdateFieldsInput
+	createdAt: Date
+	updatedAt: Date
+	search: [String]
+}
+
+input _MagicLinkChallengeACLObjectUpdateFieldsInput {
+	users: [_MagicLinkChallengeACLObjectUsersACLUpdateFieldsInput]
+	roles: [_MagicLinkChallengeACLObjectRolesACLUpdateFieldsInput]
+}
+
+input _MagicLinkChallengeACLObjectUsersACLUpdateFieldsInput {
+	userId: String
+	read: Boolean
+	write: Boolean
+}
+
+input _MagicLinkChallengeACLObjectRolesACLUpdateFieldsInput {
+	roleId: String
+	read: Boolean
+	write: Boolean
+}
+
+input Update_MagicLinkChallengesInput {
+	fields: _MagicLinkChallengeUpdateFieldsInput
+	where: _MagicLinkChallengeWhereInput
+	offset: Int
+	first: Int
+	order: [_MagicLinkChallengeOrder]
+}
+
+type Delete_MagicLinkChallengePayload {
+	_magicLinkChallenge: _MagicLinkChallenge
+	ok: Boolean
+}
+
+input Delete_MagicLinkChallengeInput {
+	id: ID
+}
+
+input Delete_MagicLinkChallengesInput {
+	where: _MagicLinkChallengeWhereInput
+	order: [_MagicLinkChallengeOrder]
+}
+
 type Create_MutexPayload {
 	_mutex: _Mutex
 	ok: Boolean
@@ -1983,11 +2312,16 @@ input SignInWithInput {
 }
 
 input SignInWithAuthenticationInput {
+	magicLink: SignInWithAuthenticationMagicLinkInput
 	emailPasswordSRP: SignInWithAuthenticationEmailPasswordSRPInput
 	phonePassword: SignInWithAuthenticationPhonePasswordInput
 	emailPassword: SignInWithAuthenticationEmailPasswordInput
 	google: SignInWithAuthenticationGoogleInput
 	github: SignInWithAuthenticationGithubInput
+}
+
+input SignInWithAuthenticationMagicLinkInput {
+	email: Email!
 }
 
 input SignInWithAuthenticationEmailPasswordSRPInput {
@@ -2019,8 +2353,9 @@ input SignInWithAuthenticationGithubInput {
 
 type SignUpWithOutput {
 	id: String
-	accessToken: String!
-	refreshToken: String!
+	challengeToken: String
+	accessToken: String
+	refreshToken: String
 }
 
 input SignUpWithInput {
@@ -2028,11 +2363,16 @@ input SignUpWithInput {
 }
 
 input SignUpWithAuthenticationInput {
+	magicLink: SignUpWithAuthenticationMagicLinkInput
 	emailPasswordSRP: SignUpWithAuthenticationEmailPasswordSRPInput
 	phonePassword: SignUpWithAuthenticationPhonePasswordInput
 	emailPassword: SignUpWithAuthenticationEmailPasswordInput
 	google: SignUpWithAuthenticationGoogleInput
 	github: SignUpWithAuthenticationGithubInput
+}
+
+input SignUpWithAuthenticationMagicLinkInput {
+	email: Email!
 }
 
 input SignUpWithAuthenticationEmailPasswordSRPInput {
@@ -2082,14 +2422,20 @@ type VerifyChallengeOutputSRPOutputVerifyChallenge {
 }
 
 input VerifyChallengeInput {
-	challengeToken: String
+	challengeToken: String!
 	secondFA: VerifyChallengeSecondaryFactorAuthenticationInput
 }
 
 input VerifyChallengeSecondaryFactorAuthenticationInput {
+	magicLinkChallenge: VerifyChallengeSecondaryFactorAuthenticationMagicLinkChallengeInput
 	emailPasswordSRPChallenge: VerifyChallengeSecondaryFactorAuthenticationEmailPasswordSRPChallengeInput
 	emailOTP: VerifyChallengeSecondaryFactorAuthenticationEmailOTPInput
 	qrCodeOTP: VerifyChallengeSecondaryFactorAuthenticationQrCodeOTPInput
+}
+
+input VerifyChallengeSecondaryFactorAuthenticationMagicLinkChallengeInput {
+	email: Email!
+	otp: String!
 }
 
 input VerifyChallengeSecondaryFactorAuthenticationEmailPasswordSRPChallengeInput {

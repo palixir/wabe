@@ -1,8 +1,21 @@
-import { beforeAll, afterAll, describe, expect, it, beforeEach } from 'bun:test'
-import { type DevWabeTypes, getAnonymousClient } from '../../utils/helper'
-import type { Wabe } from '../../server'
+import { afterAll, beforeAll, beforeEach, describe, expect, it, spyOn } from 'bun:test'
 import { gql } from 'graphql-request'
-import { setupTests, closeTests } from '../../utils/testHelper'
+import { EmailPassword } from '../providers/EmailPassword'
+import type { Wabe } from '../../server'
+import { verifyArgon2 } from '../../utils/crypto'
+import { contextWithRoot } from '../../utils/export'
+import { type DevWabeTypes, getAnonymousClient } from '../../utils/helper'
+import { closeTests, setupTests } from '../../utils/testHelper'
+
+const signUpWithEmailPasswordMutation = gql`
+	mutation signUpWith($input: SignUpWithInput!) {
+		signUpWith(input: $input) {
+			id
+			accessToken
+			refreshToken
+		}
+	}
+`
 
 describe('SignUpWith', () => {
 	let wabe: Wabe<DevWabeTypes>
@@ -151,30 +164,83 @@ describe('SignUpWith', () => {
 	it('should signUpWith email and password when the user not exist', async () => {
 		const anonymousClient = getAnonymousClient(wabe.config.port)
 
-		const res = await anonymousClient.request<any>(
-			gql`
-				mutation signUpWith($input: SignUpWithInput!) {
-					signUpWith(input: $input) {
-						id
-						accessToken
-						refreshToken
-					}
-				}
-			`,
-			{
-				input: {
-					authentication: {
-						emailPassword: {
-							email: 'test@gmail.com',
-							password: 'password',
-						},
+		const res = await anonymousClient.request<any>(signUpWithEmailPasswordMutation, {
+			input: {
+				authentication: {
+					emailPassword: {
+						email: 'test@gmail.com',
+						password: 'password',
 					},
 				},
 			},
-		)
+		})
 
 		expect(res.signUpWith.id).toEqual(expect.any(String))
 		expect(res.signUpWith.accessToken).toEqual(expect.any(String))
 		expect(res.signUpWith.refreshToken).toEqual(expect.any(String))
+	})
+
+	it('should call onSignUp only once via signUpWith and still hash the password', async () => {
+		const spyOnSignUp = spyOn(EmailPassword.prototype, 'onSignUp')
+		const email = 'signup-once@test.fr'
+		const password = 'password'
+		const anonymousClient = getAnonymousClient(wabe.config.port)
+
+		try {
+			await anonymousClient.request<any>(signUpWithEmailPasswordMutation, {
+				input: {
+					authentication: {
+						emailPassword: { email, password },
+					},
+				},
+			})
+
+			expect(spyOnSignUp).toHaveBeenCalledTimes(1)
+
+			const users = await wabe.controllers.database.getObjects({
+				className: 'User',
+				where: {
+					authentication: {
+						emailPassword: {
+							email: { equalTo: email },
+						},
+					},
+				},
+				select: { authentication: true },
+				first: 1,
+				context: contextWithRoot({ wabe, isRoot: true }),
+			})
+
+			const storedPassword = users[0]?.authentication?.emailPassword?.password
+			expect(storedPassword).toEqual(expect.any(String))
+			expect(await verifyArgon2(password, storedPassword!)).toBe(true)
+		} finally {
+			spyOnSignUp.mockRestore()
+		}
+	})
+
+	it('should still call onSignUp once when creating a User directly', async () => {
+		const spyOnSignUp = spyOn(EmailPassword.prototype, 'onSignUp')
+		const email = 'signup-hook@test.fr'
+
+		try {
+			await wabe.controllers.database.createObject({
+				className: 'User',
+				context: contextWithRoot({ wabe, isRoot: true }),
+				data: {
+					authentication: {
+						emailPassword: {
+							email,
+							password: 'password',
+						},
+					},
+				},
+				select: { id: true },
+			})
+
+			expect(spyOnSignUp).toHaveBeenCalledTimes(1)
+		} finally {
+			spyOnSignUp.mockRestore()
+		}
 	})
 })

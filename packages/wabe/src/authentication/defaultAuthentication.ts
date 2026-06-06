@@ -6,11 +6,46 @@ import { EmailOTP } from './providers/EmailOTP'
 import { EmailPassword } from './providers/EmailPassword'
 import { EmailPasswordSRPChallenge, EmailPasswordSRP } from './providers/EmailPasswordSRP'
 import { PhonePassword } from './providers/PhonePassword'
+import { MagicLink, MagicLinkChallenge } from './providers/MagicLink'
 
 export const defaultAuthenticationMethods = <T extends WabeTypes>(): CustomAuthenticationMethods<
 	T,
 	ProviderInterface<T>
 >[] => [
+	{
+		name: 'magicLinkChallenge',
+		input: {
+			email: {
+				type: 'Email',
+				required: true,
+			},
+			otp: {
+				type: 'String',
+				required: true,
+			},
+		},
+		// @ts-expect-error
+		provider: new MagicLinkChallenge(),
+		isSecondaryFactor: true,
+		challengeStorage: 'providerManaged',
+	},
+	{
+		name: 'magicLink',
+		input: {
+			email: {
+				type: 'Email',
+				required: true,
+			},
+		},
+		dataToStore: {
+			email: {
+				type: 'Email',
+				required: true,
+			},
+		},
+		// @ts-expect-error
+		provider: new MagicLink(),
+	},
 	{
 		name: 'emailPasswordSRPChallenge',
 		input: {

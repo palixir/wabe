@@ -6,6 +6,7 @@ Here is a list of the default authentication methods:
 
 - Email password
 - Phone password
+- Magic link (email OTP) — see [Magic link](./magicLink.md)
 - Google
 
 ```graphql

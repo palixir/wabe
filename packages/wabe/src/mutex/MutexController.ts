@@ -2,7 +2,6 @@ import type { DatabaseController } from '../database'
 import type { WabeContext } from '../server/interface'
 import type { Wabe, WabeTypes } from '../server'
 import { contextWithRoot } from '../utils/export'
-import { DevWabeTypes } from 'src/utils/helper'
 
 export class MutexController<T extends WabeTypes> {
 	private databaseController: DatabaseController<T>

@@ -59,7 +59,7 @@ describe('verifyChallenge', () => {
 			verifyChallengeResolver(
 				undefined,
 				{
-					input: {},
+					input: {} as any,
 				},
 				context,
 			),
@@ -144,6 +144,7 @@ describe('verifyChallenge', () => {
 		expect(mockOnVerifyChallenge).toHaveBeenCalledWith({
 			input: { code: '123456' },
 			context: expect.any(Object),
+			challengeToken,
 		})
 
 		expect(spyCreateSession).toHaveBeenCalledTimes(1)

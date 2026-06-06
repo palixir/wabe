@@ -1,7 +1,5 @@
 export enum RoleEnum {
 	DashboardAdmin = 'DashboardAdmin',
-	Admin = 'Admin',
-	Client = 'Client',
 }
 
 export enum AuthenticationProvider {
@@ -9,11 +7,17 @@ export enum AuthenticationProvider {
 	google = 'google',
 	emailPassword = 'emailPassword',
 	phonePassword = 'phonePassword',
+	magicLink = 'magicLink',
 }
 
 export enum SecondaryFactor {
 	emailOTP = 'emailOTP',
 	qrcodeOTP = 'qrcodeOTP',
+}
+
+export enum MagicLinkIntent {
+	signIn = 'signIn',
+	signUp = 'signUp',
 }
 
 export type ACLObjectUsersACL = {
@@ -33,20 +37,34 @@ export type ACLObjectRolesACL = {
 	write: boolean
 }
 
+export type Collection1 = {
+	id: string
+	name?: string
+	acl?: ACLObject
+	createdAt?: string
+	updatedAt?: string
+	search?: Array<string>
+}
+
+export type AuthenticationMagicLink = {
+	email: string
+}
+
+export type Authentication = {
+	magicLink?: AuthenticationMagicLink
+	emailPasswordSRP?: AuthenticationEmailPasswordSRP
+	phonePassword?: AuthenticationPhonePassword
+	emailPassword?: AuthenticationEmailPassword
+	google?: AuthenticationGoogle
+	github?: AuthenticationGithub
+}
+
 export type AuthenticationEmailPasswordSRP = {
 	email: string
 	salt: string
 	verifier: string
 	serverSecret?: string
 	serverSecretExpiresAt?: Date
-}
-
-export type Authentication = {
-	emailPasswordSRP?: AuthenticationEmailPasswordSRP
-	phonePassword?: AuthenticationPhonePassword
-	emailPassword?: AuthenticationEmailPassword
-	google?: AuthenticationGoogle
-	github?: AuthenticationGithub
 }
 
 export type AuthenticationPhonePassword = {
@@ -85,39 +103,16 @@ export type PendingAuthenticationChallenge = {
 
 export type User = {
 	id: string
-	name?: string
-	age?: number
-	email?: string
-	acl?: ACLObject
-	createdAt?: string
-	updatedAt?: string
-	search?: Array<string>
 	authentication?: Authentication
 	provider?: AuthenticationProvider
 	isOauth?: boolean
+	email?: string
 	verifiedEmail?: boolean
 	role?: Role
 	sessions?: Array<_Session>
 	secondFA?: SecondFA
 	otpSalt?: string
 	pendingChallenges?: Array<PendingAuthenticationChallenge>
-}
-
-export type Experience = {
-	jobTitle: string
-	companyName: string
-	startDate: string
-	endDate: string
-	achievements?: Array<string>
-}
-
-export type Post = {
-	id: string
-	name: string
-	test2?: RoleEnum
-	test3: Array<User>
-	test4: User
-	experiences?: Array<Experience>
 	acl?: ACLObject
 	createdAt?: string
 	updatedAt?: string
@@ -158,6 +153,20 @@ export type _InternalConfig = {
 	search?: Array<string>
 }
 
+export type _MagicLinkChallenge = {
+	id: string
+	email: string
+	token: string
+	otpHash: string
+	expiresAt: string
+	intent: MagicLinkIntent
+	attempts: number
+	acl?: ACLObject
+	createdAt?: string
+	updatedAt?: string
+	search?: Array<string>
+}
+
 export type _Mutex = {
 	id: string
 	name: string
@@ -168,33 +177,27 @@ export type _Mutex = {
 	search?: Array<string>
 }
 
-export type WhereUser = {
+export type WhereCollection1 = {
 	id: string
 	name?: string
-	age?: number
-	email?: string
 	acl?: ACLObject
 	createdAt?: Date
 	updatedAt?: Date
 	search?: Array<string>
+}
+
+export type WhereUser = {
+	id: string
 	authentication?: Authentication
 	provider?: AuthenticationProvider
 	isOauth?: boolean
+	email?: string
 	verifiedEmail?: boolean
 	role?: Role
 	sessions?: Array<_Session>
 	secondFA?: SecondFA
 	otpSalt?: string
 	pendingChallenges?: Array<PendingAuthenticationChallenge>
-}
-
-export type WherePost = {
-	id: string
-	name: string
-	test2?: RoleEnum
-	test3: Array<User>
-	test4: User
-	experiences?: Array<Experience>
 	acl?: ACLObject
 	createdAt?: Date
 	updatedAt?: Date
@@ -235,6 +238,20 @@ export type Where_InternalConfig = {
 	search?: Array<string>
 }
 
+export type Where_MagicLinkChallenge = {
+	id: string
+	email: string
+	token: string
+	otpHash: string
+	expiresAt: Date
+	intent: MagicLinkIntent
+	attempts: number
+	acl?: ACLObject
+	createdAt?: Date
+	updatedAt?: Date
+	search?: Array<string>
+}
+
 export type Where_Mutex = {
 	id: string
 	name: string
@@ -243,36 +260,6 @@ export type Where_Mutex = {
 	createdAt?: Date
 	updatedAt?: Date
 	search?: Array<string>
-}
-
-export type CreateMutationInput = {
-	name: number
-}
-
-export type MutationCreateMutationArgs = {
-	input: CreateMutationInput
-}
-
-export type CustomMutationInput = {
-	a: number
-	b: number
-}
-
-export type MutationCustomMutationArgs = {
-	input: CustomMutationInput
-}
-
-export type SecondCustomMutationInput = {
-	sum?: SecondCustomMutationSum
-}
-
-export type MutationSecondCustomMutationArgs = {
-	input: SecondCustomMutationInput
-}
-
-export type SecondCustomMutationSum = {
-	a: number
-	b: number
 }
 
 export type ResetPasswordInput = {
@@ -302,19 +289,24 @@ export type MutationSignInWithArgs = {
 	input: SignInWithInput
 }
 
-export type SignInWithAuthenticationEmailPasswordSRP = {
+export type SignInWithAuthenticationMagicLink = {
 	email: string
-	clientPublic: string
-	salt?: string
-	verifier?: string
 }
 
 export type SignInWithAuthentication = {
+	magicLink?: SignInWithAuthenticationMagicLink
 	emailPasswordSRP?: SignInWithAuthenticationEmailPasswordSRP
 	phonePassword?: SignInWithAuthenticationPhonePassword
 	emailPassword?: SignInWithAuthenticationEmailPassword
 	google?: SignInWithAuthenticationGoogle
 	github?: SignInWithAuthenticationGithub
+}
+
+export type SignInWithAuthenticationEmailPasswordSRP = {
+	email: string
+	clientPublic: string
+	salt?: string
+	verifier?: string
 }
 
 export type SignInWithAuthenticationPhonePassword = {
@@ -345,19 +337,24 @@ export type MutationSignUpWithArgs = {
 	input: SignUpWithInput
 }
 
-export type SignUpWithAuthenticationEmailPasswordSRP = {
+export type SignUpWithAuthenticationMagicLink = {
 	email: string
-	clientPublic: string
-	salt?: string
-	verifier?: string
 }
 
 export type SignUpWithAuthentication = {
+	magicLink?: SignUpWithAuthenticationMagicLink
 	emailPasswordSRP?: SignUpWithAuthenticationEmailPasswordSRP
 	phonePassword?: SignUpWithAuthenticationPhonePassword
 	emailPassword?: SignUpWithAuthenticationEmailPassword
 	google?: SignUpWithAuthenticationGoogle
 	github?: SignUpWithAuthenticationGithub
+}
+
+export type SignUpWithAuthenticationEmailPasswordSRP = {
+	email: string
+	clientPublic: string
+	salt?: string
+	verifier?: string
 }
 
 export type SignUpWithAuthenticationPhonePassword = {
@@ -396,7 +393,7 @@ export type MutationRefreshArgs = {
 }
 
 export type VerifyChallengeInput = {
-	challengeToken?: string
+	challengeToken: string
 	secondFA?: VerifyChallengeSecondFA
 }
 
@@ -404,16 +401,22 @@ export type MutationVerifyChallengeArgs = {
 	input: VerifyChallengeInput
 }
 
+export type VerifyChallengeSecondFAMagicLinkChallenge = {
+	email: string
+	otp: string
+}
+
+export type VerifyChallengeSecondFA = {
+	magicLinkChallenge?: VerifyChallengeSecondFAMagicLinkChallenge
+	emailPasswordSRPChallenge?: VerifyChallengeSecondFAEmailPasswordSRPChallenge
+	emailOTP?: VerifyChallengeSecondFAEmailOTP
+	qrCodeOTP?: VerifyChallengeSecondFAQrCodeOTP
+}
+
 export type VerifyChallengeSecondFAEmailPasswordSRPChallenge = {
 	email: string
 	clientPublic: string
 	clientSessionProof: string
-}
-
-export type VerifyChallengeSecondFA = {
-	emailPasswordSRPChallenge?: VerifyChallengeSecondFAEmailPasswordSRPChallenge
-	emailOTP?: VerifyChallengeSecondFAEmailOTP
-	qrCodeOTP?: VerifyChallengeSecondFAQrCodeOTP
 }
 
 export type VerifyChallengeSecondFAEmailOTP = {
@@ -426,10 +429,6 @@ export type VerifyChallengeSecondFAQrCodeOTP = {
 	otp: string
 }
 
-export type QueryHelloWorldArgs = {
-	name: string
-}
-
 export type QueryMeArgs = {}
 
 export type WabeSchemaScalars = ''
@@ -438,22 +437,25 @@ export type WabeSchemaEnums = {
 	RoleEnum: RoleEnum
 	AuthenticationProvider: AuthenticationProvider
 	SecondaryFactor: SecondaryFactor
+	MagicLinkIntent: MagicLinkIntent
 }
 
 export type WabeSchemaTypes = {
+	Collection1: Collection1
 	User: User
-	Post: Post
 	_Session: _Session
 	Role: Role
 	_InternalConfig: _InternalConfig
+	_MagicLinkChallenge: _MagicLinkChallenge
 	_Mutex: _Mutex
 }
 
 export type WabeSchemaWhereTypes = {
+	Collection1: WhereCollection1
 	User: WhereUser
-	Post: WherePost
 	_Session: Where_Session
 	Role: WhereRole
 	_InternalConfig: Where_InternalConfig
+	_MagicLinkChallenge: Where_MagicLinkChallenge
 	_Mutex: Where_Mutex
 }

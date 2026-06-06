@@ -22,29 +22,32 @@ export const verifyChallengeResolver = async (
 
 	if (listOfFactor.length > 1) throw new Error('Only one factor is allowed')
 
-	const { provider, name } = getAuthenticationMethod<any, SecondaryProviderInterface<DevWabeTypes>>(
-		listOfFactor,
-		context,
-	)
+	const { provider, name, challengeStorage } = getAuthenticationMethod<
+		any,
+		SecondaryProviderInterface<DevWabeTypes>
+	>(listOfFactor, context)
+
+	const challengeToken = input.challengeToken
+	if (!challengeToken) throw new Error('Invalid challenge')
 
 	const result = await provider.onVerifyChallenge({
 		context,
 		// @ts-expect-error
 		input: input.secondFA[name],
+		challengeToken,
 	})
 
 	if (!result?.userId) throw new Error('Invalid challenge')
 
-	const challengeToken = input.challengeToken
-	if (!challengeToken) throw new Error('Invalid challenge')
+	if (challengeStorage !== 'providerManaged') {
+		const isValidChallenge = await consumeMfaChallenge(context, {
+			challengeToken,
+			userId: result.userId,
+			provider: name,
+		})
 
-	const isValidChallenge = await consumeMfaChallenge(context, {
-		challengeToken,
-		userId: result.userId,
-		provider: name,
-	})
-
-	if (!isValidChallenge) throw new Error('Invalid challenge')
+		if (!isValidChallenge) throw new Error('Invalid challenge')
+	}
 
 	const session = new Session<DevWabeTypes>()
 

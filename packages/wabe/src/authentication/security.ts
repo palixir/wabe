@@ -122,7 +122,15 @@ export const registerRateLimitFailure = <T extends WabeTypes>(
 	context: WabeContext<T>,
 	scope: RateLimitScope,
 	key: string,
-) => {
+): void => {
+	registerRateLimitAttempt(context, scope, key)
+}
+
+export const registerRateLimitAttempt = <T extends WabeTypes>(
+	context: WabeContext<T>,
+	scope: RateLimitScope,
+	key: string,
+): void => {
 	const options = getRateLimitOptions(context, scope)
 
 	if (!options.enabled) return

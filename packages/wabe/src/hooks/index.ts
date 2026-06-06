@@ -102,6 +102,7 @@ export const initializeHook = <T extends WabeTypes, K extends keyof T['types']>(
 	select,
 	objectLoader,
 	objectsLoader,
+	_skipAuthenticationSignUpHook,
 }: {
 	className: K
 	newData?: MutationData<DevWabeTypes, any, any>
@@ -112,6 +113,7 @@ export const initializeHook = <T extends WabeTypes, K extends keyof T['types']>(
 		where?: WhereType<DevWabeTypes, any>
 		ids: string[]
 	}) => Promise<OutputType<DevWabeTypes, any, any>[]>
+	_skipAuthenticationSignUpHook?: boolean
 }) => {
 	const computeObject = ({ id }: { id?: string }): Promise<OutputType<DevWabeTypes, any, any>> => {
 		// If we don't have an id, like for example after delete, we return an empty object
@@ -173,6 +175,7 @@ export const initializeHook = <T extends WabeTypes, K extends keyof T['types']>(
 				object,
 				originalObject: options.originalObject,
 				select,
+				_skipAuthenticationSignUpHook,
 			})
 
 			// We need to keep the order of the data but we need to execute the hooks in parallel

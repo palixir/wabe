@@ -51,6 +51,7 @@ export class HookObject<T extends WabeTypes, K extends keyof WabeTypes['types']>
 	// Object before any mutation, for example before delete
 	public originalObject: OutputType<T, K, keyof T['types'][K]> | undefined
 	public select: Select
+	public readonly skipAuthenticationSignUpHook: boolean
 
 	constructor({
 		newData,
@@ -60,6 +61,7 @@ export class HookObject<T extends WabeTypes, K extends keyof WabeTypes['types']>
 		object,
 		originalObject,
 		select,
+		_skipAuthenticationSignUpHook,
 	}: {
 		className: K
 		newData?: MutationData<T, K, keyof T['types'][K]>
@@ -68,10 +70,12 @@ export class HookObject<T extends WabeTypes, K extends keyof WabeTypes['types']>
 		object: OutputType<T, K, keyof T['types'][K]>
 		originalObject?: OutputType<T, K, keyof T['types'][K]>
 		select: Select
+		_skipAuthenticationSignUpHook?: boolean
 	}) {
 		this.className = className
 		this.operationType = operationType
 		this.context = context
+		this.skipAuthenticationSignUpHook = _skipAuthenticationSignUpHook ?? false
 		this.newData = this._normalizeMutationData(newData)
 		this.object = object
 		this.originalObject = originalObject

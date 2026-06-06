@@ -208,6 +208,8 @@ export interface CreateObjectOptions<
 	data: MutationInputData<T, K, U>
 	context: WabeContext<T>
 	select?: SelectType<T, K, W>
+	/** @internal Skips the authentication onSignUp BeforeCreate hook (already run by signUpWith). */
+	_skipAuthenticationSignUpHook?: boolean
 }
 export interface CreateObjectsOptions<
 	T extends WabeTypes,
