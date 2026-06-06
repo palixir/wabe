@@ -306,7 +306,7 @@ describe('Magic link authentication integration', () => {
 		const signUp = await signUpMagicLink(client, email)
 
 		expect(
-			verifyMagicLink(client, email, signUp.signUpWith.challengeToken, '000000'),
+			verifyMagicLink(client, email, signUp.signUpWith.challengeToken, '111111'),
 		).rejects.toThrow('Invalid challenge')
 	})
 
@@ -320,7 +320,7 @@ describe('Magic link authentication integration', () => {
 		const otp = getLastSentOtp(spySend)!
 
 		await expect(
-			verifyMagicLink(client, email, signUp.signUpWith.challengeToken, '000000'),
+			verifyMagicLink(client, email, signUp.signUpWith.challengeToken, '111111'),
 		).rejects.toThrow('Invalid challenge')
 
 		const verify = await verifyMagicLink(client, email, signUp.signUpWith.challengeToken, otp!)
@@ -338,11 +338,11 @@ describe('Magic link authentication integration', () => {
 			const otp = getLastSentOtp(spySend)!
 
 			await expect(
-				verifyMagicLink(client, email, signUp.signUpWith.challengeToken, '000000'),
+				verifyMagicLink(client, email, signUp.signUpWith.challengeToken, '111111'),
 			).rejects.toThrow('Invalid challenge')
 
 			await expect(
-				verifyMagicLink(client, email, signUp.signUpWith.challengeToken, '111111'),
+				verifyMagicLink(client, email, signUp.signUpWith.challengeToken, '222222'),
 			).rejects.toThrow('Invalid challenge')
 
 			await expect(
