@@ -502,15 +502,27 @@ describe('Security tests', () => {
 		const client = getAnonymousClient(port)
 		const rootClient = getGraphqlClient(port)
 
-		const { userClient, accessToken, userId } = await createUserAndUpdateRole({
+		const { userId } = await createUserAndUpdateRole({
 			anonymousClient: client,
 			port,
 			roleName: 'Client',
 			rootClient,
 		})
 
+		const session = new Session<any>()
+
+		const { csrfToken, accessToken: validAccessToken } = await session.create(userId, {
+			wabe,
+			isRoot: false,
+		})
+
+		// A cookie-based token without a CSRF token is rejected.
+		const missingCsrfClient = getUserClient(port, {
+			accessToken: validAccessToken,
+			useCookie: true,
+		})
 		expect(
-			userClient.request(gql`
+			missingCsrfClient.request(gql`
 				mutation createTestCSRF {
 					createTestCSRF(input: { fields: { name: "CSRF Test" } }) {
 						testCSRF {
@@ -521,8 +533,11 @@ describe('Security tests', () => {
 			`),
 		).rejects.toThrow('Permission denied to create class TestCSRF')
 
+		// A cookie-based token with an invalid CSRF token is rejected.
 		const invalidCsrfClient = getUserClient(port, {
-			accessToken,
+			accessToken: validAccessToken,
+			csrfToken: 'invalid.csrf',
+			useCookie: true,
 		})
 		expect(
 			invalidCsrfClient.request(gql`
@@ -536,19 +551,69 @@ describe('Security tests', () => {
 			`),
 		).rejects.toThrow('Permission denied to create class TestCSRF')
 
-		const session = new Session<any>()
-
-		const { csrfToken, accessToken: validAccessToken } = await session.create(userId, {
-			wabe,
-			isRoot: false,
-		})
-
+		// A cookie-based token with a valid CSRF token is accepted.
 		const validCsrfClient = getUserClient(port, {
 			accessToken: validAccessToken,
 			csrfToken,
+			useCookie: true,
 		})
 
 		const res = await validCsrfClient.request<any>(gql`
+			mutation createTestCSRF {
+				createTestCSRF(input: { fields: { name: "CSRF Test" } }) {
+					testCSRF {
+						id
+					}
+				}
+			}
+		`)
+
+		expect(res.createTestCSRF.testCSRF.id).toBeDefined()
+
+		await closeTests(wabe)
+	})
+
+	it('should not require a CSRF token for tokens provided via the Wabe-Access-Token header', async () => {
+		const setup = await setupTests(
+			[
+				{
+					name: 'TestCSRF',
+					fields: {
+						name: { type: 'String' },
+					},
+					permissions: {
+						create: {
+							authorizedRoles: ['Client'],
+							requireAuthentication: true,
+						},
+						read: {
+							authorizedRoles: ['Client'],
+							requireAuthentication: true,
+						},
+					},
+				},
+			],
+			{ disableCSRFProtection: false },
+		)
+
+		const wabe = setup.wabe
+		const port = setup.port
+		const client = getAnonymousClient(port)
+		const rootClient = getGraphqlClient(port)
+
+		const { accessToken } = await createUserAndUpdateRole({
+			anonymousClient: client,
+			port,
+			roleName: 'Client',
+			rootClient,
+		})
+
+		// A token presented in the header is not exposed to CSRF, so it authenticates without one.
+		const headerClient = getUserClient(port, {
+			accessToken,
+		})
+
+		const res = await headerClient.request<any>(gql`
 			mutation createTestCSRF {
 				createTestCSRF(input: { fields: { name: "CSRF Test" } }) {
 					testCSRF {
@@ -2545,7 +2610,7 @@ describe('Security tests', () => {
 			password: 'admin',
 		})
 
-		expect(
+		await expect(
 			adminClient.request(gql`
 				mutation createTest1 {
 					createTest1(input: { fields: { name: "test1" } }) {
@@ -2571,7 +2636,7 @@ describe('Security tests', () => {
 			where: {},
 		})
 
-		expect(
+		await expect(
 			adminClient.request(gql`
 				mutation createTest1 {
 					createTest1(input: { fields: { name: "test1" } }) {
@@ -2614,7 +2679,7 @@ describe('Security tests', () => {
 			password: 'admin',
 		})
 
-		expect(
+		await expect(
 			adminClient.request(gql`
 				mutation createTest1 {
 					createTest1(input: { fields: { name: "test1" } }) {
@@ -2639,7 +2704,7 @@ describe('Security tests', () => {
 			where: {},
 		})
 
-		expect(
+		await expect(
 			adminClient.request(gql`
 				mutation createTest1 {
 					createTest1(input: { fields: { name: "test1" } }) {

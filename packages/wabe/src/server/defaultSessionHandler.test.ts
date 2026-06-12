@@ -59,4 +59,76 @@ describe('defaultSessionHandler', () => {
 		spyGetAccessTokenExpireAt.mockRestore()
 		spyGetRefreshTokenExpireAt.mockRestore()
 	})
+
+	it('should call meFromAccessToken with fromCookie: false when the token comes from a header', async () => {
+		const spyMeFromAccessToken = spyOn(Session.prototype, 'meFromAccessToken').mockResolvedValue({
+			user: { id: 'userId' } as any,
+			sessionId: 'sessionId',
+			accessToken: 'access',
+			refreshToken: 'refresh',
+		})
+
+		const wabe: any = {
+			config: {
+				rootKey: 'root',
+				authentication: {
+					session: { cookieSession: true, jwtSecret: 'dev' },
+				},
+			},
+		}
+
+		const ctx: any = {
+			request: new Request('http://localhost/graphql', {
+				headers: new Headers({
+					'Wabe-Access-Token': 'headerAccess',
+				}),
+			}),
+			res: { setCookie: mock(() => {}) },
+		}
+
+		await defaultSessionHandler(wabe)(ctx)
+
+		expect(spyMeFromAccessToken).toHaveBeenCalledWith(
+			expect.objectContaining({ accessToken: 'headerAccess', fromCookie: false }),
+			expect.any(Object),
+		)
+
+		spyMeFromAccessToken.mockRestore()
+	})
+
+	it('should call meFromAccessToken with fromCookie: true when the token comes from a cookie', async () => {
+		const spyMeFromAccessToken = spyOn(Session.prototype, 'meFromAccessToken').mockResolvedValue({
+			user: { id: 'userId' } as any,
+			sessionId: 'sessionId',
+			accessToken: 'access',
+			refreshToken: 'refresh',
+		})
+
+		const wabe: any = {
+			config: {
+				rootKey: 'root',
+				authentication: {
+					session: { cookieSession: true, jwtSecret: 'dev' },
+				},
+			},
+		}
+
+		const ctx: any = {
+			request: new Request('http://localhost/graphql', {
+				headers: new Headers({
+					cookie: 'accessToken=cookieAccess',
+				}),
+			}),
+			res: { setCookie: mock(() => {}) },
+		}
+
+		await defaultSessionHandler(wabe)(ctx)
+
+		expect(spyMeFromAccessToken).toHaveBeenCalledWith(
+			expect.objectContaining({ accessToken: 'cookieAccess', fromCookie: true }),
+			expect.any(Object),
+		)
+
+		spyMeFromAccessToken.mockRestore()
+	})
 })

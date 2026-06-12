@@ -74,7 +74,11 @@ export class Session<T extends WabeTypes> {
 	}
 
 	async meFromAccessToken(
-		{ accessToken, csrfToken }: { accessToken: string; csrfToken: string },
+		{
+			accessToken,
+			csrfToken,
+			fromCookie = true,
+		}: { accessToken: string; csrfToken: string; fromCookie?: boolean },
 		context: WabeContext<T>,
 	): Promise<{
 		sessionId: string | null
@@ -149,8 +153,11 @@ export class Session<T extends WabeTypes> {
 				refreshToken: null,
 			}
 
-		// CSRF check only for cookie-based sessions (enabled by default unless explicitly disabled)
+		// CSRF check only for tokens coming from the cookie (enabled by default unless explicitly
+		// disabled). A token presented explicitly in a header is not auto-attached by the browser,
+		// so it is not exposed to CSRF and does not require a CSRF token.
 		if (
+			fromCookie &&
 			context.wabe.config.authentication?.session?.cookieSession &&
 			context.wabe.config.security?.disableCSRFProtection !== true
 		) {

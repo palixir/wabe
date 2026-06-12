@@ -1,6 +1,5 @@
 import { gql, GraphQLClient } from 'graphql-request'
 import {
-	RoleEnum,
 	type User as GeneratedUser,
 	type WhereUser as GeneratedWhereUser,
 	type WabeSchemaWhereTypes,
@@ -83,13 +82,24 @@ export const getUserClient = (
 	options: {
 		accessToken?: string
 		csrfToken?: string
+		// When true, the access token is sent through the `accessToken` cookie instead of the
+		// `Wabe-Access-Token` header. This is required to exercise CSRF protection, which only
+		// applies to tokens coming from the cookie.
+		useCookie?: boolean
 	},
 ): GraphQLClient => {
+	const headers: Record<string, string> = {
+		'Wabe-Csrf-Token': options.csrfToken || '',
+	}
+
+	if (options.useCookie) {
+		if (options.accessToken) headers.Cookie = `accessToken=${options.accessToken}`
+	} else {
+		headers['Wabe-Access-Token'] = options.accessToken || ''
+	}
+
 	const client = new GraphQLClient(`http://127.0.0.1:${port}/graphql`, {
-		headers: {
-			'Wabe-Access-Token': options.accessToken || '',
-			'Wabe-Csrf-Token': options.csrfToken || '',
-		},
+		headers,
 	})
 
 	return { ...client, request: client.request<any> } as GraphQLClient
@@ -108,7 +118,7 @@ export const getAdminUserClient = async (
 		} as any,
 		select: { id: true },
 		where: {
-			name: { equalTo: RoleEnum.Admin },
+			name: { equalTo: 'Admin' },
 		},
 	})
 

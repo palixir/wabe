@@ -383,6 +383,50 @@ describe('Session', () => {
 		expect(res.user).toBeNull()
 	})
 
+	it('should skip the CSRF check when the access token comes from a header (fromCookie: false)', async () => {
+		mockGetObjects.mockResolvedValue([
+			{
+				id: 'sessionId',
+				refreshTokenEncrypted: encryptToken('refreshToken', 'dev'),
+				user: {
+					id: 'userId',
+					email: 'userEmail',
+				},
+				accessTokenExpiresAt: new Date(Date.now() + 1000 * 60 * 60),
+				refreshTokenExpiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
+			},
+		])
+
+		const session = new Session<any>()
+		const { accessToken } = await session.create('userId', context)
+
+		const res = await session.meFromAccessToken(
+			{
+				accessToken,
+				csrfToken: 'zz.invalid',
+				fromCookie: false,
+			},
+			{
+				...context,
+				wabe: {
+					...context.wabe,
+					config: {
+						...context.wabe.config,
+						authentication: {
+							session: {
+								jwtSecret: 'dev',
+								cookieSession: true,
+							},
+						},
+					},
+				},
+			},
+		)
+
+		expect(res.sessionId).toEqual('sessionId')
+		expect(res.user?.id).toEqual('userId')
+	})
+
 	it('should create a new session', async () => {
 		const session = new Session<any>()
 
