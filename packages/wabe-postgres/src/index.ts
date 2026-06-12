@@ -65,6 +65,13 @@ const resolveWhereToPlain = (obj: unknown): unknown => {
 	)
 }
 
+/** Safely quote a SQL identifier (column/table) by doubling embedded double quotes. */
+export const escapePostgresIdentifier = (identifier: string): string =>
+	`"${String(identifier).replace(/"/g, '""')}"`
+
+/** Safely escape a key used inside a single-quoted JSONB path (e.g. col->>'key'). */
+export const escapePostgresJsonKey = (key: string): string => String(key).replace(/'/g, "''")
+
 export const buildPostgresOrderQuery = <
 	T extends WabeTypes,
 	K extends keyof T['types'],
@@ -78,9 +85,16 @@ export const buildPostgresOrderQuery = <
 
 	if (objectKeys.length === 0) return ''
 
-	const orderClauses = objectKeys.map(
-		(key) => `${key === 'id' ? '_id' : String(key)} ${order[key]}`,
-	)
+	const orderClauses = objectKeys.map((key) => {
+		const column = key === 'id' ? '_id' : String(key)
+		const direction = order[key]
+
+		// Whitelist the sort direction to avoid SQL injection through the ORDER BY clause.
+		if (direction !== 'ASC' && direction !== 'DESC')
+			throw new Error('Invalid order direction: only ASC and DESC are allowed')
+
+		return `${escapePostgresIdentifier(column)} ${direction}`
+	})
 
 	return `ORDER BY ${orderClauses.join(', ')}`
 }
@@ -101,9 +115,13 @@ export const buildPostgresWhereQueryAndValues = <T extends WabeTypes, K extends 
 			const value = where[key]
 			const keyToWrite = key === 'id' && !parentKey ? '_id' : String(key)
 
-			const fullKey = parentKey ? `${parentKey}->>'${keyToWrite}'` : `"${keyToWrite}"`
+			const fullKey = parentKey
+				? `${parentKey}->>'${escapePostgresJsonKey(keyToWrite)}'`
+				: escapePostgresIdentifier(keyToWrite)
 
-			const simpleFullKey = parentKey ? `${parentKey}->'${keyToWrite}'` : `"${keyToWrite}"`
+			const simpleFullKey = parentKey
+				? `${parentKey}->'${escapePostgresJsonKey(keyToWrite)}'`
+				: escapePostgresIdentifier(keyToWrite)
 
 			if ('equalTo' in (value || {})) {
 				if (value?.equalTo === null || value?.equalTo === undefined) {
@@ -135,28 +153,30 @@ export const buildPostgresWhereQueryAndValues = <T extends WabeTypes, K extends 
 
 			if (value?.exists === true) {
 				if (parentKey) {
+					const jsonKey = escapePostgresJsonKey(keyToWrite)
 					acc.conditions.push(
 						`${parentKey} IS NOT NULL
-       AND ${parentKey} ? '${keyToWrite}'
-       AND ${parentKey}->'${keyToWrite}' IS NOT NULL
-       AND ${parentKey}->'${keyToWrite}' <> 'null'::jsonb`,
+       AND ${parentKey} ? '${jsonKey}'
+       AND ${parentKey}->'${jsonKey}' IS NOT NULL
+       AND ${parentKey}->'${jsonKey}' <> 'null'::jsonb`,
 					)
 				} else {
-					acc.conditions.push(`"${keyToWrite}" IS NOT NULL`)
+					acc.conditions.push(`${escapePostgresIdentifier(keyToWrite)} IS NOT NULL`)
 				}
 				return acc
 			}
 
 			if (value?.exists === false) {
 				if (parentKey) {
+					const jsonKey = escapePostgresJsonKey(keyToWrite)
 					acc.conditions.push(
 						`${parentKey} IS NULL
-       OR NOT (${parentKey} ? '${keyToWrite}')
-       OR ${parentKey}->'${keyToWrite}' IS NULL
-       OR ${parentKey}->'${keyToWrite}' = 'null'::jsonb`,
+       OR NOT (${parentKey} ? '${jsonKey}')
+       OR ${parentKey}->'${jsonKey}' IS NULL
+       OR ${parentKey}->'${jsonKey}' = 'null'::jsonb`,
 					)
 				} else {
-					acc.conditions.push(`"${keyToWrite}" IS NULL`)
+					acc.conditions.push(`${escapePostgresIdentifier(keyToWrite)} IS NULL`)
 				}
 				return acc
 			}

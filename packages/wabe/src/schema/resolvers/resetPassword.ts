@@ -50,12 +50,16 @@ export const resetPasswordResolver = async (
 	const salt = realUser ? await getOrCreateOtpSalt(context, userId) : undefined
 	const isOtpValid = otpClass.verify(otp, userId, salt)
 
-	if (realUser) {
-		if (!isOtpValid) {
-			registerRateLimitFailure(context, 'resetPassword', rateLimitKey)
-			throw new Error('Invalid OTP code')
-		}
+	// Anti-enumeration: the response must not differ based on whether the account exists. A non-root
+	// caller can never produce a valid OTP for a non-existing user (no salt), so an invalid OTP yields
+	// the exact same error ('Invalid OTP code') whether the account exists or not.
+	if (!isOtpValid) {
+		registerRateLimitFailure(context, 'resetPassword', rateLimitKey)
+		throw new Error('Invalid OTP code')
+	}
 
+	// From here the OTP is valid, which can only happen for a real account.
+	if (realUser) {
 		const providerKey = normalizedPhone ? 'phonePassword' : 'emailPassword'
 
 		await context.wabe.controllers.database.updateObject({
@@ -86,8 +90,6 @@ export const resetPasswordResolver = async (
 		})
 
 		clearRateLimit(context, 'resetPassword', rateLimitKey)
-	} else {
-		registerRateLimitFailure(context, 'resetPassword', rateLimitKey)
 	}
 
 	return true

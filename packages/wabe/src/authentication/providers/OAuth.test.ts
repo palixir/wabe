@@ -15,6 +15,7 @@ describe('OAuth', () => {
 		email: 'email@test.fr',
 		avatarUrl: 'avatarUrl',
 		username: 'username',
+		verifiedEmail: true,
 	})
 
 	const mockValidateAuthorizationCode = mock().mockResolvedValue({
@@ -64,6 +65,7 @@ describe('OAuth', () => {
 			email: 'email@test.fr',
 			avatarUrl: 'avatarUrl',
 			username: 'username',
+			verifiedEmail: true,
 		})
 
 		const github = new GitHub()
@@ -139,6 +141,7 @@ describe('OAuth', () => {
 						email: 'email@test.fr',
 						username: 'username',
 						avatarUrl: 'avatarUrl',
+						verifiedEmail: true,
 					},
 				},
 			},
@@ -163,6 +166,7 @@ describe('OAuth', () => {
 			email: 'email@test.fr',
 			avatarUrl: 'avatarUrl',
 			username: 'username',
+			verifiedEmail: true,
 		})
 
 		mockGetObjects.mockResolvedValue([
@@ -246,6 +250,7 @@ describe('OAuth', () => {
 			email: 'email@test.fr',
 			avatarUrl: 'avatarUrl',
 			username: 'username',
+			verifiedEmail: true,
 		})
 		mockGetObjects.mockResolvedValueOnce([]).mockResolvedValueOnce([
 			{
@@ -270,6 +275,69 @@ describe('OAuth', () => {
 				},
 			}),
 		).rejects.toThrow('Invalid authentication credentials')
+	})
+
+	it('should reject github oauth sign in when email is not verified', async () => {
+		mockGetUserInfo.mockResolvedValueOnce({
+			providerUserId: 'github-user-id',
+			email: 'email@test.fr',
+			avatarUrl: 'avatarUrl',
+			username: 'username',
+			verifiedEmail: false,
+		})
+
+		const github = new GitHub()
+
+		await expect(
+			github.onSignIn({
+				context,
+				input: {
+					authorizationCode: 'authorizationCode',
+					codeVerifier: 'codeVerifier',
+				},
+			}),
+		).rejects.toThrow('Invalid authentication credentials')
+
+		expect(mockCreateObject).toHaveBeenCalledTimes(0)
+	})
+
+	it('should reject oauth sign up when disableSignUp is true', async () => {
+		mockGetUserInfo.mockResolvedValueOnce({
+			providerUserId: 'github-user-id',
+			email: 'email@test.fr',
+			avatarUrl: 'avatarUrl',
+			username: 'username',
+			verifiedEmail: true,
+		})
+
+		// No existing user → this is a sign-up attempt.
+		mockGetObjects.mockResolvedValue([] as never)
+
+		const github = new GitHub()
+
+		await expect(
+			github.onSignIn({
+				context: {
+					...context,
+					wabe: {
+						...context.wabe,
+						config: {
+							...context.wabe.config,
+							authentication: {
+								...context.wabe.config.authentication,
+								disableSignUp: true,
+							},
+						},
+					},
+				},
+				input: {
+					authorizationCode: 'authorizationCode',
+					codeVerifier: 'codeVerifier',
+				},
+			}),
+		).rejects.toThrow('Sign up is disabled')
+
+		expect(mockCreateObject).toHaveBeenCalledTimes(0)
 	})
 
 	it('should reject google oauth sign in when email is not verified', async () => {

@@ -51,8 +51,14 @@ describe('File upload security config', () => {
 		expect(config.allowedExtensions).toContain('pdf')
 	})
 
-	it('should not randomize filenames outside production by default', () => {
+	it('should randomize filenames by default (even outside production)', () => {
 		const context = makeContext({})
+		const config = getUploadSecurityConfigForTests(context)
+		expect(config.randomizeFileName).toBe(true)
+	})
+
+	it('should allow explicitly disabling filename randomization', () => {
+		const context = makeContext({ security: { randomizeFileName: false } })
 		const config = getUploadSecurityConfigForTests(context)
 		expect(config.randomizeFileName).toBe(false)
 	})

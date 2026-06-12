@@ -1,24 +1,7 @@
 import { describe, expect, it } from 'bun:test'
+import { validateFileUrl } from './hookUploadFile'
 
-const ALLOWED_URL_PROTOCOLS = ['https:']
-
-const validateFileUrl = (url: string): void => {
-	let parsed: URL
-	try {
-		parsed = new URL(url)
-	} catch {
-		throw new Error('Invalid file URL')
-	}
-
-	if (!ALLOWED_URL_PROTOCOLS.includes(parsed.protocol)) throw new Error('File URL must use HTTPS')
-
-	if (
-		parsed.hostname === 'localhost' ||
-		parsed.hostname === '127.0.0.1' ||
-		parsed.hostname === '[::1]'
-	)
-		throw new Error('File URL must not point to localhost')
-}
+const PRIVATE_ADDRESS_ERROR = 'File URL must not point to a private or reserved address'
 
 describe('validateFileUrl', () => {
 	it('should accept valid HTTPS URLs', () => {
@@ -39,24 +22,39 @@ describe('validateFileUrl', () => {
 	})
 
 	it('should reject localhost URLs', () => {
-		expect(() => validateFileUrl('https://localhost/secret')).toThrow(
-			'File URL must not point to localhost',
-		)
-		expect(() => validateFileUrl('https://localhost:3000/data')).toThrow(
-			'File URL must not point to localhost',
-		)
+		expect(() => validateFileUrl('https://localhost/secret')).toThrow(PRIVATE_ADDRESS_ERROR)
+		expect(() => validateFileUrl('https://localhost:3000/data')).toThrow(PRIVATE_ADDRESS_ERROR)
 	})
 
 	it('should reject 127.0.0.1 URLs', () => {
-		expect(() => validateFileUrl('https://127.0.0.1/secret')).toThrow(
-			'File URL must not point to localhost',
-		)
+		expect(() => validateFileUrl('https://127.0.0.1/secret')).toThrow(PRIVATE_ADDRESS_ERROR)
 	})
 
 	it('should reject IPv6 loopback URLs', () => {
-		expect(() => validateFileUrl('https://[::1]/secret')).toThrow(
-			'File URL must not point to localhost',
+		expect(() => validateFileUrl('https://[::1]/secret')).toThrow(PRIVATE_ADDRESS_ERROR)
+	})
+
+	it('should reject the cloud metadata endpoint (SSRF)', () => {
+		expect(() => validateFileUrl('https://169.254.169.254/latest/meta-data/')).toThrow(
+			PRIVATE_ADDRESS_ERROR,
 		)
+	})
+
+	it('should reject private IPv4 ranges (SSRF)', () => {
+		expect(() => validateFileUrl('https://10.0.0.5/file')).toThrow(PRIVATE_ADDRESS_ERROR)
+		expect(() => validateFileUrl('https://192.168.1.10/file')).toThrow(PRIVATE_ADDRESS_ERROR)
+		expect(() => validateFileUrl('https://172.16.0.1/file')).toThrow(PRIVATE_ADDRESS_ERROR)
+		expect(() => validateFileUrl('https://172.31.255.255/file')).toThrow(PRIVATE_ADDRESS_ERROR)
+	})
+
+	it('should reject IPv6 unique-local and link-local ranges (SSRF)', () => {
+		expect(() => validateFileUrl('https://[fd00::1]/file')).toThrow(PRIVATE_ADDRESS_ERROR)
+		expect(() => validateFileUrl('https://[fe80::1]/file')).toThrow(PRIVATE_ADDRESS_ERROR)
+	})
+
+	it('should accept a public IPv4 host that is close to a private range', () => {
+		expect(() => validateFileUrl('https://172.32.0.1/file')).not.toThrow()
+		expect(() => validateFileUrl('https://8.8.8.8/file')).not.toThrow()
 	})
 
 	it('should reject invalid URLs', () => {

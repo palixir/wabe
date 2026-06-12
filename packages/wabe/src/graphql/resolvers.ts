@@ -108,6 +108,26 @@ export const extractFieldsFromSetNode = (
 	)
 }
 
+/**
+ * Extracts the selection set requested under a `user` field (e.g. `me { user { ... } }` or
+ * `signInWith(...) { user { ... } }`) so callers can enforce field-level read permissions
+ * against the exact fields a client asked for.
+ */
+export const getRequestedUserSelect = (
+	info?: GraphQLResolveInfo,
+): Record<string, any> | undefined => {
+	const userNode = info?.fieldNodes?.[0]?.selectionSet?.selections?.find(
+		(selection) => selection.kind === 'Field' && selection.name.value === 'user',
+	)
+
+	if (!userNode || !('selectionSet' in userNode) || !userNode.selectionSet) return undefined
+
+	return extractFieldsFromSetNode(userNode.selectionSet, 'User', info?.fragments, {
+		ignoreClassField: false,
+		variables: info?.variableValues,
+	})
+}
+
 const getFieldsFromInfo = (info: GraphQLResolveInfo, className: string) => {
 	const selectionSet = info.fieldNodes[0]?.selectionSet
 

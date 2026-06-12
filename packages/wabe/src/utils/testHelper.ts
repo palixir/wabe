@@ -26,7 +26,11 @@ export const setupTests = async (
 		rootKey?: string
 		rateLimit?: RateLimitOptions
 		maxWhereRecursionDepth?: number
-		security?: { maxWhereRecursionDepth?: number }
+		security?: {
+			maxWhereRecursionDepth?: number
+			defaultPaginationLimit?: number
+			maxPaginationLimit?: number
+		}
 		resolvers?: TypeResolver<DevWabeTypes>
 	} = {},
 ) => {
@@ -52,6 +56,12 @@ export const setupTests = async (
 			...(options.rateLimit && { rateLimit: options.rateLimit }),
 			...(maxWhereRecursionDepth !== undefined && {
 				maxWhereRecursionDepth,
+			}),
+			...(options.security?.defaultPaginationLimit !== undefined && {
+				defaultPaginationLimit: options.security.defaultPaginationLimit,
+			}),
+			...(options.security?.maxPaginationLimit !== undefined && {
+				maxPaginationLimit: options.security.maxPaginationLimit,
 			}),
 		},
 		authentication: {

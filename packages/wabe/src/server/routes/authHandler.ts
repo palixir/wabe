@@ -8,7 +8,7 @@ import { getSessionCookieSameSite } from '../../authentication/cookies'
 import { generateRandomValues } from '../../authentication/oauth/utils'
 import { GitHub } from '../../authentication/oauth/GitHub'
 import crypto from 'node:crypto'
-import { encryptDeterministicToken } from '../../utils/crypto'
+import { constantTimeEqual, encryptDeterministicToken } from '../../utils/crypto'
 
 const validProviders = new Set<string>(Object.values(ProviderEnum))
 
@@ -59,7 +59,8 @@ export const oauthHandlerCallback = async (context: Context, wabeContext: WabeCo
 
 		const stateInCookie = context.getCookie('state')
 
-		if (state !== stateInCookie) throw new Error('Authentication failed')
+		// Constant-time comparison to avoid leaking the expected state via timing (CSRF on OAuth).
+		if (!constantTimeEqual(state, stateInCookie)) throw new Error('Authentication failed')
 
 		const codeVerifier = context.getCookie('code_verifier')
 		const provider = context.getCookie('provider')
@@ -67,7 +68,10 @@ export const oauthHandlerCallback = async (context: Context, wabeContext: WabeCo
 		if (!provider || !validProviders.has(provider))
 			throw new Error('Authentication failed, invalid provider')
 
-		const { signInWith } = await getGraphqlClient(wabeContext.wabe.config.port).request<any>(
+		const { signInWith } = await getGraphqlClient(
+			wabeContext.wabe.config.port,
+			wabeContext.wabe.config.rootKey,
+		).request<any>(
 			gql`
 				mutation signInWith(
 					$authorizationCode: String!

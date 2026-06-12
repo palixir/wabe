@@ -97,9 +97,13 @@ export class Google implements OAuth2ProviderWithPKCE {
 	}
 
 	async getUserInfo(accessToken: string): Promise<OAuthUserInfo> {
-		const userInfo = await fetch(
-			`https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${accessToken}`,
-		)
+		// Send the access token in the Authorization header rather than the URL query string to avoid
+		// leaking it through server logs, proxies and browser history.
+		const userInfo = await fetch('https://www.googleapis.com/oauth2/v1/userinfo?alt=json', {
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+			},
+		})
 
 		if (!userInfo.ok) throw new Error('Failed to fetch user information from Google')
 

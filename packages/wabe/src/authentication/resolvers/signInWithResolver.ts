@@ -1,11 +1,14 @@
 import type { SignInWithInput } from '../../../generated/wabe'
 import type { WabeContext } from '../../server/interface'
 import type { DevWabeTypes } from '../../utils/helper'
+import type { GraphQLResolveInfo } from 'graphql'
 import { getSessionCookieSameSite } from '../cookies'
 import { createMfaChallenge } from '../security'
 import { Session } from '../Session'
 import type { ProviderInterface, SecondaryProviderInterface } from '../interface'
 import { getAuthenticationMethod } from '../utils'
+import { assertCanReadSelect } from '../../hooks/protected'
+import { getRequestedUserSelect } from '../../graphql/resolvers'
 
 // 0 - Get the authentication method
 // 1 - We check if the signIn is possible (call onSign)
@@ -19,7 +22,24 @@ export const signInWithResolver = async (
 		input: SignInWithInput
 	},
 	context: WabeContext<DevWabeTypes>,
+	info?: GraphQLResolveInfo,
 ) => {
+	// The returned `user` is loaded by providers with a root context (they need to read secret
+	// authentication data). Enforce field-level read permissions against what the client requested
+	// so secrets (password hash, SRP secrets, ...) are never exposed in the mutation response.
+	const requestedUserSelect = getRequestedUserSelect(info)
+	if (requestedUserSelect) {
+		const userSchemaClass = context.wabe.config.schema?.classes?.find(
+			(currentClass) => currentClass.name === 'User',
+		)
+
+		assertCanReadSelect({
+			select: requestedUserSelect,
+			fields: userSchemaClass?.fields,
+			context: { isRoot: !!context.isRoot, user: context.user },
+		})
+	}
+
 	const { provider, name } = getAuthenticationMethod<DevWabeTypes, ProviderInterface<DevWabeTypes>>(
 		Object.keys(input.authentication || {}),
 		context,

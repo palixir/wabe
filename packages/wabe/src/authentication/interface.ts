@@ -135,6 +135,7 @@ export interface AuthenticationSecurityConfig {
 	verifyChallengeRateLimit?: AuthenticationRateLimitConfig
 	sendOtpCodeRateLimit?: AuthenticationRateLimitConfig
 	resetPasswordRateLimit?: AuthenticationRateLimitConfig
+	refreshRateLimit?: AuthenticationRateLimitConfig
 	mfaChallengeTtlMs?: number
 	magicLinkOtpTtlMs?: number
 	magicLinkMaxAttempts?: number

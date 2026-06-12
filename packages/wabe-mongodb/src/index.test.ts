@@ -1974,6 +1974,41 @@ describe('Mongo adapter', () => {
 		)
 	})
 
+	it('should reject MongoDB operators in comparison operators (NoSQL injection)', () => {
+		expect(() => buildMongoWhereQuery({ age: { greaterThan: { $gt: 0 } } })).toThrow(
+			'operator-like keys are not allowed',
+		)
+		expect(() =>
+			buildMongoWhereQuery({ age: { greaterThanOrEqualTo: { $where: 'true' } } }),
+		).toThrow('operator-like keys are not allowed')
+		expect(() => buildMongoWhereQuery({ age: { lessThan: { $ne: null } } })).toThrow(
+			'operator-like keys are not allowed',
+		)
+		expect(() => buildMongoWhereQuery({ age: { lessThanOrEqualTo: { $regex: '.*' } } })).toThrow(
+			'operator-like keys are not allowed',
+		)
+	})
+
+	it('should reject MongoDB operators in in/notIn values (NoSQL injection)', () => {
+		expect(() => buildMongoWhereQuery({ name: { in: [{ $gt: '' }] } })).toThrow(
+			'operator-like keys are not allowed',
+		)
+		expect(() => buildMongoWhereQuery({ name: { notIn: [{ $ne: null }] } })).toThrow(
+			'operator-like keys are not allowed',
+		)
+	})
+
+	it('should still allow legitimate comparison and in/notIn values', () => {
+		expect(buildMongoWhereQuery({ age: { greaterThan: 18 } })).toEqual({ age: { $gt: 18 } })
+		expect(buildMongoWhereQuery({ age: { lessThanOrEqualTo: 65 } })).toEqual({
+			age: { $lte: 65 },
+		})
+		expect(buildMongoWhereQuery({ name: { in: ['a', 'b'] } })).toEqual({
+			name: { $in: ['a', 'b'] },
+		})
+		expect(buildMongoWhereQuery({ name: { notIn: ['a'] } })).toEqual({ name: { $nin: ['a'] } })
+	})
+
 	it('should allow legitimate object values without $ keys', () => {
 		const where = buildMongoWhereQuery({
 			name: { equalTo: 'John' },

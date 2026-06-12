@@ -2,6 +2,7 @@ import { selectFieldsWithoutPrivateFields } from 'src/utils/helper'
 import type { WabeTypes } from '../..'
 import { initializeHook, OperationType } from '../hooks'
 import { _checkCLP } from '../hooks/permissions'
+import { assertCanReadOrder, assertCanReadWhere } from '../hooks/protected'
 import type { SchemaInterface } from '../schema'
 import type { WabeContext } from '../server/interface'
 import { isUnsafeObjectKey } from '../utils/objectKeys'
@@ -74,6 +75,23 @@ export class DatabaseController<T extends WabeTypes> {
 
 	constructor(adapter: DatabaseAdapter<T>) {
 		this.adapter = adapter
+	}
+
+	/**
+	 * Clamp the requested page size for untrusted (non-root) callers to avoid unbounded reads
+	 * (DoS / memory exhaustion). Internal/root callers are trusted and keep their original behavior
+	 * (including "no limit" semantics). When no `first` is provided a sane default is applied.
+	 */
+	_clampFirst(first: number | undefined, context: WabeContext<T>): number | undefined {
+		if (context.isRoot) return first
+
+		const security = context.wabe.config.security
+		const defaultLimit = security?.defaultPaginationLimit ?? 100
+		const maxLimit = security?.maxPaginationLimit ?? 1000
+
+		if (first === undefined || first === null || first <= 0) return defaultLimit
+
+		return Math.min(first, maxLimit)
 	}
 
 	/**
@@ -246,17 +264,49 @@ export class DatabaseController<T extends WabeTypes> {
 		}
 	}
 
+	/**
+	 * Rejects `where`/`order` clauses that reference fields the caller is not allowed to read.
+	 * Without this, filtering/ordering on a protected field (e.g. a password hash) leaks information
+	 * through the query result (oracle attack). Root callers are trusted and skipped.
+	 */
+	_assertReadableWhereAndOrder<K extends keyof T['types']>({
+		className,
+		context,
+		where,
+		order,
+	}: {
+		className: K
+		context: WabeContext<T>
+		where?: Record<string, any>
+		order?: Record<string, any>
+	}) {
+		if (context.isRoot) return
+
+		const schemaClass = context.wabe.config.schema?.classes?.find(
+			(currentClass) => currentClass.name === className,
+		)
+
+		if (!schemaClass) return
+
+		assertCanReadWhere({ where, fields: schemaClass.fields, context })
+		assertCanReadOrder({ order, fields: schemaClass.fields, context })
+	}
+
 	_initializeReadHook<K extends keyof T['types']>({
 		className,
 		context,
 		userSelect,
 		selectWithoutPointers,
+		select,
 		_skipHooks,
 	}: {
 		className: K
 		context: WabeContext<T>
 		userSelect: Select
 		selectWithoutPointers: Select
+		// Original (nested) select, used so protected-field checks can recurse into nested
+		// object/array subfields (e.g. `authentication.emailPassword.password`).
+		select?: SelectWithObject
 		_skipHooks?: boolean
 	}) {
 		if (_skipHooks) return undefined
@@ -264,12 +314,14 @@ export class DatabaseController<T extends WabeTypes> {
 		return initializeHook({
 			className,
 			context,
-			select: this._buildHookReadSelect({
-				className,
-				context,
-				userSelect,
-				selectWithoutPointers,
-			}),
+			select: (select && Object.keys(select).length > 0
+				? select
+				: this._buildHookReadSelect({
+						className,
+						context,
+						userSelect,
+						selectWithoutPointers,
+					})) as Select,
 			objectLoader: this._loadObjectForHooks(className, context),
 			objectsLoader: this._loadObjectsForHooks(className, context),
 		})
@@ -970,6 +1022,8 @@ export class DatabaseController<T extends WabeTypes> {
 		context,
 		where,
 	}: CountOptions<T, K>): Promise<number> {
+		this._assertReadableWhereAndOrder({ className, context, where })
+
 		const whereWithPointer = await this._getWhereObjectWithPointerOrRelation(
 			className,
 			where || {},
@@ -1030,6 +1084,8 @@ export class DatabaseController<T extends WabeTypes> {
 		id,
 		where,
 	}: GetObjectOptions<T, K, U>): Promise<OutputType<T, K, U>> {
+		this._assertReadableWhereAndOrder({ className, context, where })
+
 		const { pointers, selectWithoutPointers } = this._getSelectMinusPointersAndRelations({
 			className,
 			context,
@@ -1046,6 +1102,7 @@ export class DatabaseController<T extends WabeTypes> {
 			context,
 			userSelect,
 			selectWithoutPointers,
+			select: select as SelectWithObject,
 			_skipHooks,
 		})
 
@@ -1116,6 +1173,8 @@ export class DatabaseController<T extends WabeTypes> {
 		order,
 		_whereRecursionDepth,
 	}: GetObjectsOptions<T, K, U, W>): Promise<OutputType<T, K, W>[]> {
+		this._assertReadableWhereAndOrder({ className, context, where, order })
+
 		const { pointers, selectWithoutPointers } = this._getSelectMinusPointersAndRelations({
 			className,
 			context,
@@ -1146,6 +1205,7 @@ export class DatabaseController<T extends WabeTypes> {
 			context,
 			userSelect,
 			selectWithoutPointers,
+			select: select as SelectWithObject,
 			_skipHooks,
 		})
 
@@ -1157,7 +1217,7 @@ export class DatabaseController<T extends WabeTypes> {
 		const objectsToReturn = await this.adapter.getObjects({
 			className,
 			context: contextWithRoot(context),
-			first,
+			first: this._clampFirst(first, context),
 			offset,
 			where: whereWithACLCondition,
 			// @ts-expect-error

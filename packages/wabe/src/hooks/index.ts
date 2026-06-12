@@ -24,6 +24,7 @@ import {
 	defaultCheckProtectedOnBeforeCreate,
 	defaultCheckProtectedOnBeforeRead,
 	defaultCheckProtectedOnBeforeUpdate,
+	defaultRedactProtectedFieldsAfterRead,
 } from './protected'
 import {
 	defaultSearchableFieldsBeforeCreate,
@@ -189,7 +190,14 @@ export const initializeHook = <T extends WabeTypes, K extends keyof T['types']>(
 					config: context.wabe.config,
 				})
 
-				await Promise.all(hooksToCompute.map((hook) => hook.callback(hookObject)))
+				// Priority 0 holds the security hooks (CLP -> protected -> ACL). They must run in a
+				// deterministic order, so they are executed sequentially in registration order rather
+				// than racing in parallel.
+				if (priority === 0) {
+					for (const hook of hooksToCompute) await hook.callback(hookObject)
+				} else {
+					await Promise.all(hooksToCompute.map((hook) => hook.callback(hookObject)))
+				}
 			}, Promise.resolve())
 
 			return { object, newData: hookObject.getNewData() }
@@ -242,7 +250,13 @@ export const initializeHook = <T extends WabeTypes, K extends keyof T['types']>(
 							config: context.wabe.config,
 						})
 
-						await Promise.all(hooksToCompute.map((hook) => hook.callback(hookObject)))
+						// Priority 0 holds the security hooks (CLP -> protected -> ACL): run them
+						// sequentially in registration order for deterministic security behavior.
+						if (priority === 0) {
+							for (const hook of hooksToCompute) await hook.callback(hookObject)
+						} else {
+							await Promise.all(hooksToCompute.map((hook) => hook.callback(hookObject)))
+						}
 					}, Promise.resolve())
 
 					return hookObject.getNewData()
@@ -289,6 +303,13 @@ export const getDefaultHooks = (): Hook<any, any>[] => [
 		operationType: OperationType.BeforeCreate,
 		priority: 0,
 		callback: defaultCheckProtectedOnBeforeCreate,
+	},
+	{
+		// Strips protected (including nested) fields from read results for unauthorized callers.
+		// Must run before file/virtual AfterRead hooks (priority >= 1).
+		operationType: OperationType.AfterRead,
+		priority: 0,
+		callback: defaultRedactProtectedFieldsAfterRead,
 	},
 	{
 		operationType: OperationType.BeforeCreate,

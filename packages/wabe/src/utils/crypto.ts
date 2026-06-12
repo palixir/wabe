@@ -99,6 +99,25 @@ export const isArgon2Hash = (value: string): boolean =>
 	typeof value === 'string' && value.startsWith('$argon2')
 
 /**
+ * Constant-time string comparison to avoid leaking secret values (tokens, OAuth state, challenges)
+ * through timing side channels. Returns false for non-strings or length mismatches without an early
+ * character-by-character bail-out.
+ */
+export const constantTimeEqual = (
+	a: string | undefined | null,
+	b: string | undefined | null,
+): boolean => {
+	if (typeof a !== 'string' || typeof b !== 'string') return false
+
+	const bufferA = Buffer.from(a, 'utf8')
+	const bufferB = Buffer.from(b, 'utf8')
+
+	if (bufferA.length !== bufferB.length) return false
+
+	return timingSafeEqual(bufferA, bufferB)
+}
+
+/**
  * Deterministic AES-256-GCM encryption for tokens.
  * IV is derived via HMAC-SHA256(key, token) to allow equality checks without storing plaintext.
  * Caller must provide a strong 32-byte key (already derived/hashed).

@@ -70,8 +70,8 @@ export const oAuthAuthentication =
 
 		if (!providerUserId) throw new Error('Invalid authentication credentials')
 
-		// For Google, block accounts that are not provider-verified.
-		if (oAuthProvider === AuthenticationProvider.Google && userInfoToSave?.verifiedEmail !== true)
+		// Block accounts whose email is not provider-verified (Google and GitHub both expose this).
+		if (userInfoToSave?.verifiedEmail !== true)
 			throw new Error('Invalid authentication credentials')
 
 		const users = await context.wabe.controllers.database.getObjects({
@@ -142,6 +142,10 @@ export const oAuthAuthentication =
 				}
 			}
 		}
+
+		// No existing account matched: this is a sign-up. Enforce `disableSignUp` here because the
+		// OAuth flow creates the user with a root context, which bypasses the `createUser` hook.
+		if (context.wabe.config.authentication?.disableSignUp) throw new Error('Sign up is disabled')
 
 		const providerToSave =
 			oAuthProvider === AuthenticationProvider.Google
