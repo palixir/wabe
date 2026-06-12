@@ -709,6 +709,9 @@ export class Schema<T extends WabeTypes> {
 					type: 'Boolean',
 					required: true,
 				},
+				lockedAt: {
+					type: 'Date',
+				},
 			},
 			indexes: [
 				{

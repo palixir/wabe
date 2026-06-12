@@ -790,28 +790,41 @@ export class PostgresAdapter<T extends WabeTypes> implements DatabaseAdapter<T> 
 		requiredLockedState,
 		newLocked,
 		context: _context,
+		staleLockMs,
 	}: {
 		name: string
 		requiredLockedState: boolean
 		newLocked: boolean
 		context: unknown
+		staleLockMs?: number
 	}): Promise<boolean> {
 		const normalizedName = name.trim()
 		if (!normalizedName) throw new Error('Mutex name cannot be empty')
 
 		const client = await this.pool.connect()
 
+		// `lockedAt` is stored as an ISO-8601 UTC string (Date columns are VARCHAR here). Such strings
+		// are fixed-length and sort lexicographically in chronological order, so a plain text
+		// comparison against `staleThreshold` is a valid time comparison.
+		const now = new Date()
+		const nowIso = now.toISOString()
+		const staleThresholdIso =
+			staleLockMs !== undefined ? new Date(now.getTime() - staleLockMs).toISOString() : null
+
 		try {
 			if (!requiredLockedState) {
+				// A lock is acquirable when it is free, or when it is stale (held longer than
+				// `staleLockMs`, e.g. left over by a crashed process that never released it).
 				const result = await client.query(
-					`INSERT INTO "_Mutex" ("name", "locked")
-           VALUES ($1, $2)
+					`INSERT INTO "_Mutex" ("name", "locked", "lockedAt")
+           VALUES ($1, $2, $4)
            ON CONFLICT ("name")
            DO UPDATE
-             SET "locked" = EXCLUDED."locked"
+             SET "locked" = EXCLUDED."locked", "lockedAt" = EXCLUDED."lockedAt"
            WHERE "_Mutex"."locked" = $3
+             OR ($5::text IS NOT NULL AND ("_Mutex"."lockedAt" IS NULL OR "_Mutex"."lockedAt" <= $5))
            RETURNING _id`,
-					[normalizedName, newLocked, requiredLockedState],
+					[normalizedName, newLocked, requiredLockedState, nowIso, staleThresholdIso],
 				)
 
 				return (result.rowCount || 0) > 0
@@ -819,10 +832,10 @@ export class PostgresAdapter<T extends WabeTypes> implements DatabaseAdapter<T> 
 
 			const result = await client.query(
 				`UPDATE "_Mutex"
-         SET "locked" = $2
+         SET "locked" = $2, "lockedAt" = $4
          WHERE "name" = $1 AND "locked" = $3
          RETURNING _id`,
-				[normalizedName, newLocked, requiredLockedState],
+				[normalizedName, newLocked, requiredLockedState, nowIso],
 			)
 
 			return (result.rowCount || 0) > 0

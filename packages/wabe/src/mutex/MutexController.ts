@@ -3,6 +3,11 @@ import type { WabeContext } from '../server/interface'
 import type { Wabe, WabeTypes } from '../server'
 import { contextWithRoot } from '../utils/export'
 
+// A lock held longer than this is considered stale (its owner most likely crashed before
+// releasing it) and can be stolen by the next acquirer, so that a hard process crash cannot
+// leave a mutex locked forever.
+const DEFAULT_STALE_LOCK_MS = 30_000
+
 export class MutexController<T extends WabeTypes> {
 	private databaseController: DatabaseController<T>
 	private rootContext: WabeContext<T>
@@ -14,12 +19,13 @@ export class MutexController<T extends WabeTypes> {
 		} as WabeContext<T>)
 	}
 
-	async lockMutex(name: string): Promise<boolean> {
+	async lockMutex(name: string, { staleLockMs = DEFAULT_STALE_LOCK_MS } = {}): Promise<boolean> {
 		return this.databaseController.compareAndSetMutex({
 			name,
 			requiredLockedState: false,
 			newLocked: true,
 			context: this.rootContext,
+			staleLockMs,
 		})
 	}
 

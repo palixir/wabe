@@ -1,7 +1,5 @@
 export enum RoleEnum {
 	DashboardAdmin = 'DashboardAdmin',
-	Admin = 'Admin',
-	Client = 'Client',
 }
 
 export enum AuthenticationProvider {
@@ -37,6 +35,15 @@ export type ACLObjectRolesACL = {
 	roleId: string
 	read: boolean
 	write: boolean
+}
+
+export type Collection1 = {
+	id: string
+	name?: string
+	acl?: ACLObject
+	createdAt?: string
+	updatedAt?: string
+	search?: Array<string>
 }
 
 export type AuthenticationMagicLink = {
@@ -96,39 +103,16 @@ export type PendingAuthenticationChallenge = {
 
 export type User = {
 	id: string
-	name?: string
-	age?: number
-	email?: string
-	acl?: ACLObject
-	createdAt?: string
-	updatedAt?: string
-	search?: Array<string>
 	authentication?: Authentication
 	provider?: AuthenticationProvider
 	isOauth?: boolean
+	email?: string
 	verifiedEmail?: boolean
 	role?: Role
 	sessions?: Array<_Session>
 	secondFA?: SecondFA
 	otpSalt?: string
 	pendingChallenges?: Array<PendingAuthenticationChallenge>
-}
-
-export type Experience = {
-	jobTitle: string
-	companyName: string
-	startDate: string
-	endDate: string
-	achievements?: Array<string>
-}
-
-export type Post = {
-	id: string
-	name: string
-	test2?: RoleEnum
-	test3: Array<User>
-	test4: User
-	experiences?: Array<Experience>
 	acl?: ACLObject
 	createdAt?: string
 	updatedAt?: string
@@ -187,39 +171,34 @@ export type _Mutex = {
 	id: string
 	name: string
 	locked: boolean
+	lockedAt?: string
 	acl?: ACLObject
 	createdAt?: string
 	updatedAt?: string
 	search?: Array<string>
 }
 
-export type WhereUser = {
+export type WhereCollection1 = {
 	id: string
 	name?: string
-	age?: number
-	email?: string
 	acl?: ACLObject
 	createdAt?: Date
 	updatedAt?: Date
 	search?: Array<string>
+}
+
+export type WhereUser = {
+	id: string
 	authentication?: Authentication
 	provider?: AuthenticationProvider
 	isOauth?: boolean
+	email?: string
 	verifiedEmail?: boolean
 	role?: Role
 	sessions?: Array<_Session>
 	secondFA?: SecondFA
 	otpSalt?: string
 	pendingChallenges?: Array<PendingAuthenticationChallenge>
-}
-
-export type WherePost = {
-	id: string
-	name: string
-	test2?: RoleEnum
-	test3: Array<User>
-	test4: User
-	experiences?: Array<Experience>
 	acl?: ACLObject
 	createdAt?: Date
 	updatedAt?: Date
@@ -278,40 +257,11 @@ export type Where_Mutex = {
 	id: string
 	name: string
 	locked: boolean
+	lockedAt?: Date
 	acl?: ACLObject
 	createdAt?: Date
 	updatedAt?: Date
 	search?: Array<string>
-}
-
-export type CreateMutationInput = {
-	name: number
-}
-
-export type MutationCreateMutationArgs = {
-	input: CreateMutationInput
-}
-
-export type CustomMutationInput = {
-	a: number
-	b: number
-}
-
-export type MutationCustomMutationArgs = {
-	input: CustomMutationInput
-}
-
-export type SecondCustomMutationInput = {
-	sum?: SecondCustomMutationSum
-}
-
-export type MutationSecondCustomMutationArgs = {
-	input: SecondCustomMutationInput
-}
-
-export type SecondCustomMutationSum = {
-	a: number
-	b: number
 }
 
 export type ResetPasswordInput = {
@@ -481,10 +431,6 @@ export type VerifyChallengeSecondFAQrCodeOTP = {
 	otp: string
 }
 
-export type QueryHelloWorldArgs = {
-	name: string
-}
-
 export type QueryMeArgs = {}
 
 export type WabeSchemaScalars = ''
@@ -497,8 +443,8 @@ export type WabeSchemaEnums = {
 }
 
 export type WabeSchemaTypes = {
+	Collection1: Collection1
 	User: User
-	Post: Post
 	_Session: _Session
 	Role: Role
 	_InternalConfig: _InternalConfig
@@ -507,8 +453,8 @@ export type WabeSchemaTypes = {
 }
 
 export type WabeSchemaWhereTypes = {
+	Collection1: WhereCollection1
 	User: WhereUser
-	Post: WherePost
 	_Session: Where_Session
 	Role: WhereRole
 	_InternalConfig: Where_InternalConfig

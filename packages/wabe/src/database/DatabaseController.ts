@@ -1064,6 +1064,7 @@ export class DatabaseController<T extends WabeTypes> {
 		requiredLockedState,
 		newLocked,
 		context,
+		staleLockMs,
 	}: CompareAndSetMutexOptions<T>): Promise<boolean> {
 		const normalizedName = name.trim()
 		if (!normalizedName) throw new Error('Mutex name cannot be empty')
@@ -1073,6 +1074,7 @@ export class DatabaseController<T extends WabeTypes> {
 			requiredLockedState,
 			newLocked,
 			context: contextWithRoot(context),
+			staleLockMs,
 		})
 	}
 
