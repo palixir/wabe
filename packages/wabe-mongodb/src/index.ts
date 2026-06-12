@@ -509,11 +509,13 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
 		requiredLockedState,
 		newLocked,
 		context: _context,
+		staleLockMs,
 	}: {
 		name: string
 		requiredLockedState: boolean
 		newLocked: boolean
 		context: unknown
+		staleLockMs?: number
 	}): Promise<boolean> {
 		if (!this.database) throw new Error('Connection to database is not established')
 
@@ -522,15 +524,27 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
 
 		const collection = this.database.collection('_Mutex')
 
+		const now = new Date()
+
 		if (requiredLockedState === false) {
+			// A lock is acquirable when it is free, or when it is stale (held longer than
+			// `staleLockMs`, e.g. left over by a crashed process that never released it).
+			const acquirableConditions: Record<string, unknown>[] = [{ locked: false }]
+			if (staleLockMs !== undefined) {
+				const staleThreshold = new Date(now.getTime() - staleLockMs)
+				acquirableConditions.push({ lockedAt: { $lte: staleThreshold } })
+				acquirableConditions.push({ lockedAt: { $exists: false } })
+			}
+
 			const updatedDocument = await collection.findOneAndUpdate(
 				{
 					name: normalizedName,
-					locked: false,
+					$or: acquirableConditions,
 				},
 				{
 					$set: {
 						locked: newLocked,
+						lockedAt: now,
 					},
 				},
 				{
@@ -550,6 +564,7 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
 				await collection.insertOne({
 					name: normalizedName,
 					locked: newLocked,
+					lockedAt: now,
 				})
 				return true
 			} catch (error) {
@@ -573,6 +588,7 @@ export class MongoAdapter<T extends WabeTypes> implements DatabaseAdapter<T> {
 			{
 				$set: {
 					locked: newLocked,
+					lockedAt: now,
 				},
 			},
 			{

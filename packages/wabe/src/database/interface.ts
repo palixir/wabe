@@ -292,6 +292,10 @@ export interface CompareAndSetMutexOptions<T extends WabeTypes> {
 	requiredLockedState: boolean
 	newLocked: boolean
 	context: WabeContext<T>
+	// When acquiring a lock (requiredLockedState === false), a currently locked mutex whose
+	// `lockedAt` is older than `staleLockMs` is considered stale (e.g. left over by a crashed
+	// process) and can be stolen. Ignored when releasing.
+	staleLockMs?: number
 }
 
 export interface DatabaseAdapter<T extends WabeTypes> {

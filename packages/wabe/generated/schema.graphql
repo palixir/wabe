@@ -1,7 +1,5 @@
 enum RoleEnum {
 	DashboardAdmin
-	Admin
-	Client
 }
 
 enum AuthenticationProvider {
@@ -37,21 +35,106 @@ Date scalar type
 """
 scalar Date
 
-"""
-User class
-"""
-type User {
+type Collection1 {
 	id: ID!
 	name: String
-	age: Int
-	email: Email
-	acl: UserACLObject
+	acl: Collection1ACLObject
 	createdAt: Date
 	updatedAt: Date
 	search: [String]
+}
+
+type Collection1ACLObject {
+	users: [Collection1ACLObjectUsersACL]
+	roles: [Collection1ACLObjectRolesACL]
+}
+
+type Collection1ACLObjectUsersACL {
+	userId: String!
+	read: Boolean!
+	write: Boolean!
+}
+
+type Collection1ACLObjectRolesACL {
+	roleId: String!
+	read: Boolean!
+	write: Boolean!
+}
+
+input Collection1Input {
+	name: String
+	acl: Collection1ACLObjectInput
+	createdAt: Date
+	updatedAt: Date
+	search: [String]
+}
+
+input Collection1ACLObjectInput {
+	users: [Collection1ACLObjectUsersACLInput]
+	roles: [Collection1ACLObjectRolesACLInput]
+}
+
+input Collection1ACLObjectUsersACLInput {
+	userId: String!
+	read: Boolean!
+	write: Boolean!
+}
+
+input Collection1ACLObjectRolesACLInput {
+	roleId: String!
+	read: Boolean!
+	write: Boolean!
+}
+
+"""
+Input to link an object to a pointer Collection1
+"""
+input Collection1PointerInput {
+	unlink: Boolean
+	link: ID
+	createAndLink: Collection1CreateFieldsInput
+}
+
+input Collection1CreateFieldsInput {
+	name: String
+	acl: Collection1ACLObjectCreateFieldsInput
+	createdAt: Date
+	updatedAt: Date
+	search: [String]
+}
+
+input Collection1ACLObjectCreateFieldsInput {
+	users: [Collection1ACLObjectUsersACLCreateFieldsInput]
+	roles: [Collection1ACLObjectRolesACLCreateFieldsInput]
+}
+
+input Collection1ACLObjectUsersACLCreateFieldsInput {
+	userId: String
+	read: Boolean
+	write: Boolean
+}
+
+input Collection1ACLObjectRolesACLCreateFieldsInput {
+	roleId: String
+	read: Boolean
+	write: Boolean
+}
+
+"""
+Input to add a relation to the class Collection1
+"""
+input Collection1RelationInput {
+	add: [ID!]
+	remove: [ID!]
+	createAndAdd: [Collection1CreateFieldsInput!]
+}
+
+type User {
+	id: ID!
 	authentication: UserAuthentication
 	provider: AuthenticationProvider
 	isOauth: Boolean
+	email: Email
 	verifiedEmail: Boolean
 	role: Role
 	sessions(
@@ -63,28 +146,10 @@ type User {
 	secondFA: UserSecondFA
 	otpSalt: String
 	pendingChallenges: [UserPendingAuthenticationChallenge]
-}
-
-"""
-Email scalar type
-"""
-scalar Email
-
-type UserACLObject {
-	users: [UserACLObjectUsersACL]
-	roles: [UserACLObjectRolesACL]
-}
-
-type UserACLObjectUsersACL {
-	userId: String!
-	read: Boolean!
-	write: Boolean!
-}
-
-type UserACLObjectRolesACL {
-	roleId: String!
-	read: Boolean!
-	write: Boolean!
+	acl: UserACLObject
+	createdAt: Date
+	updatedAt: Date
+	search: [String]
 }
 
 type UserAuthentication {
@@ -99,6 +164,11 @@ type UserAuthentication {
 type UserAuthenticationMagicLink {
 	email: Email!
 }
+
+"""
+Email scalar type
+"""
+scalar Email
 
 type UserAuthenticationEmailPasswordSRP {
 	email: Email!
@@ -168,110 +238,25 @@ input IdWhereInput {
 	notIn: [ID]
 }
 
-"""
-User class
-"""
 input UserWhereInput {
 	id: IdWhereInput
-	name: StringWhereInput
-	age: IntWhereInput
-	email: EmailWhereInput
-	acl: UserACLObjectWhereInput
-	createdAt: DateWhereInput
-	updatedAt: DateWhereInput
-	search: SearchWhereInput
 	authentication: UserAuthenticationWhereInput
 	provider: AnyWhereInput
 	isOauth: BooleanWhereInput
+	email: EmailWhereInput
 	verifiedEmail: BooleanWhereInput
 	role: RoleWhereInput
 	sessions: _SessionRelationWhereInput
 	secondFA: UserSecondFAWhereInput
 	otpSalt: StringWhereInput
 	pendingChallenges: [UserPendingAuthenticationChallengeWhereInput]
+	acl: UserACLObjectWhereInput
+	createdAt: DateWhereInput
+	updatedAt: DateWhereInput
+	search: SearchWhereInput
 	OR: [UserWhereInput]
 	AND: [UserWhereInput]
 }
-
-input StringWhereInput {
-	equalTo: String
-	notEqualTo: String
-	in: [String]
-	notIn: [String]
-	exists: Boolean
-}
-
-input IntWhereInput {
-	equalTo: Int
-	notEqualTo: Int
-	lessThan: Int
-	lessThanOrEqualTo: Int
-	greaterThan: Int
-	greaterThanOrEqualTo: Int
-	in: [Int]
-	notIn: [Int]
-	exists: Boolean
-}
-
-input EmailWhereInput {
-	equalTo: Email
-	notEqualTo: Email
-	in: [Email]
-	notIn: [Email]
-	exists: Boolean
-}
-
-input UserACLObjectWhereInput {
-	users: [UserACLObjectUsersACLWhereInput]
-	roles: [UserACLObjectRolesACLWhereInput]
-	OR: [UserACLObjectWhereInput]
-	AND: [UserACLObjectWhereInput]
-}
-
-input UserACLObjectUsersACLWhereInput {
-	userId: StringWhereInput
-	read: BooleanWhereInput
-	write: BooleanWhereInput
-	OR: [UserACLObjectUsersACLWhereInput]
-	AND: [UserACLObjectUsersACLWhereInput]
-}
-
-input BooleanWhereInput {
-	equalTo: Boolean
-	notEqualTo: Boolean
-	in: [Boolean]
-	notIn: [Boolean]
-	exists: Boolean
-}
-
-input UserACLObjectRolesACLWhereInput {
-	roleId: StringWhereInput
-	read: BooleanWhereInput
-	write: BooleanWhereInput
-	OR: [UserACLObjectRolesACLWhereInput]
-	AND: [UserACLObjectRolesACLWhereInput]
-}
-
-input DateWhereInput {
-	equalTo: Date
-	notEqualTo: Date
-	in: [Date]
-	notIn: [Date]
-	lessThan: Date
-	lessThanOrEqualTo: Date
-	greaterThan: Date
-	greaterThanOrEqualTo: Date
-	exists: Boolean
-}
-
-input SearchWhereInput {
-	contains: Search
-}
-
-"""
-Search scalar to tokenize and search for all searchable fields
-"""
-scalar Search
 
 input UserAuthenticationWhereInput {
 	magicLink: UserAuthenticationMagicLinkWhereInput
@@ -290,6 +275,14 @@ input UserAuthenticationMagicLinkWhereInput {
 	AND: [UserAuthenticationMagicLinkWhereInput]
 }
 
+input EmailWhereInput {
+	equalTo: Email
+	notEqualTo: Email
+	in: [Email]
+	notIn: [Email]
+	exists: Boolean
+}
+
 input UserAuthenticationEmailPasswordSRPWhereInput {
 	email: EmailWhereInput
 	salt: StringWhereInput
@@ -298,6 +291,26 @@ input UserAuthenticationEmailPasswordSRPWhereInput {
 	serverSecretExpiresAt: DateWhereInput
 	OR: [UserAuthenticationEmailPasswordSRPWhereInput]
 	AND: [UserAuthenticationEmailPasswordSRPWhereInput]
+}
+
+input StringWhereInput {
+	equalTo: String
+	notEqualTo: String
+	in: [String]
+	notIn: [String]
+	exists: Boolean
+}
+
+input DateWhereInput {
+	equalTo: Date
+	notEqualTo: Date
+	in: [Date]
+	notIn: [Date]
+	lessThan: Date
+	lessThanOrEqualTo: Date
+	greaterThan: Date
+	greaterThanOrEqualTo: Date
+	exists: Boolean
 }
 
 input UserAuthenticationPhonePasswordWhereInput {
@@ -328,6 +341,14 @@ input UserAuthenticationGoogleWhereInput {
 	verifiedEmail: BooleanWhereInput
 	OR: [UserAuthenticationGoogleWhereInput]
 	AND: [UserAuthenticationGoogleWhereInput]
+}
+
+input BooleanWhereInput {
+	equalTo: Boolean
+	notEqualTo: Boolean
+	in: [Boolean]
+	notIn: [Boolean]
+	exists: Boolean
 }
 
 input UserAuthenticationGithubWhereInput {
@@ -393,6 +414,15 @@ input RoleACLObjectRolesACLWhereInput {
 	AND: [RoleACLObjectRolesACLWhereInput]
 }
 
+input SearchWhereInput {
+	contains: Search
+}
+
+"""
+Search scalar to tokenize and search for all searchable fields
+"""
+scalar Search
+
 """
 Filter on relation to _Session
 """
@@ -414,6 +444,29 @@ input UserPendingAuthenticationChallengeWhereInput {
 	expiresAt: DateWhereInput
 	OR: [UserPendingAuthenticationChallengeWhereInput]
 	AND: [UserPendingAuthenticationChallengeWhereInput]
+}
+
+input UserACLObjectWhereInput {
+	users: [UserACLObjectUsersACLWhereInput]
+	roles: [UserACLObjectRolesACLWhereInput]
+	OR: [UserACLObjectWhereInput]
+	AND: [UserACLObjectWhereInput]
+}
+
+input UserACLObjectUsersACLWhereInput {
+	userId: StringWhereInput
+	read: BooleanWhereInput
+	write: BooleanWhereInput
+	OR: [UserACLObjectUsersACLWhereInput]
+	AND: [UserACLObjectUsersACLWhereInput]
+}
+
+input UserACLObjectRolesACLWhereInput {
+	roleId: StringWhereInput
+	read: BooleanWhereInput
+	write: BooleanWhereInput
+	OR: [UserACLObjectRolesACLWhereInput]
+	AND: [UserACLObjectRolesACLWhereInput]
 }
 
 input _SessionACLObjectWhereInput {
@@ -471,43 +524,38 @@ type UserPendingAuthenticationChallenge {
 	expiresAt: Date!
 }
 
-"""
-User class
-"""
+type UserACLObject {
+	users: [UserACLObjectUsersACL]
+	roles: [UserACLObjectRolesACL]
+}
+
+type UserACLObjectUsersACL {
+	userId: String!
+	read: Boolean!
+	write: Boolean!
+}
+
+type UserACLObjectRolesACL {
+	roleId: String!
+	read: Boolean!
+	write: Boolean!
+}
+
 input UserInput {
-	name: String
-	age: Int
-	email: Email
-	acl: UserACLObjectInput
-	createdAt: Date
-	updatedAt: Date
-	search: [String]
 	authentication: UserAuthenticationInput
 	provider: AuthenticationProvider
 	isOauth: Boolean
+	email: Email
 	verifiedEmail: Boolean
 	role: RolePointerInput
 	sessions: _SessionRelationInput
 	secondFA: UserSecondFAInput
 	otpSalt: String
 	pendingChallenges: [UserPendingAuthenticationChallengeInput]
-}
-
-input UserACLObjectInput {
-	users: [UserACLObjectUsersACLInput]
-	roles: [UserACLObjectRolesACLInput]
-}
-
-input UserACLObjectUsersACLInput {
-	userId: String!
-	read: Boolean!
-	write: Boolean!
-}
-
-input UserACLObjectRolesACLInput {
-	roleId: String!
-	read: Boolean!
-	write: Boolean!
+	acl: UserACLObjectInput
+	createdAt: Date
+	updatedAt: Date
+	search: [String]
 }
 
 input UserAuthenticationInput {
@@ -565,6 +613,23 @@ input UserPendingAuthenticationChallengeInput {
 	expiresAt: Date!
 }
 
+input UserACLObjectInput {
+	users: [UserACLObjectUsersACLInput]
+	roles: [UserACLObjectRolesACLInput]
+}
+
+input UserACLObjectUsersACLInput {
+	userId: String!
+	read: Boolean!
+	write: Boolean!
+}
+
+input UserACLObjectRolesACLInput {
+	roleId: String!
+	read: Boolean!
+	write: Boolean!
+}
+
 """
 Input to link an object to a pointer User
 """
@@ -574,43 +639,21 @@ input UserPointerInput {
 	createAndLink: UserCreateFieldsInput
 }
 
-"""
-User class
-"""
 input UserCreateFieldsInput {
-	name: String
-	age: Int
-	email: Email
-	acl: UserACLObjectCreateFieldsInput
-	createdAt: Date
-	updatedAt: Date
-	search: [String]
 	authentication: UserAuthenticationCreateFieldsInput
 	provider: AuthenticationProvider
 	isOauth: Boolean
+	email: Email
 	verifiedEmail: Boolean
 	role: RolePointerInput
 	sessions: _SessionRelationInput
 	secondFA: UserSecondFACreateFieldsInput
 	otpSalt: String
 	pendingChallenges: [UserPendingAuthenticationChallengeCreateFieldsInput]
-}
-
-input UserACLObjectCreateFieldsInput {
-	users: [UserACLObjectUsersACLCreateFieldsInput]
-	roles: [UserACLObjectRolesACLCreateFieldsInput]
-}
-
-input UserACLObjectUsersACLCreateFieldsInput {
-	userId: String
-	read: Boolean
-	write: Boolean
-}
-
-input UserACLObjectRolesACLCreateFieldsInput {
-	roleId: String
-	read: Boolean
-	write: Boolean
+	acl: UserACLObjectCreateFieldsInput
+	createdAt: Date
+	updatedAt: Date
+	search: [String]
 }
 
 input UserAuthenticationCreateFieldsInput {
@@ -668,6 +711,23 @@ input UserPendingAuthenticationChallengeCreateFieldsInput {
 	expiresAt: Date
 }
 
+input UserACLObjectCreateFieldsInput {
+	users: [UserACLObjectUsersACLCreateFieldsInput]
+	roles: [UserACLObjectRolesACLCreateFieldsInput]
+}
+
+input UserACLObjectUsersACLCreateFieldsInput {
+	userId: String
+	read: Boolean
+	write: Boolean
+}
+
+input UserACLObjectRolesACLCreateFieldsInput {
+	roleId: String
+	read: Boolean
+	write: Boolean
+}
+
 """
 Input to add a relation to the class User
 """
@@ -675,181 +735,6 @@ input UserRelationInput {
 	add: [ID!]
 	remove: [ID!]
 	createAndAdd: [UserCreateFieldsInput!]
-}
-
-type Post {
-	id: ID!
-	name: String!
-	test2: RoleEnum
-	test3(where: UserWhereInput, offset: Int, first: Int, order: [UserOrder!]): UserConnection
-	test4: User
-	experiences: [PostExperience!]
-	acl: PostACLObject
-	createdAt: Date
-	updatedAt: Date
-	search: [String]
-}
-
-type UserConnection {
-	ok: Boolean
-	totalCount: Int
-	edges: [UserEdge]
-}
-
-type UserEdge {
-	node: User!
-}
-
-enum UserOrder {
-	name_ASC
-	name_DESC
-	age_ASC
-	age_DESC
-	email_ASC
-	email_DESC
-	acl_ASC
-	acl_DESC
-	createdAt_ASC
-	createdAt_DESC
-	updatedAt_ASC
-	updatedAt_DESC
-	search_ASC
-	search_DESC
-	authentication_ASC
-	authentication_DESC
-	provider_ASC
-	provider_DESC
-	isOauth_ASC
-	isOauth_DESC
-	verifiedEmail_ASC
-	verifiedEmail_DESC
-	role_ASC
-	role_DESC
-	sessions_ASC
-	sessions_DESC
-	secondFA_ASC
-	secondFA_DESC
-	otpSalt_ASC
-	otpSalt_DESC
-	pendingChallenges_ASC
-	pendingChallenges_DESC
-}
-
-type PostExperience {
-	jobTitle: String!
-	companyName: String!
-	startDate: String!
-	endDate: String!
-	achievements: [String]
-}
-
-type PostACLObject {
-	users: [PostACLObjectUsersACL]
-	roles: [PostACLObjectRolesACL]
-}
-
-type PostACLObjectUsersACL {
-	userId: String!
-	read: Boolean!
-	write: Boolean!
-}
-
-type PostACLObjectRolesACL {
-	roleId: String!
-	read: Boolean!
-	write: Boolean!
-}
-
-input PostInput {
-	name: String!
-	test2: RoleEnum
-	test3: UserRelationInput
-	test4: UserPointerInput
-	experiences: [PostExperienceInput!]
-	acl: PostACLObjectInput
-	createdAt: Date
-	updatedAt: Date
-	search: [String]
-}
-
-input PostExperienceInput {
-	jobTitle: String!
-	companyName: String!
-	startDate: String!
-	endDate: String!
-	achievements: [String]
-}
-
-input PostACLObjectInput {
-	users: [PostACLObjectUsersACLInput]
-	roles: [PostACLObjectRolesACLInput]
-}
-
-input PostACLObjectUsersACLInput {
-	userId: String!
-	read: Boolean!
-	write: Boolean!
-}
-
-input PostACLObjectRolesACLInput {
-	roleId: String!
-	read: Boolean!
-	write: Boolean!
-}
-
-"""
-Input to link an object to a pointer Post
-"""
-input PostPointerInput {
-	unlink: Boolean
-	link: ID
-	createAndLink: PostCreateFieldsInput
-}
-
-input PostCreateFieldsInput {
-	name: String
-	test2: RoleEnum
-	test3: UserRelationInput
-	test4: UserPointerInput
-	experiences: [PostExperienceCreateFieldsInput!]
-	acl: PostACLObjectCreateFieldsInput
-	createdAt: Date
-	updatedAt: Date
-	search: [String]
-}
-
-input PostExperienceCreateFieldsInput {
-	jobTitle: String
-	companyName: String
-	startDate: String
-	endDate: String
-	achievements: [String]
-}
-
-input PostACLObjectCreateFieldsInput {
-	users: [PostACLObjectUsersACLCreateFieldsInput]
-	roles: [PostACLObjectRolesACLCreateFieldsInput]
-}
-
-input PostACLObjectUsersACLCreateFieldsInput {
-	userId: String
-	read: Boolean
-	write: Boolean
-}
-
-input PostACLObjectRolesACLCreateFieldsInput {
-	roleId: String
-	read: Boolean
-	write: Boolean
-}
-
-"""
-Input to add a relation to the class Post
-"""
-input PostRelationInput {
-	add: [ID!]
-	remove: [ID!]
-	createAndAdd: [PostCreateFieldsInput!]
 }
 
 type _Session {
@@ -966,6 +851,47 @@ type Role {
 	createdAt: Date
 	updatedAt: Date
 	search: [String]
+}
+
+type UserConnection {
+	ok: Boolean
+	totalCount: Int
+	edges: [UserEdge]
+}
+
+type UserEdge {
+	node: User!
+}
+
+enum UserOrder {
+	authentication_ASC
+	authentication_DESC
+	provider_ASC
+	provider_DESC
+	isOauth_ASC
+	isOauth_DESC
+	email_ASC
+	email_DESC
+	verifiedEmail_ASC
+	verifiedEmail_DESC
+	role_ASC
+	role_DESC
+	sessions_ASC
+	sessions_DESC
+	secondFA_ASC
+	secondFA_DESC
+	otpSalt_ASC
+	otpSalt_DESC
+	pendingChallenges_ASC
+	pendingChallenges_DESC
+	acl_ASC
+	acl_DESC
+	createdAt_ASC
+	createdAt_DESC
+	updatedAt_ASC
+	updatedAt_DESC
+	search_ASC
+	search_DESC
 }
 
 type RoleACLObject {
@@ -1268,6 +1194,7 @@ type _Mutex {
 	id: ID!
 	name: String!
 	locked: Boolean!
+	lockedAt: Date
 	acl: _MutexACLObject
 	createdAt: Date
 	updatedAt: Date
@@ -1294,6 +1221,7 @@ type _MutexACLObjectRolesACL {
 input _MutexInput {
 	name: String!
 	locked: Boolean!
+	lockedAt: Date
 	acl: _MutexACLObjectInput
 	createdAt: Date
 	updatedAt: Date
@@ -1329,6 +1257,7 @@ input _MutexPointerInput {
 input _MutexCreateFieldsInput {
 	name: String
 	locked: Boolean
+	lockedAt: Date
 	acl: _MutexACLObjectCreateFieldsInput
 	createdAt: Date
 	updatedAt: Date
@@ -1362,17 +1291,15 @@ input _MutexRelationInput {
 }
 
 type Query {
-	"""
-	User class
-	"""
+	collection1(id: ID): Collection1
+	collection1s(
+		where: Collection1WhereInput
+		offset: Int
+		first: Int
+		order: [Collection1Order!]
+	): Collection1Connection!
 	user(id: ID): User
-
-	"""
-	User class
-	"""
 	users(where: UserWhereInput, offset: Int, first: Int, order: [UserOrder!]): UserConnection!
-	post(id: ID): Post
-	posts(where: PostWhereInput, offset: Int, first: Int, order: [PostOrder!]): PostConnection!
 	_session(id: ID): _Session
 	_sessions(
 		where: _SessionWhereInput
@@ -1403,91 +1330,56 @@ type Query {
 		first: Int
 		order: [_MutexOrder!]
 	): _MutexConnection!
-
-	"""
-	Hello world description
-	"""
-	helloWorld(name: String!): String
 	me: MeOutput
 }
 
-type PostConnection {
+type Collection1Connection {
 	ok: Boolean
 	totalCount: Int
-	edges: [PostEdge]
+	edges: [Collection1Edge]
 }
 
-type PostEdge {
-	node: Post!
+type Collection1Edge {
+	node: Collection1!
 }
 
-input PostWhereInput {
+input Collection1WhereInput {
 	id: IdWhereInput
 	name: StringWhereInput
-	test2: AnyWhereInput
-	test3: UserRelationWhereInput
-	test4: UserWhereInput
-	experiences: [PostExperienceWhereInput!]
-	acl: PostACLObjectWhereInput
+	acl: Collection1ACLObjectWhereInput
 	createdAt: DateWhereInput
 	updatedAt: DateWhereInput
 	search: SearchWhereInput
-	OR: [PostWhereInput]
-	AND: [PostWhereInput]
+	OR: [Collection1WhereInput]
+	AND: [Collection1WhereInput]
 }
 
-input PostExperienceWhereInput {
-	jobTitle: StringWhereInput
-	companyName: StringWhereInput
-	startDate: StringWhereInput
-	endDate: StringWhereInput
-	achievements: ArrayWhereInput
-	OR: [PostExperienceWhereInput]
-	AND: [PostExperienceWhereInput]
+input Collection1ACLObjectWhereInput {
+	users: [Collection1ACLObjectUsersACLWhereInput]
+	roles: [Collection1ACLObjectRolesACLWhereInput]
+	OR: [Collection1ACLObjectWhereInput]
+	AND: [Collection1ACLObjectWhereInput]
 }
 
-input ArrayWhereInput {
-	equalTo: Any
-	notEqualTo: Any
-	contains: Any
-	notContains: Any
-	exists: Boolean
-}
-
-input PostACLObjectWhereInput {
-	users: [PostACLObjectUsersACLWhereInput]
-	roles: [PostACLObjectRolesACLWhereInput]
-	OR: [PostACLObjectWhereInput]
-	AND: [PostACLObjectWhereInput]
-}
-
-input PostACLObjectUsersACLWhereInput {
+input Collection1ACLObjectUsersACLWhereInput {
 	userId: StringWhereInput
 	read: BooleanWhereInput
 	write: BooleanWhereInput
-	OR: [PostACLObjectUsersACLWhereInput]
-	AND: [PostACLObjectUsersACLWhereInput]
+	OR: [Collection1ACLObjectUsersACLWhereInput]
+	AND: [Collection1ACLObjectUsersACLWhereInput]
 }
 
-input PostACLObjectRolesACLWhereInput {
+input Collection1ACLObjectRolesACLWhereInput {
 	roleId: StringWhereInput
 	read: BooleanWhereInput
 	write: BooleanWhereInput
-	OR: [PostACLObjectRolesACLWhereInput]
-	AND: [PostACLObjectRolesACLWhereInput]
+	OR: [Collection1ACLObjectRolesACLWhereInput]
+	AND: [Collection1ACLObjectRolesACLWhereInput]
 }
 
-enum PostOrder {
+enum Collection1Order {
 	name_ASC
 	name_DESC
-	test2_ASC
-	test2_DESC
-	test3_ASC
-	test3_DESC
-	test4_ASC
-	test4_DESC
-	experiences_ASC
-	experiences_DESC
 	acl_ASC
 	acl_DESC
 	createdAt_ASC
@@ -1612,6 +1504,18 @@ input _MagicLinkChallengeWhereInput {
 	AND: [_MagicLinkChallengeWhereInput]
 }
 
+input IntWhereInput {
+	equalTo: Int
+	notEqualTo: Int
+	lessThan: Int
+	lessThanOrEqualTo: Int
+	greaterThan: Int
+	greaterThanOrEqualTo: Int
+	in: [Int]
+	notIn: [Int]
+	exists: Boolean
+}
+
 input _MagicLinkChallengeACLObjectWhereInput {
 	users: [_MagicLinkChallengeACLObjectUsersACLWhereInput]
 	roles: [_MagicLinkChallengeACLObjectRolesACLWhereInput]
@@ -1672,6 +1576,7 @@ input _MutexWhereInput {
 	id: IdWhereInput
 	name: StringWhereInput
 	locked: BooleanWhereInput
+	lockedAt: DateWhereInput
 	acl: _MutexACLObjectWhereInput
 	createdAt: DateWhereInput
 	updatedAt: DateWhereInput
@@ -1708,6 +1613,8 @@ enum _MutexOrder {
 	name_DESC
 	locked_ASC
 	locked_DESC
+	lockedAt_ASC
+	lockedAt_DESC
 	acl_ASC
 	acl_DESC
 	createdAt_ASC
@@ -1723,41 +1630,18 @@ type MeOutput {
 }
 
 type Mutation {
-	"""
-	User class
-	"""
+	createCollection1(input: CreateCollection1Input!): CreateCollection1Payload
+	createCollection1s(input: CreateCollection1sInput!): Collection1Connection!
+	updateCollection1(input: UpdateCollection1Input!): UpdateCollection1Payload
+	updateCollection1s(input: UpdateCollection1sInput!): Collection1Connection!
+	deleteCollection1(input: DeleteCollection1Input!): DeleteCollection1Payload
+	deleteCollection1s(input: DeleteCollection1sInput!): Collection1Connection!
 	createUser(input: CreateUserInput!): CreateUserPayload
-
-	"""
-	User class
-	"""
 	createUsers(input: CreateUsersInput!): UserConnection!
-
-	"""
-	User class
-	"""
 	updateUser(input: UpdateUserInput!): UpdateUserPayload
-
-	"""
-	User class
-	"""
 	updateUsers(input: UpdateUsersInput!): UserConnection!
-
-	"""
-	User class
-	"""
 	deleteUser(input: DeleteUserInput!): DeleteUserPayload
-
-	"""
-	User class
-	"""
 	deleteUsers(input: DeleteUsersInput!): UserConnection!
-	createPost(input: CreatePostInput!): CreatePostPayload
-	createPosts(input: CreatePostsInput!): PostConnection!
-	updatePost(input: UpdatePostInput!): UpdatePostPayload
-	updatePosts(input: UpdatePostsInput!): PostConnection!
-	deletePost(input: DeletePostInput!): DeletePostPayload
-	deletePosts(input: DeletePostsInput!): PostConnection!
 	create_Session(input: Create_SessionInput!): Create_SessionPayload
 	create_Sessions(input: Create_SessionsInput!): _SessionConnection!
 	update_Session(input: Update_SessionInput!): Update_SessionPayload
@@ -1800,9 +1684,6 @@ type Mutation {
 	update_Mutexes(input: Update_MutexesInput!): _MutexConnection!
 	delete_Mutex(input: Delete_MutexInput!): Delete_MutexPayload
 	delete_Mutexes(input: Delete_MutexesInput!): _MutexConnection!
-	createMutation(input: CreateMutationInput!): Boolean!
-	customMutation(input: CustomMutationInput!): Int
-	secondCustomMutation(input: SecondCustomMutationInput!): Int
 
 	"""
 	Mutation to reset the password of the user
@@ -1818,6 +1699,79 @@ type Mutation {
 	signOut: Boolean
 	refresh(input: RefreshInput!): RefreshSessionOutput
 	verifyChallenge(input: VerifyChallengeInput!): VerifyChallengeOutput
+}
+
+type CreateCollection1Payload {
+	collection1: Collection1
+	ok: Boolean
+}
+
+input CreateCollection1Input {
+	fields: Collection1CreateFieldsInput
+}
+
+input CreateCollection1sInput {
+	fields: [Collection1CreateFieldsInput]!
+	offset: Int
+	first: Int
+	order: [Collection1Order]
+}
+
+type UpdateCollection1Payload {
+	collection1: Collection1
+	ok: Boolean
+}
+
+input UpdateCollection1Input {
+	id: ID
+	fields: Collection1UpdateFieldsInput
+}
+
+input Collection1UpdateFieldsInput {
+	name: String
+	acl: Collection1ACLObjectUpdateFieldsInput
+	createdAt: Date
+	updatedAt: Date
+	search: [String]
+}
+
+input Collection1ACLObjectUpdateFieldsInput {
+	users: [Collection1ACLObjectUsersACLUpdateFieldsInput]
+	roles: [Collection1ACLObjectRolesACLUpdateFieldsInput]
+}
+
+input Collection1ACLObjectUsersACLUpdateFieldsInput {
+	userId: String
+	read: Boolean
+	write: Boolean
+}
+
+input Collection1ACLObjectRolesACLUpdateFieldsInput {
+	roleId: String
+	read: Boolean
+	write: Boolean
+}
+
+input UpdateCollection1sInput {
+	fields: Collection1UpdateFieldsInput
+	where: Collection1WhereInput
+	offset: Int
+	first: Int
+	order: [Collection1Order]
+}
+
+type DeleteCollection1Payload {
+	collection1: Collection1
+	ok: Boolean
+}
+
+input DeleteCollection1Input {
+	id: ID
+}
+
+input DeleteCollection1sInput {
+	where: Collection1WhereInput
+	order: [Collection1Order]
 }
 
 type CreateUserPayload {
@@ -1846,43 +1800,21 @@ input UpdateUserInput {
 	fields: UserUpdateFieldsInput
 }
 
-"""
-User class
-"""
 input UserUpdateFieldsInput {
-	name: String
-	age: Int
-	email: Email
-	acl: UserACLObjectUpdateFieldsInput
-	createdAt: Date
-	updatedAt: Date
-	search: [String]
 	authentication: UserAuthenticationUpdateFieldsInput
 	provider: AuthenticationProvider
 	isOauth: Boolean
+	email: Email
 	verifiedEmail: Boolean
 	role: RolePointerInput
 	sessions: _SessionRelationInput
 	secondFA: UserSecondFAUpdateFieldsInput
 	otpSalt: String
 	pendingChallenges: [UserPendingAuthenticationChallengeUpdateFieldsInput]
-}
-
-input UserACLObjectUpdateFieldsInput {
-	users: [UserACLObjectUsersACLUpdateFieldsInput]
-	roles: [UserACLObjectRolesACLUpdateFieldsInput]
-}
-
-input UserACLObjectUsersACLUpdateFieldsInput {
-	userId: String
-	read: Boolean
-	write: Boolean
-}
-
-input UserACLObjectRolesACLUpdateFieldsInput {
-	roleId: String
-	read: Boolean
-	write: Boolean
+	acl: UserACLObjectUpdateFieldsInput
+	createdAt: Date
+	updatedAt: Date
+	search: [String]
 }
 
 input UserAuthenticationUpdateFieldsInput {
@@ -1940,6 +1872,23 @@ input UserPendingAuthenticationChallengeUpdateFieldsInput {
 	expiresAt: Date
 }
 
+input UserACLObjectUpdateFieldsInput {
+	users: [UserACLObjectUsersACLUpdateFieldsInput]
+	roles: [UserACLObjectRolesACLUpdateFieldsInput]
+}
+
+input UserACLObjectUsersACLUpdateFieldsInput {
+	userId: String
+	read: Boolean
+	write: Boolean
+}
+
+input UserACLObjectRolesACLUpdateFieldsInput {
+	roleId: String
+	read: Boolean
+	write: Boolean
+}
+
 input UpdateUsersInput {
 	fields: UserUpdateFieldsInput
 	where: UserWhereInput
@@ -1960,91 +1909,6 @@ input DeleteUserInput {
 input DeleteUsersInput {
 	where: UserWhereInput
 	order: [UserOrder]
-}
-
-type CreatePostPayload {
-	post: Post
-	ok: Boolean
-}
-
-input CreatePostInput {
-	fields: PostCreateFieldsInput
-}
-
-input CreatePostsInput {
-	fields: [PostCreateFieldsInput]!
-	offset: Int
-	first: Int
-	order: [PostOrder]
-}
-
-type UpdatePostPayload {
-	post: Post
-	ok: Boolean
-}
-
-input UpdatePostInput {
-	id: ID
-	fields: PostUpdateFieldsInput
-}
-
-input PostUpdateFieldsInput {
-	name: String
-	test2: RoleEnum
-	test3: UserRelationInput
-	test4: UserPointerInput
-	experiences: [PostExperienceUpdateFieldsInput!]
-	acl: PostACLObjectUpdateFieldsInput
-	createdAt: Date
-	updatedAt: Date
-	search: [String]
-}
-
-input PostExperienceUpdateFieldsInput {
-	jobTitle: String
-	companyName: String
-	startDate: String
-	endDate: String
-	achievements: [String]
-}
-
-input PostACLObjectUpdateFieldsInput {
-	users: [PostACLObjectUsersACLUpdateFieldsInput]
-	roles: [PostACLObjectRolesACLUpdateFieldsInput]
-}
-
-input PostACLObjectUsersACLUpdateFieldsInput {
-	userId: String
-	read: Boolean
-	write: Boolean
-}
-
-input PostACLObjectRolesACLUpdateFieldsInput {
-	roleId: String
-	read: Boolean
-	write: Boolean
-}
-
-input UpdatePostsInput {
-	fields: PostUpdateFieldsInput
-	where: PostWhereInput
-	offset: Int
-	first: Int
-	order: [PostOrder]
-}
-
-type DeletePostPayload {
-	post: Post
-	ok: Boolean
-}
-
-input DeletePostInput {
-	id: ID
-}
-
-input DeletePostsInput {
-	where: PostWhereInput
-	order: [PostOrder]
 }
 
 type Create_SessionPayload {
@@ -2380,6 +2244,7 @@ input Update_MutexInput {
 input _MutexUpdateFieldsInput {
 	name: String
 	locked: Boolean
+	lockedAt: Date
 	acl: _MutexACLObjectUpdateFieldsInput
 	createdAt: Date
 	updatedAt: Date
@@ -2423,24 +2288,6 @@ input Delete_MutexInput {
 input Delete_MutexesInput {
 	where: _MutexWhereInput
 	order: [_MutexOrder]
-}
-
-input CreateMutationInput {
-	name: Int!
-}
-
-input CustomMutationInput {
-	a: Int!
-	b: Int!
-}
-
-input SecondCustomMutationInput {
-	sum: SecondCustomMutationSumInput
-}
-
-input SecondCustomMutationSumInput {
-	a: Int!
-	b: Int!
 }
 
 input ResetPasswordInput {

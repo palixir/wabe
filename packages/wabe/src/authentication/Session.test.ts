@@ -770,4 +770,69 @@ describe('Session', () => {
 		expect(mockLockMutex).toHaveBeenCalledTimes(1)
 		expect(mockUnlockMutex).toHaveBeenCalledTimes(1)
 	})
+
+	it('should throw an error on refresh when the stored refresh token cannot be decrypted', async () => {
+		const session = new Session<any>()
+		const { refreshToken, accessToken } = await session.create('userId', context)
+
+		// A stored value that cannot be decrypted (decryptDeterministicToken returns null). The
+		// validation must reject it instead of falling back to the incoming refresh token.
+		mockGetObjects.mockResolvedValue([
+			{
+				id: 'sessionId',
+				refreshTokenEncrypted: 'deadbeef:deadbeef:deadbeef',
+				refreshTokenExpiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
+				user: {
+					id: 'userId',
+					email: 'userEmail',
+				},
+			},
+		])
+
+		await expect(session.refresh(accessToken, refreshToken, context)).rejects.toThrow(
+			'Invalid refresh token',
+		)
+	})
+
+	it('should not auto-rotate tokens for header tokens (fromCookie: false) when the access token is expired', async () => {
+		const session = new Session<any>()
+		const { accessToken } = await session.create('userId', context)
+
+		mockGetObjects.mockResolvedValue([
+			{
+				id: 'sessionId',
+				refreshTokenEncrypted: encryptToken('refreshToken', 'dev'),
+				user: {
+					id: 'userId',
+					email: 'userEmail',
+				},
+				// Access token expired in the database, refresh token still valid.
+				accessTokenExpiresAt: new Date(Date.now() - 1000),
+				refreshTokenExpiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
+			},
+		])
+
+		const res = await session.meFromAccessToken(
+			{ accessToken, csrfToken: '', fromCookie: false },
+			{
+				...context,
+				wabe: {
+					...context.wabe,
+					config: {
+						...context.wabe.config,
+						authentication: {
+							session: { jwtSecret: 'dev', cookieSession: true },
+						},
+					},
+				},
+			},
+		)
+
+		// No rotation must happen for header-based tokens (the rotated tokens would be lost).
+		expect(mockUpdateObjects).toHaveBeenCalledTimes(0)
+		expect(mockLockMutex).toHaveBeenCalledTimes(0)
+		expect(res.sessionId).toEqual('sessionId')
+		expect(res.user?.id).toEqual('userId')
+		expect(res.accessToken).toEqual(accessToken)
+	})
 })

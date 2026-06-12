@@ -47,4 +47,26 @@ describe('MutexController', () => {
 		expect(await wabe.controllers.mutex.unlockMutex(mutexName)).toBe(true)
 		expect(await wabe.controllers.mutex.lockMutex(mutexName)).toBe(true)
 	})
+
+	it('should not steal a fresh lock', async () => {
+		const mutexName = 'refresh:user-fresh'
+
+		expect(await wabe.controllers.mutex.lockMutex(mutexName)).toBe(true)
+		// A lock that is younger than the stale threshold cannot be stolen.
+		expect(await wabe.controllers.mutex.lockMutex(mutexName, { staleLockMs: 60_000 })).toBe(false)
+		expect(await wabe.controllers.mutex.getMutexStatus(mutexName)).toBe(true)
+	})
+
+	it('should steal a stale lock left over by a crashed owner', async () => {
+		const mutexName = 'refresh:user-stale'
+
+		expect(await wabe.controllers.mutex.lockMutex(mutexName)).toBe(true)
+
+		// Wait so the lock becomes older than the (small) stale threshold below.
+		await new Promise((resolve) => setTimeout(resolve, 30))
+
+		expect(await wabe.controllers.mutex.lockMutex(mutexName, { staleLockMs: 10 })).toBe(true)
+		// The mutex stays locked: the lock was stolen, not released.
+		expect(await wabe.controllers.mutex.getMutexStatus(mutexName)).toBe(true)
+	})
 })

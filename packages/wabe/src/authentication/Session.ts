@@ -225,8 +225,13 @@ export class Session<T extends WabeTypes> {
 			role: userWithRole?.role,
 		} as T['types']['User']
 
+		// Auto-rotation only makes sense for cookie sessions: the rotated tokens are returned to the
+		// client through the Set-Cookie headers in defaultSessionHandler. For tokens provided through
+		// a header, the client never receives the rotated tokens, so rotating here would silently
+		// invalidate its access/refresh tokens. Header clients must refresh explicitly instead.
 		// If access token is expired and refresh token is not expired
 		if (
+			fromCookie &&
 			new Date(session.accessTokenExpiresAt) < new Date() &&
 			new Date(session.refreshTokenExpiresAt) >= new Date() &&
 			session.refreshTokenEncrypted
@@ -435,11 +440,12 @@ export class Session<T extends WabeTypes> {
 			if (new Date(refreshTokenExpiresAt) < new Date(Date.now()))
 				throw new Error('Refresh token expired')
 
-			const decryptedRefreshToken =
-				decryptDeterministicToken(storedRefreshTokenEncrypted, getTokenEncryptionKey(context)) ||
-				refreshToken
+			const decryptedRefreshToken = decryptDeterministicToken(
+				storedRefreshTokenEncrypted,
+				getTokenEncryptionKey(context),
+			)
 
-			if (!constantTimeEqual(decryptedRefreshToken, refreshToken))
+			if (!decryptedRefreshToken || !constantTimeEqual(decryptedRefreshToken, refreshToken))
 				throw new Error('Invalid refresh token')
 
 			// Always rotate tokens on refresh
