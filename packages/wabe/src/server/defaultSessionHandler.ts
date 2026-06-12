@@ -20,19 +20,21 @@ export const defaultSessionHandler =
 		}
 
 		const getAccessToken = () => {
-			if (headers.get('Wabe-Access-Token')) return { accessToken: headers.get('Wabe-Access-Token') }
+			if (headers.get('Wabe-Access-Token'))
+				return { accessToken: headers.get('Wabe-Access-Token'), fromCookie: false }
 
 			const isCookieSession = !!wabe.config.authentication?.session?.cookieSession
 
 			if (isCookieSession)
 				return {
 					accessToken: getCookieInRequestHeaders('accessToken', ctx.request.headers),
+					fromCookie: true,
 				}
 
-			return { accessToken: null }
+			return { accessToken: null, fromCookie: false }
 		}
 
-		const { accessToken } = getAccessToken()
+		const { accessToken, fromCookie } = getAccessToken()
 
 		if (!accessToken) {
 			ctx.wabe = {
@@ -60,7 +62,7 @@ export const defaultSessionHandler =
 			accessToken: newAccessToken,
 			refreshToken: newRefreshToken,
 		} = await session.meFromAccessToken(
-			{ accessToken, csrfToken },
+			{ accessToken, csrfToken, fromCookie },
 			{
 				wabe,
 				isRoot: true,
