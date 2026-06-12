@@ -70,7 +70,7 @@ describe('Default fields', () => {
 			expect(updatedAt.getFullYear()).toEqual(now.getFullYear())
 		})
 
-		it('should not overwrite if the createdAt field is already set', () => {
+		it('should not overwrite a root-provided createdAt field', () => {
 			const hookObject = new HookObject<DevWabeTypes, 'User'>({
 				className: 'User',
 				operationType: OperationType.BeforeCreate,
@@ -78,7 +78,7 @@ describe('Default fields', () => {
 					email: 'email@test.fr',
 					createdAt: now,
 				} as any,
-				context: {} as any,
+				context: { isRoot: true } as any,
 				object: {} as any,
 				select: {},
 			})
@@ -90,7 +90,7 @@ describe('Default fields', () => {
 			expect(spyHookObjectUpsertNewData).toHaveBeenCalledTimes(1)
 		})
 
-		it('should not overwrite if the updatedAt field is already set', () => {
+		it('should not overwrite a root-provided updatedAt field', () => {
 			const hookObject = new HookObject<DevWabeTypes, 'User'>({
 				className: 'User',
 				operationType: OperationType.BeforeCreate,
@@ -98,7 +98,7 @@ describe('Default fields', () => {
 					email: 'email@test.fr',
 					updatedAt: now,
 				} as any,
-				context: {} as any,
+				context: { isRoot: true } as any,
 				object: {} as any,
 				select: {},
 			})
@@ -108,6 +108,35 @@ describe('Default fields', () => {
 			defaultBeforeCreateForCreatedAt(hookObject)
 
 			expect(spyHookObjectUpsertNewData).toHaveBeenCalledTimes(1)
+		})
+
+		it('should overwrite client-provided createdAt/updatedAt for a non-root caller (mass assignment protection)', () => {
+			const forgedDate = new Date('2000-01-01T00:00:00.000Z')
+
+			const hookObject = new HookObject<DevWabeTypes, 'User'>({
+				className: 'User',
+				operationType: OperationType.BeforeCreate,
+				newData: {
+					email: 'email@test.fr',
+					createdAt: forgedDate,
+					updatedAt: forgedDate,
+				} as any,
+				context: { isRoot: false } as any,
+				object: {} as any,
+				select: {},
+			})
+
+			const spyHookObjectUpsertNewData = spyOn(hookObject, 'upsertNewData')
+
+			defaultBeforeCreateForCreatedAt(hookObject)
+
+			expect(spyHookObjectUpsertNewData).toHaveBeenCalledTimes(2)
+
+			const createdAt = spyHookObjectUpsertNewData.mock.calls[0]?.[1]
+			const updatedAt = spyHookObjectUpsertNewData.mock.calls[1]?.[1]
+
+			expect(createdAt.getFullYear()).toEqual(now.getFullYear())
+			expect(updatedAt.getFullYear()).toEqual(now.getFullYear())
 		})
 	})
 

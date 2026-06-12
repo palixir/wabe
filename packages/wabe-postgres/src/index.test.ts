@@ -2,7 +2,13 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'bun:test'
 import { fail } from 'node:assert'
 import getPort from 'get-port'
 import { v4 as uuid } from 'uuid'
-import { buildPostgresWhereQueryAndValues, PostgresAdapter } from '.'
+import {
+	buildPostgresOrderQuery,
+	buildPostgresWhereQueryAndValues,
+	escapePostgresIdentifier,
+	escapePostgresJsonKey,
+	PostgresAdapter,
+} from '.'
 import { setupTests, closeTests } from '../utils/testHelper'
 import { notEmpty, Wabe, type WabeContext } from 'wabe'
 
@@ -2264,5 +2270,57 @@ describe('PostgreSQL DDL index syntax', () => {
 
 		expect(ddl).toContain('DESC')
 		expect(ddl).toContain('"createdAt"')
+	})
+})
+
+describe('Postgres query builder security (SQL injection)', () => {
+	it('should only allow ASC/DESC directions in ORDER BY', () => {
+		// @ts-expect-error testing an invalid (malicious) direction
+		expect(() => buildPostgresOrderQuery({ name: 'ASC; DROP TABLE "User"; --' })).toThrow(
+			'Invalid order direction',
+		)
+
+		// @ts-expect-error testing an invalid (malicious) direction
+		expect(() => buildPostgresOrderQuery({ name: 'DESC--' })).toThrow('Invalid order direction')
+	})
+
+	it('should build a valid ORDER BY clause for legitimate input', () => {
+		expect(buildPostgresOrderQuery({ name: 'ASC' } as any)).toBe('ORDER BY "name" ASC')
+		expect(buildPostgresOrderQuery({ id: 'DESC' } as any)).toBe('ORDER BY "_id" DESC')
+		expect(buildPostgresOrderQuery({ name: 'ASC', age: 'DESC' } as any)).toBe(
+			'ORDER BY "name" ASC, "age" DESC',
+		)
+	})
+
+	it('should escape double quotes in identifiers to prevent injection', () => {
+		expect(escapePostgresIdentifier('name')).toBe('"name"')
+		expect(escapePostgresIdentifier('na"me')).toBe('"na""me"')
+		expect(escapePostgresIdentifier('a" ; DROP TABLE "User" --')).toBe(
+			'"a"" ; DROP TABLE ""User"" --"',
+		)
+	})
+
+	it('should escape single quotes in JSONB keys to prevent injection', () => {
+		expect(escapePostgresJsonKey('key')).toBe('key')
+		expect(escapePostgresJsonKey("k'ey")).toBe("k''ey")
+	})
+
+	it('should quote top-level identifiers in WHERE clauses', () => {
+		const { query, values } = buildPostgresWhereQueryAndValues({
+			name: { equalTo: 'user1' },
+		} as any)
+
+		expect(query).toContain('"name" = $1')
+		expect(values).toEqual(['user1'])
+	})
+
+	it('should keep using parameterized values for WHERE filters', () => {
+		const { query, values } = buildPostgresWhereQueryAndValues({
+			name: { equalTo: "x' OR '1'='1" },
+		} as any)
+
+		expect(query).toContain('"name" = $1')
+		expect(query).not.toContain("OR '1'='1")
+		expect(values).toEqual(["x' OR '1'='1"])
 	})
 })

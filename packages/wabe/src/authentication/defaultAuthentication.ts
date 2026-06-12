@@ -96,12 +96,24 @@ export const defaultAuthenticationMethods = <T extends WabeTypes>(): CustomAuthe
 			verifier: {
 				type: 'String',
 				required: true,
+				protected: {
+					authorizedRoles: ['rootOnly'],
+					protectedOperations: ['read'],
+				},
 			},
 			serverSecret: {
 				type: 'String',
+				protected: {
+					authorizedRoles: ['rootOnly'],
+					protectedOperations: ['read'],
+				},
 			},
 			serverSecretExpiresAt: {
 				type: 'Date',
+				protected: {
+					authorizedRoles: ['rootOnly'],
+					protectedOperations: ['read'],
+				},
 			},
 		},
 		// @ts-expect-error
@@ -159,6 +171,10 @@ export const defaultAuthenticationMethods = <T extends WabeTypes>(): CustomAuthe
 			password: {
 				type: 'Hash',
 				required: true,
+				protected: {
+					authorizedRoles: ['rootOnly'],
+					protectedOperations: ['read'],
+				},
 			},
 		},
 		// @ts-expect-error
@@ -184,6 +200,10 @@ export const defaultAuthenticationMethods = <T extends WabeTypes>(): CustomAuthe
 			password: {
 				type: 'Hash',
 				required: true,
+				protected: {
+					authorizedRoles: ['rootOnly'],
+					protectedOperations: ['read'],
+				},
 			},
 		},
 		// @ts-expect-error

@@ -23,11 +23,25 @@ const bucketHandler = ({
 		if (ctx.pathname.startsWith(BUCKET_PREFIX)) {
 			const rawFileName = ctx.pathname.slice(BUCKET_PREFIX.length)
 
+			let fileName: string
 			try {
-				ctx.params.filename = decodeURIComponent(rawFileName)
+				fileName = decodeURIComponent(rawFileName)
 			} catch {
-				ctx.params.filename = rawFileName
+				fileName = rawFileName
 			}
+
+			// Reject path traversal: a decoded `..` segment (or absolute path) could escape the bucket
+			// directory and expose arbitrary files on disk.
+			const hasTraversal = fileName
+				.split(/[\\/]/)
+				.some((segment) => segment === '..' || segment === '~')
+
+			if (hasTraversal || fileName.startsWith('/') || fileName.startsWith('\\')) {
+				ctx.res.status = 400
+				return ctx.res.send('Invalid file path')
+			}
+
+			ctx.params.filename = fileName
 		}
 
 		return baseHandler(ctx)

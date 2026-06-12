@@ -92,7 +92,9 @@ const getUploadSecurityConfig = <T extends WabeTypes>(context: WabeContext<T>) =
 	const allowedExtensions = (security?.allowedExtensions || DEFAULT_ALLOWED_EXTENSIONS).map(
 		(value) => value.trim().toLowerCase(),
 	)
-	const randomizeFileName = security?.randomizeFileName ?? context.wabe.config.isProduction
+	// Randomize by default (even in dev): predictable file names allow enumeration/overwrite of other
+	// users' files. Opt out explicitly with `randomizeFileName: false`.
+	const randomizeFileName = security?.randomizeFileName ?? true
 
 	return {
 		enabled,

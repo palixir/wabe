@@ -57,6 +57,7 @@ describe('Protected hook', () => {
 					},
 				},
 				permissions: {
+					acl: null,
 					read: {
 						authorizedRoles: ['everyone'],
 						requireAuthentication: true,

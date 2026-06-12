@@ -1,4 +1,14 @@
-export const sendOtpCodeTemplate = (otp: string) => `
+const escapeHtml = (value: string): string =>
+	value
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;')
+		.replace(/'/g, '&#39;')
+
+export const sendOtpCodeTemplate = (rawOtp: string) => {
+	const otp = escapeHtml(rawOtp)
+	return `
   <!DOCTYPE html>
   <html lang="en">
 
@@ -118,3 +128,4 @@ export const sendOtpCodeTemplate = (otp: string) => `
 
   </html>
 `
+}

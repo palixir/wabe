@@ -1,4 +1,14 @@
-import { afterAll, afterEach, beforeAll, describe, expect, it, mock, spyOn } from 'bun:test'
+import {
+	afterAll,
+	afterEach,
+	beforeAll,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	mock,
+	spyOn,
+} from 'bun:test'
 import { FileDevAdapter, type Wabe } from '..'
 import { type DevWabeTypes, getAnonymousClient } from '../utils/helper'
 import { setupTests, closeTests } from '../utils/testHelper'
@@ -976,7 +986,6 @@ describe('File upload', () => {
 			},
 			data: {
 				name: 'John',
-				// @ts-expect-error
 				avatar: {
 					file: new File(['avatar-content'], 'avatar.txt', {
 						type: 'text/plain',
@@ -997,15 +1006,11 @@ describe('File upload', () => {
 			className: 'User',
 			context: { isRoot: true, wabe },
 			id: created.id,
-			// @ts-expect-error
 			select: { avatar: true, id: true },
 		})
 
-		// @ts-expect-error
 		expect(user?.avatar?.name).toEqual('avatar.txt')
-		// @ts-expect-error
 		expect(user?.avatar?.url).toEqual(`http://127.0.0.1:${port}/bucket/avatar.txt`)
-		// @ts-expect-error
 		expect(user?.avatar?.isPresignedUrl).toEqual(true)
 	})
 
@@ -1322,5 +1327,121 @@ describe('File upload security in production', () => {
 				select: {},
 			}),
 		).rejects.toThrow('File content does not match MIME type')
+	})
+})
+
+describe('File deletion reference counting', () => {
+	let wabe: Wabe<DevWabeTypes>
+
+	const spyDeleteFile = spyOn(FileDevAdapter.prototype, 'deleteFile')
+
+	const rootContext = () =>
+		({
+			isRoot: true,
+			wabe,
+		}) as any
+
+	const createWithFile = (fileName: string) =>
+		wabe.controllers.database.createObject({
+			// @ts-expect-error custom test class
+			className: 'FileRef',
+			// @ts-expect-error custom test class field
+			data: { file: { name: fileName, isPresignedUrl: true } },
+			context: rootContext(),
+			select: { id: true },
+		})
+
+	beforeAll(async () => {
+		const setup = await setupTests([
+			{
+				name: 'FileRef',
+				fields: { file: { type: 'File' } },
+				permissions: {
+					acl: null,
+					read: { requireAuthentication: false },
+					create: { requireAuthentication: false },
+					update: { requireAuthentication: false },
+					delete: { requireAuthentication: false },
+				},
+			},
+		])
+		wabe = setup.wabe
+	})
+
+	afterAll(async () => {
+		await closeTests(wabe)
+	})
+
+	beforeEach(async () => {
+		await wabe.controllers.database.deleteObjects({
+			// @ts-expect-error custom test class
+			className: 'FileRef',
+			context: rootContext(),
+			where: {},
+			select: {},
+		})
+		spyDeleteFile.mockClear()
+	})
+
+	it('should not delete the physical file while another record still references it', async () => {
+		const sharedName = 'shared-file.bin'
+
+		const a = await createWithFile(sharedName)
+		await createWithFile(sharedName)
+
+		await wabe.controllers.database.deleteObject({
+			// @ts-expect-error custom test class
+			className: 'FileRef',
+			id: a!.id,
+			context: rootContext(),
+			select: {},
+		})
+
+		expect(spyDeleteFile).not.toHaveBeenCalled()
+	})
+
+	it('should delete the physical file once the last reference is removed', async () => {
+		const sharedName = 'shared-file-last.bin'
+
+		const a = await createWithFile(sharedName)
+		const b = await createWithFile(sharedName)
+
+		await wabe.controllers.database.deleteObject({
+			// @ts-expect-error custom test class
+			className: 'FileRef',
+			id: a!.id,
+			context: rootContext(),
+			select: {},
+		})
+
+		expect(spyDeleteFile).not.toHaveBeenCalled()
+
+		await wabe.controllers.database.deleteObject({
+			// @ts-expect-error custom test class
+			className: 'FileRef',
+			id: b!.id,
+			context: rootContext(),
+			select: {},
+		})
+
+		expect(spyDeleteFile).toHaveBeenCalledTimes(1)
+		expect(spyDeleteFile).toHaveBeenCalledWith(sharedName)
+	})
+
+	it('should delete the physical file for a single, unreferenced record', async () => {
+		const uniqueName = 'unique-file.bin'
+
+		const a = await createWithFile(uniqueName)
+
+		await wabe.controllers.database.deleteObject({
+			// @ts-expect-error custom test class
+			className: 'FileRef',
+			id: a!.id,
+			context: rootContext(),
+			select: {},
+		})
+
+		expect(spyDeleteFile).toHaveBeenCalledTimes(1)
+		expect(spyDeleteFile).toHaveBeenCalledWith(uniqueName)
 	})
 })

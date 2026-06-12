@@ -222,7 +222,15 @@ export type ACLProperties = (hookObject: HookObject<any, any>) => void | Promise
 
 export type ClassPermissions<T extends WabeTypes> = Partial<
 	Record<PermissionsOperations, PermissionProperties<T>> & {
-		acl: ACLProperties
+		/**
+		 * Callback to define the ACL of an object on creation.
+		 * - a function: custom ACL logic.
+		 * - `undefined` (not provided): a secure-by-default owner ACL is applied (the creator gets
+		 *   read/write, no roles) when the creator is known.
+		 * - `null`: explicitly opt out of any default ACL (object governed by class-level permissions
+		 *   only). Use this for publicly shared collections.
+		 */
+		acl: ACLProperties | null
 	}
 >
 
@@ -534,6 +542,27 @@ export class Schema<T extends WabeTypes> {
 				refreshTokenExpiresAt: {
 					type: 'Date',
 					required: true,
+				},
+			},
+			// Sessions hold encrypted access/refresh tokens. Make the root-only access explicit
+			// (empty authorizedRoles + requireAuthentication) instead of relying solely on the
+			// zero-trust default, so the intent is clear and cannot be loosened by accident.
+			permissions: {
+				create: {
+					authorizedRoles: [],
+					requireAuthentication: true,
+				},
+				read: {
+					authorizedRoles: [],
+					requireAuthentication: true,
+				},
+				update: {
+					authorizedRoles: [],
+					requireAuthentication: true,
+				},
+				delete: {
+					authorizedRoles: [],
+					requireAuthentication: true,
 				},
 			},
 		}

@@ -12,7 +12,7 @@ import {
 	getUserClient,
 } from './utils/helper'
 import { setupTests, closeTests, getDatabaseAdapter } from './utils/testHelper'
-import { RoleEnum } from 'generated/wabe'
+import type { RoleEnum } from 'generated/wabe'
 import { Session } from './authentication/Session'
 import { Wabe } from './server'
 import type { DevWabeTypes } from './utils/helper'
@@ -312,7 +312,7 @@ describe('Security tests', () => {
 						await hookObject.addACL('roles', {
 							read: true,
 							write: true,
-							role: RoleEnum.Client,
+							role: 'Client' as RoleEnum,
 						})
 					},
 				},
@@ -429,7 +429,7 @@ describe('Security tests', () => {
 						await hookObject.addACL('roles', {
 							read: true,
 							write: true,
-							role: RoleEnum.Client,
+							role: 'Client' as RoleEnum,
 						})
 					},
 				},
@@ -2472,6 +2472,51 @@ describe('Security tests', () => {
 		await closeTests(wabe)
 	})
 
+	it('should not be able to read sessions (except root)', async () => {
+		const setup = await setupTests()
+		const wabe = setup.wabe
+
+		const adminClient = await getAdminUserClient(wabe.config.port, wabe, {
+			email: 'admin@wabe.dev',
+			password: 'admin',
+		})
+
+		// `_Session` rows hold encrypted access/refresh tokens, so reads must be root-only.
+		expect(
+			adminClient.request<any>(gql`
+				query sessions {
+					_sessions {
+						edges {
+							node {
+								id
+								accessTokenEncrypted
+								refreshTokenEncrypted
+							}
+						}
+					}
+				}
+			`),
+		).rejects.toThrowError('Permission denied to read class _Session')
+
+		const rootClient = getGraphqlClient(wabe.config.port)
+
+		const rootRead = await rootClient.request<any>(gql`
+			query sessions {
+				_sessions {
+					edges {
+						node {
+							id
+						}
+					}
+				}
+			}
+		`)
+
+		expect(rootRead._sessions.edges).toBeDefined()
+
+		await closeTests(wabe)
+	})
+
 	it('should not be able to do some actions with expired session', async () => {
 		const setup = await setupTests([
 			{
@@ -2617,6 +2662,7 @@ describe('Security tests', () => {
 					name: { type: 'String' },
 				},
 				permissions: {
+					acl: null,
 					create: {
 						requireAuthentication: true,
 						authorizedRoles: ['Client'],
@@ -2684,6 +2730,7 @@ describe('Security tests', () => {
 					name: { type: 'String' },
 				},
 				permissions: {
+					acl: null,
 					create: {
 						requireAuthentication: true,
 						authorizedRoles: ['Client'],
@@ -2751,6 +2798,7 @@ describe('Security tests', () => {
 					name: { type: 'String' },
 				},
 				permissions: {
+					acl: null,
 					create: {
 						requireAuthentication: true,
 						authorizedRoles: ['Client'],
@@ -3105,7 +3153,7 @@ describe('Security tests', () => {
 					},
 					acl: async (hookObject) => {
 						await hookObject.addACL('roles', {
-							role: RoleEnum.Client,
+							role: 'Client' as RoleEnum,
 							read: true,
 							write: true,
 						})
@@ -3232,7 +3280,7 @@ describe('Security tests', () => {
 					},
 					acl: async (hookObject) => {
 						await hookObject.addACL('roles', {
-							role: RoleEnum.Client,
+							role: 'Client' as RoleEnum,
 							read: true,
 							write: true,
 						})
@@ -5507,6 +5555,531 @@ describe('Security tests', () => {
 		).rejects.toThrow('Permission denied to update class Test')
 
 		await closeTests(wabe)
+	})
+
+	describe('authentication secret leak', () => {
+		const signUp = async (
+			anonymousClient: ReturnType<typeof getAnonymousClient>,
+			email: string,
+		) => {
+			const res = await anonymousClient.request<any>(
+				gql`
+					mutation signUpWith($input: SignUpWithInput!) {
+						signUpWith(input: $input) {
+							id
+							accessToken
+						}
+					}
+				`,
+				{
+					input: {
+						authentication: {
+							emailPassword: { email, password: 'password1234' },
+						},
+					},
+				},
+			)
+
+			return { id: res.signUpWith.id as string, accessToken: res.signUpWith.accessToken as string }
+		}
+
+		it('should deny reading the password hash through the me query', async () => {
+			const setup = await setupTests()
+			const wabe = setup.wabe
+			const anonymousClient = getAnonymousClient(setup.port)
+
+			const { accessToken } = await signUp(anonymousClient, 'me-leak@wabe.dev')
+			const userClient = getUserClient(setup.port, { accessToken })
+
+			expect(
+				userClient.request<any>(gql`
+					query me {
+						me {
+							user {
+								authentication {
+									emailPassword {
+										password
+									}
+								}
+							}
+						}
+					}
+				`),
+			).rejects.toThrow('You are not authorized to read this field')
+
+			const res = await userClient.request<any>(gql`
+				query me {
+					me {
+						user {
+							authentication {
+								emailPassword {
+									email
+								}
+							}
+						}
+					}
+				}
+			`)
+
+			expect(res.me.user.authentication.emailPassword.email).toBe('me-leak@wabe.dev')
+			await closeTests(wabe)
+		})
+
+		it('should deny reading the password hash through the users query for a non-root caller', async () => {
+			const setup = await setupTests()
+			const wabe = setup.wabe
+			const anonymousClient = getAnonymousClient(setup.port)
+
+			await signUp(anonymousClient, 'users-leak@wabe.dev')
+			const { accessToken } = await signUp(anonymousClient, 'users-reader@wabe.dev')
+			const userClient = getUserClient(setup.port, { accessToken })
+
+			expect(
+				userClient.request<any>(gql`
+					query users {
+						users {
+							edges {
+								node {
+									authentication {
+										emailPassword {
+											password
+										}
+									}
+								}
+							}
+						}
+					}
+				`),
+			).rejects.toThrow('You are not authorized to read this field')
+
+			await closeTests(wabe)
+		})
+
+		it('should still allow root to read the password hash (internal usage)', async () => {
+			const setup = await setupTests()
+			const wabe = setup.wabe
+			const anonymousClient = getAnonymousClient(setup.port)
+			const rootClient = getGraphqlClient(setup.port)
+
+			await signUp(anonymousClient, 'root-read@wabe.dev')
+
+			const res = await rootClient.request<any>(gql`
+				query users {
+					users(where: { email: { equalTo: "root-read@wabe.dev" } }) {
+						edges {
+							node {
+								authentication {
+									emailPassword {
+										password
+									}
+								}
+							}
+						}
+					}
+				}
+			`)
+
+			expect(res.users.edges[0].node.authentication.emailPassword.password).toEqual(
+				expect.any(String),
+			)
+			await closeTests(wabe)
+		})
+
+		it('should deny returning the password hash in the signInWith response', async () => {
+			const setup = await setupTests()
+			const wabe = setup.wabe
+			const anonymousClient = getAnonymousClient(setup.port)
+
+			await signUp(anonymousClient, 'signin-leak@wabe.dev')
+
+			expect(
+				anonymousClient.request<any>(
+					gql`
+						mutation signInWith($input: SignInWithInput!) {
+							signInWith(input: $input) {
+								user {
+									id
+									authentication {
+										emailPassword {
+											password
+										}
+									}
+								}
+							}
+						}
+					`,
+					{
+						input: {
+							authentication: {
+								emailPassword: { email: 'signin-leak@wabe.dev', password: 'password1234' },
+							},
+						},
+					},
+				),
+			).rejects.toThrow('You are not authorized to read this field')
+
+			await closeTests(wabe)
+		})
+	})
+
+	describe('default owner ACL', () => {
+		it('should scope an object to its creator by default (no acl configured)', async () => {
+			const setup = await setupTests([
+				{
+					name: 'Note',
+					fields: { content: { type: 'String' } },
+					permissions: {
+						create: { requireAuthentication: true, authorizedRoles: ['Client'] },
+						read: { requireAuthentication: true, authorizedRoles: ['Client'] },
+						update: { requireAuthentication: true, authorizedRoles: ['Client'] },
+					},
+				},
+			])
+			const wabe = setup.wabe
+			const anonymousClient = getAnonymousClient(setup.port)
+			const rootClient = getGraphqlClient(setup.port)
+
+			const { userClient: ownerClient } = await createUserAndUpdateRole({
+				anonymousClient,
+				rootClient,
+				roleName: 'Client',
+				port: setup.port,
+			})
+
+			const { userClient: otherClient } = await createUserAndUpdateRole({
+				anonymousClient,
+				rootClient,
+				roleName: 'Client',
+				port: setup.port,
+			})
+
+			await ownerClient.request<any>(gql`
+				mutation createNote {
+					createNote(input: { fields: { content: "secret" } }) {
+						note {
+							id
+						}
+					}
+				}
+			`)
+
+			const ownerView = await ownerClient.request<any>(gql`
+				query notes {
+					notes {
+						edges {
+							node {
+								content
+							}
+						}
+					}
+				}
+			`)
+
+			expect(ownerView.notes.edges.length).toBe(1)
+
+			const otherView = await otherClient.request<any>(gql`
+				query notes {
+					notes {
+						edges {
+							node {
+								content
+							}
+						}
+					}
+				}
+			`)
+
+			expect(otherView.notes.edges.length).toBe(0)
+			await closeTests(wabe)
+		})
+
+		it('should allow cross-user reads when acl is explicitly null', async () => {
+			const setup = await setupTests([
+				{
+					name: 'PublicNote',
+					fields: { content: { type: 'String' } },
+					permissions: {
+						acl: null,
+						create: { requireAuthentication: true, authorizedRoles: ['Client'] },
+						read: { requireAuthentication: true, authorizedRoles: ['Client'] },
+					},
+				},
+			])
+			const wabe = setup.wabe
+			const anonymousClient = getAnonymousClient(setup.port)
+			const rootClient = getGraphqlClient(setup.port)
+
+			const { userClient: ownerClient } = await createUserAndUpdateRole({
+				anonymousClient,
+				rootClient,
+				roleName: 'Client',
+				port: setup.port,
+			})
+
+			const { userClient: otherClient } = await createUserAndUpdateRole({
+				anonymousClient,
+				rootClient,
+				roleName: 'Client',
+				port: setup.port,
+			})
+
+			await ownerClient.request<any>(gql`
+				mutation createPublicNote {
+					createPublicNote(input: { fields: { content: "shared" } }) {
+						publicNote {
+							id
+						}
+					}
+				}
+			`)
+
+			const otherView = await otherClient.request<any>(gql`
+				query publicNotes {
+					publicNotes {
+						edges {
+							node {
+								content
+							}
+						}
+					}
+				}
+			`)
+
+			expect(otherView.publicNotes.edges.length).toBe(1)
+			expect(otherView.publicNotes.edges[0].node.content).toBe('shared')
+			await closeTests(wabe)
+		})
+	})
+
+	describe('where/order oracle on protected fields', () => {
+		it('should reject filtering by a protected field for a non-root caller', async () => {
+			const setup = await setupTests([
+				{
+					name: 'Widget',
+					fields: {
+						name: { type: 'String' },
+						secret: {
+							type: 'String',
+							protected: {
+								authorizedRoles: ['rootOnly'],
+								protectedOperations: ['read'],
+							},
+						},
+					},
+					permissions: {
+						acl: null,
+						create: { requireAuthentication: false },
+						read: { requireAuthentication: false },
+						update: { requireAuthentication: false },
+						delete: { requireAuthentication: false },
+					},
+				},
+			])
+			const wabe = setup.wabe
+			const anonymousClient = getAnonymousClient(setup.port)
+			const rootClient = getGraphqlClient(setup.port)
+
+			await rootClient.request<any>(
+				gql`
+					mutation createWidget($input: CreateWidgetInput!) {
+						createWidget(input: $input) {
+							widget {
+								id
+							}
+						}
+					}
+				`,
+				{ input: { fields: { name: 'public-name', secret: 'top-secret' } } },
+			)
+
+			expect(
+				anonymousClient.request<any>(gql`
+					query widgets {
+						widgets(where: { secret: { equalTo: "top-secret" } }) {
+							edges {
+								node {
+									id
+								}
+							}
+						}
+					}
+				`),
+			).rejects.toThrow('You are not authorized to filter by this field')
+
+			await closeTests(wabe)
+		})
+
+		it('should reject ordering by a protected field for a non-root caller', async () => {
+			const setup = await setupTests([
+				{
+					name: 'Widget',
+					fields: {
+						name: { type: 'String' },
+						secret: {
+							type: 'String',
+							protected: {
+								authorizedRoles: ['rootOnly'],
+								protectedOperations: ['read'],
+							},
+						},
+					},
+					permissions: {
+						acl: null,
+						create: { requireAuthentication: false },
+						read: { requireAuthentication: false },
+						update: { requireAuthentication: false },
+						delete: { requireAuthentication: false },
+					},
+				},
+			])
+			const wabe = setup.wabe
+			const anonymousClient = getAnonymousClient(setup.port)
+			const rootClient = getGraphqlClient(setup.port)
+
+			await rootClient.request<any>(
+				gql`
+					mutation createWidget($input: CreateWidgetInput!) {
+						createWidget(input: $input) {
+							widget {
+								id
+							}
+						}
+					}
+				`,
+				{ input: { fields: { name: 'public-name', secret: 'top-secret' } } },
+			)
+
+			expect(
+				anonymousClient.request<any>(gql`
+					query widgets {
+						widgets(order: [secret_ASC]) {
+							edges {
+								node {
+									id
+								}
+							}
+						}
+					}
+				`),
+			).rejects.toThrow('You are not authorized to order by this field')
+
+			await closeTests(wabe)
+		})
+
+		it('should still allow filtering by a readable field for a non-root caller', async () => {
+			const setup = await setupTests([
+				{
+					name: 'Widget',
+					fields: {
+						name: { type: 'String' },
+						secret: {
+							type: 'String',
+							protected: {
+								authorizedRoles: ['rootOnly'],
+								protectedOperations: ['read'],
+							},
+						},
+					},
+					permissions: {
+						acl: null,
+						create: { requireAuthentication: false },
+						read: { requireAuthentication: false },
+						update: { requireAuthentication: false },
+						delete: { requireAuthentication: false },
+					},
+				},
+			])
+			const wabe = setup.wabe
+			const anonymousClient = getAnonymousClient(setup.port)
+			const rootClient = getGraphqlClient(setup.port)
+
+			await rootClient.request<any>(
+				gql`
+					mutation createWidget($input: CreateWidgetInput!) {
+						createWidget(input: $input) {
+							widget {
+								id
+							}
+						}
+					}
+				`,
+				{ input: { fields: { name: 'public-name', secret: 'top-secret' } } },
+			)
+
+			const res = await anonymousClient.request<any>(gql`
+				query widgets {
+					widgets(where: { name: { equalTo: "public-name" } }) {
+						edges {
+							node {
+								id
+								name
+							}
+						}
+					}
+				}
+			`)
+
+			expect(res.widgets.edges.length).toBe(1)
+			expect(res.widgets.edges[0].node.name).toBe('public-name')
+			await closeTests(wabe)
+		})
+
+		it('should allow a trusted root caller to filter by a protected field', async () => {
+			const setup = await setupTests([
+				{
+					name: 'Widget',
+					fields: {
+						name: { type: 'String' },
+						secret: {
+							type: 'String',
+							protected: {
+								authorizedRoles: ['rootOnly'],
+								protectedOperations: ['read'],
+							},
+						},
+					},
+					permissions: {
+						acl: null,
+						create: { requireAuthentication: false },
+						read: { requireAuthentication: false },
+						update: { requireAuthentication: false },
+						delete: { requireAuthentication: false },
+					},
+				},
+			])
+			const wabe = setup.wabe
+			const rootClient = getGraphqlClient(setup.port)
+
+			await rootClient.request<any>(
+				gql`
+					mutation createWidget($input: CreateWidgetInput!) {
+						createWidget(input: $input) {
+							widget {
+								id
+							}
+						}
+					}
+				`,
+				{ input: { fields: { name: 'public-name', secret: 'top-secret' } } },
+			)
+
+			const res = await rootClient.request<any>(gql`
+				query widgets {
+					widgets(where: { secret: { equalTo: "top-secret" } }) {
+						edges {
+							node {
+								id
+								name
+							}
+						}
+					}
+				}
+			`)
+
+			expect(res.widgets.edges.length).toBe(1)
+			expect(res.widgets.edges[0].node.name).toBe('public-name')
+			await closeTests(wabe)
+		})
 	})
 })
 

@@ -3,7 +3,11 @@ import crypto from 'node:crypto'
 import type { WabeContext } from '../server/interface'
 import type { WabeConfig, WabeTypes } from '../server'
 import { contextWithRoot } from '../utils/export'
-import { encryptDeterministicToken, decryptDeterministicToken } from '../utils/crypto'
+import {
+	encryptDeterministicToken,
+	decryptDeterministicToken,
+	constantTimeEqual,
+} from '../utils/crypto'
 
 const getJwtSecret = <T extends WabeTypes>(context: WabeContext<T>): string => {
 	const secret = context.wabe.config.authentication?.session?.jwtSecret
@@ -206,6 +210,14 @@ export class Session<T extends WabeTypes> {
 			id: user.id,
 		})
 
+		// Only hydrate the context user with a minimal allowlist to avoid leaking sensitive
+		// fields (password hash, SRP secrets, otpSalt, ...) through `context.user` to custom code.
+		const safeUser = {
+			id: user.id,
+			email: user.email,
+			role: userWithRole?.role,
+		} as T['types']['User']
+
 		// If access token is expired and refresh token is not expired
 		if (
 			new Date(session.accessTokenExpiresAt) < new Date() &&
@@ -233,10 +245,7 @@ export class Session<T extends WabeTypes> {
 
 			return {
 				sessionId: session.id,
-				user: {
-					...user,
-					role: userWithRole?.role,
-				},
+				user: safeUser,
 				accessToken: newAccessToken,
 				refreshToken: newRefreshToken,
 			}
@@ -244,10 +253,7 @@ export class Session<T extends WabeTypes> {
 
 		return {
 			sessionId: session.id,
-			user: {
-				...user,
-				role: userWithRole?.role,
-			},
+			user: safeUser,
 			accessToken,
 			refreshToken: decryptDeterministicToken(
 				session.refreshTokenEncrypted as string,
@@ -426,7 +432,7 @@ export class Session<T extends WabeTypes> {
 				decryptDeterministicToken(storedRefreshTokenEncrypted, getTokenEncryptionKey(context)) ||
 				refreshToken
 
-			if (!decryptedRefreshToken || decryptedRefreshToken !== refreshToken)
+			if (!constantTimeEqual(decryptedRefreshToken, refreshToken))
 				throw new Error('Invalid refresh token')
 
 			// Always rotate tokens on refresh

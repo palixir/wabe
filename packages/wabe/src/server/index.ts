@@ -7,7 +7,7 @@ import type { AuthenticationConfig } from '../authentication/interface'
 import { type WabeRoute, defaultRoutes } from './routes'
 import { type Hook, getDefaultHooks } from '../hooks'
 import { defaultAuthenticationMethods } from '../authentication/defaultAuthentication'
-import { Wobe, cors, rateLimit } from 'wobe'
+import { Wobe, cors, rateLimit, secureHeaders, bodyLimit } from 'wobe'
 import type { Context, CorsOptions, RateLimitOptions } from 'wobe'
 import type { WabeContext } from './interface'
 import { initializeRoles } from '../authentication/roles'
@@ -34,6 +34,43 @@ type SecurityConfig = {
 	 * Prevents DoS via deeply nested queries. Default: 10.
 	 */
 	maxWhereRecursionDepth?: number
+	/**
+	 * Default number of objects returned by list queries when the client does not provide `first`.
+	 * Prevents unbounded reads (DoS / memory exhaustion). Default: 100.
+	 */
+	defaultPaginationLimit?: number
+	/**
+	 * Maximum number of objects a list query is allowed to return. Any `first` greater than this
+	 * value is clamped down to it. Prevents unbounded reads (DoS / memory exhaustion). Default: 1000.
+	 */
+	maxPaginationLimit?: number
+	/**
+	 * Maximum allowed request body size in bytes (rejected with 413 when exceeded). When omitted, no
+	 * body-size limit is enforced. Prevents large-payload DoS.
+	 */
+	maxRequestSizeBytes?: number
+}
+
+/**
+ * Validates CORS options to prevent the dangerous combination of `credentials: true` with a wildcard
+ * origin (`*`), which browsers forbid and which would expose authenticated responses to any site.
+ */
+export const getSafeCorsOptions = (corsOptions?: CorsOptions): CorsOptions | undefined => {
+	if (!corsOptions || !corsOptions.credentials) return corsOptions
+
+	const origin = (corsOptions as { origin?: unknown }).origin
+
+	const isWildcard =
+		origin === undefined ||
+		origin === '*' ||
+		(Array.isArray(origin) && origin.some((value) => value === '*'))
+
+	if (isWildcard)
+		throw new Error(
+			'Insecure CORS configuration: `credentials: true` cannot be combined with a wildcard origin ("*"). Specify explicit allowed origins.',
+		)
+
+	return corsOptions
 }
 
 export * from './interface'
@@ -234,12 +271,37 @@ export class Wabe<T extends WabeTypes> {
 		})
 	}
 
+	_assertSecureProductionConfig() {
+		if (!this.config.isProduction) return
+		// The integration test suite intentionally runs in production mode with development secrets.
+		if (process.env.NODE_ENV === 'test') return
+
+		const insecureSecrets = new Set(['dev', 'test', 'secret', 'changeme', ''])
+
+		if (insecureSecrets.has(this.config.rootKey))
+			throw new Error(
+				'Insecure configuration: `rootKey` must not use a development/default value in production',
+			)
+
+		const jwtSecret = this.config.authentication?.session?.jwtSecret
+		if (jwtSecret && insecureSecrets.has(jwtSecret))
+			throw new Error(
+				'Insecure configuration: `jwtSecret` must not use a development/default value in production',
+			)
+
+		const emailAdapterName = this.config.email?.adapter?.constructor?.name
+		if (emailAdapterName === 'EmailDevAdapter')
+			throw new Error('Insecure configuration: `EmailDevAdapter` must not be used in production')
+	}
+
 	async start() {
 		if (!this.config.rootKey || this.config.rootKey.length === 0)
 			throw new Error('rootKey cannot be empty')
 
 		if (this.config.authentication?.session && !this.config.authentication.session.jwtSecret)
 			throw new Error('Authentication session requires jwt secret')
+
+		this._assertSecureProductionConfig()
 
 		const wabeSchema = new Schema(this.config)
 
@@ -289,13 +351,21 @@ export class Wabe<T extends WabeTypes> {
 			if (process.env.CODEGEN) process.exit(0)
 		}
 
+		const safeCorsOptions = getSafeCorsOptions(this.config.security?.corsOptions)
+
 		this.server.options(
 			'/*',
 			(ctx) => {
 				return ctx.res.send('OK')
 			},
-			cors(this.config.security?.corsOptions),
+			cors(safeCorsOptions),
 		)
+
+		// Defense-in-depth security headers (X-Frame-Options, nosniff, referrer-policy, HSTS, ...).
+		this.server.beforeHandler(secureHeaders({}))
+
+		const maxRequestSizeBytes = this.config.security?.maxRequestSizeBytes
+		if (maxRequestSizeBytes) this.server.beforeHandler(bodyLimit({ maxSize: maxRequestSizeBytes }))
 
 		const rateLimitOptions =
 			this.config.security?.rateLimit ||
@@ -308,7 +378,7 @@ export class Wabe<T extends WabeTypes> {
 
 		if (rateLimitOptions) this.server.beforeHandler(rateLimit(rateLimitOptions))
 
-		this.server.beforeHandler(cors(this.config.security?.corsOptions))
+		this.server.beforeHandler(cors(safeCorsOptions))
 
 		// Set the wabe context
 		this.server.beforeHandler(
@@ -331,7 +401,8 @@ export class Wabe<T extends WabeTypes> {
 				maskedErrors: this.config.security?.hideSensitiveErrorMessage || this.config.isProduction,
 				allowIntrospection: !introspectionDisabled,
 				maxDepth,
-				allowMultipleOperations: true,
+				// Disable GraphQL operation batching in production to limit query-cost amplification/DoS.
+				allowMultipleOperations: !this.config.isProduction,
 				graphqlEndpoint: '/graphql',
 				plugins: [
 					(() => {

@@ -151,13 +151,14 @@ export const buildMongoWhereQuery = <T extends WabeTypes, K extends keyof T['typ
 			}
 
 			if (value?.greaterThan || value?.greaterThan === null)
-				acc[keyToWrite] = { $gt: value.greaterThan }
+				acc[keyToWrite] = { $gt: sanitizeValue(value.greaterThan) }
 			if (value?.greaterThanOrEqualTo || value?.greaterThanOrEqualTo === null)
-				acc[keyToWrite] = { $gte: value.greaterThanOrEqualTo }
+				acc[keyToWrite] = { $gte: sanitizeValue(value.greaterThanOrEqualTo) }
 
-			if (value?.lessThan || value?.lessThan === null) acc[keyToWrite] = { $lt: value.lessThan }
+			if (value?.lessThan || value?.lessThan === null)
+				acc[keyToWrite] = { $lt: sanitizeValue(value.lessThan) }
 			if (value?.lessThanOrEqualTo || value?.lessThanOrEqualTo === null)
-				acc[keyToWrite] = { $lte: value.lessThanOrEqualTo }
+				acc[keyToWrite] = { $lte: sanitizeValue(value.lessThanOrEqualTo) }
 
 			if (value?.in || value?.in === null)
 				acc[keyToWrite] = {
@@ -170,7 +171,7 @@ export const buildMongoWhereQuery = <T extends WabeTypes, K extends keyof T['typ
 									.filter((inValue) => ObjectId.isValid(inValue))
 									// @ts-expect-error
 									.map((inValue) => ObjectId.createFromHexString(inValue))
-							: value.in,
+							: sanitizeValue(value.in),
 				}
 			if (value?.notIn || value?.notIn === null)
 				acc[keyToWrite] = {
@@ -183,7 +184,7 @@ export const buildMongoWhereQuery = <T extends WabeTypes, K extends keyof T['typ
 									.filter((notInValue) => ObjectId.isValid(notInValue))
 									// @ts-expect-error
 									.map((notInValue) => ObjectId.createFromHexString(notInValue))
-							: value.notIn,
+							: sanitizeValue(value.notIn),
 				}
 
 			if (value && keyToWrite === 'OR') {

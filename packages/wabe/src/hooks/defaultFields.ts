@@ -3,9 +3,13 @@ import type { DevWabeTypes } from '../utils/helper'
 import type { HookObject } from './HookObject'
 
 export const defaultBeforeCreateForCreatedAt = (object: HookObject<any, any>) => {
-	if (!object.isFieldUpdated('createdAt')) object.upsertNewData('createdAt', new Date())
+	// `createdAt`/`updatedAt` are server-controlled. Only a trusted root caller (migrations, imports)
+	// may provide explicit values; untrusted callers can never forge timestamps (mass assignment).
+	const isRoot = !!object.context?.isRoot
 
-	if (!object.isFieldUpdated('updatedAt')) object.upsertNewData('updatedAt', new Date())
+	if (!isRoot || !object.isFieldUpdated('createdAt')) object.upsertNewData('createdAt', new Date())
+
+	if (!isRoot || !object.isFieldUpdated('updatedAt')) object.upsertNewData('updatedAt', new Date())
 }
 
 export const defaultBeforeUpdateForUpdatedAt = (object: HookObject<any, any>) => {

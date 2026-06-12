@@ -5,7 +5,28 @@ import {
 	hashArgon2,
 	verifyArgon2,
 	isArgon2Hash,
+	constantTimeEqual,
 } from './crypto'
+
+describe('constantTimeEqual', () => {
+	it('should return true for equal strings', () => {
+		expect(constantTimeEqual('a-secret-token', 'a-secret-token')).toBe(true)
+	})
+
+	it('should return false for different strings of the same length', () => {
+		expect(constantTimeEqual('a-secret-token', 'b-secret-token')).toBe(false)
+	})
+
+	it('should return false for strings of different lengths', () => {
+		expect(constantTimeEqual('short', 'a-much-longer-value')).toBe(false)
+	})
+
+	it('should return false when either value is not a string', () => {
+		expect(constantTimeEqual(undefined, 'x')).toBe(false)
+		expect(constantTimeEqual('x', null)).toBe(false)
+		expect(constantTimeEqual(undefined, undefined)).toBe(false)
+	})
+})
 
 const key = Buffer.alloc(32, 1) // deterministic test key
 

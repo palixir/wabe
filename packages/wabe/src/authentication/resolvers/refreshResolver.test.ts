@@ -50,4 +50,47 @@ describe('refreshResolver', () => {
 			),
 		).rejects.toThrow('Invalid refresh token')
 	})
+
+	it('should rate limit repeated invalid refresh attempts', async () => {
+		spyOn(Session.prototype, 'refresh').mockResolvedValue({
+			accessToken: null,
+			refreshToken: null,
+		} as any)
+
+		const rateLimitedContext = {
+			...context,
+			wabe: {
+				config: {
+					authentication: {
+						security: {
+							refreshRateLimit: {
+								enabled: true,
+								maxAttempts: 1,
+								windowMs: 60_000,
+								blockDurationMs: 60_000,
+							},
+						},
+					},
+				},
+			},
+		} as any
+
+		const refreshToken = `refresh-rate-limit-${Date.now()}`
+
+		await expect(
+			refreshResolver(
+				null,
+				{ input: { accessToken: 'accessToken', refreshToken } },
+				rateLimitedContext,
+			),
+		).rejects.toThrow('Invalid refresh token')
+
+		await expect(
+			refreshResolver(
+				null,
+				{ input: { accessToken: 'accessToken', refreshToken } },
+				rateLimitedContext,
+			),
+		).rejects.toThrow('Too many attempts. Please try again later.')
+	})
 })

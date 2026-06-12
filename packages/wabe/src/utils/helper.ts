@@ -1,6 +1,8 @@
 import { gql, GraphQLClient } from 'graphql-request'
 import {
 	RoleEnum,
+	type User as GeneratedUser,
+	type WhereUser as GeneratedWhereUser,
 	type WabeSchemaWhereTypes,
 	type WabeSchemaEnums,
 	type WabeSchemaScalars,
@@ -9,11 +11,42 @@ import {
 import type { Wabe, WabeTypes } from '../server'
 import { defaultPrivateFields } from 'src/schema'
 
+/** Extra User fields declared in setupTests() but absent from dev codegen output. */
+type DevTestUserFields = {
+	name?: string
+	age?: number
+	avatar?: {
+		name: string
+		url?: string
+		urlGeneratedAt?: string
+		isPresignedUrl: boolean
+	}
+	isAdmin?: boolean
+	floatValue?: number
+	birthDate?: string | Date
+	arrayValue?: string[]
+	test?: string
+}
+
+type DevTestWhereUserFields = {
+	name?: string
+	age?: number
+	isAdmin?: boolean
+	floatValue?: number
+	birthDate?: Date
+	arrayValue?: string[]
+	test?: string
+}
+
 export interface DevWabeTypes extends WabeTypes {
-	types: WabeSchemaTypes
+	types: Omit<WabeSchemaTypes, 'User'> & {
+		User: GeneratedUser & DevTestUserFields
+	}
 	scalars: WabeSchemaScalars
 	enums: WabeSchemaEnums
-	where: WabeSchemaWhereTypes
+	where: Omit<WabeSchemaWhereTypes, 'User'> & {
+		User: GeneratedWhereUser & DevTestWhereUserFields
+	}
 }
 
 export const selectFieldsWithoutPrivateFields = <T extends Record<string, any>>(select?: T): T =>
@@ -29,10 +62,10 @@ export const selectFieldsWithoutPrivateFields = <T extends Record<string, any>>(
 export const firstLetterUpperCase = (str: string): string =>
 	str.charAt(0).toUpperCase() + str.slice(1)
 
-export const getGraphqlClient = (port: number): GraphQLClient => {
+export const getGraphqlClient = (port: number, rootKey = 'dev'): GraphQLClient => {
 	const client = new GraphQLClient(`http://127.0.0.1:${port}/graphql`, {
 		headers: {
-			'Wabe-Root-Key': 'dev',
+			'Wabe-Root-Key': rootKey,
 		},
 	})
 

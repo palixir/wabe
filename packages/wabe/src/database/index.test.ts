@@ -1708,6 +1708,209 @@ describe('Database', () => {
 		expect(objectsWithNameAndAge.length).toBe(2)
 		expect(objectsWithNameAndAge.every((obj) => obj?.name && obj?.age)).toBe(true)
 	})
+
+	describe('unbounded reads (pagination cap)', () => {
+		const totalWidgets = 6
+
+		it('should apply the default pagination limit when a non-root caller omits first', async () => {
+			const setup = await setupTests(
+				[
+					{
+						name: 'Widget',
+						fields: { name: { type: 'String' } },
+						permissions: {
+							create: { requireAuthentication: false },
+							read: { requireAuthentication: false },
+							update: { requireAuthentication: false },
+							delete: { requireAuthentication: false },
+						},
+					},
+				],
+				{ security: { defaultPaginationLimit: 2, maxPaginationLimit: 3 } },
+			)
+			const wabe = setup.wabe
+			const anonymousClient = getAnonymousClient(setup.port)
+			const rootClient = getGraphqlClient(setup.port)
+
+			for (let i = 0; i < totalWidgets; i++)
+				await rootClient.request<any>(
+					gql`
+						mutation createWidget($input: CreateWidgetInput!) {
+							createWidget(input: $input) {
+								widget {
+									id
+								}
+							}
+						}
+					`,
+					{ input: { fields: { name: `widget-${i}` } } },
+				)
+
+			const res = await anonymousClient.request<any>(gql`
+				query widgets {
+					widgets {
+						edges {
+							node {
+								id
+							}
+						}
+					}
+				}
+			`)
+
+			expect(res.widgets.edges.length).toBe(2)
+			await closeTests(wabe)
+		})
+
+		it('should clamp first to the maximum pagination limit for a non-root caller', async () => {
+			const setup = await setupTests(
+				[
+					{
+						name: 'Widget',
+						fields: { name: { type: 'String' } },
+						permissions: {
+							create: { requireAuthentication: false },
+							read: { requireAuthentication: false },
+							update: { requireAuthentication: false },
+							delete: { requireAuthentication: false },
+						},
+					},
+				],
+				{ security: { defaultPaginationLimit: 2, maxPaginationLimit: 3 } },
+			)
+			const wabe = setup.wabe
+			const anonymousClient = getAnonymousClient(setup.port)
+			const rootClient = getGraphqlClient(setup.port)
+
+			for (let i = 0; i < totalWidgets; i++)
+				await rootClient.request<any>(
+					gql`
+						mutation createWidget($input: CreateWidgetInput!) {
+							createWidget(input: $input) {
+								widget {
+									id
+								}
+							}
+						}
+					`,
+					{ input: { fields: { name: `widget-${i}` } } },
+				)
+
+			const res = await anonymousClient.request<any>(gql`
+				query widgets {
+					widgets(first: 1000) {
+						edges {
+							node {
+								id
+							}
+						}
+					}
+				}
+			`)
+
+			expect(res.widgets.edges.length).toBe(3)
+			await closeTests(wabe)
+		})
+
+		it('should treat first: 0 as the default limit (not "no limit") for a non-root caller', async () => {
+			const setup = await setupTests(
+				[
+					{
+						name: 'Widget',
+						fields: { name: { type: 'String' } },
+						permissions: {
+							create: { requireAuthentication: false },
+							read: { requireAuthentication: false },
+							update: { requireAuthentication: false },
+							delete: { requireAuthentication: false },
+						},
+					},
+				],
+				{ security: { defaultPaginationLimit: 2, maxPaginationLimit: 3 } },
+			)
+			const wabe = setup.wabe
+			const anonymousClient = getAnonymousClient(setup.port)
+			const rootClient = getGraphqlClient(setup.port)
+
+			for (let i = 0; i < totalWidgets; i++)
+				await rootClient.request<any>(
+					gql`
+						mutation createWidget($input: CreateWidgetInput!) {
+							createWidget(input: $input) {
+								widget {
+									id
+								}
+							}
+						}
+					`,
+					{ input: { fields: { name: `widget-${i}` } } },
+				)
+
+			const res = await anonymousClient.request<any>(gql`
+				query widgets {
+					widgets(first: 0) {
+						edges {
+							node {
+								id
+							}
+						}
+					}
+				}
+			`)
+
+			expect(res.widgets.edges.length).toBe(2)
+			await closeTests(wabe)
+		})
+
+		it('should not clamp reads for a trusted root caller', async () => {
+			const setup = await setupTests(
+				[
+					{
+						name: 'Widget',
+						fields: { name: { type: 'String' } },
+						permissions: {
+							create: { requireAuthentication: false },
+							read: { requireAuthentication: false },
+							update: { requireAuthentication: false },
+							delete: { requireAuthentication: false },
+						},
+					},
+				],
+				{ security: { defaultPaginationLimit: 2, maxPaginationLimit: 3 } },
+			)
+			const wabe = setup.wabe
+			const rootClient = getGraphqlClient(setup.port)
+
+			for (let i = 0; i < totalWidgets; i++)
+				await rootClient.request<any>(
+					gql`
+						mutation createWidget($input: CreateWidgetInput!) {
+							createWidget(input: $input) {
+								widget {
+									id
+								}
+							}
+						}
+					`,
+					{ input: { fields: { name: `widget-${i}` } } },
+				)
+
+			const res = await rootClient.request<any>(gql`
+				query widgets {
+					widgets(first: 1000) {
+						edges {
+							node {
+								id
+							}
+						}
+					}
+				}
+			`)
+
+			expect(res.widgets.edges.length).toBeGreaterThanOrEqual(totalWidgets)
+			await closeTests(wabe)
+		})
+	})
 })
 
 const graphql = {

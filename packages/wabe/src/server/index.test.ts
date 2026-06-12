@@ -1,7 +1,7 @@
 import { describe, expect, it, spyOn, mock } from 'bun:test'
 import { v4 as uuid } from 'uuid'
 import getPort from 'get-port'
-import { Wabe } from '.'
+import { Wabe, getSafeCorsOptions } from '.'
 import { Schema } from '../schema'
 import { OperationType } from '../hooks'
 import { getAnonymousClient } from '../utils/helper'
@@ -46,6 +46,73 @@ describe('Server', () => {
 		})
 
 		expect(wabe.start()).rejects.toThrow('Authentication session requires jwt secret')
+	})
+
+	it('should reject a development rootKey in production', async () => {
+		const previousNodeEnv = process.env.NODE_ENV
+		process.env.NODE_ENV = 'production'
+
+		try {
+			const databaseId = uuid()
+			const port = await getPort()
+			const wabe = new Wabe({
+				isProduction: true,
+				rootKey: 'dev',
+				database: {
+					// @ts-expect-error
+					adapter: await getDatabaseAdapter(databaseId),
+				},
+				port,
+				schema: {
+					classes: [
+						{
+							name: 'Collection1',
+							fields: { name: { type: 'String' } },
+						},
+					],
+				},
+			})
+
+			expect(wabe.start()).rejects.toThrow('rootKey` must not use a development/default value')
+		} finally {
+			process.env.NODE_ENV = previousNodeEnv
+		}
+	})
+
+	it('should reject a development jwtSecret in production', async () => {
+		const previousNodeEnv = process.env.NODE_ENV
+		process.env.NODE_ENV = 'production'
+
+		try {
+			const databaseId = uuid()
+			const port = await getPort()
+			const wabe = new Wabe({
+				isProduction: true,
+				rootKey: 'eIUbb9abFa8PJGRfRwgiGSCU0fGnLErph2QYjigDRjLsbyNA3fZJ8Npd0FJNzxAc',
+				database: {
+					// @ts-expect-error
+					adapter: await getDatabaseAdapter(databaseId),
+				},
+				port,
+				authentication: {
+					session: {
+						jwtSecret: 'dev',
+					},
+				},
+				schema: {
+					classes: [
+						{
+							name: 'Collection1',
+							fields: { name: { type: 'String' } },
+						},
+					],
+				},
+			})
+
+			expect(wabe.start()).rejects.toThrow('jwtSecret` must not use a development/default value')
+		} finally {
+			process.env.NODE_ENV = previousNodeEnv
+		}
 	})
 
 	it('should throw error if no jwt secret provided but csrf protection is enabled', async () => {
@@ -252,7 +319,8 @@ describe('Server', () => {
 		const args = receivedOptions[0]
 		expect(args?.allowIntrospection).toBe(false)
 		expect(args?.maxDepth).toBe(60)
-		expect(args?.allowMultipleOperations).toBe(true)
+		// Operation batching is disabled in production to limit query-cost amplification/DoS.
+		expect(args?.allowMultipleOperations).toBe(false)
 	})
 
 	it('should mask graphql errors message', async () => {
@@ -1011,5 +1079,39 @@ describe('Server', () => {
 		expect(stopCron).toHaveBeenCalledTimes(1)
 		expect(closeDatabase).toHaveBeenCalledTimes(1)
 		expect(stopServer).toHaveBeenCalledTimes(1)
+	})
+})
+
+describe('getSafeCorsOptions (CORS hardening)', () => {
+	it('should reject credentials: true with a wildcard origin', () => {
+		expect(() => getSafeCorsOptions({ origin: '*', credentials: true } as any)).toThrow(
+			'Insecure CORS configuration',
+		)
+	})
+
+	it('should reject credentials: true with an undefined origin (implicit wildcard)', () => {
+		expect(() => getSafeCorsOptions({ credentials: true } as any)).toThrow(
+			'Insecure CORS configuration',
+		)
+	})
+
+	it('should reject credentials: true when the origin list contains a wildcard', () => {
+		expect(() =>
+			getSafeCorsOptions({ origin: ['https://app.example.com', '*'], credentials: true } as any),
+		).toThrow('Insecure CORS configuration')
+	})
+
+	it('should allow credentials: true with explicit origins', () => {
+		expect(() =>
+			getSafeCorsOptions({ origin: 'https://app.example.com', credentials: true } as any),
+		).not.toThrow()
+	})
+
+	it('should allow a wildcard origin when credentials are not enabled', () => {
+		expect(() => getSafeCorsOptions({ origin: '*' } as any)).not.toThrow()
+	})
+
+	it('should pass through undefined options', () => {
+		expect(getSafeCorsOptions(undefined)).toBeUndefined()
 	})
 })

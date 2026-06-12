@@ -374,18 +374,52 @@ describe('resetPasswordResolver', () => {
 		expect(res.signInWith.user.id).toEqual(userId)
 	})
 
-	it("should return true if the user doesn't exist (hide sensitive data)", async () => {
-		process.env.NODE_ENV = 'test'
+	it('should not reveal whether an account exists (constant anti-enumeration response)', async () => {
+		process.env.NODE_ENV = 'production'
 
-		const res = await client.request<any>(graphql.resetPassword, {
+		// Existing account with an invalid OTP.
+		await client.request<any>(graphql.createUserWithRoot, {
 			input: {
-				email: 'invalidUser@toto.fr',
-				password: 'tata',
-				otp: '000000',
+				fields: {
+					authentication: {
+						emailPassword: {
+							email: 'enumeration-existing@toto.fr',
+							password: 'totototo',
+						},
+					},
+				},
 			},
 		})
 
-		expect(res.resetPassword).toEqual(true)
+		const existingAccountError = await client
+			.request<any>(graphql.resetPassword, {
+				input: {
+					email: 'enumeration-existing@toto.fr',
+					password: 'tata',
+					otp: 'invalidOtp',
+				},
+			})
+			.then(() => null)
+			.catch((error) => error)
+
+		// Non-existing account with the same invalid OTP must fail identically.
+		const missingAccountError = await client
+			.request<any>(graphql.resetPassword, {
+				input: {
+					email: 'enumeration-missing@toto.fr',
+					password: 'tata',
+					otp: 'invalidOtp',
+				},
+			})
+			.then(() => null)
+			.catch((error) => error)
+
+		expect(existingAccountError).not.toBeNull()
+		expect(missingAccountError).not.toBeNull()
+		expect(String(existingAccountError)).toContain('Invalid OTP code')
+		expect(String(missingAccountError)).toContain('Invalid OTP code')
+
+		process.env.NODE_ENV = 'test'
 	})
 
 	it('should not reset password of an user if the OTP code is invalid', async () => {
