@@ -125,7 +125,7 @@ export class MagicLink implements ProviderInterface<DevWabeTypes, MagicLinkInput
 
 		const existingUser = await findMagicLinkUserByEmail(context, normalizedEmail)
 
-		if (!existingUser) {
+		if (!existingUser && !isMagicLinkAccountCreationAllowed(context)) {
 			runDummyMagicLinkOtpWork(context.wabe.config.rootKey)
 			return {
 				user: { email: normalizedEmail },

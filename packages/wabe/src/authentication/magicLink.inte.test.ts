@@ -204,28 +204,43 @@ describe('Magic link authentication integration', () => {
 		expect(verify.verifyChallenge.accessToken).toEqual(expect.any(String))
 	})
 
-	it('should sign in unknown email without revealing account existence', async () => {
+	it('should sign in unknown email, send OTP and create user only after verification', async () => {
 		const client = getAnonymousClient(wabe.config.port)
 		const email = 'magic-new-signin@test.fr'
 
 		spySend.mockClear()
 
-		const signIn = await signInMagicLink(client, email)
-		expect(signIn.signInWith.challengeToken).toEqual(expect.any(String))
-		expect(signIn.signInWith.accessToken).toBeNull()
-		expect(signIn.signInWith.user).toBeNull()
-		expect(spySend).not.toHaveBeenCalled()
-
-		await expect(
-			verifyMagicLink(client, email, signIn.signInWith.challengeToken, '123456'),
-		).rejects.toThrow('Invalid challenge')
-
-		const count = await wabe.controllers.database.count({
+		const usersBefore = await wabe.controllers.database.count({
 			className: 'User',
 			where: { email: { equalTo: email } },
 			context: rootContext(wabe),
 		})
-		expect(count).toBe(0)
+		expect(usersBefore).toBe(0)
+
+		const signIn = await signInMagicLink(client, email)
+		expect(signIn.signInWith.challengeToken).toEqual(expect.any(String))
+		expect(signIn.signInWith.accessToken).toBeNull()
+		expect(signIn.signInWith.user).toBeNull()
+		expect(spySend).toHaveBeenCalledTimes(1)
+
+		const usersAfterSignIn = await wabe.controllers.database.count({
+			className: 'User',
+			where: { email: { equalTo: email } },
+			context: rootContext(wabe),
+		})
+		expect(usersAfterSignIn).toBe(0)
+
+		const otp = getLastSentOtp(spySend)!
+
+		const verify = await verifyMagicLink(client, email, signIn.signInWith.challengeToken, otp)
+		expect(verify.verifyChallenge.accessToken).toEqual(expect.any(String))
+
+		const usersAfterVerify = await wabe.controllers.database.count({
+			className: 'User',
+			where: { email: { equalTo: email } },
+			context: rootContext(wabe),
+		})
+		expect(usersAfterVerify).toBe(1)
 	})
 
 	it('should reject signUp when email already exists', async () => {
